@@ -33,7 +33,7 @@ static naked void detour() {
 		mov [PlayerTracker::playerentity], r9
 
 		//playerid
-		mov r9, [r9+E64]
+		mov r9, [r9+0xE64]
 		mov [PlayerTracker::playerid], r9
 
 
@@ -132,10 +132,10 @@ void PlayerTracker::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_debug_ui() {
 	ImGui::Text("PlayerTracker Debug");
-	Imgui::Text("Is Grounded:");
+	ImGui::Text("Is Grounded:");
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_ui() {
-	Imgui::Text("PlayerTracker Main");
+	ImGui::Text("PlayerTracker Main");
 }
