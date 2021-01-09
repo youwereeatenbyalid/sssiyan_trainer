@@ -1,6 +1,8 @@
 set(MODS_SRC
     mods/SimpleMod.hpp
     mods/SimpleMod.cpp
+    mods/PlayerTracker.hpp 
+    mods/PlayerTracker.cpp 
 )
 
 set(HOOKS_SRC
