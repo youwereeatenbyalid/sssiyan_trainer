@@ -26,10 +26,10 @@ static naked void detour() {
 		manualplayer:
 		//playerentity
 
-		cmp [rdx+60h], 0
+		cmp qword ptr [rdx+0x60], 0
 		je playerarray
 
-		mov r9, [rdx+60h]
+		mov r9, [rdx+0x60]
 		mov [PlayerTracker::playerentity], r9
 
 		//playerid
@@ -38,63 +38,63 @@ static naked void detour() {
 
 
 		//groundmem
-		mov r9, [rdx+60h]
-		mov r9, [r9+3B0h]
-		lea r9, [r9+10h]
+		mov r9, [rdx+0x60]
+		mov r9, [r9+0x3B0]
+		lea r9, [r9+0x10]
 		mov [PlayerTracker::groundedmem], r9
 
 		//isgrounded
-		mov r9, [rdx+60h]
-		mov r9, [r9+3B0h]
-		mov r9, [r9+18h]
+		mov r9, [rdx+0x60]
+		mov r9, [r9+0x3B0]
+		mov r9, [r9+0x18]
 		mov [PlayerTracker::isgrounded], r9
 
 		//playertransform
-		mov r9, [rdx+60h]
-		mov r9, [r9+1F0h]
+		mov r9, [rdx+0x60]
+		mov r9, [r9+0x1F0]
 		mov [PlayerTracker::playertransform], r9
 
 		playerarray:
 		push r8
-		cmp [rdx+78h], 0
+		cmp qword ptr [rdx+0x78], 0
 		je playerexit
 
-		mov r9, [rdx+78h]
+		mov r9, [rdx+0x78]
 
 		playernero:
-		cmp [r9+20h], 0
+		cmp qword ptr [r9+0x20], 0
 		je playerdante
 
-		mov r8, [r9+20h]
+		mov r8, [r9+0x20]
 		mov [PlayerTracker::neroentity], r8
-		mov r8, [r8+1F0h]
+		mov r8, [r8+0x1F0]
 		mov [PlayerTracker::nerotransform], r8
 
 		playerdante:
-		cmp [r9+28h], 0
+		cmp qword ptr [r9+0x28], 0
 		je playerv
 
-		mov r8, [r9+28h]
+		mov r8, [r9+0x28]
 		mov [PlayerTracker::danteentity], r8
-		mov r8, [r8+1F0h]
+		mov r8, [r8+0x1F0]
 		mov [PlayerTracker::dantetransform], r8
 
 		playerv:
-		cmp [r9+30h], 0
+		cmp qword ptr [r9+0x30], 0
 		je playervergil
 
-		mov r8, [r9+30h]
+		mov r8, [r9+0x30]
 		mov [PlayerTracker::ventity], r8
-		mov r8, [r8+1F0h]
+		mov r8, [r8+0x1F0]
 		mov [PlayerTracker::vtransform], r8
 
 		playervergil:
-		cmp [r9+40h], 0
+		cmp qword ptr [r9+0x40], 0
 		je playerexit
 
-		mov r8, [r9+40h]
+		mov r8, [r9+0x40]
 		mov [PlayerTracker::vergilentity], r8
-		mov r8, [r8+1F0h]
+		mov r8, [r8+0x1F0]
 		mov [PlayerTracker::vergiltransform], r8
 
 
@@ -102,7 +102,7 @@ static naked void detour() {
 		pop r8
 		code:
 		  mov r9,rcx
-		  cmp r8d,-01h
+		  cmp r8d,-0x01
 		  jmp ret_jmp
 
 		ret_jmp:
@@ -119,7 +119,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize PlayerTracker";
-  //}
+  }
   return Mod::on_initialize();
 }
 
@@ -131,11 +131,11 @@ void PlayerTracker::on_config_save(utility::Config &cfg) {}
 void PlayerTracker::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_debug_ui() {
-	ImGui::Text("PlayerTracker Debug")
-	Imgui::Text("Is Grounded:")
+	ImGui::Text("PlayerTracker Debug");
+	Imgui::Text("Is Grounded:");
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_ui() {
-	Imgui::Text("PlayerTracker Main")
+	Imgui::Text("PlayerTracker Main");
 }
