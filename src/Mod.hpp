@@ -1,4 +1,11 @@
 #pragma once
+// NOTE(): Doing this because clang-cl now gives
+// errors when using __declspec(naked) in x64 
+#ifdef __clang__
+#define naked __attribute__ ((naked))
+#else
+#define naked __declspec(naked)
+#endif
 
 // Game can't use virtual keys unless the menu is open.
 #define DIRECTINPUT_VERSION 0x0800
@@ -11,6 +18,7 @@
 #include <imgui/imgui.h>
 
 #include "sdk/ReClass.hpp"
+#include "sdk/Offsets.hpp"
 #include "utility/Config.hpp"
 
 #include "ModFramework.hpp"
