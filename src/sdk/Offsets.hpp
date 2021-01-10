@@ -8,4 +8,5 @@ constexpr ptrdiff_t PLAYER_TRACKER = 0x00AA55A4;
 constexpr ptrdiff_t STYLE_RANK     = 0x021BC099;
 constexpr ptrdiff_t COS_COORDINATE = 0x01694AEC;
 constexpr ptrdiff_t SIN_COORDINATE = 0x01694ADD;
+constexpr ptrdiff_t MOVE_ID        = 0x007A8BC0;
 } // namespace offsets
