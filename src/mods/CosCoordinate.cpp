@@ -42,7 +42,7 @@ std::optional<std::string> CosCoordinate::on_initialize() {
 //void CosCoordinate::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void CosCoordinate::on_draw_debug_ui() { 
-	ImGui::Text("Cos Value: %X", CosCoordinate::directioncosvalue);
+	ImGui::Text("Cos Value: %.4f", CosCoordinate::directioncosvalue);
 }
 // will show up in main window, dump ImGui widgets you want here
 void CosCoordinate::on_draw_ui() {}
