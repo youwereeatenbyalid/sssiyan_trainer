@@ -9,8 +9,6 @@ set(MODS_SRC
     mods/SinCoordinate.cpp 
     mods/CosCoordinate.hpp 
     mods/CosCoordinate.cpp 
-    mods/MoveID.hpp 
-    mods/MoveID.cpp 
 )
 
 set(HOOKS_SRC

@@ -5,13 +5,16 @@
 #include "mods/SimpleMod.hpp"
 #include "mods/PlayerTracker.hpp"
 #include "mods/StyleRank.hpp"
-
+#include "mods/SinCoordinate.hpp"
+#include "mods/CosCoordinate.hpp"
 
 Mods::Mods()
 {
     m_mods.emplace_back(std::make_unique<SimpleMod>());
     m_mods.emplace_back(std::make_unique<PlayerTracker>());
     m_mods.emplace_back(std::make_unique<StyleRank>());
+    m_mods.emplace_back(std::make_unique<SinCoordinate>());
+    m_mods.emplace_back(std::make_unique<CosCoordinate>());
     //m_mods.emplace_back(std::make_unique<YourMod>());
 
 #ifdef DEVELOPER
