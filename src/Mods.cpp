@@ -4,12 +4,14 @@
 //#inlcude "YourMod.hpp"
 #include "mods/SimpleMod.hpp"
 #include "mods/PlayerTracker.hpp"
+#include "mods/StyleRank.hpp"
 
 
 Mods::Mods()
 {
     m_mods.emplace_back(std::make_unique<SimpleMod>());
     m_mods.emplace_back(std::make_unique<PlayerTracker>());
+    m_mods.emplace_back(std::make_unique<StyleRank>());
     //m_mods.emplace_back(std::make_unique<YourMod>());
 
 #ifdef DEVELOPER

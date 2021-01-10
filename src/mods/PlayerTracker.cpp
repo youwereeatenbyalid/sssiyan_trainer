@@ -131,10 +131,11 @@ void PlayerTracker::on_config_save(utility::Config &cfg) {}
 void PlayerTracker::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_debug_ui() {
+	ImGui::Text("[PlayerTracker] Player ID: %X", PlayerTracker::playerid);
 	ImGui::Text("[PlayerTracker] Is Grounded: %X",PlayerTracker::isgrounded);
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_ui() {
-	ImGui::Text("[PlayerTracker] Player ID: %X",PlayerTracker::playerid);
+
 }

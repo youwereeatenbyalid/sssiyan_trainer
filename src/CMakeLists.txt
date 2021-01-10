@@ -3,6 +3,14 @@ set(MODS_SRC
     mods/SimpleMod.cpp
     mods/PlayerTracker.hpp 
     mods/PlayerTracker.cpp 
+    mods/StyleRank.hpp 
+    mods/StyleRank.cpp 
+    mods/SinCoordinate.hpp 
+    mods/SinCoordinate.cpp 
+    mods/CosCoordinate.hpp 
+    mods/CosCoordinate.cpp 
+    mods/MoveID.hpp 
+    mods/MoveID.cpp 
 )
 
 set(HOOKS_SRC
