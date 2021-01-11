@@ -16,6 +16,7 @@ static naked void detour() {
         je movecheck
         cmp byte ptr [rcx-342h], 7077954 // 'Blood'
         je movecheck
+        jmp code
 
     movecheck:
         cmp dword ptr [MoveID::playermoveid], 00DC00C8h // dante ms start reb
