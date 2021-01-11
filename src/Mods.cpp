@@ -27,6 +27,7 @@
         // #include "mods/DisplayEnemyHPInOrbs.hpp"
         #include "mods/FileFrameCuts.hpp"
         #include "mods/EntitySpeeds.hpp"
+        #include "mods/MovingTargetSwitch.hpp"
     // Nero
 
     // Dante
@@ -41,6 +42,7 @@
         #include "mods/VergilInfSDT.hpp"
         #include "mods/VergilDirectionalMappings.hpp"
         #include "mods/VergilInstantSDT.hpp"
+        #include "mods/VergilInfJdCs.hpp"
 
 Mods::Mods()
 {
@@ -70,6 +72,7 @@ Mods::Mods()
         // m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<FileFrameCuts>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
+        m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         
     // Nero
     // Dante
@@ -84,6 +87,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilInfSDT>());
         m_mods.emplace_back(std::make_unique<VergilDirectionalMappings>());
         m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
+        m_mods.emplace_back(std::make_unique<VergilInfJdCs>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

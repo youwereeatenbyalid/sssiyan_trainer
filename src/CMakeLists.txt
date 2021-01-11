@@ -47,6 +47,10 @@ set(MODS_SRC
     mods/FileFrameCuts.cpp 
     mods/EntitySpeeds.hpp 
     mods/EntitySpeeds.cpp 
+    mods/MovingTargetSwitch.hpp 
+    mods/MovingTargetSwitch.cpp 
+    mods/VergilInfJdCs.hpp 
+    mods/VergilInfJdCs.cpp 
 
 )
 
