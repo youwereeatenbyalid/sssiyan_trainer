@@ -11,6 +11,37 @@ set(MODS_SRC
     mods/CosCoordinate.cpp 
 	mods/MoveID.hpp
 	mods/MoveID.cpp
+    mods/DeepTurbo.hpp 
+    mods/DeepTurbo.cpp 
+    mods/BufferedReversals.hpp 
+    mods/BufferedReversals.cpp 
+    mods/BypassBPCav.hpp 
+    mods/BypassBPCav.cpp 
+    mods/DanteMaxSDT.hpp 
+    mods/DanteMaxSDT.cpp 
+    mods/FreezeBPTimer.hpp 
+    mods/FreezeBPTimer.cpp 
+    mods/NoScreenShake.hpp 
+    mods/NoScreenShake.cpp 
+    mods/DanteQuickSDT.hpp 
+    mods/DanteQuickSDT.cpp 
+    mods/DanteAlwaysQ4SDT.hpp 
+    mods/DanteAlwaysQ4SDT.cpp 
+    mods/DanteInfQ4ExitWindow.hpp 
+    mods/DanteInfQ4ExitWindow.cpp 
+    mods/VergilInfConcentration.hpp 
+    mods/VergilInfConcentration.cpp 
+    mods/VergilAirTrickNoSS.hpp 
+    mods/VergilAirTrickNoSS.cpp 
+    mods/VergilInfSDT.hpp 
+    mods/VergilInfSDT.cpp 
+    mods/VergilDirectionalMappings.hpp 
+    mods/VergilDirectionalMappings.cpp 
+    mods/DamageMultiplier.hpp 
+    mods/DamageMultiplier.cpp 
+    mods/DisplayEnemyHPInOrbs.hpp 
+    mods/DisplayEnemyHPInOrbs.cpp 
+
 )
 
 set(HOOKS_SRC

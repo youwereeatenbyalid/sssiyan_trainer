@@ -1,23 +1,82 @@
 #include <spdlog/spdlog.h>
 #include "Mods.hpp"
 
-//#inlcude "YourMod.hpp"
-#include "mods/SimpleMod.hpp"
-#include "mods/PlayerTracker.hpp"
-#include "mods/StyleRank.hpp"
-#include "mods/SinCoordinate.hpp"
-#include "mods/CosCoordinate.hpp"
-#include "mods/MoveID.hpp"
+// Example
+        #include "mods/SimpleMod.hpp"
+
+// Hitch
+    // Game
+        #include "mods/PlayerTracker.hpp"
+        #include "mods/StyleRank.hpp"
+        #include "mods/SinCoordinate.hpp"
+        #include "mods/CosCoordinate.hpp"
+        #include "mods/MoveID.hpp"
+    // Nero
+    // Dante
+    // V
+    // Vergil
+
+// Siyan
+    // Game
+        #include "mods/DeepTurbo.hpp"
+        #include "mods/BypassBPCav.hpp"
+        #include "mods/FreezeBPTimer.hpp"
+        #include "mods/NoScreenShake.hpp"
+        #include "mods/BufferedReversals.hpp"
+        #include "mods/DamageMultiplier.hpp"
+        // #include "mods/DisplayEnemyHPInOrbs.hpp"
+    // Nero
+
+    // Dante
+        #include "mods/DanteMaxSDT.hpp"
+        #include "mods/DanteQuickSDT.hpp"
+        #include "mods/DanteAlwaysQ4SDT.hpp"
+        #include "mods/DanteInfQ4ExitWindow.hpp"
+    // V
+    // Vergil
+        #include "mods/VergilInfConcentration.hpp"
+        #include "mods/VergilAirTrickNoSS.hpp"
+        #include "mods/VergilInfSDT.hpp"
+        #include "mods/VergilDirectionalMappings.hpp"
 
 Mods::Mods()
 {
-    m_mods.emplace_back(std::make_unique<SimpleMod>());
-    m_mods.emplace_back(std::make_unique<PlayerTracker>());
-    m_mods.emplace_back(std::make_unique<StyleRank>());
-    m_mods.emplace_back(std::make_unique<SinCoordinate>());
-    m_mods.emplace_back(std::make_unique<CosCoordinate>());
-    m_mods.emplace_back(std::make_unique<MoveID>());
-    //m_mods.emplace_back(std::make_unique<YourMod>());
+// Example
+        m_mods.emplace_back(std::make_unique<SimpleMod>());
+
+// Hitch
+    // Game
+        m_mods.emplace_back(std::make_unique<PlayerTracker>());
+        m_mods.emplace_back(std::make_unique<StyleRank>());
+        m_mods.emplace_back(std::make_unique<SinCoordinate>());
+        m_mods.emplace_back(std::make_unique<CosCoordinate>());
+        m_mods.emplace_back(std::make_unique<MoveID>());
+    // Nero
+    // Dante
+    // V
+    // Vergil
+
+// Siyan
+    // Game
+        m_mods.emplace_back(std::make_unique<DeepTurbo>());
+        m_mods.emplace_back(std::make_unique<BypassBPCav>());
+        m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
+        m_mods.emplace_back(std::make_unique<NoScreenShake>());
+        m_mods.emplace_back(std::make_unique<BufferedReversals>());
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        // m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>()); @HELP
+    // Nero
+    // Dante
+        m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
+        m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
+        m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
+    // V
+    // Vergil
+        m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
+        m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
+        m_mods.emplace_back(std::make_unique<VergilInfSDT>());
+        m_mods.emplace_back(std::make_unique<VergilDirectionalMappings>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
