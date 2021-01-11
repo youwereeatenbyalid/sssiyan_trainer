@@ -9,8 +9,8 @@ uintptr_t DanteMaxSDT::jmp_ret{NULL};
 
 static naked void detour() {
 	__asm {
-		mov dword ptr [rdi+00001A14h], 461c4000h // 10,000
-        movss xmm1, [rdi+00001A14h]
+		mov dword ptr [rdi+0x00001A14], 0x461c4000 // 10,000
+        movss xmm1, [rdi+0x00001A14]
 		jmp qword ptr [DanteMaxSDT::jmp_ret]
 	}
 }

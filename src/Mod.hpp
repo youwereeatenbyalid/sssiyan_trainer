@@ -20,7 +20,7 @@
 #include "sdk/ReClass.hpp"
 #include "sdk/Offsets.hpp"
 #include "utility/Config.hpp"
-
+#include "utility/Scan.hpp"
 #include "ModFramework.hpp"
 
 class IModValue {

@@ -11,6 +11,8 @@ set(MODS_SRC
     mods/CosCoordinate.cpp 
 	mods/MoveID.hpp
 	mods/MoveID.cpp
+    mods/EnemyNumber.hpp 
+    mods/EnemyNumber.cpp 
     mods/DeepTurbo.hpp 
     mods/DeepTurbo.cpp 
     mods/BufferedReversals.hpp 
@@ -51,7 +53,6 @@ set(MODS_SRC
     mods/MovingTargetSwitch.cpp 
     mods/VergilInfJdCs.hpp 
     mods/VergilInfJdCs.cpp 
-
 )
 
 set(HOOKS_SRC
