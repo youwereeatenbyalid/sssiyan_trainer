@@ -1,4 +1,4 @@
-/*
+
 #include "DisplayEnemyHPInOrbs.hpp"
 #include "DamageMultiplier.hpp"
 #include "utility/Scan.hpp"
@@ -28,7 +28,8 @@ static naked void detour() {
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");
-  DisplayEnemyHPInOrbs::jmp_cont = base + 0x02494A0C; // @HELP
+  // DisplayEnemyHPInOrbs::jmp_cont = utility::scan(base, "44 8B 05 D5 FC 9E 05"); // ??
+  // DisplayEnemyHPInOrbs::jmp_cont = (base + 0x02494A0C); // ?? 
 
   if (!addr) {
     return "Unable to find DisplayEnemyHPInOrbs pattern.";
@@ -54,4 +55,3 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
 // }
 // will show up in main window, dump ImGui widgets you want here
 // void MoveID::on_draw_ui() {}
-*/

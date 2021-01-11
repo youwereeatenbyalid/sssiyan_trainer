@@ -41,6 +41,12 @@ set(MODS_SRC
     mods/DamageMultiplier.cpp 
     mods/DisplayEnemyHPInOrbs.hpp 
     mods/DisplayEnemyHPInOrbs.cpp 
+    mods/VergilInstantSDT.hpp 
+    mods/VergilInstantSDT.cpp 
+    mods/FileFrameCuts.hpp 
+    mods/FileFrameCuts.cpp 
+    mods/EntitySpeeds.hpp 
+    mods/EntitySpeeds.cpp 
 
 )
 

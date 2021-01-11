@@ -25,6 +25,8 @@
         #include "mods/BufferedReversals.hpp"
         #include "mods/DamageMultiplier.hpp"
         // #include "mods/DisplayEnemyHPInOrbs.hpp"
+        #include "mods/FileFrameCuts.hpp"
+        #include "mods/EntitySpeeds.hpp"
     // Nero
 
     // Dante
@@ -38,6 +40,7 @@
         #include "mods/VergilAirTrickNoSS.hpp"
         #include "mods/VergilInfSDT.hpp"
         #include "mods/VergilDirectionalMappings.hpp"
+        #include "mods/VergilInstantSDT.hpp"
 
 Mods::Mods()
 {
@@ -64,7 +67,10 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<DamageMultiplier>());
-        // m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>()); @HELP
+        // m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
+        m_mods.emplace_back(std::make_unique<FileFrameCuts>());
+        m_mods.emplace_back(std::make_unique<EntitySpeeds>());
+        
     // Nero
     // Dante
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
@@ -77,6 +83,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
         m_mods.emplace_back(std::make_unique<VergilInfSDT>());
         m_mods.emplace_back(std::make_unique<VergilDirectionalMappings>());
+        m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

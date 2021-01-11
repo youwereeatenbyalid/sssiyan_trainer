@@ -12,7 +12,7 @@ float maxconcentration = 300.0f;
 static naked void detour() {
 	__asm {
         movss xmm2, [maxconcentration]
-        movss [rdi+00001B50h], xmm2
+        movss [rbx+00001B50h], xmm2
 		jmp qword ptr [VergilInfConcentration::jmp_ret]
 	}
 }
@@ -21,7 +21,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilInfConcentration::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 11 97 50 1B 00 00 48 8B 43 50 48 83");
+  auto addr = utility::scan(base, "F3 0F 10 93 50 1B 00 00");
   if (!addr) {
     return "Unable to find VergilInfConcentration pattern.";
   }

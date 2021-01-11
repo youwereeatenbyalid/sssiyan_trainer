@@ -1,51 +1,48 @@
 
-#include "VergilInfSDT.hpp"
+#include "VergilInstantSDT.hpp"
 #include "utility/Scan.hpp"
 
-uintptr_t VergilInfSDT::jmp_ret1{NULL};
-uintptr_t VergilInfSDT::jmp_ret2{NULL};
-
-float desiredsdtvalue = 10000.0f;
+uintptr_t VergilInstantSDT::jmp_ret1{NULL};
+uintptr_t VergilInstantSDT::jmp_ret2{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour1() {
 	__asm {
-        movss xmm1, [desiredsdtvalue]
-        movss [rbx+00001B20h], xmm1
-		jmp qword ptr [VergilInfSDT::jmp_ret1]
+        movss xmm1,[rdi+00001B20h]
+		jmp qword ptr [VergilInstantSDT::jmp_ret1]
 	}
 }
 
 static naked void detour2() {
 	__asm {
-		jmp qword ptr [VergilInfSDT::jmp_ret2]
+		jmp qword ptr [VergilInstantSDT::jmp_ret2]
 	}
 }
 
 // clang-format on
 
-std::optional<std::string> VergilInfSDT::on_initialize() {
+std::optional<std::string> VergilInstantSDT::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "F3 0F 10 8B 20 1B 00 00 8B");
+  auto addr1 = utility::scan(base, "77 D9 F3 0F 10 8F 20 1B 00 00");
   if (!addr1) {
-    return "Unable to find VergilInfSDT pattern.";
+    return "Unable to find VergilInstantSDT1 pattern.";
   }
-  auto addr2 = utility::scan(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
+  auto addr2 = utility::scan(base, "00 00 00 F3 0F 10 5E 48");
   if (!addr2) {
-    return "Unable to find VergilInfSDT pattern.";
+    return "Unable to find VergilInstantSDT2 pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 8)) {
+  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 10)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize VergilInfSDT1";
+    return "Failed to initialize VergilInstantSDT1";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 8)) {
+  if (!install_hook_absolute(addr2.value()+3, m_function_hook2, &detour2, &jmp_ret2, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize VergilInfSDT2";
+    return "Failed to initialize VergilInstantSDT2";
   }
   return Mod::on_initialize();
 }
