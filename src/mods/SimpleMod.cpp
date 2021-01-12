@@ -31,8 +31,16 @@ void SimpleMod::on_draw_debug_ui() {
 }
 // will show up in main window, dump ImGui widgets you want here
 bool checkbox;
+bool abox;
+bool bbox;
 void SimpleMod::on_draw_ui() {
-	ImGui::Text("Hello from SimpleMod");
-	ImGui::Button("SimpleMod Button");
-	ImGui::Checkbox("SimpleMod Checkbox", &checkbox);
+    ImGui::Checkbox("##mod1", &checkbox);
+    ImGui::SameLine();
+	ImGui::Selectable("Mod 1");
+    ImGui::Checkbox("##mod2", &abox);
+    ImGui::SameLine();
+    ImGui::Selectable("Mod 2");
+    ImGui::Checkbox("##mod3", &bbox);
+    ImGui::SameLine();
+    ImGui::Selectable("Mod 3");
 }

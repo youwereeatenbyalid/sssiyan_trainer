@@ -61,6 +61,7 @@ void EnemyNumber::on_draw_debug_ui() {
   ImGui::Text("Enemy Limit type is currently %X", EnemyNumber::limittype);
   ImGui::Text("Hard limit is: %X", EnemyNumber::hardlimit);
   ImGui::Text("Soft limit is: %X", EnemyNumber::softlimit);
+  ImGui::Selectable("Select me?? IDK lol", true);
 }
 
 // will show up in main window, dump ImGui widgets you want here

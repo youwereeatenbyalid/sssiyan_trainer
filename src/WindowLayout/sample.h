@@ -846,7 +846,7 @@ class MyImwWindow : public ImwWindow, ImwMenu
 {
 public:
 	MyImwWindow(ModFramework* mf,const char* pTitle = "MyImwWindow")
-		: ImwWindow(ImWindow::E_WINDOW_MODE_ALONE)
+		: ImwWindow()
 		, ImwMenu(0, false)
 	{
 		p_mf = mf;
@@ -886,24 +886,8 @@ public:
 		//ImGui::ShowMetricsWindow();
 	}
 
-	virtual void OnContextMenu()
-	{
-		if (ImGui::MenuItem("Focus"))
-		{
-			ImwWindowManager::GetInstance()->FocusWindow(this);
-		}
-	}
-
 	virtual void OnMenu()
 	{
-		if (ImGui::BeginMenu("MyImwWindow"))
-		{
-			if (ImGui::MenuItem("Create new MyImwWindow3"))
-			{
-				new MyImwWindow3();
-			}
-			ImGui::EndMenu();
-		}
 	}
 
 	char m_pText[512];
@@ -946,6 +930,7 @@ void InitSample(ModFramework* mf)
 
 	ImwWindow* pWindow1 = new MyImwWindow(mf);
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
+    ImwWindow* pWindow2 = new MyImwWindow(mf);
 
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
@@ -960,6 +945,7 @@ void InitSample(ModFramework* mf)
 	new MyToolBar();
 
 	oMgr.Dock(pWindow1);
+    oMgr.Dock(pWindow2);
 	oMgr.Dock(pDebugWindow, E_DOCK_ORIENTATION_BOTTOM);
 	//oMgr.Dock(pWindow2, E_DOCK_ORIENTATION_LEFT);
 	//oMgr.DockWith(pWindowPlaceholder, pWindow2, E_DOCK_ORIENTATION_BOTTOM);
