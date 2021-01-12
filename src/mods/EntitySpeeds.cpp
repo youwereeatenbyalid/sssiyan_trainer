@@ -4,6 +4,7 @@
 #include "MoveID.hpp"
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};
+bool dantemillionstabspeedup;
 
 float dantemillionstabstartspeed = 3.0f;
 
@@ -19,6 +20,7 @@ static naked void detour() {
         jmp code
 
     movecheck:
+    part1:
         cmp dword ptr [MoveID::playermoveid], 00DC00C8h // dante ms start reb
         je dantemstab
         cmp dword ptr [MoveID::playermoveid], 00D200FAh // dante ms start sparda
@@ -28,6 +30,8 @@ static naked void detour() {
         jmp code
 
     dantemstab:
+        cmp byte ptr [dantemillionstabspeedup], 0
+        je code
         mulss xmm0, [dantemillionstabstartspeed]
         jmp code
 
@@ -54,15 +58,6 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void EntitySpeeds::on_draw_ui() {
+  ImGui::Checkbox("Dante Million Stab Startup Speed Up", &dantemillionstabspeedup);
+}

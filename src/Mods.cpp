@@ -2,7 +2,7 @@
 #include "Mods.hpp"
 
 // Example
-        #include "mods/SimpleMod.hpp"
+        // #include "mods/SimpleMod.hpp"
 
 // Hitch
     // Game
@@ -25,7 +25,7 @@
         #include "mods/NoScreenShake.hpp"
         #include "mods/BufferedReversals.hpp"
         #include "mods/DamageMultiplier.hpp"
-        // #include "mods/DisplayEnemyHPInOrbs.hpp"
+        #include "mods/DisplayEnemyHPInOrbs.hpp"
         #include "mods/FileFrameCuts.hpp"
         #include "mods/EntitySpeeds.hpp"
         #include "mods/MovingTargetSwitch.hpp"
@@ -48,7 +48,7 @@
 Mods::Mods()
 {
 // Example
-        m_mods.emplace_back(std::make_unique<SimpleMod>());
+        // m_mods.emplace_back(std::make_unique<SimpleMod>());
 
 // Hitch
     // Game
@@ -70,8 +70,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
+
         m_mods.emplace_back(std::make_unique<DamageMultiplier>());
-        // m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
+        m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<FileFrameCuts>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());

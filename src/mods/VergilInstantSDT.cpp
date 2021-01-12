@@ -3,20 +3,45 @@
 #include "utility/Scan.hpp"
 
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
+uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 uintptr_t VergilInstantSDT::jmp_ret2{NULL};
+
+bool vergilinstantsdtcheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour1() {
 	__asm {
-        movss xmm1,[rdi+00001B20h]
+        cmp byte ptr [vergilinstantsdtcheck], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
+        movss xmm1, [rdi+00001B20h]
 		jmp qword ptr [VergilInstantSDT::jmp_ret1]
+
+    code:
+        comisd xmm1, xmm2
+        ja jajmp
+        jmp qword ptr [VergilInstantSDT::jmp_ret1]
+
+    jajmp:
+        jmp qword ptr [VergilInstantSDT::jmp_ja1]
 	}
 }
 
 static naked void detour2() {
 	__asm {
+        cmp byte ptr [vergilinstantsdtcheck], 1
+        je cheatcode
+        jmp code
+
+    code:
+        movss xmm3, [rsi+48h]
+        jmp qword ptr [VergilInstantSDT::jmp_ret2]
+
+    cheatcode:
 		jmp qword ptr [VergilInstantSDT::jmp_ret2]
 	}
 }
@@ -25,7 +50,7 @@ static naked void detour2() {
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "77 D9 F3 0F 10 8F 20 1B 00 00");
+  auto addr1 = utility::scan(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
   if (!addr1) {
     return "Unable to find VergilInstantSDT1 pattern.";
   }
@@ -34,7 +59,9 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
     return "Unable to find VergilInstantSDT2 pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 10)) {
+  VergilInstantSDT::jmp_ja1 = utility::scan(base, "02 02 48 8B 5C 24 30 32").value();
+
+  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilInstantSDT1";
@@ -47,15 +74,6 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void VergilInstantSDT::on_draw_ui() {
+  ImGui::Checkbox("Vergil Instant SDT", &vergilinstantsdtcheck);
+}

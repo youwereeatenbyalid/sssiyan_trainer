@@ -5,19 +5,24 @@
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
 uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};
+bool enemyhpinorbscheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp dword ptr [DamageMultiplier::enemyhpvalue], 00000000
-        jbe write0
+        cmp byte ptr [enemyhpinorbscheck], 1
+        je code
+        jmp cheatcode
 
+    cheatcode:
+        cmp dword ptr [DamageMultiplier::enemyhpvalue], 00000000
+        jbe code
         CVTTSS2SI ebp, [DamageMultiplier::enemyhpvalue]
         jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
 
-        write0:
+        code:
         mov ebp, [rdx+78h]
         jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
 	}
@@ -28,7 +33,7 @@ static naked void detour() {
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");
-  // DisplayEnemyHPInOrbs::jmp_cont = utility::scan(base, "44 8B 05 D5 FC 9E 05"); // ??
+  DisplayEnemyHPInOrbs::jmp_cont = utility::scan(base, "44 8B 05 D5 FC 9E 05").value();
   // DisplayEnemyHPInOrbs::jmp_cont = (base + 0x02494A0C); // ?? 
 
   if (!addr) {
@@ -43,15 +48,6 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+  void DisplayEnemyHPInOrbs::on_draw_ui() {
+  ImGui::Checkbox("Display Enemy HP In Orbs", &enemyhpinorbscheck);
+  }

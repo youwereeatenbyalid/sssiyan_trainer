@@ -3,6 +3,7 @@
 #include "utility/Scan.hpp"
 
 uintptr_t FileFrameCuts::jmp_ret{NULL};
+bool dantefasterguard;
 
 float danteguardgroundstartlength = 1.0f;
 float danteairguardstartlength    = 3.0f;
@@ -27,6 +28,8 @@ static naked void detour() {
     guardairstartcheck:
         cmp byte ptr [rdx+0xAC], 6357108 //'ta' (StartFly)
         jne code
+        cmp byte ptr [dantefasterguard],0
+        je code
         movss xmm0, [danteairguardstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
@@ -53,15 +56,6 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void FileFrameCuts::on_draw_ui() {
+  ImGui::Checkbox("Dante Cut Frames On Guard", &dantefasterguard);
+}
