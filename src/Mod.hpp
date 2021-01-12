@@ -359,10 +359,10 @@ public:
     virtual void on_frame() {};
     virtual void on_draw_ui() {};
 	virtual void on_draw_debug_ui() {};
-
+    bool ischecked;
+    int onpage;
     virtual void on_config_load(const utility::Config& cfg) {};
     virtual void on_config_save(utility::Config& cfg) {};
-
     // Game-specific callbacks
     /*
     virtual void on_pre_update_transform(RETransform* transform) {};

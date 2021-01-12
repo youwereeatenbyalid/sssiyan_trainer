@@ -135,3 +135,12 @@ void Mods::on_draw_ui() const {
     }
 }
 
+void Mods::on_pagelist_ui(int page) const {
+  for (auto& mod : m_mods) {
+    //std::string_view hiddenname = "##" + mod->get_name();
+    if (page == mod->onpage) {
+      ImGui::Checkbox(std::string{mod->get_name()}.c_str(), &mod->ischecked);
+    }
+  }
+}
+

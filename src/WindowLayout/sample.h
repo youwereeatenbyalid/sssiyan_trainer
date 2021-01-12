@@ -845,13 +845,14 @@ public:
 class MyImwWindow : public ImwWindow, ImwMenu
 {
 public:
-	MyImwWindow(ModFramework* mf,const char* pTitle = "MyImwWindow")
+  MyImwWindow(ModFramework* mf, int p_pageid, const char* pTitle = "MyImwWindow")
 		: ImwWindow()
 		, ImwMenu(0, false)
 	{
 		p_mf = mf;
 		SetTitle(pTitle);
 		m_pText[0] = 0;
+        pageid = p_pageid;
 	}
 	virtual void OnGui()
 	{
@@ -866,7 +867,8 @@ public:
 		/*draw_about();*/
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_draw_ui();
+			//p_mf->get_mods()->on_draw_ui();
+            p_mf->get_mods()->on_pagelist_ui(pageid);
 		}
 		else if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -892,6 +894,7 @@ public:
 
 	char m_pText[512];
 	ModFramework* p_mf;
+    int pageid;
 };
 
 class PlaceholderWindow : public ImWindow::ImwWindow
@@ -928,9 +931,9 @@ void InitSample(ModFramework* mf)
 
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
 
-	ImwWindow* pWindow1 = new MyImwWindow(mf);
+	ImwWindow* pWindow1 = new MyImwWindow(mf, 1, "Dante Specific");
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
-    ImwWindow* pWindow2 = new MyImwWindow(mf);
+    ImwWindow* pWindow2 = new MyImwWindow(mf, 2, "Vergil Specific");
 
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 

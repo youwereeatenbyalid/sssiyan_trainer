@@ -12,7 +12,7 @@ public:
     void on_frame() const;
     void on_draw_ui() const;
     void on_draw_debug_ui() const;
-
+    void on_pagelist_ui(int page) const;
     const auto& get_mods() const {
         return m_mods;
     }
