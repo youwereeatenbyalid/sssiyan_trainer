@@ -3,6 +3,7 @@
 #include "utility/Scan.hpp"
 
 uintptr_t DamageMultiplier::jmp_ret{NULL};
+bool damagemultipliercheck;
 float DamageMultiplier::enemyhpvalue = 0.0f;
 
 float playerdamagemultiplier         = 1.0f;
@@ -14,8 +15,11 @@ float enemydamagemultiplier          = 1.0f;
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [damagemultipliercheck],1
+        je damagemultcode
         jmp code
 
+    damagemultcode:
         cmp dword ptr [rdi+134h], 7077968  // 'Pl' in 'Play'
         je enemydamageoutput
         cmp dword ptr [rdi-18Ch], 6225996  // 'L_' in L_B_Hand'
@@ -73,15 +77,12 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void DamageMultiplier::on_draw_ui() {
+  ImGui::Checkbox("Damage Multiplier", &damagemultipliercheck);
+  ImGui::PushItemWidth(100);
+  ImGui::InputFloat("Player Damage Output", &playerdamagemultiplier, 0.1f);
+  ImGui::PopItemWidth();
+  ImGui::PushItemWidth(100);
+  ImGui::InputFloat("Enemy Damage Output", &enemydamagemultiplier, 0.1f);
+  ImGui::PopItemWidth();
+}

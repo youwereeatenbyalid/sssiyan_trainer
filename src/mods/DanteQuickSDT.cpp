@@ -3,6 +3,7 @@
 
 
 uintptr_t DanteQuickSDT::jmp_ret{NULL};
+bool dantequicksdtcheck;
 
 float sdtspeedup = 3.0f;
 
@@ -11,9 +12,18 @@ float sdtspeedup = 3.0f;
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [dantequicksdtcheck], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
         movss xmm0, [rdi+00000128h]
         mulss xmm0, [sdtspeedup]
 		jmp qword ptr [DanteQuickSDT::jmp_ret]
+
+    code:
+        movss xmm0,[rdi+00000128h]
+        jmp qword ptr [DanteQuickSDT::jmp_ret]
 	}
 }
 
@@ -34,15 +44,6 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void DanteQuickSDT::on_draw_ui() {
+  ImGui::Checkbox("Dante Quick SDT", &dantequicksdtcheck);
+}

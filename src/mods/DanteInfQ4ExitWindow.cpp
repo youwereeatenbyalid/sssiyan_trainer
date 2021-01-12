@@ -3,14 +3,30 @@
 #include "utility/Scan.hpp"
 
 uintptr_t DanteInfQ4ExitWindow::jmp_ret{NULL};
+uintptr_t DanteInfQ4ExitWindow::jmp_jne{NULL};
+
+bool danteq4exitwindowcheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [danteq4exitwindowcheck],1
+        je cheatcode
+        jmp code
+
+    cheatcode:
         cvtss2sd xmm0,xmm0
 		jmp qword ptr [DanteInfQ4ExitWindow::jmp_ret]
+
+    code:
+        cmp qword ptr [rax+18h], 00
+        jne exitjne
+        jmp qword ptr [DanteInfQ4ExitWindow::jmp_ret]
+
+    exitjne:
+        jmp qword ptr [DanteInfQ4ExitWindow::jmp_jne]
 	}
 }
 
@@ -22,6 +38,7 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   if (!addr) {
     return "Unable to find DanteInfQ4ExitWindow pattern.";
   }
+  DanteInfQ4ExitWindow::jmp_jne = utility::scan(base, "1A 00 00 00 00 00 00 0F 28 74 24 30").value();
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
@@ -31,15 +48,6 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void DanteInfQ4ExitWindow::on_draw_ui() {
+  ImGui::Checkbox("Dante Inf Q4 Exit Window", &danteq4exitwindowcheck);
+}

@@ -3,6 +3,7 @@
 #include "utility/Scan.hpp"
 
 uintptr_t VergilInfConcentration::jmp_ret{NULL};
+bool vergilinfconcheck;
 
 float maxconcentration = 300.0f;
 
@@ -11,7 +12,16 @@ float maxconcentration = 300.0f;
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [vergilinfconcheck], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
         movss xmm2, [maxconcentration]
+        movss [rbx+00001B50h], xmm2
+		jmp qword ptr [VergilInfConcentration::jmp_ret]
+
+    code:
         movss [rbx+00001B50h], xmm2
 		jmp qword ptr [VergilInfConcentration::jmp_ret]
 	}
@@ -34,15 +44,6 @@ std::optional<std::string> VergilInfConcentration::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void VergilInfConcentration::on_draw_ui() {
+  ImGui::Checkbox("Vergil Inf Concentration", &vergilinfconcheck);
+}

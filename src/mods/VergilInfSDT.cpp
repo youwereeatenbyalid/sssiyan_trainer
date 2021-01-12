@@ -5,6 +5,7 @@
 uintptr_t VergilInfSDT::jmp_ret1{NULL};
 uintptr_t VergilInfSDT::jmp_ret2{NULL};
 
+bool vergilinfsdtcheck;
 float desiredsdtvalue = 10000.0f;
 
 // clang-format off
@@ -12,7 +13,16 @@ float desiredsdtvalue = 10000.0f;
 
 static naked void detour1() {
 	__asm {
+        cmp byte ptr [vergilinfsdtcheck], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
         movss xmm1, [desiredsdtvalue]
+        movss [rbx+00001B20h], xmm1
+		jmp qword ptr [VergilInfSDT::jmp_ret1]
+
+    code:
         movss [rbx+00001B20h], xmm1
 		jmp qword ptr [VergilInfSDT::jmp_ret1]
 	}
@@ -20,7 +30,16 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
+        cmp byte ptr [vergilinfsdtcheck], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
 		jmp qword ptr [VergilInfSDT::jmp_ret2]
+
+    code:
+        movss [rdi+00001B20h], xmm0
+        jmp qword ptr [VergilInfSDT::jmp_ret2]
 	}
 }
 
@@ -50,15 +69,6 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-// void MoveID::on_config_load(const utility::Config &cfg) {}
-// during save
-// void MoveID::on_config_save(utility::Config &cfg) {}
-// do something every frame
-// void MoveID::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-// void DeepTurbo::on_draw_debug_ui() {
-// ImGui::Text("Deep Turbo : %.0f", turbospeed);
-// }
-// will show up in main window, dump ImGui widgets you want here
-// void MoveID::on_draw_ui() {}
+void VergilInfSDT::on_draw_ui() {
+  ImGui::Checkbox("Vergil Inf SDT", &vergilinfsdtcheck);
+}
