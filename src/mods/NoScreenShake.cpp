@@ -1,6 +1,5 @@
 
 #include "NoScreenShake.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t NoScreenShake::jmp_ret{NULL};
 bool noscreenshakecheck;

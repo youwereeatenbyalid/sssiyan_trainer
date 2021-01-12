@@ -1,6 +1,5 @@
 
 #include "DanteAlwaysQ4SDT.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DanteAlwaysQ4SDT::jmp_ret{NULL};
 uintptr_t DanteAlwaysQ4SDT::jmp_jne{NULL};

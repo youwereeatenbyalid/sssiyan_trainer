@@ -1,6 +1,5 @@
 
 #include "DamageMultiplier.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DamageMultiplier::jmp_ret{NULL};
 bool damagemultipliercheck;

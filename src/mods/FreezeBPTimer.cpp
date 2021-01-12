@@ -1,6 +1,5 @@
 
 #include "FreezeBPTimer.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t FreezeBPTimer::jmp_ret{NULL};
 bool freezebptimercheck;

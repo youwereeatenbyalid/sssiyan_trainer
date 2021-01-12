@@ -1,11 +1,10 @@
 
 #include "VergilInfConcentration.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilInfConcentration::jmp_ret{NULL};
-bool vergilinfconcheck;
 
 float maxconcentration = 300.0f;
+bool vergilinfconcheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -22,7 +21,7 @@ static naked void detour() {
 		jmp qword ptr [VergilInfConcentration::jmp_ret]
 
     code:
-        movss [rbx+00001B50h], xmm2
+        movss xmm2,[rbx+00001B50h]
 		jmp qword ptr [VergilInfConcentration::jmp_ret]
 	}
 }

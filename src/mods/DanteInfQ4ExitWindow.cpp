@@ -1,6 +1,5 @@
 
 #include "DanteInfQ4ExitWindow.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DanteInfQ4ExitWindow::jmp_ret{NULL};
 uintptr_t DanteInfQ4ExitWindow::jmp_jne{NULL};

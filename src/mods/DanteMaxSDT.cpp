@@ -1,6 +1,5 @@
 
 #include "DanteMaxSDT.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DanteMaxSDT::jmp_ret{NULL};
 bool dantemaxsdtcheck;

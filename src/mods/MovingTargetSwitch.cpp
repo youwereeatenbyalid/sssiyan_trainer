@@ -1,6 +1,5 @@
 
 #include "MovingTargetSwitch.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t MovingTargetSwitch::jmp_ret{NULL};
 uintptr_t MovingTargetSwitch::jmp_jae{NULL};
@@ -39,7 +38,7 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
     return "Unable to find MovingTargetSwitch pattern.";
   }
 
-  MovingTargetSwitch::jmp_jae = utility::scan(base, "3E 00 00 48 85 C9 75 12").value();
+  MovingTargetSwitch::jmp_jae = utility::scan(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

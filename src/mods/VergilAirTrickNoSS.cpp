@@ -1,6 +1,5 @@
 
 #include "VergilAirTrickNoSS.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilAirTrickNoSS::jmp_ret{NULL};
 uintptr_t VergilAirTrickNoSS::jmp_je{NULL};

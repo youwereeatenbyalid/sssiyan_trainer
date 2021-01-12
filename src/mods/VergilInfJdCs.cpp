@@ -1,6 +1,5 @@
 
 #include "VergilInfJdCs.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
 bool vergilinfjdcscheck;

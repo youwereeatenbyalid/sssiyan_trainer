@@ -1,6 +1,5 @@
 
 #include "DeepTurbo.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DeepTurbo::jmp_ret1{NULL};
 uintptr_t DeepTurbo::jmp_ret2{NULL};

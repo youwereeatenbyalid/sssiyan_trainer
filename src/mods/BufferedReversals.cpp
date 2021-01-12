@@ -1,6 +1,5 @@
 
 #include "BufferedReversals.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t BufferedReversals::jmp_ret{NULL};
 bool bufferedreversalscheck;

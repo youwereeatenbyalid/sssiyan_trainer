@@ -1,12 +1,11 @@
 
 #include "VergilInfSDT.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilInfSDT::jmp_ret1{NULL};
 uintptr_t VergilInfSDT::jmp_ret2{NULL};
 
-bool vergilinfsdtcheck;
 float desiredsdtvalue = 10000.0f;
+bool vergilinfsdtcheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -23,7 +22,7 @@ static naked void detour1() {
 		jmp qword ptr [VergilInfSDT::jmp_ret1]
 
     code:
-        movss [rbx+00001B20h], xmm1
+        movss xmm1,[rbx+00001B20h]
 		jmp qword ptr [VergilInfSDT::jmp_ret1]
 	}
 }

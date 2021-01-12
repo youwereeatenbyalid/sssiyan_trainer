@@ -1,6 +1,5 @@
 
 #include "FileFrameCuts.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t FileFrameCuts::jmp_ret{NULL};
 bool dantefasterguard;

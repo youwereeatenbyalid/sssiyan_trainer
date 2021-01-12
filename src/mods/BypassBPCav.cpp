@@ -1,6 +1,5 @@
 
 #include "BypassBPCav.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t BypassBPCav::jmp_ret{NULL};
 uintptr_t BypassBPCav::jmp_jb{NULL};

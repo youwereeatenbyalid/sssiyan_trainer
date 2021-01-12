@@ -1,6 +1,5 @@
 
 #include "VergilDirectionalMappings.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilDirectionalMappings::jmp_ret{NULL};
 bool vergiltrickbackcheck;

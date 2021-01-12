@@ -1,6 +1,5 @@
 
 #include "EntitySpeeds.hpp"
-#include "utility/Scan.hpp"
 #include "MoveID.hpp"
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};

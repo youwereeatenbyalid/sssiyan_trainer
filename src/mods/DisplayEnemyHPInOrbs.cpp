@@ -1,7 +1,6 @@
 
 #include "DisplayEnemyHPInOrbs.hpp"
 #include "DamageMultiplier.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
 uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};

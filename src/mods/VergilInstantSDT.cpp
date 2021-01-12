@@ -1,6 +1,5 @@
 
 #include "VergilInstantSDT.hpp"
-#include "utility/Scan.hpp"
 
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
 uintptr_t VergilInstantSDT::jmp_ja1{NULL};
@@ -59,7 +58,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
     return "Unable to find VergilInstantSDT2 pattern.";
   }
 
-  VergilInstantSDT::jmp_ja1 = utility::scan(base, "02 02 48 8B 5C 24 30 32").value();
+  VergilInstantSDT::jmp_ja1 = utility::scan(base, "02 02 48 8B 5C 24 30 32").value()+2;
 
   if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 6)) {
     //  return a error string in case something goes wrong
