@@ -80,6 +80,7 @@ void DeepTurbo::on_draw_debug_ui() {
 }
 void DeepTurbo::on_draw_ui() {
 ImGui::Checkbox("Deep Turbo", &deepturbocheck);
+ImGui::SliderFloat("Speed", &turbospeed, 0.5f, 2.5f, "%.2f");
 }
 
 #if 0

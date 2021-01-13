@@ -290,6 +290,7 @@ protected:
     using ValueList = std::vector<std::reference_wrapper<IModValue>>;
 
 public:
+    enum page_enum {commonpage,gamepage,neropage,dantepage,vpage,vergilpage};
     virtual ~Mod() {};
     virtual std::string_view get_name() const { return "UnknownMod"; };
 
@@ -360,7 +361,7 @@ public:
     virtual void on_draw_ui() {};
 	virtual void on_draw_debug_ui() {};
     bool ischecked;
-    int onpage;
+    int onpage =-1;
     virtual void on_config_load(const utility::Config& cfg) {};
     virtual void on_config_save(utility::Config& cfg) {};
     // Game-specific callbacks

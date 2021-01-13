@@ -11,10 +11,12 @@ static naked void detour() {
     validation:
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
+
         push rax
         mov rax, [DanteMaxSDT::cheaton]
         cmp byte ptr [rax], 1
         pop rax
+
         je cheatcode
         jmp code
 
@@ -32,10 +34,10 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteMaxSDT::on_initialize() {
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
-  onpage    = 1;
+  ischecked            = false;
+  onpage               = dantepage;
   DanteMaxSDT::cheaton = (uintptr_t)&ischecked;
+  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
   if (!addr) {
     return "Unable to find DanteMaxSDT pattern.";

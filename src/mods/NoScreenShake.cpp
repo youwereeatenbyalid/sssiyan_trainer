@@ -2,14 +2,16 @@
 #include "NoScreenShake.hpp"
 
 uintptr_t NoScreenShake::jmp_ret{NULL};
-bool noscreenshakecheck;
-
+uintptr_t NoScreenShake::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [noscreenshakecheck], 1
+        push rax
+        mov rax, [NoScreenShake::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -25,6 +27,10 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> NoScreenShake::on_initialize() {
+  ischecked            = false;
+  onpage               = commonpage;
+  NoScreenShake::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
   if (!addr) {
@@ -40,5 +46,4 @@ std::optional<std::string> NoScreenShake::on_initialize() {
 }
 
 void NoScreenShake::on_draw_ui() {
-  ImGui::Checkbox("No Screen Shake", &noscreenshakecheck);
 }

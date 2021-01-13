@@ -2,6 +2,7 @@
 #include "MovingTargetSwitch.hpp"
 
 uintptr_t MovingTargetSwitch::jmp_ret{NULL};
+uintptr_t MovingTargetSwitch::cheaton{NULL};
 uintptr_t MovingTargetSwitch::jmp_jae{NULL};
 bool movingtargetswitchcheck;
 
@@ -12,7 +13,10 @@ float comissvalue = 0.75f;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [movingtargetswitchcheck], 1
+        push rax
+        mov rax, [MovingTargetSwitch::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -32,6 +36,9 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> MovingTargetSwitch::on_initialize() {
+  ischecked            = false;
+  onpage               = commonpage;
+  MovingTargetSwitch::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "0F 2F 05 81 DF F6 02");
   if (!addr) {

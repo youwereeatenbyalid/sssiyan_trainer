@@ -113,8 +113,20 @@ std::optional<std::string> Mods::on_initialize() const {
         spdlog::info("{:s}::on_config_load()", mod->get_name().data());
         mod->on_config_load(cfg);
     }
-
+    //this is very not great
+    focusedmod = m_mods[0];
     return std::nullopt;
+}
+std::shared_ptr<Mod> Mods::get_mod(std::string modname) const {
+  for (auto& mod : m_mods) {
+    if (modname == mod->get_name()) {
+      return mod;
+    }
+  }
+}
+
+std::shared_ptr<Mod> Mods::get_focused_mod() const {
+  return focusedmod;
 }
 
 void Mods::on_frame() const {
@@ -135,11 +147,15 @@ void Mods::on_draw_ui() const {
     }
 }
 
-void Mods::on_pagelist_ui(int page) const {
+void Mods::on_pagelist_ui(int page) const{
   for (auto& mod : m_mods) {
     //std::string_view hiddenname = "##" + mod->get_name();
     if (page == mod->onpage) {
       ImGui::Checkbox(std::string{mod->get_name()}.c_str(), &mod->ischecked);
+      ImGui::SameLine();
+      if(ImGui::SmallButton(std::string{mod->get_name()}.c_str())) {
+        focusedmod = mod;
+      }
     }
   }
 }

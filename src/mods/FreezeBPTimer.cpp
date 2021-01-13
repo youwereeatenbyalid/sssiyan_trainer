@@ -2,6 +2,7 @@
 #include "FreezeBPTimer.hpp"
 
 uintptr_t FreezeBPTimer::jmp_ret{NULL};
+uintptr_t FreezeBPTimer::cheaton{NULL};
 bool freezebptimercheck;
 
 // clang-format off
@@ -9,7 +10,10 @@ bool freezebptimercheck;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [freezebptimercheck], 1
+        push rax
+        mov rax, [FreezeBPTimer::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -27,6 +31,9 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> FreezeBPTimer::on_initialize() {
+  ischecked            = false;
+  onpage               = gamepage;
+  FreezeBPTimer::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
   if (!addr) {

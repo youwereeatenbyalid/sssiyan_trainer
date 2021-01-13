@@ -826,10 +826,12 @@ public:
 	virtual void OnGui()
 	{
 		ImGui::Text("Debug window");
-
+          
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_draw_debug_ui();
+            ImGui::Text(std::string{p_mf->get_mods()->get_focused_mod()->get_name()}.c_str());
+            p_mf->get_mods()->get_mod("DeepTurbo")->on_draw_ui();
+			//p_mf->get_mods()->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -931,9 +933,10 @@ void InitSample(ModFramework* mf)
 
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
 
-	ImwWindow* pWindow1 = new MyImwWindow(mf, 1, "Dante Specific");
+	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
-    ImwWindow* pWindow2 = new MyImwWindow(mf, 2, "Vergil Specific");
+    ImwWindow* dantewindow     = new MyImwWindow(mf, 3, "Dante Mods");
+    ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil Specific");
 
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
@@ -947,8 +950,9 @@ void InitSample(ModFramework* mf)
 	new MyStatusBar();
 	new MyToolBar();
 
-	oMgr.Dock(pWindow1);
-    oMgr.Dock(pWindow2);
+	oMgr.Dock(commonwindow);
+    oMgr.Dock(dantewindow);
+    oMgr.Dock(vergilwindow);
 	oMgr.Dock(pDebugWindow, E_DOCK_ORIENTATION_BOTTOM);
 	//oMgr.Dock(pWindow2, E_DOCK_ORIENTATION_LEFT);
 	//oMgr.DockWith(pWindowPlaceholder, pWindow2, E_DOCK_ORIENTATION_BOTTOM);
