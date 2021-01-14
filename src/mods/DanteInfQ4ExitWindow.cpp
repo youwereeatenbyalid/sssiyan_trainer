@@ -1,6 +1,6 @@
 
 #include "DanteInfQ4ExitWindow.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t DanteInfQ4ExitWindow::jmp_ret{NULL};
 uintptr_t DanteInfQ4ExitWindow::jmp_jne{NULL};
 uintptr_t DanteInfQ4ExitWindow::cheaton{NULL};
@@ -10,6 +10,8 @@ uintptr_t DanteInfQ4ExitWindow::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [DanteInfQ4ExitWindow::cheaton]
         cmp byte ptr [rax],1

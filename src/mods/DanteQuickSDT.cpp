@@ -1,6 +1,6 @@
 
 #include "DanteQuickSDT.hpp"
-
+#include "PlayerTracker.hpp"
 
 uintptr_t DanteQuickSDT::jmp_ret{NULL};
 uintptr_t DanteQuickSDT::cheaton{NULL};
@@ -11,6 +11,9 @@ float sdtspeedup = 3.0f;
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
+        jne code
+
         push rax
         mov rax,[DanteQuickSDT::cheaton]
         cmp byte ptr [rax], 1

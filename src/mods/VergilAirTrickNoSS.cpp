@@ -1,6 +1,6 @@
 
 #include "VergilAirTrickNoSS.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t VergilAirTrickNoSS::jmp_ret{NULL};
 uintptr_t VergilAirTrickNoSS::jmp_je{NULL};
 uintptr_t VergilAirTrickNoSS::cheaton{NULL};
@@ -10,6 +10,8 @@ uintptr_t VergilAirTrickNoSS::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [VergilAirTrickNoSS::cheaton]
         cmp byte ptr [rax], 1

@@ -1,4 +1,5 @@
 #include "VergilInfJdCs.hpp"
+#include "PlayerTracker.hpp"
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
 uintptr_t VergilInfJdCs::cheaton{NULL};
 
@@ -7,6 +8,8 @@ uintptr_t VergilInfJdCs::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
         push rax
         mov rax,[VergilInfJdCs::cheaton]
         cmp byte ptr [rax], 1

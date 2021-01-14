@@ -8,7 +8,7 @@ uintptr_t VergilDirectionalMappings::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
 
         push rax

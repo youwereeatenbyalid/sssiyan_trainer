@@ -1,5 +1,6 @@
 
 #include "DanteAlwaysQ4SDT.hpp"
+#include "PlayerTracker.hpp"
 uintptr_t DanteAlwaysQ4SDT::jmp_ret{NULL};
 uintptr_t DanteAlwaysQ4SDT::jmp_jne{NULL};
 uintptr_t DanteAlwaysQ4SDT::cheaton{NULL};
@@ -10,6 +11,8 @@ uintptr_t DanteAlwaysQ4SDT::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [DanteAlwaysQ4SDT::cheaton]
         cmp byte ptr [rax], 1

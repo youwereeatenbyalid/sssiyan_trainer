@@ -1,6 +1,6 @@
 
 #include "VergilInfSDT.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t VergilInfSDT::jmp_ret1{NULL};
 uintptr_t VergilInfSDT::jmp_ret2{NULL};
 uintptr_t VergilInfSDT::cheaton{NULL};
@@ -12,6 +12,8 @@ float desiredsdtvalue = 10000.0f;
 
 static naked void detour1() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [VergilInfSDT::cheaton]
         cmp byte ptr [rax], 1
@@ -32,6 +34,7 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         push rax
         mov rax, [VergilInfSDT::cheaton]
         cmp byte ptr [rax], 1

@@ -1,5 +1,5 @@
 #include "BypassBPCav.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t BypassBPCav::jmp_ret{NULL};
 uintptr_t BypassBPCav::jmp_jb{NULL};
 uintptr_t BypassBPCav::cheaton{NULL};
@@ -9,6 +9,8 @@ uintptr_t BypassBPCav::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [BypassBPCav::cheaton]
         cmp byte ptr [rax], 1

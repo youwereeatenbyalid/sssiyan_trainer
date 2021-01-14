@@ -1,6 +1,6 @@
 
 #include "VergilInstantSDT.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
 uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 uintptr_t VergilInstantSDT::jmp_ret2{NULL};
@@ -11,6 +11,8 @@ uintptr_t VergilInstantSDT::cheaton{NULL};
 
 static naked void detour1() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
         push rax
         mov rax, [VergilInstantSDT::cheaton]
         cmp byte ptr [rax], 1
