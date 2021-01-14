@@ -31,7 +31,10 @@ static naked void detour() {
 std::optional<std::string> ModSample::on_initialize() {
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
   //ischecked = false;
-  //onpage    = 1;
+  //onpage    = commonpage;
+  //full_name_string     = "SampleMod Full Name";
+  //author_string        = "Author";
+  //description_string   = "This is the description of SampleMod.";
   //SampleMod::cheaton = (uintptr_t)&ischecked;
 
   //auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");

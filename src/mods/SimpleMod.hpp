@@ -1,5 +1,6 @@
 #pragma once
 #include "Mod.hpp"
+#include "PlayerTracker.hpp"
 #include "sdk/ReClass.hpp"
 
 class SimpleMod : public Mod {
