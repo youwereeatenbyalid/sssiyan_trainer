@@ -5,8 +5,6 @@ uintptr_t DanteInfQ4ExitWindow::jmp_ret{NULL};
 uintptr_t DanteInfQ4ExitWindow::jmp_jne{NULL};
 uintptr_t DanteInfQ4ExitWindow::cheaton{NULL};
 
-bool danteq4exitwindowcheck;
-
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -58,5 +56,4 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
 }
 
 void DanteInfQ4ExitWindow::on_draw_ui() {
-  ImGui::Checkbox("Dante Inf Q4 Exit Window", &danteq4exitwindowcheck);
 }

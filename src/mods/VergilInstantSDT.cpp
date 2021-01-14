@@ -6,8 +6,6 @@ uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 uintptr_t VergilInstantSDT::jmp_ret2{NULL};
 uintptr_t VergilInstantSDT::cheaton{NULL};
 
-bool vergilinstantsdtcheck;
-
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -56,7 +54,7 @@ static naked void detour2() {
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   ischecked            = false;
-  onpage               = dantepage;
+  onpage               = vergilpage;
   full_name_string     = "Instant SDT";
   author_string        = "SSSiyan";
   description_string   = "Allow Vergil to enter SDT instantly.";
@@ -87,5 +85,4 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
 }
 
 void VergilInstantSDT::on_draw_ui() {
-  ImGui::Checkbox("Vergil Instant SDT", &vergilinstantsdtcheck);
 }

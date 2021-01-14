@@ -4,7 +4,6 @@
 uintptr_t MovingTargetSwitch::jmp_ret{NULL};
 uintptr_t MovingTargetSwitch::cheaton{NULL};
 uintptr_t MovingTargetSwitch::jmp_jae{NULL};
-bool movingtargetswitchcheck;
 
 float comissvalue = 0.75f;
 
@@ -59,5 +58,4 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
 }
 
 void MovingTargetSwitch::on_draw_ui() {
-  ImGui::Checkbox("Moving Target Switch", &movingtargetswitchcheck);
 }
