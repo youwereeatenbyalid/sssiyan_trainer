@@ -42,7 +42,7 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   onpage               = commonpage;
   full_name_string     = "Display Enemy HP in Orbs";
   author_string        = "SSSiyan";
-  description_string   = "Displays the last hit enemy's HP in the orb counter on the top right."
+  description_string = "Displays the last hit enemy's HP in the orb counter on the top right.";
   DisplayEnemyHPInOrbs::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");
