@@ -2,7 +2,7 @@
 #include "DamageMultiplier.hpp"
 
 uintptr_t DamageMultiplier::jmp_ret{NULL};
-bool damagemultipliercheck;
+uintptr_t DamageMultiplier::cheaton{NULL};
 float DamageMultiplier::enemyhpvalue = 0.0f;
 
 float playerdamagemultiplier         = 1.0f;
@@ -14,7 +14,10 @@ float enemydamagemultiplier          = 1.0f;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [damagemultipliercheck],1
+        push rax
+        mov rax, [DamageMultiplier::cheaton]
+        cmp byte ptr [rax],1
+        pop rax
         je damagemultcode
         jmp code
 
@@ -62,6 +65,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DamageMultiplier::on_initialize() {
+  ischecked             = false;
+  onpage                = commonpage;
+  full_name_string      = "Damage Multiplier";
+  author_string         = "SSSiyan";
+  description_string    = "Adjust the Damage output of players and enemies.";
+  DamageMultiplier::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C9 F3 0F 11 4F 10 48");
   if (!addr) {
@@ -77,7 +87,6 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
 }
 
 void DamageMultiplier::on_draw_ui() {
-  ImGui::Checkbox("Damage Multiplier", &damagemultipliercheck);
   ImGui::PushItemWidth(100);
   ImGui::InputFloat("Player Damage Output", &playerdamagemultiplier, 0.1f);
   ImGui::PopItemWidth();

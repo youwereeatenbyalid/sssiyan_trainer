@@ -1,13 +1,11 @@
-
 #include "DeepTurbo.hpp"
 
 uintptr_t DeepTurbo::jmp_ret1{NULL};
 uintptr_t DeepTurbo::jmp_ret2{NULL};
-
+uintptr_t DeepTurbo::cheaton{NULL};
 float defscale   = 1.0;
 float turbospeed = 1.2;
 int state        = 0;
-bool deepturbocheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -23,7 +21,10 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
-        cmp byte ptr [deepturbocheck], 1
+        push rax
+        mov rax, [DeepTurbo::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -50,6 +51,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> DeepTurbo::on_initialize() {
+  ischecked          = false;
+  onpage             = commonpage;
+  full_name_string   = "Deep's Turbo";
+  author_string      = "DeepDarkKapusta";
+  description_string = "Change the game speed by adjusting the slider.";
+  DeepTurbo::cheaton = (uintptr_t)&ischecked;
+
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "89 46 68 44 89 6E 6C");
   if (!addr1) {
@@ -79,7 +87,6 @@ void DeepTurbo::on_draw_debug_ui() {
   ImGui::Text("Deep Turbo: %.1f", turbospeed);
 }
 void DeepTurbo::on_draw_ui() {
-ImGui::Checkbox("Deep Turbo", &deepturbocheck);
 ImGui::SliderFloat("Speed", &turbospeed, 0.5f, 2.5f, "%.2f");
 }
 

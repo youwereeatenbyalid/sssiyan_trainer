@@ -29,6 +29,9 @@ static naked void detour() {
 std::optional<std::string> NoScreenShake::on_initialize() {
   ischecked            = false;
   onpage               = commonpage;
+  full_name_string     = "No Screen Shake";
+  author_string        = "SSSiyan";
+  description_string   = "Disables the screen shake effect";
   NoScreenShake::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

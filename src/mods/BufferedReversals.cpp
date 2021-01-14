@@ -1,4 +1,3 @@
-
 #include "BufferedReversals.hpp"
 
 uintptr_t BufferedReversals::jmp_ret{NULL};
@@ -34,7 +33,9 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   ischecked            = false;
   onpage               = commonpage;
   BufferedReversals::cheaton = (uintptr_t)&ischecked;
-
+  full_name_string           = "Buffered Reversals";
+  author_string              = "SSSiyan";
+  description_string = "Like I know how buffered reversals work.\nFucking spam lock-on IDK";
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "48 89 87 40 17 00 00");
   if (!addr) {

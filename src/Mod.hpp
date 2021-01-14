@@ -293,7 +293,6 @@ public:
     enum page_enum {commonpage,gamepage,neropage,dantepage,vpage,vergilpage};
     virtual ~Mod() {};
     virtual std::string_view get_name() const { return "UnknownMod"; };
-
     // can be used for ModValues, like Mod_ValueName
     virtual std::string generate_name(std::string_view name) { return std::string{ get_name() } + "_" + name.data(); }
 
@@ -362,6 +361,9 @@ public:
 	virtual void on_draw_debug_ui() {};
     bool ischecked;
     int onpage =-1;
+    std::string full_name_string = "Mod Name";
+    std::string author_string = "Author Name";
+    std::string description_string = "Description of the mod.\nNew line commands should work";
     virtual void on_config_load(const utility::Config& cfg) {};
     virtual void on_config_save(utility::Config& cfg) {};
     // Game-specific callbacks

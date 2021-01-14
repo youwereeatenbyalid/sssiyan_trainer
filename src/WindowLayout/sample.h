@@ -829,8 +829,12 @@ public:
           
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-            ImGui::Text("Focused mod: %s", p_mf->get_mods()->get_focused_mod().c_str());
-                  p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod())->on_draw_ui();
+            auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
+            ImGui::Text("%s", focusmod->full_name_string.c_str());
+            ImGui::Text("Author: %s", focusmod->author_string.c_str());
+            ImGui::Text("%s", focusmod->description_string.c_str());
+            focusmod->on_draw_ui();
+                  //p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod())->on_draw_ui();
 			//p_mf->get_mods()->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {

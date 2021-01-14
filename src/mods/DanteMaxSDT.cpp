@@ -36,6 +36,9 @@ static naked void detour() {
 std::optional<std::string> DanteMaxSDT::on_initialize() {
   ischecked            = false;
   onpage               = dantepage;
+  full_name_string     = "Max SDT";
+  author_string        = "SSSiyan";
+  description_string   = "Set SDT Bar to maximum.";
   DanteMaxSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");

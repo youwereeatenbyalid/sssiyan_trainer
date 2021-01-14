@@ -2,6 +2,7 @@
 #include "FileFrameCuts.hpp"
 
 uintptr_t FileFrameCuts::jmp_ret{NULL};
+uintptr_t FileFrameCuts::cheaton{NULL};
 bool dantefasterguard;
 
 float danteguardgroundstartlength = 1.0f;
@@ -12,6 +13,10 @@ float danteairguardstartlength    = 3.0f;
 
 static naked void detour() {
 	__asm {
+        push rax
+        mov rax, [FileFrameCuts::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         cmp dword ptr [rdx+9Ah], 7274604 //'lo' (Block)
         je guardgroundstartcheck
         cmp dword ptr [rdx+9Ah], 7471209 //'ir' (AirBlock)
@@ -41,6 +46,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> FileFrameCuts::on_initialize() {
+  ischecked            = false;
+  onpage               = commonpage;
+  full_name_string     = "Frame Cuts";
+  author_string        = "SSSiyan";
+  description_string   = "Cuts frames from various moves.";
+  FileFrameCuts::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 42 58 66 85 C0 74 0E");
   if (!addr) {

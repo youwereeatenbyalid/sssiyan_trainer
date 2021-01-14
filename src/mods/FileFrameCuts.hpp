@@ -1,4 +1,4 @@
-#pragma once
+uintptr_t static cheaton;#pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
 class FileFrameCuts : public Mod {
@@ -9,6 +9,7 @@ public:
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
+  uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
   // void on_config_load(const utility::Config& cfg) override;

@@ -156,7 +156,7 @@ void Mods::on_pagelist_ui(int page) const{
     if (page == mod->onpage) {
       ImGui::Checkbox(checkboxname.c_str(), &mod->ischecked);
       ImGui::SameLine();
-      if(ImGui::Selectable(std::string{mod->get_name()}.c_str())) {
+      if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
         focusedmod = mod->get_name();
       }
     }

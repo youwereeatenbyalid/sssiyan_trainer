@@ -3,6 +3,7 @@
 #include "MoveID.hpp"
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};
+uintptr_t EntitySpeeds::cheaton{NULL};
 bool dantemillionstabspeedup;
 
 float dantemillionstabstartspeed = 3.0f;
@@ -12,6 +13,11 @@ float dantemillionstabstartspeed = 3.0f;
 
 static naked void detour() {
 	__asm {
+        push rax
+        mov rax, [EntitySpeeds::cheaton]
+        cmp byte ptr [rax],1
+        pop rax
+        jne code
         cmp byte ptr [rcx+144h], 40h // Hitch prbably has better compares
         je movecheck
         cmp byte ptr [rcx-342h], 7077954 // 'Blood'
@@ -43,6 +49,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> EntitySpeeds::on_initialize() {
+  ischecked          = false;
+  onpage             = commonpage;
+  full_name_string   = "Entity Speeds";
+  author_string      = "SSSiyan";
+  description_string = "Adjust the speed of various moves.";
+  EntitySpeeds::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 11 41 4C 48 8B 5C");
   if (!addr) {

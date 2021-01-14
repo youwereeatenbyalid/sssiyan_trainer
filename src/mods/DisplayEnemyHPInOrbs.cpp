@@ -35,6 +35,9 @@ static naked void detour() {
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   ischecked            = false;
   onpage               = commonpage;
+  full_name_string     = "Display Enemy HP in Orbs";
+  author_string        = "SSSiyan";
+  description_string = "This should display the enemies HP in the orb counter on the top right,\n but it doesn't. I blame Siyan.";
   DisplayEnemyHPInOrbs::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");
