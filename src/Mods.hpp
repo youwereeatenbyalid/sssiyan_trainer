@@ -15,6 +15,8 @@ public:
     std::shared_ptr<Mod> get_mod(std::string modname) const;
     std::string get_focused_mod() const;
     void on_pagelist_ui(int page) const;
+    void save_mods() const;
+    void load_mods() const;
     const auto& get_mods() const {
         return m_mods;
     }

@@ -82,6 +82,14 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   }
   return Mod::on_initialize();
 }
+void DeepTurbo::on_config_load(const utility::Config& cfg) {
+  //ischecked = cfg.get<bool>("deep_turbo_custom").value_or(false);
+   turbospeed = cfg.get<float>("deep_turbo_value").value_or(1.2f);
+}
+void DeepTurbo::on_config_save(utility::Config& cfg) {
+  //cfg.set<bool>("deep_turbo_custom", ischecked);
+  cfg.set<float>("deep_turbo_value", turbospeed);
+}
 
 void DeepTurbo::on_draw_debug_ui() {
   ImGui::Text("Deep Turbo: %.1f", turbospeed);

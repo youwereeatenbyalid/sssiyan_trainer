@@ -862,6 +862,12 @@ public:
 	}
 	virtual void OnGui()
 	{
+		if (ImGui::Button("Save Settings")) {
+            p_mf->get_mods()->save_mods();
+		}
+        if (ImGui::Button("Load Settings")) {
+            p_mf->get_mods()->load_mods();
+        }
 		ImGui::Text("Hello, world! I'm an alone window");
 		
 #ifdef GIT_HASH

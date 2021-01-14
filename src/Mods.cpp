@@ -108,12 +108,14 @@ std::optional<std::string> Mods::on_initialize() const {
         }
     }
 
-    utility::Config cfg{ "re2_fw_config.txt" };
+    /*utility::Config cfg{ "re2_fw_config.txt" };
 
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_load()", mod->get_name().data());
         mod->on_config_load(cfg);
     }
+    */
+    load_mods();
     //this is still very not great
     focusedmod = "nomod";
     return std::nullopt;
@@ -137,6 +139,34 @@ void Mods::on_frame() const {
         mod->on_frame();
     }
 }
+void Mods::save_mods() const {
+  utility::Config cfg{"DMC2_fw_config.txt"};
+    for (auto& mod : m_mods) {
+        spdlog::info("{:s}::on_config_save()", mod->get_name().data());
+        std::string togglename = std::string{mod->get_name()};
+        togglename.append("_on");
+        cfg.set<bool>(togglename, mod->ischecked);
+        mod->on_config_save(cfg);
+        //and then probably call the rest of the stuff here;
+    }
+    // dorime
+    auto m_conf_path            = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Devil May Cry 5\\DMC2_fw_config.txt";
+    // ameno
+    cfg.save(m_conf_path);
+
+}
+
+void Mods::load_mods() const {
+  utility::Config cfg{"DMC2_fw_config.txt"};
+  for (auto& mod : m_mods) {
+    spdlog::info("{:s}::on_config_load()", mod->get_name().data());
+    std::string togglename = std::string{mod->get_name()};
+    togglename.append("_on");
+    mod->ischecked = cfg.get<bool>(togglename).value_or(false);
+    mod->on_config_load(cfg);
+    // and then probably call the rest of the stuff here;
+  }
+}
 
 void Mods::on_draw_debug_ui() const {
 	for (auto& mod : m_mods) {
@@ -149,6 +179,8 @@ void Mods::on_draw_ui() const {
         mod->on_draw_ui();
     }
 }
+
+
 
 void Mods::on_pagelist_ui(int page) const{
   for (auto& mod : m_mods) {
