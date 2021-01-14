@@ -13,20 +13,11 @@ float enemydamagemultiplier          = 1.0f;
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
-	__asm {
-        push rax
-        mov rax, [DamageMultiplier::cheaton]
-        cmp byte ptr [rax],1
-        pop rax
-        je damagemultcode
-        jmp code
-
-    damagemultcode:
+	__asm {                                // Compares will play out even without cheat enabled so we can get a backup of last hit entitiy's HP
         cmp dword ptr [rdi+134h], 7077968  // 'Pl' in 'Play'
         je enemydamageoutput
         cmp dword ptr [rdi-18Ch], 6225996  // 'L_' in L_B_Hand'
         je enemydamageoutput
-
         cmp dword ptr [rdi-16Ch], 6881357  // 'Mi' in 'Miss'
         je BPcheck
         jmp playerdamageoutput
@@ -36,13 +27,15 @@ static naked void detour() {
         je enemydamageoutput
         jmp playerdamageoutput
 
-    playerdamageoutput:
-        movss xmm2, [rdi+10h]
-        subss xmm2, xmm1
-        movss xmm1, [rdi+10h]
-        jmp effectdamage
-
     enemydamageoutput:
+        push rax
+        mov rax, [DamageMultiplier::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
+        je enemydamageoutputaffect          // If cheat is ticked, affect incoming damage. If not, don't
+        jmp code
+
+    enemydamageoutputaffect:
         movss xmm3, [rdi+10h]
         subss xmm3, xmm1
         movss xmm1, [rdi+10h]
@@ -50,9 +43,21 @@ static naked void detour() {
         subss xmm1, xmm3
         jmp code
 
-    effectdamage:
+    playerdamageoutput:
+        push rax
+        mov rax, [DamageMultiplier::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
+        je playerdamageoutputaffect         // If cheat is ticked, affect outgoing damage. If not, don't
+        jmp backupenemyhp
+
+    playerdamageoutputaffect:
+        movss xmm2, [rdi+10h]
+        subss xmm2, xmm1
+        movss xmm1, [rdi+10h]
         mulss xmm2, [playerdamagemultiplier]
         subss xmm1, xmm2
+    backupenemyhp:
         movss [DamageMultiplier::enemyhpvalue], xmm1
         jmp code
 
@@ -69,7 +74,7 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
   onpage                = commonpage;
   full_name_string      = "Damage Multiplier";
   author_string         = "SSSiyan";
-  description_string    = "Adjust the Damage output of players and enemies.";
+  description_string    = "Allows you to adjust the damage output of players and enemies.";
   DamageMultiplier::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

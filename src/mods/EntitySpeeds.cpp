@@ -72,4 +72,13 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
 
 void EntitySpeeds::on_draw_ui() {
   ImGui::Checkbox("Dante Million Stab Startup Speed Up", &dantemillionstabspeedup);
+  ImGui::Text("Test");
+  ImGui::Spacing();
+  ImGui::Text("Test after spacing");
+  ImGui::Text("Test without spacing");
+  ImGui::Text("Test");
+  ImGui::SameLine(200);
+  ImGui::Text("Sameline");
+  ImGui::Separator();
+  ImGui::Text("Test");
 }

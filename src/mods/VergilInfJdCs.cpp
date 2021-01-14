@@ -33,7 +33,7 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   onpage               = vergilpage;
   full_name_string     = "Infinite Just Judgement Cuts";
   author_string        = "SSSiyan";
-  description_string   = "Perform Just Judgement Cuts forever as long as your execution is good enough.";
+  description_string   = "Remove the consecutive Just Judgement Cut limit.";
   VergilInfJdCs::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF 87 E0 18 00 00");

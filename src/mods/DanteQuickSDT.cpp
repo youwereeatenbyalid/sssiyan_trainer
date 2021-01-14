@@ -39,7 +39,7 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
   onpage               = dantepage;
   full_name_string     = "Quick SDT";
   author_string        = "SSSiyan";
-  description_string   = "SDT Bar fills quickly.";
+  description_string   = "Reduces the time you have to hold DT to enter SDT.";
   DanteQuickSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");

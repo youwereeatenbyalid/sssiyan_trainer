@@ -30,7 +30,7 @@
         #include "mods/EntitySpeeds.hpp"
         #include "mods/MovingTargetSwitch.hpp"
     // Nero
-
+        #include "mods/NeroDisableWiresnatch.hpp"
     // Dante
         #include "mods/DanteMaxSDT.hpp"
         #include "mods/DanteQuickSDT.hpp"
@@ -78,6 +78,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         
     // Nero
+        m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
     // Dante
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
         m_mods.emplace_back(std::make_unique<DanteQuickSDT>());

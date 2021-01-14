@@ -58,7 +58,7 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   onpage               = vergilpage;
   full_name_string     = "Infinite SDT";
   author_string        = "SSSiyan";
-  description_string   = "Grant infinite SDT.";
+  description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
   VergilInfSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "F3 0F 10 8B 20 1B 00 00 8B");

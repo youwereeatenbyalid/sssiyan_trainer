@@ -53,6 +53,11 @@ set(MODS_SRC
     mods/MovingTargetSwitch.cpp 
     mods/VergilInfJdCs.hpp 
     mods/VergilInfJdCs.cpp 
+    mods/NeroDisableWiresnatch.hpp 
+    mods/NeroDisableWiresnatch.cpp 
+    mods/NeroInfBreakers.hpp 
+    mods/NeroInfBreakers.cpp 
+
 )
 
 set(HOOKS_SRC

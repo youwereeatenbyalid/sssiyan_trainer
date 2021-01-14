@@ -38,7 +38,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   onpage             = dantepage;
   full_name_string   = "Bypass BP Cavaliere Restriction";
   author_string      = "SSSiyan";
-  description_string = "Allows you to take cavaliere R into bloody palace.";
+  description_string = "Allows you to take Cavaliere R into Bloody Palace.";
   BypassBPCav::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "C8 00 EB 44 3B 70 1C 72 11");

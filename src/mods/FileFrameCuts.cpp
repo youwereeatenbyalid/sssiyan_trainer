@@ -67,5 +67,5 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
 }
 
 void FileFrameCuts::on_draw_ui() {
-  ImGui::Checkbox("Dante Cut Frames On Guard", &dantefasterguard);
+  ImGui::Checkbox("Faster Guard", &dantefasterguard);
 }

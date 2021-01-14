@@ -35,7 +35,7 @@ std::optional<std::string> FreezeBPTimer::on_initialize() {
   onpage               = gamepage;
   full_name_string     = "Freeze Bloody Palace Timer";
   author_string        = "SSSiyan";
-  description_string = "Freezes the timer in bloody palace. Useful for practice, or just stress-free fun.";
+  description_string   = "Freezes the timer in Bloody Palace.";
   FreezeBPTimer::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");

@@ -30,8 +30,8 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   ischecked            = false;
   onpage               = commonpage;
   full_name_string     = "No Screen Shake";
-  author_string        = "SSSiyan";
-  description_string   = "Disables the screen shake effect";
+  author_string        = "DeepDarkKapustka";
+  description_string   = "Disables screen shake completely.";
   NoScreenShake::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

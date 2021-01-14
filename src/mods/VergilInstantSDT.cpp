@@ -59,7 +59,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   onpage               = vergilpage;
   full_name_string     = "Instant SDT";
   author_string        = "SSSiyan";
-  description_string   = "Allow Vergil to enter SDT instantly.";
+  description_string   = "Removes the need to hold the DT button to enter SDT.";
   VergilInstantSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");

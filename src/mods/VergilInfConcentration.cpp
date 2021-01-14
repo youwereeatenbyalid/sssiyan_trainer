@@ -37,7 +37,7 @@ std::optional<std::string> VergilInfConcentration::on_initialize() {
   onpage               = vergilpage;
   full_name_string     = "Infinite Concentration";
   author_string        = "SSSiyan";
-  description_string   = "Set concentration meter to maximum.";
+  description_string   = "Set Concentration meter to maximum.";
   VergilInfConcentration::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 93 50 1B 00 00");

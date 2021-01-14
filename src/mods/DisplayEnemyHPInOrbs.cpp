@@ -15,12 +15,17 @@ static naked void detour() {
         mov rax, [DisplayEnemyHPInOrbs::cheaton]
         cmp byte ptr [rax], 1
         pop rax
+        je healthcheck
+        jmp code
+
+    healthcheck:
+        cmp dword ptr [DamageMultiplier::enemyhpvalue], 80000000h // write default orbs if enemy hp is less than 0
+        ja code
+        cmp dword ptr [DamageMultiplier::enemyhpvalue], 00000000h // write default orbs if enemy hp is equal to 0
         je code
         jmp cheatcode
 
     cheatcode:
-        cmp dword ptr [DamageMultiplier::enemyhpvalue], 00000000
-        jbe code
         CVTTSS2SI ebp, [DamageMultiplier::enemyhpvalue]
         jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
 
@@ -37,7 +42,7 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   onpage               = commonpage;
   full_name_string     = "Display Enemy HP in Orbs";
   author_string        = "SSSiyan";
-  description_string = "This should display the enemies HP in the orb counter on the top right,\n but it doesn't. I blame Siyan.";
+  description_string   = "Displays the last hit enemy's HP in the orb counter on the top right."
   DisplayEnemyHPInOrbs::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");

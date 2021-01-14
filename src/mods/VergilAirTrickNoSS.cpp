@@ -37,9 +37,9 @@ static naked void detour() {
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   ischecked            = false;
   onpage               = vergilpage;
-  full_name_string     = "No Summoned Swords on Air Trick";
-  author_string        = "SSSiyan";
-  description_string   = "I honestly have no clue what this does yet.";
+  full_name_string     = "Disable Embedded Swords";
+  author_string        = "VPZadov";
+  description_string   = "Allows you to trick to enemies without using an embedded sword.";
   VergilAirTrickNoSS::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
