@@ -829,8 +829,8 @@ public:
           
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-            ImGui::Text(std::string{p_mf->get_mods()->get_focused_mod()->get_name()}.c_str());
-            p_mf->get_mods()->get_mod("DeepTurbo")->on_draw_ui();
+            ImGui::Text("Focused mod: %s", p_mf->get_mods()->get_focused_mod().c_str());
+                  p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod())->on_draw_ui();
 			//p_mf->get_mods()->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {

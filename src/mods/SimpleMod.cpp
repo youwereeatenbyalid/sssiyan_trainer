@@ -34,13 +34,6 @@ bool checkbox;
 bool abox;
 bool bbox;
 void SimpleMod::on_draw_ui() {
-    ImGui::Checkbox("##mod1", &checkbox);
-    ImGui::SameLine();
-	ImGui::Selectable("Mod 1");
-    ImGui::Checkbox("##mod2", &abox);
-    ImGui::SameLine();
-    ImGui::Selectable("Mod 2");
-    ImGui::Checkbox("##mod3", &bbox);
-    ImGui::SameLine();
-    ImGui::Selectable("Mod 3");
+  ImGui::Text("Welcome to simple mod!");
+  ImGui::Selectable("Mod 3");
 }

@@ -2,7 +2,7 @@
 #include "Mods.hpp"
 
 // Example
-        // #include "mods/SimpleMod.hpp"
+         #include "mods/SimpleMod.hpp"
 
 // Hitch
     // Game
@@ -48,7 +48,7 @@
 Mods::Mods()
 {
 // Example
-        // m_mods.emplace_back(std::make_unique<SimpleMod>());
+        m_mods.emplace_back(std::make_unique<SimpleMod>());
 
 // Hitch
     // Game
@@ -113,19 +113,21 @@ std::optional<std::string> Mods::on_initialize() const {
         spdlog::info("{:s}::on_config_load()", mod->get_name().data());
         mod->on_config_load(cfg);
     }
-    //this is very not great
-    focusedmod = m_mods[0];
+    //this is still very not great
+    focusedmod = "nomod";
     return std::nullopt;
 }
 std::shared_ptr<Mod> Mods::get_mod(std::string modname) const {
+    //recursive call in case we can't find the mod being looked for
   for (auto& mod : m_mods) {
     if (modname == mod->get_name()) {
       return mod;
     }
   }
+  return get_mod("SimpleMod");
 }
 
-std::shared_ptr<Mod> Mods::get_focused_mod() const {
+std::string Mods::get_focused_mod() const {
   return focusedmod;
 }
 
@@ -149,12 +151,13 @@ void Mods::on_draw_ui() const {
 
 void Mods::on_pagelist_ui(int page) const{
   for (auto& mod : m_mods) {
-    //std::string_view hiddenname = "##" + mod->get_name();
+    std::string checkboxname = "##";
+    checkboxname.append(std::string{mod->get_name()});
     if (page == mod->onpage) {
-      ImGui::Checkbox(std::string{mod->get_name()}.c_str(), &mod->ischecked);
+      ImGui::Checkbox(checkboxname.c_str(), &mod->ischecked);
       ImGui::SameLine();
-      if(ImGui::SmallButton(std::string{mod->get_name()}.c_str())) {
-        focusedmod = mod;
+      if(ImGui::Selectable(std::string{mod->get_name()}.c_str())) {
+        focusedmod = mod->get_name();
       }
     }
   }
