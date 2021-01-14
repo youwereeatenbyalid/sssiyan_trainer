@@ -1,16 +1,18 @@
-
 #include "BypassBPCav.hpp"
 
 uintptr_t BypassBPCav::jmp_ret{NULL};
 uintptr_t BypassBPCav::jmp_jb{NULL};
-bool bypassbpcavcheck;
+uintptr_t BypassBPCav::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [bypassbpcavcheck], 1
+        push rax
+        mov rax, [BypassBPCav::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -30,6 +32,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> BypassBPCav::on_initialize() {
+  ischecked          = false;
+  onpage             = dantepage;
+  full_name_string   = "Bypass BP Cavaliere Restriction";
+  author_string      = "SSSiyan";
+  description_string = "Allows you to take cavaliere R into bloody palace.";
+  BypassBPCav::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "C8 00 EB 44 3B 70 1C 72 11");
   if (!addr) {
@@ -47,5 +55,4 @@ std::optional<std::string> BypassBPCav::on_initialize() {
 }
 
 void BypassBPCav::on_draw_ui() {
-  ImGui::Checkbox("Bypass BP Cav R Restriction", &bypassbpcavcheck);
 }

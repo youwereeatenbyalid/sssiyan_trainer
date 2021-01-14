@@ -1,4 +1,4 @@
-uintptr_t static cheaton;#pragma once
+#pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
 class FileFrameCuts : public Mod {

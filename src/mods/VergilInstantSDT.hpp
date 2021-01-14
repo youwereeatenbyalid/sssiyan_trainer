@@ -11,6 +11,7 @@ public:
   uintptr_t static jmp_ret1;
   uintptr_t static jmp_ja1;
   uintptr_t static jmp_ret2;
+  uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
   // void on_config_load(const utility::Config& cfg) override;

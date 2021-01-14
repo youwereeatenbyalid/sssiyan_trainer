@@ -3,6 +3,7 @@
 
 uintptr_t DanteInfQ4ExitWindow::jmp_ret{NULL};
 uintptr_t DanteInfQ4ExitWindow::jmp_jne{NULL};
+uintptr_t DanteInfQ4ExitWindow::cheaton{NULL};
 
 bool danteq4exitwindowcheck;
 
@@ -11,7 +12,10 @@ bool danteq4exitwindowcheck;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [danteq4exitwindowcheck],1
+        push rax
+        mov rax, [DanteInfQ4ExitWindow::cheaton]
+        cmp byte ptr [rax],1
+        pop rax
         je cheatcode
         jmp code
 
@@ -32,6 +36,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
+  ischecked            = false;
+  onpage               = dantepage;
+  full_name_string     = "Infinite Q4 SDT Exit Window";
+  author_string        = "SSSiyan";
+  description_string   = "Removes the time limit on the Quadruple S Exit window.";
+  DanteInfQ4ExitWindow::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "75 2E F3 0F 5A C0 F2 0F 5C F8 66 0F 5A CF F3 0F 11 8B");
   if (!addr) {

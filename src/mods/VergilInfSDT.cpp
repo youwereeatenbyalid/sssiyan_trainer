@@ -3,16 +3,19 @@
 
 uintptr_t VergilInfSDT::jmp_ret1{NULL};
 uintptr_t VergilInfSDT::jmp_ret2{NULL};
+uintptr_t VergilInfSDT::cheaton{NULL};
 
 float desiredsdtvalue = 10000.0f;
-bool vergilinfsdtcheck;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour1() {
 	__asm {
-        cmp byte ptr [vergilinfsdtcheck], 1
+        push rax
+        mov rax, [VergilInfSDT::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -29,7 +32,10 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
-        cmp byte ptr [vergilinfsdtcheck], 1
+        push rax
+        mov rax, [VergilInfSDT::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -45,6 +51,12 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> VergilInfSDT::on_initialize() {
+  ischecked            = false;
+  onpage               = vergilpage;
+  full_name_string     = "Infinite SDT";
+  author_string        = "SSSiyan";
+  description_string   = "Grant infinite SDT.";
+  VergilInfSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "F3 0F 10 8B 20 1B 00 00 8B");
   if (!addr1) {
@@ -69,5 +81,4 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
 }
 
 void VergilInfSDT::on_draw_ui() {
-  ImGui::Checkbox("Vergil Inf SDT", &vergilinfsdtcheck);
 }

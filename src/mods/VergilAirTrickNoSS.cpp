@@ -3,14 +3,17 @@
 
 uintptr_t VergilAirTrickNoSS::jmp_ret{NULL};
 uintptr_t VergilAirTrickNoSS::jmp_je{NULL};
-bool vergilairtricknosscheck;
+uintptr_t VergilAirTrickNoSS::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [vergilairtricknosscheck], 1
+        push rax
+        mov rax, [VergilAirTrickNoSS::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -30,6 +33,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
+  ischecked            = false;
+  onpage               = vergilpage;
+  full_name_string     = "No Summoned Swords on Air Trick";
+  author_string        = "SSSiyan";
+  description_string   = "I honestly have no clue what this does yet.";
+  VergilAirTrickNoSS::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
   if (!addr) {
@@ -47,5 +56,4 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
 }
 
 void VergilAirTrickNoSS::on_draw_ui() {
-  ImGui::Checkbox("Vergil Air Trick Without Summoned Swords", &vergilairtricknosscheck);
 }

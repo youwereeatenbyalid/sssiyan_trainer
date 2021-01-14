@@ -4,6 +4,7 @@
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
 uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 uintptr_t VergilInstantSDT::jmp_ret2{NULL};
+uintptr_t VergilInstantSDT::cheaton{NULL};
 
 bool vergilinstantsdtcheck;
 
@@ -12,7 +13,10 @@ bool vergilinstantsdtcheck;
 
 static naked void detour1() {
 	__asm {
-        cmp byte ptr [vergilinstantsdtcheck], 1
+        push rax
+        mov rax, [VergilInstantSDT::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -32,7 +36,10 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
-        cmp byte ptr [vergilinstantsdtcheck], 1
+        push rax
+        mov rax, [VergilInstantSDT::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -48,6 +55,12 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
+  ischecked            = false;
+  onpage               = dantepage;
+  full_name_string     = "Instant SDT";
+  author_string        = "SSSiyan";
+  description_string   = "Allow Vergil to enter SDT instantly.";
+  VergilInstantSDT::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
   if (!addr1) {

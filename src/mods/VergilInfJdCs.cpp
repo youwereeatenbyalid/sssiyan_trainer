@@ -1,15 +1,16 @@
-
 #include "VergilInfJdCs.hpp"
-
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
-bool vergilinfjdcscheck;
+uintptr_t VergilInfJdCs::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [vergilinfjdcscheck], 1
+        push rax
+        mov rax,[VergilInfJdCs::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         je cheatcode
         jmp code
 
@@ -25,6 +26,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilInfJdCs::on_initialize() {
+  ischecked            = false;
+  onpage               = vergilpage;
+  full_name_string     = "Infinite Just Judgement Cuts";
+  author_string        = "SSSiyan";
+  description_string   = "Perform Just Judgement Cuts forever as long as your execution is good enough.";
+  VergilInfJdCs::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF 87 E0 18 00 00");
   if (!addr) {
@@ -40,5 +47,4 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
 }
 
 void VergilInfJdCs::on_draw_ui() {
-  ImGui::Checkbox("Vergil Inf JdCs", &vergilinfjdcscheck);
 }
