@@ -93,9 +93,9 @@ void DeepTurbo::on_config_save(utility::Config& cfg) {
 }
 
 void DeepTurbo::on_draw_ui() {
-  // ModSlider turboslider = ModSlider("Mod Speed", 0.5f, 2.5f, turbospeed);
-  // turboslider.draw("Turbo slider");
-  ImGui::SliderFloat("Speed", &turbospeed, 0.5f, 2.5f, "%.2f");
+    //ModSlider turboslider = ModSlider("Mod Speed", 0.5f, 2.5f, turbospeed);
+    //turboslider.draw("Turbo slider");
+    ImGui::SliderFloat("Speed", &turbospeed, 0.5f, 2.5f, "%.2f");
 }
 
 

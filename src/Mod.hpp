@@ -40,7 +40,7 @@ class ModValue : public IModValue {
 public:
     using Ptr = std::unique_ptr<ModValue<T>>;
 
-    static auto create(std::string_view config_name, T default_value = T{}) {
+    static auto create(std::string_view config_name, T& default_value = T{}) {
         return std::make_unique<ModValue<T>>(config_name, default_value);
     }
 
@@ -77,7 +77,7 @@ public:
     }
 
 protected:
-    T m_value{};
+    T& m_value{};
     std::string m_config_name{ "Default_ModValue" };
 };
 

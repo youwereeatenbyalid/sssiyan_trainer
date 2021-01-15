@@ -964,10 +964,10 @@ void InitSample(ModFramework* mf)
 	style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.204f, 0.204f, 0.204f, 1.f);
 	style.Colors[ImGuiCol_MenuBarBg] = style.Colors[ImGuiCol_WindowBg];
 
-	//oMgr.GetMainPlatformWindow()->SetPos(2000,100);
+	oMgr.GetMainPlatformWindow()->SetSize(1280,720);
 
 	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
-
+	
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
     ImwWindow* pDebugWindow = new DebugWindow(mf);
     ImwWindow* pFocusWindow = new FocusWindow(mf);
