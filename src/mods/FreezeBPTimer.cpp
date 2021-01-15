@@ -32,7 +32,7 @@ static naked void detour() {
 
 std::optional<std::string> FreezeBPTimer::on_initialize() {
   ischecked            = false;
-  onpage               = commonpage;
+  onpage               = gamepage;
   full_name_string     = "Freeze Bloody Palace Timer";
   author_string        = "SSSiyan";
   description_string   = "Freezes the timer in Bloody Palace.";

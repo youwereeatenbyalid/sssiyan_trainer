@@ -71,7 +71,7 @@ static naked void detour() {
 
 std::optional<std::string> DamageMultiplier::on_initialize() {
   ischecked             = false;
-  onpage                = commonpage;
+  onpage                = gamepage;
   full_name_string      = "Damage Multiplier";
   author_string         = "SSSiyan";
   description_string    = "Allows you to adjust the damage output of players and enemies.";

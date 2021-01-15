@@ -960,12 +960,11 @@ void InitSample(ModFramework* mf)
 {
 	ImWindow::ImwWindowManager& oMgr = *ImWindow::ImwWindowManager::GetInstance();
 	ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::SetNextWindowSize(ImVec2(1900, 1000));
 	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.095f, 0.095f, 0.095f, 1.f);
 	style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.204f, 0.204f, 0.204f, 1.f);
 	style.Colors[ImGuiCol_MenuBarBg] = style.Colors[ImGuiCol_WindowBg];
 
-	oMgr.GetMainPlatformWindow()->SetSize(1280,720);
+	oMgr.GetMainPlatformWindow()->SetSize(1152,648);
 
 	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
 	
@@ -974,10 +973,10 @@ void InitSample(ModFramework* mf)
     ImwWindow* pFocusWindow = new FocusWindow(mf);
 	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
     ImwWindow* gamewindow   = new MyImwWindow(mf, 1, "Gameplay Changes");
-    ImwWindow* nerowindow	= new MyImwWindow(mf, 2, "Nero Mods");
-    ImwWindow* dantewindow	= new MyImwWindow(mf, 3, "Dante Mods");
-    ImwWindow* vwindow      = new MyImwWindow(mf, 4, "V Mods");
-    ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil Specific");
+    ImwWindow* nerowindow	= new MyImwWindow(mf, 2, "Nero");
+    ImwWindow* dantewindow	= new MyImwWindow(mf, 3, "Dante");
+    ImwWindow* vwindow      = new MyImwWindow(mf, 4, "V");
+    ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil");
     //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
@@ -991,7 +990,7 @@ void InitSample(ModFramework* mf)
 	new MyStatusBar();
     new MyToolBar(mf);
 
-	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.7f);
+	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.6f);
     oMgr.DockWith(gamewindow, commonwindow);
         oMgr.DockWith(nerowindow, commonwindow);
     oMgr.DockWith(dantewindow, commonwindow);
@@ -1005,7 +1004,7 @@ void InitSample(ModFramework* mf)
 	//oMgr.DockWith(pWindow5, pWindow1, E_DOCK_ORIENTATION_BOTTOM, 0.7f);
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
-    oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.3f);
+    oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
     //oMgr.DockWith(pStyleEditor, commonwindow);
     //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
 	

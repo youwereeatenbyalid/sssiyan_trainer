@@ -31,7 +31,7 @@ static naked void detour() {
 
 std::optional<std::string> InfDT::on_initialize() {
   ischecked          = false;
-  onpage             = commonpage;
+  onpage             = gamepage;
   full_name_string   = "Infinite DT";
   author_string      = "SSSiyan";
   description_string = "Sets your DT bar to maximum.";
