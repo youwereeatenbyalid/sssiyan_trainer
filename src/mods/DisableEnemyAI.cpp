@@ -4,9 +4,10 @@
 
 uintptr_t DisableEnemyAI::jmp_ret{NULL};
 uintptr_t DisableEnemyAI::cheaton{NULL};
+uintptr_t DisableEnemyAI::jmp_je{NULL};
 
-// clang-format off
-// only in clang/icl mode on x64, sorry
+    // clang-format off
+    // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
@@ -24,7 +25,11 @@ static naked void detour() {
 
     code:
         cmp byte ptr [rax+0000009Ch], 00
+        je  jejmp
         jmp qword ptr [DisableEnemyAI::jmp_ret]
+
+    jejmp:
+        jmp qword ptr [DisableEnemyAI::jmp_je]
 	}
 }
 
@@ -38,17 +43,19 @@ std::optional<std::string> DisableEnemyAI::on_initialize() {
   description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
   DisableEnemyAI::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr =
-      utility::scan(base, "80 B8 9C 00 00 00 00 74 11");
+  auto addr = utility::scan(base, "80 B8 9C 00 00 00 00 74 11");
   if (!addr) {
     return "Unable to find DisableEnemyAI pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DisableEnemyAI";
   }
+
+  DisableEnemyAI::jmp_je = addr.value() + 26;
+
   return Mod::on_initialize();
 }
 

@@ -1,15 +1,14 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class DisableEnemyAI : public Mod {
+class InfDT : public Mod {
 public:
-  DisableEnemyAI() = default;
+  InfDT() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "DisableEnemyAI"; }
+  std::string_view get_name() const override { return "InfDT"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
-  uintptr_t static jmp_je;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
