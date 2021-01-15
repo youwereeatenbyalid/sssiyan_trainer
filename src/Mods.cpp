@@ -150,11 +150,11 @@ void Mods::save_mods() const {
         //and then probably call the rest of the stuff here;
     }
     // dorime
-    namespace fs = std::filesystem;
-    std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
-    auto m_conf_path             = mypath.string();
+    //namespace fs = std::filesystem;
+    //std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
+    //auto m_conf_path             = mypath.string();
     // ameno
-    cfg.save(m_conf_path);
+    cfg.save("DMC2_fw_config.txt");
 
 }
 
@@ -188,13 +188,16 @@ void Mods::on_draw_ui() const {
 void Mods::on_pagelist_ui(int page) const{
   for (auto& mod : m_mods) {
     std::string checkboxname = "##";
+    std::string hotkeyname   = "key ";
     checkboxname.append(std::string{mod->get_name()});
+    hotkeyname.append(std::string{mod->get_name()});
     if (page == mod->onpage) {
       ImGui::Checkbox(checkboxname.c_str(), &mod->ischecked);
       ImGui::SameLine();
       if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
         focusedmod = mod->get_name();
       }
+      //mod->modkeytoggle.draw(mod->get_name());
     }
   }
 }

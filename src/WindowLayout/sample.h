@@ -690,34 +690,47 @@ class MyStatusBar : public ImwStatusBar
 public:
 	MyStatusBar()
 	{
-		m_fTime = 0.f;
+		//m_fTime = 0.f;
 	}
 
 	virtual void OnStatusBar()
 	{
-		m_fTime += ImGui::GetIO().DeltaTime;
-		ImGui::Text("My status bar");
-		ImGui::SameLine();
-		while (m_fTime > 5.f)
-			m_fTime -= 5.f;
-		ImGui::ProgressBar(m_fTime / 5.f, ImVec2(150.f, 0.f));
+	#ifdef GIT_HASH
+			ImGui::Text("Version: %s", GIT_HASH);
+			ImGui::SameLine();
+			ImGui::Text("Date: %s", GIT_DATE);
+            ImGui::SameLine();
+	#endif
 	}
-
-	float m_fTime;
+	//float m_fTime;
 };
 
 class MyToolBar : public ImwToolBar
 {
 public:
+  MyToolBar(ModFramework* mf): ImwToolBar() { 
+	  p_mf = mf;
+  }
 	virtual void OnToolBar()
 	{
-		ImGui::Text("My tool bar");
+		//ImGui::Text("My tool bar");
+        ImGui::Text("Menu Key: Insert");
 		ImGui::SameLine();
+		if (ImGui::Button("Save Settings")) {
+			p_mf->get_mods()->save_mods();
+		}
+        ImGui::SameLine();
+		if (ImGui::Button("Load Settings")) {
+			p_mf->get_mods()->load_mods();
+		}
+        /*
 		if (ImGui::SmallButton("Open Node window"))
 		{
 			new NodeWindow();
 		}
+        */
 	}
+    ModFramework* p_mf;
 };
 
 class MyMenu : public ImwMenu
@@ -829,13 +842,7 @@ public:
           
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-            auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
-            ImGui::Text("%s", focusmod->full_name_string.c_str());
-            ImGui::Text("Author: %s", focusmod->author_string.c_str());
-            ImGui::Text("%s", focusmod->description_string.c_str());
-            focusmod->on_draw_ui();
-                  //p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod())->on_draw_ui();
-			//p_mf->get_mods()->on_draw_debug_ui();
+			p_mf->get_mods()->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -848,6 +855,31 @@ public:
 	ModFramework* p_mf;
 };
 
+class FocusWindow : public ImwWindow {
+public:
+  FocusWindow(ModFramework* mf, const char* pTitle = "FocusWindow")
+      : ImwWindow(ImWindow::E_WINDOW_MODE_ALONE) {
+    p_mf = mf;
+    SetTitle(pTitle);
+  }
+  virtual void OnGui() {
+    ImGui::Text("Selected mod:");
+
+    if (p_mf->is_error() && p_mf->is_ready()) {
+      auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
+      ImGui::Text("%s", focusmod->full_name_string.c_str());
+      ImGui::Text("Author: %s", focusmod->author_string.c_str());
+      ImGui::Text("%s", focusmod->description_string.c_str());
+      focusmod->on_draw_ui();
+    } else if (!p_mf->is_ready()) {
+      ImGui::TextWrapped("ModFramework is currently initializing...");
+    } else if (!p_mf->is_error()) {
+      ImGui::TextWrapped("ModFramework error: %s", p_mf->get_error().c_str());
+    }
+  }
+
+  ModFramework* p_mf;
+};
 class MyImwWindow : public ImwWindow, ImwMenu
 {
 public:
@@ -862,20 +894,14 @@ public:
 	}
 	virtual void OnGui()
 	{
-		if (ImGui::Button("Save Settings")) {
-            p_mf->get_mods()->save_mods();
-		}
-        if (ImGui::Button("Load Settings")) {
-            p_mf->get_mods()->load_mods();
-        }
-		ImGui::Text("Hello, world! I'm an alone window");
-		
+		//ImGui::Text("Hello, world! I'm an alone window");
+/*
 #ifdef GIT_HASH
 		ImGui::Text("Version: %s", GIT_HASH);
 		ImGui::Text("Date: %s", GIT_DATE);
 #endif
 		ImGui::Text("Menu Key: Insert");
-
+        */
 		/*draw_about();*/
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
@@ -933,21 +959,25 @@ void InitSample(ModFramework* mf)
 {
 	ImWindow::ImwWindowManager& oMgr = *ImWindow::ImwWindowManager::GetInstance();
 	ImGuiStyle& style = ImGui::GetStyle();
-
+    ImGui::SetNextWindowSize(ImVec2(1900, 1000));
 	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.095f, 0.095f, 0.095f, 1.f);
 	style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.204f, 0.204f, 0.204f, 1.f);
 	style.Colors[ImGuiCol_MenuBarBg] = style.Colors[ImGuiCol_WindowBg];
 
 	//oMgr.GetMainPlatformWindow()->SetPos(2000,100);
-	oMgr.SetMainTitle("ImWindow sample");
+
+	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
 
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
-
+    ImwWindow* pDebugWindow = new DebugWindow(mf);
+    ImwWindow* pFocusWindow = new FocusWindow(mf);
 	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
-	ImwWindow* pDebugWindow = new DebugWindow(mf);
-    ImwWindow* dantewindow     = new MyImwWindow(mf, 3, "Dante Mods");
+    ImwWindow* gamewindow   = new MyImwWindow(mf, 1, "Gameplay Changes");
+    ImwWindow* nerowindow	= new MyImwWindow(mf, 2, "Nero Mods");
+    ImwWindow* dantewindow	= new MyImwWindow(mf, 3, "Dante Mods");
+    ImwWindow* vwindow      = new MyImwWindow(mf, 4, "V Mods");
     ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil Specific");
-
+    //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
 	ImwWindow* pWindow3 = new MyImwWindow2("MyImwWindow2(1)");
@@ -956,14 +986,17 @@ void InitSample(ModFramework* mf)
 	pWindow5->SetClosable(false);*/
 
 	ImwWindow* pStyleEditor = new StyleEditorWindow();
-	new MyMenu();
+	//new MyMenu();
 	new MyStatusBar();
-	new MyToolBar();
+    new MyToolBar(mf);
 
-	oMgr.Dock(commonwindow);
-    oMgr.Dock(dantewindow);
-    oMgr.Dock(vergilwindow);
-	oMgr.Dock(pDebugWindow, E_DOCK_ORIENTATION_BOTTOM);
+	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.6f);
+    oMgr.DockWith(gamewindow, commonwindow);
+        oMgr.DockWith(nerowindow, commonwindow);
+    oMgr.DockWith(dantewindow, commonwindow);
+        oMgr.DockWith(vwindow, commonwindow);
+    oMgr.DockWith(vergilwindow, commonwindow);
+	
 	//oMgr.Dock(pWindow2, E_DOCK_ORIENTATION_LEFT);
 	//oMgr.DockWith(pWindowPlaceholder, pWindow2, E_DOCK_ORIENTATION_BOTTOM);
 	//oMgr.DockWith(pWindow3, pWindow2, E_DOCK_ORIENTATION_TOP);
@@ -971,7 +1004,10 @@ void InitSample(ModFramework* mf)
 	//oMgr.DockWith(pWindow5, pWindow1, E_DOCK_ORIENTATION_BOTTOM, 0.7f);
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
-	oMgr.Dock(pStyleEditor, E_DOCK_ORIENTATION_RIGHT, 0.375f);
+    oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
+    oMgr.DockWith(pStyleEditor, commonwindow);
+    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+	
 
 	//oMgr.Dock
 	//MyImwWindow* pWindow2 = new MyImwWindow(pWindow1);
