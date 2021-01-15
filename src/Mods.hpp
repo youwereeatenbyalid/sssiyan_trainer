@@ -1,7 +1,6 @@
 #pragma once
-
 #include "Mod.hpp"
-
+#include <filesystem>
 class Mods {
 public:
     Mods();
@@ -17,6 +16,8 @@ public:
     void on_pagelist_ui(int page) const;
     void save_mods() const;
     void load_mods() const;
+    void static addressseek();
+    std::string get_module_path(void* address) const;
     const auto& get_mods() const {
         return m_mods;
     }

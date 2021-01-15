@@ -1,6 +1,6 @@
+
 #include <spdlog/spdlog.h>
 #include "Mods.hpp"
-
 // Example
          #include "mods/SimpleMod.hpp"
 
@@ -150,11 +150,14 @@ void Mods::save_mods() const {
         //and then probably call the rest of the stuff here;
     }
     // dorime
-    auto m_conf_path            = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Devil May Cry 5\\DMC2_fw_config.txt";
+    namespace fs = std::filesystem;
+    std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
+    auto m_conf_path             = mypath.string();
     // ameno
     cfg.save(m_conf_path);
 
 }
+
 
 void Mods::load_mods() const {
   utility::Config cfg{"DMC2_fw_config.txt"};
