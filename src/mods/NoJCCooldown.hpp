@@ -1,19 +1,19 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class FileFrameCuts : public Mod {
+class NoJCCooldown : public Mod {
 public:
-  FileFrameCuts() = default;
+  NoJCCooldown() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "FileFrameCuts"; }
+  std::string_view get_name() const override { return "NoJCCooldown"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   // void on_frame() override;

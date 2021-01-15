@@ -1,11 +1,11 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class FileFrameCuts : public Mod {
+class HideHUD : public Mod {
 public:
-  FileFrameCuts() = default;
+  HideHUD() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "FileFrameCuts"; }
+  std::string_view get_name() const override { return "HideHUD"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;

@@ -57,6 +57,14 @@ set(MODS_SRC
     mods/NeroDisableWiresnatch.cpp 
     mods/NeroInfBreakers.hpp 
     mods/NeroInfBreakers.cpp 
+    mods/NoJCCooldown.hpp 
+    mods/NoJCCooldown.cpp 
+    mods/DisableEnemyAI.hpp 
+    mods/DisableEnemyAI.cpp 
+    mods/HideHUD.hpp 
+    mods/HideHUD.cpp 
+    mods/CameraSettings.hpp 
+    mods/CameraSettings.cpp 
 
 )
 
