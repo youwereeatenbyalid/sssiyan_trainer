@@ -36,8 +36,8 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   full_name_string           = "Buffered Reversals";
   author_string              = "SSSiyan";
   description_string		 = "Allows you to use directional moves in any direction.\n"
-							   "During the recovery of a move, buffer a directional attack, then\n"
-							   "push the stick in a new direction and let go of lock on before the\n"
+							   "During the recovery of a move, buffer a directional attack, then "
+							   "push the stick in a new direction and let go of lock on before the"
 							   "buffered attack comes out to change the direction it points.";
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "48 89 87 40 17 00 00");

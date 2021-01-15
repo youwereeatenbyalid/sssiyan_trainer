@@ -34,7 +34,7 @@ std::optional<std::string> NoJCCooldown::on_initialize() {
   onpage             = commonpage;
   full_name_string   = "No Jump Cancel Cooldown";
   author_string      = "SSSiyan";
-  description_string = "Removes the cooldown that starts when you enemy step,\n"
+  description_string = "Removes the cooldown that starts when you enemy step,"
                        "allowing you to perform jump cancels in quicker succession.";
   NoJCCooldown::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

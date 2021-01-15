@@ -103,5 +103,6 @@ void HideHUD::on_draw_ui() {
   ImGui::Checkbox("Hide Orbs", &hideorbs);
   ImGui::Checkbox("Hide Style", &hidestyle);
   ImGui::Checkbox("Hide all optional HUD", &hideeverything);
-  ImGui::Text("(Use this when there's something not hidden by any other option)");
+  ImGui::SameLine();
+  ImGui::TextWrapped("(Use this when there's something not hidden by any other option)");
 }

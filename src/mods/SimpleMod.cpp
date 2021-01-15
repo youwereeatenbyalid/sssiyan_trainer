@@ -5,6 +5,9 @@
 // clang-format on
 
 std::optional<std::string> SimpleMod::on_initialize() {
+  full_name_string   = "";
+  author_string      = "";
+  description_string = "";
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
   return Mod::on_initialize();
 }
@@ -34,6 +37,6 @@ bool checkbox;
 bool abox;
 bool bbox;
 void SimpleMod::on_draw_ui() {
-  ImGui::Text("Welcome to simple mod!");
-  ImGui::Selectable("Mod 3");
+  ImGui::TextWrapped("Welcome to SSSiyan's collaborative cheat trainer!"
+	  " To see additional options, click on a cheat's name.");
 }

@@ -869,7 +869,8 @@ public:
       auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
       ImGui::Text("%s", focusmod->full_name_string.c_str());
       ImGui::Text("Author: %s", focusmod->author_string.c_str());
-      ImGui::Text("%s", focusmod->description_string.c_str());
+      ImGui::TextWrapped("%s", focusmod->description_string.c_str());
+      ImGui::Separator();
       focusmod->on_draw_ui();
     } else if (!p_mf->is_ready()) {
       ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -969,7 +970,7 @@ void InitSample(ModFramework* mf)
 	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
 	
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
-    ImwWindow* pDebugWindow = new DebugWindow(mf);
+    //ImwWindow* pDebugWindow = new DebugWindow(mf);
     ImwWindow* pFocusWindow = new FocusWindow(mf);
 	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
     ImwWindow* gamewindow   = new MyImwWindow(mf, 1, "Gameplay Changes");
@@ -985,12 +986,12 @@ void InitSample(ModFramework* mf)
 	ImwWindow* pWindow5 = new MyImwWindow3();
 	pWindow5->SetClosable(false);*/
 
-	ImwWindow* pStyleEditor = new StyleEditorWindow();
+	//ImwWindow* pStyleEditor = new StyleEditorWindow();
 	//new MyMenu();
 	new MyStatusBar();
     new MyToolBar(mf);
 
-	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.6f);
+	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.7f);
     oMgr.DockWith(gamewindow, commonwindow);
         oMgr.DockWith(nerowindow, commonwindow);
     oMgr.DockWith(dantewindow, commonwindow);
@@ -1004,9 +1005,9 @@ void InitSample(ModFramework* mf)
 	//oMgr.DockWith(pWindow5, pWindow1, E_DOCK_ORIENTATION_BOTTOM, 0.7f);
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
-    oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
-    oMgr.DockWith(pStyleEditor, commonwindow);
-    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+    oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.3f);
+    //oMgr.DockWith(pStyleEditor, commonwindow);
+    //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
 	
 
 	//oMgr.Dock

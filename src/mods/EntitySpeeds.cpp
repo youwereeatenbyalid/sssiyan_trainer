@@ -79,13 +79,4 @@ void EntitySpeeds::on_config_save(utility::Config& cfg) {
 
 void EntitySpeeds::on_draw_ui() {
   ImGui::Checkbox("Dante Million Stab Startup Speed Up", &dantemillionstabspeedup);
-  ImGui::Text("Test");
-  ImGui::Spacing();
-  ImGui::Text("Test after spacing");
-  ImGui::Text("Test without spacing");
-  ImGui::Text("Test");
-  ImGui::SameLine(200);
-  ImGui::Text("Sameline");
-  ImGui::Separator();
-  ImGui::Text("Test");
 }
