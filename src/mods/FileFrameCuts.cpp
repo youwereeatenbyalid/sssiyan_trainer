@@ -66,6 +66,13 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
   return Mod::on_initialize();
 }
 
+void FileFrameCuts::on_config_load(const utility::Config& cfg) {
+  dantefasterguard = cfg.get<bool>("dante_faster_guard").value_or(false);
+}
+void FileFrameCuts::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("dante_faster_guard", dantefasterguard);
+}
+
 void FileFrameCuts::on_draw_ui() {
   ImGui::Checkbox("Faster Guard", &dantefasterguard);
 }

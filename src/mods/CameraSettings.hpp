@@ -1,14 +1,16 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class FileFrameCuts : public Mod {
+class CameraSettings : public Mod {
 public:
-  FileFrameCuts() = default;
+  CameraSettings() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "FileFrameCuts"; }
+  std::string_view get_name() const override { return "CameraSettings"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
+  uintptr_t static jmp_retFoV;
+  uintptr_t static jmp_retHorizontalSensClockwise;
+  uintptr_t static jmp_retHorizontalSensAntiClockwise;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
@@ -26,5 +28,7 @@ public:
 private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::unique_ptr<FunctionHook> m_function_hookFoV;
+  std::unique_ptr<FunctionHook> m_function_hookHorizontalSensClockwise;
+  std::unique_ptr<FunctionHook> m_function_hookHorizontalSensAntiClockwise;
 };

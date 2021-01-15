@@ -70,6 +70,13 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
   return Mod::on_initialize();
 }
 
+void EntitySpeeds::on_config_load(const utility::Config& cfg) {
+  dantemillionstabspeedup = cfg.get<bool>("dante_million_stab_startup_speedup").value_or(false);
+}
+void EntitySpeeds::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("dante_million_stab_startup_speedup", dantemillionstabspeedup);
+}
+
 void EntitySpeeds::on_draw_ui() {
   ImGui::Checkbox("Dante Million Stab Startup Speed Up", &dantemillionstabspeedup);
   ImGui::Text("Test");
