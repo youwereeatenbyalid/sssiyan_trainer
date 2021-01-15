@@ -65,6 +65,10 @@ set(MODS_SRC
     mods/HideHUD.cpp 
     mods/CameraSettings.hpp 
     mods/CameraSettings.cpp 
+    mods/AlwaysSTaunts.hpp 
+    mods/AlwaysSTaunts.cpp 
+    mods/InfDT.hpp 
+    mods/InfDT.cpp 
 
 )
 

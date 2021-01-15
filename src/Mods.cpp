@@ -20,11 +20,13 @@
 // Siyan
     // Game
         #include "mods/DeepTurbo.hpp"
+        #include "mods/AlwaysSTaunts.hpp"
         #include "mods/NoJCCooldown.hpp"
         #include "mods/FreezeBPTimer.hpp"
         #include "mods/NoScreenShake.hpp"
         #include "mods/BufferedReversals.hpp"
         #include "mods/DamageMultiplier.hpp"
+        #include "mods/InfDT.hpp"
         #include "mods/DisplayEnemyHPInOrbs.hpp"
         #include "mods/FileFrameCuts.hpp"
         #include "mods/EntitySpeeds.hpp"
@@ -69,11 +71,13 @@ Mods::Mods()
 // Siyan
     // Game
         m_mods.emplace_back(std::make_unique<DeepTurbo>());
+        m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<FileFrameCuts>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
