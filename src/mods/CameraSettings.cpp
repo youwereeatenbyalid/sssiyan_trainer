@@ -79,7 +79,7 @@ static naked void detourHorizontalSensAntiClockwise() {
 std::optional<std::string> CameraSettings::on_initialize() {
   ischecked          = false;
   onpage             = commonpage;
-  full_name_string   = "Camera Settings";
+  full_name_string   = "Camera Settings (+)";
   author_string      = "SSSiyan";
   description_string = "Change various camera settings.";
   CameraSettings::cheaton = (uintptr_t)&ischecked;

@@ -53,7 +53,7 @@ static naked void detour2() {
 std::optional<std::string> DeepTurbo::on_initialize() {
   ischecked          = false;
   onpage             = commonpage;
-  full_name_string   = "Turbo";
+  full_name_string   = "Turbo (+)";
   author_string      = "DeepDarkKapustka";
   description_string = "Change the game speed by adjusting the slider.\n"
                        "1.2 is the value used in DMC3 and DMC4.";

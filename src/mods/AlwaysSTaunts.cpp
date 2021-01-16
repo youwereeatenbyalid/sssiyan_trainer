@@ -91,8 +91,8 @@ static naked void detour3() {
 
 std::optional<std::string> AlwaysSTaunts::on_initialize() {
   ischecked          = false;
-  onpage             = commonpage;
-  full_name_string   = "Always S+ Taunts";
+  onpage             = gamepage;
+  full_name_string   = "Always S+ Taunts (+)";
   author_string      = "SSSiyan";
   description_string = "Restricts your taunts to those that play when at S rank or above.";
   AlwaysSTaunts::cheaton = (uintptr_t)&ischecked;

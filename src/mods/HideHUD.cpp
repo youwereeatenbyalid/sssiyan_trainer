@@ -67,7 +67,7 @@ static naked void detour() {
 std::optional<std::string> HideHUD::on_initialize() {
   ischecked               = false;
   onpage                  = commonpage;
-  full_name_string        = "Hide HUD";
+  full_name_string        = "Hide HUD (+)";
   author_string           = "SSSiyan";
   description_string      = "Disables elements of the Heads Up Display.";
   HideHUD::cheaton        = (uintptr_t)&ischecked;

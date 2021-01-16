@@ -37,7 +37,7 @@ static naked void detour() {
 
 std::optional<std::string> DisableEnemyAI::on_initialize() {
   ischecked               = false;
-  onpage                  = commonpage;
+  onpage                  = gamepage;
   full_name_string        = "Disable Enemy AI";
   author_string           = "SSSiyan";
   description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
