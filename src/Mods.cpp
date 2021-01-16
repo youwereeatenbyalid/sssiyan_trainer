@@ -30,10 +30,13 @@
         #include "mods/MovingTargetSwitch.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
+        #include "mods/KeyboardCamera.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
         #include "mods/NoJCCooldown.hpp"
         #include "mods/AlwaysSTaunts.hpp"
+        #include "mods/AllStart.hpp"
+        #include "mods/JumpStart.hpp"
         #include "mods/DamageMultiplier.hpp"
         #include "mods/InfDT.hpp"
         #include "mods/EntitySpeeds.hpp"
@@ -60,6 +63,7 @@
         #include "mods/VergilInfSDT.hpp"
         #include "mods/VergilInstantSDT.hpp"
         #include "mods/VergilInfConcentration.hpp"
+        #include "mods/VergilNoTrickRestriction.hpp"
 Mods::Mods()
 {
 // Example
@@ -90,10 +94,13 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
+        m_mods.emplace_back(std::make_unique<KeyboardCamera>());
     // Game
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
+        m_mods.emplace_back(std::make_unique<AllStart>());
+        m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
         m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
@@ -120,6 +127,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilInfSDT>());
         m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
         m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
+        m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

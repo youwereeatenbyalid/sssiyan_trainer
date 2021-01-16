@@ -11,6 +11,7 @@
   
   uintptr_t PlayerTracker::danteentity{NULL};
   uintptr_t PlayerTracker::dantetransform{NULL};
+  uintptr_t PlayerTracker::danteweapon{NULL}; // DevilMayCry5.exe+1986263 - mov [rdi+000018B0],r15d Vergil exe 1
   
   uintptr_t PlayerTracker::ventity{NULL};
   uintptr_t PlayerTracker::vtransform{NULL};
@@ -78,6 +79,10 @@ static naked void detour() {
 		mov [PlayerTracker::danteentity], r8
 		mov r8, [r8+0x1F0]
 		mov [PlayerTracker::dantetransform], r8
+
+		mov r8,[r9+0x28]
+		mov r8, [r8+0x18B0]
+		mov [PlayerTracker::danteweapon], r8 // @HELPSIYAN
 
 		playerv:
 		cmp qword ptr [r9+0x30], 0

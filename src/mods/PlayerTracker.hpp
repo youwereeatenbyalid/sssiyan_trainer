@@ -20,6 +20,7 @@ public:
   
   uintptr_t static danteentity;
   uintptr_t static dantetransform;
+  uintptr_t static danteweapon;
   
   uintptr_t static ventity;
   uintptr_t static vtransform;

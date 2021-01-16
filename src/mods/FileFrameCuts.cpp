@@ -67,7 +67,7 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
 }
 
 void FileFrameCuts::on_config_load(const utility::Config& cfg) {
-  dantefasterguard = cfg.get<bool>("dante_faster_guard").value_or(false);
+  dantefasterguard = cfg.get<bool>("dante_faster_guard").value_or(true);
 }
 void FileFrameCuts::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("dante_faster_guard", dantefasterguard);

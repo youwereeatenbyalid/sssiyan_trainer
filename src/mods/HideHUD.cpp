@@ -89,7 +89,7 @@ void HideHUD::on_config_load(const utility::Config& cfg) {
   hidehp         = cfg.get<bool>("hide_hp_hud").value_or(false);
   hideorbs       = cfg.get<bool>("hide_orbs_hud").value_or(false);
   hidestyle      = cfg.get<bool>("hide_style_hud").value_or(false);
-  hideeverything = cfg.get<bool>("hide_all_hud").value_or(false);
+  hideeverything = cfg.get<bool>("hide_all_hud").value_or(true);
 }
 void HideHUD::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("hide_hp_hud", hidehp);
@@ -103,6 +103,4 @@ void HideHUD::on_draw_ui() {
   ImGui::Checkbox("Hide Orbs", &hideorbs);
   ImGui::Checkbox("Hide Style", &hidestyle);
   ImGui::Checkbox("Hide all optional HUD", &hideeverything);
-  ImGui::SameLine();
-  ImGui::TextWrapped("(Use this when there's something not hidden by any other option)");
 }
