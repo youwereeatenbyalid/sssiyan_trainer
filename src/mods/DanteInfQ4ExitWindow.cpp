@@ -14,13 +14,12 @@ static naked void detour() {
         jne code
         push rax
         mov rax, [DanteInfQ4ExitWindow::cheaton]
-        cmp byte ptr [rax],1
+        cmp byte ptr [rax], 1
         pop rax
         je cheatcode
         jmp code
 
     cheatcode:
-        cvtss2sd xmm0,xmm0
 		jmp qword ptr [DanteInfQ4ExitWindow::jmp_ret]
 
     code:

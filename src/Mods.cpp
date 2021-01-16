@@ -34,8 +34,10 @@
         #include "mods/DisableEnemyAI.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
+        #include "mods/DamageTypeLean.hpp"
     // Nero
         #include "mods/NeroDisableWiresnatch.hpp"
+        #include "mods/NeroSwapWiresnatch.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -50,7 +52,6 @@
         #include "mods/VergilInfSDT.hpp"
         #include "mods/VergilInstantSDT.hpp"
         #include "mods/VergilInfConcentration.hpp"
-
 Mods::Mods()
 {
 // Example
@@ -85,8 +86,10 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
+        m_mods.emplace_back(std::make_unique<DamageTypeLean>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());

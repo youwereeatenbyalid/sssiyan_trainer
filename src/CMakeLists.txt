@@ -69,6 +69,10 @@ set(MODS_SRC
     mods/AlwaysSTaunts.cpp 
     mods/InfDT.hpp 
     mods/InfDT.cpp 
+    mods/DamageTypeLean.hpp 
+    mods/DamageTypeLean.cpp 
+    mods/NeroSwapWiresnatch.hpp 
+    mods/NeroSwapWiresnatch.cpp 
 
 )
 
