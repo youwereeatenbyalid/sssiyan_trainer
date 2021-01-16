@@ -77,7 +77,7 @@ static naked void detour2() {
 		jmp qword ptr [NeroInfBreakers::jmp_ret2]
 
     code:
-        mov [rsi+000017CCh], eax // probably
+        mov eax, [rsi+000017CCh]
         jmp qword ptr [NeroInfBreakers::jmp_ret2]
 	}
 }
@@ -89,7 +89,7 @@ std::optional<std::string> NeroInfBreakers::on_initialize() {
   onpage             = neropage;
   full_name_string   = "Infinite Devil Breakers";
   author_string      = "DeepDarkKapustka";
-  description_string = "When using 8 Devil Breakers, this will function like the Void option.\n" -
+  description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
                        "When using less than 8, this will bug and give you Overtures.";
   NeroInfBreakers::cheaton = (uintptr_t)&ischecked;
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE

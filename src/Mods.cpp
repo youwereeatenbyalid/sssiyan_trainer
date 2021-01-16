@@ -36,6 +36,7 @@
         #include "mods/CameraSettings.hpp"
         #include "mods/DamageTypeLean.hpp"
     // Nero
+        #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
     // Dante
@@ -44,6 +45,9 @@
         #include "mods/DanteQuickSDT.hpp"
         #include "mods/DanteAlwaysQ4SDT.hpp"
         #include "mods/DanteInfQ4ExitWindow.hpp"
+        #include "mods/DanteTwoTricks.hpp"
+        #include "mods/DanteAlwaysOvertop.hpp"
+        #include "mods/DanteInfIgnition.hpp"
     // V
     // Vergil
         #include "mods/VergilAirTrickNoSS.hpp"
@@ -88,6 +92,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<DamageTypeLean>());
     // Nero
+        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
     // Dante
@@ -96,6 +101,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
         m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
         m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
+        m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
+        m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());

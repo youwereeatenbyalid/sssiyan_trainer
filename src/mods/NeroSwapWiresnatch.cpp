@@ -58,9 +58,9 @@ static naked void detour2() {
 std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   ischecked          = false;
   onpage             = neropage;
-  full_name_string   = "DmC Snatch";
+  full_name_string   = "Angel and Devil Snatch";
   author_string      = "SSSiyan";
-  description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and makes it stun.";
+  description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
   NeroSwapWiresnatch::cheaton = (uintptr_t)&ischecked;
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "C7 40 10 1A 00 00 00 E9");
