@@ -1051,7 +1051,7 @@ void InitSample(ModFramework* mf)
 	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
 	
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
-    //ImwWindow* pDebugWindow = new DebugWindow(mf);
+    
     ImwWindow* pFocusWindow = new FocusWindow(mf);
 	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
     ImwWindow* gamewindow   = new MyImwWindow(mf, 1, "Gameplay Changes");
@@ -1088,7 +1088,9 @@ void InitSample(ModFramework* mf)
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
     oMgr.DockWith(pStyleEditor, commonwindow);
-    //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+
+	ImwWindow* pDebugWindow = new DebugWindow(mf);
+    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
 	
 
 	//oMgr.Dock

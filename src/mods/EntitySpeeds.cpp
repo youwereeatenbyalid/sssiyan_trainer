@@ -1,6 +1,6 @@
 
 #include "EntitySpeeds.hpp"
-#include "MoveID.hpp"
+#include "PlayerTracker.hpp"
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};
 uintptr_t EntitySpeeds::cheaton{NULL};
@@ -26,11 +26,11 @@ static naked void detour() {
 
     movecheck:
     part1:
-        cmp dword ptr [MoveID::playermoveid], 00DC00C8h // dante ms start reb
+        cmp dword ptr [PlayerTracker::playermoveid], 00DC00C8h // dante ms start reb
         je dantemstab
-        cmp dword ptr [MoveID::playermoveid], 00D200FAh // dante ms start sparda
+        cmp dword ptr [PlayerTracker::playermoveid], 00D200FAh // dante ms start sparda
         je dantemstab
-        cmp dword ptr [MoveID::playermoveid], 00DC00F0h // dante ms start dsd
+        cmp dword ptr [PlayerTracker::playermoveid], 00DC00F0h // dante ms start dsd
         je dantemstab
         jmp code
 

@@ -5,6 +5,8 @@
   uintptr_t PlayerTracker::groundedmem{NULL};
   uint32_t PlayerTracker::isgrounded{0};
   uintptr_t PlayerTracker::playertransform{NULL};
+
+  uint32_t PlayerTracker::playermoveid{0};
   
   uintptr_t PlayerTracker::neroentity{NULL};
   uintptr_t PlayerTracker::nerotransform{NULL};
@@ -25,7 +27,8 @@ static naked void detour() {
 	__asm {
 		manualplayer:
 		//playerentity
-
+		push r8
+		push r10
 		cmp qword ptr [rdx+0x60], 0
 		je playerarray
 
@@ -53,9 +56,25 @@ static naked void detour() {
 		mov r9, [rdx+0x60]
 		mov r9, [r9+0x1F0]
 		mov [PlayerTracker::playertransform], r9
+			
+		mov r9, [rdx+0x60]
+
+		mov r9, [r9+0x000002E0]
+		test r9, r9
+		je playerarray
+
+		mov r9, [r9+0x000000D8]
+		test r9, r9
+		je playerarray
+
+		mov r10, [r9+0x2C]
+		mov [PlayerTracker::playermoveid], r10d
+		mov r10, [r9+0x34]
+		mov [PlayerTracker::playermoveid+2], r10d
 
 		playerarray:
-		push r8
+
+		
 		cmp qword ptr [rdx+0x78], 0
 		je playerexit
 
@@ -99,6 +118,7 @@ static naked void detour() {
 
 
 		playerexit:
+		pop r10
 		pop r8
 		code:
 		  mov r9,rcx
@@ -133,6 +153,7 @@ void PlayerTracker::on_frame() {}
 void PlayerTracker::on_draw_debug_ui() {
 	ImGui::Text("[PlayerTracker] Player ID: %X", PlayerTracker::playerid);
 	ImGui::Text("[PlayerTracker] Is Grounded: %X",PlayerTracker::isgrounded);
+    ImGui::Text("[PlayerTracker] Move ID: %X", PlayerTracker::playermoveid);
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here

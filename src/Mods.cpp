@@ -10,7 +10,7 @@
         #include "mods/StyleRank.hpp"
         #include "mods/SinCoordinate.hpp"
         #include "mods/CosCoordinate.hpp"
-        #include "mods/MoveID.hpp"
+        //#include "mods/MoveID.hpp"
         #include "mods/EnemyNumber.hpp"
     // Nero
     // Dante
@@ -62,7 +62,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<StyleRank>());
         m_mods.emplace_back(std::make_unique<SinCoordinate>());
         m_mods.emplace_back(std::make_unique<CosCoordinate>());
-        m_mods.emplace_back(std::make_unique<MoveID>());
+        //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<EnemyNumber>());
     // Nero
     // Dante

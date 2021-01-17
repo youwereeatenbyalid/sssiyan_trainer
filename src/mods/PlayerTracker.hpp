@@ -14,7 +14,7 @@ public:
   uintptr_t static groundedmem;
   uint32_t static isgrounded;
   uintptr_t static playertransform;
-  
+  uint32_t static playermoveid;
   uintptr_t static neroentity;
   uintptr_t static nerotransform;
   

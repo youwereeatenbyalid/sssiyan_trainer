@@ -9,8 +9,6 @@ set(MODS_SRC
     mods/SinCoordinate.cpp 
     mods/CosCoordinate.hpp 
     mods/CosCoordinate.cpp 
-	mods/MoveID.hpp
-	mods/MoveID.cpp
     mods/EnemyNumber.hpp 
     mods/EnemyNumber.cpp 
     mods/DeepTurbo.hpp 
