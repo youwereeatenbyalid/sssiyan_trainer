@@ -8,13 +8,17 @@ public:
   std::string_view get_name() const override { return "PlayerTracker"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
+  uintptr_t static jmp_ret1;
+  uintptr_t static jmp_ret2;
+  uintptr_t static jmp_je;
+
   uintptr_t static playerentity;
   uint32_t static playerid;
   uintptr_t static groundedmem;
   uint32_t static isgrounded;
   uintptr_t static playertransform;
   uint32_t static playermoveid;
+
   uintptr_t static neroentity;
   uintptr_t static nerotransform;
   
@@ -25,6 +29,18 @@ public:
   uintptr_t static ventity;
   uintptr_t static vtransform;
   
+  uintptr_t static shadowcontroller;
+  uintptr_t static shadowentity;
+  uintptr_t static shadowtransform;
+
+  uintptr_t static griffoncontroller;
+  uintptr_t static griffonentity;
+  uintptr_t static griffontransform;
+
+  uintptr_t static nightmarecontroller;
+  uintptr_t static nightmareentity;
+  uintptr_t static nightmaretransform;
+
   uintptr_t static vergilentity;
   uintptr_t static vergiltransform;
   
@@ -44,5 +60,6 @@ private:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::unique_ptr<FunctionHook> m_function_hook1;
+  std::unique_ptr<FunctionHook> m_function_hook2;
 };

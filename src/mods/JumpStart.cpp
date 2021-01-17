@@ -31,9 +31,9 @@ static naked void detour() {
         jmp code
 
     nerocancels:
-        cmp dword ptr [MoveID::playermoveid], 0x00000A // Nero Ground DT
+        cmp dword ptr [PlayerTracker::playermoveid], 0x00000A // Nero Ground DT
         je nerodtcheck
-        cmp dword ptr [MoveID::playermoveid], 0x64000A // Nero Air DT
+        cmp dword ptr [PlayerTracker::playermoveid], 0x64000A // Nero Air DT
         je nerodtcheck
         jmp code
 

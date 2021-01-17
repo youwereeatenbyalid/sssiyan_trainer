@@ -1,6 +1,5 @@
 #include "AllStart.hpp"
 #include "PlayerTracker.hpp"
-#include "MoveID.hpp"
 uintptr_t AllStart::jmp_ret{NULL};
 uintptr_t AllStart::cheaton{NULL};
 uintptr_t AllStart::jmp_initial{NULL};
@@ -31,22 +30,22 @@ static naked void detour() {
         jmp code
 
     nerocancels:
-        cmp dword ptr [MoveID::playermoveid], 53C0000h // Nero Enemy Step
+        cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Nero Enemy Step
         je jccheck
         jmp code
 
     dantecancels:
-        cmp dword ptr [MoveID::playermoveid], 53C0000h // Dante Enemy Step
+        cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Dante Enemy Step
         je dantejccheck
         jmp code
 
     vancels:
-        cmp dword ptr [MoveID::playermoveid], 53C0000h // V Enemy Step (probably)
+        cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // V Enemy Step (probably)
         je jccheck
         jmp code
 
     vergilancels:
-        cmp dword ptr [MoveID::playermoveid], 53C0000h // Vergil Enemy Step (probably)
+        cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Vergil Enemy Step (probably)
         je jccheck
         jmp code
 

@@ -1,5 +1,8 @@
 #include "PlayerTracker.hpp"
-  uintptr_t PlayerTracker::jmp_ret{NULL};
+  uintptr_t PlayerTracker::jmp_ret1{NULL};
+  uintptr_t PlayerTracker::jmp_ret2{NULL};
+  uintptr_t PlayerTracker::jmp_je{NULL};
+
   uintptr_t PlayerTracker::playerentity{NULL};
   uint32_t PlayerTracker::playerid{0};
   uintptr_t PlayerTracker::groundedmem{NULL};
@@ -17,6 +20,18 @@
   
   uintptr_t PlayerTracker::ventity{NULL};
   uintptr_t PlayerTracker::vtransform{NULL};
+
+  uintptr_t PlayerTracker::shadowcontroller{NULL};
+  uintptr_t PlayerTracker::shadowentity{NULL};
+  uintptr_t PlayerTracker::shadowtransform{NULL};
+
+  uintptr_t PlayerTracker::griffoncontroller{NULL};
+  uintptr_t PlayerTracker::griffonentity{NULL};
+  uintptr_t PlayerTracker::griffontransform{NULL};
+
+  uintptr_t PlayerTracker::nightmarecontroller{NULL};
+  uintptr_t PlayerTracker::nightmareentity{NULL};
+  uintptr_t PlayerTracker::nightmaretransform{NULL};
   
   uintptr_t PlayerTracker::vergilentity{NULL};
   uintptr_t PlayerTracker::vergiltransform{NULL};
@@ -24,9 +39,8 @@
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-static naked void detour() {
+static naked void detour1() {
 	__asm {
-		manualplayer:
 		//playerentity
 		push r8
 		push r10
@@ -131,20 +145,94 @@ static naked void detour() {
 		  jmp ret_jmp
 
 		ret_jmp:
-			jmp qword ptr [PlayerTracker::jmp_ret]
+			jmp qword ptr [PlayerTracker::jmp_ret1]
 	}
 }
+static naked void detour2() {
+	__asm {
+		//this is allocated memory, you have read,write,execute access
+		//place your code here
+		//64 = status
+		//D0-> Down to enemy
+		//B18 = enemy ID
+		//108 = is enemy
+		//1D2 = master lock-on
+		//1F0-> down to transform
+		//30 = x coordinate
+		//34 = y coordinate
+		//38 = z coordinate
+		
+		push r8
+		push r9
 
+		mov r8, [rdi+0xD0]
+		mov r9, [r8+0x1F0]
+		cmp dword ptr [r8+0xB18], 0x20
+		je writegriffon
+		cmp dword ptr [r8+0xB18], 0x21
+		je writeshadow
+		cmp dword ptr [r8+0xB18], 0x22
+		je writenightmare
+		jmp originalcode
+
+		writeshadow:
+			mov [PlayerTracker::shadowcontroller], rdi
+			mov [PlayerTracker::shadowentity], r8
+			mov [PlayerTracker::shadowtransform], r9
+
+		writegriffon:
+			mov [PlayerTracker::griffoncontroller], rdi
+			mov [PlayerTracker::griffonentity], r8
+			mov [PlayerTracker::griffontransform], r9
+
+		writenightmare:
+			mov [PlayerTracker::nightmarecontroller], rdi
+			mov [PlayerTracker::nightmareentity], r8
+			mov [PlayerTracker::nightmaretransform], r9
+
+		originalcode:
+			pop r9
+			pop r8
+			cmp dword ptr [rdi+0x64],ebp
+			je je_jmp
+			jmp ret_jmp
+
+		je_jmp:
+			jmp qword ptr [PlayerTracker::jmp_je] //DevilMayCry5.exe+3F0756 
+		ret_jmp:
+		jmp qword ptr [PlayerTracker::jmp_ret2]
+	}
+}
 // clang-format on
 
 std::optional<std::string> PlayerTracker::on_initialize() {
-  // uintptr_t base = g_framework->get_module().as<uintptr_t>();
-
-  if (!install_hook_offset(offsets::PLAYER_TRACKER, m_function_hook, &detour, &jmp_ret, 7)) {
-  //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize PlayerTracker";
+  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  //player tracker
+  auto addr1 = utility::scan(base, "4C 8B C9 41 83 F8 FF 74");
+  if (!addr1) {
+    return "Unable to find Player Tracker pattern.";
   }
+  //summon tracker
+  auto addr2 = utility::scan(base, "39 6F 64 0F 84 52 01 00 00");
+  if (!addr2) {
+    return "Unable to find Summon Tracker pattern.";
+  }
+
+  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1,
+                             &jmp_ret1, 7)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize player tracker";
+  }
+  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2,
+                             &jmp_ret2, 9)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize summon tracker";
+  }
+  PlayerTracker::jmp_je = addr2.value() + 0x15B;
+
+
   return Mod::on_initialize();
 }
 
