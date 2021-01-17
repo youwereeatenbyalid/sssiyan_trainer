@@ -9,8 +9,8 @@ uintptr_t BypassBPCav::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
-        jne code
+        // cmp byte ptr [PlayerTracker::playerid], 1 // "dante" player isn't active when this is called
+        // jne code
         push rax
         mov rax, [BypassBPCav::cheaton]
         cmp byte ptr [rax], 1

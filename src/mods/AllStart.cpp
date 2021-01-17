@@ -21,18 +21,41 @@ static naked void detour() {
 
     cheatcode:
         cmp [PlayerTracker::playerid], 0
-        je code
+        je nerocancels
         cmp [PlayerTracker::playerid], 1
         je dantecancels
         cmp [PlayerTracker::playerid], 2
-        je code
+        je vancels
         cmp [PlayerTracker::playerid], 4
-        je code
+        je vergilancels
+        jmp code
+
+    nerocancels:
+        cmp dword ptr [MoveID::playermoveid], 53C0000h // Nero Enemy Step
+        je jccheck
         jmp code
 
     dantecancels:
         cmp dword ptr [MoveID::playermoveid], 53C0000h // Dante Enemy Step
         je dantejccheck
+        jmp code
+
+    vancels:
+        cmp dword ptr [MoveID::playermoveid], 53C0000h // V Enemy Step (probably)
+        je jccheck
+        jmp code
+
+    vergilancels:
+        cmp dword ptr [MoveID::playermoveid], 53C0000h // Vergil Enemy Step (probably)
+        je jccheck
+        jmp code
+
+//_____________________________________________________________________________________
+
+
+    jccheck:
+        cmp byte ptr [enemystepcancels], 1
+        je cancellable
         jmp code
 
     dantejccheck:
