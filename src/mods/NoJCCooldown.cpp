@@ -31,10 +31,10 @@ static naked void detour() {
 
 std::optional<std::string> NoJCCooldown::on_initialize() {
   ischecked          = false;
-  onpage             = commonpage;
+  onpage             = gamepage;
   full_name_string   = "No Jump Cancel Cooldown";
   author_string      = "SSSiyan";
-  description_string = "Removes the cooldown that starts when you enemy step,"
+  description_string = "Removes the cooldown that starts when you enemy step, "
                        "allowing you to perform jump cancels in quicker succession.";
   NoJCCooldown::cheaton = (uintptr_t)&ischecked;
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

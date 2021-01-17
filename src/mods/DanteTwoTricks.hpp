@@ -1,20 +1,19 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class VergilInfSDT : public Mod {
+class DanteTwoTricks : public Mod {
 public:
-  VergilInfSDT() = default;
+  DanteTwoTricks() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "VergilInfSDT"; }
+  std::string_view get_name() const override { return "DanteTwoTricks"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret1;
-  uintptr_t static jmp_ret2;
+  uintptr_t static jmp_ret;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   // void on_frame() override;
@@ -27,6 +26,5 @@ public:
 private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook1;
-  std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_function_hook;
 };

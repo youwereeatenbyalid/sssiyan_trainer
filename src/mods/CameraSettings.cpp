@@ -79,7 +79,7 @@ static naked void detourHorizontalSensAntiClockwise() {
 std::optional<std::string> CameraSettings::on_initialize() {
   ischecked          = false;
   onpage             = commonpage;
-  full_name_string   = "Camera Settings";
+  full_name_string   = "Camera Settings (+)";
   author_string      = "SSSiyan";
   description_string = "Change various camera settings.";
   CameraSettings::cheaton = (uintptr_t)&ischecked;
@@ -115,8 +115,8 @@ std::optional<std::string> CameraSettings::on_initialize() {
   return Mod::on_initialize();
 }
 void CameraSettings::on_config_load(const utility::Config& cfg) {
-  fov = cfg.get<float>("camera_settings_fov").value_or(65.0f);
-  horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(3.25f);
+  fov = cfg.get<float>("camera_settings_fov").value_or(90.0f);
+  horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(4.00f);
 }
 
 void CameraSettings::on_config_save(utility::Config& cfg) {

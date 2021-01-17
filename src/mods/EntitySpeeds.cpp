@@ -50,8 +50,8 @@ static naked void detour() {
 
 std::optional<std::string> EntitySpeeds::on_initialize() {
   ischecked          = false;
-  onpage             = commonpage;
-  full_name_string   = "Entity Speeds";
+  onpage             = gamepage;
+  full_name_string   = "Entity Speeds (+)";
   author_string      = "SSSiyan";
   description_string = "Adjust the speed of various moves.";
   EntitySpeeds::cheaton = (uintptr_t)&ischecked;
@@ -71,7 +71,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
 }
 
 void EntitySpeeds::on_config_load(const utility::Config& cfg) {
-  dantemillionstabspeedup = cfg.get<bool>("dante_million_stab_startup_speedup").value_or(false);
+  dantemillionstabspeedup = cfg.get<bool>("dante_million_stab_startup_speedup").value_or(true);
 }
 void EntitySpeeds::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("dante_million_stab_startup_speedup", dantemillionstabspeedup);

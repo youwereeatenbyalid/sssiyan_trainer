@@ -71,6 +71,20 @@ set(MODS_SRC
     mods/DamageTypeLean.cpp 
     mods/NeroSwapWiresnatch.hpp 
     mods/NeroSwapWiresnatch.cpp 
+    mods/DanteTwoTricks.hpp 
+    mods/DanteTwoTricks.cpp 
+    mods/DanteAlwaysOvertop.hpp 
+    mods/DanteAlwaysOvertop.cpp 
+    mods/DanteInfIgnition.hpp 
+    mods/DanteInfIgnition.cpp 
+    mods/VergilNoTrickRestriction.hpp 
+    mods/VergilNoTrickRestriction.cpp 
+    mods/KeyboardCamera.hpp 
+    mods/KeyboardCamera.cpp 
+    mods/AllStart.hpp 
+    mods/AllStart.cpp 
+    mods/JumpStart.hpp 
+    mods/JumpStart.cpp 
 
 )
 

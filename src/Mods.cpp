@@ -5,37 +5,45 @@
          #include "mods/SimpleMod.hpp"
 
 // Hitch
-    // Game
+    // Background
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
         #include "mods/SinCoordinate.hpp"
         #include "mods/CosCoordinate.hpp"
         //#include "mods/MoveID.hpp"
         #include "mods/EnemyNumber.hpp"
+    // Common
+    // Gameplay
     // Nero
     // Dante
     // V
     // Vergil
 
 // Siyan
-    // Game
+    // Background
+        #include "mods/DamageTypeLean.hpp"
+    // Common
         #include "mods/DeepTurbo.hpp"
-        #include "mods/AlwaysSTaunts.hpp"
-        #include "mods/NoJCCooldown.hpp"
         #include "mods/FreezeBPTimer.hpp"
         #include "mods/NoScreenShake.hpp"
-        #include "mods/BufferedReversals.hpp"
-        #include "mods/DamageMultiplier.hpp"
-        #include "mods/InfDT.hpp"
         #include "mods/DisplayEnemyHPInOrbs.hpp"
-        #include "mods/FileFrameCuts.hpp"
-        #include "mods/EntitySpeeds.hpp"
         #include "mods/MovingTargetSwitch.hpp"
-        #include "mods/DisableEnemyAI.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
-        #include "mods/DamageTypeLean.hpp"
+        #include "mods/KeyboardCamera.hpp"
+    // Gameplay
+        #include "mods/BufferedReversals.hpp"
+        #include "mods/NoJCCooldown.hpp"
+        #include "mods/AlwaysSTaunts.hpp"
+        #include "mods/AllStart.hpp"
+        #include "mods/JumpStart.hpp"
+        #include "mods/DamageMultiplier.hpp"
+        #include "mods/InfDT.hpp"
+        #include "mods/EntitySpeeds.hpp"
+        #include "mods/FileFrameCuts.hpp"
+        #include "mods/DisableEnemyAI.hpp"
     // Nero
+        #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
     // Dante
@@ -44,6 +52,9 @@
         #include "mods/DanteQuickSDT.hpp"
         #include "mods/DanteAlwaysQ4SDT.hpp"
         #include "mods/DanteInfQ4ExitWindow.hpp"
+        #include "mods/DanteTwoTricks.hpp"
+        #include "mods/DanteAlwaysOvertop.hpp"
+        #include "mods/DanteInfIgnition.hpp"
     // V
     // Vergil
         #include "mods/VergilAirTrickNoSS.hpp"
@@ -52,42 +63,51 @@
         #include "mods/VergilInfSDT.hpp"
         #include "mods/VergilInstantSDT.hpp"
         #include "mods/VergilInfConcentration.hpp"
+        #include "mods/VergilNoTrickRestriction.hpp"
 Mods::Mods()
 {
 // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
 // Hitch
-    // Game
+    // Background
         m_mods.emplace_back(std::make_unique<PlayerTracker>());
         m_mods.emplace_back(std::make_unique<StyleRank>());
         m_mods.emplace_back(std::make_unique<SinCoordinate>());
         m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<EnemyNumber>());
+    // Common
+    // Gameplay
     // Nero
     // Dante
     // V
     // Vergil
 
 // Siyan
-    // Game
+    // Background
+        m_mods.emplace_back(std::make_unique<DamageTypeLean>());
+    // Common
         m_mods.emplace_back(std::make_unique<DeepTurbo>());
-        m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
-        m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
-        m_mods.emplace_back(std::make_unique<BufferedReversals>());
-        m_mods.emplace_back(std::make_unique<DamageMultiplier>());
-        m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
-        m_mods.emplace_back(std::make_unique<FileFrameCuts>());
-        m_mods.emplace_back(std::make_unique<EntitySpeeds>());
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
-        m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
-        m_mods.emplace_back(std::make_unique<DamageTypeLean>());
+        m_mods.emplace_back(std::make_unique<KeyboardCamera>());
+    // Game
+        m_mods.emplace_back(std::make_unique<BufferedReversals>());
+        m_mods.emplace_back(std::make_unique<NoJCCooldown>());
+        m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
+        m_mods.emplace_back(std::make_unique<AllStart>());
+        m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        m_mods.emplace_back(std::make_unique<InfDT>());
+        m_mods.emplace_back(std::make_unique<EntitySpeeds>());
+        m_mods.emplace_back(std::make_unique<FileFrameCuts>());
+        m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
     // Nero
+        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
     // Dante
@@ -96,6 +116,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
         m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
         m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
+        m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
+        m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
@@ -104,6 +127,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilInfSDT>());
         m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
         m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
+        m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
