@@ -396,6 +396,9 @@ static naked void lockon_detour() {
         cheatcode:
             cmp byte ptr [rdx+0x000000F4],2
             je jmp_ret
+            //so vergil doesn't auto lock the doppelganger
+            cmp byte ptr [rdx+0x000000F4], 0
+            je jmp_ret
             //if base matches a summoned enemy, jump to the specific comparisons
             cmp rdx, [PlayerTracker::shadowentity]
             je shadowcheck

@@ -16,20 +16,23 @@ static naked void detour() {
 	__asm {
     newmem:
         push r8
-        mov r8, [rsi+0x98]
+        mov r8, [r14+0x98]
         test r8, r8
         je originalcode
 
 	validation:
         cmp byte ptr [noonetakesdamage], 1
         je nodamage
-        jmp originalcode
+
     cheatcode:
         //if enemy, jump to allornothing
         cmp byte ptr [r8+0xF4], 1
         je allornothing
         //we pvp bois?
-        cmp byte ptr [HeavyDay::cheaton], 1
+        push rax
+        mov rax, [HeavyDay::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         jne originalcode
         //if networked enemy don't do damage
         cmp byte ptr [r8+0xF4], 3
@@ -47,7 +50,10 @@ static naked void detour() {
     cmp byte ptr [onehitkill], 1
     je alldamage
     //if we're not in combat, jump to the original code
-    cmp byte ptr [AllOrNothing::cheaton], 0
+    push rax
+    mov rax, [AllOrNothing::cheaton]
+    cmp byte ptr [rax], 0
+    pop rax
     je originalcode
     cmp byte ptr [PlayerTracker::incombat], 0
     je originalcode
@@ -71,6 +77,7 @@ static naked void detour() {
         movss xmm6, [rdi+0x10]
         jmp originalcode
     originalcode:
+        pop r8
         movss xmm1,[rdi+0x10]
         jmp qword ptr [AllOrNothing::jmp_ret]
 	}
