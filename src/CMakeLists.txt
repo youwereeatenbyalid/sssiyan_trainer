@@ -87,6 +87,8 @@ set(MODS_SRC
     mods/AllStart.cpp 
     mods/JumpStart.hpp 
     mods/JumpStart.cpp 
+    mods/AllOrNothing.hpp 
+    mods/AllOrNothing.cpp 
 
 )
 

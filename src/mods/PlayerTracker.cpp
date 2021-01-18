@@ -1,6 +1,7 @@
 #include "PlayerTracker.hpp"
   uintptr_t PlayerTracker::jmp_ret1{NULL};
   uintptr_t PlayerTracker::jmp_ret2{NULL};
+  uintptr_t PlayerTracker::incombat_jmp_ret{NULL};
   uintptr_t PlayerTracker::jmp_je{NULL};
 
   uintptr_t PlayerTracker::playerentity{NULL};
@@ -35,6 +36,8 @@
   
   uintptr_t PlayerTracker::vergilentity{NULL};
   uintptr_t PlayerTracker::vergiltransform{NULL};
+
+  uint32_t PlayerTracker::incombat{0};
   
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -203,7 +206,17 @@ static naked void detour2() {
 		jmp qword ptr [PlayerTracker::jmp_ret2]
 	}
 }
-// clang-format on
+static naked void incombat_detour(){
+	__asm{
+			mov byte ptr [PlayerTracker::incombat], 0
+			cmp byte ptr [rax+0x00000ECA],sil
+			je jmp_ret
+			mov byte ptr [PlayerTracker::incombat], 1
+		jmp_ret:
+			jmp qword ptr[PlayerTracker::incombat_jmp_ret]
+	}
+}
+    // clang-format on
 
 std::optional<std::string> PlayerTracker::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -217,7 +230,10 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   if (!addr2) {
     return "Unable to find Summon Tracker pattern.";
   }
-
+  auto incombat_addr = utility::scan(base, "40 38 B0 CA 0E 00 00 0F 84 04");
+  if (!incombat_addr) {
+    return "Unable to find In Combat pattern.";
+  }
   if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1,
                              &jmp_ret1, 7)) {
     //  return a error string in case something goes wrong
@@ -229,6 +245,13 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize summon tracker";
+  }
+
+  if (!install_hook_absolute(incombat_addr.value(), m_incombat_hook, &incombat_detour,
+                             &incombat_jmp_ret, 7)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize In Combat";
   }
   PlayerTracker::jmp_je = addr2.value() + 0x15B;
 
@@ -247,6 +270,7 @@ void PlayerTracker::on_draw_debug_ui() {
 	ImGui::Text("[PlayerTracker] Player ID: %X", PlayerTracker::playerid);
 	ImGui::Text("[PlayerTracker] Is Grounded: %X",PlayerTracker::isgrounded);
     ImGui::Text("[PlayerTracker] Move ID: %X", PlayerTracker::playermoveid);
+    ImGui::Text("[PlayerTracker] In Combat: %X", PlayerTracker::incombat);
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here

@@ -11,6 +11,7 @@ public:
   uintptr_t static jmp_ret1;
   uintptr_t static jmp_ret2;
   uintptr_t static jmp_je;
+  uintptr_t static incombat_jmp_ret;
 
   uintptr_t static playerentity;
   uint32_t static playerid;
@@ -44,6 +45,7 @@ public:
   uintptr_t static vergilentity;
   uintptr_t static vergiltransform;
   
+  uint32_t static incombat;
   
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
@@ -62,4 +64,5 @@ private:
   // around minhook
   std::unique_ptr<FunctionHook> m_function_hook1;
   std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_incombat_hook;
 };
