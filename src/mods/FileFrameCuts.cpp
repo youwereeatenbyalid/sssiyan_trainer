@@ -17,6 +17,7 @@ static naked void detour() {
         mov rax, [FileFrameCuts::cheaton]
         cmp byte ptr [rax], 1
         pop rax
+        jne code
         cmp dword ptr [rdx+9Ah], 7274604 //'lo' (Block)
         je guardgroundstartcheck
         cmp dword ptr [rdx+9Ah], 7471209 //'ir' (AirBlock)
