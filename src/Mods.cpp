@@ -15,6 +15,7 @@
     // Common
         #include "mods/HeavyDay.hpp"
     // Gameplay
+        #include "mods/AllOrNothing.hpp"
     // Nero
     // Dante
     // V
@@ -80,6 +81,7 @@ Mods::Mods()
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
     // Gameplay
+        m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero
     // Dante
     // V
