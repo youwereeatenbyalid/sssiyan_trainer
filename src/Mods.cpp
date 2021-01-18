@@ -13,6 +13,7 @@
         //#include "mods/MoveID.hpp"
         #include "mods/EnemyNumber.hpp"
     // Common
+        #include "mods/HeavyDay.hpp"
     // Gameplay
     // Nero
     // Dante
@@ -77,6 +78,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<EnemyNumber>());
     // Common
+        m_mods.emplace_back(std::make_unique<HeavyDay>());
     // Gameplay
     // Nero
     // Dante
