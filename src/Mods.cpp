@@ -10,8 +10,8 @@
         #include "mods/StyleRank.hpp"
         #include "mods/SinCoordinate.hpp"
         #include "mods/CosCoordinate.hpp"
-        //#include "mods/MoveID.hpp"
         #include "mods/EnemyNumber.hpp"
+        #include "mods/GameInput.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
     // Gameplay
@@ -78,6 +78,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<EnemyNumber>());
+        m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
     // Gameplay

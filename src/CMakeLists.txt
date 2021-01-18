@@ -3,6 +3,8 @@ set(MODS_SRC
     mods/SimpleMod.cpp
     mods/PlayerTracker.hpp 
     mods/PlayerTracker.cpp
+    mods/GameInput.hpp 
+    mods/GameInput.cpp 
     mods/HeavyDay.hpp 
     mods/HeavyDay.cpp 
     mods/StyleRank.hpp 
