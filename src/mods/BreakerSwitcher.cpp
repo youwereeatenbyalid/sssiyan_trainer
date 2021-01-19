@@ -74,7 +74,28 @@ static naked void breakerui_detour() {
         jmp qword ptr [BreakerSwitcher::breakerui_jmp_ret]
 	}
 }
-
+static naked void disablebreakaway_detour() {
+	__asm {
+	validation:
+        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
+        jne code
+        push rax
+        mov rax, [BreakerSwitcher::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
+        je cheatcode
+        jmp code
+    code:
+        mov [r11+rcx],eax
+        mov rdx,[rsi+0x00000108]
+        jmp qword ptr [BreakerSwitcher::breakerui_jmp_ret]        
+    cheatcode:
+        mov eax, [BreakerSwitcher::nextbreaker]
+		mov [r11+rcx],eax
+        mov rdx,[rsi+0x00000108]
+        jmp qword ptr [BreakerSwitcher::breakerui_jmp_ret]
+	}
+}
 naked void BreakerSwitcher::breakerpress_detour() {
 	__asm {
 	validation:
