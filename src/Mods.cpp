@@ -17,6 +17,8 @@
     // Gameplay
         #include "mods/AllOrNothing.hpp"
     // Nero
+        #include "mods/BreakerSwitcher.hpp"
+        #include "mods/DisableBreakaway.hpp"
     // Dante
     // V
     // Vergil
@@ -84,6 +86,8 @@ Mods::Mods()
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero
+        m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
+        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
     // Dante
     // V
     // Vergil

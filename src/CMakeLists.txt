@@ -91,7 +91,10 @@ set(MODS_SRC
     mods/JumpStart.cpp 
     mods/AllOrNothing.hpp 
     mods/AllOrNothing.cpp 
-
+    mods/BreakerSwitcher.hpp 
+    mods/BreakerSwitcher.cpp
+    mods/DisableBreakaway.hpp 
+    mods/DisableBreakaway.cpp 
 )
 
 set(HOOKS_SRC

@@ -68,7 +68,7 @@ static naked void detour1() {
 		mov r9, [rdx+0x60]
 		mov r9, [r9+0x3B0]
 		mov r9, [r9+0x18]
-		mov [PlayerTracker::isgrounded], r9
+		mov [PlayerTracker::isgrounded], r9b
 
 		//playertransform
 		mov r9, [rdx+0x60]

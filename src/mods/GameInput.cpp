@@ -1,6 +1,7 @@
 
 #include "GameInput.hpp"
 #include "mods/PlayerTracker.hpp"
+#include "mods/BreakerSwitcher.hpp"
 uintptr_t GameInput::validcontrol_jmp_ret{NULL};
 uintptr_t GameInput::hold_jmp_ret{NULL};
 uintptr_t GameInput::clearhold_jmp_ret{NULL};
@@ -103,7 +104,7 @@ static naked void clearhold_detour() {
 
 static naked void press_detour() {
 	__asm {
-	    validation:
+	validation:
         push r8
         push r9
         push r10
@@ -116,7 +117,7 @@ static naked void press_detour() {
         jne code
         mov r15, 0
         test [rbx+0x00000090],ebp
-        jna charactercompare
+        jna code
         or GameInput::pressframes[0], rsi
         mov r15, 1
         jmp charactercompare
@@ -132,6 +133,13 @@ static naked void press_detour() {
         pop r8
         jmp qword ptr [GameInput::press_jmp_ret]        
     charactercompare:
+        mov r9, GameInput::pressframes[0*8]
+        or r9, GameInput::pressframes[1*8]
+        or r9, GameInput::pressframes[2*8]
+        or r9, GameInput::pressframes[3*8]
+        call BreakerSwitcher::breakerpress_detour
+    pressexit:
+        cmp r15,0
         pop r15
         pop r14
         pop r13

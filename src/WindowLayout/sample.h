@@ -1088,10 +1088,10 @@ void InitSample(ModFramework* mf)
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
     oMgr.DockWith(pStyleEditor, commonwindow);
-
+	#ifndef NDEBUG
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
     oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
-	
+	#endif
 
 	//oMgr.Dock
 	//MyImwWindow* pWindow2 = new MyImwWindow(pWindow1);
