@@ -1,14 +1,19 @@
 #include "PlayerTracker.hpp"
-  uintptr_t PlayerTracker::jmp_ret1{NULL};
-  uintptr_t PlayerTracker::jmp_ret2{NULL};
+  uintptr_t PlayerTracker::player_jmp_ret{NULL};
+  uintptr_t PlayerTracker::summon_jmp_ret{NULL};
   uintptr_t PlayerTracker::incombat_jmp_ret{NULL};
-  uintptr_t PlayerTracker::jmp_je{NULL};
+  uintptr_t PlayerTracker::summon_jmp_je{NULL};
+  uintptr_t PlayerTracker::sin_jmp_ret{NULL};
+  uintptr_t PlayerTracker::cos_jmp_ret{NULL};
+  uintptr_t PlayerTracker::threshhold_jmp_ret{NULL};
+  uintptr_t PlayerTracker::threshhold_jmp_jb{NULL};
 
   uintptr_t PlayerTracker::playerentity{NULL};
   uint32_t PlayerTracker::playerid{0};
   uintptr_t PlayerTracker::groundedmem{NULL};
   uint32_t PlayerTracker::isgrounded{0};
   uintptr_t PlayerTracker::playertransform{NULL};
+  glm::vec3 PlayerTracker::playerinertia{0.0f, 0.0f, 0.0f};
 
   uint32_t PlayerTracker::playermoveid{0};
   
@@ -36,13 +41,17 @@
   
   uintptr_t PlayerTracker::vergilentity{NULL};
   uintptr_t PlayerTracker::vergiltransform{NULL};
-
   uint32_t PlayerTracker::incombat{0};
+
+  float PlayerTracker::sinvalue{0};
+  float PlayerTracker::cosvalue{0};
+  bool PlayerTracker::redirect{0};
+  float threshholdsubstitute = 0.35;
   
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-static naked void detour1() {
+static naked void player_detour() {
 	__asm {
 		//playerentity
 		push r8
@@ -71,8 +80,15 @@ static naked void detour1() {
 		mov [PlayerTracker::isgrounded], r9b
 
 		//playertransform
-		mov r9, [rdx+0x60]
-		mov r9, [r9+0x1F0]
+		
+		mov r8, [rdx+0x60]
+		mov r9, [r8+1140]
+		mov [PlayerTracker::playerinertia.x],r9
+		mov r9, [r8+1144]
+		mov [PlayerTracker::playerinertia.y],r9
+		mov r9, [r8+1148]
+		mov [PlayerTracker::playerinertia.z],r9
+		mov r9, [r8+0x1F0]
 		mov [PlayerTracker::playertransform], r9
 			
 		mov r9, [rdx+0x60]
@@ -148,10 +164,10 @@ static naked void detour1() {
 		  jmp ret_jmp
 
 		ret_jmp:
-			jmp qword ptr [PlayerTracker::jmp_ret1]
+			jmp qword ptr [PlayerTracker::player_jmp_ret]
 	}
 }
-static naked void detour2() {
+static naked void summon_detour() {
 	__asm {
 		//this is allocated memory, you have read,write,execute access
 		//place your code here
@@ -201,9 +217,9 @@ static naked void detour2() {
 			jmp ret_jmp
 
 		je_jmp:
-			jmp qword ptr [PlayerTracker::jmp_je] //DevilMayCry5.exe+3F0756 
+			jmp qword ptr [PlayerTracker::summon_jmp_je] //DevilMayCry5.exe+3F0756 
 		ret_jmp:
-		jmp qword ptr [PlayerTracker::jmp_ret2]
+		jmp qword ptr [PlayerTracker::summon_jmp_ret]
 	}
 }
 static naked void incombat_detour(){
@@ -216,32 +232,90 @@ static naked void incombat_detour(){
 			jmp qword ptr[PlayerTracker::incombat_jmp_ret]
 	}
 }
+static naked void sin_detour() {
+	__asm {
+		sincoordinatenewmem: //this is allocated memory, you have read,write,execute access
+		//place your code here
+
+		cmp rdi, [PlayerTracker::playerentity]
+		jne sincoordinateoriginalcode
+
+		movss dword ptr [PlayerTracker::sinvalue], xmm0
+
+		sincoordinateoriginalcode:
+		xorps xmm6,xmm6
+		cvtss2sd xmm6,xmm0
+
+		sincoordinateexit:
+		jmp qword ptr [PlayerTracker::sin_jmp_ret]
+	}
+}
+static naked void cos_detour() {
+	__asm {
+		newmem: 
+		cmp rdi, [PlayerTracker::playerentity]
+		jne coscoordinateoriginalcode
+
+		movss dword ptr [PlayerTracker::cosvalue], xmm0
+
+		coscoordinateoriginalcode:
+		mulss xmm0,[rdi+0x00000F88]
+
+		coscoordinateexit:
+		jmp qword ptr [PlayerTracker::cos_jmp_ret]
+	}
+}
+static naked void threshhold_detour() {
+	__asm {
+	newmem: 
+		mov byte ptr [PlayerTracker::redirect], 1
+		jb jbexit
+		mov byte ptr [PlayerTracker::redirect], 0
+		movss xmm0, [threshholdsubstitute]
+		jmp qword ptr [PlayerTracker::threshhold_jmp_ret]
+	jbexit:
+		jmp qword ptr [PlayerTracker::threshhold_jmp_jb]
+	}
+}
     // clang-format on
 
 std::optional<std::string> PlayerTracker::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   //player tracker
-  auto addr1 = utility::scan(base, "4C 8B C9 41 83 F8 FF 74");
-  if (!addr1) {
+  auto player_addr = utility::scan(base, "4C 8B C9 41 83 F8 FF 74");
+  if (!player_addr) {
     return "Unable to find Player Tracker pattern.";
   }
   //summon tracker
-  auto addr2 = utility::scan(base, "39 6F 64 0F 84 52 01 00 00");
-  if (!addr2) {
+  auto summon_addr = utility::scan(base, "39 6F 64 0F 84 52 01 00 00");
+  if (!summon_addr) {
     return "Unable to find Summon Tracker pattern.";
   }
   auto incombat_addr = utility::scan(base, "40 38 B0 CA 0E 00 00 0F 84 04");
   if (!incombat_addr) {
     return "Unable to find In Combat pattern.";
   }
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1,
-                             &jmp_ret1, 7)) {
+  auto sin_addr = utility::scan(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
+  if (!sin_addr) {
+    return "Unable to find Sin pattern.";
+  }
+
+  auto cos_addr = utility::scan(base, "F3 0F 59 87 88 0F 00 00");
+  if (!cos_addr) {
+    return "Unable to find Cos pattern.";
+  }
+  auto threshhold_addr = utility::scan(base, "72 12 F3 0F 10 05 87 9D AC 02");
+  if (!threshhold_addr) {
+    return "Unable to find threshhold pattern.";
+  }
+  if (!install_hook_absolute(player_addr.value(), m_player_hook, &player_detour,
+                             &player_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize player tracker";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2,
-                             &jmp_ret2, 9)) {
+  if (!install_hook_absolute(summon_addr.value(), m_summon_hook, &summon_detour,
+                             &summon_jmp_ret, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize summon tracker";
@@ -253,8 +327,28 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize In Combat";
   }
-  PlayerTracker::jmp_je = addr2.value() + 0x15B;
+  if (!install_hook_absolute(sin_addr.value(), m_sin_hook,
+                             &sin_detour, &sin_jmp_ret, 7)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize Sin coordinate";
+  }
 
+  if (!install_hook_absolute(cos_addr.value(), m_cos_hook,
+                             &cos_detour, &cos_jmp_ret, 8)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize Cos coordinate";
+  }
+  if (!install_hook_absolute(threshhold_addr.value(), m_threshhold_hook, &threshhold_detour,
+                             &threshhold_jmp_ret, 10)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize stick threshhold";
+  }
+
+  PlayerTracker::summon_jmp_je     = summon_addr.value() + 0x15B;
+  PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x14;
 
   return Mod::on_initialize();
 }
@@ -271,6 +365,10 @@ void PlayerTracker::on_draw_debug_ui() {
 	ImGui::Text("[PlayerTracker] Is Grounded: %X",PlayerTracker::isgrounded);
     ImGui::Text("[PlayerTracker] Move ID: %X", PlayerTracker::playermoveid);
     ImGui::Text("[PlayerTracker] In Combat: %X", PlayerTracker::incombat);
+    ImGui::Text("[PlayerTracker] Cos Value: %.4f",PlayerTracker::cosvalue);
+    ImGui::Text("[PlayerTracker] Sin Value: %.4f", PlayerTracker::sinvalue);
+    ImGui::Text("[PlayerTracker] Stick Pushed: %X", PlayerTracker::redirect);
+
 	//Imgui::Text(PlayerTracker::isgrounded)
 }
 // will show up in main window, dump ImGui widgets you want here

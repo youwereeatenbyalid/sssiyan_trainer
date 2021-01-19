@@ -8,10 +8,14 @@ public:
   std::string_view get_name() const override { return "PlayerTracker"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret1;
-  uintptr_t static jmp_ret2;
-  uintptr_t static jmp_je;
+  uintptr_t static player_jmp_ret;
+  uintptr_t static summon_jmp_ret;
+  uintptr_t static summon_jmp_je;
   uintptr_t static incombat_jmp_ret;
+  uintptr_t static sin_jmp_ret;
+  uintptr_t static cos_jmp_ret;
+  uintptr_t static threshhold_jmp_ret;
+  uintptr_t static threshhold_jmp_jb;
 
   uintptr_t static playerentity;
   uint32_t static playerid;
@@ -19,7 +23,7 @@ public:
   uint32_t static isgrounded;
   uintptr_t static playertransform;
   uint32_t static playermoveid;
-
+  glm::vec3 static playerinertia;
   uintptr_t static neroentity;
   uintptr_t static nerotransform;
   
@@ -47,6 +51,9 @@ public:
   
   uint32_t static incombat;
   
+  float static sinvalue;
+  float static cosvalue;
+  bool static redirect;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
@@ -62,7 +69,10 @@ private:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook1;
-  std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_player_hook;
+  std::unique_ptr<FunctionHook> m_summon_hook;
   std::unique_ptr<FunctionHook> m_incombat_hook;
+  std::unique_ptr<FunctionHook> m_sin_hook;
+  std::unique_ptr<FunctionHook> m_cos_hook;
+  std::unique_ptr<FunctionHook> m_threshhold_hook;
 };

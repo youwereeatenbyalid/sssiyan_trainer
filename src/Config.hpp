@@ -1,5 +1,5 @@
 #define LOG_FILENAME "DMC2_framework_log.txt"
 #define LOG_ENTRY "DMC2 ModFramework entry"
 #define CONFIG_FILENAME "DMC2_fw_config.txt"
-#define GIT_HASH "250c4cc"
-#define GIT_DATE "2021-01-18"
+#define GIT_HASH "99f03eb"
+#define GIT_DATE "2021-01-19"

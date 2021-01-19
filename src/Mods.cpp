@@ -8,8 +8,8 @@
     // Background
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
-        #include "mods/SinCoordinate.hpp"
-        #include "mods/CosCoordinate.hpp"
+        //#include "mods/SinCoordinate.hpp"
+        //#include "mods/CosCoordinate.hpp"
         #include "mods/EnemyNumber.hpp"
         #include "mods/GameInput.hpp"
     // Common
@@ -76,8 +76,8 @@ Mods::Mods()
     // Background
         m_mods.emplace_back(std::make_unique<PlayerTracker>());
         m_mods.emplace_back(std::make_unique<StyleRank>());
-        m_mods.emplace_back(std::make_unique<SinCoordinate>());
-        m_mods.emplace_back(std::make_unique<CosCoordinate>());
+        //m_mods.emplace_back(std::make_unique<SinCoordinate>());
+        //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<EnemyNumber>());
         m_mods.emplace_back(std::make_unique<GameInput>());

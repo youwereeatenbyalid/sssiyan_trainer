@@ -95,6 +95,8 @@ set(MODS_SRC
     mods/BreakerSwitcher.cpp
     mods/DisableBreakaway.hpp 
     mods/DisableBreakaway.cpp 
+    mods/MoveReplacer.hpp 
+    mods/MoveReplacer.cpp 
 )
 
 set(HOOKS_SRC
