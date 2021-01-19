@@ -4,9 +4,11 @@
 uintptr_t FileFrameCuts::jmp_ret{NULL};
 uintptr_t FileFrameCuts::cheaton{NULL};
 bool dantefasterguard;
+bool dantefasterhatgatling;
 
 float danteguardgroundstartlength = 1.0f;
 float danteairguardstartlength    = 3.0f;
+float dantegatlingstartlength     = 1.0f;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -18,24 +20,44 @@ static naked void detour() {
         cmp byte ptr [rax], 1
         pop rax
         jne code
-        cmp dword ptr [rdx+9Ah], 7274604 //'lo' (Block)
+        cmp dword ptr [rdx+9Ah], 7274604 // 'lo' (Block)
         je guardgroundstartcheck
-        cmp dword ptr [rdx+9Ah], 7471209 //'ir' (AirBlock)
+        cmp dword ptr [rdx+9Ah], 7471209 // 'ir' (AirBlock)
         je guardairstartcheck
+        cmp dword ptr [rdx+9Eh], 7078004 // 'tl' Gatling)
+        je hatturretstartcheck
+        cmp dword ptr [rdx+9Ch], 7078004 // 'tl' Gatling)
+        je hatturretairstartcheck
         jmp code
 
     guardgroundstartcheck:
-        cmp byte ptr [rdx+0xA4], 7602259 //'St' (Start)
+        cmp dword ptr [rdx+0xA4], 7602259 //'St' (Start)
         jne code
         movss xmm0, [danteguardgroundstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
     guardairstartcheck:
-        cmp byte ptr [rdx+0xAC], 6357108 //'ta' (StartFly)
+        cmp dword ptr [rdx+0xAC], 6357108 //'ta' (StartFly)
         jne code
-        cmp byte ptr [dantefasterguard],0
+        cmp byte ptr [dantefasterguard], 0
         je code
         movss xmm0, [danteairguardstartlength]
+        jmp qword ptr [FileFrameCuts::jmp_ret]
+
+    hatturretstartcheck:
+        cmp dword ptr [rdx+0xAC], 6357108 // 'ta' (Start)
+        jne code
+        cmp byte ptr [dantefasterhatgatling], 0
+        je code
+        movss xmm0, [dantegatlingstartlength]
+        jmp qword ptr [FileFrameCuts::jmp_ret]
+
+    hatturretairstartcheck:
+        cmp dword ptr [rdx+0xAA], 6357108 // 'ta' (Start)
+        jne code
+        cmp byte ptr [dantefasterhatgatling], 0
+        je code
+        movss xmm0, [dantegatlingstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
     code:
@@ -69,11 +91,14 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
 
 void FileFrameCuts::on_config_load(const utility::Config& cfg) {
   dantefasterguard = cfg.get<bool>("dante_faster_guard").value_or(true);
+  dantefasterhatgatling = cfg.get<bool>("dante_faster_hat_gatling").value_or(true);
 }
 void FileFrameCuts::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("dante_faster_guard", dantefasterguard);
+  cfg.set<bool>("dante_faster_hat_gatling", dantefasterhatgatling);
 }
 
 void FileFrameCuts::on_draw_ui() {
   ImGui::Checkbox("Faster Guard", &dantefasterguard);
+  ImGui::Checkbox("Faster Faust Gatling", &dantefasterhatgatling);
 }
