@@ -727,13 +727,13 @@ std::optional<std::string> HeavyDay::on_initialize() {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize rgenable";
     }
-    if (!install_hook_absolute(rgmod_addr.value(), m_rgmod_hook,
+   /* if (!install_hook_absolute(rgmod_addr.value(), m_rgmod_hook,
                                &rgmod_detour, &rgmod_jmp_ret, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize rgmod";
     }
-    
+    */
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
     HeavyDay::dtenable_ja_ret  = dtenable_addr.value() + 0x166;
   return Mod::on_initialize();
