@@ -99,6 +99,13 @@ set(MODS_SRC
     mods/MoveReplacer.cpp 
     mods/Inertia.hpp 
     mods/Inertia.cpp 
+    mods/BpStageJump.hpp 
+    mods/BpStageJump.cpp 
+    mods/NeroTomboyLockOn.hpp 
+    mods/NeroTomboyLockOn.cpp 
+    mods/SprintInBattle.hpp 
+    mods/SprintInBattle.cpp 
+
 )
 
 set(HOOKS_SRC

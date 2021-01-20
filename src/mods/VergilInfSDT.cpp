@@ -23,6 +23,8 @@ static naked void detour1() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [supersdepletesdt], 1
+        je code
         movss xmm1, [desiredsdtvalue]
         movss [rbx+00001B20h], xmm1
 		jmp qword ptr [VergilInfSDT::jmp_ret1]
