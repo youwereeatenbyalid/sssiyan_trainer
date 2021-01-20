@@ -1,18 +1,18 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class MoveReplacer : public Mod {
+class Inertia : public Mod {
 public:
-  MoveReplacer() = default;
+  Inertia() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "MoveReplacer"; }
+  std::string_view get_name() const override { return "Inertia"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
   uintptr_t static cheaton;
-  uintptr_t static filtercall;
-  uintptr_t static startmovecall;
-  uintptr_t static endmovecall;
+  void static store_detour();
+  void static preserve_detour();
+  void static redirect_detour();
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
@@ -28,6 +28,6 @@ private:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook;
+   std::unique_ptr<FunctionHook> m_function_hook;
 };
 

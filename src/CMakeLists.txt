@@ -97,6 +97,8 @@ set(MODS_SRC
     mods/DisableBreakaway.cpp 
     mods/MoveReplacer.hpp 
     mods/MoveReplacer.cpp 
+    mods/Inertia.hpp 
+    mods/Inertia.cpp 
 )
 
 set(HOOKS_SRC

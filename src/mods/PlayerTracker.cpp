@@ -13,8 +13,9 @@
   uintptr_t PlayerTracker::groundedmem{NULL};
   uint32_t PlayerTracker::isgrounded{0};
   uintptr_t PlayerTracker::playertransform{NULL};
-  glm::vec3 PlayerTracker::playerinertia{0.0f, 0.0f, 0.0f};
-
+  uintptr_t PlayerTracker::playerinertiax{NULL};
+  uintptr_t PlayerTracker::playerinertiay{NULL};
+  uintptr_t PlayerTracker::playerinertiaz{NULL};
   uint32_t PlayerTracker::playermoveid{0};
   
   uintptr_t PlayerTracker::neroentity{NULL};
@@ -82,12 +83,12 @@ static naked void player_detour() {
 		//playertransform
 		
 		mov r8, [rdx+0x60]
-		mov r9, [r8+1140]
-		mov [PlayerTracker::playerinertia.x],r9
-		mov r9, [r8+1144]
-		mov [PlayerTracker::playerinertia.y],r9
-		mov r9, [r8+1148]
-		mov [PlayerTracker::playerinertia.z],r9
+		lea r9, [r8+0x1140]
+		mov [PlayerTracker::playerinertiax],r9
+		lea r9, [r8+0x1144]
+		mov [PlayerTracker::playerinertiay],r9
+		lea r9, [r8+0x1148]
+		mov [PlayerTracker::playerinertiaz],r9
 		mov r9, [r8+0x1F0]
 		mov [PlayerTracker::playertransform], r9
 			

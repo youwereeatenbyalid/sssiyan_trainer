@@ -14,6 +14,8 @@
         #include "mods/GameInput.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
+        #include "mods/MoveReplacer.hpp"
+        #include "mods/Inertia.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
     // Nero
@@ -83,6 +85,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
+        m_mods.emplace_back(std::make_unique<MoveReplacer>());
+        m_mods.emplace_back(std::make_unique<Inertia>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero

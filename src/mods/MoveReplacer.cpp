@@ -1,8 +1,12 @@
-#if 0
+
 #include "MoveReplacer.hpp"
 #include "mods/PlayerTracker.hpp"
+#include "mods/Inertia.hpp"
 uintptr_t MoveReplacer::jmp_ret{NULL};
 uintptr_t MoveReplacer::cheaton{NULL};
+uintptr_t MoveReplacer::filtercall{NULL};
+uintptr_t MoveReplacer::startmovecall{NULL};
+uintptr_t MoveReplacer::endmovecall{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -10,186 +14,163 @@ static naked void detour() {
 	__asm {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
-        jne code
+        je nerocode
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
-        je cheatcode
+        je dantecode
+        cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
+        je vcode
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
-        jmp code
+        je vergilcode
+        jmp moveswaporiginalcode
     nerocode:
+        //neutral enemy step
+        cmp dword ptr [r14], 0x522
+        je enemystep
 
-        jmp qword ptr [MoveReplacer::jmp_ret]        
+        //forward enemy step
+        cmp dword ptr [r14], 0x4A3
+        je enemystep
+
+        //backward enemy step
+        cmp dword ptr [r14], 0x53C
+        je enemystep
+
+        //left enemy step
+        cmp dword ptr [r14], 0x535
+        je enemystep
+
+        //right enemy step
+        cmp dword ptr [r14], 0x549
+        je enemystep
+        jmp moveswaporiginalcode
     dantecode:
-		
-    vergilcode:
+        //jmp moveswaporiginalcode
+        push rax
+        mov rax, [MoveReplacer::filtercall]
+        cmp [rsp+0x160], rax
+        pop rax
+        je moveswaporiginalcode
 
+        //neutral enemy step
+        cmp dword ptr [r14], 0x106
+        je enemystep
+
+        //forward enemy step
+        cmp dword ptr [r14], 0x10D
+        je enemystep
+
+        //backward enemy step
+        cmp dword ptr [r14], 0x148
+        je enemystep
+
+        //left enemy step
+        cmp dword ptr [r14], 0x173
+        je enemystep
+
+        //right enemy step
+        cmp dword ptr [r14], 0x15E
+        je enemystep
+
+        //Air Hike Back
+        cmp dword ptr [r14], 0x12A
+        je airhike
+        //Air Hike Forward
+        cmp dword ptr [r14], 0x136
+        je airhike
+        //Air Hike Left
+        cmp dword ptr [r14], 0x153
+        je airhike
+        //Air Hike Right
+        cmp dword ptr [r14], 0x167
+        je airhike
+
+        //Balrog Air Hike Back
+        cmp dword ptr [r14], 0x12D
+        je airhike
+        //Balrog Air Hike Forward
+        cmp dword ptr [r14], 0x0EC
+        je airhike
+        //Balrog Air Hike Left
+        cmp dword ptr [r14], 0x139
+        je airhike
+        //Balrog Air Hike Right
+        cmp dword ptr [r14], 0x156
+        je airhike
+
+        //cmp [r14], CDA
+        //je guardfly
+        jmp moveswaporiginalcode
+    vcode:
+        jmp moveswaporiginalcode
+    vergilcode:
+        jmp moveswaporiginalcode
     enemystep:
-        cmp [inertiatoggle], 1
+        //cmp [inertiatoggle], 1
         jne moveswaporiginalcode
-        cmp [rsp+60],"DevilMayCry5.exe"+24E8348
+        push rax
+        mov rax, [MoveReplacer::startmovecall]
+        cmp [rsp+0x60], rax
+        pop rax
         je inertiastore
-        cmp [rsp+60], "DevilMayCry5.exe"+24E72DE
-        je inertiapreserve
+        push rax
+        mov rax, [MoveReplacer::endmovecall]
+        cmp [rsp+0x60], rax
+        pop rax
+        je inertiawrite
         jmp moveswaporiginalcode
 
 
-        airhike:
-        //cmp [rsp+60],"DevilMayCry5.exe"+24E8348
+        airhike:        
+        //push rax
+        //mov rax, [MoveReplacer::startmovecall]
+        //cmp [rsp+0x60], rax
+        //pop rax
         //je startairhiketimer
-        //cmp [rsp+60], "DevilMayCry5.exe"+24E72DE
+        //push rax
+        //mov rax, [MoveReplacer::endmovecall]
+        //cmp [rsp+0x60], rax
+        //pop rax
         //je endairhiketimer
         jmp moveswaporiginalcode
 
 
         startairhiketimer:
-        mov [airhiketimer], 800
+        //mov [airhiketimer], 800
         jmp inertiastore
 
         endairhiketimer:
-        mov [airhiketimer], 0
-        jmp inertiapreserve
+        //mov [airhiketimer], 0
+        jmp inertiawrite
 
-        guardfly:
-        //cmp [rsp+60],"DevilMayCry5.exe"+24E8348
-        //je inertiapreserve
-        jmp moveswaporiginalcode
+        
+
+        inertiawrite:
+        cmp [PlayerTracker::redirect], 1
+        je inertiaredirect
+        jmp inertiastore
 
         inertiastore:
-        push r8
-           //move the x inertia into XMM13
-           mov r8, [Xinertia]
-
-           test r8, r8
-           je inertiastoresafety
-
-           movss xmm13, dword ptr [r8]
-           //move the z inertia into XMM14
-           mov r8, [Zinertia]
-           movss xmm14, dword ptr [r8]
-
-           movss dword ptr [backupxinertia], xmm13
-           movss dword ptr [backupzinertia], xmm14
-
-           //square x and z, sum them, and move the square root of the sum into XMM14
-           mulss xmm13, xmm13
-           mulss xmm14, xmm14
-           addss xmm13, xmm14
-           sqrtss xmm14, xmm13
-           //move the composite inertia into xmm14
-           movss dword ptr [backupinertia], xmm14
-        inertiastoresafety:
-           //clear xmm13 and xmm14
-           movss xmm13, xmm15
-           movss xmm14, xmm15
-        pop r8
-        jmp moveswaporiginalcode
-
-
+            push r8
+            call Inertia::store_detour
+            pop r8
+            jmp moveswaporiginalcode
 
         inertiapreserve:
-        cmp [threshholdmet], 1
-        je inertiaredirect
-        push r8
-           //move the x and z values into xmm13 and xmm14
-           movss xmm13, dword ptr [backupxinertia]
-           movss xmm14, dword ptr [backupzinertia]
-           //move them into their respective addresses
-           mov r8, [Xinertia]
-           test r8, r8
-           je inertiapreservesafety
-
-           movss dword ptr [r8],xmm13
-           mov r8, [Zinertia]
-           movss dword ptr [r8],xmm14
-
-        inertiapreservesafety:
-           //clear the xmm13 and xmm14 registers
-           movss xmm13, xmm15
-           movss xmm14, xmm15
-        pop r8
-        jmp moveswaporiginalcode
-
+            push r8
+            call Inertia::store_detour
+            pop r8
+            jmp moveswaporiginalcode
 
         inertiaredirect:
-        push r8
-           //move the composite inertia into xmm14
-           movss xmm14, dword ptr [backupinertia]
-           //move the sin value into xmm13
-           movss xmm13, dword ptr [directionsinvalue]
-           //multiply the two together to get the new X inertia
-           mulss xmm13, xmm14
-           //move the new value into the X inertia address
-           mov r8, [Xinertia]
-           test r8, r8
-           je inertiaredirectsafety
+            push r8
+            call Inertia::store_detour
+            pop r8
+            jmp moveswaporiginalcode
 
-           movss dword ptr [r8],xmm13
-           //move the cos value into xmm13
-           movss xmm13, dword ptr [directioncosvalue]
-           //multiply the two together to get the new X inertia
-           mulss xmm13, xmm14
-           //move the new value into the X inertia address
-           mov r8, [Zinertia]
-           movss dword ptr [r8],xmm13
 
-        inertiaredirectsafety:
-           //clear the xmm13 and xmm14 registers
-           movss xmm13, xmm15
-           movss xmm14, xmm15
-        pop r8
-        jmp moveswaporiginalcode
-
-        inertiaairhike:
-        //time to get funky kids
-
-        cmp [threshholdmet], 1
-        jne moveswaporiginalcode
-
-        push r8
-           //move the x inertia into XMM13
-           mov r8, [Xinertia]
-           test r8, r8
-           je inertiaairhikesafety
-
-           movss xmm13, dword ptr [r8]
-           //move the z inertia into XMM14
-           mov r8, [Zinertia]
-           movss xmm14, dword ptr [r8]
-
-           movss dword ptr [backupxinertia], xmm13
-           movss dword ptr [backupzinertia], xmm14
-
-           //square x and z, sum them, and move the square root of the sum into XMM14
-           mulss xmm13, xmm13
-           mulss xmm14, xmm14
-           addss xmm13, xmm14
-           sqrtss xmm14, xmm13
-
-           //move the sin value into xmm13
-           movss xmm13, dword ptr [directionsinvalue]
-           //multiply the two together to get the new X inertia
-           mulss xmm13, xmm14
-           //move the new value into the X inertia address
-           mov r8, [Xinertia]
-           movss dword ptr [r8],xmm13
-           //move the cos value into xmm13
-           movss xmm13, dword ptr [directioncosvalue]
-           //multiply the two together to get the new X inertia
-           mulss xmm13, xmm14
-           //move the new value into the X inertia address
-           mov r8, [Zinertia]
-           movss dword ptr [r8],xmm13
-
-           inertiaairhikesafety:
-           //clear the xmm13 and xmm14 registers
-           movss xmm13, xmm15
-           movss xmm14, xmm15
-        pop r8
-        jmp moveswaporiginalcode
     moveswaporiginalcode:
         mov ebx,[r14]
         mov rcx,r13
-  
-
         jmp qword ptr [MoveReplacer::jmp_ret]
 	}
 }
@@ -197,34 +178,39 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> MoveReplacer::on_initialize() {
-  // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  //ischecked = false;
-  //onpage    = commonpage;
-  //full_name_string     = "MoveReplacer Full Name";
-  //author_string        = "Author";
-  //description_string   = "This is the description of MoveReplacer.";
-  //MoveReplacer::cheaton = (uintptr_t)&ischecked;
+  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  ischecked = false;
+  onpage    = commonpage;
+  full_name_string     = "MoveReplacer";
+  author_string        = "The Hitchhiker";
+  description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
+  MoveReplacer::cheaton = (uintptr_t)&ischecked;
 
-  //auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
-  //if (!addr) {
-  //  return "Unable to find MoveReplacer pattern.";
-  //}
-  //if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
-  //  return a error string in case something goes wrong
-  //  spdlog::error("[{}] failed to initialize", get_name());
-  //  return "Failed to initialize MoveReplacer";
-  //}
+  auto addr = utility::scan(base, "41 8B 1E 49 8B CD");
+  auto filtercalladdr = utility::scan(base, "FE FE FF FF 48 83 C3 04 48 FF C7");
+  auto startmovecalladdr = utility::scan(base, "49 8B 46 20 41 8B CC");
+  auto endmovecalladdr   = utility::scan(base, "66 44 21 73 1A");
+  MoveReplacer::filtercall = filtercalladdr.value();
+  MoveReplacer::startmovecall = startmovecalladdr.value();
+  MoveReplacer::endmovecall   = endmovecalladdr.value();
+  if (!addr) {
+    return "Unable to find MoveReplacer pattern.";
+  }
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+    //return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize MoveReplacer";
+  }
   return Mod::on_initialize();
 }
 
 // during load
-//void MoveReplacer::on_config_load(const utility::Config &cfg) {}
+void MoveReplacer::on_config_load(const utility::Config &cfg) {}
 // during save
-//void MoveReplacer::on_config_save(utility::Config &cfg) {}
+void MoveReplacer::on_config_save(utility::Config &cfg) {}
 // do something every frame
-//void MoveReplacer::on_frame() {}
+void MoveReplacer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-//void MoveReplacer::on_draw_debug_ui() {}
+void MoveReplacer::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-//void MoveReplacer::on_draw_ui() {}
-#endif
+void MoveReplacer::on_draw_ui() {}

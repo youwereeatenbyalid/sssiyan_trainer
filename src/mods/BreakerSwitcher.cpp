@@ -239,13 +239,13 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
 void BreakerSwitcher::on_config_load(const utility::Config& cfg) {
   for (int i = 0; i < 8; i++) {
     BreakerSwitcher::breakers[i] =
-        cfg.get<float>("breaker_slot_" + i).value_or(0);
+        cfg.get<int>("breaker_slot_" + i).value_or(0);
   }
 }
 // during save
 void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   for (int i = 0; i < 8; i++) {
-    cfg.set<float>("breaker_slot_" + i, BreakerSwitcher::breakers[i]);
+    cfg.set<int>("breaker_slot_" + i, BreakerSwitcher::breakers[i]);
   }
 }
 // do something every frame

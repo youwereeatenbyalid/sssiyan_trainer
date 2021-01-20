@@ -23,7 +23,11 @@ public:
   uint32_t static isgrounded;
   uintptr_t static playertransform;
   uint32_t static playermoveid;
-  glm::vec3 static playerinertia;
+
+  uintptr_t static playerinertiax;
+  uintptr_t static playerinertiay;
+  uintptr_t static playerinertiaz;
+
   uintptr_t static neroentity;
   uintptr_t static nerotransform;
   
