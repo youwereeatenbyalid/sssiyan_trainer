@@ -83,8 +83,6 @@ set(MODS_SRC
     mods/DanteInfIgnition.cpp 
     mods/VergilNoTrickRestriction.hpp 
     mods/VergilNoTrickRestriction.cpp 
-    mods/KeyboardCamera.hpp 
-    mods/KeyboardCamera.cpp 
     mods/AllStart.hpp 
     mods/AllStart.cpp 
     mods/JumpStart.hpp 
@@ -99,6 +97,21 @@ set(MODS_SRC
     mods/MoveReplacer.cpp 
     mods/Inertia.hpp 
     mods/Inertia.cpp 
+    mods/BpStageJump.hpp 
+    mods/BpStageJump.cpp 
+    mods/NeroTomboyLockOn.hpp 
+    mods/NeroTomboyLockOn.cpp 
+    mods/SprintInBattle.hpp 
+    mods/SprintInBattle.cpp 
+    mods/NeroSwapSidesteps.hpp 
+    mods/NeroSwapSidesteps.cpp 
+    mods/NeroInfPunchline.hpp 
+    mods/NeroInfPunchline.cpp 
+    mods/NeroSkipCS2.hpp 
+    mods/NeroSkipCS2.cpp 
+    mods/NeroNoDTCooldown.hpp 
+    mods/NeroNoDTCooldown.cpp 
+
 )
 
 set(HOOKS_SRC

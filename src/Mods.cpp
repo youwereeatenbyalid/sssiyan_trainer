@@ -30,13 +30,13 @@
         #include "mods/DamageTypeLean.hpp"
     // Common
         #include "mods/DeepTurbo.hpp"
+        #include "mods/BpStageJump.hpp"
         #include "mods/FreezeBPTimer.hpp"
         #include "mods/NoScreenShake.hpp"
         #include "mods/DisplayEnemyHPInOrbs.hpp"
         #include "mods/MovingTargetSwitch.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
-        #include "mods/KeyboardCamera.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
         #include "mods/NoJCCooldown.hpp"
@@ -47,11 +47,17 @@
         #include "mods/InfDT.hpp"
         #include "mods/EntitySpeeds.hpp"
         #include "mods/FileFrameCuts.hpp"
+        #include "mods/SprintInBattle.hpp"
         #include "mods/DisableEnemyAI.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
+        #include "mods/NeroTomboyLockOn.hpp"
+        #include "mods/NeroSwapSidesteps.hpp"
+        #include "mods/NeroInfPunchline.hpp"
+        #include "mods/NeroSkipCS2.hpp"
+        #include "mods/NeroNoDTCooldown.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -101,14 +107,14 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DamageTypeLean>());
     // Common
         m_mods.emplace_back(std::make_unique<DeepTurbo>());
+        m_mods.emplace_back(std::make_unique<BpStageJump>());
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
-        m_mods.emplace_back(std::make_unique<KeyboardCamera>());
-    // Game
+    // Gameplay
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
@@ -118,11 +124,17 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
         m_mods.emplace_back(std::make_unique<FileFrameCuts>());
+        m_mods.emplace_back(std::make_unique<SprintInBattle>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
+        m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
+        m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
+        m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
+        m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());

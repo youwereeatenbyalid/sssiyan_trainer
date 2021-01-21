@@ -1,15 +1,14 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class KeyboardCamera : public Mod {
+class NeroSkipCS2 : public Mod {
 public:
-  KeyboardCamera() = default;
+  NeroSkipCS2() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "KeyboardCamera"; }
+  std::string_view get_name() const override { return "NeroSkipCS2"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
-  uintptr_t static jmp_je;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
