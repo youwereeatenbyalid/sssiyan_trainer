@@ -11,6 +11,8 @@ public:
   uintptr_t static jmp_retFoV;
   uintptr_t static jmp_retHorizontalSensClockwise;
   uintptr_t static jmp_retHorizontalSensAntiClockwise;
+  uintptr_t static jmp_retKeyboardHorizontalEnable;
+  uintptr_t static jmp_jeKeyboardHorizontalEnable;
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
@@ -31,4 +33,5 @@ private:
   std::unique_ptr<FunctionHook> m_function_hookFoV;
   std::unique_ptr<FunctionHook> m_function_hookHorizontalSensClockwise;
   std::unique_ptr<FunctionHook> m_function_hookHorizontalSensAntiClockwise;
+  std::unique_ptr<FunctionHook> m_function_hookKeyboardHorizontalEnable;
 };

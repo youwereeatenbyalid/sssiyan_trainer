@@ -37,7 +37,6 @@
         #include "mods/MovingTargetSwitch.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
-        #include "mods/KeyboardCamera.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
         #include "mods/NoJCCooldown.hpp"
@@ -115,7 +114,6 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
-        m_mods.emplace_back(std::make_unique<KeyboardCamera>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());

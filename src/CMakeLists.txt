@@ -83,8 +83,6 @@ set(MODS_SRC
     mods/DanteInfIgnition.cpp 
     mods/VergilNoTrickRestriction.hpp 
     mods/VergilNoTrickRestriction.cpp 
-    mods/KeyboardCamera.hpp 
-    mods/KeyboardCamera.cpp 
     mods/AllStart.hpp 
     mods/AllStart.cpp 
     mods/JumpStart.hpp 
