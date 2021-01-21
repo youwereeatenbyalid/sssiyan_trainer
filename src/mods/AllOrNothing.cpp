@@ -4,7 +4,7 @@
 #include "mods/StyleRank.hpp"
 uintptr_t AllOrNothing::jmp_ret{NULL};
 uintptr_t AllOrNothing::cheaton{NULL};
-uint32_t AllOrNothing::stylebar{0};
+uint32_t AllOrNothing::stylebar{NULL};
 bool noonetakesdamage;
 bool onehitkill;
 float zerovalue = 0.0;
@@ -89,9 +89,9 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = false;
   onpage    = gamepage;
-  full_name_string     = "Must Style (+)";
+  full_name_string     = "Must Style / Damage Toggles (+)";
   author_string        = "The Hitchhiker";
-  description_string   = "Must Style is a gamemode where you must be above a certain style rank to do damage.";
+  description_string   = "Disable damage altogether or when below a certain Style Rank.";
   AllOrNothing::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
@@ -106,17 +106,21 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   return Mod::on_initialize();
 }
 
-// during load
-//void AllOrNothing::on_config_load(const utility::Config &cfg) {}
-// during save
-//void AllOrNothing::on_config_save(utility::Config &cfg) {}
-// do something every frame
-//void AllOrNothing::on_frame() {}
-// will show up in debug window, dump ImGui widgets you want here
-//void AllOrNothing::on_draw_debug_ui() {}
-// will show up in main window, dump ImGui widgets you want here
+void AllOrNothing::on_config_load(const utility::Config& cfg) {
+  noonetakesdamage = cfg.get<bool>("no_one_takes_damage").value_or(false);
+  onehitkill       = cfg.get<bool>("one_hit_kill").value_or(false);
+  AllOrNothing::stylebar = cfg.get<int>("style_damage_requirement").value_or(5);
+}
+void AllOrNothing::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("no_one_takes_damage", noonetakesdamage);
+  cfg.set<bool>("one_hit_kill", onehitkill);
+  cfg.set<int>("style_damage_requirement", AllOrNothing::stylebar);
+}
+
 void AllOrNothing::on_draw_ui() {
   ImGui::Checkbox("No one takes damage", &noonetakesdamage);
   ImGui::Checkbox("One hit kill", &onehitkill);
-  ImGui::SliderInt("Style Rank to beat", (int*)&AllOrNothing::stylebar, 0, 7);
+  ImGui::Text("Style Rank to beat (1:D, 7:SSS)");
+  ImGui::SliderInt("##StlyeRankRequirement", (int*)&AllOrNothing::stylebar, 1, 7);
+  
 }
