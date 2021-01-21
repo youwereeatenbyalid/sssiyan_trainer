@@ -105,6 +105,14 @@ set(MODS_SRC
     mods/NeroTomboyLockOn.cpp 
     mods/SprintInBattle.hpp 
     mods/SprintInBattle.cpp 
+    mods/NeroSwapSidesteps.hpp 
+    mods/NeroSwapSidesteps.cpp 
+    mods/NeroInfPunchline.hpp 
+    mods/NeroInfPunchline.cpp 
+    mods/NeroSkipCS2.hpp 
+    mods/NeroSkipCS2.cpp 
+    mods/NeroNoDTCooldown.hpp 
+    mods/NeroNoDTCooldown.cpp 
 
 )
 

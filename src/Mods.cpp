@@ -55,6 +55,10 @@
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
         #include "mods/NeroTomboyLockOn.hpp"
+        #include "mods/NeroSwapSidesteps.hpp"
+        #include "mods/NeroInfPunchline.hpp"
+        #include "mods/NeroSkipCS2.hpp"
+        #include "mods/NeroNoDTCooldown.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -129,6 +133,10 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
+        m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
+        m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
+        m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
+        m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
