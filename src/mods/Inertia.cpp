@@ -5,7 +5,7 @@ uintptr_t Inertia::jmp_ret{NULL};
 uintptr_t Inertia::cheaton{NULL};
 float backupxinertia = 0.0f;
 float backupzinertia = 0.0f;
-float backupinertia = 0.0f;
+float backupinertia  = 0.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 static naked void detour() {
@@ -105,9 +105,6 @@ inertiaredirect:
 	}
 }
 
-
-
-
 // clang-format on
 
 std::optional<std::string> Inertia::on_initialize() {
@@ -116,7 +113,7 @@ std::optional<std::string> Inertia::on_initialize() {
   onpage    = commonpage;
   full_name_string     = "Inertia Redirection";
   author_string        = "The Hitchhiker";
-  description_string   = "Redirect air hikes & enemy steps .";
+  description_string   = "Redirect air hikes & enemy steps. (This be broke)";
   Inertia::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "48 8B 41 08 44 8B 40 78");

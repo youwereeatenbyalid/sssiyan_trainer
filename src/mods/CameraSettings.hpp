@@ -17,6 +17,12 @@ public:
 
   uintptr_t static jmp_retSiyansCamFix1;
   uintptr_t static jmp_jneSiyansCamFix1;
+
+  uintptr_t static jmp_retCloseAutoCorrect;
+  uintptr_t static jmp_jneCloseAutoCorrect;
+
+  uintptr_t static jmp_retDistantAutoCorrect;
+
   uintptr_t static cheaton;
 
   // Override this things if you want to store values in the config file
@@ -39,4 +45,6 @@ private:
   std::unique_ptr<FunctionHook> m_function_hookHorizontalSensAntiClockwise;
   std::unique_ptr<FunctionHook> m_function_hookKeyboardHorizontalEnable;
   std::unique_ptr<FunctionHook> m_function_hookSiyansCamFix1;
+  std::unique_ptr<FunctionHook> m_function_hookCloseAutoCorrect;
+  std::unique_ptr<FunctionHook> m_function_hookDistantAutoCorrect;
 };
