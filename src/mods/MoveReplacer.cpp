@@ -103,10 +103,34 @@ static naked void detour() {
     vcode:
         jmp moveswaporiginalcode
     vergilcode:
+        //neutral enemy step
+        cmp dword ptr [r14], 0x68
+        je enemystep
+
+        //forward enemy step
+        cmp dword ptr [r14], 0x6E
+        je enemystep
+
+        //backward enemy step
+        cmp dword ptr [r14], 0x8F
+        je enemystep
+
+        //left enemy step
+        cmp dword ptr [r14], 0xA1
+        je enemystep
+
+        //right enemy step
+        cmp dword ptr [r14], 0x98
+        je enemystep
         jmp moveswaporiginalcode
     enemystep:
         //cmp [inertiatoggle], 1
+        push rax
+        mov rax, [Inertia::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
         jne moveswaporiginalcode
+
         push rax
         mov rax, [MoveReplacer::startmovecall]
         cmp [rsp+0x60], rax
@@ -121,25 +145,32 @@ static naked void detour() {
 
 
         airhike:        
-        //push rax
-        //mov rax, [MoveReplacer::startmovecall]
-        //cmp [rsp+0x60], rax
-        //pop rax
-        //je startairhiketimer
-        //push rax
-        //mov rax, [MoveReplacer::endmovecall]
-        //cmp [rsp+0x60], rax
-        //pop rax
-        //je endairhiketimer
+
+        push rax
+        mov rax, [Inertia::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
+        jne moveswaporiginalcode
+
+        push rax
+        mov rax, [MoveReplacer::startmovecall]
+        cmp [rsp+0x60], rax
+        pop rax
+        je startairhiketimer
+        push rax
+        mov rax, [MoveReplacer::endmovecall]
+        cmp [rsp+0x60], rax
+        pop rax
+        je endairhiketimer
         jmp moveswaporiginalcode
 
 
         startairhiketimer:
-        //mov [airhiketimer], 800
+        mov [Inertia::airhiketimer], 800
         jmp inertiastore
 
         endairhiketimer:
-        //mov [airhiketimer], 0
+        mov [Inertia::airhiketimer], 0
         jmp inertiawrite
 
         
@@ -147,7 +178,7 @@ static naked void detour() {
         inertiawrite:
         cmp [PlayerTracker::redirect], 1
         je inertiaredirect
-        jmp inertiastore
+        jmp inertiapreserve
 
         inertiastore:
             push r8
@@ -157,13 +188,13 @@ static naked void detour() {
 
         inertiapreserve:
             push r8
-            call Inertia::store_detour
+            call Inertia::preserve_detour
             pop r8
             jmp moveswaporiginalcode
 
         inertiaredirect:
             push r8
-            call Inertia::store_detour
+            call Inertia::redirect_detour
             pop r8
             jmp moveswaporiginalcode
 
@@ -180,7 +211,7 @@ static naked void detour() {
 std::optional<std::string> MoveReplacer::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = false;
-  onpage    = commonpage;
+  onpage    = -1;
   full_name_string     = "MoveReplacer";
   author_string        = "The Hitchhiker";
   description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";

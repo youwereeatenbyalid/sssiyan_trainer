@@ -10,6 +10,7 @@ public:
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
   uintptr_t static cheaton;
+  uint32_t static airhiketimer;
   void static store_detour();
   void static preserve_detour();
   void static redirect_detour();

@@ -841,7 +841,9 @@ public:
           
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_draw_debug_ui();
+            auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
+            ImGui::Text("%s Debug", focusmod->full_name_string.c_str());
+            focusmod->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -1088,10 +1090,10 @@ void InitSample(ModFramework* mf)
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
     oMgr.DockWith(pStyleEditor, commonwindow);
-	#ifndef NDEBUG
+	//#ifndef NDEBUG
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
     oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
-	#endif
+	//#endif
 
 	//oMgr.Dock
 	//MyImwWindow* pWindow2 = new MyImwWindow(pWindow1);

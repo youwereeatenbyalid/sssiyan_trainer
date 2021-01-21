@@ -6,6 +6,7 @@ uintptr_t Inertia::cheaton{NULL};
 float backupxinertia = 0.0f;
 float backupzinertia = 0.0f;
 float backupinertia = 0.0f;
+uint32_t Inertia::airhiketimer = 0;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 static naked void detour() {
@@ -136,9 +137,23 @@ void Inertia::on_config_load(const utility::Config &cfg) {}
 // during save
 void Inertia::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void Inertia::on_frame() {}
+void Inertia::on_frame() { 
+  if (airhiketimer > 1) {
+    Inertia::airhiketimer--;
+  }
+  if (airhiketimer < 10 && airhiketimer > 1) {
+    backupxinertia = 0.0;
+    backupzinertia = 0.0;
+    backupinertia  = 0.0;
+  }
+}
 // will show up in debug window, dump ImGui widgets you want here
-void Inertia::on_draw_debug_ui() {}
+void Inertia::on_draw_debug_ui() { 
+    ImGui::Text("[Inertia] X inertia: %.2f", &backupxinertia);
+    ImGui::Text("[Inertia] Z inertia: %.2f", &backupzinertia);
+    ImGui::Text("[Inertia] Composite inertia: %.2f", &backupinertia);
+    ImGui::Text("[Inertia] Air Hike Timer: %d", (int*)&Inertia::airhiketimer);
+}
 // will show up in main window, dump ImGui widgets you want here
 void Inertia::on_draw_ui() {}
 
