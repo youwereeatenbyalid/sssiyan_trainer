@@ -7,13 +7,18 @@ uintptr_t CameraSettings::jmp_retHorizontalSensAntiClockwise{NULL};
 uintptr_t CameraSettings::jmp_retKeyboardHorizontalEnable{NULL};
 uintptr_t CameraSettings::jmp_jeKeyboardHorizontalEnable{NULL};
 
+uintptr_t CameraSettings::jmp_retSiyansCamFix1;
+uintptr_t CameraSettings::jmp_jneSiyansCamFix1;
+
 uintptr_t CameraSettings::cheaton{NULL};
 
 float fov = 65.0;
 
 float horizontalmult = 100.0;
 float horizontalsens = 3.25;
+
 bool keyboardhorizontalenable;
+bool siyanscamerafixenable;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -104,6 +109,30 @@ static naked void detourKeyboardHorizontalEnable() {
 	}
 }
 
+static naked void detourSiyansCamFix1() {
+	__asm {
+        push rax
+        mov rax, [CameraSettings::cheaton]
+        cmp byte ptr [rax], 1
+        pop rax
+        je cheatcode
+        jmp code
+
+    cheatcode:
+        cmp byte ptr [siyanscamerafixenable], 1
+        jne code
+		jmp qword ptr [CameraSettings::jmp_retSiyansCamFix1]
+
+    code:
+        cmp qword ptr [rax+18h], 00
+        jne jnejmp
+        jmp qword ptr [CameraSettings::jmp_retSiyansCamFix1]
+
+    jnejmp:
+        jmp qword ptr [CameraSettings::jmp_jneSiyansCamFix1]
+	}
+}
+
 // clang-format on
 
 std::optional<std::string> CameraSettings::on_initialize() {
@@ -119,19 +148,28 @@ std::optional<std::string> CameraSettings::on_initialize() {
   if (!addr1) {
     return "Unable to find CameraSettings1 pattern.";
   }
+
   auto addr2 = utility::scan(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 0F");
   if (!addr2) {
     return "Unable to find CameraSettings2 pattern.";
   }
+
   auto addr3 = utility::scan(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 E8");
   if (!addr3) {
     return "Unable to find CameraSettings3 pattern.";
   }
+
   auto addr4 = utility::scan(base, "74 17 89 8B 98 02 00 00");
   if (!addr4) {
     return "Unable to find CameraSettings4 pattern.";
   }
   CameraSettings::jmp_jeKeyboardHorizontalEnable = addr4.value() + 25;
+
+  auto addr5 = utility::scan(base, "48 83 78 18 00 0F 85 5D 01 00 00 C6");
+  if (!addr5) {
+    return "Unable to find CameraSettings5 pattern.";
+  }
+  CameraSettings::jmp_jneSiyansCamFix1 = addr5.value() + 360;
 
   if (!install_hook_absolute(addr1.value(), m_function_hookFoV, &detourFoV, &jmp_retFoV, 5)) {
     //  return a error string in case something goes wrong
@@ -153,21 +191,29 @@ std::optional<std::string> CameraSettings::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings4";
   }
+  if (!install_hook_absolute(addr5.value(), m_function_hookSiyansCamFix1, &detourSiyansCamFix1, &jmp_retSiyansCamFix1, 11)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize CameraSettings5";
+  }
   return Mod::on_initialize();
 }
 void CameraSettings::on_config_load(const utility::Config& cfg) {
-  keyboardhorizontalenable = cfg.get<bool>("camera_settings_keyboard_horizontal").value_or(true);
+  siyanscamerafixenable = cfg.get<bool>("camera_settings_siyans_cam_fix_1").value_or(false);
+  keyboardhorizontalenable = cfg.get<bool>("camera_settings_keyboard_horizontal").value_or(false);
   fov = cfg.get<float>("camera_settings_fov").value_or(90.0f);
   horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(4.00f);
 }
 
 void CameraSettings::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("camera_settings_siyans_cam_fix_1", siyanscamerafixenable);
   cfg.set<bool>("camera_settings_keyboard_horizontal", keyboardhorizontalenable);
   cfg.set<float>("camera_settings_fov", fov);
   cfg.set<float>("camera_settings_horizontal_sens", horizontalsens);
 }
 
 void CameraSettings::on_draw_ui() {
+  ImGui::Checkbox("Siyan's Camera Fix 1.0", &siyanscamerafixenable);
   ImGui::Checkbox("Allow Keyboard Camera Movement While Locked On", &keyboardhorizontalenable);
   ImGui::Text("Field of View (65 default)");
   ImGui::SliderFloat("##fovslider", &fov, 0.0f, 120.0f, "%.0f");
