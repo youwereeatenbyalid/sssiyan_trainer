@@ -5,8 +5,8 @@ uintptr_t DamageMultiplier::jmp_ret{NULL};
 uintptr_t DamageMultiplier::cheaton{NULL};
 float DamageMultiplier::enemyhpvalue = 0.0f;
 
-float playerdamagemultiplier         = 1.0f;
-float enemydamagemultiplier          = 1.0f;
+// float playerdamagemultiplier         = 1.0f;
+// float enemydamagemultiplier          = 1.0f;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -36,13 +36,13 @@ static naked void detour() {
         // je enemydamageoutputaffect          // If cheat is ticked, affect incoming damage. If not, don't
         jmp code
 
-    enemydamageoutputaffect:
-        movss xmm3, [rdi+10h]
-        subss xmm3, xmm1
-        movss xmm1, [rdi+10h]
-        mulss xmm3, [enemydamagemultiplier]
-        subss xmm1, xmm3
-        jmp code
+    // enemydamageoutputaffect:
+        // movss xmm3, [rdi+10h]
+        // subss xmm3, xmm1
+        // movss xmm1, [rdi+10h]
+        // mulss xmm3, [enemydamagemultiplier]
+        // subss xmm1, xmm3
+        // jmp code
 
     playerdamageoutput:
         // push rax
@@ -52,12 +52,12 @@ static naked void detour() {
         // je playerdamageoutputaffect         // If cheat is ticked, affect outgoing damage. If not, don't
         jmp backupenemyhp
 
-    playerdamageoutputaffect:
-        movss xmm2, [rdi+10h]
-        subss xmm2, xmm1
-        movss xmm1, [rdi+10h]
-        mulss xmm2, [playerdamagemultiplier]
-        subss xmm1, xmm2
+    // playerdamageoutputaffect:
+        // movss xmm2, [rdi+10h]
+        // subss xmm2, xmm1
+        // movss xmm1, [rdi+10h]
+        // mulss xmm2, [playerdamagemultiplier]
+        // subss xmm1, xmm2
     backupenemyhp:
         movss [DamageMultiplier::enemyhpvalue], xmm1
         jmp code
@@ -92,11 +92,11 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DamageMultiplier::on_draw_ui() {
-  ImGui::PushItemWidth(100);
-  ImGui::InputFloat("Player Damage Output", &playerdamagemultiplier, 0.1f);
-  ImGui::PopItemWidth();
-  ImGui::PushItemWidth(100);
-  ImGui::InputFloat("Enemy Damage Output", &enemydamagemultiplier, 0.1f);
-  ImGui::PopItemWidth();
-}
+// void DamageMultiplier::on_draw_ui() {
+  // ImGui::PushItemWidth(100);
+  // ImGui::InputFloat("Player Damage Output", &playerdamagemultiplier, 0.1f);
+  // ImGui::PopItemWidth();
+  // ImGui::PushItemWidth(100);
+  // ImGui::InputFloat("Enemy Damage Output", &enemydamagemultiplier, 0.1f);
+  // ImGui::PopItemWidth();
+// 
