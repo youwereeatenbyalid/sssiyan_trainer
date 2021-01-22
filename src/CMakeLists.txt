@@ -111,6 +111,8 @@ set(MODS_SRC
     mods/NeroSkipCS2.cpp 
     mods/NeroNoDTCooldown.hpp 
     mods/NeroNoDTCooldown.cpp 
+    mods/PlayerDamageMult.hpp 
+    mods/PlayerDamageMult.cpp 
 
 )
 

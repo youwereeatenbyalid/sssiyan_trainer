@@ -8,9 +8,10 @@ float DamageMultiplier::enemyhpvalue = 0.0f;
 float playerdamagemultiplier         = 1.0f;
 float enemydamagemultiplier          = 1.0f;
 
-
 // clang-format off
 // only in clang/icl mode on x64, sorry
+
+// NOTE: A LOT OF THIS IS COMMENTED OUT AS WE NOW ONLY USE THIS CHEAT FOR BACKING UP ENEMY HP
 
 static naked void detour() {
 	__asm {                                // Compares will play out even without cheat enabled so we can get a backup of last hit entitiy's HP
@@ -28,11 +29,11 @@ static naked void detour() {
         jmp playerdamageoutput
 
     enemydamageoutput:
-        push rax
-        mov rax, [DamageMultiplier::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
-        je enemydamageoutputaffect          // If cheat is ticked, affect incoming damage. If not, don't
+        // push rax
+        // mov rax, [DamageMultiplier::cheaton]
+        // cmp byte ptr [rax], 1
+        // pop rax
+        // je enemydamageoutputaffect          // If cheat is ticked, affect incoming damage. If not, don't
         jmp code
 
     enemydamageoutputaffect:
@@ -44,11 +45,11 @@ static naked void detour() {
         jmp code
 
     playerdamageoutput:
-        push rax
-        mov rax, [DamageMultiplier::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
-        je playerdamageoutputaffect         // If cheat is ticked, affect outgoing damage. If not, don't
+        // push rax
+        // mov rax, [DamageMultiplier::cheaton]
+        // cmp byte ptr [rax], 1
+        // pop rax
+        // je playerdamageoutputaffect         // If cheat is ticked, affect outgoing damage. If not, don't
         jmp backupenemyhp
 
     playerdamageoutputaffect:
