@@ -1049,7 +1049,7 @@ void InitSample(ModFramework* mf)
 	//style.Colors[ImGuiCol_MenuBarBg] = style.Colors[ImGuiCol_WindowBg];
 
 	oMgr.GetMainPlatformWindow()->SetSize(1152,648);
-
+	//oMgr.GetMainPlatformWindow()->SetClosable(false);
 	oMgr.SetMainTitle("SSSiyan Collaborative Cheat Trainer");
 	
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
@@ -1061,13 +1061,14 @@ void InitSample(ModFramework* mf)
     ImwWindow* dantewindow	= new MyImwWindow(mf, 3, "Dante");
     ImwWindow* vwindow      = new MyImwWindow(mf, 4, "V");
     ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil");
+	commonwindow->SetClosable(false);
     //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
 	ImwWindow* pWindow3 = new MyImwWindow2("MyImwWindow2(1)");
 	ImwWindow* pWindow4 = new MyImwWindow2("MyImwWindow2(2)");
 	ImwWindow* pWindow5 = new MyImwWindow3();
-	pWindow5->SetClosable(false);*/
+	;*/
 
 	ImwWindow* pStyleEditor = new StyleEditorWindow();
 	//new MyMenu();
