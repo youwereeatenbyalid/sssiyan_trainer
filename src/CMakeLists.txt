@@ -117,6 +117,8 @@ set(MODS_SRC
     mods/TauntSelector.cpp 
     mods/DanteGuardflyWip.hpp 
     mods/DanteGuardflyWip.cpp 
+    mods/VergilTrickUpLockedOn.hpp 
+    mods/VergilTrickUpLockedOn.cpp 
 
 )
 

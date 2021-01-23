@@ -24,7 +24,7 @@ static naked void detour() {
     cheatcode:
         // push r11
         // mov r11, [addr3] // DevilMayCry5.exe+7E5BC40
-        // mov r11, [r11+88]
+        // mov r11, [r11+88h]
         // mov [gamedifficultyreference],r11d
         // pop r11
         movss xmm3,[rcx+rax*4+20h]
