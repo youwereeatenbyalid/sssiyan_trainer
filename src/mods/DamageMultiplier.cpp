@@ -71,8 +71,8 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DamageMultiplier::on_initialize() {
-  ischecked             = &DamageMultiplier::cheaton;
-  onpage                = gamepage;
+  // ischecked             = &DamageMultiplier::cheaton;
+  // onpage                = gamepage;
 
   full_name_string      = "Damage Multiplier (+)";
   author_string         = "SSSiyan";
