@@ -1,14 +1,20 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class EnemyNumber : public Mod {
+class LDK : public Mod {
 public:
-  EnemyNumber() = default;
+  LDK() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "EnemyNumber"; }
+  std::string_view get_name() const override { return "LDK"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
+  uintptr_t static enemynumber_jmp_ret;
+  uintptr_t static capbypass_jmp_ret1;
+  uintptr_t static capbypass_jmp_ret2;
+  uintptr_t static capbypass_jmp_jnl;
+  uintptr_t static capbypass_jmp_jle;
+  uintptr_t static cheaton;
+
   uint32_t static number;
   uint32_t static hardlimit;
   uint32_t static softlimit;
@@ -28,5 +34,7 @@ public:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::unique_ptr<FunctionHook> m_enemynumber_hook;
+  std::unique_ptr<FunctionHook> m_capbypass_hook1;
+  std::unique_ptr<FunctionHook> m_capbypass_hook2;
 };
