@@ -138,9 +138,11 @@ public:
 			s_iTranslateKeys[VK_LWIN]       = EKey::KEY_LEFTMETA;
 			s_iTranslateKeys[VK_RWIN]       = EKey::KEY_RIGHTMETA;
 		}
-
-		DWORD iWindowStyle = WS_OVERLAPPEDWINDOW; // E_NORMAL
-		DWORD iWindowExStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+		DWORD iWindowStyle = WS_OVERLAPPEDWINDOW;
+		DWORD iWindowExStyle = 0;
+		//DWORD iWindowStyle = WS_OVERLAPPEDWINDOW; // E_NORMAL
+		//DWORD iWindowStyle = E_NORMAL;
+		//DWORD iWindowExStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
 		if (eStyle == E_STYLE_BORDERLESS)
 		{

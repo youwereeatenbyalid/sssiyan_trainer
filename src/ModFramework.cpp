@@ -34,16 +34,16 @@ void update_thread_func(ModFramework* mf) {
 
 	InitSample(mf);
 
-	while (o_mgr.Run(false) && o_mgr.Run(draw_imwindow)) {
+	while (o_mgr.Run(false) && o_mgr.Run(true)) {
 		mf->on_frame();
-		if (GetAsyncKeyState(VK_INSERT) & 1) {
+		/*if (GetAsyncKeyState(VK_INSERT) & 1) {
 			auto mpw = o_mgr.GetMainPlatformWindow();
 			draw_imwindow = !draw_imwindow;
 			mpw->Show(draw_imwindow);
 		}
 		if (should_quit) {
 			break;
-		}
+		}*/
 		std::this_thread::sleep_for(std::chrono::milliseconds(17));
 	}
 

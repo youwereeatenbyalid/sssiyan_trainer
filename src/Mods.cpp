@@ -228,8 +228,10 @@ void Mods::load_mods() const {
     spdlog::info("{:s}::on_config_load()", mod->get_name().data());
     std::string togglename = std::string{mod->get_name()};
     togglename.append("_on");
-    *mod->ischecked = cfg.get<bool>(togglename).value_or(false);
-    mod->on_config_load(cfg);
+	if (mod->ischecked) {
+		*(mod->ischecked) = cfg.get<bool>(togglename).value_or(false);
+		mod->on_config_load(cfg);
+	}
     // and then probably call the rest of the stuff here;
   }
 }
