@@ -128,9 +128,26 @@ std::optional<std::string> TauntSelector::on_initialize() {
 }
 
 // during load
-void TauntSelector::on_config_load(const utility::Config &cfg) {}
+void TauntSelector::on_config_load(const utility::Config &cfg) {
+    for (int i = 0; i < 6; i++) {
+        TauntSelector::vergiltaunts[i] = cfg.get<int>("vergiltaunts_" + std::to_string(i)).value_or(0);
+        //this seems really dumb actually
+        for (std::map<std::string, uint32_t>::iterator it = vergiltauntmap.begin(); it != vergiltauntmap.end(); ++it) {
+            if (TauntSelector::vergiltaunts[i] == it->second) {
+                vergiltauntstrings[i] = it->first;
+            }
+        }
+    }
+    
+}
 // during save
-void TauntSelector::on_config_save(utility::Config &cfg) {}
+void TauntSelector::on_config_save(utility::Config &cfg) {
+    for (int i = 0; i < 6; i++) {
+        cfg.set<int>("vergiltaunts_" + std::to_string(i), TauntSelector::vergiltaunts[i]);
+        //cfg.set<const std::string&>("vergiltauntstrings_" + std::to_string(i), vergiltauntstrings[i]);
+    }
+    
+}
 // do something every frame
 void TauntSelector::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
