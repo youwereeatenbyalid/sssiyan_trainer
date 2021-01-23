@@ -29,7 +29,7 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   ischecked                  = &BufferedReversals::cheaton;
   onpage                     = gamepage;
   full_name_string           = "Buffered Reversals";
-  author_string              = "SSSiyan";
+  author_string              = "Nekupaska, socks";
   description_string		 = "Allows you to use directional moves in any direction. "
 							   "During the recovery of a move, buffer a directional attack, then "
 							   "push the stick in a new direction and let go of lock on before the "

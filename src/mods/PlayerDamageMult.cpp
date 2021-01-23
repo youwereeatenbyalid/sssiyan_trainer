@@ -62,7 +62,7 @@ std::optional<std::string> PlayerDamageMult::on_initialize() {
   ischecked          = &PlayerDamageMult::cheaton;
   onpage             = gamepage;
   full_name_string   = "Damage Multiplier (+)";
-  author_string      = "DanteSSS333";
+  author_string      = "Dante";
   description_string = "Adjust the damage output of players and enemies.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

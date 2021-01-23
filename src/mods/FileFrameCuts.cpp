@@ -7,7 +7,7 @@ bool dantefasterguard;
 bool dantefasterhatgatling;
 
 float danteguardgroundstartlength = 1.0f;
-float danteairguardstartlength    = 3.0f;
+float danteairguardstartlength    = 5.0f;
 float dantegatlingstartlength     = 1.0f;
 
 // clang-format off

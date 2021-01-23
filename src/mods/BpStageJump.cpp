@@ -28,9 +28,9 @@ static naked void detour() {
         mov [rbx+68h], eax
         mov rax, [rdi+50h]
         pop rax
-        // cmp byte ptr [retrystage], 1
-        // je retcode
-        // mov byte ptr [BpStageJump::cheaton], 00
+        cmp byte ptr [retrystage], 1
+        je retcode
+        mov byte ptr [BpStageJump::cheaton], 00
         jmp retcode
 
     bossrushstart:
@@ -108,15 +108,15 @@ std::optional<std::string> BpStageJump::on_initialize() {
 
 void BpStageJump::on_config_load(const utility::Config& cfg) {
   bossrush   = cfg.get<bool>("bp_jump_boss_rush").value_or(false);
-  // retrystage = cfg.get<bool>("bp_jump_retry_stage").value_or(false);
+  retrystage = cfg.get<bool>("bp_jump_retry_stage").value_or(false);
 }
 void BpStageJump::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("bp_jump_boss_rush", bossrush);
-  // cfg.set<bool>("bp_jump_retry_stage", retrystage);
+  cfg.set<bool>("bp_jump_retry_stage", retrystage);
 }
 
 void BpStageJump::on_draw_ui() {
     ImGui::Checkbox("Boss Rush", &bossrush);
-    // ImGui::Checkbox("Retry Stage", &retrystage);
+    ImGui::Checkbox("Retry Stage", &retrystage);
     ImGui::SliderInt("BP Stage", &bpstage, 1, 101);
 }

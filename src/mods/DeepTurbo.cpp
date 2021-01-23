@@ -2,11 +2,11 @@
 
 uintptr_t DeepTurbo::jmp_ret1{NULL};
 uintptr_t DeepTurbo::jmp_ret2{NULL};
-bool DeepTurbo::cheaton{NULL};
+
 float defscale   = 1.0;
 float turbospeed = 1.2;
 int state        = 0;
-
+bool DeepTurbo::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
