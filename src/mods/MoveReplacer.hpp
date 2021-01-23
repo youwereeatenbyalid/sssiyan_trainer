@@ -8,11 +8,11 @@ public:
   std::string_view get_name() const override { return "MoveReplacer"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  uintptr_t static cheaton;
-  uintptr_t static filtercall;
-  uintptr_t static startmovecall;
-  uintptr_t static endmovecall;
+  static uintptr_t jmp_ret;
+  static bool cheaton;
+  static uintptr_t filtercall;
+  static uintptr_t startmovecall;
+  static uintptr_t endmovecall;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

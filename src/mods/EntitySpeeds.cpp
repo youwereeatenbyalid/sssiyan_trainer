@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};
-uintptr_t EntitySpeeds::cheaton{NULL};
+bool EntitySpeeds::cheaton{NULL};
 bool dantemillionstabspeedup;
 bool nerosnatchspeedup;
 
@@ -16,10 +16,7 @@ float nerosnatchpullspeed        = 2.0f;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [EntitySpeeds::cheaton]
-        cmp byte ptr [rax],1
-        pop rax
+        cmp byte ptr [EntitySpeeds::cheaton],1
         jne code
         jmp playercheck
 
@@ -110,12 +107,11 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> EntitySpeeds::on_initialize() {
-  ischecked          = false;
+  ischecked          = &EntitySpeeds::cheaton;
   onpage             = gamepage;
   full_name_string   = "Entity Speeds (+)";
   author_string      = "SSSiyan";
   description_string = "Adjust the speed of various moves.";
-  EntitySpeeds::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 11 41 4C 48 8B 5C");

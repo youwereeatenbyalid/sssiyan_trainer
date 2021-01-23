@@ -359,7 +359,7 @@ public:
     virtual void on_frame() {};
     virtual void on_draw_ui() {};
 	virtual void on_draw_debug_ui() {};
-    bool ischecked;
+    bool* ischecked;
     int onpage =-1;
     ModKey modkeytoggle = ModKey("hotkey_on");
     std::string full_name_string = "Mod Name";

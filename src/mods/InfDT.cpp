@@ -1,7 +1,7 @@
 #include "InfDT.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t InfDT::jmp_ret{NULL};
-uintptr_t InfDT::cheaton{NULL};
+bool InfDT::cheaton{NULL};
 
 float desireddt = 10000.0;
 
@@ -10,10 +10,7 @@ float desireddt = 10000.0;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [InfDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [InfDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -30,12 +27,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> InfDT::on_initialize() {
-  ischecked          = false;
+  ischecked          = &InfDT::cheaton;
   onpage             = gamepage;
+
   full_name_string   = "Infinite DT";
   author_string      = "SSSiyan";
   description_string = "Sets your DT bar to maximum.";
-  InfDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "F3 0F 5D 87 10 11 00 00");
   if (!addr) {

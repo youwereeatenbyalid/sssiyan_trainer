@@ -1,18 +1,14 @@
 #include "BufferedReversals.hpp"
 
 uintptr_t BufferedReversals::jmp_ret{NULL};
-uintptr_t BufferedReversals::cheaton{NULL};
+bool BufferedReversals::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-		push rax
-		mov rax, [BufferedReversals::cheaton]
-		cmp byte ptr [rax], 1
-		pop rax
-
+		cmp byte ptr [BufferedReversals::cheaton], 1
 		je cheatcode
 		jmp code
 
@@ -30,9 +26,8 @@ static naked void detour() {
 
 std::optional<std::string> BufferedReversals::on_initialize() {
   
-  ischecked            = false;
-  onpage               = gamepage;
-  BufferedReversals::cheaton = (uintptr_t)&ischecked;
+  ischecked                  = &BufferedReversals::cheaton;
+  onpage                     = gamepage;
   full_name_string           = "Buffered Reversals";
   author_string              = "SSSiyan";
   description_string		 = "Allows you to use directional moves in any direction. "

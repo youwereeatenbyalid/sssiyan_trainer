@@ -1,17 +1,14 @@
 #include "VergilNoTrickRestriction.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t VergilNoTrickRestriction::jmp_ret{NULL};
-uintptr_t VergilNoTrickRestriction::cheaton{NULL};
+bool VergilNoTrickRestriction::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [VergilNoTrickRestriction::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilNoTrickRestriction::cheaton], 1
         je cheatcode
         jmp code
 
@@ -29,12 +26,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
-  ischecked          = false;
+  ischecked          = &VergilNoTrickRestriction::cheaton;
   onpage             = vergilpage;
+
   full_name_string   = "No Trick Restriction";
   author_string      = "SSSiyan";
   description_string = "Allows you to trick during things like World of V startup.";
-  VergilNoTrickRestriction::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "80 B9 A8 00 00 00 00 0F");
   if (!addr) {

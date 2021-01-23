@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 
 uintptr_t HideHUD::jmp_ret{NULL};
-uintptr_t HideHUD::cheaton{NULL};
+bool HideHUD::cheaton{NULL};
 bool hideeverything;
 bool hidehp;
 bool hideorbs;
@@ -16,10 +16,7 @@ static naked void detour() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         // jne code
-        push rax
-        mov rax,[HideHUD::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [HideHUD::cheaton], 1
         je cheatcode
         jmp code
 
@@ -65,12 +62,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> HideHUD::on_initialize() {
-  ischecked               = false;
+  ischecked               = &HideHUD::cheaton  ;
   onpage                  = commonpage;
+
   full_name_string        = "Hide HUD (+)";
   author_string           = "SSSiyan";
   description_string      = "Disables elements of the Heads Up Display.";
-  HideHUD::cheaton        = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "89 83 C4 00 00 00 F3");
   if (!addr) {

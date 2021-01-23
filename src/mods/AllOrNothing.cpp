@@ -3,7 +3,7 @@
 #include "mods/HeavyDay.hpp"
 #include "mods/StyleRank.hpp"
 uintptr_t AllOrNothing::jmp_ret{NULL};
-uintptr_t AllOrNothing::cheaton{NULL};
+bool AllOrNothing::cheaton{NULL};
 uint32_t AllOrNothing::stylebar{NULL};
 bool noonetakesdamage;
 bool onehitkill;
@@ -29,10 +29,7 @@ static naked void detour() {
         cmp byte ptr [r8+0xF4], 1
         je allornothing
         //we pvp bois?
-        push rax
-        mov rax, [HeavyDay::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [HeavyDay::cheaton], 1
         jne originalcode
         //if networked enemy don't do damage
         cmp byte ptr [r8+0xF4], 3
@@ -50,10 +47,7 @@ static naked void detour() {
     cmp byte ptr [onehitkill], 1
     je alldamage
     //if we're not in combat, jump to the original code
-    push rax
-    mov rax, [AllOrNothing::cheaton]
-    cmp byte ptr [rax], 0
-    pop rax
+	cmp byte ptr [AllOrNothing::cheaton], 1
     je originalcode
     cmp byte ptr [PlayerTracker::incombat], 0
     je originalcode
@@ -87,12 +81,12 @@ static naked void detour() {
 
 std::optional<std::string> AllOrNothing::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
   onpage    = gamepage;
+  ischecked = &AllOrNothing::cheaton;
+
   full_name_string     = "Must Style / Damage Toggles (+)";
   author_string        = "The Hitchhiker";
   description_string   = "Disable damage altogether or when below a certain Style Rank.";
-  AllOrNothing::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
   if (!addr) {

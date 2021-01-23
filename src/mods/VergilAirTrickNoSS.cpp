@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t VergilAirTrickNoSS::jmp_ret{NULL};
 uintptr_t VergilAirTrickNoSS::jmp_je{NULL};
-uintptr_t VergilAirTrickNoSS::cheaton{NULL};
+bool VergilAirTrickNoSS::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,10 +12,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [VergilAirTrickNoSS::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilAirTrickNoSS::cheaton], 1
         je cheatcode
         jmp code
 
@@ -35,12 +32,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
-  ischecked            = false;
+  ischecked            = &VergilAirTrickNoSS::cheaton;
   onpage               = vergilpage;
+
   full_name_string     = "Disable Embedded Swords";
   author_string        = "VPZadov";
   description_string   = "Allows you to trick to enemies without using an embedded sword.";
-  VergilAirTrickNoSS::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
   if (!addr) {

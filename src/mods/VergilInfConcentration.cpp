@@ -2,7 +2,7 @@
 #include "VergilInfConcentration.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t VergilInfConcentration::jmp_ret{NULL};
-uintptr_t VergilInfConcentration::cheaton{NULL};
+bool VergilInfConcentration::cheaton{NULL};
 float maxconcentration = 300.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,10 +12,7 @@ static naked void detour() {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax, [VergilInfConcentration::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInfConcentration::cheaton], 1
         je cheatcode
         jmp code
 
@@ -33,12 +30,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilInfConcentration::on_initialize() {
-  ischecked            = false;
+  ischecked            = &VergilInfConcentration::cheaton;
   onpage               = vergilpage;
+
   full_name_string     = "Infinite Concentration";
   author_string        = "SSSiyan";
   description_string   = "Set Concentration meter to maximum.";
-  VergilInfConcentration::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 93 50 1B 00 00");
   if (!addr) {

@@ -228,7 +228,7 @@ void Mods::load_mods() const {
     spdlog::info("{:s}::on_config_load()", mod->get_name().data());
     std::string togglename = std::string{mod->get_name()};
     togglename.append("_on");
-    mod->ischecked = cfg.get<bool>(togglename).value_or(false);
+    *mod->ischecked = cfg.get<bool>(togglename).value_or(false);
     mod->on_config_load(cfg);
     // and then probably call the rest of the stuff here;
   }
@@ -255,7 +255,7 @@ void Mods::on_pagelist_ui(int page) const{
     checkboxname.append(std::string{mod->get_name()});
     hotkeyname.append(std::string{mod->get_name()});
     if (page == mod->onpage) {
-      ImGui::Checkbox(checkboxname.c_str(), &mod->ischecked);
+      ImGui::Checkbox(checkboxname.c_str(), mod->ischecked);
       ImGui::SameLine();
       if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
         focusedmod = mod->get_name();

@@ -7,7 +7,7 @@ uintptr_t LDK::capbypass_jmp_ret1{NULL};
 uintptr_t LDK::capbypass_jmp_ret2{NULL};
 uintptr_t LDK::capbypass_jmp_jnl{NULL};
 uintptr_t LDK::capbypass_jmp_jle{NULL};
-uintptr_t LDK::cheaton{NULL};
+bool LDK::cheaton{NULL};
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{20};
@@ -44,10 +44,7 @@ static naked void enemynumber_detour() {
 static naked void capbypass_detour1() {
 __asm {
 originalcode:
-    push rax
-    mov rax,[LDK::cheaton]
-    cmp byte ptr [rax], 1
-    pop rax
+    cmp byte ptr [LDK::cheaton], 1
 	je cheatcode
 	jmp code
 cheatcode:
@@ -67,10 +64,8 @@ ret_jmp:
 static naked void capbypass_detour2() {
   __asm {
 originalcode:
-    push rax
-    mov rax,[LDK::cheaton]
-    cmp byte ptr [rax], 1
-    pop rax
+
+    cmp byte ptr [LDK::cheaton], 1
 	je cheatcode
 	jmp code
 cheatcode:
@@ -88,12 +83,13 @@ ret_jmp:
   }
 }
 std::optional<std::string> LDK::on_initialize() {
-  ischecked            = false;
+  ischecked            = &LDK::cheaton;
   onpage               = commonpage;
+
   full_name_string     = "Legendary Dark Knights";
   author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta";
   description_string   = "Enables the Legendary Dark Knights Gamemode.";
-  LDK::cheaton         = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto enemynumber_addr = utility::scan(base, "8B 40 70 89 87 50 07 00 00");
   if (!enemynumber_addr) {

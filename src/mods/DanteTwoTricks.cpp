@@ -2,7 +2,7 @@
 #include "DanteTwoTricks.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t DanteTwoTricks::jmp_ret{NULL};
-uintptr_t DanteTwoTricks::cheaton{NULL};
+bool DanteTwoTricks::cheaton{NULL};
 
 
 // clang-format off
@@ -12,10 +12,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DanteTwoTricks::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteTwoTricks::cheaton], 1
         je cheatcode
         jmp code
 
@@ -32,12 +29,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteTwoTricks::on_initialize() {
-  ischecked          = false;
+  ischecked          = &DanteTwoTricks::cheaton;
   onpage             = dantepage;
+
   full_name_string   = "Always Get 2 Tricks";
   author_string      = "SSSiyan";
   description_string = "Allows non DT Dante to trick twice.";
-  DanteTwoTricks::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 BE 98 00 00 00 00 0F 95 C0 48 85 C9 75 9D 8B 4F 44");
   if (!addr) {

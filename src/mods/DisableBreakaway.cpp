@@ -3,7 +3,7 @@
 #include "mods/PlayerTracker.hpp"
 #include "mods/GameInput.hpp"
 uintptr_t DisableBreakaway::jmp_ret{NULL};
-uintptr_t DisableBreakaway::cheaton{NULL};
+bool DisableBreakaway::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -12,10 +12,7 @@ static naked void detour() {
 	    validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DisableBreakaway::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DisableBreakaway::cheaton], 1
         je cheatcode
         jmp code
      code:
@@ -41,12 +38,12 @@ static naked void detour() {
 
 std::optional<std::string> DisableBreakaway::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &DisableBreakaway::cheaton;
   onpage    = neropage;
+
   full_name_string     = "Disable Breakaway";
   author_string        = "Lidemi & The Hitchhiker";
   description_string   = "Disables the Breakaway animation.";
-  DisableBreakaway::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
   if (!addr) {

@@ -2,7 +2,7 @@
 #include "FreezeBPTimer.hpp"
 
 uintptr_t FreezeBPTimer::jmp_ret{NULL};
-uintptr_t FreezeBPTimer::cheaton{NULL};
+bool FreezeBPTimer::cheaton{NULL};
 bool freezebptimercheck;
 
 // clang-format off
@@ -10,10 +10,7 @@ bool freezebptimercheck;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [FreezeBPTimer::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [FreezeBPTimer::cheaton], 1
         je cheatcode
         jmp code
 
@@ -31,12 +28,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> FreezeBPTimer::on_initialize() {
-  ischecked            = false;
+  ischecked            = &FreezeBPTimer::cheaton;
   onpage               = commonpage;
+
   full_name_string     = "Freeze Bloody Palace Timer";
   author_string        = "SSSiyan";
   description_string   = "Freezes the timer in Bloody Palace.";
-  FreezeBPTimer::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
   if (!addr) {

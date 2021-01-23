@@ -2,7 +2,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t DanteInfIgnition::jmp_ret{NULL};
 uintptr_t DanteInfIgnition::jmp_ret2{NULL};
-uintptr_t DanteInfIgnition::cheaton{NULL};
+bool DanteInfIgnition::cheaton{NULL};
 
     // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -13,10 +13,7 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax, [DanteInfIgnition::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DanteInfIgnition::cheaton], 1
 
         je cheatcode
         jmp code
@@ -37,10 +34,7 @@ static naked void detour2() {
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax, [DanteInfIgnition::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DanteInfIgnition::cheaton], 1
 
         je cheatcode
         jmp code
@@ -59,12 +53,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> DanteInfIgnition::on_initialize() {
-  ischecked            = false;
+  ischecked            = &DanteInfIgnition::cheaton;
   onpage               = dantepage;
+
   full_name_string     = "Infinite Ignition";
   author_string        = "SSSiyan";
   description_string   = "Sets ignition to full when you switch modes.";
-  DanteInfIgnition::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F2 0F 5C C8 66 0F 5A D1 F3 0F 11 97 68 03 00 00 48 8B 43 50 48 39 68 18 0F 85 17");
   if (!addr) {

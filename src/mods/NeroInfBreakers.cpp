@@ -13,7 +13,7 @@ int breaker06;
 int breaker07;
 int breaker08;
 
-uintptr_t NeroInfBreakers::cheaton{NULL};
+bool NeroInfBreakers::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -22,10 +22,7 @@ static naked void detour1() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [NeroInfBreakers::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NeroInfBreakers::cheaton], 1
         je cheatcode
         jmp code
 
@@ -63,10 +60,7 @@ static naked void detour1() {
 static naked void detour2() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
-        push rax
-        mov rax, [NeroInfBreakers::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NeroInfBreakers::cheaton], 1
         je cheatcode
         jmp code
 
@@ -85,13 +79,14 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> NeroInfBreakers::on_initialize() {
-  ischecked          = false;
+  ischecked          = &NeroInfBreakers::cheaton;
   onpage             = neropage;
+
   full_name_string   = "Infinite Devil Breakers";
   author_string      = "DeepDarkKapustka";
   description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
                        "When using less than 8, this will bug and give you Overtures.";
-  NeroInfBreakers::cheaton = (uintptr_t)&ischecked;
+
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "FF 41 8B 44 12 04");
   if (!addr1) {

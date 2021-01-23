@@ -8,22 +8,22 @@ public:
   std::string_view get_name() const override { return "CameraSettings"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_retFoV;
-  uintptr_t static jmp_retHorizontalSensClockwise;
-  uintptr_t static jmp_retHorizontalSensAntiClockwise;
+  static uintptr_t jmp_retFoV;
+  static uintptr_t jmp_retHorizontalSensClockwise;
+  static uintptr_t jmp_retHorizontalSensAntiClockwise;
 
-  uintptr_t static jmp_retKeyboardHorizontalEnable;
-  uintptr_t static jmp_jeKeyboardHorizontalEnable;
+  static uintptr_t jmp_retKeyboardHorizontalEnable;
+  static uintptr_t jmp_jeKeyboardHorizontalEnable;
 
-  uintptr_t static jmp_retSiyansCamFix1;
-  uintptr_t static jmp_jneSiyansCamFix1;
+  static uintptr_t jmp_retSiyansCamFix1;
+  static uintptr_t jmp_jneSiyansCamFix1;
 
-  uintptr_t static jmp_retCloseAutoCorrect;
-  uintptr_t static jmp_jneCloseAutoCorrect;
+  static uintptr_t jmp_retCloseAutoCorrect;
+  static uintptr_t jmp_jneCloseAutoCorrect;
 
-  uintptr_t static jmp_retDistantAutoCorrect;
+  static uintptr_t jmp_retDistantAutoCorrect;
 
-  uintptr_t static cheaton;
+  static bool cheaton;
 
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;

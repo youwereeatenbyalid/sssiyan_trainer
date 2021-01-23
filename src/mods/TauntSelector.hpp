@@ -8,12 +8,12 @@ public:
   std::string_view get_name() const override { return "TauntSelector"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  uintptr_t static cheaton;
-  uint32_t static nerotaunts[6];
-  uint32_t static dantetaunts[6];
-  uint32_t static vtaunts[6];
-  uint32_t static vergiltaunts[6];
+  static uintptr_t jmp_ret;
+  static bool cheaton;
+  static uint32_t nerotaunts[6];
+  static uint32_t dantetaunts[6];
+  static uint32_t vtaunts[6];
+  static uint32_t vergiltaunts[6];
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

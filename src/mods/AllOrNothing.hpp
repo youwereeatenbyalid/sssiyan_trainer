@@ -8,9 +8,9 @@ public:
   std::string_view get_name() const override { return "AllOrNothing"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  uintptr_t static cheaton;
-  uint32_t static stylebar;
+  static uintptr_t jmp_ret;
+  static uint32_t stylebar;
+  static bool cheaton;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

@@ -1,7 +1,7 @@
 #include "VergilInfJdCs.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
-uintptr_t VergilInfJdCs::cheaton{NULL};
+bool VergilInfJdCs::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -10,10 +10,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        push rax
-        mov rax,[VergilInfJdCs::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInfJdCs::cheaton], 1
         je cheatcode
         jmp code
 
@@ -29,12 +26,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilInfJdCs::on_initialize() {
-  ischecked            = false;
+  ischecked            = &VergilInfJdCs::cheaton;
   onpage               = vergilpage;
+
   full_name_string     = "Infinite Just Judgement Cuts";
   author_string        = "SSSiyan";
   description_string   = "Remove the consecutive Just Judgement Cut limit.";
-  VergilInfJdCs::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF 87 E0 18 00 00");
   if (!addr) {

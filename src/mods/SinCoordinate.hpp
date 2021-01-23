@@ -7,8 +7,8 @@ public:
   // mod name string for config
   std::string_view get_name() const override { return "SinCoordinate"; }
   // called by m_mods->init() you'd want to override this
-  uintptr_t static jmp_ret;
-  float static directionsinvalue;
+  static uintptr_t jmp_ret;
+  static float directionsinvalue;
   std::optional<std::string> on_initialize() override;
 
   // Override this things if you want to store values in the config file

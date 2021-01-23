@@ -15,10 +15,7 @@ static naked void detour() {
         jmp code
 
     nerocode:
-        push rax
-        mov rax,[NeroSwapWiresnatch::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [NeroSwapWiresnatch::cheaton], 1
         je nerocheatcode
         jmp code
 

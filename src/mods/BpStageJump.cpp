@@ -4,7 +4,7 @@
 
 uintptr_t BpStageJump::jmp_ret{NULL};
 uintptr_t BpStageJump::jmp_jne{NULL};
-uintptr_t BpStageJump::cheaton{NULL};
+bool BpStageJump::cheaton{NULL};
 int bpstage = 1;
 bool bossrush;
 bool retrystage;
@@ -16,10 +16,7 @@ static naked void detour() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         // jne code
-        push rax
-        mov rax,[BpStageJump::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [BpStageJump::cheaton], 1
         je cheatcode
         jmp code
 
@@ -86,12 +83,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> BpStageJump::on_initialize() {
-  ischecked               = false;
+  ischecked               = &BpStageJump::cheaton;
   onpage                  = commonpage;
   full_name_string        = "Bp Stage Jump (+)";
   author_string           = "SSSiyan";
   description_string      = "Allows you to skip to a BP stage of your choosing.";
-  BpStageJump::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "38 4B 79 75 03");
   if (!addr) {

@@ -4,7 +4,7 @@
 uintptr_t DanteAlwaysOvertop::jmp_ret{NULL};
 uintptr_t DanteAlwaysOvertop::jmp_ret2{NULL};
 uintptr_t DanteAlwaysOvertop::jmp_ret3{NULL};
-uintptr_t DanteAlwaysOvertop::cheaton{NULL};
+bool DanteAlwaysOvertop::cheaton{NULL};
 
 
 // clang-format off
@@ -14,10 +14,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DanteAlwaysOvertop::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteAlwaysOvertop::cheaton], 1
         je cheatcode
         jmp code
 
@@ -34,10 +31,7 @@ static naked void detour2() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DanteAlwaysOvertop::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteAlwaysOvertop::cheaton], 1
         je cheatcode
         jmp code
 
@@ -54,10 +48,7 @@ static naked void detour3() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DanteAlwaysOvertop::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteAlwaysOvertop::cheaton], 1
         je cheatcode
         jmp code
 
@@ -74,12 +65,13 @@ static naked void detour3() {
 // clang-format on
 
 std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
-  ischecked          = false;
+  ischecked          = &DanteAlwaysOvertop::cheaton;
   onpage             = dantepage;
+
   full_name_string   = "Always Overtop";
   author_string      = "SSSiyan";
   description_string = "Forces Cavaliere to always use its highest gear.";
-  DanteAlwaysOvertop::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "89 B7 40 03 00 00 48 8B");
   if (!addr) {

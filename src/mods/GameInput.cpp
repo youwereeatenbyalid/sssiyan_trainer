@@ -10,7 +10,7 @@ uintptr_t GameInput::clearpress_jmp_ret{NULL};
 uintptr_t GameInput::release_jmp_ret{NULL};
 uintptr_t GameInput::releasewhenheld_jmp_ret{NULL};
 uintptr_t GameInput::clearrelease_jmp_ret{NULL};
-uintptr_t GameInput::cheaton{NULL};
+bool GameInput::cheaton{NULL};
 
 uintptr_t GameInput::validcontrols{NULL};
 uintptr_t GameInput::holdframes[20]{};
@@ -263,12 +263,11 @@ static naked void clearrelease_detour() {
 
 std::optional<std::string> GameInput::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &GameInput::cheaton;
   onpage    = -1;
   full_name_string     = "Game Input Hook";
   author_string        = "The HitchHiker";
   description_string   = "Hooks the virtual inputs.";
-  GameInput::cheaton   = (uintptr_t)&ischecked;
 
   auto validcontrol_addr    = utility::scan(base, "A1 01 00 00 48 8B 97 C0 00 00 00 48 8B CB 48 85 D2");
   auto hold_addr            = utility::scan(base, "44 85 82 98 00 00 00");

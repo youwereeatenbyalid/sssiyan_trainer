@@ -2,7 +2,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t NeroSwapSidesteps::jmp_ret{NULL};
 uintptr_t NeroSwapSidesteps::jmp_ret2{NULL};
-uintptr_t NeroSwapSidesteps::cheaton{NULL};
+bool NeroSwapSidesteps::cheaton{NULL};
 
 
 // clang-format off
@@ -12,10 +12,9 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax,[NeroSwapSidesteps::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+
+        cmp byte ptr [NeroSwapSidesteps::cheaton], 1
+
         je cheatcode
         jmp code
 
@@ -33,10 +32,9 @@ static naked void detour2() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax,[NeroSwapSidesteps::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+
+        cmp byte ptr [NeroSwapSidesteps::cheaton], 1
+
         je cheatcode
         jmp code
 
@@ -53,12 +51,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> NeroSwapSidesteps::on_initialize() {
-  ischecked            = false;
+  ischecked            = &NeroSwapSidesteps::cheaton;
   onpage               = neropage;
+
   full_name_string     = "Swap Sidesteps with Table Hopper";
   author_string        = "SSSiyan";
   description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
-  NeroSwapSidesteps::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C7 40 10 1F 08 00 00");
   if (!addr) {

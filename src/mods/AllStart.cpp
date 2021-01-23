@@ -1,7 +1,7 @@
 #include "AllStart.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t AllStart::jmp_ret{NULL};
-uintptr_t AllStart::cheaton{NULL};
+bool AllStart::cheaton{NULL};
 uintptr_t AllStart::jmp_initial{NULL};
 
 bool enemystepcancels;
@@ -11,10 +11,7 @@ bool enemystepcancels;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [AllStart::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [AllStart::cheaton], 1
         je cheatcode
         jmp code
 
@@ -82,12 +79,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> AllStart::on_initialize() {
-  ischecked          = false;
+  ischecked          = &AllStart::cheaton;
   onpage             = gamepage;
+
   full_name_string   = "AllStart";
   author_string      = "SSSiyan";
   description_string = "Allows you to cancel out of a selection of moves with any other move.";
-  AllStart::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "66 C7 47 5E 00 00");
   if (!addr) {

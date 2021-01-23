@@ -15,7 +15,7 @@ uintptr_t CameraSettings::jmp_jneCloseAutoCorrect;
 
 uintptr_t CameraSettings::jmp_retDistantAutoCorrect;
 
-uintptr_t CameraSettings::cheaton{NULL};
+bool CameraSettings::cheaton{NULL};
 
 float fov = 65.0;
 
@@ -32,10 +32,7 @@ bool distantautocorrectenable;
 
 static naked void detourFoV() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -51,10 +48,7 @@ static naked void detourFoV() {
 
 static naked void detourHorizontalSensClockwise() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -72,10 +66,8 @@ static naked void detourHorizontalSensClockwise() {
 
 static naked void detourHorizontalSensAntiClockwise() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -93,10 +85,7 @@ static naked void detourHorizontalSensAntiClockwise() {
 
 static naked void detourKeyboardHorizontalEnable() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -118,10 +107,7 @@ static naked void detourKeyboardHorizontalEnable() {
 
 static naked void detourSiyansCamFix1() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -142,10 +128,7 @@ static naked void detourSiyansCamFix1() {
 
 static naked void detourCloseAutoCorrect() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -166,10 +149,7 @@ static naked void detourCloseAutoCorrect() {
 
 static naked void detourDistantAutoCorrect() {
 	__asm {
-        push rax
-        mov rax, [CameraSettings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [CameraSettings::cheaton], 1
         je cheatcode
         jmp code
 
@@ -187,12 +167,13 @@ static naked void detourDistantAutoCorrect() {
 // clang-format on
 
 std::optional<std::string> CameraSettings::on_initialize() {
-  ischecked          = false;
+  ischecked          = &CameraSettings::cheaton;
   onpage             = commonpage;
+
   full_name_string   = "Camera Settings (+)";
   author_string      = "SSSiyan";
   description_string = "Change various camera settings.";
-  CameraSettings::cheaton = (uintptr_t)&ischecked;
+
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "F3 0F 10 57 30 48 8B D6");

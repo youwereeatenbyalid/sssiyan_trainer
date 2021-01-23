@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 
 uintptr_t DisableEnemyAI::jmp_ret{NULL};
-uintptr_t DisableEnemyAI::cheaton{NULL};
+bool DisableEnemyAI::cheaton{NULL};
 uintptr_t DisableEnemyAI::jmp_je{NULL};
 
     // clang-format off
@@ -13,10 +13,7 @@ static naked void detour() {
 	__asm {
         //cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         //jne code
-        push rax
-        mov rax,[DisableEnemyAI::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DisableEnemyAI::cheaton], 1
         je cheatcode
         jmp code
 
@@ -36,12 +33,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DisableEnemyAI::on_initialize() {
-  ischecked               = false;
+  ischecked               = &DisableEnemyAI::cheaton;
   onpage                  = gamepage;
+
   full_name_string        = "Disable Enemy AI";
   author_string           = "SSSiyan";
   description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
-  DisableEnemyAI::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 B8 9C 00 00 00 00 74 11");
   if (!addr) {

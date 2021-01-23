@@ -2,7 +2,7 @@
 #include "VergilDirectionalMappings.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t VergilDirectionalMappings::jmp_ret{NULL};
-uintptr_t VergilDirectionalMappings::cheaton{NULL};
+bool VergilDirectionalMappings::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -11,10 +11,7 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax, [VergilDirectionalMappings::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilDirectionalMappings::cheaton], 1
 
         je cheatcode
         jmp code
@@ -41,12 +38,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> VergilDirectionalMappings::on_initialize() {
+  ischecked            = &VergilDirectionalMappings::cheaton;
+  onpage               = vergilpage;
+  
   full_name_string     = "Down Trick on Back + Trick";
   author_string        = "The Hitchhiker";
   description_string   = "Down Trick input moved to Back + B / O.";
-  ischecked            = false;
-  onpage               = vergilpage;
-  VergilDirectionalMappings::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 57 10 48 85 C0 0F 84 67");

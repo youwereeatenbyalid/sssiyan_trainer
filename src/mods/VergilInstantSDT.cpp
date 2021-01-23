@@ -4,7 +4,7 @@
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
 uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 uintptr_t VergilInstantSDT::jmp_ret2{NULL};
-uintptr_t VergilInstantSDT::cheaton{NULL};
+bool VergilInstantSDT::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -13,10 +13,7 @@ static naked void detour1() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [VergilInstantSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -36,10 +33,7 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
-        push rax
-        mov rax, [VergilInstantSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -55,12 +49,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
-  ischecked            = false;
+  ischecked            = &VergilInstantSDT::cheaton;
   onpage               = vergilpage;
+
   full_name_string     = "Instant SDT";
   author_string        = "SSSiyan";
   description_string   = "Removes the need to hold the DT button to enter SDT.";
-  VergilInstantSDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
   if (!addr1) {

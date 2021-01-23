@@ -1,7 +1,7 @@
 #include "DanteMaxSDT.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t DanteMaxSDT::jmp_ret{NULL};
-uintptr_t DanteMaxSDT::cheaton{NULL};
+bool DanteMaxSDT::cheaton{NULL};
 
     // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,10 +12,7 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax, [DanteMaxSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DanteMaxSDT::cheaton], 1
 
         je cheatcode
         jmp code
@@ -34,12 +31,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteMaxSDT::on_initialize() {
-  ischecked            = false;
+  ischecked            = &DanteMaxSDT::cheaton;
   onpage               = dantepage;
+
   full_name_string     = "Infinite SDT";
   author_string        = "SSSiyan";
   description_string   = "Sets the SDT Bar to maximum.";
-  DanteMaxSDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
   if (!addr) {

@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t DanteAlwaysQ4SDT::jmp_ret{NULL};
 uintptr_t DanteAlwaysQ4SDT::jmp_jne{NULL};
-uintptr_t DanteAlwaysQ4SDT::cheaton{NULL};
+bool DanteAlwaysQ4SDT::cheaton{NULL};
 
 
 // clang-format off
@@ -13,10 +13,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [DanteAlwaysQ4SDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteAlwaysQ4SDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -36,12 +33,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
-  ischecked          = false;
+  ischecked          = &DanteAlwaysQ4SDT::cheaton;
   onpage             = dantepage;
+
   full_name_string   = "Always Quadruple S";
   author_string      = "SSSiyan";
   description_string = "Removes the style requirement for Quadruple S.";
-  DanteAlwaysQ4SDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "83 B8 B0 00 00 00 07");
   if (!addr) {

@@ -2,7 +2,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t NeroInfPunchline::jmp_ret{NULL};
 uintptr_t NeroInfPunchline::jmp_jnl{NULL};
-uintptr_t NeroInfPunchline::cheaton{NULL};
+bool NeroInfPunchline::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -11,10 +11,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax,[NeroInfPunchline::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NeroInfPunchline::cheaton], 1
         je cheatcode
         jmp code
 
@@ -34,12 +31,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> NeroInfPunchline::on_initialize() {
-  ischecked            = false;
+  ischecked            = &NeroInfPunchline::cheaton;
   onpage               = neropage;
+
   full_name_string     = "Infinite Punchline Duration";
   author_string        = "SSSiyan";
   description_string   = "Removes the ride timer on Punchline.";
-  NeroInfPunchline::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "83 B8 B0 00 00 00 05");
   if (!addr) {

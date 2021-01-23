@@ -8,8 +8,8 @@ public:
   std::string_view get_name() const override { return "DamageTypeLean"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  uint32_t static playermoveid;
+  static uintptr_t jmp_ret;
+  static uint32_t playermoveid;
 
   // Override this things if you want to store values in the config file
   // void on_config_load(const utility::Config& cfg) override;

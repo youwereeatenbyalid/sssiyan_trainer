@@ -2,7 +2,7 @@
 #include "DamageMultiplier.hpp"
 
 uintptr_t DamageMultiplier::jmp_ret{NULL};
-uintptr_t DamageMultiplier::cheaton{NULL};
+bool DamageMultiplier::cheaton{NULL};
 float DamageMultiplier::enemyhpvalue = 0.0f;
 
 // float playerdamagemultiplier         = 1.0f;
@@ -71,12 +71,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DamageMultiplier::on_initialize() {
-  ischecked             = false;
+  ischecked             = &DamageMultiplier::cheaton;
   onpage                = gamepage;
+
   full_name_string      = "Damage Multiplier (+)";
   author_string         = "SSSiyan";
   description_string    = "Allows you to adjust the damage output of players and enemies.";
-  DamageMultiplier::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C9 F3 0F 11 4F 10 48");

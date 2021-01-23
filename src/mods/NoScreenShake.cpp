@@ -2,16 +2,13 @@
 #include "NoScreenShake.hpp"
 
 uintptr_t NoScreenShake::jmp_ret{NULL};
-uintptr_t NoScreenShake::cheaton{NULL};
+bool NoScreenShake::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [NoScreenShake::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NoScreenShake::cheaton], 1
         je cheatcode
         jmp code
 
@@ -27,12 +24,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> NoScreenShake::on_initialize() {
-  ischecked            = false;
+  ischecked            = &NoScreenShake::cheaton;
   onpage               = commonpage;
+
   full_name_string     = "No Screen Shake";
   author_string        = "DeepDarkKapustka";
   description_string   = "Disables screen shake completely.";
-  NoScreenShake::cheaton = (uintptr_t)&ischecked;
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");

@@ -2,7 +2,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t BypassBPCav::jmp_ret{NULL};
 uintptr_t BypassBPCav::jmp_jb{NULL};
-uintptr_t BypassBPCav::cheaton{NULL};
+bool BypassBPCav::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -11,10 +11,8 @@ static naked void detour() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 1 // "dante" player isn't active when this is called
         // jne code
-        push rax
-        mov rax, [BypassBPCav::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [BypassBPCav::cheaton], 1
+
         je cheatcode
         jmp code
 
@@ -34,12 +32,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> BypassBPCav::on_initialize() {
-  ischecked          = false;
+  ischecked          = &BypassBPCav::cheaton;
   onpage             = dantepage;
+
   full_name_string   = "Bypass BP Cavaliere Restriction";
   author_string      = "SSSiyan";
   description_string = "Allows you to take Cavaliere R into Bloody Palace.";
-  BypassBPCav::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "C8 00 EB 44 3B 70 1C 72 11");
   if (!addr) {

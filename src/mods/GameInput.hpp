@@ -8,21 +8,21 @@ public:
   std::string_view get_name() const override { return "GameInput"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static validcontrol_jmp_ret;
-  uintptr_t static hold_jmp_ret;
-  uintptr_t static clearhold_jmp_ret;
-  uintptr_t static press_jmp_ret;
-  uintptr_t static clearpress_jmp_ret;
-  uintptr_t static release_jmp_ret;
-  uintptr_t static releasewhenheld_jmp_ret;
-  uintptr_t static clearrelease_jmp_ret;
-  uintptr_t static cheaton;
+  static uintptr_t validcontrol_jmp_ret;
+  static uintptr_t hold_jmp_ret;
+  static uintptr_t clearhold_jmp_ret;
+  static uintptr_t press_jmp_ret;
+  static uintptr_t clearpress_jmp_ret;
+  static uintptr_t release_jmp_ret;
+  static uintptr_t releasewhenheld_jmp_ret;
+  static uintptr_t clearrelease_jmp_ret;
+  static bool cheaton;
 
-  uintptr_t static validcontrols;
+  static uintptr_t validcontrols;
 
-  uintptr_t static holdframes[20];
-  uintptr_t static pressframes[20];
-  uintptr_t static releaseframes[20];
+  static uintptr_t holdframes[20];
+  static uintptr_t pressframes[20];
+  static uintptr_t releaseframes[20];
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

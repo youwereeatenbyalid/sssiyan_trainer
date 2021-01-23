@@ -2,7 +2,7 @@
 #include "mods/PlayerTracker.hpp"
 #include "mods/StyleRank.hpp"
 uintptr_t TauntSelector::jmp_ret{NULL};
-uintptr_t TauntSelector::cheaton{NULL};
+bool TauntSelector::cheaton{NULL};
 //Taunt order: Air, Lock-on, S-Rank Air, S-Rank Lockon, BP taunt, EX Taunt
 uint32_t TauntSelector::nerotaunts[6]{0,0,0,0,0,0};
 uint32_t TauntSelector::dantetaunts[6]{0,0,0,0,0,0};
@@ -17,10 +17,7 @@ std::string vergiltauntstrings[6] = {"Default", "Default", "Default",
 static naked void detour() {
 	__asm {
 	validation:
-        push rax
-        mov rax, [TauntSelector::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [TauntSelector::cheaton], 1
         jne code
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         je vergilcode
@@ -88,12 +85,12 @@ static naked void detour() {
 
 std::optional<std::string> TauntSelector::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &TauntSelector::cheaton;
   onpage    = commonpage;
+
   full_name_string     = "Taunt Selector";
   author_string        = "The Hitchhiker";
   description_string   = "Allows you to specify what taunts will be used by each character.";
-  TauntSelector::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "44 8B 47 10 41 0F 95 C1 4C");
   if (!addr) {

@@ -13,7 +13,7 @@ uintptr_t HeavyDay::dtenable_jmp_ret{NULL};
 uintptr_t HeavyDay::dtenable_ja_ret{NULL};
 uintptr_t HeavyDay::rgenable_jmp_ret{NULL};
 uintptr_t HeavyDay::rgmod_jmp_ret{NULL};
-uintptr_t HeavyDay::cheaton{NULL};
+bool HeavyDay::cheaton{NULL};
 
 
 float shadowJCradius = 2.0;
@@ -32,10 +32,7 @@ float rgmult = 10.0;
 static naked void enemystep_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
 
@@ -386,10 +383,7 @@ static naked void enemystep_detour() {
 static naked void lockon_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
 
@@ -449,10 +443,7 @@ static naked void lockon_detour() {
 static naked void targetswitch_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -466,10 +457,7 @@ static naked void targetswitch_detour() {
 static naked void damageall_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp originalcode
         cheatcode:
@@ -504,10 +492,7 @@ static naked void damageall_detour() {
 static naked void pvp1_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -520,10 +505,7 @@ static naked void pvp1_detour() {
 static naked void pvp2_detour() {
 	__asm {
         validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -549,10 +531,7 @@ static naked void pvp2_detour() {
 static naked void danteclientside_detour() {
 	__asm {
         validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -568,10 +547,7 @@ static naked void danteclientside_detour() {
 static naked void dtenable_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -587,10 +563,7 @@ static naked void dtenable_detour() {
 static naked void rgenable_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 0
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 0
             jne cheatcode
             jmp code
         code:
@@ -603,10 +576,7 @@ static naked void rgenable_detour() {
 static naked void rgmod_detour() {
 	__asm {
 	    validation:
-            push rax
-            mov rax, [HeavyDay::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [HeavyDay::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -624,13 +594,13 @@ static naked void rgmod_detour() {
 
 std::optional<std::string> HeavyDay::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &HeavyDay::cheaton;
   onpage    = commonpage;
+
   full_name_string     = "PVP";
   author_string        = "The HitchHiker, SSSiyan, Dr. Penguin";
   description_string   = "Enables PVP Combat between players."
       "All players must have the cheat enabled for the mod to work correctly.";
-  HeavyDay::cheaton = (uintptr_t)&ischecked;
 
   auto enemystep_addr = utility::scan(base, "85 C9 0F 84 AA 00 00 00 F3 0F 10 8B");
   auto lockon_addr = utility::scan(base, "39 82 08 01 00 00 0F");

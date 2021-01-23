@@ -7,7 +7,7 @@ uintptr_t NeroDisableWiresnatch::jmp_jne1{NULL};
 uintptr_t NeroDisableWiresnatch::jmp_ret2{NULL};
 uintptr_t NeroDisableWiresnatch::jmp_jne2{NULL};
 
-uintptr_t NeroDisableWiresnatch::cheaton{NULL};
+bool NeroDisableWiresnatch::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -16,10 +16,7 @@ static naked void detour1() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [NeroDisableWiresnatch::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NeroDisableWiresnatch::cheaton], 1
         je cheatcode
         jmp code
 
@@ -39,10 +36,8 @@ static naked void detour1() {
 static naked void detour2() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
-        push rax
-        mov rax, [NeroDisableWiresnatch::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+
+        cmp byte ptr [NeroDisableWiresnatch::cheaton], 1
         je cheatcode
         jmp code
 
@@ -62,12 +57,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
-  ischecked          = false;
+  ischecked          = &NeroDisableWiresnatch::cheaton;
   onpage             = neropage;
+
   full_name_string   = "Disable Wiresnatch";
   author_string      = "SSSiyan";
   description_string = "Disables Wiresnatch to allow breaker abilities while locked on.";
-  NeroDisableWiresnatch::cheaton = (uintptr_t)&ischecked;
+
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "80 BA D0 0E 00 00 00 75 21");
   if (!addr1) {

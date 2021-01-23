@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 
 uintptr_t JumpStart::jmp_ret{NULL};
-uintptr_t JumpStart::cheaton{NULL};
+bool JumpStart::cheaton{NULL};
 
 bool nerodtcancel;
 
@@ -12,10 +12,7 @@ bool nerodtcancel;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [JumpStart::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [JumpStart::cheaton], 1
         je cheatcode
         jmp code
 
@@ -55,12 +52,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> JumpStart::on_initialize() {
-  ischecked          = false;
+  ischecked          = &JumpStart::cheaton ;
   onpage             = gamepage;
+
   full_name_string   = "JumpStart";
   author_string      = "SSSiyan";
   description_string = "Allows you to cancel out of a selection of moves with any jump action.";
-  JumpStart::cheaton = (uintptr_t)&ischecked;
+
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   // auto addr  = AllStart::jmp_initial - 6;

@@ -8,19 +8,19 @@ public:
   std::string_view get_name() const override { return "HeavyDay"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static enemystep_jmp_ret;
-  uintptr_t static enemystep_je_ret;
-  uintptr_t static lockon_jmp_ret;
-  uintptr_t static targetswitch_jmp_ret;
-  uintptr_t static damageall_jmp_ret;
-  uintptr_t static pvp1_jmp_ret;
-  uintptr_t static pvp2_jmp_ret;
-  uintptr_t static danteclientside_jmp_ret;
-  uintptr_t static dtenable_jmp_ret;
-  uintptr_t static dtenable_ja_ret;
-  uintptr_t static rgenable_jmp_ret;
-  uintptr_t static rgmod_jmp_ret;
-  uintptr_t static cheaton;
+  static uintptr_t enemystep_jmp_ret;
+  static uintptr_t enemystep_je_ret;
+  static uintptr_t lockon_jmp_ret;
+  static uintptr_t targetswitch_jmp_ret;
+  static uintptr_t damageall_jmp_ret;
+  static uintptr_t pvp1_jmp_ret;
+  static uintptr_t pvp2_jmp_ret;
+  static uintptr_t danteclientside_jmp_ret;
+  static uintptr_t dtenable_jmp_ret;
+  static uintptr_t dtenable_ja_ret;
+  static uintptr_t rgenable_jmp_ret;
+  static uintptr_t rgmod_jmp_ret;
+  static bool cheaton;
 
   // Override this things if you want to store values in the config file
   //void on_config_load(const utility::Config& cfg) override;

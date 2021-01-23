@@ -8,13 +8,13 @@ public:
   std::string_view get_name() const override { return "BreakerSwitcher"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static breakersize_jmp_ret;
-  uintptr_t static nextbreaker_jmp_ret;
-  uintptr_t static breakerui_jmp_ret;
-  uintptr_t static cheaton;
+  static uintptr_t breakersize_jmp_ret;
+  static uintptr_t nextbreaker_jmp_ret;
+  static uintptr_t breakerui_jmp_ret;
+  static bool cheaton;
 
-  uint32_t static breakers[8];
-  uint32_t static nextbreaker;
+  static uint32_t breakers[8];
+  static uint32_t nextbreaker;
   void static breakerpress_detour(); 
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;

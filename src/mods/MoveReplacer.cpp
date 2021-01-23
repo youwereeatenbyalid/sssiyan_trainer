@@ -3,7 +3,7 @@
 #include "mods/PlayerTracker.hpp"
 #include "mods/Inertia.hpp"
 uintptr_t MoveReplacer::jmp_ret{NULL};
-uintptr_t MoveReplacer::cheaton{NULL};
+bool MoveReplacer::cheaton{NULL};
 uintptr_t MoveReplacer::filtercall{NULL};
 uintptr_t MoveReplacer::startmovecall{NULL};
 uintptr_t MoveReplacer::endmovecall{NULL};
@@ -125,10 +125,7 @@ static naked void detour() {
         jmp moveswaporiginalcode
     enemystep:
         //cmp [inertiatoggle], 1
-        push rax
-        mov rax, [Inertia::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [Inertia::cheaton], 1
         jne moveswaporiginalcode
 
         push rax
@@ -146,10 +143,8 @@ static naked void detour() {
 
         airhike:        
 
-        push rax
-        mov rax, [Inertia::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+
+        cmp byte ptr [Inertia::cheaton], 1
         jne moveswaporiginalcode
 
         push rax
@@ -210,12 +205,11 @@ static naked void detour() {
 
 std::optional<std::string> MoveReplacer::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &MoveReplacer::cheaton;
   onpage    = -1;
   full_name_string     = "MoveReplacer";
   author_string        = "The Hitchhiker";
   description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
-  MoveReplacer::cheaton = (uintptr_t)&ischecked;
 
   auto addr = utility::scan(base, "41 8B 1E 49 8B CD");
   auto filtercalladdr = utility::scan(base, "FE FE FF FF 48 83 C3 04 48 FF C7");

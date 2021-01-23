@@ -4,17 +4,14 @@
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
 uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};
-uintptr_t DisplayEnemyHPInOrbs::cheaton{NULL};
+bool DisplayEnemyHPInOrbs::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [DisplayEnemyHPInOrbs::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [DisplayEnemyHPInOrbs::cheaton], 1
         je healthcheck
         jmp code
 
@@ -38,12 +35,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
-  ischecked            = false;
+  ischecked            = &DisplayEnemyHPInOrbs::cheaton;
   onpage               = commonpage;
+
   full_name_string     = "Display Enemy HP in Orbs";
   author_string        = "SSSiyan";
-  description_string = "Displays the last hit enemy's HP in the orb counter on the top right.";
-  DisplayEnemyHPInOrbs::cheaton = (uintptr_t)&ischecked;
+  description_string   = "Displays the last hit enemy's HP in the orb counter on the top right.";
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");
   DisplayEnemyHPInOrbs::jmp_cont = utility::scan(base, "44 8B 05 D5 FC 9E 05").value();

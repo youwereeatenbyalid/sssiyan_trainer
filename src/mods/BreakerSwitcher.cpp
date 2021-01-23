@@ -3,7 +3,7 @@
 uintptr_t BreakerSwitcher::breakersize_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::nextbreaker_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::breakerui_jmp_ret{NULL};
-uintptr_t BreakerSwitcher::cheaton{NULL};
+bool BreakerSwitcher::cheaton{NULL};
 
 uint32_t BreakerSwitcher::breakers[8]{};
 uint32_t BreakerSwitcher::nextbreaker{3};
@@ -15,10 +15,7 @@ static naked void breakersize_detour() {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [BreakerSwitcher::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [BreakerSwitcher::cheaton],1
         je cheatcode
         jmp code
     code:
@@ -35,10 +32,7 @@ static naked void nextbreaker_detour() {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [BreakerSwitcher::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [BreakerSwitcher::cheaton], 1
         je cheatcode
         jmp code
     code:
@@ -57,10 +51,7 @@ static naked void breakerui_detour() {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [BreakerSwitcher::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [BreakerSwitcher::cheaton], 1
         je cheatcode
         jmp code
     code:
@@ -79,10 +70,7 @@ static naked void disablebreakaway_detour() {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [BreakerSwitcher::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [BreakerSwitcher::cheaton]
         je cheatcode
         jmp code
     code:
@@ -101,21 +89,20 @@ naked void BreakerSwitcher::breakerpress_detour() {
 	validation:
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [BreakerSwitcher::cheaton]
+        //push rax
+        //mov rax, [BreakerSwitcher::cheaton]
         //Why the fuck can this be called before it's properly initialized I hate this
-        test rax, rax
-        je validationexit
-        cmp byte ptr [rax], 1
-        pop rax
+        //test rax, rax
+        //je validationexit
+        cmp byte ptr [BreakerSwitcher::cheaton], 1
         je cheatcode
     
 
     code:
         ret    
-    validationexit:
-        pop rax
-        ret
+    //validationexit:
+    //    pop rax
+    //    ret
     cheatcode:
 		cmp esi, 0x100
         je upbreaker
@@ -195,12 +182,13 @@ naked void BreakerSwitcher::breakerpress_detour() {
 
 std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = false;
+  ischecked = &BreakerSwitcher::cheaton;
   onpage    = neropage;
+
   full_name_string     = "Breaker Switcher";
   author_string        = "The Hitchhiker (original version by Nino)";
   description_string   = "Press a button on the d-pad to switch breakers.";
-  BreakerSwitcher::cheaton = (uintptr_t)&ischecked;
+
 
   auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");

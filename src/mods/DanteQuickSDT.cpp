@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 
 uintptr_t DanteQuickSDT::jmp_ret{NULL};
-uintptr_t DanteQuickSDT::cheaton{NULL};
+bool DanteQuickSDT::cheaton{NULL};
 float sdtspeedup = 3.0f;
 
 // clang-format off
@@ -14,10 +14,8 @@ static naked void detour() {
         cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 
-        push rax
-        mov rax,[DanteQuickSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [DanteQuickSDT::cheaton], 1
+
         je cheatcode
         jmp code
 
@@ -35,12 +33,12 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> DanteQuickSDT::on_initialize() {
-  ischecked            = false;
+  ischecked            = &DanteQuickSDT::cheaton;
   onpage               = dantepage;
   full_name_string     = "Quick SDT";
   author_string        = "SSSiyan";
   description_string   = "Reduces the time you have to hold DT to enter SDT.";
-  DanteQuickSDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");
   if (!addr) {

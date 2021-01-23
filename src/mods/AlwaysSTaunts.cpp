@@ -3,7 +3,7 @@
 uintptr_t AlwaysSTaunts::jmp_ret{NULL};
 uintptr_t AlwaysSTaunts::jmp_ret2{NULL};
 uintptr_t AlwaysSTaunts::jmp_ret3{NULL};
-uintptr_t AlwaysSTaunts::cheaton{NULL};
+bool AlwaysSTaunts::cheaton{NULL};
 
 int lowstylerank  = 0;
 int highstylerank = 7;
@@ -14,10 +14,7 @@ bool sminus;
 
 static naked void detour() {
 	__asm {
-        push rax
-        mov rax, [AlwaysSTaunts::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [AlwaysSTaunts::cheaton], 1
         je cheatcode
         jmp code
 
@@ -33,10 +30,7 @@ static naked void detour() {
 
 static naked void detour2() {
 	__asm {
-        push rax
-        mov rax, [AlwaysSTaunts::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [AlwaysSTaunts::cheaton], 1
         je cheatcode
         jmp code
 
@@ -61,10 +55,7 @@ static naked void detour2() {
 
 static naked void detour3() {
 	__asm {
-        push rax
-        mov rax, [AlwaysSTaunts::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+		cmp byte ptr [AlwaysSTaunts::cheaton], 1
         je cheatcode
         jmp code
 
@@ -90,12 +81,13 @@ static naked void detour3() {
 // clang-format on
 
 std::optional<std::string> AlwaysSTaunts::on_initialize() {
-  ischecked          = false;
+  ischecked          = &AlwaysSTaunts::cheaton;
   onpage             = gamepage;
+
   full_name_string   = "Always S+ Taunts (+)";
   author_string      = "SSSiyan";
   description_string = "Restricts your taunts to those that play when at S rank or above.";
-  AlwaysSTaunts::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "8B 88 B0 00 00 00 48 8B 15");
   if (!addr) {

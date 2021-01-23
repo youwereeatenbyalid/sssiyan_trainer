@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t VergilInfSDT::jmp_ret1{NULL};
 uintptr_t VergilInfSDT::jmp_ret2{NULL};
-uintptr_t VergilInfSDT::cheaton{NULL};
+bool VergilInfSDT::cheaton{NULL};
 
 float desiredsdtvalue = 10000.0f;
 bool supersdepletesdt;
@@ -15,10 +15,7 @@ static naked void detour1() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [VergilInfSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInfSDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -39,10 +36,7 @@ static naked void detour2() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [VergilInfSDT::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [VergilInfSDT::cheaton], 1
         je cheatcode
         jmp code
 
@@ -58,12 +52,13 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> VergilInfSDT::on_initialize() {
-  ischecked            = false;
+  ischecked            = &VergilInfSDT::cheaton;
   onpage               = vergilpage;
+
   full_name_string     = "Infinite SDT";
   author_string        = "SSSiyan";
   description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
-  VergilInfSDT::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "F3 0F 10 8B 20 1B 00 00 8B");
   if (!addr1) {

@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t PlayerDamageMult::jmp_ret{NULL};
 uintptr_t PlayerDamageMult::jmp_ret2{NULL};
-uintptr_t PlayerDamageMult::cheaton{NULL};
+bool PlayerDamageMult::cheaton{NULL};
 
 float desireddamageoutput = 1.0f;
 float desireddamageinput  = 1.0f;
@@ -17,10 +17,7 @@ static naked void detour() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         // jne code
-        push rax
-        mov rax, [PlayerDamageMult::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [PlayerDamageMult::cheaton], 1
         je cheatcode
         jmp code
 
@@ -44,10 +41,7 @@ static naked void detour2() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
         // jne code
-        push rax
-        mov rax, [PlayerDamageMult::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [PlayerDamageMult::cheaton], 1
         je cheatcode
         jmp code
 
@@ -65,12 +59,12 @@ static naked void detour2() {
 // clang-format on
 
 std::optional<std::string> PlayerDamageMult::on_initialize() {
-  ischecked          = false;
+  ischecked          = &PlayerDamageMult::cheaton;
   onpage             = gamepage;
   full_name_string   = "Damage Multiplier (+)";
   author_string      = "DanteSSS333";
   description_string = "Adjust the damage output of players and enemies.";
-  PlayerDamageMult::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 5C 81 20");
   if (!addr) {

@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t NeroTomboyLockOn::jmp_ret{NULL};
 uintptr_t NeroTomboyLockOn::jmp_jne{NULL};
-uintptr_t NeroTomboyLockOn::cheaton{NULL};
+bool NeroTomboyLockOn::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,10 +12,7 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        push rax
-        mov rax, [NeroTomboyLockOn::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [NeroTomboyLockOn::cheaton], 1
         je cheatcode
         jmp code
 
@@ -37,12 +34,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> NeroTomboyLockOn::on_initialize() {
-  ischecked          = false;
+  ischecked          = &NeroTomboyLockOn::cheaton;
   onpage             = neropage;
+
   full_name_string   = "Lock On With Tomboy";
   author_string      = "SSSiyan";
   description_string        = "Allows you to lock on while using Tomboy.";
-  NeroTomboyLockOn::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "20 85 C9 75 15 48 8B D3");
   if (!addr) {

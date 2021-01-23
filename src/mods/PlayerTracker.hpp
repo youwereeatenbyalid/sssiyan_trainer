@@ -8,55 +8,55 @@ public:
   std::string_view get_name() const override { return "PlayerTracker"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static player_jmp_ret;
-  uintptr_t static summon_jmp_ret;
-  uintptr_t static summon_jmp_je;
-  uintptr_t static incombat_jmp_ret;
-  uintptr_t static sin_jmp_ret;
-  uintptr_t static cos_jmp_ret;
-  uintptr_t static threshhold_jmp_ret;
-  uintptr_t static threshhold_jmp_jb;
+  static uintptr_t player_jmp_ret;
+  static uintptr_t summon_jmp_ret;
+  static uintptr_t summon_jmp_je;
+  static uintptr_t incombat_jmp_ret;
+  static uintptr_t sin_jmp_ret;
+  static uintptr_t cos_jmp_ret;
+  static uintptr_t threshhold_jmp_ret;
+  static uintptr_t threshhold_jmp_jb;
 
-  uintptr_t static playerentity;
-  uint32_t static playerid;
-  uintptr_t static groundedmem;
-  uint32_t static isgrounded;
-  uintptr_t static playertransform;
-  uint32_t static playermoveid;
+  static uintptr_t playerentity;
+  static uint32_t playerid;
+  static uintptr_t groundedmem;
+  static uint32_t isgrounded;
+  static uintptr_t playertransform;
+  static uint32_t playermoveid;
 
-  uintptr_t static playerinertiax;
-  uintptr_t static playerinertiay;
-  uintptr_t static playerinertiaz;
+  static uintptr_t playerinertiax;
+  static uintptr_t playerinertiay;
+  static uintptr_t playerinertiaz;
 
-  uintptr_t static neroentity;
-  uintptr_t static nerotransform;
+  static uintptr_t neroentity;
+  static uintptr_t nerotransform;
   
-  uintptr_t static danteentity;
-  uintptr_t static dantetransform;
-  uintptr_t static danteweapon;
+  static uintptr_t danteentity;
+  static uintptr_t dantetransform;
+  static uintptr_t danteweapon;
   
-  uintptr_t static ventity;
-  uintptr_t static vtransform;
+  static uintptr_t ventity;
+  static uintptr_t vtransform;
   
-  uintptr_t static shadowcontroller;
-  uintptr_t static shadowentity;
-  uintptr_t static shadowtransform;
+  static uintptr_t shadowcontroller;
+  static uintptr_t shadowentity;
+  static uintptr_t shadowtransform;
 
-  uintptr_t static griffoncontroller;
-  uintptr_t static griffonentity;
-  uintptr_t static griffontransform;
+  static uintptr_t griffoncontroller;
+  static uintptr_t griffonentity;
+  static uintptr_t griffontransform;
 
-  uintptr_t static nightmarecontroller;
-  uintptr_t static nightmareentity;
-  uintptr_t static nightmaretransform;
+  static uintptr_t nightmarecontroller;
+  static uintptr_t nightmareentity;
+  static uintptr_t nightmaretransform;
 
-  uintptr_t static vergilentity;
-  uintptr_t static vergiltransform;
+  static uintptr_t vergilentity;
+  static uintptr_t vergiltransform;
   
-  uint32_t static incombat;
+  static uint32_t incombat;
   
-  float static sinvalue;
-  float static cosvalue;
+  static float sinvalue;
+  static float cosvalue;
   bool static redirect;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;

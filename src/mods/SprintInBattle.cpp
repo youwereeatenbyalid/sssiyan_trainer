@@ -3,7 +3,7 @@
 #include "PlayerTracker.hpp"
 uintptr_t SprintInBattle::jmp_ret{NULL};
 uintptr_t SprintInBattle::jmp_jne{NULL};
-uintptr_t SprintInBattle::cheaton{NULL};
+bool SprintInBattle::cheaton{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,10 +12,7 @@ static naked void detour() {
 	__asm {
         // cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
         // jne code
-        push rax
-        mov rax, [SprintInBattle::cheaton]
-        cmp byte ptr [rax], 1
-        pop rax
+        cmp byte ptr [SprintInBattle::cheaton], 1
         je cheatcode
         jmp code
 
@@ -36,12 +33,13 @@ static naked void detour() {
 // clang-format on
 
 std::optional<std::string> SprintInBattle::on_initialize() {
-  ischecked          = false;
+  ischecked          = &SprintInBattle::cheaton;
   onpage             = gamepage;
+
   full_name_string   = "Sprint In Battle";
   author_string      = "SSSiyan";
   description_string = "Allows you to Sprint in battle.";
-  SprintInBattle::cheaton = (uintptr_t)&ischecked;
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 BA CA 0E 00 00 00 0F 85 1E");
   if (!addr) {
