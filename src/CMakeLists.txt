@@ -13,8 +13,8 @@ set(MODS_SRC
     mods/SinCoordinate.cpp 
     mods/CosCoordinate.hpp 
     mods/CosCoordinate.cpp 
-    mods/EnemyNumber.hpp 
-    mods/EnemyNumber.cpp 
+    mods/LDK.hpp 
+    mods/LDK.cpp 
     mods/DeepTurbo.hpp 
     mods/DeepTurbo.cpp 
     mods/BufferedReversals.hpp 
@@ -113,7 +113,8 @@ set(MODS_SRC
     mods/NeroNoDTCooldown.cpp 
     mods/PlayerDamageMult.hpp 
     mods/PlayerDamageMult.cpp 
-
+    mods/TauntSelector.hpp 
+    mods/TauntSelector.cpp 
 )
 
 set(HOOKS_SRC

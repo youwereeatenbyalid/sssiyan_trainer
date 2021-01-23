@@ -3,20 +3,17 @@
 #include "Mods.hpp"
 // Example
          #include "mods/SimpleMod.hpp"
-
 // Hitch
     // Background
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
-        //#include "mods/SinCoordinate.hpp"
-        //#include "mods/CosCoordinate.hpp"
-        
         #include "mods/GameInput.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
         #include "mods/Inertia.hpp"
         #include "mods/LDK.hpp"
+        #include "mods/TauntSelector.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
     // Nero
@@ -89,12 +86,14 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
-        m_mods.emplace_back(std::make_unique<LDK>());
+        
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
         m_mods.emplace_back(std::make_unique<Inertia>());
+        m_mods.emplace_back(std::make_unique<LDK>());
+        m_mods.emplace_back(std::make_unique<TauntSelector>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero
