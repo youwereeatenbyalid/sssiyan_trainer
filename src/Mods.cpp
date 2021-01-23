@@ -208,7 +208,11 @@ void Mods::save_mods() const {
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
         std::string togglename = std::string{mod->get_name()};
         togglename.append("_on");
-        cfg.set<bool>(togglename, mod->ischecked);
+        if(mod->ischecked){
+        cfg.set<bool>(togglename, *mod->ischecked);
+        }else{
+            cfg.set<bool>(togglename, false);
+        }
         mod->on_config_save(cfg);
         //and then probably call the rest of the stuff here;
     }
