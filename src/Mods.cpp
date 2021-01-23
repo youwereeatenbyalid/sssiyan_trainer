@@ -76,6 +76,7 @@
         #include "mods/VergilInstantSDT.hpp"
         #include "mods/VergilInfConcentration.hpp"
         #include "mods/VergilNoTrickRestriction.hpp"
+        #include "mods/VergilTrickUpLockedOn.hpp"
 Mods::Mods()
 {
 // Example
@@ -157,6 +158,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
         m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
         m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
+        m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
