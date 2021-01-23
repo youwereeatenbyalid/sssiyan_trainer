@@ -47,7 +47,7 @@ static naked void detour() {
     cmp byte ptr [onehitkill], 1
     je alldamage
     //if we're not in combat, jump to the original code
-	cmp byte ptr [AllOrNothing::cheaton], 1
+	cmp byte ptr [AllOrNothing::cheaton], 0
     je originalcode
     cmp byte ptr [PlayerTracker::incombat], 0
     je originalcode
