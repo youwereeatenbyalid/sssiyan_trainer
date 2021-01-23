@@ -7,13 +7,14 @@ float defscale   = 1.0;
 float turbospeed = 1.2;
 int state        = 0;
 bool DeepTurbo::cheaton{NULL};
+
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour1() {
 	__asm {
         mov [rsi+68h], eax
-        mov [state], rax
+        mov [state], eax
         mov [rsi+6Ch], r13d
 		jmp qword ptr [DeepTurbo::jmp_ret1]
 	}

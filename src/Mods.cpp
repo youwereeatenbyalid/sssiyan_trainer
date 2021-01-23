@@ -66,6 +66,7 @@
         #include "mods/DanteTwoTricks.hpp"
         #include "mods/DanteAlwaysOvertop.hpp"
         #include "mods/DanteInfIgnition.hpp"
+        #include "mods/DanteGuardflyWip.hpp"
     // V
     // Vergil
         #include "mods/VergilAirTrickNoSS.hpp"
@@ -121,7 +122,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
-        m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
@@ -146,6 +147,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
         m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
         m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
+        m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());

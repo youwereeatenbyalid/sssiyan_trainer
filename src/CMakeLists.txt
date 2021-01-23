@@ -115,6 +115,9 @@ set(MODS_SRC
     mods/PlayerDamageMult.cpp 
     mods/TauntSelector.hpp 
     mods/TauntSelector.cpp 
+    mods/DanteGuardflyWip.hpp 
+    mods/DanteGuardflyWip.cpp 
+
 )
 
 set(HOOKS_SRC
