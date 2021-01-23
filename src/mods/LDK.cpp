@@ -7,11 +7,20 @@ uintptr_t LDK::capbypass_jmp_ret1{NULL};
 uintptr_t LDK::capbypass_jmp_ret2{NULL};
 uintptr_t LDK::capbypass_jmp_jnl{NULL};
 uintptr_t LDK::capbypass_jmp_jle{NULL};
+uintptr_t LDK::gethpoflasthitobject_jmp_ret{NULL};
+uintptr_t LDK::multipledeathoptimize_jmp_ret{NULL};
+uintptr_t LDK::multipledeathoptimize_jmp_jle{NULL};
+uintptr_t LDK::canlasthitkill_jmp_ret{NULL};
+uintptr_t LDK::nopfunction_jmp_ret1{NULL};
+uintptr_t LDK::nopfunction_jmp_ret2{NULL};
 bool LDK::cheaton{NULL};
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{20};
 uint32_t LDK::limittype{0};
+bool canhitkill = true;
+float hpoflasthitobj = 0.0;
+float 
 static naked void enemynumber_detour() {
 	__asm {
 		originalcode:
@@ -81,6 +90,28 @@ ret_jle:
 ret_jmp:
 	jmp qword ptr [LDK::capbypass_jmp_ret2]
   }
+}
+
+static naked void gethpoflasthitobject() {
+	__asm {
+	originalcode:
+
+		cmp byte ptr[LDK::cheaton], 1
+			je cheatcode
+			jmp code
+			cheatcode :
+		cmp byte ptr[LDK::limittype], 2
+			je ret_jle
+			jmp ret_jmp
+			code :
+		cmp r14d, eax
+			jle ret_jle
+			jmp ret_jmp
+			ret_jle :
+		jmp qword ptr[LDK::capbypass_jmp_jle]
+			ret_jmp :
+			jmp qword ptr[LDK::capbypass_jmp_ret2]
+	}
 }
 std::optional<std::string> LDK::on_initialize() {
   ischecked            = &LDK::cheaton;
