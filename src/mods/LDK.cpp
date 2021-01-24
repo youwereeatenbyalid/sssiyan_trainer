@@ -106,10 +106,19 @@ static naked void multipledeathoptimize_detour() {
 		push rsi
 		mov rsi, [rsi+0x98]
 		cmp [PlayerTracker::playerentity], rsi
+		je friendlydeath
+		cmp[PlayerTracker::shadowentity], rsi
+		je friendlydeath
+		cmp[PlayerTracker::griffonentity], rsi
+		je friendlydeath
 		pop rsi
-
-		je originalcode
 		cmp byte ptr [LDK::cheaton], 0
+		je originalcode
+
+		cmp byte ptr [LDK::cheaton], 0
+		je originalcode
+
+		cmp dword ptr [LDK::limittype], 0
 		je originalcode
 
 		cmp [LDK::hpoflasthitobj], 0.0
@@ -120,7 +129,9 @@ static naked void multipledeathoptimize_detour() {
 		cmp [canhitkill], 1
 		je physicsdisable
 		jmp originalcode
-
+	
+	friendlydeath:
+		pop rsi
 
 	originalcode:
 		mov rcx, [rbx+0x50]
