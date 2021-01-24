@@ -19,7 +19,7 @@ uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{20};
 uint32_t LDK::limittype{0};
 bool canhitkill = true;
-float hpoflasthitobj = 0.0;
+float LDK::hpoflasthitobj = 0.0f;
 
 static naked void enemynumber_detour() {
 	__asm {
@@ -94,7 +94,7 @@ ret_jmp:
 
 static naked void gethpoflasthitobject_detour() {
 	__asm {
-		movss [hpoflasthitobj], xmm1
+		movss [LDK::hpoflasthitobj], xmm1
 		movss [rdi+0x10], xmm1
 		mov [canhitkill], 1
 		jmp qword ptr[LDK::gethpoflasthitobject_jmp_ret]
@@ -112,7 +112,7 @@ static naked void multipledeathoptimize_detour() {
 		cmp byte ptr [LDK::cheaton], 0
 		je originalcode
 
-		cmp [hpoflasthitobj], 0.0
+		cmp [LDK::hpoflasthitobj], 0.0
 		jle checklasthit
 		jmp originalcode
 
@@ -148,7 +148,7 @@ static naked void nopfunction_detour1() {
 
 static naked void nopfunction_detour2() {
 	__asm {
-		mov rbx, [rsp+0x30]
+		mov r9, [rax-0x10]
 		jmp qword ptr[LDK::nopfunction_jmp_ret2]
 	}
 }
@@ -191,7 +191,7 @@ std::optional<std::string> LDK::on_initialize() {
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }
-  auto nopfunction_addr2 = utility::scan(base, "41 FF 51 58 48 8B 5C 24 30");
+  auto nopfunction_addr2 = utility::scan(base, "4C 8B 48 F0 41 FF 51 58 48 8B 5C");
   if (!nopfunction_addr2) {
 	  return "Unable to find nop function 2 pattern.";
   }
@@ -243,7 +243,7 @@ std::optional<std::string> LDK::on_initialize() {
 	  return "Failed to initialize Cap bypass 1";
   }
   if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2,
-	  &nopfunction_detour2, &nopfunction_jmp_ret2, 9)) {
+	  &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cap bypass 2";

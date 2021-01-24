@@ -1,6 +1,6 @@
 
 #include "DisplayEnemyHPInOrbs.hpp"
-#include "DamageMultiplier.hpp"
+#include "LDK.hpp"
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
 uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};
@@ -16,14 +16,14 @@ static naked void detour() {
         jmp code
 
     healthcheck:
-        cmp dword ptr [DamageMultiplier::enemyhpvalue], 80000000h // write default orbs if enemy hp is less than 0
+        cmp dword ptr [LDK::hpoflasthitobj], 80000000h // write default orbs if enemy hp is less than 0
         ja code
-        cmp dword ptr [DamageMultiplier::enemyhpvalue], 00000000h // write default orbs if enemy hp is equal to 0
+        cmp dword ptr [LDK::hpoflasthitobj], 00000000h // write default orbs if enemy hp is equal to 0
         je code
         jmp cheatcode
 
     cheatcode:
-        CVTTSS2SI ebp, [DamageMultiplier::enemyhpvalue]
+        CVTTSS2SI ebp, [LDK::hpoflasthitobj]
         jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
 
         code:

@@ -27,6 +27,8 @@ public:
   static uint32_t softlimit;
   static uint32_t limittype;
 
+  static float hpoflasthitobj;
+
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
