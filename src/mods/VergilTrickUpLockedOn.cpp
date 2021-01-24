@@ -48,6 +48,8 @@ static naked void detour1() { // Disable Trick To
 
 static naked void detour2() { // Enable Trick Up While Locked On
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4
+        jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
         jmp code
@@ -74,9 +76,12 @@ static naked void detour2() { // Enable Trick Up While Locked On
 
 static naked void detour3() { // Disable Directional Dodges
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4
+        jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
         jmp code
+
     cheatcode:
         comiss xmm0, [leftstickthreshold]
         ja cheatcode2
