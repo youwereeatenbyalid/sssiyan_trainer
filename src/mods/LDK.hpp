@@ -19,6 +19,7 @@ public:
   static uintptr_t canlasthitkill_jmp_ret;
   static uintptr_t nopfunction_jmp_ret1;
   static uintptr_t nopfunction_jmp_ret2;
+  static uintptr_t nopfunction_1_call;
 
   static bool cheaton;
 

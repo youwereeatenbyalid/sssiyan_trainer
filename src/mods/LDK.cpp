@@ -13,6 +13,8 @@ uintptr_t LDK::multipledeathoptimize_jmp_jle{NULL};
 uintptr_t LDK::canlasthitkill_jmp_ret{NULL};
 uintptr_t LDK::nopfunction_jmp_ret1{NULL};
 uintptr_t LDK::nopfunction_jmp_ret2{NULL};
+uintptr_t LDK::nopfunction_1_call{NULL};
+
 bool LDK::cheaton{NULL};
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
@@ -95,7 +97,7 @@ ret_jmp:
 static naked void gethpoflasthitobject_detour() {
 	__asm {
 		movss [LDK::hpoflasthitobj], xmm1
-		movss [rdi+0x10], xmm1
+		movss [rdi+0x10], xmm1 // originalcode
 		mov [canhitkill], 1
 		jmp qword ptr[LDK::gethpoflasthitobject_jmp_ret]
 	}
@@ -146,21 +148,37 @@ static naked void multipledeathoptimize_detour() {
 static naked void canlasthitkill_detour() {
 	__asm {
 		mov [canhitkill], 0
-		mov dword ptr [rdi+0x10], 0x3F800000
+		mov dword ptr [rdi+0x10], 0x3F800000 // originalcode
 		jmp qword ptr[LDK::canlasthitkill_jmp_ret]
 	}
 }
 
 static naked void nopfunction_detour1() {
 	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		je cheatcode
+
+		call [LDK::nopfunction_1_call]		// call DevilMayCry5.exe+59EE90
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+	cheatcode:
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 	}
 }
 
 static naked void nopfunction_detour2() {
 	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		je cheatcode
+
+		mov r9, [rax-0x10]
+		call qword ptr [r9+0x58]
+		jmp qword ptr[LDK::nopfunction_jmp_ret2]
+
+	cheatcode:
 		mov r9, [rax-0x10]
 		jmp qword ptr[LDK::nopfunction_jmp_ret2]
+
 	}
 }
 
@@ -206,24 +224,27 @@ std::optional<std::string> LDK::on_initialize() {
   if (!nopfunction_addr2) {
 	  return "Unable to find nop function 2 pattern.";
   }
+  auto nopfunction_1_call = utility::scan(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
+  if (!nopfunction_1_call) {
+	  return "Unable to find nop function call pattern.";
+  }
+  LDK::nopfunction_1_call = nopfunction_1_call.value();
+
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
   LDK::capbypass_jmp_jle = capbypass_addr2.value() + 0x57;
   LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
 
-  if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour,
-                             &enemynumber_jmp_ret, 9)) {
+  if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Enemy Number";
   }
-  if (!install_hook_absolute(capbypass_addr1.value(), m_capbypass_hook1,
-                             &capbypass_detour1, &capbypass_jmp_ret1, 5)) {
+  if (!install_hook_absolute(capbypass_addr1.value(), m_capbypass_hook1, &capbypass_detour1, &capbypass_jmp_ret1, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cap bypass 1";
   }
-  if (!install_hook_absolute(capbypass_addr2.value(), m_capbypass_hook2,
-                             &capbypass_detour2, &capbypass_jmp_ret2, 5)) {
+  if (!install_hook_absolute(capbypass_addr2.value(), m_capbypass_hook2, &capbypass_detour2, &capbypass_jmp_ret2, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cap bypass 2";
@@ -247,14 +268,12 @@ std::optional<std::string> LDK::on_initialize() {
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Enemy Number";
   }
-  if (!install_hook_absolute(nopfunction_addr1.value(), m_nopfunction_hook1,
-	  &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
+  if (!install_hook_absolute(nopfunction_addr1.value(), m_nopfunction_hook1, &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cap bypass 1";
   }
-  if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2,
-	  &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
+  if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2, &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cap bypass 2";
