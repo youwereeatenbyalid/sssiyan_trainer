@@ -83,6 +83,8 @@ static naked void detour3() { // Disable Directional Dodges
         jmp code
 
     cheatcode:
+        cmp byte ptr [rdi+00000ED0h], 00 // is not locked on?
+        je code
         comiss xmm0, [leftstickthreshold]
         ja cheatcode2
 
