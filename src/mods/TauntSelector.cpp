@@ -39,6 +39,8 @@ static naked void detour() {
         je vergilcode
         jmp code
     code:
+        cmp byte ptr [rdi+20h], 00  // new
+        mov rcx,rbx                 // new
         mov r8d,[rdi+0x10]
         setne r9b
         jmp qword ptr [TauntSelector::jmp_ret]        
@@ -67,6 +69,8 @@ static naked void detour() {
         mov r10, 5
         jmp tauntcode
     tauntcode:
+        cmp byte ptr [rdi+20h], 00  // new
+        mov rcx,rbx                 // new
 		mov r8d,[rdi+0x10]
         setne r9b
 
@@ -134,11 +138,11 @@ std::optional<std::string> TauntSelector::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Allows you to specify what taunts will be used by each character.";
 
-  auto addr = utility::scan(base, "44 8B 47 10 41 0F 95 C1 4C");
+  auto addr = utility::scan(base, "80 7F 20 00 48 8B CB 44");
   if (!addr) {
     return "Unable to find TauntSelector pattern.";
   }
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 15)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize TauntSelector";
