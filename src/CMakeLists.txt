@@ -119,7 +119,8 @@ set(MODS_SRC
     mods/DanteGuardflyWip.cpp 
     mods/VergilTrickUpLockedOn.hpp 
     mods/VergilTrickUpLockedOn.cpp 
-
+    mods/DoppelWeaponSwitcher.hpp 
+    mods/DoppelWeaponSwitcher.cpp 
 )
 
 set(HOOKS_SRC

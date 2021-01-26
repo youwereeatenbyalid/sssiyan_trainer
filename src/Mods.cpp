@@ -22,7 +22,7 @@
     // Dante
     // V
     // Vergil
-
+        #include "mods/DoppelWeaponSwitcher.hpp"
 // Siyan
     // Background
         #include "mods/DamageTypeLean.hpp"
@@ -104,6 +104,7 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
+        m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
 
 // Siyan
     // Background
