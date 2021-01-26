@@ -312,38 +312,42 @@ void TauntSelector::draw_combo_box(std::map<std::string, uint32_t> map, const ch
   }
 } 
 void TauntSelector::on_draw_ui() { 
-    ImGui::Text("Nero Taunts");
-    draw_combo_box(nerotauntmap, "Air Taunt##nero", nerotaunts[0], nerotauntstrings[0]);
-    draw_combo_box(nerotauntmap, "Lock-on Taunt##nero", nerotaunts[1], nerotauntstrings[1]);
-    draw_combo_box(nerotauntmap, "S-Rank Air Taunt##nero", nerotaunts[2], nerotauntstrings[2]);
-    draw_combo_box(nerotauntmap, "S-Rank Lock-on Taunt##nero", nerotaunts[3], nerotauntstrings[3]);
-    draw_combo_box(nerotauntmap, "Bloody Palace Taunt##nero", nerotaunts[4], nerotauntstrings[4]);
-    draw_combo_box(nerotauntmap, "EX Taunt##nero", nerotaunts[5], nerotauntstrings[5]);
-    ImGui::Separator();
-    ImGui::Text("Dante Taunts");
-    draw_combo_box(dantetauntmap, "Air Taunt##dante", dantetaunts[0], dantetauntstrings[0]);
-    draw_combo_box(dantetauntmap, "Lock-on Taunt##dante", dantetaunts[1], dantetauntstrings[1]);
-    draw_combo_box(dantetauntmap, "S-Rank Air Taunt##dante", dantetaunts[2], dantetauntstrings[2]);
-    draw_combo_box(dantetauntmap, "S-Rank Lock-on Taunt##dante", dantetaunts[3], dantetauntstrings[3]);
-    draw_combo_box(dantetauntmap, "Bloody Palace Taunt##dante", dantetaunts[4], dantetauntstrings[4]);
-    draw_combo_box(dantetauntmap, "EX Taunt##dante", dantetaunts[5], dantetauntstrings[5]);
-    ImGui::Separator();
-    ImGui::Text("V Taunts");
-    draw_combo_box(vtauntmap, "Air Taunt##v", vtaunts[0], vtauntstrings[0]);
-    draw_combo_box(vtauntmap, "Lock-on Taunt##v", vtaunts[1], vtauntstrings[1]);
-    draw_combo_box(vtauntmap, "S-Rank Air Taunt##v", vtaunts[2], vtauntstrings[2]);
-    draw_combo_box(vtauntmap, "S-Rank Lock-on Taunt##v", vtaunts[3], vtauntstrings[3]);
-    draw_combo_box(vtauntmap, "Bloody Palace Taunt##v", vtaunts[4], vtauntstrings[4]);
-    draw_combo_box(vtauntmap, "EX Taunt##v", vtaunts[5], vtauntstrings[5]);
-    ImGui::Separator();
-    ImGui::Text("Vergil Taunts");
+    if (ImGui::CollapsingHeader("Nero Taunts"))
+    {
+        draw_combo_box(nerotauntmap, "Air Taunt##nero", nerotaunts[0], nerotauntstrings[0]);
+        draw_combo_box(nerotauntmap, "Lock-on Taunt##nero", nerotaunts[1], nerotauntstrings[1]);
+        draw_combo_box(nerotauntmap, "S-Rank Air Taunt##nero", nerotaunts[2], nerotauntstrings[2]);
+        draw_combo_box(nerotauntmap, "S-Rank Lock-on Taunt##nero", nerotaunts[3], nerotauntstrings[3]);
+        draw_combo_box(nerotauntmap, "Bloody Palace Taunt##nero", nerotaunts[4], nerotauntstrings[4]);
+        draw_combo_box(nerotauntmap, "EX Taunt##nero", nerotaunts[5], nerotauntstrings[5]);
+    }
+    if (ImGui::CollapsingHeader("Dante Taunts"))
+    {
+        draw_combo_box(dantetauntmap, "Air Taunt##dante", dantetaunts[0], dantetauntstrings[0]);
+        draw_combo_box(dantetauntmap, "Lock-on Taunt##dante", dantetaunts[1], dantetauntstrings[1]);
+        draw_combo_box(dantetauntmap, "S-Rank Air Taunt##dante", dantetaunts[2], dantetauntstrings[2]);
+        draw_combo_box(dantetauntmap, "S-Rank Lock-on Taunt##dante", dantetaunts[3], dantetauntstrings[3]);
+        draw_combo_box(dantetauntmap, "Bloody Palace Taunt##dante", dantetaunts[4], dantetauntstrings[4]);
+        draw_combo_box(dantetauntmap, "EX Taunt##dante", dantetaunts[5], dantetauntstrings[5]);
+    }
+    if (ImGui::CollapsingHeader("V Taunts"))
+    {
+        draw_combo_box(vtauntmap, "Air Taunt##v", vtaunts[0], vtauntstrings[0]);
+        draw_combo_box(vtauntmap, "Lock-on Taunt##v", vtaunts[1], vtauntstrings[1]);
+        draw_combo_box(vtauntmap, "S-Rank Air Taunt##v", vtaunts[2], vtauntstrings[2]);
+        draw_combo_box(vtauntmap, "S-Rank Lock-on Taunt##v", vtaunts[3], vtauntstrings[3]);
+        draw_combo_box(vtauntmap, "Bloody Palace Taunt##v", vtaunts[4], vtauntstrings[4]);
+        draw_combo_box(vtauntmap, "EX Taunt##v", vtaunts[5], vtauntstrings[5]);
+    }
+    if (ImGui::CollapsingHeader("Vergil Taunts"))
+    {
     draw_combo_box(vergiltauntmap, "Air Taunt##vergil", vergiltaunts[0],vergiltauntstrings[0]);
     draw_combo_box(vergiltauntmap, "Lock-on Taunt##vergil", vergiltaunts[1], vergiltauntstrings[1]);
     draw_combo_box(vergiltauntmap, "S-Rank Air Taunt##vergil", vergiltaunts[2], vergiltauntstrings[2]);
     draw_combo_box(vergiltauntmap, "S-Rank Lock-on Taunt##vergil", vergiltaunts[3], vergiltauntstrings[3]);
     draw_combo_box(vergiltauntmap, "Bloody Palace Taunt##vergil", vergiltaunts[4], vergiltauntstrings[4]);
     draw_combo_box(vergiltauntmap, "EX Taunt##vergil", vergiltaunts[5], vergiltauntstrings[5]);
-
+    }
 }
 
 

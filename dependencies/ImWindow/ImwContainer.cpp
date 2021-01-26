@@ -1033,7 +1033,7 @@ namespace ImWindow
 
 	float ImwContainer::GetTabAreaWidth() const
 	{
-		return m_oLastSize.x - 50.f;
+		return m_oLastSize.x + 500.f;
 	}
 
 	const ImwContainer* ImwContainer::GetBestContainer(const ImVec2& oCursorPos) const

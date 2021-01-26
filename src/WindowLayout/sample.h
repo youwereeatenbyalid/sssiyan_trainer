@@ -882,10 +882,10 @@ public:
 
   ModFramework* p_mf;
 };
-class MyImwWindow : public ImwWindow, ImwMenu
+class PageWindow : public ImwWindow, ImwMenu
 {
 public:
-  MyImwWindow(ModFramework* mf, int p_pageid, const char* pTitle = "MyImwWindow")
+  PageWindow(ModFramework* mf, int p_pageid, const char* pTitle = "PageWindow")
 		: ImwWindow()
 		, ImwMenu(0, false)
 	{
@@ -1055,12 +1055,12 @@ void InitSample(ModFramework* mf)
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
     
     ImwWindow* pFocusWindow = new FocusWindow(mf);
-	ImwWindow* commonwindow = new MyImwWindow(mf, 0, "Common Changes");
-    ImwWindow* gamewindow   = new MyImwWindow(mf, 1, "Gameplay Changes");
-    ImwWindow* nerowindow	= new MyImwWindow(mf, 2, "Nero");
-    ImwWindow* dantewindow	= new MyImwWindow(mf, 3, "Dante");
-    ImwWindow* vwindow      = new MyImwWindow(mf, 4, "V");
-    ImwWindow* vergilwindow = new MyImwWindow(mf, 5, "Vergil");
+	ImwWindow* commonwindow = new PageWindow(mf, 0, "Common Changes");
+    ImwWindow* gamewindow   = new PageWindow(mf, 1, "Gameplay Changes");
+    ImwWindow* nerowindow	= new PageWindow(mf, 2, "Nero");
+    ImwWindow* dantewindow	= new PageWindow(mf, 3, "Dante");
+    ImwWindow* vwindow      = new PageWindow(mf, 4, "V");
+    ImwWindow* vergilwindow = new PageWindow(mf, 5, "Vergil");
 	commonwindow->SetClosable(false);
     //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
@@ -1097,7 +1097,7 @@ void InitSample(ModFramework* mf)
 	//#endif
 
 	//oMgr.Dock
-	//MyImwWindow* pWindow2 = new MyImwWindow(pWindow1);
+	//PageWindow* pWindow2 = new PageWindow(pWindow1);
 	//pWindow2->SetSize(300, 200);
 	//pWindow2->Show();*/
 
