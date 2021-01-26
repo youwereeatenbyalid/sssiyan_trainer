@@ -16,6 +16,7 @@ public:
   static uintptr_t cos_jmp_ret;
   static uintptr_t threshhold_jmp_ret;
   static uintptr_t threshhold_jmp_jb;
+  static uintptr_t vergildata_jmp_ret;
 
   static uintptr_t playerentity;
   static uint32_t playerid;
@@ -52,6 +53,16 @@ public:
 
   static uintptr_t vergilentity;
   static uintptr_t vergiltransform;
+
+  static uintptr_t yamatomodel;
+  static uintptr_t yamatocommonparameter;
+  static uintptr_t forceedgemodel;
+  static uintptr_t beowulfmodel;
+
+  static uintptr_t doppelentity;
+  static uintptr_t doppeltransform;
+  static uintptr_t doppelweaponmodel;
+
   
   static uint32_t incombat;
   
@@ -79,4 +90,5 @@ private:
   std::unique_ptr<FunctionHook> m_sin_hook;
   std::unique_ptr<FunctionHook> m_cos_hook;
   std::unique_ptr<FunctionHook> m_threshhold_hook;
+  std::unique_ptr<FunctionHook> m_vergildata_hook;
 };

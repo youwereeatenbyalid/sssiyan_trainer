@@ -1,53 +1,60 @@
 #include "PlayerTracker.hpp"
-  uintptr_t PlayerTracker::player_jmp_ret{NULL};
-  uintptr_t PlayerTracker::summon_jmp_ret{NULL};
-  uintptr_t PlayerTracker::incombat_jmp_ret{NULL};
-  uintptr_t PlayerTracker::summon_jmp_je{NULL};
-  uintptr_t PlayerTracker::sin_jmp_ret{NULL};
-  uintptr_t PlayerTracker::cos_jmp_ret{NULL};
-  uintptr_t PlayerTracker::threshhold_jmp_ret{NULL};
-  uintptr_t PlayerTracker::threshhold_jmp_jb{NULL};
-
-  uintptr_t PlayerTracker::playerentity{NULL};
-  uint32_t PlayerTracker::playerid{0};
-  uintptr_t PlayerTracker::groundedmem{NULL};
-  uint32_t PlayerTracker::isgrounded{0};
-  uintptr_t PlayerTracker::playertransform{NULL};
-  uintptr_t PlayerTracker::playerinertiax{NULL};
-  uintptr_t PlayerTracker::playerinertiay{NULL};
-  uintptr_t PlayerTracker::playerinertiaz{NULL};
-  uint32_t PlayerTracker::playermoveid{0};
+	uintptr_t PlayerTracker::player_jmp_ret{NULL};
+	uintptr_t PlayerTracker::summon_jmp_ret{NULL};
+	uintptr_t PlayerTracker::incombat_jmp_ret{NULL};
+	uintptr_t PlayerTracker::summon_jmp_je{NULL};
+	uintptr_t PlayerTracker::sin_jmp_ret{NULL};
+	uintptr_t PlayerTracker::cos_jmp_ret{NULL};
+	uintptr_t PlayerTracker::threshhold_jmp_ret{NULL};
+	uintptr_t PlayerTracker::threshhold_jmp_jb{NULL};
+	uintptr_t PlayerTracker::vergildata_jmp_ret{NULL};
+	uintptr_t PlayerTracker::playerentity{NULL};
+	uint32_t PlayerTracker::playerid{0};
+	uintptr_t PlayerTracker::groundedmem{NULL};
+	uint32_t PlayerTracker::isgrounded{0};
+	uintptr_t PlayerTracker::playertransform{NULL};
+	uintptr_t PlayerTracker::playerinertiax{NULL};
+	uintptr_t PlayerTracker::playerinertiay{NULL};
+	uintptr_t PlayerTracker::playerinertiaz{NULL};
+	uint32_t PlayerTracker::playermoveid{0};
   
-  uintptr_t PlayerTracker::neroentity{NULL};
-  uintptr_t PlayerTracker::nerotransform{NULL};
+	uintptr_t PlayerTracker::neroentity{NULL};
+	uintptr_t PlayerTracker::nerotransform{NULL};
   
-  uintptr_t PlayerTracker::danteentity{NULL};
-  uintptr_t PlayerTracker::dantetransform{NULL};
-  uintptr_t PlayerTracker::danteweapon{NULL}; // DevilMayCry5.exe+1986263 - mov [rdi+000018B0],r15d Vergil exe 1
+	uintptr_t PlayerTracker::danteentity{NULL};
+	uintptr_t PlayerTracker::dantetransform{NULL};
+	uintptr_t PlayerTracker::danteweapon{NULL}; // DevilMayCry5.exe+1986263 - mov [rdi+000018B0],r15d Vergil exe 1
   
-  uintptr_t PlayerTracker::ventity{NULL};
-  uintptr_t PlayerTracker::vtransform{NULL};
+	uintptr_t PlayerTracker::ventity{NULL};
+	uintptr_t PlayerTracker::vtransform{NULL};
 
-  uintptr_t PlayerTracker::shadowcontroller{NULL};
-  uintptr_t PlayerTracker::shadowentity{NULL};
-  uintptr_t PlayerTracker::shadowtransform{NULL};
+	uintptr_t PlayerTracker::shadowcontroller{NULL};
+	uintptr_t PlayerTracker::shadowentity{NULL};
+	uintptr_t PlayerTracker::shadowtransform{NULL};
 
-  uintptr_t PlayerTracker::griffoncontroller{NULL};
-  uintptr_t PlayerTracker::griffonentity{NULL};
-  uintptr_t PlayerTracker::griffontransform{NULL};
+	uintptr_t PlayerTracker::griffoncontroller{NULL};
+	uintptr_t PlayerTracker::griffonentity{NULL};
+	uintptr_t PlayerTracker::griffontransform{NULL};
 
-  uintptr_t PlayerTracker::nightmarecontroller{NULL};
-  uintptr_t PlayerTracker::nightmareentity{NULL};
-  uintptr_t PlayerTracker::nightmaretransform{NULL};
+	uintptr_t PlayerTracker::nightmarecontroller{NULL};
+	uintptr_t PlayerTracker::nightmareentity{NULL};
+	uintptr_t PlayerTracker::nightmaretransform{NULL};
   
-  uintptr_t PlayerTracker::vergilentity{NULL};
-  uintptr_t PlayerTracker::vergiltransform{NULL};
-  uint32_t PlayerTracker::incombat{0};
+	uintptr_t PlayerTracker::vergilentity{NULL};
+	uintptr_t PlayerTracker::vergiltransform{NULL};
+	uint32_t PlayerTracker::incombat{0};
+	uintptr_t PlayerTracker::yamatomodel{NULL};
+	uintptr_t PlayerTracker::yamatocommonparameter{NULL};
+	uintptr_t PlayerTracker::forceedgemodel{NULL};
+	uintptr_t PlayerTracker::beowulfmodel{NULL};
 
-  float PlayerTracker::sinvalue{0};
-  float PlayerTracker::cosvalue{0};
-  bool PlayerTracker::redirect{0};
-  float threshholdsubstitute = 0.35;
+	uintptr_t PlayerTracker::doppelentity{NULL};
+	uintptr_t PlayerTracker::doppeltransform{NULL};
+	uintptr_t PlayerTracker::doppelweaponmodel{NULL};
+	float PlayerTracker::sinvalue{0};
+	float PlayerTracker::cosvalue{0};
+	bool PlayerTracker::redirect{0};
+	float threshholdsubstitute = 0.35;
   
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -278,6 +285,72 @@ static naked void threshhold_detour() {
 		jmp qword ptr [PlayerTracker::threshhold_jmp_jb]
 	}
 }
+static naked void vergildata_detour() {
+	__asm {
+	newmem:
+		//original code line
+		mov rdi, [rdi+0x10]
+		//verify vergil is even loaded
+		cmp [PlayerTracker::vergilentity], 0
+		je code
+		//verify this is a real address
+		test r15, r15
+		je code
+		cmp r15d, 0xFFFFFFFF
+		je code
+		cmp r15d, 0x1000
+		jb code
+		//verify it's a vergil
+		push rdi
+		//get the player vergil
+		mov rdi, [PlayerTracker::vergilentity]
+		//get his id
+		mov rdi, [rdi]
+		//compare to id of the incoming one to confirm big vergil
+		cmp [r15], rdi
+		pop rdi
+		jne code
+		//check if it's a doppelganger
+		cmp byte ptr [r15+0x17F0], 1
+		je isdoppelweapon
+		cmp r9, 1
+		je isbeowulf
+		cmp r9, 2
+		je isforceedge
+
+	isyamato:
+		mov [PlayerTracker::yamatomodel], rdi
+		push rdi
+		mov rdi, [rdi+0x10]
+		mov rdi, [rdi+0x300]
+		mov [PlayerTracker::yamatocommonparameter], rdi
+		pop rdi
+		jmp code
+
+	isforceedge:
+		mov[PlayerTracker::forceedgemodel], rdi
+		jmp code
+
+	isbeowulf:
+		mov[PlayerTracker::beowulfmodel], rdi
+		jmp code
+
+	isdoppelweapon:
+		mov [PlayerTracker::doppelentity], r15
+		push r15
+		mov r15, [r15+0x1F0]
+		mov [PlayerTracker::doppeltransform], r15
+		pop r15
+
+		mov [PlayerTracker::doppelweaponmodel], rdi
+		jmp code
+
+	code:
+		//mov rdi,[rdi+10]
+		test r11, r11
+		jmp qword ptr [PlayerTracker::vergildata_jmp_ret]
+	}
+}
     // clang-format on
 
 std::optional<std::string> PlayerTracker::on_initialize() {
@@ -308,6 +381,10 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   auto threshhold_addr = utility::scan(base, "72 12 F3 0F 10 05 87 9D AC 02");
   if (!threshhold_addr) {
     return "Unable to find threshhold pattern.";
+  }
+  auto vergildata_addr = utility::scan(base, "48 8B 7F 10 4D 85 DB");
+  if (!vergildata_addr) {
+	  return "Unable to find vergildata pattern.";
   }
   if (!install_hook_absolute(player_addr.value(), m_player_hook, &player_detour,
                              &player_jmp_ret, 7)) {
@@ -347,7 +424,12 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize stick threshhold";
   }
-
+  if (!install_hook_absolute(vergildata_addr.value(), m_vergildata_hook, &vergildata_detour,
+	  &vergildata_jmp_ret, 7)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize vergildata";
+  }
   PlayerTracker::summon_jmp_je     = summon_addr.value() + 0x15B;
   PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x14;
 
