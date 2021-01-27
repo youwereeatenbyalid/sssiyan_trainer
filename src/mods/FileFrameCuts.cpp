@@ -16,18 +16,21 @@ float dantegatlingstartlength     = 1.0f;
 static naked void detour() {
 	__asm {
         cmp byte ptr [FileFrameCuts::cheaton], 1
+        jne code
         cmp dword ptr [rdx+9Ah], 7274604 // 'lo' (Block)
         je guardgroundstartcheck
         cmp dword ptr [rdx+9Ah], 7471209 // 'ir' (AirBlock)
         je guardairstartcheck
-        cmp dword ptr [rdx+9Eh], 7078004 // 'tl' Gatling)
+        cmp dword ptr [rdx+9Eh], 7078004 // 'tl' (Gatling)
         je hatturretstartcheck
-        cmp dword ptr [rdx+9Ch], 7078004 // 'tl' Gatling)
+        cmp dword ptr [rdx+9Ch], 7078004 // 'tl' (Gatling)
         je hatturretairstartcheck
         jmp code
 
     guardgroundstartcheck:
         cmp dword ptr [rdx+0xA4], 7602259 //'St' (Start)
+        jne code
+        cmp byte ptr [dantefasterguard], 1
         jne code
         movss xmm0, [danteguardgroundstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
@@ -35,29 +38,29 @@ static naked void detour() {
     guardairstartcheck:
         cmp dword ptr [rdx+0xAC], 6357108 //'ta' (StartFly)
         jne code
-        cmp byte ptr [dantefasterguard], 0
-        je code
+        cmp byte ptr [dantefasterguard], 1
+        jne code
         movss xmm0, [danteairguardstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
     hatturretstartcheck:
         cmp dword ptr [rdx+0xAC], 6357108 // 'ta' (Start)
         jne code
-        cmp byte ptr [dantefasterhatgatling], 0
-        je code
+        cmp byte ptr [dantefasterhatgatling], 1
+        jne code
         movss xmm0, [dantegatlingstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
     hatturretairstartcheck:
         cmp dword ptr [rdx+0xAA], 6357108 // 'ta' (Start)
         jne code
-        cmp byte ptr [dantefasterhatgatling], 0
-        je code
+        cmp byte ptr [dantefasterhatgatling], 1
+        jne code
         movss xmm0, [dantegatlingstartlength]
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
     code:
-        movss xmm0,[rdx+58h]
+        movss xmm0, [rdx+58h]
 		jmp qword ptr [FileFrameCuts::jmp_ret]
 	}
 }

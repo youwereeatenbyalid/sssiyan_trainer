@@ -9,10 +9,9 @@ bool BypassBPCav::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        // cmp byte ptr [PlayerTracker::playerid], 1 // "dante" player isn't active when this is called
+        // cmp [PlayerTracker::playerid], 1 // "dante" player isn't active when this is called
         // jne code
         cmp byte ptr [BypassBPCav::cheaton], 1
-
         je cheatcode
         jmp code
 

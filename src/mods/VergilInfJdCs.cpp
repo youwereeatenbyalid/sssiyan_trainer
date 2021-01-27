@@ -8,7 +8,7 @@ bool VergilInfJdCs::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
         cmp byte ptr [VergilInfJdCs::cheaton], 1
         je cheatcode

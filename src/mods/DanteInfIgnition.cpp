@@ -14,7 +14,6 @@ static naked void detour() {
         jne code
 
         cmp byte ptr [DanteInfIgnition::cheaton], 1
-
         je cheatcode
         jmp code
 
@@ -35,7 +34,6 @@ static naked void detour2() {
         jne code
 
         cmp byte ptr [DanteInfIgnition::cheaton], 1
-
         je cheatcode
         jmp code
 

@@ -35,6 +35,9 @@ naked void Inertia::store_detour() {
            mov r8, [PlayerTracker::playerinertiaz]
            movss xmm14, dword ptr [r8]
 
+
+           // mulss xmm13, [inertiamult]
+           // mulss xmm14, [inertiamult]
            movss [backupxinertia], xmm13
            movss [backupzinertia], xmm14
 

@@ -13,14 +13,14 @@ std::map<std::string, uint32_t> dantetauntmap;
 std::map<std::string, uint32_t> vtauntmap;
 std::map<std::string, uint32_t> vergiltauntmap;
 
-std::string nerotauntstrings[6] = { "Default", "Default", "Default",
-                                     "Default", "Default", "Default" };
-std::string dantetauntstrings[6] = { "Default", "Default", "Default",
-                                     "Default", "Default", "Default" };
-std::string vtauntstrings[6] = { "Default", "Default", "Default",
-                                     "Default", "Default", "Default" };
-std::string vergiltauntstrings[6] = {"Default", "Default", "Default",
-                                     "Default", "Default", "Default"};
+std::string nerotauntstrings[6]   = { "Default", "Default", "Default",
+                                      "Default", "Default", "Default" };
+std::string dantetauntstrings[6]  = { "Default", "Default", "Default",
+                                      "Default", "Default", "Default" };
+std::string vtauntstrings[6]      = { "Default", "Default", "Default",
+                                      "Default", "Default", "Default" };
+std::string vergiltauntstrings[6] = { "Default", "Default", "Default",
+                                      "Default", "Default", "Default" };
     // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -38,42 +38,47 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         je vergilcode
         jmp code
+
     code:
         cmp byte ptr [rdi+20h], 00  // new
         mov rcx,rbx                 // new
-        mov r8d,[rdi+0x10]
+        mov r8d, [rdi+0x10]
         setne r9b
-        jmp qword ptr [TauntSelector::jmp_ret]        
+        jmp qword ptr [TauntSelector::jmp_ret] 
+
     nerocode:
         push r10
         push r11
         lea r11, [TauntSelector::nerotaunts]
         mov r10, 5
         jmp tauntcode
+
     dantecode:
         push r10
         push r11
         lea r11, [TauntSelector::dantetaunts]
         mov r10, 5
         jmp tauntcode
+
     vcode:
         push r10
         push r11
         lea r11, [TauntSelector::vtaunts]
         mov r10, 5
         jmp tauntcode
+
     vergilcode:
         push r10
         push r11
         lea r11, [TauntSelector::vergiltaunts]
         mov r10, 5
         jmp tauntcode
+
     tauntcode:
         cmp byte ptr [rdi+20h], 00  // new
         mov rcx,rbx                 // new
 		mov r8d,[rdi+0x10]
         setne r9b
-
 
         //ex taunt 5
         cmp r8d, 0x7F
@@ -99,6 +104,7 @@ static naked void detour() {
         cmp r8d, 0x79
         je overridetaunt
         jmp ret_jmp
+
     srankcode:
         //lock-on s-rank 3
         cmp r8d, 0x7C
@@ -120,6 +126,7 @@ static naked void detour() {
         je ret_jmp
         mov r8d, r11d
         jmp ret_jmp
+
     ret_jmp:
         pop r11
         pop r10

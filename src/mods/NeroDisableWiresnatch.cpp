@@ -14,7 +14,7 @@ bool NeroDisableWiresnatch::cheaton{NULL};
 
 static naked void detour1() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
         cmp byte ptr [NeroDisableWiresnatch::cheaton], 1
         je cheatcode
@@ -35,7 +35,8 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 0 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
+        jne code
 
         cmp byte ptr [NeroDisableWiresnatch::cheaton], 1
         je cheatcode

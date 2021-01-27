@@ -9,7 +9,7 @@ float maxconcentration = 300.0f;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
 
         cmp byte ptr [VergilInfConcentration::cheaton], 1

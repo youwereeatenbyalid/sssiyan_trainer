@@ -8,16 +8,16 @@ uint32_t	StyleRank::rank{0};
 
 static naked void detour() {
 	__asm {
-		styleranknewmem: //this is allocated memory, you have read,write,execute access
-		//place your code here
+	styleranknewmem:
 		lea rcx,[rax+0x000000B0]
 		mov [StyleRank::rankaddress], rcx
 		mov ecx,[rax+0x000000B0]
 		mov [StyleRank::rank], ecx
-		stylerankoriginalcode:
+
+	stylerankoriginalcode:
 		mov ecx,[rax+0x000000B0]
 
-		stylerankexit:
+	stylerankexit:
 		jmp qword ptr [StyleRank::jmp_ret]
 	}
 }
