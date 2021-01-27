@@ -20,9 +20,17 @@ public:
   uintptr_t static doppelonlyjjdc_jmp_call;
   uintptr_t static doppelonlyjjdcteleport_jmp_ret;
   uintptr_t static doppelonlyjjdcteleport_jmp_call;
+
   uintptr_t static doppelidle1_jmp_ret;
   uintptr_t static doppelidle2_jmp_ret;
   uintptr_t static doppelidle3_jmp_ret;
+
+  uintptr_t static doppelbeowulfcharge_jmp_ret;
+  uintptr_t static soundchargestart_jmp_ret;
+  uintptr_t static soundchargeend_jmp_ret;
+  uintptr_t static soundchargelevel1_jmp_ret;
+  uintptr_t static soundchargelevel2_jmp_ret;
+
   uintptr_t static yamatotype;
   uintptr_t static beowulftype;
   uintptr_t static forceedgetype;
@@ -54,7 +62,14 @@ private:
   std::unique_ptr<FunctionHook> m_doppeljjdc_hook;
   std::unique_ptr<FunctionHook> m_doppelonlyjjdc_hook;
   std::unique_ptr<FunctionHook> m_doppelonlyjjdcteleport_hook;
+
   std::unique_ptr<FunctionHook> m_doppelidle1_hook;
   std::unique_ptr<FunctionHook> m_doppelidle2_hook;
   std::unique_ptr<FunctionHook> m_doppelidle3_hook;
+
+  std::unique_ptr<FunctionHook> m_doppelbeowulfcharge_hook;
+  std::unique_ptr<FunctionHook> m_soundchargestart_hook;
+  std::unique_ptr<FunctionHook> m_soundchargeend_hook;
+  std::unique_ptr<FunctionHook> m_soundchargelevel1_hook;
+  std::unique_ptr<FunctionHook> m_soundchargelevel2_hook;
 };

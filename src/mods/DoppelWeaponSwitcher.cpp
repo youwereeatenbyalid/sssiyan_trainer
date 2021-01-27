@@ -15,8 +15,14 @@ uintptr_t DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_ret{NULL};
 uintptr_t DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_call{NULL};
 
 uintptr_t DoppelWeaponSwitcher::doppelidle1_jmp_ret{NULL};
-uintptr_t DoppelWeaponSwitcher::doppelidle2_jmp_ret{ NULL };
-uintptr_t DoppelWeaponSwitcher::doppelidle3_jmp_ret{ NULL };
+uintptr_t DoppelWeaponSwitcher::doppelidle2_jmp_ret{NULL};
+uintptr_t DoppelWeaponSwitcher::doppelidle3_jmp_ret{NULL};
+
+uintptr_t DoppelWeaponSwitcher::doppelbeowulfcharge_jmp_ret{NULL};
+uintptr_t DoppelWeaponSwitcher::soundchargestart_jmp_ret{NULL};
+uintptr_t DoppelWeaponSwitcher::soundchargeend_jmp_ret{NULL};
+uintptr_t DoppelWeaponSwitcher::soundchargelevel1_jmp_ret{NULL};
+uintptr_t DoppelWeaponSwitcher::soundchargelevel2_jmp_ret{NULL};
 
 uintptr_t DoppelWeaponSwitcher::yamatotype{NULL};
 uintptr_t DoppelWeaponSwitcher::beowulftype{NULL};
@@ -350,6 +356,100 @@ static naked void doppelidle3_detour() {
         jmp qword ptr [DoppelWeaponSwitcher::doppelidle3_jmp_ret]
     }
 }
+
+
+static naked void doppelbeowulfcharge_detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
+        jmp code
+    code:
+        cmp dword ptr [rdx+0x00001978], 02
+        jmp qword ptr [DoppelWeaponSwitcher::doppelbeowulfcharge_jmp_ret]
+    cheatcode:
+        cmp byte ptr [rdx+0x17F0], 0
+        je code
+        cmp dword ptr [DoppelWeaponSwitcher::doppelweaponid], 02
+        jmp qword ptr [DoppelWeaponSwitcher::doppelbeowulfcharge_jmp_ret]
+    }
+}
+static naked void soundchargestart_detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
+        jmp code
+    code:
+        mov rcx, [rax+0x00001980]
+            
+        jmp qword ptr[DoppelWeaponSwitcher::soundchargestart_jmp_ret]
+    cheatcode:
+        mov rcx, [PlayerTracker::beowulfmodel]
+        jmp qword ptr[DoppelWeaponSwitcher::soundchargestart_jmp_ret]
+    }
+}
+static naked void soundchargeend_detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
+        jmp code
+    code:
+        mov rdx, [rax+0x10]
+        mov rcx, rbx
+        jmp qword ptr [DoppelWeaponSwitcher::soundchargeend_jmp_ret]
+    cheatcode:
+        mov rax, [PlayerTracker::beowulfmodel]
+        mov rdx, [rax+0x10]
+        mov rcx, rbx
+        jmp qword ptr[DoppelWeaponSwitcher::soundchargeend_jmp_ret]
+    }
+}
+static naked void soundchargelevel1_detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
+        jmp code
+    code:
+        mov rdx, [rcx+0x10]
+        mov rcx, rbx
+        jmp qword ptr [DoppelWeaponSwitcher::soundchargelevel1_jmp_ret]
+    cheatcode:
+        mov rax, [PlayerTracker::beowulfmodel]
+        mov rdx, [rcx+0x10]
+        mov rcx, rbx
+        jmp qword ptr [DoppelWeaponSwitcher::soundchargelevel1_jmp_ret]
+    }
+}
+static naked void soundchargelevel2_detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
+        jmp code
+    code:
+        mov rdx, [rcx+0x10]
+        mov rcx, rbx
+        jmp qword ptr [DoppelWeaponSwitcher::soundchargelevel2_jmp_ret]
+    cheatcode:
+        mov rax, [PlayerTracker::beowulfmodel]
+        mov rdx, [rcx+0x10]
+        mov rcx, rbx
+        jmp qword ptr [DoppelWeaponSwitcher::soundchargelevel2_jmp_ret]
+    }
+}
 // clang-format on
 
 std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
@@ -485,15 +585,68 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelidle2";
   }
+
   auto doppelidle3_addr = utility::scan(base, "8B 80 78 19 00 00");
   if (!doppelidle3_addr) {
       return "Unable to find doppelidle3 pattern.";
   }
-
   if (!install_hook_absolute(doppelidle3_addr.value(), m_doppelidle3_hook, &doppelidle3_detour, &doppelidle3_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelidle3";
+  }
+  /// <summary>
+  /// Beowulf Charge for Doppel
+  /// </summary>
+  /// <returns></returns>
+  auto doppelbeowulfcharge_addr = utility::scan(base, "83 BA 78 19 00 00 02 0F 94");
+  if (!doppelbeowulfcharge_addr) {
+      return "Unable to find doppelbeowulfcharge pattern.";
+  }
+  if (!install_hook_absolute(doppelbeowulfcharge_addr.value(), m_doppelbeowulfcharge_hook, &doppelbeowulfcharge_detour, &doppelbeowulfcharge_jmp_ret, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize doppelbeowulfcharge";
+  }
+
+  auto soundchargestart_addr = utility::scan(base, "48 8B 88 80 19 00 00 48 85 C9 74 DB	");
+  if (!soundchargestart_addr) {
+      return "Unable to find soundchargestart pattern.";
+  }
+  if (!install_hook_absolute(soundchargestart_addr.value(), m_soundchargestart_hook, &soundchargestart_detour, &soundchargestart_jmp_ret, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize soundchargestart";
+  }
+
+  auto soundchargeend_addr = utility::scan(base, "25 48 8B 50 10 48 8B CB");
+  if (!soundchargeend_addr) {
+      return "Unable to find soundchargeend pattern.";
+  }
+  if (!install_hook_absolute(soundchargeend_addr.value()+1, m_soundchargeend_hook, &soundchargeend_detour, &soundchargeend_jmp_ret, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize soundchargeend";
+  }
+
+  auto soundchargelevel1_addr = utility::scan(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 07");
+  if (!soundchargelevel1_addr) {
+      return "Unable to find soundchargelevel1 pattern.";
+  }
+  if (!install_hook_absolute(soundchargelevel1_addr.value(), m_soundchargelevel1_hook, &soundchargelevel1_detour, &soundchargelevel1_jmp_ret, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize soundchargelevel1";
+  }
+
+  auto soundchargelevel2_addr = utility::scan(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 56");
+  if (!soundchargelevel2_addr) {
+      return "Unable to find soundchargelevel2 pattern.";
+  }
+  if (!install_hook_absolute(soundchargelevel2_addr.value(), m_soundchargelevel2_hook, &soundchargelevel2_detour, &soundchargelevel2_jmp_ret, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize soundchargelevel2";
   }
   return Mod::on_initialize();
 }
