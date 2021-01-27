@@ -11,11 +11,10 @@ float sdtspeedup = 3.0f;
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 1 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 
 		cmp byte ptr [DanteQuickSDT::cheaton], 1
-
         je cheatcode
         jmp code
 

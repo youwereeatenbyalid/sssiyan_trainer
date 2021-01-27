@@ -10,7 +10,7 @@ uintptr_t DamageTypeLean::jmp_ret{NULL};
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 0
+        cmp [PlayerTracker::playerid], 0
         je nerocode
         jmp code
 

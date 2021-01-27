@@ -16,10 +16,10 @@ uintptr_t HeavyDay::rgmod_jmp_ret{NULL};
 bool HeavyDay::cheaton{NULL};
 
 
-float shadowJCradius = 2.0;
-float shadowJCyoffset = 0.5;
-float griffonJCradius = 1.0;
-float nightmareJCradius = 3;
+float shadowJCradius     = 2.0;
+float shadowJCyoffset    = 0.5;
+float griffonJCradius    = 1.0;
+float nightmareJCradius  = 3;
 float nightmareJCyoffset = 1.5;
 float playerJCradius     = 2.0;
 float playerJCyoffset    = 0.8;
@@ -105,7 +105,6 @@ static naked void enemystep_detour() {
             mov r9, [PlayerTracker::dantetransform]
             test r9, r9
             jne dantecomparison
-
 
          vcheck:
             //get player coordinates from transform

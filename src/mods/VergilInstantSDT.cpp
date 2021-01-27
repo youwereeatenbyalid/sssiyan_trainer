@@ -11,7 +11,7 @@ bool VergilInstantSDT::cheaton{NULL};
 
 static naked void detour1() {
 	__asm {
-        cmp byte ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
         cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode

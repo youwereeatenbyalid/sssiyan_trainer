@@ -25,27 +25,25 @@ float LDK::hpoflasthitobj = 0.0f;
 
 static naked void enemynumber_detour() {
 	__asm {
-		originalcode:
 		mov eax,[rax+0x70]
 		mov [rdi+0x00000750],eax
 		mov [LDK::number], eax
 
-
-		hardcheck:
+	hardcheck:
 		cmp eax, [LDK::hardlimit]
 		jb softcheck
 
 		mov [LDK::limittype], 2
 		jmp ret_jmp
 
-		softcheck:
+	softcheck:
 		cmp eax, [LDK::softlimit]
 		jb belowsoftcapacity
 
 		mov [LDK::limittype], 1
 		jmp ret_jmp
 
-		belowsoftcapacity:
+	belowsoftcapacity:
 		mov [LDK::limittype], 0
 		ret_jmp:
 		jmp qword ptr[LDK::enemynumber_jmp_ret]
@@ -54,43 +52,51 @@ static naked void enemynumber_detour() {
 // clang-format on
 static naked void capbypass_detour1() {
 __asm {
-originalcode:
-    cmp byte ptr [LDK::cheaton], 1
-	je cheatcode
-	jmp code
-cheatcode:
-	cmp byte ptr [LDK::limittype], 2
-	je ret_jnl
-	jmp ret_jmp
-code:
-	cmp eax,[rcx+0x30]
-	jnl ret_jnl
-	jmp ret_jmp
-ret_jnl:
-	jmp qword ptr [LDK::capbypass_jmp_jnl]
-ret_jmp:
-	jmp qword ptr [LDK::capbypass_jmp_ret1]
+	originalcode:
+		cmp byte ptr [LDK::cheaton], 1
+		je cheatcode
+		jmp code
+
+	cheatcode:
+		cmp byte ptr [LDK::limittype], 2
+		je ret_jnl
+		jmp ret_jmp
+
+	code:
+		cmp eax, [rcx+0x30]
+		jnl ret_jnl
+		jmp ret_jmp
+
+	ret_jnl:
+		jmp qword ptr [LDK::capbypass_jmp_jnl]
+
+	ret_jmp:
+		jmp qword ptr [LDK::capbypass_jmp_ret1]
 	}
 }
 static naked void capbypass_detour2() {
   __asm {
-originalcode:
+	originalcode:
 
-    cmp byte ptr [LDK::cheaton], 1
-	je cheatcode
-	jmp code
-cheatcode:
-	cmp byte ptr [LDK::limittype], 2
-	je ret_jle
-	jmp ret_jmp
-code:
-	cmp r14d,eax
-	jle ret_jle
-	jmp ret_jmp
-ret_jle:
-	jmp qword ptr [LDK::capbypass_jmp_jle]
-ret_jmp:
-	jmp qword ptr [LDK::capbypass_jmp_ret2]
+		cmp byte ptr [LDK::cheaton], 1
+		je cheatcode
+		jmp code
+
+	cheatcode:
+		cmp byte ptr [LDK::limittype], 2
+		je ret_jle
+		jmp ret_jmp
+
+	code:
+		cmp r14d,eax
+		jle ret_jle
+		jmp ret_jmp
+
+	ret_jle:
+		jmp qword ptr [LDK::capbypass_jmp_jle]
+
+	ret_jmp:
+		jmp qword ptr [LDK::capbypass_jmp_ret2]
   }
 }
 
@@ -109,9 +115,9 @@ static naked void multipledeathoptimize_detour() {
 		mov rsi, [rsi+0x98]
 		cmp [PlayerTracker::playerentity], rsi
 		je friendlydeath
-		cmp[PlayerTracker::shadowentity], rsi
+		cmp [PlayerTracker::shadowentity], rsi
 		je friendlydeath
-		cmp[PlayerTracker::griffonentity], rsi
+		cmp [PlayerTracker::griffonentity], rsi
 		je friendlydeath
 		pop rsi
 		cmp byte ptr [LDK::cheaton], 0
@@ -128,7 +134,7 @@ static naked void multipledeathoptimize_detour() {
 		jmp originalcode
 
 	checklasthit:
-		cmp [canhitkill], 1
+		cmp byte ptr [canhitkill], 1
 		je physicsdisable
 		jmp originalcode
 	
@@ -137,7 +143,7 @@ static naked void multipledeathoptimize_detour() {
 
 	originalcode:
 		mov rcx, [rbx+0x50]
-		cmp qword ptr[rcx+0x18], 00
+		cmp qword ptr [rcx+0x18], 00
 		jmp qword ptr [LDK::multipledeathoptimize_jmp_ret]
 
 	physicsdisable:
@@ -147,9 +153,9 @@ static naked void multipledeathoptimize_detour() {
 
 static naked void canlasthitkill_detour() {
 	__asm {
-		mov [canhitkill], 0
+		mov byte ptr [canhitkill], 0
 		mov dword ptr [rdi+0x10], 0x3F800000 // originalcode
-		jmp qword ptr[LDK::canlasthitkill_jmp_ret]
+		jmp qword ptr [LDK::canlasthitkill_jmp_ret]
 	}
 }
 
@@ -252,31 +258,31 @@ std::optional<std::string> LDK::on_initialize() {
 
   if (!install_hook_absolute(gethpoflasthitobject_addr.value()+1, m_gethpoflasthitobject_hook, &gethpoflasthitobject_detour,
 	  &gethpoflasthitobject_jmp_ret, 5)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize Enemy Number";
+	//  return a error string in case something goes wrong
+	spdlog::error("[{}] failed to initialize", get_name());
+	return "Failed to initialize Enemy Number";
   }
   if (!install_hook_absolute(multipledeathoptimize_addr.value(), m_multipledeathoptimize_hook, &multipledeathoptimize_detour,
 	  &multipledeathoptimize_jmp_ret, 9)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize Enemy Number";
+	//  return a error string in case something goes wrong
+	spdlog::error("[{}] failed to initialize", get_name());
+	return "Failed to initialize Enemy Number";
   }
   if (!install_hook_absolute(canlasthitkill_addr.value(), m_canlasthitkill_hook, &canlasthitkill_detour,
-	  &canlasthitkill_jmp_ret, 7)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize Enemy Number";
+	&canlasthitkill_jmp_ret, 7)) {
+	//  return a error string in case something goes wrong
+	spdlog::error("[{}] failed to initialize", get_name());
+	return "Failed to initialize Enemy Number";
   }
   if (!install_hook_absolute(nopfunction_addr1.value(), m_nopfunction_hook1, &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize Cap bypass 1";
+	//  return a error string in case something goes wrong
+	spdlog::error("[{}] failed to initialize", get_name());
+	return "Failed to initialize Cap bypass 1";
   }
   if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2, &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize Cap bypass 2";
+	//  return a error string in case something goes wrong
+	spdlog::error("[{}] failed to initialize", get_name());
+	return "Failed to initialize Cap bypass 2";
   }
   return Mod::on_initialize();
 }

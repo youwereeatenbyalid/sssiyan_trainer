@@ -20,13 +20,13 @@ uintptr_t GameInput::releaseframes[20]{};
 // only in clang/icl mode on x64, sorry
 static naked void validcontrol_detour() {
 	__asm {
-        code:
-            mov rcx,rbx
-            test rdx,rdx
-            je validcontrol_jmp
-            mov [GameInput::validcontrols],rdx
-        validcontrol_jmp:
-            jmp qword ptr [GameInput::validcontrol_jmp_ret]        
+        mov rcx, rbx
+        test rdx, rdx
+        je validcontrol_jmp
+        mov [GameInput::validcontrols],rdx
+
+    validcontrol_jmp:
+        jmp qword ptr [GameInput::validcontrol_jmp_ret]        
 
 	}
 }
@@ -49,6 +49,7 @@ static naked void hold_detour() {
         or GameInput::holdframes[0], rsi
         mov r15, 1
         jmp charactercompare
+
     code:
         test [rdx+0x00000098],r8d
         pop r15
@@ -59,7 +60,8 @@ static naked void hold_detour() {
         pop r10
         pop r9
         pop r8
-        jmp qword ptr [GameInput::hold_jmp_ret]        
+        jmp qword ptr [GameInput::hold_jmp_ret]
+
     charactercompare:
         pop r15
         pop r14
@@ -96,15 +98,14 @@ static naked void clearhold_detour() {
         pop r8
 
     clearholdoriginalcode:
-        mov [r14+0x3C],r12d
-        mov rax,[rsi+0x50]
+        mov [r14+0x3C], r12d
+        mov rax, [rsi+0x50]
         jmp qword ptr [GameInput::clearhold_jmp_ret]
 	}
 }
 
 static naked void press_detour() {
 	__asm {
-	validation:
         push r8
         push r9
         push r10
@@ -121,6 +122,7 @@ static naked void press_detour() {
         or GameInput::pressframes[0], rsi
         mov r15, 1
         jmp charactercompare
+
     code:
         test [rbx+0x00000090],ebp
         pop r15
@@ -132,12 +134,14 @@ static naked void press_detour() {
         pop r9
         pop r8
         jmp qword ptr [GameInput::press_jmp_ret]        
+
     charactercompare:
         mov r9, GameInput::pressframes[0*8]
         or r9, GameInput::pressframes[1*8]
         or r9, GameInput::pressframes[2*8]
         or r9, GameInput::pressframes[3*8]
         call BreakerSwitcher::breakerpress_detour
+
     pressexit:
         cmp r15,0
         pop r15
@@ -162,6 +166,7 @@ static naked void clearpress_detour() {
         push rax
         lea rcx, GameInput::pressframes[0]
         mov rax, 19
+
     iterate:
         dec rax
         mov r8, [rcx+rax*8]
@@ -169,21 +174,21 @@ static naked void clearpress_detour() {
         cmp rax, 0
         ja iterate
     
-        mov GameInput::pressframes[0*8],0
+        mov GameInput::pressframes[0*8], 0
         pop rax
         pop rcx
         pop r8
 
     clearpressoriginalcode:
         mov [r14+0x48],r12d
-        mov rax,[rsi+0x50]
+        mov rax, [rsi+0x50]
         jmp qword ptr [GameInput::clearpress_jmp_ret]
 	}
 }
 
 static naked void release_detour() {
 	__asm {
-	    validation:
+	validation:
         push r8
         push r9
         push r10
@@ -195,13 +200,14 @@ static naked void release_detour() {
         cmp rdx, [GameInput::validcontrols]
         jne code
         mov r15, 0
-        test [rbx+0x00000094],ebp
+        test [rbx+0x00000094], ebp
         jna charactercompare
         or GameInput::releaseframes[0], rsi
         mov r15, 1
         jmp charactercompare
+
     code:
-        test [rbx+0x00000094],ebp
+        test [rbx+0x00000094], ebp
         pop r15
         pop r14
         pop r13
@@ -210,7 +216,8 @@ static naked void release_detour() {
         pop r10
         pop r9
         pop r8
-        jmp qword ptr [GameInput::release_jmp_ret]        
+        jmp qword ptr [GameInput::release_jmp_ret]       
+
     charactercompare:
         pop r15
         pop r14
@@ -225,7 +232,7 @@ static naked void release_detour() {
 }
 static naked void releasewhenheld_detour() {
 	__asm {
-        test [rbx+0x3C],esi
+        test [rbx+0x3C], esi
         jmp qword ptr [GameInput::releasewhenheld_jmp_ret]
 	}
 }
@@ -240,6 +247,7 @@ static naked void clearrelease_detour() {
         push rax
         lea rcx, GameInput::releaseframes[0]
         mov rax, 19
+
     iterate:
         dec rax
         mov r8, [rcx+rax*8]
@@ -253,8 +261,8 @@ static naked void clearrelease_detour() {
         pop r8
 
     clearpressoriginalcode:   
-        mov [r14+0x44],r12d
-        mov rax,[rsi+0x50]
+        mov [r14+0x44], r12d
+        mov rax, [rsi+0x50]
         jmp qword ptr [GameInput::clearrelease_jmp_ret]
 	}
 }
