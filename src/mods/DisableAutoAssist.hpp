@@ -1,16 +1,14 @@
-#pragma once
-#if 0
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class ModSample : public Mod {
+class DisableAutoAssist : public Mod {
 public:
-  ModSample() = default;
+  DisableAutoAssist() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "ModSample"; }
+  std::string_view get_name() const override { return "DisableAutoAssist"; }
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_ret;
-  bool static cheaton;
+  static bool cheaton;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
@@ -26,6 +24,6 @@ private:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
-  // std::unique_ptr<FunctionHook> m_function_hook;
+  std::unique_ptr<FunctionHook> m_function_hook;
 };
-#endif
+

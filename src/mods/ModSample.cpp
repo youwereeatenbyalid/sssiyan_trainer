@@ -2,7 +2,7 @@
 #include "ModSample.hpp"
 #include "mods/PlayerTracker.hpp"
 uintptr_t ModSample::jmp_ret{NULL};
-uintptr_t ModSample::cheaton{NULL};
+bool ModSample::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 /*
@@ -11,10 +11,7 @@ static naked void detour() {
 	    validation:
             cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
             jne code
-            push rax
-            mov rax, [ModSample::cheaton]
-            cmp byte ptr [rax], 1
-            pop rax
+            cmp byte ptr [ModSample::cheaton], 1
             je cheatcode
             jmp code
         code:
@@ -30,12 +27,11 @@ static naked void detour() {
 
 std::optional<std::string> ModSample::on_initialize() {
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  //ischecked = false;
+  //ischecked = &ModSample::cheaton;
   //onpage    = commonpage;
   //full_name_string     = "ModSample Full Name";
   //author_string        = "Author";
   //description_string   = "This is the description of ModSample.";
-  //ModSample::cheaton = (uintptr_t)&ischecked;
 
   //auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
   //if (!addr) {

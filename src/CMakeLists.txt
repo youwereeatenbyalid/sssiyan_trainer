@@ -121,6 +121,10 @@ set(MODS_SRC
     mods/VergilTrickUpLockedOn.cpp 
     mods/DoppelWeaponSwitcher.hpp 
     mods/DoppelWeaponSwitcher.cpp 
+    mods/DisableAutoAssist.hpp 
+    mods/DisableAutoAssist.cpp 
+    mods/DisableTitleTimer.hpp 
+    mods/DisableTitleTimer.cpp 
 )
 
 set(HOOKS_SRC
