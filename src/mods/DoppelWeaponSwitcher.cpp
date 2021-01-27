@@ -66,9 +66,11 @@ static naked void updateweapon_detour() {
             //this confirms doppel is either being summoned or recalled, and prevents it changing on trick
             je originalcode
             cmp r14d, 0xFFFFFFFF
-            je originalcode
+            je swapcondition
             cmp r14d, 0x0
-            jne originalcode
+            je swapcondition
+            jmp originalcode
+        swapcondition:
             //weaponid
             mov r12d, [r11+0x1978]
             //doppeljdccharge
@@ -314,7 +316,6 @@ static naked void doppelidle1_detour() {
         jmp qword ptr [DoppelWeaponSwitcher::doppelidle1_jmp_ret]
     }
 }
-
 static naked void doppelidle2_detour() {
     __asm {
     validation:
@@ -333,7 +334,6 @@ static naked void doppelidle2_detour() {
         jmp qword ptr [DoppelWeaponSwitcher::doppelidle2_jmp_ret]
     }
 }
-
 static naked void doppelidle3_detour() {
     __asm {
     validation:
@@ -356,7 +356,6 @@ static naked void doppelidle3_detour() {
         jmp qword ptr [DoppelWeaponSwitcher::doppelidle3_jmp_ret]
     }
 }
-
 
 static naked void doppelbeowulfcharge_detour() {
     __asm {
