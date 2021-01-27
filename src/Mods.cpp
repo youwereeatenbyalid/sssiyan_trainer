@@ -49,6 +49,7 @@
         #include "mods/EntitySpeeds.hpp"
         #include "mods/FileFrameCuts.hpp"
         #include "mods/SprintInBattle.hpp"
+        #include "mods/EnemyStepBanHeight.hpp"
         #include "mods/DisableEnemyAI.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
@@ -134,6 +135,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
         m_mods.emplace_back(std::make_unique<FileFrameCuts>());
         m_mods.emplace_back(std::make_unique<SprintInBattle>());
+        m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());

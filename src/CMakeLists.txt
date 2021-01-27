@@ -125,6 +125,9 @@ set(MODS_SRC
     mods/DisableAutoAssist.cpp 
     mods/DisableTitleTimer.hpp 
     mods/DisableTitleTimer.cpp 
+    mods/EnemyStepBanHeight.hpp 
+    mods/EnemyStepBanHeight.cpp 
+
 )
 
 set(HOOKS_SRC

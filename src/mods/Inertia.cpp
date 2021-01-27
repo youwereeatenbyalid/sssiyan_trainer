@@ -6,7 +6,7 @@ bool Inertia::cheaton{NULL};
 float backupxinertia = 0.0f;
 float backupzinertia = 0.0f;
 float backupinertia  = 0.0f;
-float inertiamult    = 0.5f;
+float inertiamult    = 0.8f;
 uint32_t Inertia::airhiketimer = 0;
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -36,8 +36,8 @@ naked void Inertia::store_detour() {
            movss xmm14, dword ptr [r8]
 
 
-           // mulss xmm13, [inertiamult]
-           // mulss xmm14, [inertiamult]
+               mulss xmm13, [inertiamult] // I was thinking about making this an option but might just force it sue me
+               mulss xmm14, [inertiamult]
            movss [backupxinertia], xmm13
            movss [backupzinertia], xmm14
 

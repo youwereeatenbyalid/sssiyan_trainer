@@ -19,7 +19,7 @@ static naked void detour() {
             jmp qword ptr [DisableTitleTimer::jmp_ret]        
         cheatcode:
             movss xmm0, [timerdisable]
-            movss [rbx+0xD8], xmm0;
+            movss [rbx+0xD8], xmm0
 		    movss xmm0, [maxtime]
             jmp qword ptr [DisableTitleTimer::jmp_ret]
 	}
