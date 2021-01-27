@@ -15,12 +15,16 @@ uintptr_t LDK::nopfunction_jmp_ret1{NULL};
 uintptr_t LDK::nopfunction_jmp_ret2{NULL};
 uintptr_t LDK::nopfunction_1_call{NULL};
 
+uintptr_t LDK::vergildivebomb_jmp_ret{NULL};
+uintptr_t LDK::missionmanager{NULL};
+
 bool LDK::cheaton{NULL};
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{20};
 uint32_t LDK::limittype{0};
 bool canhitkill = true;
+bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
 
 static naked void enemynumber_detour() {
@@ -188,6 +192,33 @@ static naked void nopfunction_detour2() {
 	}
 }
 
+static naked void vergildivebomb_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		jne code
+		push r12
+		mov r12, [LDK::missionmanager]
+		mov r12, [r12]
+		cmp byte ptr [r12+0x7C], 7
+		pop r12
+		je cheatcode
+		jmp code
+	
+	code:
+		mov byte ptr [rax+0x10], 0x15
+		jmp qword ptr [LDK::vergildivebomb_jmp_ret]
+
+	cheatcode:
+		xor [vergilflipper], 1
+		cmp [vergilflipper], 1
+		je jce
+		mov byte ptr [rax+0x10], 0x34
+		jmp qword ptr [LDK::vergildivebomb_jmp_ret]
+	jce:
+		mov byte ptr [rax+0x10], 0xB
+		jmp qword ptr [LDK::vergildivebomb_jmp_ret]
+	}
+}
 
 std::optional<std::string> LDK::on_initialize() {
   ischecked            = &LDK::cheaton;
@@ -198,6 +229,9 @@ std::optional<std::string> LDK::on_initialize() {
   description_string   = "Enables the Legendary Dark Knights Gamemode.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
+
+
   auto enemynumber_addr = utility::scan(base, "8B 40 70 89 87 50 07 00 00");
   if (!enemynumber_addr) {
     return "Unable to find Enemy Number pattern.";
@@ -234,11 +268,20 @@ std::optional<std::string> LDK::on_initialize() {
   if (!nopfunction_1_call) {
 	  return "Unable to find nop function call pattern.";
   }
+
+  auto vergildivebomb_addr = utility::scan(base, "C7 40 10 15 00 00 00 48");
+  if (!vergildivebomb_addr) {
+	  return "Unable to find vergildivebomb pattern.";
+  }
+  auto missionmanager_addr = 
   LDK::nopfunction_1_call = nopfunction_1_call.value();
 
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
   LDK::capbypass_jmp_jle = capbypass_addr2.value() + 0x57;
+  LDK::missionmanager = staticbase+0x7E836F8;
   LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
+ 
+
 
   if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
@@ -260,29 +303,37 @@ std::optional<std::string> LDK::on_initialize() {
 	  &gethpoflasthitobject_jmp_ret, 5)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
-	return "Failed to initialize Enemy Number";
+	return "Failed to initialize getlasthpofhitobject";
   }
   if (!install_hook_absolute(multipledeathoptimize_addr.value(), m_multipledeathoptimize_hook, &multipledeathoptimize_detour,
 	  &multipledeathoptimize_jmp_ret, 9)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
-	return "Failed to initialize Enemy Number";
+	return "Failed to initialize multipledeathoptimize";
   }
   if (!install_hook_absolute(canlasthitkill_addr.value(), m_canlasthitkill_hook, &canlasthitkill_detour,
 	&canlasthitkill_jmp_ret, 7)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
-	return "Failed to initialize Enemy Number";
+	return "Failed to initialize canlasthitkill";
   }
   if (!install_hook_absolute(nopfunction_addr1.value(), m_nopfunction_hook1, &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
-	return "Failed to initialize Cap bypass 1";
+	return "Failed to initialize nopfunction 1";
   }
   if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2, &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
-	return "Failed to initialize Cap bypass 2";
+	return "Failed to initialize nopfunction 2";
+  }
+
+
+  if (!install_hook_absolute(vergildivebomb_addr.value(), m_vergildivebomb_hook, &vergildivebomb_detour,
+	  &vergildivebomb_jmp_ret, 7)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize Vergil Dive bomb";
   }
   return Mod::on_initialize();
 }

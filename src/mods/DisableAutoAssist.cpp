@@ -29,7 +29,7 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
   onpage    = commonpage;
   full_name_string     = "Disable Auto Assist";
   author_string        = "The Hitchhiker";
-  description_string   = "Prevents ";
+  description_string   = "Prevents Auto Assist from being activated.";
 
   auto addr = utility::scan(base, "BE 89 48 14 48 8B 5C 24 30");
   if (!addr) {
