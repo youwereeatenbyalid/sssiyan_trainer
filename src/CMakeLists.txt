@@ -127,7 +127,8 @@ set(MODS_SRC
     mods/DisableTitleTimer.cpp 
     mods/EnemyStepBanHeight.hpp 
     mods/EnemyStepBanHeight.cpp 
-
+    mods/SpardaWorkshop.hpp 
+    mods/SpardaWorkshop.cpp 
 )
 
 set(HOOKS_SRC

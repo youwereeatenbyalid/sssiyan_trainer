@@ -23,6 +23,12 @@ public:
   static uintptr_t nopfunction_1_call;
 
   static uintptr_t vergildivebomb_jmp_ret;
+  static uintptr_t cavforcevalid_jmp_ret;
+  static uintptr_t cavforcevalid_jmp_ret2;
+  static uintptr_t cavforcevalid_jmp_je;
+  static uintptr_t cavforcelightning1_jmp_ret;
+  static uintptr_t cavforcelightning2_jmp_ret;
+  static uintptr_t cavcoordinatechange_jmp_ret;
   static uintptr_t missionmanager;
   static bool cheaton;
 
@@ -63,4 +69,11 @@ public:
   /// Vergil miniboss
   /// </summary>
   std::unique_ptr<FunctionHook> m_vergildivebomb_hook;
+  /// <summary>
+  /// Cavaliere miniboss
+  /// </summary>
+  std::unique_ptr<FunctionHook> m_cavforcevalid_hook;
+  std::unique_ptr<FunctionHook> m_cavforcelightning1_hook;
+  std::unique_ptr<FunctionHook> m_cavforcelightning2_hook;
+  std::unique_ptr<FunctionHook> m_cavcoordinatechange_hook;
 };

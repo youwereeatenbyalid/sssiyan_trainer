@@ -16,6 +16,14 @@ uintptr_t LDK::nopfunction_jmp_ret2{NULL};
 uintptr_t LDK::nopfunction_1_call{NULL};
 
 uintptr_t LDK::vergildivebomb_jmp_ret{NULL};
+
+uintptr_t LDK::cavforcevalid_jmp_ret{NULL};
+uintptr_t LDK::cavforcevalid_jmp_ret2{NULL};
+uintptr_t LDK::cavforcevalid_jmp_je{NULL};
+uintptr_t LDK::cavforcelightning1_jmp_ret{NULL};
+uintptr_t LDK::cavforcelightning2_jmp_ret{NULL};
+uintptr_t LDK::cavcoordinatechange_jmp_ret{NULL};
+
 uintptr_t LDK::missionmanager{NULL};
 
 bool LDK::cheaton{NULL};
@@ -23,10 +31,12 @@ uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{20};
 uint32_t LDK::limittype{0};
+uint32_t lightningcounter = 0;
 bool canhitkill = true;
 bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
-
+static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
+static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 static naked void enemynumber_detour() {
 	__asm {
 		mov eax,[rax+0x70]
@@ -192,6 +202,7 @@ static naked void nopfunction_detour2() {
 	}
 }
 
+
 static naked void vergildivebomb_detour() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 1
@@ -219,6 +230,136 @@ static naked void vergildivebomb_detour() {
 		jmp qword ptr [LDK::vergildivebomb_jmp_ret]
 	}
 }
+
+
+static naked void cavforcevalid_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		jne code
+		push r12
+		mov r12, [LDK::missionmanager]
+		mov r12, [r12]
+		cmp byte ptr [r12+0x7C], 5
+		pop r12
+		je cheatcode
+		jmp code
+
+	code:
+		cmp eax, 0x17
+		je je_ret
+		xor al, al
+		jmp jmp_ret
+
+	cheatcode:
+		jmp je_ret
+
+	jmp_ret:
+		jmp qword ptr [LDK::cavforcevalid_jmp_ret2]
+
+	je_ret:
+		jmp qword ptr [LDK::cavforcevalid_jmp_je]
+	}
+}
+
+static naked void cavforcelightning1_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		jne code
+		push r12
+		mov r12, [LDK::missionmanager]
+		mov r12, [r12]
+		cmp byte ptr [r12+0x7C], 5
+		pop r12
+		je cheatcode
+		jmp code
+
+	code:
+		mov [r13+0x00000E34], eax
+		jmp qword ptr [LDK::cavforcelightning1_jmp_ret]
+
+	cheatcode:
+		cmp eax, 1
+		je code
+		cmp [lightningcounter], 3
+		jae code
+		mov eax, 2
+		jmp code
+	}
+}
+
+static naked void cavforcelightning2_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		jne code
+		push r12
+		mov r12, [LDK::missionmanager]
+		mov r12, [r12]
+		cmp byte ptr [r12+0x7C], 5
+		pop r12
+		je cheatcode
+		jmp code
+
+	code:
+		mov [r13+0x00000E30], ecx
+		jmp qword ptr [LDK::cavforcelightning2_jmp_ret]
+
+	cheatcode:
+		cmp eax, 1
+		je code
+		lock inc [lightningcounter]
+		cmp [lightningcounter], 3
+		jae resetcounter
+		mov ecx, 2
+		jmp code
+
+	resetcounter:
+		and [lightningcounter], 0
+		jmp code
+	}
+}
+
+static naked void cavcoordinatechange_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 1
+		jne code
+		push r12
+		mov r12, [LDK::missionmanager]
+		mov r12, [r12]
+		cmp byte ptr [r12+0x7C], 5
+		pop r12
+		je cheatcode
+		jmp code
+
+	code:
+		mov rcx,[r13+0x10]
+		movss [rbp-0x70],xmm0
+		jmp qword ptr [LDK::cavcoordinatechange_jmp_ret]
+
+	cheatcode:
+		push r8
+		mov r8d, [rcx+0x10]
+		cmp r8d, [coordinate1.x]
+		pop r8
+
+		je floatupdate
+		movss xmm0, [coordinate1.x]
+		movss xmm1, [coordinate1.z]
+		movss xmm2, [coordinate1.y]
+		jmp floatreplace
+
+	floatupdate:
+		movss xmm0, [coordinate2.x]
+		movss xmm1, [coordinate2.z]
+		movss xmm2, [coordinate2.y]
+		jmp floatreplace
+	floatreplace:
+		movss [rcx+0x10], xmm0
+		movss [rcx+0x14], xmm1
+		movss [rcx+0x18], xmm2
+		jmp code
+	}
+}
+
 
 std::optional<std::string> LDK::on_initialize() {
   ischecked            = &LDK::cheaton;
@@ -269,15 +410,33 @@ std::optional<std::string> LDK::on_initialize() {
 	  return "Unable to find nop function call pattern.";
   }
 
+
   auto vergildivebomb_addr = utility::scan(base, "C7 40 10 15 00 00 00 48");
   if (!vergildivebomb_addr) {
 	  return "Unable to find vergildivebomb pattern.";
   }
-  auto missionmanager_addr = 
-  LDK::nopfunction_1_call = nopfunction_1_call.value();
 
+
+  auto cavforcevalid_addr = utility::scan(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
+  if (!cavforcevalid_addr) {
+	  return "Unable to find cavforcevalid pattern.";
+  }
+  auto cavforcelightning_addr = utility::scan(base, "41 89 8D 30 0E 00 00");
+  if (!cavforcelightning_addr) {
+	  return "Unable to find cavforcelightning pattern.";
+  }
+  auto cavcoordinatechange_addr = utility::scan(base, "49 8B 4D 10 F3 0F 11 45 90");
+  if (!cavcoordinatechange_addr) {
+	  return "Unable to find cavcoordinatechange pattern.";
+  }
+  
+  LDK::nopfunction_1_call = nopfunction_1_call.value();
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
   LDK::capbypass_jmp_jle = capbypass_addr2.value() + 0x57;
+
+  LDK::cavforcevalid_jmp_ret2 = cavforcevalid_addr.value()+0x6;
+  LDK::cavforcevalid_jmp_je = cavforcevalid_addr.value()+0x8;
+
   LDK::missionmanager = staticbase+0x7E836F8;
   LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
  
@@ -331,6 +490,36 @@ std::optional<std::string> LDK::on_initialize() {
 
   if (!install_hook_absolute(vergildivebomb_addr.value(), m_vergildivebomb_hook, &vergildivebomb_detour,
 	  &vergildivebomb_jmp_ret, 7)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize Vergil Dive bomb";
+  }
+
+
+
+  if (!install_hook_absolute(cavforcevalid_addr.value(), m_cavforcevalid_hook, &cavforcevalid_detour,
+	  &cavforcevalid_jmp_ret, 6)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize Cav force valid";
+  }
+
+  if (!install_hook_absolute(cavforcelightning_addr.value() + 0x11, m_cavforcelightning1_hook, &cavforcelightning1_detour,
+	  &cavforcelightning1_jmp_ret, 7)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize Cav force lightning 1";
+  }
+
+  if (!install_hook_absolute(cavforcelightning_addr.value(), m_cavforcelightning2_hook, &cavforcelightning2_detour,
+	  &cavforcelightning2_jmp_ret, 7)) {
+	  //  return a error string in case something goes wrong
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize Cav force lightning 2";
+  }
+
+  if (!install_hook_absolute(cavcoordinatechange_addr.value(), m_cavcoordinatechange_hook, &cavcoordinatechange_detour,
+	  &cavcoordinatechange_jmp_ret, 9)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Vergil Dive bomb";
