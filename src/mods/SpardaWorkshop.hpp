@@ -10,6 +10,9 @@ public:
   std::optional<std::string> on_initialize() override;
   uintptr_t static sceneplacer_jmp_ret;
   uintptr_t static enemyplacer_jmp_ret;
+  static glm::vec3 custombarrelcoords;
+  static glm::vec3 customplayercoords;
+  static glm::vec3 customenemycoords;
   bool static cheaton;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
