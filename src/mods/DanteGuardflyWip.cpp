@@ -35,7 +35,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteGuardflyWip::on_initialize() {
   ischecked = &DanteGuardflyWip::cheaton;
-  onpage               = common;
+  onpage               = mechanics;
 
   full_name_string     = "Guardfly WIP";
   author_string        = "socks";

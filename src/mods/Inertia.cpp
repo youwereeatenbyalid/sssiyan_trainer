@@ -115,7 +115,7 @@ inertiaredirect:
 std::optional<std::string> Inertia::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &Inertia::cheaton;
-  onpage    = common;
+  onpage    = mechanics;
 
   full_name_string     = "Inertia Redirection";
   author_string        = "The Hitchhiker";

@@ -930,20 +930,24 @@ public:
 	NeroWindow(ModFramework* mf)
 	: super(mf, "Nero"){}
 	virtual void OnGui(){
+		//ImGui::PushStyleColor(ImGuiCol_Header,ImVec4(0.306f, 0.541f, 0.804f, 0.600f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderHovered,ImVec4(0.408f, 0.643f, 0.906f, 1.000f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.408f, 0.643f, 0.906f, 1.000f));
 		super::OnGui();
-		if(ImGui::CollapsingHeader("Breaker Options")){
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::breaker);
-			}
-		}
-		if (ImGui::CollapsingHeader("Wiresnatch Options")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::wiresnatch);
-			}
+		ImGui::Separator();
+		ImGui::Text("Breaker");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::breaker);
 		}
 		ImGui::Separator();
+		ImGui::Text("Wiresnatch");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::wiresnatch);
+		}
+		ImGui::Separator();
+		ImGui::Text("Cheats");
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			//p_mf->get_mods()->on_draw_ui();
 			p_mf->get_mods()->on_pagelist_ui(Mod::nero);
@@ -957,17 +961,18 @@ public:
 		: super(mf, "Dante") {}
 	virtual void OnGui() {
 		super::OnGui();
-		if (ImGui::CollapsingHeader("SDT Options")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::dantesdt);
-			}
+		ImGui::Separator();
+		ImGui::Text("SDT");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::dantesdt);
 		}
-		if (ImGui::CollapsingHeader("Dante Cheats")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::dantecheat);
-			}
+
+		ImGui::Separator();
+		ImGui::Text("Cheats");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::dantecheat);
 		}
 		//ImGui::Separator();
 		//if (p_mf->is_error() && p_mf->is_ready()) {
@@ -982,50 +987,59 @@ public:
 	VergilWindow(ModFramework* mf)
 		: super(mf, "Vergil") {}
 	virtual void OnGui() {
+		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.306f, 0.804f, 0.804f, 0.600f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.408f, 0.906f, 0.906f, 0.702f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.408f, 0.906f, 0.906f, 0.702f));
 		super::OnGui();
-		if (ImGui::CollapsingHeader("SDT Options")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::vergilsdt);
-			}
-		}
-		if (ImGui::CollapsingHeader("Darkslayer Options")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::vergiltrick);
-			}
+		ImGui::Separator();
+		ImGui::Text("SDT");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::vergilsdt);
 		}
 		ImGui::Separator();
+		ImGui::Text("Darkslayer");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::vergiltrick);
+		}
+
+		ImGui::Separator();
+		ImGui::Text("Cheats");
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::vergilcheat);
 		}
 		ImGui::Separator();
+		ImGui::Text("DoppelGanger");
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::vergildoppel);
 		}
 	}
 };
-class GameplayWindow : public PageWindow {
+class ScenarioWindow : public PageWindow {
 public:
 	typedef PageWindow super;
-	GameplayWindow(ModFramework* mf)
-		: super(mf, "Gameplay") {}
+	ScenarioWindow(ModFramework* mf)
+		: super(mf, "Scenario") {}
 	virtual void OnGui() {
 		super::OnGui();
-
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::gamemode);
-			}
-		if (ImGui::CollapsingHeader("Bloody Palace")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::bloodypalace);
-			}
+		ImGui::Separator();
+		ImGui::Text("Game Modes");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::gamemode);
 		}
 		ImGui::Separator();
+		ImGui::Text("Bloody Palace");
 		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_pagelist_ui(Mod::gameplay);
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::bloodypalace);
+		}
+
+		ImGui::Separator();
+		ImGui::Text("Game Balance");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			p_mf->get_mods()->on_pagelist_ui(Mod::balance);
 		}
 	}
 };
@@ -1036,39 +1050,50 @@ public:
 		: super(mf, "Practice") {}
 	virtual void OnGui() {
 		super::OnGui();
+		ImGui::Separator();
+		ImGui::Text("Shared Cheats");
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::commoncheat);
 		}
-		if (ImGui::CollapsingHeader("Dante SDT")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::dantesdt);
-			}
+		ImGui::Separator();
+		ImGui::Text("Dante SDT");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::dantesdt);
 		}
-		if (ImGui::CollapsingHeader("Dante Cheats")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::dantecheat);
-			}
+
+		ImGui::Separator();
+		ImGui::Text("Dante Cheats");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::dantecheat);
+		}
+
+		ImGui::Separator();
+		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.306f, 0.804f, 0.804f, 0.600f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.408f, 0.906f, 0.906f, 0.702f));
+		//ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.408f, 0.906f, 0.906f, 0.702f));
+		ImGui::Text("Vergil SDT");
+
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::vergilsdt);
 		}
 		ImGui::Separator();
-		if (ImGui::CollapsingHeader("Vergil SDT")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::vergilsdt);
-			}
+		ImGui::Text("Vergil cheats");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::vergilcheat);
 		}
-		if (ImGui::CollapsingHeader("Vergil Cheats")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::vergilcheat);
-			}
-		}
+		//ImGui::PopStyleColor();
+		//ImGui::PopStyleColor();
+		//ImGui::PopStyleColor();
 		ImGui::Separator();
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::taunt);
-			}
+		ImGui::Text("Taunts");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::taunt);
+		}
 
 	}
 };
@@ -1079,41 +1104,44 @@ public:
 		: super(mf, "System") {}
 	virtual void OnGui() {
 		super::OnGui();
-		if (ImGui::CollapsingHeader("Camera")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::camera);
-			}
+		ImGui::Separator();
+		ImGui::Text("Camera");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::camera);
 		}
-		if (ImGui::CollapsingHeader("Quality of Life")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::qol);
-			}
+		ImGui::Separator();
+		ImGui::Text("Quality-of-life");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::qol);
 		}
 	}
 };
-class CommonWindow : public PageWindow {
+class GameplayWindow : public PageWindow {
 public:
 	typedef PageWindow super;
-	CommonWindow(ModFramework* mf)
-		: super(mf, "Common") {}
+	GameplayWindow(ModFramework* mf)
+		: super(mf, "Gameplay") {}
 	virtual void OnGui() {
+		ImGui::Separator();
+		ImGui::Text("Common Mechanics");
 		super::OnGui();
 		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_pagelist_ui(Mod::common);
+			p_mf->get_mods()->on_pagelist_ui(Mod::mechanics);
 		}
-		if (ImGui::CollapsingHeader("Enemy Step")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::enemystep);
-			}
+		ImGui::Separator();
+		ImGui::Text("Enemy Step");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::enemystep);
 		}
-		if (ImGui::CollapsingHeader("Animation")) {
-			if (p_mf->is_error() && p_mf->is_ready()) {
-				//p_mf->get_mods()->on_draw_ui();
-				p_mf->get_mods()->on_pagelist_ui(Mod::animation);
-			}
+
+		ImGui::Separator();
+		ImGui::Text("Animation");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::animation);
 		}
 	}
 };
@@ -1235,10 +1263,10 @@ void InitSample(ModFramework* mf)
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
     
     ImwWindow* pFocusWindow = new FocusWindow(mf);
-	ImwWindow* commonwindow = new CommonWindow(mf);
+	ImwWindow* gameplaywindow = new GameplayWindow(mf);
 	ImwWindow* systemwindow = new SystemWindow(mf);
 	ImwWindow* practicewindow = new PracticeWindow(mf);
-    ImwWindow* gamewindow   = new GameplayWindow(mf);
+    ImwWindow* scenariowindow   = new ScenarioWindow(mf);
     ImwWindow* nerowindow	= new NeroWindow(mf);
     ImwWindow* dantewindow	= new DanteWindow(mf);
     //ImwWindow* vwindow      = new PageWindow(mf, 4, "V");
@@ -1252,18 +1280,18 @@ void InitSample(ModFramework* mf)
 	ImwWindow* pWindow5 = new MyImwWindow3();
 	;*/
 
-	//ImwWindow* pStyleEditor = new StyleEditorWindow();
+	ImwWindow* pStyleEditor = new StyleEditorWindow();
 	//new MyMenu();
 	new MyStatusBar();
     new MyToolBar(mf);
 
-	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.6f);
-    oMgr.DockWith(gamewindow, commonwindow);
-	oMgr.DockWith(systemwindow,commonwindow);
-	oMgr.DockWith(practicewindow, commonwindow);
-	oMgr.DockWith(nerowindow, commonwindow);
-    oMgr.DockWith(dantewindow, commonwindow);
-	oMgr.DockWith(vergilwindow, commonwindow);
+	oMgr.Dock(gameplaywindow, E_DOCK_ORIENTATION_CENTER,0.6f);
+    oMgr.DockWith(scenariowindow, gameplaywindow);
+	oMgr.DockWith(systemwindow, gameplaywindow);
+	oMgr.DockWith(practicewindow, gameplaywindow);
+	oMgr.DockWith(nerowindow, gameplaywindow);
+    oMgr.DockWith(dantewindow, gameplaywindow);
+	oMgr.DockWith(vergilwindow, gameplaywindow);
 	
     //    oMgr.DockWith(vwindow, commonwindow);
     //oMgr.DockWith(vergilwindow, commonwindow);
@@ -1276,7 +1304,7 @@ void InitSample(ModFramework* mf)
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
-    //oMgr.DockWith(pStyleEditor, nerowindow);
+    oMgr.DockWith(pStyleEditor, gameplaywindow);
 	//#ifndef NDEBUG
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
     oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);

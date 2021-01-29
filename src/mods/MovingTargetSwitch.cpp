@@ -33,7 +33,7 @@ static naked void detour() {
 
 std::optional<std::string> MovingTargetSwitch::on_initialize() {
   ischecked            = &MovingTargetSwitch::cheaton;
-  onpage               = common;
+  onpage               = mechanics;
 
   full_name_string     = "Moving Target Switch";
   author_string        = "SSSiyan";

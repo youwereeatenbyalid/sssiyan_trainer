@@ -290,7 +290,7 @@ protected:
     using ValueList = std::vector<std::reference_wrapper<IModValue>>;
 
 public:
-    enum page_enum {breaker,wiresnatch,nero,dantesdt,dantecheat,commoncheat,vergilsdt,vergiltrick,vergildoppel,vergilcheat,gamemode,bloodypalace,gameplay,camera,qol,common,enemystep,animation,taunt};
+    enum page_enum {breaker,wiresnatch,nero,dantesdt,dantecheat,commoncheat,vergilsdt,vergiltrick,vergildoppel,vergilcheat,gamemode,bloodypalace,balance,camera,qol,mechanics,enemystep,animation,taunt};
     //enum old_enum {common, gamemode, nero, dantecheat, vpage, vergiltrick };
     virtual ~Mod() {};
     virtual std::string_view get_name() const { return "UnknownMod"; };
