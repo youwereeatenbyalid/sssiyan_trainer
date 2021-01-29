@@ -21,6 +21,7 @@ public:
   static uintptr_t rgenable_jmp_ret;
   static uintptr_t rgmod_jmp_ret;
   static uintptr_t combatmode_jmp_ret;
+  static uintptr_t dantefix_jmp_ret;
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
@@ -49,5 +50,6 @@ private:
   std::unique_ptr<FunctionHook> m_rgenable_hook;
   std::unique_ptr<FunctionHook> m_rgmod_hook;
   std::unique_ptr<FunctionHook> m_combatmode_hook;
+  std::unique_ptr<FunctionHook> m_dantefix_hook;
 
 };

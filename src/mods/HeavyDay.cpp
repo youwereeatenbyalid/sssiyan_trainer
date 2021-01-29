@@ -14,6 +14,7 @@ uintptr_t HeavyDay::dtenable_ja_ret{NULL};
 uintptr_t HeavyDay::rgenable_jmp_ret{NULL};
 uintptr_t HeavyDay::rgmod_jmp_ret{NULL};
 uintptr_t HeavyDay::combatmode_jmp_ret{ NULL };
+uintptr_t HeavyDay::dantefix_jmp_ret{ NULL };
 bool HeavyDay::cheaton{NULL};
 
 
@@ -628,6 +629,32 @@ static naked void combatmode_detour() {
     }
 }
 
+
+
+static naked void dantefix_detour() {
+    __asm {
+        validation:
+            //jump if dante because this is hyper specific
+            cmp byte ptr [PlayerTracker::playerid], 1
+            je code
+            cmp byte ptr [HeavyDay::cheaton], 1
+            je cheatcode
+            jmp code
+        code:
+            lea eax,[rdx+01]
+            mov [rsi+0x18],eax
+            jmp qword ptr [HeavyDay::dantefix_jmp_ret]
+        cheatcode:
+            lea eax,[rdx+01]
+            cmp eax, 2
+            jb originalcode
+            mov eax, 0
+        originalcode:
+            mov [rsi+0x18],eax
+            jmp qword ptr [HeavyDay::dantefix_jmp_ret]
+    }
+}
+
 // clang-format on
 
 std::optional<std::string> HeavyDay::on_initialize() {
@@ -651,7 +678,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto rgenable_addr = utility::scan(base, "41 80 B8 CA 0E 00 00 00 74 58");
   auto rgmod_addr = utility::scan(base, "4D F3 0F 10 4A 28");
   auto combatmode_addr = utility::scan(base, "41 88 86 93 00 00 00");
-
+  auto dantefix_addr = utility::scan(base, "41 8D 50 38 E8 23 F4 76 01");
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
   }
@@ -684,6 +711,9 @@ std::optional<std::string> HeavyDay::on_initialize() {
   }
   if (!combatmode_addr) {
       return "Unable to find combat mode pattern.";
+  }
+  if (!dantefix_addr){
+      return "Unable to find dante fix pattern";
   }
     if (!install_hook_absolute(enemystep_addr.value(), m_enemystep_hook,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
@@ -752,6 +782,12 @@ std::optional<std::string> HeavyDay::on_initialize() {
         return "Failed to initialize combatmode";
     }
     
+    if (!install_hook_absolute(dantefix_addr.value()+0x55, m_dantefix_hook,
+        &dantefix_detour, &dantefix_jmp_ret, 6)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize dantefix";
+    }
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
     HeavyDay::dtenable_ja_ret  = dtenable_addr.value() + 0x166;
   return Mod::on_initialize();
