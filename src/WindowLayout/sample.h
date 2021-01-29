@@ -1124,9 +1124,9 @@ public:
 	GameplayWindow(ModFramework* mf)
 		: super(mf, "Gameplay") {}
 	virtual void OnGui() {
+		super::OnGui();
 		ImGui::Separator();
 		ImGui::Text("Common Mechanics");
-		super::OnGui();
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::mechanics);
 		}
