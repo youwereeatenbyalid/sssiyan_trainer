@@ -13,6 +13,7 @@ uintptr_t HeavyDay::dtenable_jmp_ret{NULL};
 uintptr_t HeavyDay::dtenable_ja_ret{NULL};
 uintptr_t HeavyDay::rgenable_jmp_ret{NULL};
 uintptr_t HeavyDay::rgmod_jmp_ret{NULL};
+uintptr_t HeavyDay::combatmode_jmp_ret{ NULL };
 bool HeavyDay::cheaton{NULL};
 
 
@@ -498,6 +499,27 @@ static naked void pvp1_detour() {
             cmp dword ptr [rbx+0x000000F4],01
             jmp qword ptr [HeavyDay::pvp1_jmp_ret]        
         cheatcode:
+            cmp [PlayerTracker::shadowentity], 0
+            je ret_jmp
+            push r8
+            mov r8, [PlayerTracker::shadowentity]
+            cmp qword ptr [r8+0x1F8], 0
+            je ret_jmp_pop
+            mov r8, [r8+0x1F8]
+            mov byte ptr [r8+0x1DF], 0
+            mov r8, [PlayerTracker::griffonentity]
+            cmp qword ptr [r8+0x1F8], 0
+            je ret_jmp_pop
+            mov r8, [r8+0x1F8]
+            mov byte ptr[r8+0x1DF], 0
+            mov r8, [PlayerTracker::nightmareentity]
+            cmp qword ptr [r8+0x1F8], 0
+            je ret_jmp_pop
+            mov r8, [r8+0x1F8]
+            mov byte ptr [r8+0x1DF], 0
+        ret_jmp_pop:
+            pop r8
+        ret_jmp:
             jmp qword ptr [HeavyDay::pvp1_jmp_ret]
 	}
 }
@@ -572,6 +594,7 @@ static naked void rgenable_detour() {
             jmp qword ptr [HeavyDay::rgenable_jmp_ret]
 	}
 }
+
 static naked void rgmod_detour() {
 	__asm {
 	    validation:
@@ -588,6 +611,21 @@ static naked void rgmod_detour() {
 	}
 }
 
+
+static naked void combatmode_detour() {
+    __asm {
+        validation:
+            cmp byte ptr [HeavyDay::cheaton], 1
+            je cheatcode
+            jmp code
+        code:
+            mov byte ptr [r14+0x93], al
+            jmp qword ptr [HeavyDay::combatmode_jmp_ret]
+        cheatcode:
+            mov byte ptr [r14+0x93], 01
+            jmp qword ptr [HeavyDay::combatmode_jmp_ret]
+    }
+}
 
 // clang-format on
 
@@ -611,6 +649,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto dtenable_addr = utility::scan(base, "0F 87 60 01 00 00 A9");
   auto rgenable_addr = utility::scan(base, "41 80 B8 CA 0E 00 00 00 74 58");
   auto rgmod_addr = utility::scan(base, "4D F3 0F 10 4A 28");
+  auto combatmode_addr = utility::scan(base, "41 88 86 93 00 00 00");
 
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
@@ -641,6 +680,9 @@ std::optional<std::string> HeavyDay::on_initialize() {
   }
   if (!rgmod_addr) {
     return "Unable to find Royalg Guard Mod pattern.";
+  }
+  if (!combatmode_addr) {
+      return "Unable to find combat mode pattern.";
   }
     if (!install_hook_absolute(enemystep_addr.value(), m_enemystep_hook,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
@@ -701,6 +743,12 @@ std::optional<std::string> HeavyDay::on_initialize() {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize rgmod";
+    }
+    if (!install_hook_absolute(combatmode_addr.value(), m_combatmode_hook,
+        &combatmode_detour, &combatmode_jmp_ret, 7)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize combatmode";
     }
     
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
