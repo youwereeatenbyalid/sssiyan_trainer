@@ -30,7 +30,7 @@ static naked void detour() {
 std::optional<std::string> DisableTitleTimer::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &DisableTitleTimer::cheaton;
-  onpage    = commonpage;
+  onpage    = common;
   full_name_string     = "Disable Titlescreen Timer";
   author_string        = "The Hitchhiker";
   description_string   = "Prevent the titlescreen from playing the mission 1 cutscene if left idling.";

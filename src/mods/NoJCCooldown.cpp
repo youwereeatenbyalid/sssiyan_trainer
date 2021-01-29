@@ -28,7 +28,7 @@ static naked void detour() {
 
 std::optional<std::string> NoJCCooldown::on_initialize() {
   ischecked          = &NoJCCooldown::cheaton;
-  onpage             = gamepage;
+  onpage             = gamemode;
 
   full_name_string   = "No Jump Cancel Cooldown";
   author_string      = "SSSiyan";

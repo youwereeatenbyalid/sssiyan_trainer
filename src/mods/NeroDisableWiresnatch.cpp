@@ -59,7 +59,7 @@ static naked void detour2() {
 
 std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   ischecked          = &NeroDisableWiresnatch::cheaton;
-  onpage             = neropage;
+  onpage             = wiresnatch;
 
   full_name_string   = "Disable Wiresnatch";
   author_string      = "SSSiyan";

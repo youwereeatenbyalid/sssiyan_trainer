@@ -32,7 +32,7 @@ static naked void detour() {
 
 std::optional<std::string> NeroInfPunchline::on_initialize() {
   ischecked            = &NeroInfPunchline::cheaton;
-  onpage               = neropage;
+  onpage               = nero;
 
   full_name_string     = "Infinite Punchline Duration";
   author_string        = "SSSiyan";

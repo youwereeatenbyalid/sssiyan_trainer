@@ -84,7 +84,7 @@ static naked void detour() {
 
 std::optional<std::string> BpStageJump::on_initialize() {
   ischecked               = &BpStageJump::cheaton;
-  onpage                  = commonpage;
+  onpage                  = common;
   full_name_string        = "Bp Stage Jump (+)";
   author_string           = "SSSiyan";
   description_string      = "Allows you to skip to a BP stage of your choosing.";

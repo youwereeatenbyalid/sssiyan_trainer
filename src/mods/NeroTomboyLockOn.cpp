@@ -35,7 +35,7 @@ static naked void detour() {
 
 std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   ischecked          = &NeroTomboyLockOn::cheaton;
-  onpage             = neropage;
+  onpage             = nero;
 
   full_name_string   = "Lock On With Tomboy";
   author_string      = "SSSiyan";

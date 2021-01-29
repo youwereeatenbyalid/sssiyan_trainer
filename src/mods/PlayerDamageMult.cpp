@@ -60,7 +60,7 @@ static naked void detour2() {
 
 std::optional<std::string> PlayerDamageMult::on_initialize() {
   ischecked          = &PlayerDamageMult::cheaton;
-  onpage             = gamepage;
+  onpage             = gamemode;
   full_name_string   = "Damage Multiplier (+)";
   author_string      = "Dante";
   description_string = "Adjust the damage output of players and enemies.";

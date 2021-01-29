@@ -105,7 +105,7 @@ static naked void detour3() { // Disable Directional Dodges
 
 std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
   ischecked            = &VergilTrickUpLockedOn::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergiltrick;
 
   full_name_string     = "Trick Up On Forward + Trick";
   author_string        = "SSSiyan";

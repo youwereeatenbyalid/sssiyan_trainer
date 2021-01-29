@@ -39,7 +39,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   ischecked            = &VergilDirectionalMappings::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergiltrick;
   
   full_name_string     = "Down Trick on Back + Trick";
   author_string        = "The Hitchhiker";

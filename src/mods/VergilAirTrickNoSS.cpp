@@ -33,7 +33,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   ischecked            = &VergilAirTrickNoSS::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergiltrick;
 
   full_name_string     = "Disable Embedded Swords";
   author_string        = "VPZadov";

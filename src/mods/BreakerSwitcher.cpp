@@ -183,7 +183,7 @@ naked void BreakerSwitcher::breakerpress_detour() {
 std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &BreakerSwitcher::cheaton;
-  onpage    = neropage;
+  onpage    = breaker;
 
   full_name_string     = "Breaker Switcher";
   author_string        = "The Hitchhiker (original version by Nino)";

@@ -27,7 +27,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   ischecked          = &VergilNoTrickRestriction::cheaton;
-  onpage             = vergilpage;
+  onpage             = vergiltrick;
 
   full_name_string   = "No Trick Restriction";
   author_string      = "SSSiyan";

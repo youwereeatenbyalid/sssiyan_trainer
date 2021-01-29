@@ -52,7 +52,7 @@ static naked void detour2() {
 
 std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   ischecked          = &NeroSwapWiresnatch::cheaton;
-  onpage             = neropage;
+  onpage             = wiresnatch;
 
   full_name_string   = "Angel and Devil Snatch";
   author_string      = "SSSiyan";

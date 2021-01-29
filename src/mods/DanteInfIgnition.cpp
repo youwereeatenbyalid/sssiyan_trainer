@@ -52,7 +52,7 @@ static naked void detour2() {
 
 std::optional<std::string> DanteInfIgnition::on_initialize() {
   ischecked            = &DanteInfIgnition::cheaton;
-  onpage               = dantepage;
+  onpage               = dantecheat;
 
   full_name_string     = "Infinite Ignition";
   author_string        = "SSSiyan";

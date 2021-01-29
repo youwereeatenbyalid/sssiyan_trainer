@@ -32,7 +32,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteMaxSDT::on_initialize() {
   ischecked            = &DanteMaxSDT::cheaton;
-  onpage               = dantepage;
+  onpage               = dantesdt;
 
   full_name_string     = "Infinite SDT";
   author_string        = "SSSiyan";

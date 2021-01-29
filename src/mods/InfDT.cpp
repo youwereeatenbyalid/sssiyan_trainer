@@ -28,7 +28,7 @@ static naked void detour() {
 
 std::optional<std::string> InfDT::on_initialize() {
   ischecked          = &InfDT::cheaton;
-  onpage             = gamepage;
+  onpage             = gamemode;
 
   full_name_string   = "Infinite DT";
   author_string      = "SSSiyan";

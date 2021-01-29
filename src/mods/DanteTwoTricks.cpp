@@ -30,7 +30,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteTwoTricks::on_initialize() {
   ischecked          = &DanteTwoTricks::cheaton;
-  onpage             = dantepage;
+  onpage             = dantecheat;
 
   full_name_string   = "Always Get 2 Tricks";
   author_string      = "SSSiyan";

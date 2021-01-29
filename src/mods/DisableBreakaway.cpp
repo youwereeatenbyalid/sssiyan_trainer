@@ -39,7 +39,7 @@ static naked void detour() {
 std::optional<std::string> DisableBreakaway::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &DisableBreakaway::cheaton;
-  onpage    = neropage;
+  onpage    = breaker;
 
   full_name_string     = "Disable Breakaway";
   author_string        = "Lidemi & The Hitchhiker";

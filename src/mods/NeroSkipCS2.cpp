@@ -33,7 +33,7 @@ static naked void detour() {
 
 std::optional<std::string> NeroSkipCS2::on_initialize() {
   ischecked            = &NeroSkipCS2::cheaton;
-  onpage               = neropage;
+  onpage               = nero;
 
   full_name_string     = "Skip Charge Shot 2";
   author_string        = "SSSiyan";

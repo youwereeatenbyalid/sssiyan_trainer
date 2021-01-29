@@ -33,7 +33,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   ischecked            = &DanteInfQ4ExitWindow::cheaton;
-  onpage               = dantepage;
+  onpage               = dantesdt;
 
   full_name_string     = "Infinite Q4 SDT Exit Window";
   author_string        = "SSSiyan";

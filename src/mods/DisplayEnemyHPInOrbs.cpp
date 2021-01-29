@@ -36,7 +36,7 @@ static naked void detour() {
 
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   ischecked            = &DisplayEnemyHPInOrbs::cheaton;
-  onpage               = commonpage;
+  onpage               = common;
 
   full_name_string     = "Display Enemy HP in Orbs";
   author_string        = "SSSiyan";

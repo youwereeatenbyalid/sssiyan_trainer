@@ -66,7 +66,7 @@ static naked void detour3() {
 
 std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   ischecked          = &DanteAlwaysOvertop::cheaton;
-  onpage             = dantepage;
+  onpage             = dantecheat;
 
   full_name_string   = "Always Overtop";
   author_string      = "SSSiyan";

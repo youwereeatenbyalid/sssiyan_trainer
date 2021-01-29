@@ -27,7 +27,7 @@ static naked void detour() {
 std::optional<std::string> BufferedReversals::on_initialize() {
   
   ischecked                  = &BufferedReversals::cheaton;
-  onpage                     = gamepage;
+  onpage                     = gamemode;
   full_name_string           = "Buffered Reversals";
   author_string              = "Nekupaska, socks";
   description_string		 = "Allows you to use directional moves in any direction. "

@@ -81,7 +81,7 @@ static naked void detour2() {
 
 std::optional<std::string> NeroInfBreakers::on_initialize() {
   ischecked          = &NeroInfBreakers::cheaton;
-  onpage             = neropage;
+  onpage             = breaker;
 
   full_name_string   = "Infinite Devil Breakers";
   author_string      = "DeepDarkKapustka";

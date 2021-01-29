@@ -32,7 +32,7 @@ static naked void detour() {
 
 std::optional<std::string> BypassBPCav::on_initialize() {
   ischecked          = &BypassBPCav::cheaton;
-  onpage             = dantepage;
+  onpage             = dantecheat;
 
   full_name_string   = "Bypass BP Cavaliere Restriction";
   author_string      = "SSSiyan";

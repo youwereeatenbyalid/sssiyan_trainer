@@ -28,7 +28,7 @@ static naked void detour() {
 
 std::optional<std::string> NeroNoDTCooldown::on_initialize() {
   ischecked            = &NeroNoDTCooldown::cheaton;
-  onpage               = neropage;
+  onpage               = nero;
 
   full_name_string     = "No DT Cooldown";
   author_string        = "SSSiyan";

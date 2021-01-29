@@ -108,7 +108,7 @@ static naked void detour() {
 
 std::optional<std::string> EntitySpeeds::on_initialize() {
   ischecked          = &EntitySpeeds::cheaton;
-  onpage             = gamepage;
+  onpage             = gamemode;
   full_name_string   = "Entity Speeds (+)";
   author_string      = "SSSiyan";
   description_string = "Adjust the speed of various moves.";

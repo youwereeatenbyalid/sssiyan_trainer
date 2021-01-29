@@ -363,7 +363,7 @@ static naked void cavcoordinatechange_detour() {
 
 std::optional<std::string> LDK::on_initialize() {
   ischecked            = &LDK::cheaton;
-  onpage               = commonpage;
+  onpage               = common;
 
   full_name_string     = "Legendary Dark Knights";
   author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";

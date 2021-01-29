@@ -33,7 +33,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteQuickSDT::on_initialize() {
   ischecked            = &DanteQuickSDT::cheaton;
-  onpage               = dantepage;
+  onpage               = dantesdt;
   full_name_string     = "Quick SDT";
   author_string        = "SSSiyan";
   description_string   = "Reduces the time you have to hold DT to enter SDT.";

@@ -885,14 +885,13 @@ public:
 class PageWindow : public ImwWindow, ImwMenu
 {
 public:
-  PageWindow(ModFramework* mf, int p_pageid, const char* pTitle = "PageWindow")
+  PageWindow (ModFramework* mf, const char* pTitle = "PageWindow")
 		: ImwWindow()
 		, ImwMenu(0, false)
 	{
 		p_mf = mf;
 		SetTitle(pTitle);
 		m_pText[0] = 0;
-        pageid = p_pageid;
 	}
 	virtual void OnGui()
 	{
@@ -906,26 +905,15 @@ public:
         */
 		/*draw_about();*/
 
-		if (p_mf->is_error() && p_mf->is_ready()) {
-			//p_mf->get_mods()->on_draw_ui();
-            p_mf->get_mods()->on_pagelist_ui(pageid);
-		}
-		else if (!p_mf->is_ready()) {
+
+		//else 
+		if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
 		}
 		else if(!p_mf->is_error()) {
 			ImGui::TextWrapped("ModFramework error: %s", p_mf->get_error().c_str());
 		}
 
-
-		/*if (ImGui::Button("Create new MyImwWindow3"))
-		{
-			new MyImwWindow3();
-		}*/
-
-		//ImGui::InputText("Input", m_pText, 512);
-
-		//ImGui::ShowMetricsWindow();
 	}
 
 	virtual void OnMenu()
@@ -936,7 +924,59 @@ public:
 	ModFramework* p_mf;
     int pageid;
 };
+class NeroWindow : public PageWindow {
+public:
+	typedef PageWindow super;
+	NeroWindow(ModFramework* mf)
+	: super(mf, "Nero Options"){}
+	virtual void OnGui(){
+		super::OnGui();
+		if(ImGui::CollapsingHeader("Breaker Options")){
+			if (p_mf->is_error() && p_mf->is_ready()) {
+				//p_mf->get_mods()->on_draw_ui();
+				p_mf->get_mods()->on_pagelist_ui(Mod::breaker);
+			}
+		}
+		if (ImGui::CollapsingHeader("Wiresnatch Options")) {
+			if (p_mf->is_error() && p_mf->is_ready()) {
+				//p_mf->get_mods()->on_draw_ui();
+				p_mf->get_mods()->on_pagelist_ui(Mod::wiresnatch);
+			}
+		}
+		ImGui::Separator();
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::nero);
+		}
+	}
+};
 
+class DanteWindow : public PageWindow {
+public:
+	typedef PageWindow super;
+	DanteWindow(ModFramework* mf)
+		: super(mf, "Dante Options") {}
+	virtual void OnGui() {
+		super::OnGui();
+		if (ImGui::CollapsingHeader("SDT Options")) {
+			if (p_mf->is_error() && p_mf->is_ready()) {
+				//p_mf->get_mods()->on_draw_ui();
+				p_mf->get_mods()->on_pagelist_ui(Mod::dantesdt);
+			}
+		}
+		if (ImGui::CollapsingHeader("Dante Cheats")) {
+			if (p_mf->is_error() && p_mf->is_ready()) {
+				//p_mf->get_mods()->on_draw_ui();
+				p_mf->get_mods()->on_pagelist_ui(Mod::dantecheat);
+			}
+		}
+		ImGui::Separator();
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			std::string gflystr = "DanteGuardflyWip";
+			p_mf->get_mods()->get_mod(gflystr)->on_draw_ui();
+		}
+	}
+};
 class PlaceholderWindow : public ImWindow::ImwWindow
 {
 public:
@@ -1055,13 +1095,13 @@ void InitSample(ModFramework* mf)
 	//ImwWindow* pWindowPlaceholder = new PlaceholderWindow();
     
     ImwWindow* pFocusWindow = new FocusWindow(mf);
-	ImwWindow* commonwindow = new PageWindow(mf, 0, "Common Changes");
-    ImwWindow* gamewindow   = new PageWindow(mf, 1, "Gameplay Changes");
-    ImwWindow* nerowindow	= new PageWindow(mf, 2, "Nero");
-    ImwWindow* dantewindow	= new PageWindow(mf, 3, "Dante");
-    ImwWindow* vwindow      = new PageWindow(mf, 4, "V");
-    ImwWindow* vergilwindow = new PageWindow(mf, 5, "Vergil");
-	commonwindow->SetClosable(false);
+	//ImwWindow* commonwindow = new PageWindow(mf, 0, "Common Changes");
+    //ImwWindow* gamewindow   = new PageWindow(mf, 1, "Gameplay Changes");
+    ImwWindow* nerowindow	= new NeroWindow(mf);
+    ImwWindow* dantewindow	= new DanteWindow(mf);
+    //ImwWindow* vwindow      = new PageWindow(mf, 4, "V");
+    //ImwWindow* vergilwindow = new PageWindow(mf, 5, "Vergil");
+	//commonwindow->SetClosable(false);
     //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
 
@@ -1075,12 +1115,12 @@ void InitSample(ModFramework* mf)
 	new MyStatusBar();
     new MyToolBar(mf);
 
-	oMgr.Dock(commonwindow, E_DOCK_ORIENTATION_CENTER,0.6f);
-    oMgr.DockWith(gamewindow, commonwindow);
-        oMgr.DockWith(nerowindow, commonwindow);
-    oMgr.DockWith(dantewindow, commonwindow);
-        oMgr.DockWith(vwindow, commonwindow);
-    oMgr.DockWith(vergilwindow, commonwindow);
+	oMgr.Dock(nerowindow, E_DOCK_ORIENTATION_CENTER,0.6f);
+    //oMgr.DockWith(gamewindow, commonwindow);
+    //    oMgr.DockWith(nerowindow, commonwindow);
+    oMgr.DockWith(dantewindow, nerowindow);
+    //    oMgr.DockWith(vwindow, commonwindow);
+    //oMgr.DockWith(vergilwindow, commonwindow);
 	
 	//oMgr.Dock(pWindow2, E_DOCK_ORIENTATION_LEFT);
 	//oMgr.DockWith(pWindowPlaceholder, pWindow2, E_DOCK_ORIENTATION_BOTTOM);
@@ -1090,7 +1130,7 @@ void InitSample(ModFramework* mf)
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
-    oMgr.DockWith(pStyleEditor, commonwindow);
+    oMgr.DockWith(pStyleEditor, nerowindow);
 	//#ifndef NDEBUG
 	ImwWindow* pDebugWindow = new DebugWindow(mf);
     oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);

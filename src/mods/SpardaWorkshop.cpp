@@ -116,7 +116,7 @@ static naked void enemyplacer_detour() {
 std::optional<std::string> SpardaWorkshop::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &SpardaWorkshop::cheaton;
-  onpage    = commonpage;
+  onpage    = common;
   full_name_string     = "Sparda's Workshop";
   author_string        = "Lidemi";
   description_string   = "Integration with the Sparda's Workshop mod."

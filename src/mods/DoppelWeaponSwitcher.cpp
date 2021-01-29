@@ -455,7 +455,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   ischecked = &DoppelWeaponSwitcher::cheaton;
-  onpage    = vergilpage;
+  onpage    = vergiltrick;
   full_name_string     = "Doppelganger Weapon Switcher";
   author_string        = "The HitchHiker";
   description_string   = "This is the description of DoppelWeaponSwitcher.";

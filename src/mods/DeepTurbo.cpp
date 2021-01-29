@@ -50,7 +50,7 @@ static naked void detour2() {
 
 std::optional<std::string> DeepTurbo::on_initialize() {
   ischecked          = &DeepTurbo::cheaton;
-  onpage             = commonpage;
+  onpage             = common;
 
   full_name_string   = "Turbo (+)";
   author_string      = "DeepDarkKapustka";

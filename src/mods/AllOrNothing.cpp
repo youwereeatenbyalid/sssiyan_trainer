@@ -89,7 +89,7 @@ static naked void detour() {
 
 std::optional<std::string> AllOrNothing::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  onpage    = gamepage;
+  onpage    = gamemode;
   ischecked = &AllOrNothing::cheaton;
 
   full_name_string     = "Must Style / Damage Toggles (+)";
@@ -211,7 +211,7 @@ static naked void detour() {
 
 std::optional<std::string> AllOrNothing::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  onpage    = gamepage;
+  onpage    = gamemode;
   ischecked = &AllOrNothing::cheaton;
 
   full_name_string     = "Must Style / Damage Toggles (+)";

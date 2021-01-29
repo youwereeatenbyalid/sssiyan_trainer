@@ -72,7 +72,7 @@ static naked void detour() {
 
 std::optional<std::string> DamageMultiplier::on_initialize() {
   // ischecked             = &DamageMultiplier::cheaton;
-  // onpage                = gamepage;
+  // onpage                = gamemode;
 
   full_name_string      = "Damage Multiplier (+)";
   author_string         = "SSSiyan";

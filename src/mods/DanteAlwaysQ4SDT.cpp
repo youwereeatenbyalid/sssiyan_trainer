@@ -34,7 +34,7 @@ static naked void detour() {
 
 std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   ischecked          = &DanteAlwaysQ4SDT::cheaton;
-  onpage             = dantepage;
+  onpage             = dantesdt;
 
   full_name_string   = "Always Quadruple S";
   author_string      = "SSSiyan";

@@ -25,7 +25,7 @@ static naked void detour() {
 
 std::optional<std::string> NoScreenShake::on_initialize() {
   ischecked            = &NoScreenShake::cheaton;
-  onpage               = commonpage;
+  onpage               = common;
 
   full_name_string     = "No Screen Shake";
   author_string        = "DeepDarkKapustka";

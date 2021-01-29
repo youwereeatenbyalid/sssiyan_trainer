@@ -80,7 +80,7 @@ static naked void detour() {
 
 std::optional<std::string> AllStart::on_initialize() {
   ischecked          = &AllStart::cheaton;
-  onpage             = gamepage;
+  onpage             = gamemode;
 
   full_name_string   = "AllStart";
   author_string      = "SSSiyan";

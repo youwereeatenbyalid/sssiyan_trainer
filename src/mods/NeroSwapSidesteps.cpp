@@ -50,7 +50,7 @@ static naked void detour2() {
 
 std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   ischecked            = &NeroSwapSidesteps::cheaton;
-  onpage               = neropage;
+  onpage               = nero;
 
   full_name_string     = "Swap Sidesteps with Table Hopper";
   author_string        = "SSSiyan";
