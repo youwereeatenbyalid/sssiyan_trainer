@@ -1280,7 +1280,7 @@ void InitSample(ModFramework* mf)
 	ImwWindow* pWindow5 = new MyImwWindow3();
 	;*/
 
-	ImwWindow* pStyleEditor = new StyleEditorWindow();
+
 	//new MyMenu();
 	new MyStatusBar();
     new MyToolBar(mf);
@@ -1304,10 +1304,12 @@ void InitSample(ModFramework* mf)
 
 	//oMgr.Dock(pNodeWindow, E_DOCK_ORIENTATION_LEFT);
     oMgr.Dock(pFocusWindow, E_DOCK_ORIENTATION_RIGHT, 0.4f);
-    oMgr.DockWith(pStyleEditor, gameplaywindow);
+
+	//ImwWindow* pStyleEditor = new StyleEditorWindow();
+    //oMgr.DockWith(pStyleEditor, gameplaywindow);
 	//#ifndef NDEBUG
-	ImwWindow* pDebugWindow = new DebugWindow(mf);
-    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+	//ImwWindow* pDebugWindow = new DebugWindow(mf);
+    //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
 	//#endif
 
 	//oMgr.Dock
