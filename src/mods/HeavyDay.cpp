@@ -39,7 +39,7 @@ static naked void enemystep_detour() {
 
         cheatcode:
             test ecx,ecx
-            je code
+            jne code
 
             push r8
             push r9
@@ -520,6 +520,7 @@ static naked void pvp1_detour() {
         ret_jmp_pop:
             pop r8
         ret_jmp:
+            cmp byte ptr [HeavyDay::cheaton], 1
             jmp qword ptr [HeavyDay::pvp1_jmp_ret]
 	}
 }
