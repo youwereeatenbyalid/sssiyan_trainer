@@ -82,7 +82,7 @@ static naked void detour3() {
 
 std::optional<std::string> AlwaysSTaunts::on_initialize() {
   ischecked          = &AlwaysSTaunts::cheaton;
-  onpage             = gamemode;
+  onpage             = taunt;
 
   full_name_string   = "Always S+ Taunts (+)";
   author_string      = "SSSiyan";

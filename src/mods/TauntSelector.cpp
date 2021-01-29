@@ -139,7 +139,7 @@ static naked void detour() {
 std::optional<std::string> TauntSelector::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &TauntSelector::cheaton;
-  onpage    = common;
+  onpage    = taunt;
 
   full_name_string     = "Taunt Selector (+)";
   author_string        = "The Hitchhiker";

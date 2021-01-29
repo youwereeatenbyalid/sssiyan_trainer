@@ -53,7 +53,7 @@ static naked void detour() {
 
 std::optional<std::string> JumpStart::on_initialize() {
   ischecked          = &JumpStart::cheaton ;
-  onpage             = gamemode;
+  onpage             = enemystep;
 
   full_name_string   = "JumpStart";
   author_string      = "SSSiyan";

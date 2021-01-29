@@ -34,7 +34,7 @@ static naked void detour() {
 
 std::optional<std::string> SprintInBattle::on_initialize() {
   ischecked          = &SprintInBattle::cheaton;
-  onpage             = gamemode;
+  onpage             = common;
 
   full_name_string   = "Sprint In Battle";
   author_string      = "SSSiyan";

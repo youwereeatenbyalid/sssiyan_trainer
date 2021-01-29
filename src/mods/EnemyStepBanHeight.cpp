@@ -30,7 +30,7 @@ static naked void detour() {
 
 std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   ischecked            = &EnemyStepBanHeight::cheaton;
-  onpage               = gamemode;
+  onpage               = enemystep;
   full_name_string     = "Remove Enemy Step Height Restriction";
   author_string        = "SSSiyan";
   description_string   = "Allows you to enemy step as close to the floor as possible.";

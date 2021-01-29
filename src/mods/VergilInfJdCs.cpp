@@ -27,7 +27,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilInfJdCs::on_initialize() {
   ischecked            = &VergilInfJdCs::cheaton;
-  onpage               = vergiltrick;
+  onpage               = vergilcheat;
 
   full_name_string     = "Infinite Just Judgement Cuts";
   author_string        = "SSSiyan";

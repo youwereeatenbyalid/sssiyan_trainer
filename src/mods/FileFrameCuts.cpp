@@ -69,7 +69,7 @@ static naked void detour() {
 
 std::optional<std::string> FileFrameCuts::on_initialize() {
   ischecked            = &FileFrameCuts::cheaton;
-  onpage               = gamemode;
+  onpage               = animation;
 
   full_name_string     = "Frame Cuts (+)";
   author_string        = "SSSiyan";

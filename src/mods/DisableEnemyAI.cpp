@@ -34,7 +34,7 @@ static naked void detour() {
 
 std::optional<std::string> DisableEnemyAI::on_initialize() {
   ischecked               = &DisableEnemyAI::cheaton;
-  onpage                  = gamemode;
+  onpage                  = commoncheat;
 
   full_name_string        = "Disable Enemy AI";
   author_string           = "SSSiyan";

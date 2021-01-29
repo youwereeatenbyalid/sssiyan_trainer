@@ -660,7 +660,7 @@ static naked void dantefix_detour() {
 std::optional<std::string> HeavyDay::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &HeavyDay::cheaton;
-  onpage    = common;
+  onpage    = gamemode;
 
   full_name_string     = "PVP";
   author_string        = "The HitchHiker, SSSiyan, Dr. Penguin";

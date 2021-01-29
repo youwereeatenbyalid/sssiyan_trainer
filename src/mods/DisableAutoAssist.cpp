@@ -26,7 +26,7 @@ static naked void detour() {
 std::optional<std::string> DisableAutoAssist::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &DisableAutoAssist::cheaton;
-  onpage    = common;
+  onpage    = qol;
   full_name_string     = "Disable Auto Assist";
   author_string        = "The Hitchhiker";
   description_string   = "Prevents Auto Assist from being activated.";

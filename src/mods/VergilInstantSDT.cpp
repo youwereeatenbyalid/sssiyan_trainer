@@ -50,7 +50,7 @@ static naked void detour2() {
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   ischecked            = &VergilInstantSDT::cheaton;
-  onpage               = vergiltrick;
+  onpage               = vergilsdt;
 
   full_name_string     = "Instant SDT";
   author_string        = "SSSiyan";

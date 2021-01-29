@@ -31,7 +31,7 @@ static naked void detour() {
 
 std::optional<std::string> VergilInfConcentration::on_initialize() {
   ischecked            = &VergilInfConcentration::cheaton;
-  onpage               = vergiltrick;
+  onpage               = vergilcheat;
 
   full_name_string     = "Infinite Concentration";
   author_string        = "SSSiyan";

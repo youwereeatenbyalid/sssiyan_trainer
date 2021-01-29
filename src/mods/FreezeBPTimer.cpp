@@ -29,7 +29,7 @@ static naked void detour() {
 
 std::optional<std::string> FreezeBPTimer::on_initialize() {
   ischecked            = &FreezeBPTimer::cheaton;
-  onpage               = common;
+  onpage               = bloodypalace;
 
   full_name_string     = "Freeze Bloody Palace Timer";
   author_string        = "SSSiyan";

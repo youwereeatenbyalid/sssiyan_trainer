@@ -283,22 +283,25 @@ void Mods::on_draw_ui() const {
     }
 }
 
-
-
-void Mods::on_pagelist_ui(int page) const{
-  for (auto& mod : m_mods) {
+void Mods::draw_entry(std::shared_ptr<Mod>& mod){
     std::string checkboxname = "##";
-    std::string hotkeyname   = "key ";
-    checkboxname.append(std::string{mod->get_name()});
-    hotkeyname.append(std::string{mod->get_name()});
-    if (page == mod->onpage) {
-      ImGui::Checkbox(checkboxname.c_str(), mod->ischecked);
-      ImGui::SameLine();
-      if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
+    std::string hotkeyname = "key ";
+    checkboxname.append(std::string{ mod->get_name() });
+    hotkeyname.append(std::string{ mod->get_name() });
+    ImGui::Checkbox(checkboxname.c_str(), mod->ischecked);
+    ImGui::SameLine();
+    if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
         focusedmod = mod->get_name();
+    }
+}
+
+
+void Mods::on_pagelist_ui(int page){
+  for (auto& mod : m_mods) {
+    if (page == mod->onpage) {
+        draw_entry(mod);
       }
       //mod->modkeytoggle.draw(mod->get_name());
-    }
   }
 }
 

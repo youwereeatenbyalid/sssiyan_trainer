@@ -168,7 +168,7 @@ static naked void detourDistantAutoCorrect() {
 
 std::optional<std::string> CameraSettings::on_initialize() {
   ischecked          = &CameraSettings::cheaton;
-  onpage             = common;
+  onpage             = camera;
 
   full_name_string   = "Camera Settings (+)";
   author_string      = "SSSiyan";

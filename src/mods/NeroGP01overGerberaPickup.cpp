@@ -34,7 +34,7 @@ static naked void detour() {
 std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
    ischecked = &NeroGP01overGerberaPickup::cheaton;
-   onpage    = nero;
+   onpage    = bloodypalace;
    full_name_string     = "GP01 over Gerbera Pickup";
    author_string        = "Dr.penguin, Siyan";
    description_string   = "Replaces picking up Gerbera in BP to be GP01";

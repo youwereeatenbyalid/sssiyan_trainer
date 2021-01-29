@@ -63,7 +63,7 @@ static naked void detour() {
 
 std::optional<std::string> HideHUD::on_initialize() {
   ischecked               = &HideHUD::cheaton  ;
-  onpage                  = common;
+  onpage                  = camera;
 
   full_name_string        = "Hide HUD (+)";
   author_string           = "SSSiyan";

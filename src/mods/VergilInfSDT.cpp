@@ -53,7 +53,7 @@ static naked void detour2() {
 
 std::optional<std::string> VergilInfSDT::on_initialize() {
   ischecked            = &VergilInfSDT::cheaton;
-  onpage               = vergiltrick;
+  onpage               = vergilsdt;
 
   full_name_string     = "Infinite SDT";
   author_string        = "SSSiyan";
