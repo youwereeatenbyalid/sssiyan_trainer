@@ -10,7 +10,15 @@ public:
   std::optional<std::string> on_initialize() override;
   static uintptr_t jmp_ret1;
   static uintptr_t jmp_ja1;
+
   static uintptr_t jmp_ret2;
+
+  static uintptr_t jmp_ret3;
+  static uintptr_t jmp_out3;
+
+  static uintptr_t jmp_ret4;
+  static uintptr_t jmp_out4;
+
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
@@ -30,4 +38,6 @@ private:
   // around minhook
   std::unique_ptr<FunctionHook> m_function_hook1;
   std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_function_hook3;
+  std::unique_ptr<FunctionHook> m_function_hook4;
 };

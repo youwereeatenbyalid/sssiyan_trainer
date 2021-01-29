@@ -14,19 +14,19 @@ static naked void detour() {
             jmp code
 
         code:
-          mov [rcx+0x20],r11d
-          mov r9d,00000001
-          jmp qword ptr [NeroGP01overGerberaPickup::jmp_ret]        
+            mov [rcx+0x20], r11d
+            mov r9d, 00000001
+            jmp qword ptr [NeroGP01overGerberaPickup::jmp_ret]        
 
         cheatcode:
-          cmp r11d,3
-          je GP01overGerbera
-          jmp code
+            cmp r11d, 3
+            je GP01overGerbera
+            jmp code
 
          GP01overGerbera:
-          mov dword ptr [rcx+0x20], 9
-          mov r9d,00000001
-          jmp qword ptr [NeroGP01overGerberaPickup::jmp_ret]
+            mov dword ptr [rcx+0x20], 9
+            mov r9d, 00000001
+            jmp qword ptr [NeroGP01overGerberaPickup::jmp_ret]
 	}
 }
 // clang-format on
@@ -35,9 +35,9 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
    ischecked = &NeroGP01overGerberaPickup::cheaton;
    onpage    = neropage;
-   full_name_string     = "GP01 over Gerbera Pickup";
+   full_name_string     = "GP01 replaces Gerbera in BP";
    author_string        = "Dr.penguin, Siyan";
-   description_string   = "Replaces picking up Gerbera in BP to be GP01";
+   description_string   = "Replace all Gerbera picked up in BP with GP01.";
 
    auto addr = utility::scan(base, "44 89 59 20 41 B9 01 00 00 00");
    if (!addr) {
