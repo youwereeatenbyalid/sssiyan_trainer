@@ -27,7 +27,14 @@ static naked void detour() {
 
 // clang-format on
 
+void SinCoordinate::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> SinCoordinate::on_initialize() {
+  init_check_box_info();
+
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
 
   if (!install_hook_offset(offsets::SIN_COORDINATE, m_function_hook, &detour, &jmp_ret, 7)) {

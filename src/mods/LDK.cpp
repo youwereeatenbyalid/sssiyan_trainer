@@ -64,6 +64,11 @@ static naked void enemynumber_detour() {
 	}
 }
 // clang-format on
+
+void LDK::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
 static naked void capbypass_detour1() {
 __asm {
 	originalcode:
@@ -362,6 +367,8 @@ static naked void cavcoordinatechange_detour() {
 
 
 std::optional<std::string> LDK::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &LDK::cheaton;
   onpage               = gamemode;
 

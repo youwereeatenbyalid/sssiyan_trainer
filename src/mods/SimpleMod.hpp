@@ -8,6 +8,8 @@ public:
   SimpleMod() = default;
   // mod name string for config
   std::string_view get_name() const override { return "SimpleMod"; }
+  std::string get_checkbox_name() override { return m_check_box_name; };
+  std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
 
@@ -25,5 +27,7 @@ public:
 private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
+  void init_check_box_info() override;
+
   // std::unique_ptr<FunctionHook> m_function_hook;
 };

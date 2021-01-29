@@ -284,11 +284,8 @@ void Mods::on_draw_ui() const {
 }
 
 void Mods::draw_entry(std::shared_ptr<Mod>& mod){
-    std::string checkboxname = "##";
-    std::string hotkeyname = "key ";
-    checkboxname.append(std::string{ mod->get_name() });
-    hotkeyname.append(std::string{ mod->get_name() });
-    ImGui::Checkbox(checkboxname.c_str(), mod->ischecked);
+    //mod->get_hotkey_name()
+    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->ischecked);
     ImGui::SameLine();
     if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
         focusedmod = mod->get_name();

@@ -377,4 +377,16 @@ public:
     virtual void on_pre_update_camera_controller2(RopewayPlayerCameraController* controller) {};
     virtual void on_update_camera_controller2(RopewayPlayerCameraController* controller) {};
     */
+
+  protected:
+    const std::string m_prefix_check_box_name = "##";
+    const std::string m_prefix_hot_key_name   = "key ";
+
+    std::string m_check_box_name{};
+    std::string m_hot_key_name{};
+
+public:
+    virtual void init_check_box_info() { return; };
+    virtual std::string get_checkbox_name() { return "UnknownMod"; };
+    virtual std::string get_hotkey_name() { return "UnknownMod"; };
 };

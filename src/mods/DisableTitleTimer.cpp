@@ -27,7 +27,14 @@ static naked void detour() {
 
 // clang-format on
 
+void DisableTitleTimer::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> DisableTitleTimer::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &DisableTitleTimer::cheaton;
   onpage    = qol;

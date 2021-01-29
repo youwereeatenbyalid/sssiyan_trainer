@@ -353,7 +353,14 @@ static naked void vergildata_detour() {
 }
     // clang-format on
 
+void PlayerTracker::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> PlayerTracker::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   //player tracker
   auto player_addr = utility::scan(base, "4C 8B C9 41 83 F8 FF 74");
