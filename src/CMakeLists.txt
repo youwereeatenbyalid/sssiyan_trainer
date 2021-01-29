@@ -129,6 +129,8 @@ set(MODS_SRC
     mods/EnemyStepBanHeight.cpp 
     mods/SpardaWorkshop.hpp 
     mods/SpardaWorkshop.cpp 
+    mods/NeroGP01overGerberaPickup.hpp 
+    mods/NeroGP01overGerberaPickup.cpp 
 )
 
 set(HOOKS_SRC

@@ -81,6 +81,15 @@
         #include "mods/VergilInfConcentration.hpp"
         #include "mods/VergilNoTrickRestriction.hpp"
         #include "mods/VergilTrickUpLockedOn.hpp"
+    // Dr.penguin
+    // Background
+    // Common
+    // Gameplay
+    // Nero
+      #include "mods/NeroGP01overGerberaPickup.hpp"
+    // Dante
+    // V
+    // Vergil
 Mods::Mods()
 {
 // Example
@@ -169,6 +178,15 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
         m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
 
+ // Dr.penguin
+    // Background
+    // Common
+    // Gameplay
+    // Nero
+        m_mods.emplace_back(std::make_unique<NeroGP01overGerberaPickup>());
+    // Dante
+    // V
+    // Vergil
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
