@@ -7,6 +7,8 @@ bool JumpStart::cheaton{NULL};
 
 bool nerodtcancel;
 
+bool vergilgroundjdccancel;
+
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -24,7 +26,7 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 2
         je code
         cmp [PlayerTracker::playerid], 4
-        je code
+        je vergilcancels
         jmp code
 
     nerocancels:
@@ -36,6 +38,16 @@ static naked void detour() {
 
     nerodtcheck:
         cmp byte ptr [nerodtcancel], 1
+        je cancellable
+        jmp code
+
+    vergilcancels:
+        cmp dword ptr [PlayerTracker::playermoveid], 0x019000C8 // Vergil Ground JdC
+        je vergiljdccheck
+        jmp code
+
+    vergiljdccheck:
+        cmp byte ptr [vergilgroundjdccancel], 1
         je cancellable
         jmp code
 
@@ -56,7 +68,7 @@ std::optional<std::string> JumpStart::on_initialize() {
   onpage             = gamepage;
 
   full_name_string   = "JumpStart";
-  author_string      = "SSSiyan";
+  author_string      = "SSSiyan, Dr.penguin";
   description_string = "Allows you to cancel out of a selection of moves with any jump action.";
 
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -76,11 +88,14 @@ std::optional<std::string> JumpStart::on_initialize() {
 
 void JumpStart::on_config_load(const utility::Config& cfg) {
   nerodtcancel = cfg.get<bool>("nero_dt_cancel").value_or(true);
+  vergilgroundjdccancel = cfg.get<bool>("vergil_ground_jdc_cancel").value_or(true);
 }
 void JumpStart::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("nero_dt_cancel", nerodtcancel);
+  cfg.set<bool>("vergil_ground_jdc_cancel", vergilgroundjdccancel);
 }
 
 void JumpStart::on_draw_ui() {
   ImGui::Checkbox("Nero DT Cancel", &nerodtcancel);
+  ImGui::Checkbox("Vergil Ground JdC Cancel", &vergilgroundjdccancel);
 }
