@@ -1,6 +1,6 @@
 
 #include "FileFrameCuts.hpp"
-
+#include "PlayerTracker.hpp"
 uintptr_t FileFrameCuts::jmp_ret{NULL};
 bool FileFrameCuts::cheaton{NULL};
 bool dantefasterguard;
@@ -17,48 +17,73 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [FileFrameCuts::cheaton], 1
         jne code
-        cmp dword ptr [rdx+9Ah], 7274604 // 'lo' (Block)
-        je guardgroundstartcheck
-        cmp dword ptr [rdx+9Ah], 7471209 // 'ir' (AirBlock)
-        je guardairstartcheck
-        cmp dword ptr [rdx+9Eh], 7078004 // 'tl' (Gatling)
-        je hatturretstartcheck
-        cmp dword ptr [rdx+9Ch], 7078004 // 'tl' (Gatling)
-        je hatturretairstartcheck
+        cmp [PlayerTracker::playerid],1
+        je dantecuts
         jmp code
 
+    dantecuts:
+        push r11
+
+        mov r11, 27866499442802754 // 'B.l.o.c.' (Block)
+        cmp r11, [rdx+98h]
+        je guardgroundstartcheck
+
+        mov r11, 18577838096056385 // 'A.i.r.B.' (AirBlock)
+        cmp r11, [rdx+92h]
+        je guardairstartcheck
+
+        mov r11, 30399795707314247 // G.a.t.l. (Ground)
+        cmp r11, [rdx+9Ah]
+        je hatturretstartcheck
+
+        mov r11, 30399795707314247 // G.a.t.l. (Air)
+        cmp r11, [rdx+98h] 
+        je hatturretairstartcheck
+
+        jmp popcode
+
     guardgroundstartcheck:
-        cmp dword ptr [rdx+0xA4], 7602259 //'St' (Start)
-        jne code
+        mov r11, 32088563964444755 //'S.t.a.r.' (Start)
+        cmp r11, [rdx+0xA4]
+        jne popcode
         cmp byte ptr [dantefasterguard], 1
-        jne code
+        jne popcode
         movss xmm0, [danteguardgroundstartlength]
-        jmp qword ptr [FileFrameCuts::jmp_ret]
+        jmp popret
 
     guardairstartcheck:
-        cmp dword ptr [rdx+0xAC], 6357108 //'ta' (StartFly)
-        jne code
+        mov r11, 32088563964444755 //'S.t.a.r.' (StartFly)
+        cmp r11, [rdx+0xAA]
+        jne popcode
         cmp byte ptr [dantefasterguard], 1
-        jne code
+        jne popcode
         movss xmm0, [danteairguardstartlength]
-        jmp qword ptr [FileFrameCuts::jmp_ret]
+        jmp popret
 
     hatturretstartcheck:
-        cmp dword ptr [rdx+0xAC], 6357108 // 'ta' (Start)
-        jne code
+        mov r11, 32088563964444755 // 'S.t.a.r.' (Start)
+        cmp r11, [rdx+0xAA]
+        jne popcode
         cmp byte ptr [dantefasterhatgatling], 1
-        jne code
+        jne popcode
         movss xmm0, [dantegatlingstartlength]
-        jmp qword ptr [FileFrameCuts::jmp_ret]
+        jmp popret
 
     hatturretairstartcheck:
-        cmp dword ptr [rdx+0xAA], 6357108 // 'ta' (Start)
-        jne code
+        mov r11, 32088563964444755 // 'S.t.a.r.' (Start)
+        cmp r11, [rdx+0xA8]
+        jne popcode
         cmp byte ptr [dantefasterhatgatling], 1
-        jne code
+        jne popcode
         movss xmm0, [dantegatlingstartlength]
+        jmp popret
+
+    popret:
+        pop r11
         jmp qword ptr [FileFrameCuts::jmp_ret]
 
+    popcode:
+        pop r11
     code:
         movss xmm0, [rdx+58h]
 		jmp qword ptr [FileFrameCuts::jmp_ret]
