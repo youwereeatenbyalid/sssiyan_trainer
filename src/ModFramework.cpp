@@ -38,9 +38,6 @@ void update_thread_func(ModFramework* mf) {
 			InitSample(mf);
 
 			while (o_mgr.Run(false) && o_mgr.Run(true)) {
-				if (GetAsyncKeyState(VK_INSERT) & 0x1) {
-					break;
-				}
 				auto mpw = o_mgr.GetMainPlatformWindow();
 				mpw->Show(true);
 				mf->on_frame();
