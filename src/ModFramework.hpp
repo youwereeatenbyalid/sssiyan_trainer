@@ -55,6 +55,8 @@ public:
 	void on_direct_input_keys(const std::array<uint8_t, 256>& keys);
 
 	void save_config();
+	
+	bool m_draw_ui{ false };
 
 private:
 	void draw_ui();
@@ -67,7 +69,7 @@ private:
 	bool m_first_frame{ true };
 	bool m_valid{ false };
 	bool m_initialized{ false };
-	bool m_draw_ui{ true };
+
 	std::atomic<bool> m_game_data_initialized{ false };
 
 	std::mutex m_input_mutex{};
