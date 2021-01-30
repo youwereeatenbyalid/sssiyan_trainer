@@ -657,10 +657,17 @@ static naked void dantefix_detour() {
 
 // clang-format on
 
+void HeavyDay::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> HeavyDay::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &HeavyDay::cheaton;
-  onpage    = commonpage;
+  onpage    = gamemode;
 
   full_name_string     = "PVP";
   author_string        = "The HitchHiker, SSSiyan, Dr. Penguin";

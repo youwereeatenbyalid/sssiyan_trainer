@@ -80,9 +80,16 @@ static naked void detour3() {
 
 // clang-format on
 
+void AlwaysSTaunts::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> AlwaysSTaunts::on_initialize() {
+  init_check_box_info();
+
   ischecked          = &AlwaysSTaunts::cheaton;
-  onpage             = gamepage;
+  onpage             = taunt;
 
   full_name_string   = "Always S+ Taunts (+)";
   author_string      = "SSSiyan";

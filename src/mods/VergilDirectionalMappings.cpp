@@ -37,9 +37,16 @@ static naked void detour() {
 
 // clang-format on
 
+void VergilDirectionalMappings::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> VergilDirectionalMappings::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &VergilDirectionalMappings::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergiltrick;
   
   full_name_string     = "Down Trick on Back + Trick";
   author_string        = "The Hitchhiker";

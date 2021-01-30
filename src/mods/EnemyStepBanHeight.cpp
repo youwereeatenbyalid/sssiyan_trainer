@@ -28,9 +28,16 @@ static naked void detour() {
 
 // clang-format on
 
+void EnemyStepBanHeight::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> EnemyStepBanHeight::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &EnemyStepBanHeight::cheaton;
-  onpage               = gamepage;
+  onpage               = enemystep;
   full_name_string     = "Remove Enemy Step Height Restriction";
   author_string        = "SSSiyan";
   description_string   = "Allows you to enemy step as close to the floor as possible.";

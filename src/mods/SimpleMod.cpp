@@ -4,7 +4,14 @@
 // clang-format off
 // clang-format on
 
+void SimpleMod::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> SimpleMod::on_initialize() {
+  init_check_box_info();
+
   full_name_string   = "";
   author_string      = "";
   description_string = "";

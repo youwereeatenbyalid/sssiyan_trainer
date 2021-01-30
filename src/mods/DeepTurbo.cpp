@@ -48,9 +48,16 @@ static naked void detour2() {
 
 // clang-format on
 
+void DeepTurbo::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> DeepTurbo::on_initialize() {
+  init_check_box_info();
+
   ischecked          = &DeepTurbo::cheaton;
-  onpage             = commonpage;
+  onpage             = mechanics;
 
   full_name_string   = "Turbo (+)";
   author_string      = "DeepDarkKapustka";

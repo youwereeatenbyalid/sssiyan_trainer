@@ -26,9 +26,16 @@ static naked void detour() {
 
 // clang-format on
 
+void NeroNoDTCooldown::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> NeroNoDTCooldown::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &NeroNoDTCooldown::cheaton;
-  onpage               = neropage;
+  onpage               = nero;
 
   full_name_string     = "No DT Cooldown";
   author_string        = "SSSiyan";

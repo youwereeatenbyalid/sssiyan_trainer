@@ -180,10 +180,17 @@ naked void BreakerSwitcher::breakerpress_detour() {
 
 // clang-format on
 
+void BreakerSwitcher::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> BreakerSwitcher::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &BreakerSwitcher::cheaton;
-  onpage    = neropage;
+  onpage    = breaker;
 
   full_name_string     = "Breaker Switcher";
   author_string        = "The Hitchhiker (original version by Nino)";

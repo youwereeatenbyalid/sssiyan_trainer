@@ -451,11 +451,18 @@ static naked void soundchargelevel2_detour() {
 }
 // clang-format on
 
+void DoppelWeaponSwitcher::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   ischecked = &DoppelWeaponSwitcher::cheaton;
-  onpage    = vergilpage;
+  onpage    = vergildoppel;
   full_name_string     = "Doppelganger Weapon Switcher";
   author_string        = "The HitchHiker";
   description_string   = "This is the description of DoppelWeaponSwitcher.";

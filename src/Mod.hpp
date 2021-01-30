@@ -290,7 +290,11 @@ protected:
     using ValueList = std::vector<std::reference_wrapper<IModValue>>;
 
 public:
-    enum page_enum {commonpage,gamepage,neropage,dantepage,vpage,vergilpage};
+    enum page_enum {breaker,wiresnatch,nero,dantesdt,dantecheat,commoncheat,vergilsdt,vergiltrick,vergildoppel,vergilcheat,gamemode,bloodypalace,balance,camera,qol,mechanics,enemystep,animation,taunt};
+    enum input_enum {sword = 0x1, gun = 0x2, jump = 0x4, tauntinput =0x8, lockon = 0x10, changetarget = 0x20, 
+                    dpad = 0x40, deviltrigger = 0x80, dpadup = 0x100, dpaddown = 0x200, dpadleft = 0x400, dpadright = 0x800, 
+                    style = 0x1000,righttrigger=0x4000,lefttrigger=0x2000, resetcamera = 0x8000,SDT = 0x10000};
+    //enum old_enum {common, gamemode, nero, dantecheat, vpage, vergiltrick };
     virtual ~Mod() {};
     virtual std::string_view get_name() const { return "UnknownMod"; };
     // can be used for ModValues, like Mod_ValueName
@@ -376,4 +380,16 @@ public:
     virtual void on_pre_update_camera_controller2(RopewayPlayerCameraController* controller) {};
     virtual void on_update_camera_controller2(RopewayPlayerCameraController* controller) {};
     */
+
+  protected:
+    const std::string m_prefix_check_box_name = "##";
+    const std::string m_prefix_hot_key_name   = "key ";
+
+    std::string m_check_box_name{};
+    std::string m_hot_key_name{};
+
+public:
+    virtual void init_check_box_info() { return; };
+    virtual std::string get_checkbox_name() { return "UnknownMod"; };
+    virtual std::string get_hotkey_name() { return "UnknownMod"; };
 };

@@ -29,9 +29,16 @@ static naked void detour() {
 
 // clang-format on
 
+void VergilInfConcentration::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> VergilInfConcentration::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &VergilInfConcentration::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergilcheat;
 
   full_name_string     = "Infinite Concentration";
   author_string        = "SSSiyan";

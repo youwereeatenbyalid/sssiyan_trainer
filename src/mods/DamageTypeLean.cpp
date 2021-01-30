@@ -37,7 +37,14 @@ static naked void detour() {
 
 // clang-format on
 
+void DamageTypeLean::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> DamageTypeLean::on_initialize() {
+  init_check_box_info();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B A8 C8 00 00 00 E8");
   if (!addr) {

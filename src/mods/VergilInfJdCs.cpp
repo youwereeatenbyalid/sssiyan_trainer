@@ -25,9 +25,16 @@ static naked void detour() {
 
 // clang-format on
 
+void VergilInfJdCs::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> VergilInfJdCs::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &VergilInfJdCs::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergilcheat;
 
   full_name_string     = "Infinite Just Judgement Cuts";
   author_string        = "SSSiyan";

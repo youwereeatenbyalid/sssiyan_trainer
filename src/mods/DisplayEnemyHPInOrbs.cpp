@@ -34,9 +34,16 @@ static naked void detour() {
 
 // clang-format on
 
+void DisplayEnemyHPInOrbs::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &DisplayEnemyHPInOrbs::cheaton;
-  onpage               = commonpage;
+  onpage               = camera;
 
   full_name_string     = "Display Enemy HP in Orbs";
   author_string        = "SSSiyan";

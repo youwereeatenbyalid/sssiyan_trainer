@@ -52,7 +52,14 @@ hitchmoveidnewmem: //this is allocated memory, you have read,write,execute acces
 
 // clang-format on
 
+void MoveID::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> MoveID::on_initialize() {
+  init_check_box_info();
+
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
 
   if (!install_hook_offset(offsets::MOVE_ID, m_function_hook, &detour, &jmp_ret, 6)) {

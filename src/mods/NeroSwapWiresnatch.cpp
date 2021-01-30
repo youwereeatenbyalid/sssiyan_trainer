@@ -50,9 +50,16 @@ static naked void detour2() {
 
 // clang-format on
 
+void NeroSwapWiresnatch::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
+  init_check_box_info();
+
   ischecked          = &NeroSwapWiresnatch::cheaton;
-  onpage             = neropage;
+  onpage             = wiresnatch;
 
   full_name_string   = "Angel and Devil Snatch";
   author_string      = "SSSiyan";

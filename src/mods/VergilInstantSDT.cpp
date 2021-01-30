@@ -97,9 +97,16 @@ static naked void detour4() { // Makes SDT bar start to fill instantly when it n
 
 // clang-format on
 
+void VergilInstantSDT::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> VergilInstantSDT::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &VergilInstantSDT::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergilsdt;
 
   full_name_string     = "Instant SDT";
   author_string        = "SSSiyan";

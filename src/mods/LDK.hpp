@@ -6,6 +6,8 @@ public:
   LDK() = default;
   // mod name string for config
   std::string_view get_name() const override { return "LDK"; }
+  std::string get_checkbox_name() override { return m_check_box_name; };
+  std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   static uintptr_t enemynumber_jmp_ret;
@@ -53,6 +55,8 @@ public:
 
   // function hook instance for our detour, convinient wrapper 
   // around minhook
+  void init_check_box_info() override;
+
   std::unique_ptr<FunctionHook> m_enemynumber_hook;
   std::unique_ptr<FunctionHook> m_capbypass_hook1;
   std::unique_ptr<FunctionHook> m_capbypass_hook2;

@@ -31,12 +31,19 @@ static naked void detour() {
 }
 // clang-format on
 
+void NeroGP01overGerberaPickup::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
+  init_check_box_info();
+
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
    ischecked = &NeroGP01overGerberaPickup::cheaton;
-   onpage    = neropage;
-   full_name_string     = "GP01 replaces Gerbera in BP";
-   author_string        = "Dr.penguin, Siyan";
+   onpage    = bloodypalace;
+   full_name_string     = "GP01 over Gerbera Pickup";
+   author_string        = "Dr. Penguin, Siyan";
    description_string   = "Replace all Gerbera picked up in BP with GP01.";
 
    auto addr = utility::scan(base, "44 89 59 20 41 B9 01 00 00 00");

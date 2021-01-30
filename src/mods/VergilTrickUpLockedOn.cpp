@@ -103,9 +103,16 @@ static naked void detour3() { // Disable Directional Dodges
 
 // clang-format on
 
+void VergilTrickUpLockedOn::init_check_box_info() {
+  m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+  m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
 std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
+  init_check_box_info();
+
   ischecked            = &VergilTrickUpLockedOn::cheaton;
-  onpage               = vergilpage;
+  onpage               = vergiltrick;
 
   full_name_string     = "Trick Up On Forward + Trick";
   author_string        = "SSSiyan";
