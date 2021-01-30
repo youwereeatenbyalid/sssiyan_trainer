@@ -123,6 +123,8 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &SpardaWorkshop::cheaton;
+  //only for big boy release
+  SpardaWorkshop::cheaton = true;
   onpage    = gamemode;
   full_name_string     = "Sparda's Workshop";
   author_string        = "Lidemi";
