@@ -85,7 +85,7 @@ void DisableBreakaway::on_draw_ui() {
         "Sword\0Gun\0Jump\0Taunt\0"
         "Lock-on\0Change Target\0Breakaway\0Devil Trigger\0"
         "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"
-        "Breaker Action\0Buster\0Exceed\0Reset Camera\0")) {
+        "Breaker Action\0Exceed\0Buster\0Reset Camera\0")) {
         overrideinput = inputs[inputindex];
     }
 }
