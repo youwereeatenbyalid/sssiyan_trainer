@@ -110,8 +110,13 @@ void PlayerDamageMult::on_config_save(utility::Config& cfg) {
 }
 
 void PlayerDamageMult::on_draw_ui() {
+  ImGui::Text("Player Damage Output");
   ImGui::PushItemWidth(120);
-  ImGui::InputFloat("Player Damage Output", &desireddamageoutput, 0.1f);
-  ImGui::InputFloat("Enemy Damage Output", &desireddamageinput, 0.1f);
+  ImGui::InputFloat("##Player Damage Output Slider", &desireddamageoutput, 0.1f);
+  ImGui::PopItemWidth();
+  ImGui::Spacing();
+  ImGui::Text("Enemy Damage Output");
+  ImGui::PushItemWidth(120);
+  ImGui::InputFloat("##Enemy Damage Output Slider", &desireddamageinput, 0.1f);
   ImGui::PopItemWidth();
 }

@@ -133,6 +133,7 @@ void FileFrameCuts::on_config_save(utility::Config& cfg) {
 }
 
 void FileFrameCuts::on_draw_ui() {
+  ImGui::Text("Dante");
   ImGui::Checkbox("Faster Guard", &dantefasterguard);
   ImGui::Checkbox("Faster Faust Gatling", &dantefasterhatgatling);
 }

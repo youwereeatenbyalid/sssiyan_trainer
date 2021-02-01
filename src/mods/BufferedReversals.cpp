@@ -37,7 +37,7 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   onpage                     = mechanics;
   full_name_string           = "Buffered Reversals";
   author_string              = "Nekupaska, socks";
-  description_string		 = "Allows you to use directional moves in any direction. "
+  description_string		 = "Allows you to use directional moves in any direction.\n\n"
 							   "During the recovery of a move, buffer a directional attack, then "
 							   "push the stick in a new direction and let go of lock on before the "
 							   "buffered attack comes out to change the direction it points.";

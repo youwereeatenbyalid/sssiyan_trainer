@@ -251,8 +251,8 @@ void AllOrNothing::on_config_save(utility::Config& cfg) {
 void AllOrNothing::on_draw_ui() {
   ImGui::Checkbox("No one takes damage", &noonetakesdamage);
   ImGui::Checkbox("One hit kill", &onehitkill);
+  ImGui::Spacing();
   ImGui::Text("Style Rank to beat (1:D, 7:SSS)");
   ImGui::SliderInt("##StlyeRankRequirement", (int*)&AllOrNothing::stylebar, 1, 7);
-  
 }
 #endif

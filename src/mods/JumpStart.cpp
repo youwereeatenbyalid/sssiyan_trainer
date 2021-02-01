@@ -103,6 +103,9 @@ void JumpStart::on_config_save(utility::Config& cfg) {
 }
 
 void JumpStart::on_draw_ui() {
-  ImGui::Checkbox("Nero DT Cancel", &nerodtcancel);
-  ImGui::Checkbox("Vergil Ground JdC Cancel", &vergilgroundjdccancel);
+  ImGui::Text("Nero");
+  ImGui::Checkbox(" DT Cancel", &nerodtcancel);
+  ImGui::Separator();
+  ImGui::Text("Vergil");
+  ImGui::Checkbox("Ground JdC Cancel", &vergilgroundjdccancel);
 }

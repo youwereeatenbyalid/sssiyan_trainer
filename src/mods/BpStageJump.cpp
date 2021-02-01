@@ -125,5 +125,7 @@ void BpStageJump::on_config_save(utility::Config& cfg) {
 void BpStageJump::on_draw_ui() {
     ImGui::Checkbox("Boss Rush", &bossrush);
     ImGui::Checkbox("Retry Stage", &retrystage);
-    ImGui::SliderInt("BP Stage", &bpstage, 1, 101);
+    ImGui::Spacing();
+    ImGui::Text("BP Stage");
+    ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 }

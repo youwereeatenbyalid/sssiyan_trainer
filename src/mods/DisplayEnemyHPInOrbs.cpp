@@ -20,6 +20,8 @@ static naked void detour() {
         ja code
         cmp dword ptr [LDK::hpoflasthitobj], 00000000h // write default orbs if enemy hp is equal to 0
         je code
+        cmp dword ptr [LDK::hpoflasthitobj], 3DCCCCCDh // write default orbs if enemy hp is less than 0.1
+        jb code
         jmp cheatcode
 
     cheatcode:

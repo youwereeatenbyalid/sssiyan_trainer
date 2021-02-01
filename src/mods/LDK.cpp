@@ -549,6 +549,9 @@ void LDK::on_draw_debug_ui() {
 
 // will show up in main window, dump ImGui widgets you want here
 void LDK::on_draw_ui() {
-  ImGui::SliderInt("Enemy Hard Limit", (int*)&LDK::hardlimit, 1, 50);
-  ImGui::SliderInt("Enemy Soft Limit", (int*)&LDK::softlimit, 1, 50);
+  ImGui::Text("Enemy Hard Limit");
+  ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
+  ImGui::Separator();
+  ImGui::Text("Enemy Soft Limit");
+  ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
 }

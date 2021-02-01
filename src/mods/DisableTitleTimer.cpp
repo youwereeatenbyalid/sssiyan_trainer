@@ -40,7 +40,7 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
   onpage    = qol;
   full_name_string     = "Disable Titlescreen Timer";
   author_string        = "The Hitchhiker";
-  description_string   = "Prevent the titlescreen from playing the mission 1 cutscene if left idling.";
+  description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
 
   auto addr = utility::scan(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {

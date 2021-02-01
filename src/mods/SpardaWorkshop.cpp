@@ -128,7 +128,7 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
   onpage    = gamemode;
   full_name_string     = "Sparda's Workshop";
   author_string        = "Lidemi";
-  description_string   = "Integration with the Sparda's Workshop mod."
+  description_string   = "Integration with the Sparda's Workshop mod.\n"
                          "Set player, barrel & enemy positions.";
 
   auto sceneplacer_addr = utility::scan(base, "8B 42 08 89 41 38 80");
@@ -285,8 +285,8 @@ void SpardaWorkshop::on_draw_debug_ui() {}
 void SpardaWorkshop::on_draw_ui() {
     //ImGui::Text("Here for a quick check");
 
-
-    if(ImGui::Combo("Barrel Positions", &barrelindex, 
+    ImGui::Text("Preset Barrel Positions");
+    if(ImGui::Combo("##Barrel Positions", &barrelindex, 
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"
@@ -294,15 +294,19 @@ void SpardaWorkshop::on_draw_ui() {
         "Position 16\0")){
         barrelcoords = barrelcoordsvector.at(barrelindex);
     }
+    ImGui::Spacing();
     ImGui::Checkbox("Use Custom Barrel Position",&custombarrel);
-    ImGui::DragFloat3("Custom Barrel Position", (float*)&custombarrelcoords);
+    ImGui::Text("Custom Barrel Position");
+    ImGui::DragFloat3("##Custom Barrel Position", (float*)&custombarrelcoords);
     if(ImGui::Button("Set to player coordinates##barrel")&& PlayerTracker::playertransform != NULL){
         float* x = (float*)PlayerTracker::playertransform + 0xC;
         float* y = (float*)PlayerTracker::playertransform + 0xD;
         float* z = (float*)PlayerTracker::playertransform + 0xE;
         custombarrelcoords = {*x,*y,*z};
     }
-    if (ImGui::Combo("Enemy Positions", &enemyindex,
+    ImGui::Separator();
+    ImGui::Text("Preset Enemy Positions");
+    if (ImGui::Combo("##Enemy Positions", &enemyindex,
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"
@@ -314,16 +318,19 @@ void SpardaWorkshop::on_draw_ui() {
         "Position 32\0Position 33\0")) {
         enemycoords = enemycoordsvector.at(enemyindex);
     }
+    ImGui::Spacing();
     ImGui::Checkbox("Use Custom Enemy Position", &customenemy);
-    ImGui::DragFloat3("Custom Enemy Position", (float*)&customenemycoords);
+    ImGui::Text("Custom Enemy Position");
+    ImGui::DragFloat3("##Custom Enemy Position", (float*)&customenemycoords);
     if (ImGui::Button("Set to player coordinates##enemy") && PlayerTracker::playertransform != NULL) {
         float* x = (float*)PlayerTracker::playertransform + 0xC;
         float* y = (float*)PlayerTracker::playertransform + 0xD;
         float* z = (float*)PlayerTracker::playertransform + 0xE;
         customenemycoords = { *x,*y,*z };
     }
-    
-    if (ImGui::Combo("Player Positions", &playerindex,
+    ImGui::Separator();
+    ImGui::Text("Preset Player Positions");
+    if (ImGui::Combo("##Player Positions", &playerindex,
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"
@@ -332,8 +339,10 @@ void SpardaWorkshop::on_draw_ui() {
         "Position 20\0Position 21\0Position 22\0")) {
         playercoords = playercoordsvector.at(playerindex);
     }
+    ImGui::Spacing();
     ImGui::Checkbox("Use Custom Player Position", &customplayer);
-    ImGui::DragFloat3("Custom Player Position", (float*)&customplayercoords);
+    ImGui::Text("Custom Player Position");
+    ImGui::DragFloat3("##Custom Player Position", (float*)&customplayercoords);
     if (ImGui::Button("Set to player coordinates##player") && PlayerTracker::playertransform != NULL) {
         float* x = (float*)PlayerTracker::playertransform + 0xC;
         float* y = (float*)PlayerTracker::playertransform + 0xD;

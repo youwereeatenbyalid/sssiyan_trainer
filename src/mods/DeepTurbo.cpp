@@ -61,7 +61,7 @@ std::optional<std::string> DeepTurbo::on_initialize() {
 
   full_name_string   = "Turbo (+)";
   author_string      = "DeepDarkKapustka";
-  description_string = "Change the game speed by adjusting the slider.\n"
+  description_string = "Change the game speed by adjusting the slider.\n\n"
                        "1.2 is the value used in DMC3 and DMC4.";
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -98,7 +98,8 @@ void DeepTurbo::on_config_save(utility::Config& cfg) {
 }
 
 void DeepTurbo::on_draw_ui() {
-  ImGui::SliderFloat("Speed", &turbospeed, 0.0f, 2.5f, "%.1f");
+  ImGui::Text("Speed");
+  ImGui::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
 }
 
 
