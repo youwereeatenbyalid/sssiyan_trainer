@@ -90,6 +90,7 @@
     // Dante
     // V
     // Vergil
+      #include "mods/VergilNoSDTDismiss.hpp"
 Mods::Mods()
 {
 // Example
@@ -187,6 +188,7 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
+        m_mods.emplace_back(std::make_unique<VergilNoSDTDismiss>());
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
