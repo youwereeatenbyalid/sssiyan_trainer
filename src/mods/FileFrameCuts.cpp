@@ -13,7 +13,7 @@ float dantegatlingstartlength     = 1.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-static naked void detour() {
+static naked void detour() { // DevilMayCry5.exe+294AA6D 
 	__asm {
         cmp byte ptr [FileFrameCuts::cheaton], 1
         jne code
@@ -66,6 +66,7 @@ static naked void detour() {
         jne popcode
         cmp byte ptr [dantefasterhatgatling], 1
         jne popcode
+        cmp byte ptr [rdx],1 // TEST PLS REMOVE
         movss xmm0, [dantegatlingstartlength]
         jmp popret
 
@@ -75,6 +76,7 @@ static naked void detour() {
         jne popcode
         cmp byte ptr [dantefasterhatgatling], 1
         jne popcode
+        cmp byte ptr [rdx],1 // TEST PLS REMOVE
         movss xmm0, [dantegatlingstartlength]
         jmp popret
 

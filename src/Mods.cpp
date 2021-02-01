@@ -179,7 +179,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
         m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
 
- // Dr.penguin
+// Dr.penguin
     // Background
     // Common
     // Gameplay
@@ -189,6 +189,7 @@ Mods::Mods()
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilNoSDTDismiss>());
+
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif

@@ -61,200 +61,196 @@
 
 static naked void player_detour() {
 	__asm {
-		//playerentity
-		push r8
-		push r10
-		cmp qword ptr [rdx+0x60], 0
-		je playerarray
+	//playerentity
+	push r8
+	push r10
+	cmp qword ptr [rdx+0x60], 0
+	je playerarray
 
-		mov r9, [rdx+0x60]
-		mov [PlayerTracker::playerentity], r9
+	mov r9, [rdx+0x60]
+	mov [PlayerTracker::playerentity], r9
 
-		//playerid
-		mov r9, [r9+0xE64]
-		mov [PlayerTracker::playerid], r9
+	//playerid
+	mov r9, [r9+0xE64]
+	mov [PlayerTracker::playerid], r9
 
 
-		//groundmem
-		mov r9, [rdx+0x60]
-		mov r9, [r9+0x3B0]
-		lea r9, [r9+0x10]
-		mov [PlayerTracker::groundedmem], r9
+	//groundmem
+	mov r9, [rdx+0x60]
+	mov r9, [r9+0x3B0]
+	lea r9, [r9+0x10]
+	mov [PlayerTracker::groundedmem], r9
 
-		//isgrounded
-		mov r9, [rdx+0x60]
-		mov r9, [r9+0x3B0]
-		mov r9, [r9+0x18]
-		mov [PlayerTracker::isgrounded], r9b
+	//isgrounded
+	mov r9, [rdx+0x60]
+	mov r9, [r9+0x3B0]
+	mov r9, [r9+0x18]
+	mov [PlayerTracker::isgrounded], r9b
 
-		//playertransform
+	//playertransform
 		
-		mov r8, [rdx+0x60]
-		lea r9, [r8+0x1140]
-		mov [PlayerTracker::playerinertiax],r9
-		lea r9, [r8+0x1144]
-		mov [PlayerTracker::playerinertiay],r9
-		lea r9, [r8+0x1148]
-		mov [PlayerTracker::playerinertiaz],r9
-		mov r9, [r8+0x1F0]
-		mov [PlayerTracker::playertransform], r9
+	mov r8, [rdx+0x60]
+	lea r9, [r8+0x1140]
+	mov [PlayerTracker::playerinertiax],r9
+	lea r9, [r8+0x1144]
+	mov [PlayerTracker::playerinertiay],r9
+	lea r9, [r8+0x1148]
+	mov [PlayerTracker::playerinertiaz],r9
+	mov r9, [r8+0x1F0]
+	mov [PlayerTracker::playertransform], r9
 			
-		mov r9, [rdx+0x60]
+	mov r9, [rdx+0x60]
 
-		mov r9, [r9+0x000002E0]
-		test r9, r9
-		je playerarray
+	mov r9, [r9+0x000002E0]
+	test r9, r9
+	je playerarray
 
-		mov r9, [r9+0x000000D8]
-		test r9, r9
-		je playerarray
+	mov r9, [r9+0x000000D8]
+	test r9, r9
+	je playerarray
 
-		mov r10, [r9+0x2C]
-		mov [PlayerTracker::playermoveid], r10d
-		mov r10, [r9+0x34]
-		mov [PlayerTracker::playermoveid+2], r10d
+	mov r10, [r9+0x2C]
+	mov [PlayerTracker::playermoveid], r10d
+	mov r10, [r9+0x34]
+	mov [PlayerTracker::playermoveid+2], r10d
 
-		playerarray:
+	playerarray:
 
 		
-		cmp qword ptr [rdx+0x78], 0
-		je playerexit
+	cmp qword ptr [rdx+0x78], 0
+	je playerexit
 
-		mov r9, [rdx+0x78]
+	mov r9, [rdx+0x78]
 
-		playernero:
-		cmp qword ptr [r9+0x20], 0
-		je playerdante
+	playernero:
+	cmp qword ptr [r9+0x20], 0
+	je playerdante
 
-		mov r8, [r9+0x20]
-		mov [PlayerTracker::neroentity], r8
-		mov r8, [r8+0x1F0]
-		mov [PlayerTracker::nerotransform], r8
+	mov r8, [r9+0x20]
+	mov [PlayerTracker::neroentity], r8
+	mov r8, [r8+0x1F0]
+	mov [PlayerTracker::nerotransform], r8
 
-		playerdante:
-		cmp qword ptr [r9+0x28], 0
-		je playerv
+	playerdante:
+	cmp qword ptr [r9+0x28], 0
+	je playerv
 
-		mov r8, [r9+0x28]
-		mov [PlayerTracker::danteentity], r8
-		mov r8, [r8+0x1F0]
-		mov [PlayerTracker::dantetransform], r8
+	mov r8, [r9+0x28]
+	mov [PlayerTracker::danteentity], r8
+	mov r8, [r8+0x1F0]
+	mov [PlayerTracker::dantetransform], r8
 
-		mov r8,[r9+0x28]
-		mov r8, [r8+0x18B0]
-		mov [PlayerTracker::danteweapon], r8 // @HELPSIYAN
+	mov r8,[r9+0x28]
+	mov r8, [r8+0x18B0]
+	mov [PlayerTracker::danteweapon], r8 // @HELPSIYAN
 
-		playerv:
-		cmp qword ptr [r9+0x30], 0
-		je playervergil
+	playerv:
+	cmp qword ptr [r9+0x30], 0
+	je playervergil
 
-		mov r8, [r9+0x30]
-		mov [PlayerTracker::ventity], r8
-		mov r8, [r8+0x1F0]
-		mov [PlayerTracker::vtransform], r8
+	mov r8, [r9+0x30]
+	mov [PlayerTracker::ventity], r8
+	mov r8, [r8+0x1F0]
+	mov [PlayerTracker::vtransform], r8
 
-		playervergil:
-		cmp qword ptr [r9+0x40], 0
-		je playerexit
+	playervergil:
+	cmp qword ptr [r9+0x40], 0
+	je playerexit
 
-		mov r8, [r9+0x40]
-		mov [PlayerTracker::vergilentity], r8
-		mov r8, [r8+0x1F0]
-		mov [PlayerTracker::vergiltransform], r8
+	mov r8, [r9+0x40]
+	mov [PlayerTracker::vergilentity], r8
+	mov r8, [r8+0x1F0]
+	mov [PlayerTracker::vergiltransform], r8
 
 
-		playerexit:
-		pop r10
-		pop r8
-		code:
-		  mov r9,rcx
-		  cmp r8d,-0x01
-		  jmp ret_jmp
+	playerexit:
+	pop r10
+	pop r8
+	code:
+		mov r9,rcx
+		cmp r8d,-0x01
+		jmp ret_jmp
 
-		ret_jmp:
-			jmp qword ptr [PlayerTracker::player_jmp_ret]
+	ret_jmp:
+		jmp qword ptr [PlayerTracker::player_jmp_ret]
 	}
 }
 static naked void summon_detour() {
 	__asm {
-		//this is allocated memory, you have read,write,execute access
-		//place your code here
-		//64 = status
-		//D0-> Down to enemy
-		//B18 = enemy ID
-		//108 = is enemy
-		//1D2 = master lock-on
-		//1F0-> down to transform
-		//30 = x coordinate
-		//34 = y coordinate
-		//38 = z coordinate
+	//64 = status
+	//D0-> Down to enemy
+	//B18 = enemy ID
+	//108 = is enemy
+	//1D2 = master lock-on
+	//1F0-> down to transform
+	//30 = x coordinate
+	//34 = y coordinate
+	//38 = z coordinate
 		
-		push r8
-		push r9
+	push r8
+	push r9
 
-		mov r8, [rdi+0xD0]
-		mov r9, [r8+0x1F0]
-		cmp dword ptr [r8+0xB18], 0x20
-		je writegriffon
-		cmp dword ptr [r8+0xB18], 0x21
-		je writeshadow
-		cmp dword ptr [r8+0xB18], 0x22
-		je writenightmare
-		jmp originalcode
+	mov r8, [rdi+0xD0]
+	mov r9, [r8+0x1F0]
+	cmp dword ptr [r8+0xB18], 0x20
+	je writegriffon
+	cmp dword ptr [r8+0xB18], 0x21
+	je writeshadow
+	cmp dword ptr [r8+0xB18], 0x22
+	je writenightmare
+	jmp originalcode
 
-		writeshadow:
-			mov [PlayerTracker::shadowcontroller], rdi
-			mov [PlayerTracker::shadowentity], r8
-			mov [PlayerTracker::shadowtransform], r9
+	writeshadow:
+		mov [PlayerTracker::shadowcontroller], rdi
+		mov [PlayerTracker::shadowentity], r8
+		mov [PlayerTracker::shadowtransform], r9
 
-		writegriffon:
-			mov [PlayerTracker::griffoncontroller], rdi
-			mov [PlayerTracker::griffonentity], r8
-			mov [PlayerTracker::griffontransform], r9
+	writegriffon:
+		mov [PlayerTracker::griffoncontroller], rdi
+		mov [PlayerTracker::griffonentity], r8
+		mov [PlayerTracker::griffontransform], r9
 
-		writenightmare:
-			mov [PlayerTracker::nightmarecontroller], rdi
-			mov [PlayerTracker::nightmareentity], r8
-			mov [PlayerTracker::nightmaretransform], r9
+	writenightmare:
+		mov [PlayerTracker::nightmarecontroller], rdi
+		mov [PlayerTracker::nightmareentity], r8
+		mov [PlayerTracker::nightmaretransform], r9
 
-		originalcode:
-			pop r9
-			pop r8
-			cmp dword ptr [rdi+0x64],ebp
-			je je_jmp
-			jmp ret_jmp
+	originalcode:
+		pop r9
+		pop r8
+		cmp dword ptr [rdi+0x64],ebp
+		je je_jmp
+		jmp ret_jmp
 
-		je_jmp:
-			jmp qword ptr [PlayerTracker::summon_jmp_je] //DevilMayCry5.exe+3F0756 
-		ret_jmp:
-		jmp qword ptr [PlayerTracker::summon_jmp_ret]
+	je_jmp:
+		jmp qword ptr [PlayerTracker::summon_jmp_je] //DevilMayCry5.exe+3F0756 
+	ret_jmp:
+	jmp qword ptr [PlayerTracker::summon_jmp_ret]
 	}
 }
 static naked void incombat_detour(){
 	__asm{
-			mov byte ptr [PlayerTracker::incombat], 0
-			cmp byte ptr [rax+0x00000ECA],sil
-			je jmp_ret
-			mov byte ptr [PlayerTracker::incombat], 1
-		jmp_ret:
-			jmp qword ptr[PlayerTracker::incombat_jmp_ret]
+		mov byte ptr [PlayerTracker::incombat], 0
+		cmp byte ptr [rax+0x00000ECA],sil
+		je jmp_ret
+		mov byte ptr [PlayerTracker::incombat], 1
+	jmp_ret:
+		jmp qword ptr[PlayerTracker::incombat_jmp_ret]
 	}
 }
 static naked void sin_detour() {
 	__asm {
-		sincoordinatenewmem: //this is allocated memory, you have read,write,execute access
-		//place your code here
-
+	sincoordinatenewmem:
 		cmp rdi, [PlayerTracker::playerentity]
 		jne sincoordinateoriginalcode
 
 		movss dword ptr [PlayerTracker::sinvalue], xmm0
 
-		sincoordinateoriginalcode:
+	sincoordinateoriginalcode:
 		xorps xmm6,xmm6
 		cvtss2sd xmm6,xmm0
 
-		sincoordinateexit:
+	sincoordinateexit:
 		jmp qword ptr [PlayerTracker::sin_jmp_ret]
 	}
 }
@@ -290,6 +286,8 @@ static naked void vergildata_detour() {
 	newmem:
 		//original code line
 		mov rdi, [rdi+0x10]
+		cmp [PlayerTracker::playerid],4
+		jne code
 		//verify vergil is even loaded
 		cmp [PlayerTracker::vergilentity], 0
 		je code
@@ -393,46 +391,39 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   if (!vergildata_addr) {
 	  return "Unable to find vergildata pattern.";
   }
-  if (!install_hook_absolute(player_addr.value(), m_player_hook, &player_detour,
-                             &player_jmp_ret, 7)) {
+  if (!install_hook_absolute(player_addr.value(), m_player_hook, &player_detour, &player_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize player tracker";
   }
-  if (!install_hook_absolute(summon_addr.value(), m_summon_hook, &summon_detour,
-                             &summon_jmp_ret, 9)) {
+  if (!install_hook_absolute(summon_addr.value(), m_summon_hook, &summon_detour, &summon_jmp_ret, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize summon tracker";
   }
 
-  if (!install_hook_absolute(incombat_addr.value(), m_incombat_hook, &incombat_detour,
-                             &incombat_jmp_ret, 7)) {
+  if (!install_hook_absolute(incombat_addr.value(), m_incombat_hook, &incombat_detour, &incombat_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize In Combat";
   }
-  if (!install_hook_absolute(sin_addr.value(), m_sin_hook,
-                             &sin_detour, &sin_jmp_ret, 7)) {
+  if (!install_hook_absolute(sin_addr.value(), m_sin_hook, &sin_detour, &sin_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Sin coordinate";
   }
 
-  if (!install_hook_absolute(cos_addr.value(), m_cos_hook,
-                             &cos_detour, &cos_jmp_ret, 8)) {
+  if (!install_hook_absolute(cos_addr.value(), m_cos_hook, &cos_detour, &cos_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cos coordinate";
   }
-  if (!install_hook_absolute(threshhold_addr.value(), m_threshhold_hook, &threshhold_detour,
-                             &threshhold_jmp_ret, 10)) {
+  if (!install_hook_absolute(threshhold_addr.value(), m_threshhold_hook, &threshhold_detour, &threshhold_jmp_ret, 10)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize stick threshhold";
   }
-  if (!install_hook_absolute(vergildata_addr.value(), m_vergildata_hook, &vergildata_detour,
-	  &vergildata_jmp_ret, 7)) {
+  if (!install_hook_absolute(vergildata_addr.value(), m_vergildata_hook, &vergildata_detour, &vergildata_jmp_ret, 7)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize vergildata";
