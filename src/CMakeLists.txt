@@ -132,7 +132,10 @@ set(MODS_SRC
     mods/NeroGP01overGerberaPickup.hpp 
     mods/NeroGP01overGerberaPickup.cpp 
     mods/VergilNoSDTDismiss.hpp 
-    mods/VergilNoSDTDismiss.cpp 
+    mods/VergilNoSDTDismiss.cpp    
+    mods/SCNPathEditor.hpp 
+    mods/SCNPathEditor.cpp 
+ 
 )
 
 set(HOOKS_SRC

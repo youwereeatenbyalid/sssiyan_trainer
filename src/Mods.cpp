@@ -17,6 +17,7 @@
         #include "mods/DisableAutoAssist.hpp"
         #include "mods/DisableTitleTimer.hpp"
         #include "mods/SpardaWorkshop.hpp"
+        #include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
     // Nero
@@ -113,6 +114,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
+        m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero

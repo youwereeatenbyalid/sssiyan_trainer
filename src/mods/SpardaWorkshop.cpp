@@ -26,9 +26,9 @@ int enemyindex = 0;
 static naked void sceneplacer_detour() {
 	__asm {
 	    validation:
-            cmp byte ptr [SpardaWorkshop::cheaton], 1
-            je cheatcode
-            jmp code
+            //cmp byte ptr [SpardaWorkshop::cheaton], 1
+            //je cheatcode
+            jmp cheatcode
         code:
             mov eax, [rdx+0x8]
             mov [rcx+0x38], eax
@@ -86,9 +86,9 @@ static naked void sceneplacer_detour() {
 static naked void enemyplacer_detour() {
     __asm {
         validation:
-            cmp byte ptr [SpardaWorkshop::cheaton], 1
-            je cheatcode
-            jmp code
+            //cmp byte ptr [SpardaWorkshop::cheaton], 1
+            //je cheatcode
+            jmp cheatcode
         code:
             movss xmm0,[rsi+0x80]
             movss xmm1,[rsi+0x84]
@@ -123,8 +123,6 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &SpardaWorkshop::cheaton;
-  //only for big boy release
-  SpardaWorkshop::cheaton = true;
   onpage    = gamemode;
   full_name_string     = "Sparda's Workshop";
   author_string        = "Lidemi";
