@@ -2,13 +2,14 @@
 #include "SCNPathEditor.hpp"
 #include "mods/PlayerTracker.hpp"
 #include "mods/SpardaWorkshop.hpp"
+#include "mods/LDK.hpp"
 uintptr_t SCNPathEditor::jmp_ret{NULL};
 uintptr_t SCNPathEditor::jmp_jne{ NULL };
 bool SCNPathEditor::cheaton{NULL};
 const char16_t SCNPathEditor::aimap[] = u"Scene/Location/Location**/Location22_AIMap.scn";
 const char16_t SCNPathEditor::doujyo[] = u"Scene/Location/Location**/Environments/l22_01_doujyo.scn";
 const char16_t SCNPathEditor::doujyoprop[] = u"Scene/Location/Location**/Environments/Props/l22_01_doujyo_Props*****.scn";
-
+const char16_t SCNPathEditor::enemy[] = u"Scene/LevelDesign/Mission/Miss*****/M**_Enemy.scn";
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -23,6 +24,8 @@ static naked void detour() {
 		je doujyo
 		cmp r8, 0x49
 		je doujyoprop
+		cmp r8, 0x31
+		je enemy
 		jmp qword ptr [SCNPathEditor::jmp_ret]
  
         aimap:
@@ -52,12 +55,31 @@ static naked void detour() {
 			je workshopchoice
 			jmp qword ptr [SCNPathEditor::jmp_ret]
 
+		enemy:
+			push rcx
+			lea rcx, [SCNPathEditor::enemy]
+			call qword ptr [SCNPathEditor::stringcompare_detour]
+			cmp rcx, 1
+			pop rcx
+			je ldkchoice
+			jmp qword ptr[SCNPathEditor::jmp_ret]
+
+
 		workshopchoice:
 			mov dword ptr [rdx+0x2E], 0x00320032
 			cmp byte ptr [SpardaWorkshop::cheaton], 1
 			jne ret_jmp
 			mov dword ptr [rdx+0x2E], 0x00570053
 			jmp qword ptr[SCNPathEditor::jmp_ret]
+
+		ldkchoice:
+			mov dword ptr [rdx+0x3E], 0x006E006F
+			mov dword ptr [rdx+0x3A], 0x00690073 //sion
+			cmp byte ptr [LDK::cheaton], 1
+			jne ret_jmp
+			mov dword ptr [rdx+0x3E], 0x004B0044
+			mov dword ptr [rdx+0x3A], 0x004C0073 //sLDK
+			jmp qword ptr [SCNPathEditor::jmp_ret]
 
 		ret_jmp:
 			jmp qword ptr [SCNPathEditor::jmp_ret]

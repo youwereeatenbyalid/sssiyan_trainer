@@ -15,7 +15,8 @@ public:
   bool static cheaton;
   char16_t static const aimap[] ;
   char16_t static const doujyo[] ;
-  char16_t static const doujyoprop[] ;
+  char16_t static const doujyoprop[];
+  char16_t static const enemy[];
 
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
