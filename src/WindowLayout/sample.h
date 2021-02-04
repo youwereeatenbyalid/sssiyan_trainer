@@ -1051,10 +1051,7 @@ public:
 	virtual void OnGui() {
 		super::OnGui();
 		ImGui::Separator();
-		ImGui::Text("Shared Cheats");
-		if (p_mf->is_error() && p_mf->is_ready()) {
-			p_mf->get_mods()->on_pagelist_ui(Mod::commoncheat);
-		}
+
 		ImGui::Separator();
 		ImGui::Text("Dante SDT");
 		if (p_mf->is_error() && p_mf->is_ready()) {
@@ -1088,13 +1085,6 @@ public:
 		//ImGui::PopStyleColor();
 		//ImGui::PopStyleColor();
 		//ImGui::PopStyleColor();
-		ImGui::Separator();
-		ImGui::Text("Taunts");
-		if (p_mf->is_error() && p_mf->is_ready()) {
-			//p_mf->get_mods()->on_draw_ui();
-			p_mf->get_mods()->on_pagelist_ui(Mod::taunt);
-		}
-
 	}
 };
 class SystemWindow : public PageWindow {
@@ -1136,7 +1126,17 @@ public:
 			//p_mf->get_mods()->on_draw_ui();
 			p_mf->get_mods()->on_pagelist_ui(Mod::enemystep);
 		}
-
+		ImGui::Separator();
+		ImGui::Text("Shared Cheats");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			p_mf->get_mods()->on_pagelist_ui(Mod::commoncheat);
+		}
+		ImGui::Separator();
+		ImGui::Text("Taunts");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::taunt);
+		}
 		ImGui::Separator();
 		ImGui::Text("Animation");
 		if (p_mf->is_error() && p_mf->is_ready()) {
@@ -1265,7 +1265,7 @@ void InitSample(ModFramework* mf)
     ImwWindow* pFocusWindow = new FocusWindow(mf);
 	ImwWindow* gameplaywindow = new GameplayWindow(mf);
 	ImwWindow* systemwindow = new SystemWindow(mf);
-	ImwWindow* practicewindow = new PracticeWindow(mf);
+	//ImwWindow* practicewindow = new PracticeWindow(mf);
     ImwWindow* scenariowindow   = new ScenarioWindow(mf);
     ImwWindow* nerowindow	= new NeroWindow(mf);
     ImwWindow* dantewindow	= new DanteWindow(mf);
@@ -1288,7 +1288,7 @@ void InitSample(ModFramework* mf)
 	oMgr.Dock(gameplaywindow, E_DOCK_ORIENTATION_CENTER,0.6f);
     oMgr.DockWith(scenariowindow, gameplaywindow);
 	oMgr.DockWith(systemwindow, gameplaywindow);
-	oMgr.DockWith(practicewindow, gameplaywindow);
+	//oMgr.DockWith(practicewindow, gameplaywindow);
 	oMgr.DockWith(nerowindow, gameplaywindow);
     oMgr.DockWith(dantewindow, gameplaywindow);
 	oMgr.DockWith(vergilwindow, gameplaywindow);

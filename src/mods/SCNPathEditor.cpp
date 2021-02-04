@@ -146,7 +146,7 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &SCNPathEditor::cheaton;
-  onpage    = gamemode;
+  //onpage    = gamemode;
   full_name_string     = "SCNPathEditor Full Name";
   author_string        = "Author";
   description_string   = "This is the description of SCNPathEditor.";
