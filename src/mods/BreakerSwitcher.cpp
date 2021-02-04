@@ -192,7 +192,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   ischecked = &BreakerSwitcher::cheaton;
   onpage    = breaker;
 
-  full_name_string     = "Breaker Switcher";
+  full_name_string     = "Breaker Switcher (+)";
   author_string        = "The Hitchhiker (original version by Nino)";
   description_string   = "Press a button on the d-pad to switch breakers.";
 
@@ -209,20 +209,17 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   if (!breakerui_addr) {
     return "Unable to find breaker ui pattern.";
   }
-  if (!install_hook_absolute(breakersize_addr.value(), m_breakersize_hook,
-                             &breakersize_detour, &breakersize_jmp_ret, 6)) {
+  if (!install_hook_absolute(breakersize_addr.value(), m_breakersize_hook, &breakersize_detour, &breakersize_jmp_ret, 6)) {
     //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize breakersize";
   }
-  if (!install_hook_absolute(nextbreaker_addr.value(), m_nextbreaker_hook,
-                             &nextbreaker_detour, &nextbreaker_jmp_ret, 7)) {
+  if (!install_hook_absolute(nextbreaker_addr.value(), m_nextbreaker_hook, &nextbreaker_detour, &nextbreaker_jmp_ret, 7)) {
     //return a error string in case something goes wrong 
       spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize nextbreaker";
   }
-  if (!install_hook_absolute(breakerui_addr.value(), m_breakerui_hook,
-                             &breakerui_detour, &breakerui_jmp_ret, 11)) {
+  if (!install_hook_absolute(breakerui_addr.value(), m_breakerui_hook, &breakerui_detour, &breakerui_jmp_ret, 11)) {
     //return a error string in case something goes wrong 
       spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize breakerui";
@@ -257,22 +254,14 @@ void BreakerSwitcher::on_draw_ui() {
       "Overture\0Ragtime\0Helter Skelter\0Gerbera\0Punchline\0Buster "
       "Arm\0Rawhide\0Tomboy\0Mega Buster\0Gerbera GP01\0Pasta Breaker\0Sweet "
       "Surrender\0Monkey Business\0";
-      ImGui::Combo("breaker up", (int*)&BreakerSwitcher::breakers[0],
-             breakerboxstring);
-ImGui::Combo("breaker down", (int*)&BreakerSwitcher::breakers[1],
-             breakerboxstring);
-ImGui::Combo("breaker left", (int*)&BreakerSwitcher::breakers[2],
-             breakerboxstring);
-ImGui::Combo("breaker right", (int*)&BreakerSwitcher::breakers[3],
-             breakerboxstring);
-ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4],
-             breakerboxstring);
-ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5],
-             breakerboxstring);
-ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7],
-             breakerboxstring);
-ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6],
-             breakerboxstring);
+ImGui::Combo("breaker up", (int*)&BreakerSwitcher::breakers[0], breakerboxstring);
+ImGui::Combo("breaker down", (int*)&BreakerSwitcher::breakers[1], breakerboxstring);
+ImGui::Combo("breaker left", (int*)&BreakerSwitcher::breakers[2], breakerboxstring);
+ImGui::Combo("breaker right", (int*)&BreakerSwitcher::breakers[3], breakerboxstring);
+ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxstring);
+ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
+ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
+ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
 
 
 }

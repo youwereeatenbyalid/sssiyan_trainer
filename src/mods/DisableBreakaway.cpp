@@ -50,7 +50,7 @@ std::optional<std::string> DisableBreakaway::on_initialize() {
   ischecked = &DisableBreakaway::cheaton;
   onpage    = breaker;
 
-  full_name_string     = "Disable Breakaway";
+  full_name_string     = "Disable Breakaway (+)";
   author_string        = "Lidemi & The Hitchhiker";
   description_string   = "Disables the Breakaway animation."
                          "Hold the assigned input while pressing breakaway to force a breakaway.";
