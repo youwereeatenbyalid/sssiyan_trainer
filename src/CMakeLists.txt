@@ -135,7 +135,8 @@ set(MODS_SRC
     mods/VergilNoSDTDismiss.cpp    
     mods/SCNPathEditor.hpp 
     mods/SCNPathEditor.cpp 
- 
+    mods/TextEditor.hpp
+    mods/TextEditor.cpp
 )
 
 set(HOOKS_SRC
