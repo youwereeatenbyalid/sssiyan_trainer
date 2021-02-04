@@ -43,7 +43,7 @@ std::optional<std::string> VergilNoSDTDismiss::on_initialize() {
    onpage               = vergildoppel;
    full_name_string     = "No SDT Doppelganger Dismiss";
    author_string        = "Dr.penguin";
-   description_string   = "Disables doppelganger from disapearing after deactivating SDT (doppel dismiss button still works)";
+   description_string   = "Disables doppelganger despawn when deactivating SDT.";
 
    auto addr = utility::scan(base, "80 BF A8 18 00 00 00 74 1D");
    if (!addr) {
