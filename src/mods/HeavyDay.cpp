@@ -15,6 +15,11 @@ uintptr_t HeavyDay::rgenable_jmp_ret{NULL};
 uintptr_t HeavyDay::rgmod_jmp_ret{NULL};
 uintptr_t HeavyDay::combatmode_jmp_ret{ NULL };
 uintptr_t HeavyDay::dantefix_jmp_ret{ NULL };
+
+uintptr_t HeavyDay::styleenable1_jmp_ret{NULL};
+uintptr_t HeavyDay::styleenable1_jmp_je{NULL};
+uintptr_t HeavyDay::styleenable2_jmp_ret{NULL};
+uintptr_t HeavyDay::styleenable2_jmp_ja{NULL};
 bool HeavyDay::cheaton{NULL};
 
 
@@ -596,7 +601,6 @@ static naked void rgenable_detour() {
             jmp qword ptr [HeavyDay::rgenable_jmp_ret]
 	}
 }
-
 static naked void rgmod_detour() {
 	__asm {
 	    validation:
@@ -629,6 +633,37 @@ static naked void combatmode_detour() {
     }
 }
 
+static naked void styleenable1_detour() {
+    __asm {
+        validation:
+            cmp byte ptr [HeavyDay::cheaton], 0
+            jne cheatcode
+            jmp code
+        code:
+            cmp eax, 0x39
+            je je_ret
+        cheatcode:
+            jmp qword ptr [HeavyDay::styleenable1_jmp_ret]
+        je_ret:
+            jmp qword ptr [HeavyDay::styleenable1_jmp_je]
+    }
+}
+
+static naked void styleenable2_detour() {
+    __asm {
+        validation:
+            cmp byte ptr [HeavyDay::cheaton], 0
+            jne cheatcode
+            jmp code
+        code:
+            test eax, 0x200
+            ja ja_ret
+        cheatcode:
+            jmp qword ptr [HeavyDay::styleenable2_jmp_ret]
+        ja_ret:
+            jmp qword ptr [HeavyDay::styleenable2_jmp_ja]
+    }
+}
 
 
 static naked void dantefix_detour() {
@@ -686,6 +721,10 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto rgmod_addr = utility::scan(base, "4D F3 0F 10 4A 28");
   auto combatmode_addr = utility::scan(base, "41 88 86 93 00 00 00");
   auto dantefix_addr = utility::scan(base, "41 8D 50 38 E8 23 F4 76 01");
+
+  auto styleenable1_addr = utility::scan(base, "83 F8 39 0F 84 95 08 00 00");
+  auto styleenable2_addr = utility::scan(base, "0F 87 4C 0D 00 00");
+  auto styleenableend_addr = utility::scan(base,"23 00 00 44 0F 28 4C 24 70");
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
   }
@@ -721,6 +760,15 @@ std::optional<std::string> HeavyDay::on_initialize() {
   }
   if (!dantefix_addr){
       return "Unable to find dante fix pattern";
+  }
+  if (!styleenable1_addr) {
+      return "Unable to find style enable 1 pattern";
+  }
+  if (!styleenable2_addr) {
+      return "Unable to find style enable 2 pattern";
+  }
+  if(!styleenableend_addr){
+      return "Unable to find style end pattern";
   }
     if (!install_hook_absolute(enemystep_addr.value(), m_enemystep_hook,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
@@ -795,8 +843,25 @@ std::optional<std::string> HeavyDay::on_initialize() {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize dantefix";
     }
+
+    if (!install_hook_absolute(styleenable1_addr.value(), m_styleenable1_hook,
+        &styleenable1_detour, &styleenable1_jmp_ret, 9)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize styleenable1";
+    }
+
+    if (!install_hook_absolute(styleenable2_addr.value(), m_styleenable2_hook,
+        &styleenable2_detour, &styleenable2_jmp_ret, 6)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize styleenable2";
+    }
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
     HeavyDay::dtenable_ja_ret  = dtenable_addr.value() + 0x166;
+    
+    HeavyDay::styleenable1_jmp_je = styleenableend_addr.value()+0x3;
+    HeavyDay::styleenable2_jmp_ja = styleenableend_addr.value()+0x3;
   return Mod::on_initialize();
 }
 

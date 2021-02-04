@@ -24,6 +24,11 @@ public:
   static uintptr_t rgmod_jmp_ret;
   static uintptr_t combatmode_jmp_ret;
   static uintptr_t dantefix_jmp_ret;
+
+  static uintptr_t styleenable1_jmp_ret;
+  static uintptr_t styleenable1_jmp_je; //DevilMayCry5.exe+FAA7F9
+  static uintptr_t styleenable2_jmp_ret;
+  static uintptr_t styleenable2_jmp_ja;
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
@@ -56,4 +61,6 @@ private:
   std::unique_ptr<FunctionHook> m_combatmode_hook;
   std::unique_ptr<FunctionHook> m_dantefix_hook;
 
+  std::unique_ptr<FunctionHook> m_styleenable1_hook;
+  std::unique_ptr<FunctionHook> m_styleenable2_hook;
 };
