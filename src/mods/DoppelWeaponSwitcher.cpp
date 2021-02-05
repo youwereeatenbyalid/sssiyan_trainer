@@ -145,6 +145,8 @@ static naked void resetweapon_detour() {
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne originalcode
         mov rdx, [PlayerTracker::doppelweaponmodel]
+        test rdx, rdx
+        je originalcode
         cmp rbx, [rdx+0x10]
         jne originalcode
         mov rax, [DoppelWeaponSwitcher::yamatotype]
