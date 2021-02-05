@@ -465,7 +465,11 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   onpage    = vergildoppel;
   full_name_string     = "Doppelganger Weapon Switcher";
   author_string        = "The HitchHiker";
-  description_string   = "This is the description of DoppelWeaponSwitcher.";
+  description_string   = "Assign different weapons to the Doppelganger.\n"
+                        "The Doppelganger will use the weapon you had equipped when you summoned it."
+                        "Recalling the Doppelganger using the dpad will update its weapon.\n"
+                        "Just Judgement Cuts can be performed at any time regardless of the weapon the"
+                        "Doppelganger has equipped."
   
   
 

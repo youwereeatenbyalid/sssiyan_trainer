@@ -126,8 +126,8 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
   onpage    = gamemode;
   full_name_string     = "Sparda's Workshop";
   author_string        = "Lidemi";
-  description_string   = "Integration with the Sparda's Workshop mod.\n"
-                         "Set player, barrel & enemy positions.";
+  description_string   = "A comprehensive environmental training tool that enhances the Void.\n"
+                         "Use the advanced options to set player, barrel & enemy spawn positions.";
 
   auto sceneplacer_addr = utility::scan(base, "8B 42 08 89 41 38 80");
   if (!sceneplacer_addr) {

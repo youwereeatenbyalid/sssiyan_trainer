@@ -24,7 +24,7 @@ wchar_t TextEditor::voidconfirmstring[] = L"Quit the Void?";
 wchar_t TextEditor::swconfirmstring[] = L"Quit Sparda's Workshop?";
 
 wchar_t TextEditor::voiddescriptionstring[] = L"Practice controls and moves.";
-wchar_t TextEditor::swdescriptionstring[] = L"Shit ton of platforms yo.";
+wchar_t TextEditor::swdescriptionstring[] = L"Practice advanced combos in an environmental sandbox.";
 
 wchar_t TextEditor::sosdescriptionstring[] = L"You'll have to be stylish to\r\nsurvive this mode.";
 wchar_t TextEditor::ldkdescriptionstring[] = L"A challenge fit for Sparda.\r\nBring your friends, you'll need them.";
