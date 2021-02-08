@@ -15,6 +15,10 @@ uintptr_t CameraSettings::jmp_jneCloseAutoCorrect;
 
 uintptr_t CameraSettings::jmp_retDistantAutoCorrect;
 
+uintptr_t CameraSettings::jmp_retMovementAutoCorrect;
+
+uintptr_t CameraSettings::jmp_retHeightAutoCorrect;
+
 bool CameraSettings::cheaton{NULL};
 
 float fov = 65.0;
@@ -26,6 +30,8 @@ bool keyboardhorizontalenable;
 bool siyanscamerafixenable;
 bool closeautocorrectenable;
 bool distantautocorrectenable;
+bool movementautocorrectenable;
+bool heightautocorrectenable;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -164,6 +170,40 @@ static naked void detourDistantAutoCorrect() {
 	}
 }
 
+static naked void detourHeightAutoCorrect() {
+	__asm {
+		cmp byte ptr [CameraSettings::cheaton], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
+        cmp byte ptr [heightautocorrectenable], 1
+        jne code
+		jmp qword ptr [CameraSettings::jmp_retHeightAutoCorrect]
+
+    code:
+        movss [rdi+00000280h], xmm0
+        jmp qword ptr [CameraSettings::jmp_retHeightAutoCorrect]
+	}
+}
+
+static naked void detourMovementAutoCorrect() {
+	__asm {
+		cmp byte ptr [CameraSettings::cheaton], 1
+        je cheatcode
+        jmp code
+
+    cheatcode:
+        cmp byte ptr [movementautocorrectenable], 1
+        jne code
+		jmp qword ptr [CameraSettings::jmp_retMovementAutoCorrect]
+
+    code:
+        movss [rdi+00000280h], xmm0
+        jmp qword ptr [CameraSettings::jmp_retMovementAutoCorrect]
+	}
+}
+
 // clang-format on
 
 void CameraSettings::init_check_box_info() {
@@ -221,6 +261,16 @@ std::optional<std::string> CameraSettings::on_initialize() {
     return "Unable to find CameraSettings7 pattern.";
   }
 
+  auto addr8 = utility::scan(base, "F3 0F 11 87 80 02 00 00 48 8B 43 50 48 8B");
+  if (!addr8) {
+    return "Unable to find CameraHeightBasedAutocorrects pattern.";
+  }
+
+  auto addr9 = utility::scan(base, "F3 0F 11 87 80 02 00 00 48 83");
+  if (!addr9) {
+    return "Unable to find CameraMovementBasedAutocorrects pattern.";
+  }
+
   if (!install_hook_absolute(addr1.value(), m_function_hookFoV, &detourFoV, &jmp_retFoV, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -256,7 +306,16 @@ std::optional<std::string> CameraSettings::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings7";
   }
-
+  if (!install_hook_absolute(addr8.value(), m_function_hookHeightAutoCorrect, &detourHeightAutoCorrect, &jmp_retHeightAutoCorrect, 8)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize CameraSettings8";
+  }
+  if (!install_hook_absolute(addr9.value(), m_function_hookMovementAutoCorrect, &detourMovementAutoCorrect, &jmp_retMovementAutoCorrect, 8)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize CameraSettings9";
+  }
 
   return Mod::on_initialize();
 }
@@ -264,6 +323,8 @@ void CameraSettings::on_config_load(const utility::Config& cfg) {
   siyanscamerafixenable = cfg.get<bool>("camera_settings_siyans_cam_fix_1").value_or(false);
   closeautocorrectenable = cfg.get<bool>("camera_settings_close_auto_correct").value_or(false);
   distantautocorrectenable = cfg.get<bool>("camera_settings_distant_auto_correct").value_or(false);
+  heightautocorrectenable = cfg.get<bool>("camera_settings_height_auto_correct").value_or(false);
+  movementautocorrectenable = cfg.get<bool>("camera_settings_movement_auto_correct").value_or(false);
   keyboardhorizontalenable = cfg.get<bool>("camera_settings_keyboard_horizontal").value_or(false);
   fov = cfg.get<float>("camera_settings_fov").value_or(90.0f);
   horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(4.00f);
@@ -273,6 +334,8 @@ void CameraSettings::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("camera_settings_siyans_cam_fix_1", siyanscamerafixenable);
   cfg.set<bool>("camera_settings_close_auto_correct", closeautocorrectenable);
   cfg.set<bool>("camera_settings_distant_auto_correct", distantautocorrectenable);
+  cfg.set<bool>("camera_settings_height_auto_correct", heightautocorrectenable);
+  cfg.set<bool>("camera_settings_movement_auto_correct", movementautocorrectenable);
   cfg.set<bool>("camera_settings_keyboard_horizontal", keyboardhorizontalenable);
   cfg.set<float>("camera_settings_fov", fov);
   cfg.set<float>("camera_settings_horizontal_sens", horizontalsens);
@@ -282,6 +345,8 @@ void CameraSettings::on_draw_ui() {
   ImGui::Checkbox("Siyan's Camera Fix 1.0", &siyanscamerafixenable);
   ImGui::Checkbox("Disable Close Autocorrects", &closeautocorrectenable);
   ImGui::Checkbox("Disable Distant Autocorrects", &distantautocorrectenable);
+  ImGui::Checkbox("Disable Height Based Autocorrects", &heightautocorrectenable);
+  ImGui::Checkbox("Disable Movement Based Autocorrects", &movementautocorrectenable);
   ImGui::Checkbox("Allow Keyboard Camera Movement While Locked On", &keyboardhorizontalenable);
   ImGui::Spacing();
   ImGui::Text("Field of View (65 default)");

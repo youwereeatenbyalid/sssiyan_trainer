@@ -25,6 +25,10 @@ public:
 
   static uintptr_t jmp_retDistantAutoCorrect;
 
+  static uintptr_t jmp_retMovementAutoCorrect;
+
+  static uintptr_t jmp_retHeightAutoCorrect;
+
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
@@ -51,4 +55,6 @@ private:
   std::unique_ptr<FunctionHook> m_function_hookSiyansCamFix1;
   std::unique_ptr<FunctionHook> m_function_hookCloseAutoCorrect;
   std::unique_ptr<FunctionHook> m_function_hookDistantAutoCorrect;
+  std::unique_ptr<FunctionHook> m_function_hookMovementAutoCorrect;
+  std::unique_ptr<FunctionHook> m_function_hookHeightAutoCorrect;
 };
