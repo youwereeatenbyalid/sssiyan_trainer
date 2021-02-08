@@ -137,6 +137,9 @@ set(MODS_SRC
     mods/SCNPathEditor.cpp 
     mods/TextEditor.hpp
     mods/TextEditor.cpp
+    mods/WalkOnKeyboard.hpp 
+    mods/WalkOnKeyboard.cpp 
+
 )
 
 set(HOOKS_SRC

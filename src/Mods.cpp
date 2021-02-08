@@ -54,6 +54,7 @@
         #include "mods/SprintInBattle.hpp"
         #include "mods/EnemyStepBanHeight.hpp"
         #include "mods/DisableEnemyAI.hpp"
+        #include "mods/WalkOnKeyboard.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -152,6 +153,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<SprintInBattle>());
         m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
+        // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>()); // Needs Lock On compare from player+0xED0
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
