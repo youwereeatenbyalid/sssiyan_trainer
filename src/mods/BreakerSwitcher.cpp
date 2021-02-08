@@ -194,8 +194,8 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
 
   full_name_string     = "Breaker Switcher (+)";
   author_string        = "The Hitchhiker (original version by Nino)";
-  description_string   = "Press a button on the d-pad to switch breakers.";
-
+  description_string   = "Make sure your dpad is bound to breakaway, then "
+                         "press a button on the d-pad to switch breakers.";
 
   auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
