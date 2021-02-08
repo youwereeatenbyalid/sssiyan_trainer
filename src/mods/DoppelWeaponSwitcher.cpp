@@ -144,6 +144,8 @@ static naked void resetweapon_detour() {
     memory:
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne originalcode
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton],1
+        jne originalcode
         mov rdx, [PlayerTracker::doppelweaponmodel]
         test rdx, rdx
         je originalcode

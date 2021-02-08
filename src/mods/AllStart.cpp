@@ -89,7 +89,7 @@ std::optional<std::string> AllStart::on_initialize() {
   ischecked          = &AllStart::cheaton;
   onpage             = enemystep;
 
-  full_name_string   = "AllStart";
+  full_name_string   = "AllStart (+)";
   author_string      = "SSSiyan";
   description_string = "Allows you to cancel out of a selection of moves with any other move.";
 

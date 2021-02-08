@@ -6,7 +6,6 @@ uintptr_t VergilInfSDT::jmp_ret2{NULL};
 bool VergilInfSDT::cheaton{NULL};
 
 float desiredsdtvalue = 10000.0f;
-bool supersdepletesdt;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -20,8 +19,6 @@ static naked void detour1() {
         jmp code
 
     cheatcode:
-        cmp byte ptr [supersdepletesdt], 1
-        je code
         movss xmm1, [desiredsdtvalue]
         movss [rbx+00001B20h], xmm1
 		jmp qword ptr [VergilInfSDT::jmp_ret1]
@@ -89,13 +86,5 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilInfSDT::on_config_load(const utility::Config& cfg) {
-  supersdepletesdt = cfg.get<bool>("vergil_sdt_duration_only").value_or(true);
-}
-void VergilInfSDT::on_config_save(utility::Config& cfg) {
-  cfg.set<bool>("vergil_sdt_duration_only", supersdepletesdt);
-}
-
 void VergilInfSDT::on_draw_ui() {
-  ImGui::Checkbox("Inf Duration Only", &supersdepletesdt);
 }

@@ -74,7 +74,7 @@ std::optional<std::string> JumpStart::on_initialize() {
   ischecked          = &JumpStart::cheaton ;
   onpage             = enemystep;
 
-  full_name_string   = "JumpStart";
+  full_name_string   = "JumpStart (+)";
   author_string      = "SSSiyan, Dr.penguin";
   description_string = "Allows you to cancel out of a selection of moves with any jump action.";
 

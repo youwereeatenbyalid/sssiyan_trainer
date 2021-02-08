@@ -372,7 +372,7 @@ std::optional<std::string> LDK::on_initialize() {
   ischecked            = &LDK::cheaton;
   onpage               = gamemode;
 
-  full_name_string     = "Legendary Dark Knights";
+  full_name_string     = "Legendary Dark Knights (+)";
   author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
   description_string   = "Enables the Legendary Dark Knights Gamemode.";
 

@@ -124,7 +124,7 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &SpardaWorkshop::cheaton;
   onpage    = gamemode;
-  full_name_string     = "Sparda's Workshop";
+  full_name_string     = "Sparda's Workshop (+)";
   author_string        = "Lidemi";
   description_string   = "A comprehensive environmental training tool that enhances the Void.\n"
                          "Use the advanced options to set player, barrel & enemy spawn positions.";
