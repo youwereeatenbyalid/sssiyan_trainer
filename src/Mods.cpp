@@ -42,6 +42,7 @@
         #include "mods/CameraSettings.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
+        #include "mods/BufferedReversalsOriginal.hpp"
         #include "mods/NoJCCooldown.hpp"
         #include "mods/AlwaysSTaunts.hpp"
         #include "mods/AllStart.hpp"
@@ -141,11 +142,12 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CameraSettings>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
+        m_mods.emplace_back(std::make_unique<OriginalReversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
-       // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());

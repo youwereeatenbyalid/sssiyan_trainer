@@ -139,6 +139,8 @@ set(MODS_SRC
     mods/TextEditor.cpp
     mods/WalkOnKeyboard.hpp 
     mods/WalkOnKeyboard.cpp 
+    mods/BufferedReversalsOriginal.hpp 
+    mods/BufferedReversalsOriginal.cpp 
 
 )
 
