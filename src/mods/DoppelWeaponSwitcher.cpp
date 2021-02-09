@@ -236,6 +236,7 @@ static naked void doppeljjdc_detour() {
     code:
         cmp byte ptr [rdi+0x00001C3D], 00
         jne jne_ret
+        mov rdx, [rdi+0x000018B0]
         jmp jmp_ret
         
     cheatcode:
