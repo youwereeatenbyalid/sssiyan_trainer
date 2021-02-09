@@ -76,7 +76,7 @@ private:
 
 	HWND m_wnd{ 0 };
 	HMODULE m_game_module{ 0 };
-	uint8_t m_menu_key{ DIK_INSERT };
+	uint8_t m_menu_key{ DIK_DELETE };
 
 	std::array<uint8_t, 256> m_last_keys{ 0 };
 	std::unique_ptr<D3D11Hook> m_d3d11_hook{};

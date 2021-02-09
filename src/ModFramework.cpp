@@ -36,11 +36,17 @@ void update_thread_func(ModFramework* mf) {
 			o_mgr.Init();
 
 			InitSample(mf);
-
+	
 			while (o_mgr.Run(false) && o_mgr.Run(true)) {
 				auto mpw = o_mgr.GetMainPlatformWindow();
 				mpw->Show(true);
 				mf->on_frame();
+				ImGuiIO& io = mpw->GetContext()->IO;
+				HWND hwNd = (HWND)io.ImeWindowHandle;
+				HWND SetActiveWindow(hwNd);
+				//if (mf->m_draw_ui){
+				//	o_mgr.Destroy();
+				//}
 				std::this_thread::sleep_for(std::chrono::milliseconds(17));
 			}
 			mf->m_draw_ui = false;
