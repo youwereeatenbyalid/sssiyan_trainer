@@ -27,12 +27,12 @@ static naked void detour() {
         // mov r11, [r11+88h]
         // mov [gamedifficultyreference],r11d
         // pop r11
-        movss xmm3,[rcx+rax*4+20h]
+        movss xmm3,[rcx+rax*0x4+20h]
         mulss xmm3,[desireddamageoutput]
 		jmp qword ptr [PlayerDamageMult::jmp_ret]
 
     code:
-        movss xmm3,[rcx+rax*4+20h]
+        movss xmm3,[rcx+rax*0x4+20h]
         jmp qword ptr [PlayerDamageMult::jmp_ret]
 	}
 }
@@ -46,13 +46,13 @@ static naked void detour2() {
         jmp code
 
     cheatcode:
-        movss xmm3,[rcx+rdx*4+20h]
+        movss xmm3,[rcx+rdx*0x4+0x20]
         mulss xmm3,[desireddamageinput]
-		jmp qword ptr [PlayerDamageMult::jmp_ret]
+		jmp qword ptr [PlayerDamageMult::jmp_ret2]
 
     code:
-        movss xmm3,[rcx+rdx*4+20h]
-        jmp qword ptr [PlayerDamageMult::jmp_ret]
+        movss xmm3,[rcx+rdx*0x4+0x20]
+        jmp qword ptr [PlayerDamageMult::jmp_ret2]
 	}
 }
 
