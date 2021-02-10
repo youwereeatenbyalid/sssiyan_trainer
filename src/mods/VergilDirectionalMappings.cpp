@@ -12,11 +12,12 @@ static naked void detour() {
         jne code
 
         cmp byte ptr [VergilDirectionalMappings::cheaton], 1
-
         je cheatcode
         jmp code
 
     cheatcode:
+        cmp rsi,[PlayerTracker::vergilentity]
+        jne code
         cmp byte ptr [rdi+10h], 4
         je lockonback
         jmp code
