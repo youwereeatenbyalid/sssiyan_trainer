@@ -10,8 +10,8 @@ float newenemystepheight = 0.0f;
 
 static naked void detour() {
 	__asm {
-        cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
-        jne code
+        // cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
+        // jne code
 		cmp byte ptr [EnemyStepBanHeight::cheaton], 1
         je cheatcode
         jmp code
