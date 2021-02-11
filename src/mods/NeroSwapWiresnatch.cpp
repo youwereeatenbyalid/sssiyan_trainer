@@ -4,11 +4,12 @@
 uintptr_t NeroSwapWiresnatch::jmp_ret1{NULL};
 uintptr_t NeroSwapWiresnatch::jmp_ret2{NULL};
 bool NeroSwapWiresnatch::cheaton{NULL};
+bool swapInputs{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-static naked void detour1() {
+static naked void detour1() { // Air
 	__asm {
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
@@ -17,8 +18,16 @@ static naked void detour1() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [swapInputs], 1
+        je cheatcode2
         cmp rbp, 3
         je code
+        mov byte ptr [rax+10h], 43
+		jmp qword ptr [NeroSwapWiresnatch::jmp_ret1]
+
+    cheatcode2:
+        cmp rbp, 3 // 0
+        jne code
         mov byte ptr [rax+10h], 43
 		jmp qword ptr [NeroSwapWiresnatch::jmp_ret1]
 
@@ -28,7 +37,7 @@ static naked void detour1() {
 	}
 }
 
-static naked void detour2() {
+static naked void detour2() { // Ground
 	__asm {
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
@@ -37,8 +46,16 @@ static naked void detour2() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [swapInputs], 1
+        je cheatcode2
         cmp rbp, 3
         je code
+        mov byte ptr [rax+10h], 43
+		jmp qword ptr [NeroSwapWiresnatch::jmp_ret2]
+
+    cheatcode2:
+        cmp rbp, 3 // 0
+        jne code
         mov byte ptr [rax+10h], 43
 		jmp qword ptr [NeroSwapWiresnatch::jmp_ret2]
 
@@ -88,4 +105,13 @@ std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroSwapWiresnatch::on_draw_ui() {}
+void NeroSwapWiresnatch::on_config_load(const utility::Config& cfg) {
+  swapInputs = cfg.get<bool>("nero_angel_devil_swap_inputs").value_or(false);
+}
+void NeroSwapWiresnatch::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("nero_angel_devil_swap_inputs", swapInputs);
+}
+
+void NeroSwapWiresnatch::on_draw_ui() {
+  ImGui::Checkbox("Swap Inputs", &swapInputs);
+}

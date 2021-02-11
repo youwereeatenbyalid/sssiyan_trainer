@@ -1,22 +1,21 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class NeroSwapWiresnatch : public Mod {
+class EnemyInstantDT : public Mod {
 public:
-  NeroSwapWiresnatch() = default;
+  EnemyInstantDT() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "NeroSwapWiresnatch"; }
+  std::string_view get_name() const override { return "EnemyInstantDT"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  static uintptr_t jmp_ret1;
-  static uintptr_t jmp_ret2;
+  static uintptr_t jmp_ret;
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   // void on_frame() override;
@@ -31,6 +30,5 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_function_hook1;
-  std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_function_hook;
 };

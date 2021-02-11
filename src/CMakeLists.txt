@@ -141,6 +141,8 @@ set(MODS_SRC
     mods/WalkOnKeyboard.cpp 
     mods/BufferedReversalsOriginal.hpp 
     mods/BufferedReversalsOriginal.cpp 
+    mods/EnemyInstantDT.hpp 
+    mods/EnemyInstantDT.cpp 
 
 )
 

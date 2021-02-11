@@ -326,8 +326,8 @@ void CameraSettings::on_config_load(const utility::Config& cfg) {
   heightautocorrectenable = cfg.get<bool>("camera_settings_height_auto_correct").value_or(false);
   movementautocorrectenable = cfg.get<bool>("camera_settings_movement_auto_correct").value_or(false);
   keyboardhorizontalenable = cfg.get<bool>("camera_settings_keyboard_horizontal").value_or(false);
-  fov = cfg.get<float>("camera_settings_fov").value_or(90.0f);
-  horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(4.00f);
+  fov = cfg.get<float>("camera_settings_fov").value_or(65.0f);
+  horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(3.25f);
 }
 
 void CameraSettings::on_config_save(utility::Config& cfg) {
