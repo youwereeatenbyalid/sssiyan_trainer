@@ -17,7 +17,7 @@ static naked void detour() {
         jmp code
 
     cheatcode:
-		jmp qword ptr [DanteInfQ4ExitWindow::jmp_ret]
+		jmp qword ptr [DanteInfQ4ExitWindow::jmp_jne]
 
     code:
         cmp qword ptr [rax+18h], 00
@@ -47,13 +47,13 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   description_string   = "Removes the time limit on the Quadruple S Exit window.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "75 2E F3 0F 5A C0 F2 0F 5C F8 66 0F 5A CF F3 0F 11 8B");
+  auto addr = utility::scan(base, "47 50 48 83 78 18 00 75 2E F3 0F 5A");
   if (!addr) {
     return "Unable to find DanteInfQ4ExitWindow pattern.";
   }
-  DanteInfQ4ExitWindow::jmp_jne = utility::scan(base, "1A 00 00 00 00 00 00 0F 28 74 24 30").value();
+  DanteInfQ4ExitWindow::jmp_jne = addr.value() + 55;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+  if (!install_hook_absolute(addr.value()+2, m_function_hook, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteInfQ4ExitWindow";
