@@ -57,6 +57,7 @@
         #include "mods/DisableEnemyAI.hpp"
         #include "mods/EnemyInstantDT.hpp"
         #include "mods/WalkOnKeyboard.hpp"
+        #include "mods/ChargeChecker.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -147,7 +148,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
         m_mods.emplace_back(std::make_unique<AllStart>());
-        m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
+        m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
         // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
@@ -157,7 +158,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
-        // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>()); // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
+        // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());   // Needs Lock On compare from player+0xED0
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());

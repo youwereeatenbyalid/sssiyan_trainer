@@ -143,6 +143,8 @@ set(MODS_SRC
     mods/BufferedReversalsOriginal.cpp 
     mods/EnemyInstantDT.hpp 
     mods/EnemyInstantDT.cpp 
+    mods/ChargeChecker.hpp 
+    mods/ChargeChecker.cpp 
 
 )
 
