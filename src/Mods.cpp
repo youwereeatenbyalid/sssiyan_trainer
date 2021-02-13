@@ -92,11 +92,12 @@
     // Common
     // Gameplay
     // Nero
-      #include "mods/NeroGP01overGerberaPickup.hpp"
+       #include "mods/NeroGP01overGerberaPickup.hpp"
     // Dante
     // V
     // Vergil
-      #include "mods/VergilNoSDTDismiss.hpp"
+       #include "mods/VergilDoppelBanish.hpp"
+      //#include "mods/VergilNoSDTDismiss.hpp"
 Mods::Mods()
 {
 // Example
@@ -199,7 +200,8 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
-        m_mods.emplace_back(std::make_unique<VergilNoSDTDismiss>());
+        m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
+        //m_mods.emplace_back(std::make_unique<VergilNoSDTDismiss>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

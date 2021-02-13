@@ -144,7 +144,9 @@ set(MODS_SRC
     mods/EnemyInstantDT.hpp 
     mods/EnemyInstantDT.cpp 
     mods/ChargeChecker.hpp 
-    mods/ChargeChecker.cpp 
+    mods/ChargeChecker.cpp     
+    mods/VergilDoppelBanish.hpp 
+    mods/VergilDoppelBanish.cpp 
 
 )
 
