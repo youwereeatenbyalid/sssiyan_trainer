@@ -1,6 +1,7 @@
 
 #include "BpStageJump.hpp"
 #include "PlayerTracker.hpp"
+#include <ctime>
 
 uintptr_t BpStageJump::jmp_ret{NULL};
 uintptr_t BpStageJump::jmp_jne{NULL};
@@ -14,6 +15,7 @@ bool randomStageToggle;
 // only in clang/icl mode on x64, sorry
 
 int random_num(int range_start, int range_end){
+  std::srand((unsigned int)time(0));
   return range_start + ( std::rand() % ( range_end - range_start + 1 ) );
 }
 
