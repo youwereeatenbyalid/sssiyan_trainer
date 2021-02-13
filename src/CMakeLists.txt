@@ -131,8 +131,6 @@ set(MODS_SRC
     mods/SpardaWorkshop.cpp 
     mods/NeroGP01overGerberaPickup.hpp 
     mods/NeroGP01overGerberaPickup.cpp 
-    mods/VergilNoSDTDismiss.hpp 
-    mods/VergilNoSDTDismiss.cpp    
     mods/SCNPathEditor.hpp 
     mods/SCNPathEditor.cpp 
     mods/TextEditor.hpp

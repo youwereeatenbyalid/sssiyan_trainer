@@ -97,7 +97,6 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-      //#include "mods/VergilNoSDTDismiss.hpp"
 Mods::Mods()
 {
 // Example
@@ -201,7 +200,6 @@ Mods::Mods()
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
-        //m_mods.emplace_back(std::make_unique<VergilNoSDTDismiss>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
