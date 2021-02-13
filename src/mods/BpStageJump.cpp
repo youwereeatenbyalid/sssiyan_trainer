@@ -8,9 +8,14 @@ bool BpStageJump::cheaton{NULL};
 int bpstage = 1;
 bool bossrush;
 bool retrystage;
+bool randomStageToggle;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
+
+int random_num(int range_start, int range_end){
+  return range_start + ( std::rand() % ( range_end - range_start + 1 ) );
+}
 
 static naked void detour() {
 	__asm {
@@ -23,6 +28,8 @@ static naked void detour() {
     cheatcode:
         cmp byte ptr [bossrush], 1
         je bossrushstart
+        cmp byte ptr [randomStageToggle], 1
+        je randomstagestart
         push rax
         mov eax, [bpstage]
         mov [rbx+68h], eax
@@ -67,6 +74,19 @@ static naked void detour() {
         mov byte ptr [rbx+68h], 98
         jmp retcode
 
+    randomstagestart:
+        push rcx
+        push rdx
+        push rax
+        mov rcx, 1
+        mov rdx, 101
+        call random_num
+        mov [rbx+68h], al
+        pop rax
+        pop rdx
+        pop rcx
+        jmp retcode
+
     code:
         cmp [rbx+79h], cl
         jne jmp_jne
@@ -94,7 +114,8 @@ std::optional<std::string> BpStageJump::on_initialize() {
   onpage                  = bloodypalace;
   full_name_string        = "Bp Stage Jump (+)";
   author_string           = "SSSiyan";
-  description_string      = "Allows you to skip to a BP stage of your choosing.";
+  description_string      = "Allows you to skip to a BP stage of your choosing.\n"
+                            "Thanks Darkness for making the randomizer!";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "38 4B 79 75 03");
@@ -116,16 +137,31 @@ std::optional<std::string> BpStageJump::on_initialize() {
 void BpStageJump::on_config_load(const utility::Config& cfg) {
   bossrush   = cfg.get<bool>("bp_jump_boss_rush").value_or(false);
   retrystage = cfg.get<bool>("bp_jump_retry_stage").value_or(false);
+  randomStageToggle = cfg.get<bool>("bp_jump_random_stage").value_or(false);
 }
 void BpStageJump::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("bp_jump_boss_rush", bossrush);
   cfg.set<bool>("bp_jump_retry_stage", retrystage);
+  cfg.set<bool>("bp_jump_random_stage", randomStageToggle);
 }
 
 void BpStageJump::on_draw_ui() {
-    ImGui::Checkbox("Boss Rush", &bossrush);
-    ImGui::Checkbox("Retry Stage", &retrystage);
     ImGui::Spacing();
-    ImGui::Text("BP Stage");
+    ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
+    ImGui::Checkbox("Retry Current Stage", &retrystage);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::TextWrapped("Tick before starting BP to skip non boss rooms");
+    ImGui::Checkbox("Boss Rush", &bossrush);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::TextWrapped("Tick to be given random stages");
+    ImGui::Checkbox("Random Stage", &randomStageToggle);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::TextWrapped("If Boss Rush and Random Stage are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
     ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 }
