@@ -9,6 +9,7 @@
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
         #include "mods/TextEditor.hpp"
+        #include "mods/FileEditor.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -110,6 +111,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
+        m_mods.emplace_back(std::make_unique<FileEditor>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
         m_mods.emplace_back(std::make_unique<MoveReplacer>());

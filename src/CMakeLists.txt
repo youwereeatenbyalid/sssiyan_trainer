@@ -145,7 +145,8 @@ set(MODS_SRC
     mods/ChargeChecker.cpp     
     mods/VergilDoppelBanish.hpp 
     mods/VergilDoppelBanish.cpp 
-
+    mods/FileEditor.hpp 
+    mods/FileEditor.cpp 
 )
 
 set(HOOKS_SRC
