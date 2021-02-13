@@ -6,6 +6,8 @@ uintptr_t AllStart::jmp_initial{NULL};
 
 bool enemystepcancels;
 
+bool stingerjumpcancels;
+
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -29,11 +31,15 @@ static naked void detour() {
     nerocancels:
         cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Nero Enemy Step
         je jccheck
+        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Nero Stinger Jump
+        je stingercheck
         jmp code
 
     dantecancels:
         cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Dante Enemy Step
         je dantejccheck
+        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Dante Stinger Jump
+        je stingercheck
         jmp code
 
     vancels:
@@ -44,6 +50,8 @@ static naked void detour() {
     vergilancels:
         cmp dword ptr [PlayerTracker::playermoveid], 53C0000h // Vergil Enemy Step (probably)
         je jccheck
+        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Dante Stinger Jump
+        je stingercheck
         jmp code
 
 //_____________________________________________________________________________________
@@ -65,6 +73,11 @@ static naked void detour() {
         cmp byte ptr [PlayerTracker::danteweapon], 6 // Cavailiere R
         je code
         jmp cancellable
+
+    stingercheck:
+        cmp byte ptr [stingerjumpcancels], 1
+        je cancellable
+        jmp code
 
     cancellable:
         mov word ptr [rdi+5Eh], 0100h
@@ -90,7 +103,7 @@ std::optional<std::string> AllStart::on_initialize() {
   onpage             = enemystep;
 
   full_name_string   = "AllStart (+)";
-  author_string      = "SSSiyan";
+  author_string      = "SSSiyan, dr.penguin";
   description_string = "Allows you to cancel out of a selection of moves with any other move.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -110,11 +123,14 @@ std::optional<std::string> AllStart::on_initialize() {
 
 void AllStart::on_config_load(const utility::Config& cfg) {
   enemystepcancels = cfg.get<bool>("enemy_step_cancels").value_or(true);
+  stingerjumpcancels = cfg.get<bool>("stinger_jump_cancels").value_or(true);
 }
 void AllStart::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("enemy_step_cancels", enemystepcancels);
+  cfg.set<bool>("stinger_jump_cancels", stingerjumpcancels);
 }
 
 void AllStart::on_draw_ui() {
   ImGui::Checkbox("Enemy Step Cancels", &enemystepcancels);
+  ImGui::Checkbox("Stinger Jump Cancels", &stingerjumpcancels);
 }
