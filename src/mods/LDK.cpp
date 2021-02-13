@@ -550,8 +550,13 @@ void LDK::on_draw_debug_ui() {
 // will show up in main window, dump ImGui widgets you want here
 void LDK::on_draw_ui() {
   ImGui::Text("Enemy Hard Limit");
+  ImGui::TextWrapped("This controls the maximum number of enemies that can be active simultaneously in encounters.");
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
   ImGui::Text("Enemy Soft Limit");
+  ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.\n"
+	"Past this point, death animations are disabled to prevent additional stress on the game. "
+	"This currently can cause issues with enemy spawners not being destroyed.");
+  
   ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
 }
