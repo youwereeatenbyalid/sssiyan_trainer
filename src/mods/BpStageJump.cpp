@@ -194,15 +194,16 @@ int BpStageJump::next_floor()
 
 static naked void detour() {
 	__asm {
-        // cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
-        // jne code
+	// code
+        cmp [rbx+79h], cl
+        jne jmp_jne
 		cmp byte ptr [BpStageJump::cheaton], 1
         je cheatcode
         jmp code
 
     cheatcode:
-        //cmp byte ptr [bossrush], 1
-        //je bossrushstart
+        // cmp byte ptr [bossrush], 1
+        // je bossrushstart
         cmp byte ptr [randomStageToggle], 1
         je randomstagestart
 
@@ -225,8 +226,6 @@ static naked void detour() {
         jmp retcode
 
     code:
-        cmp [rbx+79h], cl
-        jne jmp_jne
         inc byte ptr [rbx+68h]
     retcode:
         mov rax, [rdi+50h]
@@ -338,3 +337,39 @@ void BpStageJump::on_draw_ui() {
 void BpStageJump::on_draw_debug_ui(){
 	
 }
+
+/*
+[ENABLE]
+aobscanmodule(BPStageJumps2,DevilMayCry5.exe,38 4B 79 75 03) // should be unique
+alloc(newmem,$1000,"DevilMayCry5.exe"+368E48)
+label(code)
+label(return)
+
+newmem:
+
+code:
+  cmp [rbx+79],cl
+  jne DevilMayCry5.exe+368E50 // 7FF6CB228E50 - 7FF6CB228E48 = 8h = #8
+  inc [rbx+68]
+  mov rax,[rdi+50]
+  jmp return
+
+BPStageJumps2:
+  jmp newmem
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+
+return:
+registersymbol(BPStageJumps2)
+
+[DISABLE]
+BPStageJumps2:
+  db 38 4B 79 75 03 FF 43 68 48 8B 47 50
+unregistersymbol(BPStageJumps2)
+dealloc(newmem)
+*/
