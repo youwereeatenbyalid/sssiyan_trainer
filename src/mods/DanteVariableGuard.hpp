@@ -1,11 +1,13 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class VergilInfConcentration : public Mod {
+class DanteVariableGuard : public Mod {
 public:
-  VergilInfConcentration() = default;
+  DanteVariableGuard() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "VergilInfConcentration"; }
+  std::string_view get_name() const override {
+    return "DanteVariableGuard";
+  }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this

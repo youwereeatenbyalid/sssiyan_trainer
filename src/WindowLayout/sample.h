@@ -871,6 +871,7 @@ public:
       ImGui::Text("%s", focusmod->full_name_string.c_str());
       ImGui::Text("Author: %s", focusmod->author_string.c_str());
       ImGui::TextWrapped("%s", focusmod->description_string.c_str());
+	  ImGui::Spacing();
       ImGui::Separator();
       focusmod->on_draw_ui();
     } else if (!p_mf->is_ready()) {

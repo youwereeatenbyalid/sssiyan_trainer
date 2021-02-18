@@ -147,6 +147,11 @@ set(MODS_SRC
     mods/VergilDoppelBanish.cpp 
     mods/FileEditor.hpp 
     mods/FileEditor.cpp 
+    mods/AllStartManual.hpp 
+    mods/AllStartManual.cpp 
+    mods/DanteVariableGuard.hpp 
+    mods/DanteVariableGuard.cpp 
+
 )
 
 set(HOOKS_SRC
