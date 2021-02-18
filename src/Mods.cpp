@@ -78,6 +78,7 @@
         #include "mods/DanteAlwaysOvertop.hpp"
         #include "mods/DanteInfIgnition.hpp"
         #include "mods/DanteGuardflyWip.hpp"
+        #include "mods/DanteVariableGuard.hpp"
     // V
     // Vergil
         #include "mods/VergilAirTrickNoSS.hpp"
@@ -181,6 +182,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
         m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
         m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
+        m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());

@@ -6,7 +6,7 @@ bool VergilInfConcentration::cheaton{NULL};
 int concentrationLevel     = 2;
 float concentrationZero    = 0.0f;
 float concentrationOne     = 100.0f;
-float concentrationTwo   = 300.0f;
+float concentrationTwo     = 300.0f;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
