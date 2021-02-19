@@ -3,13 +3,22 @@
 #include "Mods.hpp"
 // Example
          #include "mods/SimpleMod.hpp"
+// Darkness
+    // Background
+        #include "mods/FileEditor.hpp"
+    // Common
+    // Gameplay
+    // Nero
+    // Dante
+    // V
+      // Not even in my wildest dreams
+    // Vergil
 // Hitch
     // Background
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
         #include "mods/TextEditor.hpp"
-        #include "mods/FileEditor.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -104,6 +113,16 @@ Mods::Mods()
 {
 // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
+// Darkness
+    // Background
+        m_mods.emplace_back(std::make_unique<FileEditor>());
+    // Common
+    // Gameplay
+    // Nero
+    // Dante
+    // V
+      // Yeah sure :idk:
+    // Vergil
 // Hitch
     // Background
         m_mods.emplace_back(std::make_unique<PlayerTracker>());
@@ -113,7 +132,6 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<MoveID>());
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
-        m_mods.emplace_back(std::make_unique<FileEditor>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
         m_mods.emplace_back(std::make_unique<MoveReplacer>());

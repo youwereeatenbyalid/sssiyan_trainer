@@ -26,5 +26,5 @@ public:
 private:
     mutable std::string focusedmod;
     mutable bool redrawfocusedwindow = false;
-    std::vector<std::shared_ptr<Mod>> m_mods;
+    std::vector<std::unique_ptr<Mod>> m_mods;
 };
