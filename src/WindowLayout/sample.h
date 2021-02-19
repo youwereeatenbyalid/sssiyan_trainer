@@ -842,8 +842,8 @@ public:
 
 		if (p_mf->is_error() && p_mf->is_ready()) {
             auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
-            ImGui::Text("%s Debug", focusmod->full_name_string.c_str());
-            focusmod->on_draw_debug_ui();
+            ImGui::Text("%s Debug", (*focusmod)->full_name_string.c_str());
+            (*focusmod)->on_draw_debug_ui();
 		}
 		else if (!p_mf->is_ready()) {
 			ImGui::TextWrapped("ModFramework is currently initializing...");
@@ -868,12 +868,12 @@ public:
 
     if (p_mf->is_error() && p_mf->is_ready()) {
       auto focusmod = p_mf->get_mods()->get_mod(p_mf->get_mods()->get_focused_mod());
-      ImGui::Text("%s", focusmod->full_name_string.c_str());
-      ImGui::Text("Author: %s", focusmod->author_string.c_str());
-      ImGui::TextWrapped("%s", focusmod->description_string.c_str());
+      ImGui::Text("%s", (*focusmod)->full_name_string.c_str());
+      ImGui::Text("Author: %s", (*focusmod)->author_string.c_str());
+      ImGui::TextWrapped("%s", (*focusmod)->description_string.c_str());
 	  ImGui::Spacing();
       ImGui::Separator();
-      focusmod->on_draw_ui();
+      (*focusmod)->on_draw_ui();
     } else if (!p_mf->is_ready()) {
       ImGui::TextWrapped("ModFramework is currently initializing...");
     } else if (!p_mf->is_error()) {

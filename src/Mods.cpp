@@ -252,11 +252,12 @@ std::optional<std::string> Mods::on_initialize() const {
     focusedmod = "nomod";
     return std::nullopt;
 }
-std::shared_ptr<Mod> Mods::get_mod(std::string modname) const {
+
+std::unique_ptr<Mod>* Mods::get_mod(std::string modname) const {
     //recursive call in case we can't find the mod being looked for
   for (auto& mod : m_mods) {
     if (modname == mod->get_name()) {
-      return mod;
+      return (std::unique_ptr<Mod>*)&mod;
     }
   }
   return get_mod("SimpleMod");
@@ -321,7 +322,7 @@ void Mods::on_draw_ui() const {
     }
 }
 
-void Mods::draw_entry(std::shared_ptr<Mod>& mod){
+void Mods::draw_entry(std::unique_ptr<Mod>& mod){
     //mod->get_hotkey_name()
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->ischecked);
     ImGui::SameLine();
