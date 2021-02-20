@@ -82,6 +82,7 @@ private:
     static void* __fastcall internal_file_loader(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
     void* __fastcall file_editor(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
 
+    void load_mods();
     inline bool asset_check(const wchar_t* game_path, const wchar_t* mod_path) const;
 
 private: // structs
@@ -107,4 +108,5 @@ private: // structs
 private:
     std::optional<std::vector<fs::path>> m_file_config_paths{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_hot_swaps{};
+    std::optional<utility::Config> m_cfg;
 };
