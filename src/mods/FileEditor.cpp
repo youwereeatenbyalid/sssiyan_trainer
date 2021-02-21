@@ -1,8 +1,7 @@
 #include "FileEditor.hpp"
 
 std::optional<std::vector<fs::path>>
-list_files(const fs::path& root, const std::optional<std::string>& ext = {},
-           const std::optional<std::string>& ex_ext = {}) {
+list_files(const fs::path& root, const std::optional<std::string>& ext = {}, const std::optional<std::string>& ex_ext = {}) {
   if (!fs::exists(root) || !fs::is_directory(root)) {
     return {};
   }
@@ -71,7 +70,28 @@ std::optional<std::string> FileEditor::on_initialize() {
 
   full_name_string     = "Asset Swapper";
   author_string        = "Darkness (TheDarkness704)";
-  description_string   = "In the dark times of need a hero of Darkness rose and made this shit.";
+  description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
+
+  load_mods();
+
+  auto file_loader_fn = utility::scan(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
+
+  if (!file_loader_fn) {
+    return "Unable to find FileEditor pattern.";
+  }
+
+  m_file_loader_hook = std::make_unique<FunctionHook>(*file_loader_fn, (uintptr_t)&FileEditor::internal_file_loader);
+
+  if (!m_file_loader_hook->create()) {
+    return "Failed to hook File Loader.";
+  }
+
+  return Mod::on_initialize();
+}
+
+void FileEditor::load_mods()
+{
+  m_hot_swaps.value().clear();
 
   std::string cfg_ext = ".ini";
   //get config files
@@ -137,24 +157,11 @@ std::optional<std::string> FileEditor::on_initialize() {
       }
     }
   }
-
-  auto file_loader_fn = utility::scan(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
-
-  if (!file_loader_fn) {
-    return "Unable to find FileEditor pattern.";
-  }
-
-  m_file_loader_hook = std::make_unique<FunctionHook>(*file_loader_fn, (uintptr_t)&FileEditor::internal_file_loader);
-
-  if (!m_file_loader_hook->create()) {
-    return "Failed to hook File Loader.";
-  }
-
-  return Mod::on_initialize();
 }
 
 // during load
 void FileEditor::on_config_load(const utility::Config &cfg) {
+    m_cfg = cfg;
     for (auto& asset_mod : *m_hot_swaps) {
         asset_mod->is_on = cfg.get<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable").value_or(false);
         asset_mod->priority = cfg.get<unsigned int>("AssetMod(\"" + asset_mod->main_name + "\")Priority").value_or(asset_mod->priority);
@@ -164,6 +171,7 @@ void FileEditor::on_config_load(const utility::Config &cfg) {
 }
 // during save
 void FileEditor::on_config_save(utility::Config &cfg) {
+    m_cfg = cfg;
     for (auto& asset_mod : *m_hot_swaps) {
         cfg.set<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable", asset_mod->is_on);
         cfg.set<unsigned int>("AssetMod(\"" + asset_mod->main_name + "\")Priority", asset_mod->priority);
@@ -177,6 +185,15 @@ void FileEditor::on_draw_debug_ui() {}
 
 void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps)
 {
+
+void FileEditor::on_draw_ui() {
+    if (ImGui::Button("Reload Mods")) {
+        load_mods();
+        if(m_cfg){
+            on_config_load(*m_cfg);
+        }
+    }
+
     for (UINT n = 0; n < hot_swaps.value().size(); n++) {
         auto& asset_mod = hot_swaps.value()[n];
 
