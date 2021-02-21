@@ -20,14 +20,15 @@ public:
   std::optional<std::string> get_description() const { return m_description; }
   std::optional<std::string> get_version() const { return m_version; }
   std::optional<std::string> get_author() const { return m_author; }
-
+  std::optional<int> get_character() const {return m_character;}
 private:
   enum StringValue {
     ev_null,
     ev_mod_name,
     ev_description,
     ev_version,
-    ev_author
+    ev_author,
+    ev_character
   };
 
   std::map<std::string, StringValue> m_variable_map;
@@ -46,6 +47,7 @@ private:
   std::optional<std::string> m_description;
   std::optional<std::string> m_version;
   std::optional<std::string> m_author;
+  std::optional<int> m_character;
 };
 
 class FileEditor : public Mod {
@@ -95,6 +97,7 @@ private: // structs
     typedef struct {
         bool is_on;
         unsigned int priority;
+        std::optional<int> character;
         std::string name;
         std::string main_name;
         std::string label;
@@ -107,4 +110,12 @@ private: // structs
 private:
     std::optional<std::vector<fs::path>> m_file_config_paths{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_hot_swaps{};
+    std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_nero_swaps{};
+    std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_dante_swaps{};
+    std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_gilver_swaps{};
+    std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_vergil_swaps{};
+
+public:
+    void asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps);
+    void costume_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& costume_swaps);
 };

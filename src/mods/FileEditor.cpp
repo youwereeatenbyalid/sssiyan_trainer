@@ -51,7 +51,7 @@ FileEditor* g_fileEditor = nullptr;
 // only in clang/icl mode on x64, sorry
 
 FileEditor::FileEditor()
-    :m_is_active{ false }, m_file_config_paths{{}}, m_hot_swaps{{}}
+    :m_is_active{ false }, m_file_config_paths{{}}, m_hot_swaps{{}}, m_nero_swaps{ {} }, m_dante_swaps{ {} }, m_gilver_swaps{ {} }, m_vergil_swaps{ {} }
 {
 	g_fileEditor = this;
 }
@@ -74,14 +74,16 @@ std::optional<std::string> FileEditor::on_initialize() {
   description_string   = "In the dark times of need a hero of Darkness rose and made this shit.";
 
   std::string cfg_ext = ".ini";
-
+  //get config files
   m_file_config_paths = list_files("natives/x64/Mods", cfg_ext);
   
   if(m_file_config_paths){
     for(auto config : *m_file_config_paths){
       // Read Mod Info
       auto mod_cfg = HotSwapCFG(config);
+      //get size of modconfigname
       auto mod_name_length = config.stem().string().size();
+      //mod files is a list of all lifes not including the .ini?
       auto mod_files = list_files(fs::path("natives/x64/Mods") / config.stem(), {}, cfg_ext);
       if (mod_files){
         for (auto& file : *mod_files) {
@@ -111,8 +113,27 @@ std::optional<std::string> FileEditor::on_initialize() {
 
             path_replacement.push_back({org_path, new_path});
         }
-
-        m_hot_swaps.value().push_back(std::make_shared<Asset_Hotswap>(Asset_Hotswap{false, m_hot_swaps.value().size(), mod_cfg.get_name(), mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(), mod_cfg.get_version(), mod_cfg.get_author(), path_replacement}));
+        
+        Asset_Hotswap hotswap = { false, m_hot_swaps.value().size(),mod_cfg.get_character(), mod_cfg.get_name(), mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(), mod_cfg.get_version(), mod_cfg.get_author(), path_replacement};
+        m_hot_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+        if(m_hot_swaps.value().back()->character){
+            switch(m_hot_swaps.value().back()->character.value()){
+                case 0:
+                    m_nero_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+                    break;
+                case 1:
+                    m_dante_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+                    break;
+                case 2:
+                    m_gilver_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+                    break;
+                case 4:
+                    m_vergil_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+                    break;
+                default:
+                    break;
+            }
+        }
       }
     }
   }
@@ -153,13 +174,15 @@ void FileEditor::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void FileEditor::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void FileEditor::on_draw_ui() {
-    for (UINT n = 0; n < m_hot_swaps.value().size(); n++) {
-        auto& asset_mod = m_hot_swaps.value()[n];
+
+void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps)
+{
+    for (UINT n = 0; n < hot_swaps.value().size(); n++) {
+        auto& asset_mod = hot_swaps.value()[n];
 
         ImGui::Checkbox(asset_mod->label.c_str(), &asset_mod->is_on);
         ImGui::SameLine(); bool node_open = ImGui::TreeNodeEx(asset_mod->name.c_str());
-        
+
         if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
         {
             auto mouse_delta_y = ImGui::GetMouseDragDelta(0).y;
@@ -172,27 +195,27 @@ void FileEditor::on_draw_ui() {
                 delta = 1;
             }
 
-            if(delta != 0){
+            if (delta != 0) {
                 int n_next = n + delta;
-                if (n_next >= 0 && n_next < m_hot_swaps.value().size())
+                if (n_next >= 0 && n_next < hot_swaps.value().size())
                 {
-                    std::swap(m_hot_swaps.value()[n]->priority, m_hot_swaps.value()[n_next]->priority);
-                    std::swap(m_hot_swaps.value()[n], m_hot_swaps.value()[n_next]);
+                    std::swap(hot_swaps.value()[n]->priority, hot_swaps.value()[n_next]->priority);
+                    std::swap(hot_swaps.value()[n], hot_swaps.value()[n_next]);
                     ImGui::ResetMouseDragDelta();
                 }
             }
         }
 
-        if (node_open){
-            if(asset_mod->author) {
+        if (node_open) {
+            if (asset_mod->author) {
                 ImGui::SetCursorPosX(65.f);
                 ImGui::TextWrapped("Author: %s", asset_mod->author.value().c_str());
             }
-            if(asset_mod->version) {
+            if (asset_mod->version) {
                 ImGui::SetCursorPosX(65.f);
                 ImGui::TextWrapped("Version: %s", asset_mod->version.value().c_str());
             }
-            if(asset_mod->description){
+            if (asset_mod->description) {
                 ImGui::SetCursorPosX(65.f);
                 ImGui::TextWrapped("Description: %s", asset_mod->description.value().c_str());
             }
@@ -201,6 +224,78 @@ void FileEditor::on_draw_ui() {
             ImGui::TreePop();
         }
     }
+}
+
+void FileEditor::costume_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& costume_swaps)
+{
+    for (UINT n = 0; n < costume_swaps.value().size(); n++) {
+        auto& asset_mod = costume_swaps.value()[n];
+
+        bool node_open = ImGui::TreeNodeEx(asset_mod->name.c_str());
+
+        if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+        {
+            auto mouse_delta_y = ImGui::GetMouseDragDelta(0).y;
+            int delta = 0;
+
+            if (mouse_delta_y < -15.0f) {
+                delta = -1;
+            }
+            else if (mouse_delta_y > 15.0f) {
+                delta = 1;
+            }
+
+            if (delta != 0) {
+                int n_next = n + delta;
+                if (n_next >= 0 && n_next < costume_swaps.value().size())
+                {
+                    std::swap(costume_swaps.value()[n]->priority, costume_swaps.value()[n_next]->priority);
+                    std::swap(costume_swaps.value()[n], costume_swaps.value()[n_next]);
+                    ImGui::ResetMouseDragDelta();
+                }
+            }
+        }
+
+        if (node_open) {
+            if (asset_mod->author) {
+                ImGui::SetCursorPosX(65.f);
+                ImGui::TextWrapped("Author: %s", asset_mod->author.value().c_str());
+            }
+            if (asset_mod->version) {
+                ImGui::SetCursorPosX(65.f);
+                ImGui::TextWrapped("Version: %s", asset_mod->version.value().c_str());
+            }
+            if (asset_mod->description) {
+                ImGui::SetCursorPosX(65.f);
+                ImGui::TextWrapped("Description: %s", asset_mod->description.value().c_str());
+            }
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::TreePop();
+        }
+    }
+}
+
+void FileEditor::on_draw_ui() {
+    ImGui::Text("Nero Costumes");
+    costume_swap_ui(m_nero_swaps);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("Dante Costumes");
+    costume_swap_ui(m_dante_swaps);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("V Costumes");
+    costume_swap_ui(m_gilver_swaps);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("Vergil Costumes");
+    costume_swap_ui(m_vergil_swaps);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("Mods");
+    asset_swap_ui(m_hot_swaps);
+    
 }
 
 bool FileEditor::asset_check(const wchar_t* game_path, const wchar_t* mod_path) const {
@@ -238,22 +333,27 @@ HotSwapCFG::HotSwapCFG(fs::path cfg_path)
      :m_cfg_path{ cfg_path }, m_mod_name { cfg_path.stem().string() }, m_main_name{ cfg_path.stem().string() },
       m_description {}, m_version {}, m_author {}
 {
+    //map strings to enum
 	m_variable_map["name"] = ev_mod_name;
 	m_variable_map["description"] = ev_description;
 	m_variable_map["version"] = ev_version;
 	m_variable_map["author"] = ev_author;
-
+    m_variable_map["character"] = ev_character;
+    //input file stream
     std::ifstream cfg(cfg_path.string());
-
+    //if file stream exists
     if (cfg) {
+        //line by line
         for (std::string line{}; getline(cfg, line); ) {
+            //convert line to stream
             std::istringstream ss{ line };
             std::string variable{};
             std::string value{};
-
+            //split string into variable and value
             if(line.find('=') != std::string::npos){
                 getline(ss, variable, '=');
                 getline(ss, value);
+                //process line
                 process_line(variable, value);
             }
         }
@@ -263,7 +363,9 @@ HotSwapCFG::HotSwapCFG(fs::path cfg_path)
 void HotSwapCFG::process_line(std::string variable, std::string value)
 {
     if (!variable.empty() && !value.empty()) {
+        //use variable string in stringmap to determine enum
         switch (m_variable_map[str_to_lower(variable)]) {
+        //assign to member variables appropriately
         case ev_mod_name:
             m_mod_name = value;
             break;
@@ -278,6 +380,10 @@ void HotSwapCFG::process_line(std::string variable, std::string value)
 
         case ev_author:
             m_author = value;
+            break;
+
+        case ev_character:
+            m_character = std::stoi(value);
             break;
 
         default:
