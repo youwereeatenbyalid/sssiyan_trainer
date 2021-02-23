@@ -69,8 +69,12 @@ void pause_spawn()
 		is_spawn_paused = true;
 		std::thread ([&]{
 			LDK::hardlimit_temp = LDK::hardlimit;
-			if(LDK::number <= 6)
-				LDK::hardlimit = 6;
+			if (LDK::number <= 6)
+			{
+				//LDK::hardlimit = 6;
+				is_spawn_paused = false;
+				return;
+			}
 			else
 				LDK::hardlimit = 0;
 			Sleep(LDK::SPAWN_PAUSE_TIME*1000);
@@ -452,6 +456,8 @@ static naked void hitvfxskip_detour() {
 		je originalcode
 		cmp byte ptr [LDK::hitvfx_fix_on], 0
 		je originalcode
+		cmp qword ptr [LDK::number], 4
+		jle originalcode
 		jmp containernumcheck
 
 		containernumcheck:
