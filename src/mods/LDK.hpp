@@ -1,7 +1,13 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+
+enum HitVfxState { DrawAll, DamageOnly, Nothing };
+
 class LDK : public Mod {
+#define CHAR_HITS 0xD400
+#define CHAR_DAMAGE 0x7798
+
 public:
   LDK() = default;
   // mod name string for config
@@ -34,12 +40,32 @@ public:
   static uintptr_t missionmanager;
   static bool cheaton;
 
+  static uintptr_t hitvfxskip_jmp;
+  static uintptr_t hitvfxskip_ret;
+  static uintptr_t sswords_restriction_jmp;
+  static uintptr_t sswords_restriction_jmp_ret;
+  static uintptr_t containernum_addr;
+  static uintptr_t rax_backup;
+  static uintptr_t rcx_backup;
+
+  static const uint32_t SPAWN_PAUSE_TIME = 5;
+
+  static bool physics_fix_on;
+  static bool hitvfx_fix_on;
+
   static uint32_t number;
   static uint32_t hardlimit;
   static uint32_t softlimit;
   static uint32_t limittype;
 
   static float hpoflasthitobj;
+
+  static uint32_t hardlimit_temp;
+  static uint32_t container_num;
+  static uint32_t container_limit_all;
+  static uint32_t container_limit_damage_only;
+
+  static HitVfxState vfx_state;
 
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
@@ -80,4 +106,10 @@ public:
   std::unique_ptr<FunctionHook> m_cavforcelightning1_hook;
   std::unique_ptr<FunctionHook> m_cavforcelightning2_hook;
   std::unique_ptr<FunctionHook> m_cavcoordinatechange_hook;
+
+  std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
+  std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
+
+  void set_container_limit_all(uint32_t num);
+  void set_container_limit_blood_only(uint32_t num);
 };
