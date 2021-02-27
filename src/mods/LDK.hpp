@@ -7,6 +7,27 @@ enum HitVfxState { DrawAll, DamageOnly, Nothing };
 class LDK : public Mod {
 #define CHAR_HITS 0xD400
 #define CHAR_DAMAGE 0x7798
+#define SAFE_NUMBER 9
+
+private:
+  struct RegAddrBackup {
+    uintptr_t rax;
+    uintptr_t rbx;
+    uintptr_t rcx;
+    uintptr_t rdx;
+    uintptr_t rsi;
+    uintptr_t rdi;
+    uintptr_t rbp;
+    uintptr_t rsp;
+    uintptr_t r8;
+    uintptr_t r9;
+    uintptr_t r10;
+    uintptr_t r11;
+    uintptr_t r12;
+    uintptr_t r13;
+    uintptr_t r14;
+    uintptr_t r15;
+  };
 
 public:
   LDK() = default;
@@ -47,11 +68,13 @@ public:
   static uintptr_t containernum_addr;
   static uintptr_t rax_backup;
   static uintptr_t rcx_backup;
+  static uintptr_t nopfunction1_jmp_ret2;
 
   static const uint32_t SPAWN_PAUSE_TIME = 5;
 
   static bool physics_fix_on;
   static bool hitvfx_fix_on;
+  static bool pausespawn_enabled;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -64,6 +87,7 @@ public:
   static uint32_t container_num;
   static uint32_t container_limit_all;
   static uint32_t container_limit_damage_only;
+  static uint32_t physicsfix_enable_num;
 
   static HitVfxState vfx_state;
 
@@ -112,4 +136,6 @@ public:
 
   void set_container_limit_all(uint32_t num);
   void set_container_limit_blood_only(uint32_t num);
+
+  static RegAddrBackup death_func_backup;
 };
