@@ -45,9 +45,96 @@ list_files(const fs::path& root, const std::optional<std::string>& ext = {}, con
 namespace fs = std::filesystem;
 
 FileEditor* g_fileEditor = nullptr;
+uintptr_t FileEditor::scroll_list_jmp_ret{NULL};
+uintptr_t FileEditor::costume_list_jmp_ret{NULL};
+uintptr_t FileEditor::costume_list_jnl_ret{NULL};
+
+
+uint32_t FileEditor::nero_costume_count{2};
+uint32_t FileEditor::dante_costume_count{ 2 };
+uint32_t FileEditor::gilver_costume_count{ 2 };
+uint32_t FileEditor::vergil_costume_count{ 2 };
+//uintptr_t FileEditor::costume_select_jmp_ret{NULL};
+
+
+uint32_t FileEditor::nero_costumes [19]{0,0,0,0,0,0,0,8,0,1,0x19,0x1A,0x1B,0x1C,0x1D,0x1E};
+uint32_t FileEditor::dante_costumes [19]{0,0,0,0,0,0,0,8,0,1,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F};
+uint32_t FileEditor::gilver_costumes [19]{0,0,0,0,0,0,0,8,0,1,0x1B,0x1C,0x1D,0x1E,0x1F,0x20};
+uint32_t FileEditor::vergil_costumes [19]{0,0,0,0,0,0,0,8,0,1,0x16,0x17,0x18,0x19,0x1A,0x1B};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
+
+
+int FileEditor::get_costume_list_size(int character) {
+    switch (character) {
+    case 0:
+        return FileEditor::nero_costume_count;
+        break;
+    case 1:
+        return FileEditor::dante_costume_count;
+        break;
+    case 2:
+        return FileEditor::gilver_costume_count;
+        break;
+    case 3:
+        return FileEditor::vergil_costume_count;
+        break;
+    default:
+        break;
+    }
+    return 2;
+}
+
+static naked void scroll_list_detour(){
+    __asm {
+        push rcx
+        mov ecx, dword ptr [rdi+0xE8]
+        call qword ptr [FileEditor::get_costume_list_size]
+        pop rcx
+        mov [r15], rax
+        mov eax, [r15]
+        jmp qword ptr [FileEditor::scroll_list_jmp_ret]
+    }
+}
+static naked void costume_list_detour(){
+    __asm {
+        cmp eax, 0x8
+        jnl jmp_jnl
+        cmp byte ptr [r13+0xE8], 0
+        je lea_nero
+        cmp byte ptr [r13 + 0xE8], 1
+        je lea_dante
+        cmp byte ptr [r13 + 0xE8], 2
+        je lea_gilver
+        cmp byte ptr [r13 + 0xE8], 3
+        je lea_vergil
+
+        lea_nero:
+            lea rcx, [FileEditor::nero_costumes]
+            jmp original_code
+        lea_dante:
+            lea rcx, [FileEditor::dante_costumes]
+            jmp original_code
+        lea_gilver:
+            lea rcx, [FileEditor::gilver_costumes]
+            jmp original_code
+        lea_vergil:
+            lea rcx, [FileEditor::vergil_costumes]
+            jmp original_code
+
+        original_code:
+            test rcx,rcx
+        jmp_ret:
+            jmp qword ptr [FileEditor::costume_list_jmp_ret]
+
+        jmp_jnl :
+            jmp qword ptr[FileEditor::costume_list_jnl_ret]
+
+    }
+}
+
+
 
 FileEditor::FileEditor()
     :m_is_active{ false }, m_file_config_paths{{}}, m_hot_swaps{{}}, m_nero_swaps{ {} }, m_dante_swaps{ {} }, m_gilver_swaps{ {} }, m_vergil_swaps{ {} }
@@ -75,10 +162,36 @@ std::optional<std::string> FileEditor::on_initialize() {
   load_mods();
 
   auto file_loader_fn = utility::scan(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
+  auto scroll_list_addr = utility::scan(base, "41 89 07 41 8B 07");
+  auto costume_list_addr = utility::scan(base, "3B 42 18 7D 56");
+  auto costume_select_addr = utility::scan(base, "44 8B C8 48 8B 43 50 48 83 78 18 00 0F 85 83");
+
 
   if (!file_loader_fn) {
     return "Unable to find FileEditor pattern.";
   }
+
+  if (!scroll_list_addr) {
+      return "Unable to find scroll_list pattern.";
+  }
+
+  if (!costume_list_addr) {
+      return "Unable to find costume_list pattern.";
+  }
+
+  if (!install_hook_absolute(scroll_list_addr.value(), m_scroll_list_hook, &scroll_list_detour, &scroll_list_jmp_ret, 6)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize m_scroll_list_hook";
+  }
+
+  if (!install_hook_absolute(costume_list_addr.value(), m_costume_list_hook, &costume_list_detour, &costume_list_jmp_ret, 12)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize m_costume_list_hook";
+  }
+
+  FileEditor::costume_list_jnl_ret = costume_list_addr.value()+0x5B;
 
   m_file_loader_hook = std::make_unique<FunctionHook>(*file_loader_fn, (uintptr_t)&FileEditor::internal_file_loader);
 
@@ -86,12 +199,20 @@ std::optional<std::string> FileEditor::on_initialize() {
     return "Failed to hook File Loader.";
   }
 
+
+
+
+
   return Mod::on_initialize();
 }
 
 void FileEditor::load_mods()
 {
   m_hot_swaps.value().clear();
+  m_nero_swaps.value().clear();
+  m_dante_swaps.value().clear();
+  m_gilver_swaps.value().clear();
+  m_vergil_swaps.value().clear();
 
   std::string cfg_ext = ".ini";
   //get config files
@@ -136,6 +257,7 @@ void FileEditor::load_mods()
         
         Asset_Hotswap hotswap = { false, m_hot_swaps.value().size(),mod_cfg.get_character(), mod_cfg.get_name(), mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(), mod_cfg.get_version(), mod_cfg.get_author(), path_replacement};
         m_hot_swaps.value().push_back(std::make_shared<Asset_Hotswap>(hotswap));
+
         if(m_hot_swaps.value().back()->character){
             switch(m_hot_swaps.value().back()->character.value()){
                 case 0:
@@ -162,11 +284,33 @@ void FileEditor::load_mods()
 // during load
 void FileEditor::on_config_load(const utility::Config &cfg) {
     m_cfg = cfg;
+    FileEditor::nero_costume_count = 2;
+    FileEditor::dante_costume_count = 2;
+    FileEditor::gilver_costume_count = 2;
+    FileEditor::vergil_costume_count = 2;
     for (auto& asset_mod : *m_hot_swaps) {
         asset_mod->is_on = cfg.get<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable").value_or(false);
         asset_mod->priority = cfg.get<unsigned int>("AssetMod(\"" + asset_mod->main_name + "\")Priority").value_or(asset_mod->priority);
-    }
 
+        if(asset_mod->character){
+            switch (asset_mod->character.value()) {
+                case 0:
+                    FileEditor::nero_costume_count++;
+                    break;
+                case 1:
+                    FileEditor::dante_costume_count++;
+                    break;
+                case 2:
+                    FileEditor::gilver_costume_count++;
+                    break;
+                case 4:
+                    FileEditor::vergil_costume_count++;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
     std::sort(m_hot_swaps.value().begin(), m_hot_swaps.value().end(),[](std::shared_ptr<Asset_Hotswap> a, std::shared_ptr<Asset_Hotswap> b){return a->priority > b->priority;});
 }
 // during save
@@ -185,8 +329,6 @@ void FileEditor::on_draw_debug_ui() {}
 
 void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps)
 {
-
-void FileEditor::on_draw_ui() {
     if (ImGui::Button("Reload Mods")) {
         load_mods();
         if(m_cfg){
@@ -408,3 +550,4 @@ void HotSwapCFG::process_line(std::string variable, std::string value)
         }
     }
 }
+

@@ -60,7 +60,21 @@ public:
     std::string get_hotkey_name() override { return m_hot_key_name; };
     
     bool m_is_active;
+    static int get_costume_list_size(int character);
+    static uintptr_t scroll_list_jmp_ret;
+    static uintptr_t costume_list_jmp_ret;
+    static uintptr_t costume_list_jnl_ret;
+    //static uintptr_t costume_select_jmp_ret;
 
+    static uint32_t nero_costumes[19];
+    static uint32_t dante_costumes[19];
+    static uint32_t gilver_costumes[19];
+    static uint32_t vergil_costumes[19];
+
+    static uint32_t nero_costume_count;
+    static uint32_t dante_costume_count;
+    static uint32_t gilver_costume_count;
+    static uint32_t vergil_costume_count;
     // called by m_mods->init() you'd want to override this
     std::optional<std::string> on_initialize() override;
 
@@ -75,14 +89,21 @@ public:
     void on_draw_ui() override;
     // on_draw_debug_ui() is called when debug window shows up
     void on_draw_debug_ui() override;
+    
 private:
     // function hook instance for our detour, convinient wrapper 
     // around minhook
     void init_check_box_info() override;
     
     std::unique_ptr<FunctionHook> m_file_loader_hook{};
+    std::unique_ptr<FunctionHook> m_scroll_list_hook{};
+    std::unique_ptr<FunctionHook> m_costume_list_hook{};
+    std::unique_ptr<FunctionHook> m_costume_select_hook{};
+
     static void* __fastcall internal_file_loader(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
     void* __fastcall file_editor(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
+    
+    
 
     void load_mods();
     inline bool asset_check(const wchar_t* game_path, const wchar_t* mod_path) const;
