@@ -187,8 +187,6 @@ static naked void multipledeathoptimize_detour() {
 	__asm {
 		cmp byte ptr [LDK::physics_fix_on], 0
 		je originalcode
-		/*cmp qword ptr [LDK::number], 0x16//22
-		jle originalcode*/
 		mov r15, qword ptr [LDK::physicsfix_enable_num]
 		cmp [LDK::number], r15d
 		jb belownum
@@ -201,8 +199,6 @@ static naked void multipledeathoptimize_detour() {
 		je friendlydeath
 		cmp [PlayerTracker::griffonentity], rsi
 		je friendlydeath
-		/*cmp [enemyspawner_entity], si
-		je specialdeath*/
 		pop rsi
 		cmp byte ptr [LDK::cheaton], 0
 		je originalcode
@@ -221,10 +217,6 @@ static naked void multipledeathoptimize_detour() {
 	
 	friendlydeath:
 		pop rsi
-
-	/*specialdeath:
-		pop rsi
-		jmp originalcode*/
 
 	originalcode:
 		mov rcx, [rbx+0x50]
@@ -278,29 +270,6 @@ static naked void nopfunction_detour1() {
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
 		mov r11, qword ptr [LDK::death_func_backup.r11]
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
-
-		/*cheatcode:
-		cmp [LDK::number], SAFE_NUMBER
-		jle original
-		cmp [LDK::vfx_state], 0
-		jle original
-		mov [LDK::death_func_backup.rax], rax
-		mov [LDK::death_func_backup.rcx], rcx
-		mov [LDK::death_func_backup.rdx], rdx
-		mov [LDK::death_func_backup.r8], r8
-		mov [LDK::death_func_backup.r9], r9
-		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
-		call [pause_spawn]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
-		mov rcx, qword ptr [LDK::death_func_backup.rcx]
-		mov rdx, qword ptr [LDK::death_func_backup.rdx]
-		mov r8, qword ptr [LDK::death_func_backup.r8] 
-		mov r9, qword ptr [LDK::death_func_backup.r9]
-		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
-		//mov dword ptr [rdx], 0
-		jmp qword ptr [LDK::nopfunction_jmp_ret1] //[LDK::nopfunction1_jmp_ret2]*/
 	}
 }
 
@@ -500,7 +469,7 @@ void set_hitvfxstate() {
     return;
   }
 
-  /*if (LDK::number > 16) { //Some missions occurs crash with low container num
+  /*if (LDK::number > 16) {
     LDK::vfx_state = HitVfxState::Nothing;
     return;
   }*/
@@ -508,8 +477,7 @@ void set_hitvfxstate() {
   if (LDK::container_num < LDK::container_limit_damage_only)
     LDK::vfx_state = HitVfxState::DrawAll;
   else {
-    if (LDK::container_num >= LDK::container_limit_damage_only &&
-        LDK::container_num < LDK::container_limit_all)
+    if (LDK::container_num >= LDK::container_limit_damage_only && LDK::container_num < LDK::container_limit_all)
       LDK::vfx_state = HitVfxState::DamageOnly;
     else
       LDK::vfx_state = HitVfxState::Nothing;
@@ -830,9 +798,9 @@ void LDK::on_draw_ui() {
   ImGui::TextDisabled("This controls how many enemies can be active simultaneously before optimized death physics are enabled.\n"
 	"Past this point, death animations are disabled to prevent additional stress on the game. "
 	"This currently can cause issues with enemy spawners not being destroyed.");
-  ImGui::TextWrapped("Just need capbypass2 ret_jmp");
+  ImGui::TextWrapped("Set any value :D");
   
-  ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 0, 5);
+  ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 0, 50);
 
   ImGui::SliderInt("Draw damage only container num",
                    (int*)&LDK::container_limit_damage_only, 0, 95);
@@ -842,8 +810,8 @@ void LDK::on_draw_ui() {
   LDK::set_container_limit_all(LDK::container_limit_all);
 
   ImGui::Text("Enemy num physics fix disabled");
-  ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled");
-  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 1, 25);
+  ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.");
+  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 1, 18);
 
   ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
   ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
