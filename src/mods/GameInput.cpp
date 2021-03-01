@@ -140,7 +140,10 @@ static naked void press_detour() {
         or r9, GameInput::pressframes[1*8]
         or r9, GameInput::pressframes[2*8]
         or r9, GameInput::pressframes[3*8]
-        call BreakerSwitcher::breakerpress_detour
+        push r8
+        lea r8, BreakerSwitcher::breakerpress_detour
+        call r8
+        pop r8
 
     pressexit:
         cmp r15,0

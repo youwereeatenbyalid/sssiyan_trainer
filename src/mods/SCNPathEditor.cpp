@@ -30,36 +30,49 @@ static naked void detour() {
  
         aimap:
 			push rcx
+			push r8
 			lea rcx, [SCNPathEditor::aimap]
-			call qword ptr [SCNPathEditor::stringcompare_detour]
+			lea r8, SCNPathEditor::stringcompare_detour			
+			call r8
 			cmp rcx, 1
+			pop r8
 			pop rcx
+			
 			je workshopchoice
 			jmp qword ptr [SCNPathEditor::jmp_ret]  
 
 		doujyo:
 			push rcx
+			push r8
 			lea rcx, [SCNPathEditor::doujyo]
-			call qword ptr [SCNPathEditor::stringcompare_detour]
+			lea r8, SCNPathEditor::stringcompare_detour
+			call r8
 			cmp rcx, 1
+			pop r8
 			pop rcx
 			je workshopchoice
 			jmp qword ptr [SCNPathEditor::jmp_ret]
 
 		doujyoprop:
 			push rcx
+			push r8
 			lea rcx, [SCNPathEditor::doujyoprop]
-			call qword ptr [SCNPathEditor::stringcompare_detour]
+			lea r8, SCNPathEditor::stringcompare_detour
+			call r8
 			cmp rcx, 1
+			pop r8
 			pop rcx
 			je workshopchoice
 			jmp qword ptr [SCNPathEditor::jmp_ret]
 
 		enemy:
 			push rcx
+			push r8
 			lea rcx, [SCNPathEditor::enemy]
-			call qword ptr [SCNPathEditor::stringcompare_detour]
+			lea r8, SCNPathEditor::stringcompare_detour
+			call r8
 			cmp rcx, 1
+			pop r8
 			pop rcx
 			je ldkchoice
 			jmp qword ptr[SCNPathEditor::jmp_ret]

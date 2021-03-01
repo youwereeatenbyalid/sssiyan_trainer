@@ -89,8 +89,11 @@ int FileEditor::get_costume_list_size(int character) {
 static naked void scroll_list_detour(){
     __asm {
         push rcx
+        push r8
         mov ecx, dword ptr [rdi+0xE8]
-        call qword ptr [FileEditor::get_costume_list_size]
+        lea r8, FileEditor::get_costume_list_size
+        call r8
+        pop r8
         pop rcx
         mov [r15], rax
         mov eax, [r15]
