@@ -46,7 +46,7 @@ uint32_t LDK::softlimit{0};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
-uint32_t LDK::container_limit_all{76};
+uint32_t LDK::container_limit_all{70};
 uint32_t LDK::container_limit_damage_only{40};
 uint32_t LDK::container_num{0};
 uint32_t LDK::hardlimit_temp{35};

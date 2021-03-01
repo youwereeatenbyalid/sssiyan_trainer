@@ -75,6 +75,7 @@ public:
   static bool physics_fix_on;
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
+  static bool default_redorbsdrop_enabled;
 
   static uint32_t number;
   static uint32_t hardlimit;
