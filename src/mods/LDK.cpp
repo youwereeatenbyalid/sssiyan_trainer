@@ -51,13 +51,16 @@ uint32_t LDK::container_limit_damage_only{40};
 uint32_t LDK::container_num{0};
 uint32_t LDK::hardlimit_temp{35};
 uint32_t LDK::physicsfix_enable_num{16};
+uint32_t LDK::enemydeath_count{0};
 
 HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 
 bool LDK::physics_fix_on{true};
 bool LDK::hitvfx_fix_on{true};
+bool LDK::redorbspawn_enabled{true};
 
 bool is_spawn_paused = false;
+bool is_redorbspawn_paused = false;
 
 std::mutex mtx;
 
@@ -189,7 +192,7 @@ static naked void multipledeathoptimize_detour() {
 		je originalcode
 		mov r15, qword ptr [LDK::physicsfix_enable_num]
 		cmp [LDK::number], r15d
-		jb belownum
+		jbe belownum
 		mov r15, 0x00000000
 		push rsi
 		mov rsi, [rsi+0x98]
@@ -240,6 +243,22 @@ static naked void canlasthitkill_detour() {
 	}
 }
 
+void redorbtreadcheck() {
+	mtx.lock();
+        if (!is_redorbspawn_paused) {
+			std::thread([]() {
+			  uint32_t temp = LDK::enemydeath_count;
+			  Sleep(50);
+			  if (LDK::enemydeath_count - temp >= 25) {
+				is_redorbspawn_paused = true;
+				Sleep(100);
+				is_redorbspawn_paused = false;
+			  }
+			}).detach();
+		}
+	mtx.unlock();
+}
+
 static naked void nopfunction_detour1() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 0
@@ -253,7 +272,56 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		cheatcode:
-		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+		cmp [LDK::redorbspawn_enabled], 0
+		je noorbs
+		//cmp [LDK::number], 0x1E // 30
+		jmp orbspawnfix
+		/*cmp [LDK::number], 0x1c//28
+		jae noorbs*/
+		//call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+		jmp pausewithorbs
+		/*dec [LDK::number]
+		mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rcx], rcx
+		mov [LDK::death_func_backup.rdx], rdx
+		mov [LDK::death_func_backup.r8], r8
+		mov [LDK::death_func_backup.r9], r9
+		mov [LDK::death_func_backup.r10], r10
+		mov [LDK::death_func_backup.r11], r11
+		call [pause_spawn]
+		mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov rcx, qword ptr [LDK::death_func_backup.rcx]
+		mov rdx, qword ptr [LDK::death_func_backup.rdx]
+		mov r8, qword ptr [LDK::death_func_backup.r8] 
+		mov r9, qword ptr [LDK::death_func_backup.r9]
+		mov r10, qword ptr [LDK::death_func_backup.r10] 
+		mov r11, qword ptr [LDK::death_func_backup.r11]
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]*/
+
+		orbspawnfix:
+		inc [LDK::enemydeath_count]
+		mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rcx], rcx
+		mov [LDK::death_func_backup.rdx], rdx
+		mov [LDK::death_func_backup.r8], r8
+		mov [LDK::death_func_backup.r9], r9
+		mov [LDK::death_func_backup.r10], r10
+		mov [LDK::death_func_backup.r11], r11
+		call [redorbtreadcheck]
+		mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov rcx, qword ptr [LDK::death_func_backup.rcx]
+		mov rdx, qword ptr [LDK::death_func_backup.rdx]
+		mov r8, qword ptr [LDK::death_func_backup.r8] 
+		mov r9, qword ptr [LDK::death_func_backup.r9]
+		mov r10, qword ptr [LDK::death_func_backup.r10] 
+		mov r11, qword ptr [LDK::death_func_backup.r11]
+		cmp [is_redorbspawn_paused], 1
+		je noorbs
+		jmp pausewithorbs
+
+
+		noorbs:
+		//dec [LDK::number]
 		mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
@@ -270,6 +338,26 @@ static naked void nopfunction_detour1() {
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
 		mov r11, qword ptr [LDK::death_func_backup.r11]
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+		pausewithorbs:
+		call [LDK::nopfunction_1_call]
+		mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rcx], rcx
+		mov [LDK::death_func_backup.rdx], rdx
+		mov [LDK::death_func_backup.r8], r8
+		mov [LDK::death_func_backup.r9], r9
+		mov [LDK::death_func_backup.r10], r10
+		mov [LDK::death_func_backup.r11], r11
+		call [pause_spawn]
+		mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov rcx, qword ptr [LDK::death_func_backup.rcx]
+		mov rdx, qword ptr [LDK::death_func_backup.rdx]
+		mov r8, qword ptr [LDK::death_func_backup.r8] 
+		mov r9, qword ptr [LDK::death_func_backup.r9]
+		mov r10, qword ptr [LDK::death_func_backup.r10] 
+		mov r11, qword ptr [LDK::death_func_backup.r11]
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
 	}
 }
 
@@ -811,11 +899,14 @@ void LDK::on_draw_ui() {
 
   ImGui::Text("Enemy num physics fix disabled");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.");
-  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 1, 18);
+  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 0, 18);
 
   ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
   ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
 
   ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+
+  ImGui::Text("You can disable spawn red orbs from dead enemies for better stability&performance, or use red orb orb spawn fix (don't enable that without hitvfx fix & physics fix)");
+  ImGui::Checkbox("Enable red orb spawn fix", (bool*)&LDK::redorbspawn_enabled);
 }

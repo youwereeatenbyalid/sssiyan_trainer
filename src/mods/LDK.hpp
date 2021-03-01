@@ -75,6 +75,7 @@ public:
   static bool physics_fix_on;
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
+  static bool redorbspawn_enabled;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -88,6 +89,7 @@ public:
   static uint32_t container_limit_all;
   static uint32_t container_limit_damage_only;
   static uint32_t physicsfix_enable_num;
+  static uint32_t enemydeath_count;
 
   static HitVfxState vfx_state;
 
