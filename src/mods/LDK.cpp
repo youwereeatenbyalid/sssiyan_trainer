@@ -41,7 +41,7 @@ bool LDK::cheaton{NULL};
 bool LDK::pausespawn_enabled{true};
 
 uint32_t LDK::number{0};
-uint32_t LDK::hardlimit{35};
+uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{0};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
@@ -56,6 +56,7 @@ HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 
 bool LDK::physics_fix_on{true};
 bool LDK::hitvfx_fix_on{true};
+bool LDK::default_redorbsdrop_enabled{true};
 
 bool is_spawn_paused = false;
 
@@ -244,16 +245,29 @@ static naked void nopfunction_detour1() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 0
 		je original
-		cmp byte ptr [LDK::pausespawn_enabled], 1
+		jmp cheatcode
+		/*cmp byte ptr [LDK::pausespawn_enabled], 1
 		je cheatcode
-		jmp original
+		jmp original*/
 
 		original:
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		cheatcode:
+		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
+		je noorbs
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+		noorbs:
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+		pausespawn:
 		mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
@@ -270,6 +284,7 @@ static naked void nopfunction_detour1() {
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
 		mov r11, qword ptr [LDK::death_func_backup.r11]
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
 	}
 }
 
@@ -811,11 +826,14 @@ void LDK::on_draw_ui() {
 
   ImGui::Text("Enemy num physics fix disabled");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.");
-  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 1, 18);
+  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 0, 18);
 
   ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
   ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
 
   ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+
+  ImGui::Text("Enable default red orbs drop from enemies on ldk. DO NOT USE THIS with enemylimit > 30 or without hitvfx, physics and spawn pause fixes.");
+  ImGui::Checkbox("Default red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }
