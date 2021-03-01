@@ -41,12 +41,12 @@ bool LDK::cheaton{NULL};
 bool LDK::pausespawn_enabled{true};
 
 uint32_t LDK::number{0};
-uint32_t LDK::hardlimit{35};
+uint32_t LDK::hardlimit{30};
 uint32_t LDK::softlimit{0};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
-uint32_t LDK::container_limit_all{76};
+uint32_t LDK::container_limit_all{70};
 uint32_t LDK::container_limit_damage_only{40};
 uint32_t LDK::container_num{0};
 uint32_t LDK::hardlimit_temp{35};
@@ -57,7 +57,7 @@ HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 
 bool LDK::physics_fix_on{true};
 bool LDK::hitvfx_fix_on{true};
-bool LDK::redorbspawn_enabled{true};
+bool LDK::default_redorbsdrop_enabled{true};
 
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
@@ -243,85 +243,30 @@ static naked void canlasthitkill_detour() {
 	}
 }
 
-void redorbtreadcheck() {
-	mtx.lock();
-        if (!is_redorbspawn_paused) {
-			std::thread([]() {
-			  uint32_t temp = LDK::enemydeath_count;
-			  Sleep(50);
-			  if (LDK::enemydeath_count - temp >= 25) {
-				is_redorbspawn_paused = true;
-				Sleep(100);
-				is_redorbspawn_paused = false;
-			  }
-			}).detach();
-		}
-	mtx.unlock();
-}
-
 static naked void nopfunction_detour1() {
-	__asm {
+  __asm {
 		cmp byte ptr [LDK::cheaton], 0
 		je original
-		cmp byte ptr [LDK::pausespawn_enabled], 1
-		je cheatcode
-		jmp original
+		jmp cheatcode
 
 		original:
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		cheatcode:
-		cmp [LDK::redorbspawn_enabled], 0
+		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
 		je noorbs
-		//cmp [LDK::number], 0x1E // 30
-		jmp orbspawnfix
-		/*cmp [LDK::number], 0x1c//28
-		jae noorbs*/
-		//call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
-		jmp pausewithorbs
-		/*dec [LDK::number]
-		mov [LDK::death_func_backup.rax], rax
-		mov [LDK::death_func_backup.rcx], rcx
-		mov [LDK::death_func_backup.rdx], rdx
-		mov [LDK::death_func_backup.r8], r8
-		mov [LDK::death_func_backup.r9], r9
-		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
-		call [pause_spawn]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
-		mov rcx, qword ptr [LDK::death_func_backup.rcx]
-		mov rdx, qword ptr [LDK::death_func_backup.rdx]
-		mov r8, qword ptr [LDK::death_func_backup.r8] 
-		mov r9, qword ptr [LDK::death_func_backup.r9]
-		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
-		jmp qword ptr[LDK::nopfunction_jmp_ret1]*/
-
-		orbspawnfix:
-		inc [LDK::enemydeath_count]
-		mov [LDK::death_func_backup.rax], rax
-		mov [LDK::death_func_backup.rcx], rcx
-		mov [LDK::death_func_backup.rdx], rdx
-		mov [LDK::death_func_backup.r8], r8
-		mov [LDK::death_func_backup.r9], r9
-		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
-		call [redorbtreadcheck]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
-		mov rcx, qword ptr [LDK::death_func_backup.rcx]
-		mov rdx, qword ptr [LDK::death_func_backup.rdx]
-		mov r8, qword ptr [LDK::death_func_backup.r8] 
-		mov r9, qword ptr [LDK::death_func_backup.r9]
-		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
-		cmp [is_redorbspawn_paused], 1
-		je noorbs
-		jmp pausewithorbs
-
+		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		noorbs:
-		//dec [LDK::number]
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+		pausespawn:
 		mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
@@ -339,26 +284,7 @@ static naked void nopfunction_detour1() {
 		mov r11, qword ptr [LDK::death_func_backup.r11]
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
-		pausewithorbs:
-		call [LDK::nopfunction_1_call]
-		mov [LDK::death_func_backup.rax], rax
-		mov [LDK::death_func_backup.rcx], rcx
-		mov [LDK::death_func_backup.rdx], rdx
-		mov [LDK::death_func_backup.r8], r8
-		mov [LDK::death_func_backup.r9], r9
-		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
-		call [pause_spawn]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
-		mov rcx, qword ptr [LDK::death_func_backup.rcx]
-		mov rdx, qword ptr [LDK::death_func_backup.rdx]
-		mov r8, qword ptr [LDK::death_func_backup.r8] 
-		mov r9, qword ptr [LDK::death_func_backup.r9]
-		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
-		jmp qword ptr[LDK::nopfunction_jmp_ret1]
-
-	}
+  }
 }
 
 static naked void nopfunction_detour2() {
@@ -907,6 +833,6 @@ void LDK::on_draw_ui() {
   ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
 
-  ImGui::Text("You can disable spawn red orbs from dead enemies for better stability&performance, or use red orb orb spawn fix (don't enable that without hitvfx fix & physics fix)");
-  ImGui::Checkbox("Enable red orb spawn fix", (bool*)&LDK::redorbspawn_enabled);
+  ImGui::Text("Enable default red orbs drop from enemies on ldk. DO NOT USE THIS with enemylimit > 30 or without hitvfx, physics and spawn pause fixes.");
+  ImGui::Checkbox("Default red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }
