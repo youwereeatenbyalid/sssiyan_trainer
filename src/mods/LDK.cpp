@@ -46,11 +46,11 @@ uint32_t LDK::softlimit{0};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
-uint32_t LDK::container_limit_all{70};
-uint32_t LDK::container_limit_damage_only{40};
+uint32_t LDK::container_limit_all{53};
+uint32_t LDK::container_limit_damage_only{37};
 uint32_t LDK::container_num{0};
-uint32_t LDK::hardlimit_temp{35};
-uint32_t LDK::physicsfix_enable_num{16};
+uint32_t LDK::hardlimit_temp{30};
+uint32_t LDK::physicsfix_enable_num{4};
 uint32_t LDK::enemydeath_count{0};
 
 HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
@@ -61,6 +61,7 @@ bool LDK::default_redorbsdrop_enabled{true};
 
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
+bool hardhit_state = false; //For JCE, Judgement;
 
 std::mutex mtx;
 
@@ -72,9 +73,9 @@ static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
 LDK::RegAddrBackup LDK::death_func_backup;
 
-static void pause_spawn()
+void pause_spawn()
 {
-	mtx.lock();
+	//mtx.lock();
 	if (!is_spawn_paused)
 	{
 		is_spawn_paused = true;
@@ -92,7 +93,7 @@ static void pause_spawn()
 			is_spawn_paused = false;
 			LDK::hardlimit = LDK::hardlimit_temp;}).detach();
 	}
-	mtx.unlock();
+	//mtx.unlock();
 }
 
 static naked void enemynumber_detour() {
@@ -190,6 +191,8 @@ static naked void multipledeathoptimize_detour() {
 	__asm {
 		cmp byte ptr [LDK::physics_fix_on], 0
 		je originalcode
+		mov [LDK::enemydeath_count], 0
+		//mov [hardhit_state], 0
 		mov r15, qword ptr [LDK::physicsfix_enable_num]
 		cmp [LDK::number], r15d
 		jbe belownum
@@ -243,6 +246,16 @@ static naked void canlasthitkill_detour() {
 	}
 }
 
+void redorbdrop_pause() {
+  if (!hardhit_state) {
+    hardhit_state = true;
+    std::thread([] {
+      Sleep(1000);
+      hardhit_state = false;
+    }).detach();
+  }
+}
+
 static naked void nopfunction_detour1() {
   __asm {
 		cmp byte ptr [LDK::cheaton], 0
@@ -256,7 +269,13 @@ static naked void nopfunction_detour1() {
 		cheatcode:
 		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
 		je noorbs
+		inc [LDK::enemydeath_count]
+		cmp [hardhit_state], 1
+		je noorbs
+		cmp [LDK::enemydeath_count], 0xF//15
+		jae hardhit//noorbs
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+
 		cmp byte ptr [LDK::pausespawn_enabled], 1
 		je pausespawn
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
@@ -266,22 +285,28 @@ static naked void nopfunction_detour1() {
 		je pausespawn
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
+		hardhit:
+		call qword ptr [redorbdrop_pause]
+		//mov [hardhit_state], 1
+		jmp noorbs
+
+
 		pausespawn:
-		mov [LDK::death_func_backup.rax], rax
+		/*mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
 		mov [LDK::death_func_backup.r8], r8
 		mov [LDK::death_func_backup.r9], r9
 		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
-		call [pause_spawn]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov [LDK::death_func_backup.r11], r11*/
+		call qword ptr [pause_spawn]
+		/*mov rax, qword ptr [LDK::death_func_backup.rax]
 		mov rcx, qword ptr [LDK::death_func_backup.rcx]
 		mov rdx, qword ptr [LDK::death_func_backup.rdx]
 		mov r8, qword ptr [LDK::death_func_backup.r8] 
 		mov r9, qword ptr [LDK::death_func_backup.r9]
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
+		mov r11, qword ptr [LDK::death_func_backup.r11]*/
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
   }
@@ -290,6 +315,8 @@ static naked void nopfunction_detour1() {
 static naked void nopfunction_detour2() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 1
+		jne cheatcode
+		cmp [hardhit_state], 1
 		je cheatcode
 
 		mov r9, [rax-0x10]
@@ -483,10 +510,10 @@ void set_hitvfxstate() {
     return;
   }
 
-  /*if (LDK::number > 16) {
+  if (LDK::number > 16) {
     LDK::vfx_state = HitVfxState::Nothing;
     return;
-  }*/
+  }
 
   if (LDK::container_num < LDK::container_limit_damage_only)
     LDK::vfx_state = HitVfxState::DrawAll;
@@ -506,8 +533,12 @@ static naked void hitvfxskip_detour() {
 		je originalcode
 		cmp byte ptr [LDK::hitvfx_fix_on], 0
 		je originalcode
+		cmp [LDK::container_limit_all], 0
+		je nothing
+		cmp [hardhit_state], 1
+		je nothing
 		cmp qword ptr [LDK::number], SAFE_NUMBER
-		jle originalcode
+		jbe originalcode
 		jmp containernumcheck
 
 		containernumcheck:
@@ -833,6 +864,6 @@ void LDK::on_draw_ui() {
   ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
 
-  ImGui::Text("Enable default red orbs drop from enemies on ldk. DO NOT USE THIS with enemylimit > 30 or without hitvfx, physics and spawn pause fixes.");
+  ImGui::Text("Enable default red orbs drop from enemies on ldk. DO NOT USE THIS \nwith enemylimit > 30 or without hitvfx, physics and spawn pause fixes.");
   ImGui::Checkbox("Default red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }
