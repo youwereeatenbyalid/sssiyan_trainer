@@ -15,6 +15,7 @@ int BpStageJump::counter = 0;
 int BpStageJump::bossarray[8] = {};
 bool retrystage;
 bool randomizer;
+bool useseed = false;
 
 int seed = 0;
 
@@ -114,11 +115,8 @@ void BpStageJump::randomize_array(int* array_param, int range_low, int range_hig
 void BpStageJump::generate_palace(int seed)
 {
 	reset_palace();
-	if (seed != 0){
-		std::srand(seed);
-	}else{
-		std::srand((unsigned int)time(NULL));
-	}
+	std::srand(seed);
+
 	switch (BpStageJump::palace_type) {
 	case palace_type_enum::PARTIAL:
 		randomize_array(palacearray, 0, 19);
@@ -297,38 +295,44 @@ void BpStageJump::on_draw_ui() {
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-    ImGui::TextWrapped("Tick to be given random stages");
-    ImGui::Checkbox("Random Stage", &randomStageToggle);
+    ImGui::Checkbox("Bloody Palace Randomizer", &randomStageToggle);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
+	if (randomStageToggle){
+		if(palace_type == RANDOM || palace_type == PARTIAL){
+			ImGui::TextWrapped("Play through an infinite bloody palace");
+			ImGui::Checkbox("Endless", &endless);
 
-	ImGui::TextWrapped("Play through an infinite bloody palace");
-	ImGui::Checkbox("Endless", &endless);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
+		if (palace_type == BALANCED || palace_type == PARTIAL) {
+			ImGui::TextWrapped("Bosses will appear in a random order");
+			ImGui::Checkbox("Randomized boss order", &randombosses);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
+		ImGui::Combo("Palace Type",&palace_type,"Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
 
-	ImGui::TextWrapped("Bosses will appear in a random order");
-	ImGui::Checkbox("Randomized boss order", &randombosses);
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
+		if (ImGui::Button("Randomize Palace")){
+			if (!useseed)
+				seed = (unsigned int)time(NULL);
+			generate_palace(seed);
+		}
+		ImGui::Checkbox("Use seed", &useseed);
+		if (useseed)
+			ImGui::InputInt("Palace Seed",&seed);
 
-	ImGui::Combo("Palace Type",&palace_type,"Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
-
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-	if (ImGui::Button("Randomize Palace")){
-		generate_palace(seed);
 	}
-
-	ImGui::InputInt("Palace Seed",&seed);
 
     ImGui::TextWrapped("If Boss Rush and Random Stage are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
     ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
