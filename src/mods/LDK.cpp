@@ -29,8 +29,6 @@ uintptr_t LDK::sswords_restriction_jmp_ret{NULL};
 uintptr_t LDK::hitvfxskip_jmp{NULL};
 uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
-uintptr_t LDK::rax_backup{NULL};
-uintptr_t LDK::rcx_backup{NULL};
 uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
 //uintptr_t enemyspawner_entity = 0x9B38;
 
@@ -46,8 +44,8 @@ uint32_t LDK::softlimit{0};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
-uint32_t LDK::container_limit_all{53};
-uint32_t LDK::container_limit_damage_only{37};
+uint32_t LDK::container_limit_all{72};
+uint32_t LDK::container_limit_damage_only{50};
 uint32_t LDK::container_num{0};
 uint32_t LDK::hardlimit_temp{30};
 uint32_t LDK::physicsfix_enable_num{4};
@@ -55,7 +53,7 @@ uint32_t LDK::enemydeath_count{0};
 
 HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 
-bool LDK::physics_fix_on{true};
+bool LDK::physics_fix_on{false};
 bool LDK::hitvfx_fix_on{true};
 bool LDK::default_redorbsdrop_enabled{true};
 
@@ -81,7 +79,7 @@ void pause_spawn()
 		is_spawn_paused = true;
 		std::thread ([&]{
 			LDK::hardlimit_temp = LDK::hardlimit;
-			if (LDK::number <= 6)
+			if (LDK::number <= 8)
 			{
 				//LDK::hardlimit = 6;
 				is_spawn_paused = false;
@@ -554,9 +552,11 @@ static naked void hitvfxskip_detour() {
         //-------------------------------
         // C++ void func will change rcx, that cause a crash later, so just
         // backup it
-		mov [LDK::rcx_backup], rcx
+		//mov [LDK::rcx_backup], rcx
+		push rcx
 		call [set_hitvfxstate]
-		mov rcx, qword ptr [LDK::rcx_backup]
+		pop rcx
+		//mov rcx, qword ptr [LDK::rcx_backup]
 		cmp [LDK::vfx_state], 0 // DrawAll
 		je drawall
 		cmp [LDK::vfx_state], 1 // DamageOnly

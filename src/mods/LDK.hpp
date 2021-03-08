@@ -66,11 +66,9 @@ public:
   static uintptr_t sswords_restriction_jmp;
   static uintptr_t sswords_restriction_jmp_ret;
   static uintptr_t containernum_addr;
-  static uintptr_t rax_backup;
-  static uintptr_t rcx_backup;
   static uintptr_t nopfunction1_jmp_ret2;
 
-  static const uint32_t SPAWN_PAUSE_TIME = 5;
+  static const uint32_t SPAWN_PAUSE_TIME = 3;
 
   static bool physics_fix_on;
   static bool hitvfx_fix_on;
