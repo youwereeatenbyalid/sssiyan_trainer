@@ -24,6 +24,9 @@
     // Nero
         #include "mods/BreakerSwitcher.hpp"
         #include "mods/DisableBreakaway.hpp"
+        #include "mods/CaliburExceed.hpp"
+        #include "mods/NothingCancelsBubble.hpp"
+        #include "mods/ExceedValue.hpp"
     // Dante
     // V
     // Vergil
@@ -127,6 +130,9 @@ Mods::Mods()
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        m_mods.emplace_back(std::make_unique<CaliburExceed>());
+        m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
+        m_mods.emplace_back(std::make_unique<ExceedValue>());
     // Dante
     // V
     // Vergil

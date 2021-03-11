@@ -149,7 +149,16 @@ set(MODS_SRC
     mods/AllStartManual.cpp 
     mods/DanteVariableGuard.hpp 
     mods/DanteVariableGuard.cpp 
-
+    mods/CaliburExceed.hpp 
+    mods/CaliburExceed.cpp
+    mods/ExceedValue.hpp 
+    mods/ExceedValue.cpp
+    mods/DTWingsOnly.hpp 
+    mods/DTWingsOnly.cpp
+    mods/NothingCancelsBubble.hpp 
+    mods/NothingCancelsBubble.cpp
+    mods/NeroSuperNoDT.hpp
+    mods/NeroSuperNoDT.cpp
 )
 
 set(HOOKS_SRC
