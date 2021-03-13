@@ -31,6 +31,8 @@ uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
 uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
 //uintptr_t enemyspawner_entity = 0x9B38;
+uintptr_t LDK::workthreadhook_jmp_jne{NULL};
+uintptr_t LDK::workthread_jmp_ret{NULL};
 
 
 uintptr_t LDK::missionmanager{NULL};
@@ -62,6 +64,7 @@ bool is_redorbspawn_paused = false;
 bool hardhit_state = false; //For JCE, Judgement;
 
 std::mutex mtx;
+std::mutex orbpause_mtx;
 
 bool canhitkill = true;
 bool vergilflipper = false;
@@ -70,10 +73,11 @@ static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
 LDK::RegAddrBackup LDK::death_func_backup;
+LDK::RegAddrBackup LDK::redorbdrop_backup;
 
 void pause_spawn()
 {
-	//mtx.lock();
+	mtx.lock();
 	if (!is_spawn_paused)
 	{
 		is_spawn_paused = true;
@@ -86,12 +90,12 @@ void pause_spawn()
 				return;
 			}
 			else
-				LDK::hardlimit = 0;
+				LDK::hardlimit = 3;
 			Sleep(LDK::SPAWN_PAUSE_TIME*1000);
 			is_spawn_paused = false;
 			LDK::hardlimit = LDK::hardlimit_temp;}).detach();
 	}
-	//mtx.unlock();
+	mtx.unlock();
 }
 
 static naked void enemynumber_detour() {
@@ -187,9 +191,11 @@ static naked void gethpoflasthitobject_detour() {
 
 static naked void multipledeathoptimize_detour() {
 	__asm {
-		cmp byte ptr [LDK::physics_fix_on], 0
+		cmp byte ptr [LDK::cheaton], 0
 		je originalcode
 		mov [LDK::enemydeath_count], 0
+		cmp byte ptr [LDK::physics_fix_on], 0
+		je originalcode
 		//mov [hardhit_state], 0
 		mov r15, qword ptr [LDK::physicsfix_enable_num]
 		cmp [LDK::number], r15d
@@ -204,8 +210,6 @@ static naked void multipledeathoptimize_detour() {
 		cmp [PlayerTracker::griffonentity], rsi
 		je friendlydeath
 		pop rsi
-		cmp byte ptr [LDK::cheaton], 0
-		je originalcode
 
 		//cmp dword ptr [LDK::limittype], 0
 		//je originalcode
@@ -245,13 +249,15 @@ static naked void canlasthitkill_detour() {
 }
 
 void redorbdrop_pause() {
+  //orbpause_mtx.lock();
   if (!hardhit_state) {
     hardhit_state = true;
-    std::thread([] {
-      Sleep(1000);
+    std::thread([&] {
+      Sleep(2000);
       hardhit_state = false;
     }).detach();
   }
+  //orbpause_mtx.unlock();
 }
 
 static naked void nopfunction_detour1() {
@@ -268,9 +274,9 @@ static naked void nopfunction_detour1() {
 		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
 		je noorbs
 		inc [LDK::enemydeath_count]
-		cmp [hardhit_state], 1
+		cmp qword ptr [hardhit_state], 1
 		je noorbs
-		cmp [LDK::enemydeath_count], 0xF//15
+		cmp [LDK::enemydeath_count], 0x8//10
 		jae hardhit//noorbs
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 
@@ -279,32 +285,62 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		noorbs:
+		mov r8d, 0
+		call [LDK::nopfunction_1_call]
 		cmp byte ptr [LDK::pausespawn_enabled], 1
 		je pausespawn
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		hardhit:
+		mov [LDK::redorbdrop_backup.rax], rax
+		mov [LDK::redorbdrop_backup.rcx], rcx
+		mov [LDK::redorbdrop_backup.rdx], rdx
+		mov [LDK::redorbdrop_backup.r8], r8
+		mov [LDK::redorbdrop_backup.r9], r9
+		mov [LDK::redorbdrop_backup.r10], r10
+		mov [LDK::redorbdrop_backup.r11], r11
 		call qword ptr [redorbdrop_pause]
+		mov rax, qword ptr [LDK::redorbdrop_backup.rax]
+		mov rcx, qword ptr [LDK::redorbdrop_backup.rcx]
+		mov rdx, qword ptr [LDK::redorbdrop_backup.rdx]
+		mov r8, qword ptr [LDK::redorbdrop_backup.r8] 
+		mov r9, qword ptr [LDK::redorbdrop_backup.r9]
+		mov r10, qword ptr [LDK::redorbdrop_backup.r10] 
+		mov r11, qword ptr [LDK::redorbdrop_backup.r11]
 		//mov [hardhit_state], 1
 		jmp noorbs
 
 
 		pausespawn:
-		/*mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
 		mov [LDK::death_func_backup.r8], r8
 		mov [LDK::death_func_backup.r9], r9
 		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11*/
+		mov [LDK::death_func_backup.r11], r11
+		/*push rax
+		push rcx
+		push rdx
+		push r8
+		push r9
+		push r10
+		push r11*/
 		call qword ptr [pause_spawn]
-		/*mov rax, qword ptr [LDK::death_func_backup.rax]
+		/*pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rdx
+		pop rcx
+		pop rax*/
+		mov rax, qword ptr [LDK::death_func_backup.rax]
 		mov rcx, qword ptr [LDK::death_func_backup.rcx]
 		mov rdx, qword ptr [LDK::death_func_backup.rdx]
 		mov r8, qword ptr [LDK::death_func_backup.r8] 
 		mov r9, qword ptr [LDK::death_func_backup.r9]
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]*/
+		mov r11, qword ptr [LDK::death_func_backup.r11]
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
   }
@@ -313,10 +349,12 @@ static naked void nopfunction_detour1() {
 static naked void nopfunction_detour2() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 1
-		jne cheatcode
+		jne originalcode
 		cmp [hardhit_state], 1
 		je cheatcode
+		jmp originalcode
 
+		originalcode:
 		mov r9, [rax-0x10]
 		call qword ptr [r9+0x58]
 		jmp qword ptr[LDK::nopfunction_jmp_ret2]
@@ -549,9 +587,7 @@ static naked void hitvfxskip_detour() {
 		mov rax, [rax+0x788]
 		mov rax, [rax+0xE28]
 		mov [LDK::container_num], rax
-        //-------------------------------
-        // C++ void func will change rcx, that cause a crash later, so just
-        // backup it
+        //-------------------------------//
 		//mov [LDK::rcx_backup], rcx
 		push rcx
 		call [set_hitvfxstate]
@@ -568,16 +604,16 @@ static naked void hitvfxskip_detour() {
 		jmp originalcode
 
 		damageonly:
-		mov ah, [rbp]
-		cmp ah, CHAR_DAMAGE
+		mov ax, [rbp]
+		cmp ax, CHAR_DAMAGE
 		je skip
 		jmp originalcode
 
 		nothing:
-		mov ah, [rbp]
-		cmp ah, CHAR_HITS 
+		mov ax, [rbp]
+		cmp ax, CHAR_HITS 
 		je skip
-		cmp ah, CHAR_DAMAGE 
+		cmp ax, CHAR_DAMAGE 
 		je skip
 		jmp originalcode
 
@@ -588,6 +624,25 @@ static naked void hitvfxskip_detour() {
 
 		skip:
 		jmp qword ptr [LDK::hitvfxskip_jmp]
+  }
+}
+
+static naked void workthread_detour() {
+	__asm {
+		cmp [LDK::cheaton], 0
+		je originalcode
+		cmp [hardhit_state], 1
+		je skip
+		jmp originalcode
+
+		originalcode:
+		cmp dword ptr [rbx],01
+		jne skip // DevilMayCry5.exe+2528485
+		jmp qword ptr [LDK::workthread_jmp_ret]
+
+		skip:
+		jmp qword ptr [LDK::workthreadhook_jmp_jne]
+
   }
 }
 
@@ -673,6 +728,11 @@ std::optional<std::string> LDK::on_initialize() {
   if (!hitvfxskip_addr) {
     return "Unable to find hitvfxskip_addr pattern.";
   }
+
+  auto workthread_addr = utility::scan(base, "83 3B 01 75 21 48 8B CD E8 94");
+  if (!workthread_addr) {
+    return "Unable to find workthread_addr pattern.";
+  }
   
   LDK::nopfunction_1_call = nopfunction_1_call.value();
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
@@ -687,6 +747,8 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
   LDK::sswords_restriction_jmp_ret = sswords_restriction_addr.value() + 0x1AA;
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
+
+  LDK::workthreadhook_jmp_jne = workthread_addr.value() + 0x26;
 
   if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
@@ -776,10 +838,17 @@ std::optional<std::string> LDK::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize sswords_restriction_addr";
   }
+
   if (!install_hook_absolute(hitvfxskip_addr.value(), m_hitvfxskip_hook, &hitvfxskip_detour, &hitvfxskip_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize hitvfxskip_addr";
+  }
+
+  if (!install_hook_absolute(workthread_addr.value(), m_workthreaddata_hook, &workthread_detour, &workthread_jmp_ret, 5)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize workthread_addr";
   }
 
   return Mod::on_initialize();
@@ -856,7 +925,7 @@ void LDK::on_draw_ui() {
 
   ImGui::Text("Enemy num physics fix disabled");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.");
-  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 0, 18);
+  ImGui::SliderInt("##Enemy num physics fix disabled slider", (int*)&LDK::physicsfix_enable_num, 0, 50);
 
   ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
   ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);

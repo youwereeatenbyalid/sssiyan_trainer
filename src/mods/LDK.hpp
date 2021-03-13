@@ -67,6 +67,8 @@ public:
   static uintptr_t sswords_restriction_jmp_ret;
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
+  static uintptr_t workthreadhook_jmp_jne;
+  static uintptr_t workthread_jmp_ret;
 
   static const uint32_t SPAWN_PAUSE_TIME = 3;
 
@@ -134,8 +136,11 @@ public:
   std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
   std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
 
+  std::unique_ptr<FunctionHook> m_workthreaddata_hook;
+
   void set_container_limit_all(uint32_t num);
   void set_container_limit_blood_only(uint32_t num);
 
   static RegAddrBackup death_func_backup;
+  static RegAddrBackup redorbdrop_backup;
 };
