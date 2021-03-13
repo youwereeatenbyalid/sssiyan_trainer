@@ -31,8 +31,6 @@ uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
 uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
 //uintptr_t enemyspawner_entity = 0x9B38;
-uintptr_t LDK::workthreadhook_jmp_jne{NULL};
-uintptr_t LDK::workthread_jmp_ret{NULL};
 
 
 uintptr_t LDK::missionmanager{NULL};
@@ -42,7 +40,7 @@ bool LDK::pausespawn_enabled{true};
 
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
-uint32_t LDK::softlimit{0};
+uint32_t LDK::softlimit{32};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
@@ -61,7 +59,7 @@ bool LDK::default_redorbsdrop_enabled{true};
 
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
-bool hardhit_state = false; //For JCE, Judgement;
+bool hardkill_state = false; //For JCE, Judgement;
 
 std::mutex mtx;
 std::mutex orbpause_mtx;
@@ -90,7 +88,7 @@ void pause_spawn()
 				return;
 			}
 			else
-				LDK::hardlimit = 3;
+				LDK::hardlimit = 0;
 			Sleep(LDK::SPAWN_PAUSE_TIME*1000);
 			is_spawn_paused = false;
 			LDK::hardlimit = LDK::hardlimit_temp;}).detach();
@@ -196,7 +194,6 @@ static naked void multipledeathoptimize_detour() {
 		mov [LDK::enemydeath_count], 0
 		cmp byte ptr [LDK::physics_fix_on], 0
 		je originalcode
-		//mov [hardhit_state], 0
 		mov r15, qword ptr [LDK::physicsfix_enable_num]
 		cmp [LDK::number], r15d
 		jbe belownum
@@ -249,15 +246,15 @@ static naked void canlasthitkill_detour() {
 }
 
 void redorbdrop_pause() {
-  //orbpause_mtx.lock();
-  if (!hardhit_state) {
-    hardhit_state = true;
+  orbpause_mtx.lock();
+  if (!hardkill_state) {
+    hardkill_state = true;
     std::thread([&] {
       Sleep(2000);
-      hardhit_state = false;
+      hardkill_state = false;
     }).detach();
   }
-  //orbpause_mtx.unlock();
+  orbpause_mtx.unlock();
 }
 
 static naked void nopfunction_detour1() {
@@ -274,9 +271,9 @@ static naked void nopfunction_detour1() {
 		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
 		je noorbs
 		inc [LDK::enemydeath_count]
-		cmp qword ptr [hardhit_state], 1
+		cmp qword ptr [hardkill_state], 1
 		je noorbs
-		cmp [LDK::enemydeath_count], 0x8//10
+		cmp [LDK::enemydeath_count], 0x5
 		jae hardhit//noorbs
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 
@@ -307,7 +304,6 @@ static naked void nopfunction_detour1() {
 		mov r9, qword ptr [LDK::redorbdrop_backup.r9]
 		mov r10, qword ptr [LDK::redorbdrop_backup.r10] 
 		mov r11, qword ptr [LDK::redorbdrop_backup.r11]
-		//mov [hardhit_state], 1
 		jmp noorbs
 
 
@@ -319,21 +315,7 @@ static naked void nopfunction_detour1() {
 		mov [LDK::death_func_backup.r9], r9
 		mov [LDK::death_func_backup.r10], r10
 		mov [LDK::death_func_backup.r11], r11
-		/*push rax
-		push rcx
-		push rdx
-		push r8
-		push r9
-		push r10
-		push r11*/
 		call qword ptr [pause_spawn]
-		/*pop r11
-		pop r10
-		pop r9
-		pop r8
-		pop rdx
-		pop rcx
-		pop rax*/
 		mov rax, qword ptr [LDK::death_func_backup.rax]
 		mov rcx, qword ptr [LDK::death_func_backup.rcx]
 		mov rdx, qword ptr [LDK::death_func_backup.rdx]
@@ -350,7 +332,7 @@ static naked void nopfunction_detour2() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 1
 		jne originalcode
-		cmp [hardhit_state], 1
+		cmp [hardkill_state], 1
 		je cheatcode
 		jmp originalcode
 
@@ -571,8 +553,8 @@ static naked void hitvfxskip_detour() {
 		je originalcode
 		cmp [LDK::container_limit_all], 0
 		je nothing
-		cmp [hardhit_state], 1
-		je nothing
+		/*cmp [hardkill_state], 1
+		je nothing*/
 		cmp qword ptr [LDK::number], SAFE_NUMBER
 		jbe originalcode
 		jmp containernumcheck
@@ -588,11 +570,9 @@ static naked void hitvfxskip_detour() {
 		mov rax, [rax+0xE28]
 		mov [LDK::container_num], rax
         //-------------------------------//
-		//mov [LDK::rcx_backup], rcx
 		push rcx
 		call [set_hitvfxstate]
 		pop rcx
-		//mov rcx, qword ptr [LDK::rcx_backup]
 		cmp [LDK::vfx_state], 0 // DrawAll
 		je drawall
 		cmp [LDK::vfx_state], 1 // DamageOnly
@@ -624,25 +604,6 @@ static naked void hitvfxskip_detour() {
 
 		skip:
 		jmp qword ptr [LDK::hitvfxskip_jmp]
-  }
-}
-
-static naked void workthread_detour() {
-	__asm {
-		cmp [LDK::cheaton], 0
-		je originalcode
-		cmp [hardhit_state], 1
-		je skip
-		jmp originalcode
-
-		originalcode:
-		cmp dword ptr [rbx],01
-		jne skip // DevilMayCry5.exe+2528485
-		jmp qword ptr [LDK::workthread_jmp_ret]
-
-		skip:
-		jmp qword ptr [LDK::workthreadhook_jmp_jne]
-
   }
 }
 
@@ -729,10 +690,6 @@ std::optional<std::string> LDK::on_initialize() {
     return "Unable to find hitvfxskip_addr pattern.";
   }
 
-  auto workthread_addr = utility::scan(base, "83 3B 01 75 21 48 8B CD E8 94");
-  if (!workthread_addr) {
-    return "Unable to find workthread_addr pattern.";
-  }
   
   LDK::nopfunction_1_call = nopfunction_1_call.value();
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
@@ -747,8 +704,6 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
   LDK::sswords_restriction_jmp_ret = sswords_restriction_addr.value() + 0x1AA;
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
-
-  LDK::workthreadhook_jmp_jne = workthread_addr.value() + 0x26;
 
   if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
@@ -843,12 +798,6 @@ std::optional<std::string> LDK::on_initialize() {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize hitvfxskip_addr";
-  }
-
-  if (!install_hook_absolute(workthread_addr.value(), m_workthreaddata_hook, &workthread_detour, &workthread_jmp_ret, 5)) {
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize workthread_addr";
   }
 
   return Mod::on_initialize();
