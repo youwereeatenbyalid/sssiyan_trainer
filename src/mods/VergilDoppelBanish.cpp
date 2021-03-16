@@ -191,7 +191,7 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     return "Unable to find VergilDoppelBanishCall pattern.";
   }
 
-  /*if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 9)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 9)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish";
@@ -226,7 +226,7 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_sdtbeowulfbanish";
-  }*/
+  }
 
   return Mod::on_initialize();
 }
