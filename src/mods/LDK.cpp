@@ -77,20 +77,18 @@ void pause_spawn()
 	//mtx.lock();
 	if (!is_spawn_paused)
 	{
+		if (LDK::number <= 8) {
+			//LDK::hardlimit = 6;
+			//is_spawn_paused = false;
+			return;
+		}
+		LDK::hardlimit_temp = LDK::hardlimit;
+		LDK::hardlimit = 0;
 		is_spawn_paused = true;
 		std::thread ([&]{
-			LDK::hardlimit_temp = LDK::hardlimit;
-			if (LDK::number <= 8)
-			{
-				//LDK::hardlimit = 6;
-				is_spawn_paused = false;
-				return;
-			}
-			else
-				LDK::hardlimit = 0;
-			Sleep(LDK::SPAWN_PAUSE_TIME*1000);
-			is_spawn_paused = false;
-			LDK::hardlimit = LDK::hardlimit_temp;}).detach();
+		Sleep(LDK::SPAWN_PAUSE_TIME*1000);
+		is_spawn_paused = false;
+		LDK::hardlimit = LDK::hardlimit_temp;}).detach();
 	}
 	//mtx.unlock();
 }
@@ -245,7 +243,7 @@ void redorbdrop_pause() {
   if (!hardkill_state) {
     hardkill_state = true;
     std::thread([&] {
-      Sleep(2000);
+      Sleep(1000);
       hardkill_state = false;
     }).detach();
   }
@@ -284,17 +282,17 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		hardkill:
-		/*mov [LDK::redorbdrop_backup.rax], rax
+		mov [LDK::redorbdrop_backup.rax], rax
 		mov [LDK::redorbdrop_backup.rcx], rcx
-		mov [LDK::redorbdrop_backup.rdx], rdx*/
+		mov [LDK::redorbdrop_backup.rdx], rdx
 		mov [LDK::redorbdrop_backup.r8], r8
 		mov [LDK::redorbdrop_backup.r9], r9
 		mov [LDK::redorbdrop_backup.r10], r10
 		mov [LDK::redorbdrop_backup.r11], r11
 		call qword ptr [redorbdrop_pause]
-		/*mov rax, qword ptr [LDK::redorbdrop_backup.rax]
+		mov rax, qword ptr [LDK::redorbdrop_backup.rax]
 		mov rcx, qword ptr [LDK::redorbdrop_backup.rcx]
-		mov rdx, qword ptr [LDK::redorbdrop_backup.rdx]*/
+		mov rdx, qword ptr [LDK::redorbdrop_backup.rdx]
 		mov r8, qword ptr [LDK::redorbdrop_backup.r8] 
 		mov r9, qword ptr [LDK::redorbdrop_backup.r9]
 		mov r10, qword ptr [LDK::redorbdrop_backup.r10] 
@@ -303,17 +301,17 @@ static naked void nopfunction_detour1() {
 
 
 		pausespawn:
-		/*mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
-		mov [LDK::death_func_backup.rdx], rdx*/
+		mov [LDK::death_func_backup.rdx], rdx
 		mov [LDK::death_func_backup.r8], r8
 		mov [LDK::death_func_backup.r9], r9
 		mov [LDK::death_func_backup.r10], r10
 		mov [LDK::death_func_backup.r11], r11
 		call qword ptr [pause_spawn]
-		/*mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov rax, qword ptr [LDK::death_func_backup.rax]
 		mov rcx, qword ptr [LDK::death_func_backup.rcx]
-		mov rdx, qword ptr [LDK::death_func_backup.rdx]*/
+		mov rdx, qword ptr [LDK::death_func_backup.rdx]
 		mov r8, qword ptr [LDK::death_func_backup.r8] 
 		mov r9, qword ptr [LDK::death_func_backup.r9]
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
@@ -523,10 +521,10 @@ void set_hitvfxstate() {
     return;
   }
 
-  if (LDK::number > 16) {
+  /*if (LDK::number > 16) {
     LDK::vfx_state = HitVfxState::Nothing;
     return;
-  }
+  }*/
 
   if (LDK::container_num < LDK::container_limit_damage_only)
     LDK::vfx_state = HitVfxState::DrawAll;
@@ -852,12 +850,18 @@ void LDK::on_draw_ui() {
   ImGui::TextWrapped("This controls the maximum number of enemies that can be active simultaneously in encounters.");
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
+
+  ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
   ImGui::Text("Enemy Soft Limit");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.\n"
 	"Past this point, death animations are disabled to prevent additional stress on the game. "
 	"This currently can cause issues with enemy spawners not being destroyed.");
   
-  ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 0, 50);
+  ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
+  ImGui::Separator();
+
+  
+  ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
 
   ImGui::SliderInt("Draw damage only container num",
                    (int*)&LDK::container_limit_damage_only, 0, 95);
@@ -866,11 +870,12 @@ void LDK::on_draw_ui() {
                    0, 110);
   LDK::set_container_limit_all(LDK::container_limit_all);
 
-  ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
-  ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
+  ImGui::Separator();
 
   ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+
+  ImGui::Separator();
 
   ImGui::Text("Enable \"default\" red orbs drop from enemies on ldk. DO NOT USE THIS \nwith enemylimit > 30 or without hitvfx and spawn pause fixes.");
   ImGui::Checkbox("Default red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
