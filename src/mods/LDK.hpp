@@ -68,7 +68,7 @@ public:
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
 
-  static const uint32_t SPAWN_PAUSE_TIME = 3;
+  static const uint32_t SPAWN_PAUSE_TIME = 4;
 
   static bool physics_fix_on;
   static bool hitvfx_fix_on;

@@ -40,14 +40,14 @@ bool LDK::pausespawn_enabled{true};
 
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
-uint32_t LDK::softlimit{50};
+uint32_t LDK::softlimit{25};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
 
 uint32_t LDK::container_limit_all{72};
 uint32_t LDK::container_limit_damage_only{50};
 uint32_t LDK::container_num{0};
-uint32_t LDK::hardlimit_temp{30};
+uint32_t LDK::hardlimit_temp = LDK::hardlimit;
 uint32_t LDK::enemydeath_count{0};
 
 HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
@@ -60,9 +60,6 @@ bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
 bool hardkill_state = false; //For JCE, Judgement;
 
-/*std::mutex mtx;
-std::mutex orbpause_mtx;*/
-
 bool canhitkill = true;
 bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
@@ -74,12 +71,9 @@ LDK::RegAddrBackup LDK::redorbdrop_backup;
 
 void pause_spawn()
 {
-	//mtx.lock();
 	if (!is_spawn_paused)
 	{
 		if (LDK::number <= 8) {
-			//LDK::hardlimit = 6;
-			//is_spawn_paused = false;
 			return;
 		}
 		LDK::hardlimit_temp = LDK::hardlimit;
@@ -90,7 +84,6 @@ void pause_spawn()
 		is_spawn_paused = false;
 		LDK::hardlimit = LDK::hardlimit_temp;}).detach();
 	}
-	//mtx.unlock();
 }
 
 static naked void enemynumber_detour() {
@@ -239,7 +232,6 @@ static naked void canlasthitkill_detour() {
 }
 
 void redorbdrop_pause() {
-  //orbpause_mtx.lock();
   if (!hardkill_state) {
     hardkill_state = true;
     std::thread([&] {
@@ -247,7 +239,6 @@ void redorbdrop_pause() {
       hardkill_state = false;
     }).detach();
   }
-  //orbpause_mtx.unlock();
 }
 
 static naked void nopfunction_detour1() {
@@ -267,7 +258,7 @@ static naked void nopfunction_detour1() {
 		cmp qword ptr [hardkill_state], 1
 		je noorbs
 		cmp [LDK::enemydeath_count], 0x5
-		jae hardkill//noorbs
+		jae hardkill
 		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 
 		cmp byte ptr [LDK::pausespawn_enabled], 1
@@ -751,8 +742,6 @@ std::optional<std::string> LDK::on_initialize() {
 	  return "Failed to initialize Vergil Dive bomb";
   }
 
-
-
   if (!install_hook_absolute(cavforcevalid_addr.value(), m_cavforcevalid_hook, &cavforcevalid_detour,
 	  &cavforcevalid_jmp_ret, 6)) {
 	  //  return a error string in case something goes wrong
@@ -851,7 +840,7 @@ void LDK::on_draw_ui() {
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
 
-  ImGui::Checkbox("Physics fix enable", (bool*)&LDK::physics_fix_on);
+  ImGui::Checkbox("Enable physics fix", (bool*)&LDK::physics_fix_on);
   ImGui::Text("Enemy Soft Limit");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.\n"
 	"Past this point, death animations are disabled to prevent additional stress on the game. "
@@ -860,23 +849,27 @@ void LDK::on_draw_ui() {
   ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
   ImGui::Separator();
 
-  
-  ImGui::Checkbox("HitVfx fix enable", (bool*)&LDK::hitvfx_fix_on);
+  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage"
+      "to increase overall performance&stability of LDK mode.\nUnfortunately, "
+      "a few visual effects will be disabled, like Nero's charged shot.");
+  ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
 
-  ImGui::SliderInt("Draw damage only container num",
-                   (int*)&LDK::container_limit_damage_only, 0, 95);
+  ImGui::Text("ContainerNum limit to draw only damage");
+  ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 95);
   LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
-  ImGui::SliderInt("Draw nothing container num", (int*)&LDK::container_limit_all,
-                   0, 110);
+  
+  ImGui::TextWrapped("Set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
+  ImGui::Text("ContainerNum limit to draw nothing");
+  ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 110);
   LDK::set_container_limit_all(LDK::container_limit_all);
 
   ImGui::Separator();
 
-  ImGui::TextWrapped("Enable pause for spawn enemies after kill.");
+  ImGui::TextWrapped("Enable pause for spawn enemies after killing them.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
 
   ImGui::Separator();
 
-  ImGui::Text("Enable \"default\" red orbs drop from enemies on ldk. DO NOT USE THIS \nwith enemylimit > 30 or without hitvfx and spawn pause fixes.");
-  ImGui::Checkbox("Default red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
+  ImGui::Text("Enable \"default\" red orbs drop from enemies on ldk.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
+  ImGui::Checkbox("\"Default\" red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }
