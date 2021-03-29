@@ -29,6 +29,9 @@ private:
     uintptr_t r15;
   };
 
+  void set_container_limit_all(uint32_t num);
+  void set_container_limit_blood_only(uint32_t num);
+
 public:
   LDK() = default;
   // mod name string for config
@@ -132,9 +135,6 @@ public:
 
   std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
   std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
-
-  void set_container_limit_all(uint32_t num);
-  void set_container_limit_blood_only(uint32_t num);
 
   static RegAddrBackup death_func_backup;
   static RegAddrBackup redorbdrop_backup;

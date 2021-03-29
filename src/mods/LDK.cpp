@@ -849,7 +849,7 @@ void LDK::on_draw_ui() {
   ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
   ImGui::Separator();
 
-  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage"
+  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
       "to increase overall performance&stability of LDK mode.\nUnfortunately, "
       "a few visual effects will be disabled, like Nero's charged shot.");
   ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
