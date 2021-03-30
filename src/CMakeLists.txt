@@ -151,6 +151,10 @@ set(MODS_SRC
     mods/AllStartManual.cpp 
     mods/DanteVariableGuard.hpp 
     mods/DanteVariableGuard.cpp 
+    mods/VergilNoAfterimages.hpp
+    mods/VergilNoAfterimages.cpp
+    mods/VergilSDTFormTracker.hpp
+    mods/VergilSdtFormTracker.cpp
 
 )
 

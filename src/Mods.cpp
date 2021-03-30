@@ -109,6 +109,16 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
+    //VPZadov
+    // Background
+    // Common
+    // Gameplay
+    // Nero
+    // Dante
+    // V
+    // Vergil
+       #include "mods/VergilSDTFormTracker.hpp"
+       #include "mods//VergilNoAfterimages.hpp"
 Mods::Mods()
 {
 // Example
@@ -224,6 +234,17 @@ Mods::Mods()
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
+
+    // VPZadov
+        // Background
+        // Common
+        // Gameplay
+        // Nero
+        // Dante
+        // V
+        //Vergil
+        m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
+        m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
