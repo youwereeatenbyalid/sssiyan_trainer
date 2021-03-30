@@ -121,6 +121,7 @@
        #include "mods//VergilNoAfterimages.hpp"
        #include "mods/VergilDisableSDTAccumulate.hpp"
        #include "mods/VergilSetMaxJJC.hpp"
+       #include "mods/VergilAdditionalJJC.hpp"
 Mods::Mods()
 {
 // Example
@@ -249,6 +250,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
+        m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

@@ -12,6 +12,7 @@ static naked void getvergilform_detour() {
 		mov [VergilSDTFormTracker::vergilform_state], r8d
 		mov rbx,rcx
 		mov rax,[rcx+0x50]
+		//mb I should check jjc count for additional jjc here?
 		jmp [VergilSDTFormTracker::vergilform_ret]
   }
 }

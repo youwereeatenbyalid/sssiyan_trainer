@@ -159,6 +159,7 @@ set(MODS_SRC
     mods/VergilDisableSDTAccumulate.cpp
     mods/VergilSetMaxJJC.hpp
     mods/VergilSetMaxJJC.cpp
+    mods/VergilAdditionalJJC.hpp
 )
 
 set(HOOKS_SRC
