@@ -1,5 +1,5 @@
 #include "VergilDisableSDTAccumulate.hpp"
-
+//clang-format off
 bool VergilDisableSDTAccumulate::cheaton{NULL};
 uintptr_t VergilDisableSDTAccumulate::jmp_ret{NULL};
 uintptr_t VergilDisableSDTAccumulate::func_addr{NULL};
@@ -22,6 +22,7 @@ static naked void accumfunc_detour() {
 
 }
 
+//clang-format on
 void VergilDisableSDTAccumulate::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
@@ -49,7 +50,7 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   }
   VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x4;
 
-  if (!install_hook_absolute(init_addr.value(), m_accumulatefunc_hook, accumfunc_detour, &jmp_ret, 5)) {
+  if (!install_hook_absolute(init_addr.value(), m_accumulatefunc_hook, &accumfunc_detour, &jmp_ret, 5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDisableSDTAccumulate"; 
   }

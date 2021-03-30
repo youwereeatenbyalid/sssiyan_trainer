@@ -1,5 +1,6 @@
 #include "VergilNoAfterimages.hpp"
 #include "mods\VergilSDTFormTracker.hpp"
+//clang-format off
 
 uintptr_t VergilNoAfterimages::afterimages_jmp_ret{NULL};
 uintptr_t VergilNoAfterimages::afterimages_jne{NULL};
@@ -45,6 +46,7 @@ static naked void afterimages_detour() {
         jmp qword ptr [VergilNoAfterimages::afterimages_jne]
   }
 }
+//clang-format on
 
 void VergilNoAfterimages::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
@@ -68,7 +70,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
 
   VergilNoAfterimages::afterimages_jne = init_addr.value() + 0x30D;
 
-  if (!install_hook_absolute(init_addr.value(), m_vergilafterimages_hook, afterimages_detour, &afterimages_jmp_ret, 0xD)) {
+  if (!install_hook_absolute(init_addr.value(), m_vergilafterimages_hook, &afterimages_detour, &afterimages_jmp_ret, 0xD)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilNoAfterimages"; 
   }

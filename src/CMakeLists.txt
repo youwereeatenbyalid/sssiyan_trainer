@@ -157,7 +157,8 @@ set(MODS_SRC
     mods/VergilSdtFormTracker.cpp
     mods/VergilDisableSDTAccumulate.hpp
     mods/VergilDisableSDTAccumulate.cpp
-
+    mods/VergilSetMaxJJC.hpp
+    mods/VergilSetMaxJJC.cpp
 )
 
 set(HOOKS_SRC
