@@ -155,6 +155,8 @@ set(MODS_SRC
     mods/VergilNoAfterimages.cpp
     mods/VergilSDTFormTracker.hpp
     mods/VergilSdtFormTracker.cpp
+    mods/VergilDisableSDTAccumulate.hpp
+    mods/VergilDisableSDTAccumulate.cpp
 
 )
 

@@ -119,6 +119,7 @@
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
        #include "mods//VergilNoAfterimages.hpp"
+       #include "mods/VergilDisableSDTAccumulate.hpp"
 Mods::Mods()
 {
 // Example
@@ -244,7 +245,8 @@ Mods::Mods()
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
-        m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());
+        m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
+        m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
