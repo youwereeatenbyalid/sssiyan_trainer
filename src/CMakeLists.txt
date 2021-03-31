@@ -160,6 +160,8 @@ set(MODS_SRC
     mods/VergilSetMaxJJC.hpp
     mods/VergilSetMaxJJC.cpp
     mods/VergilAdditionalJJC.hpp
+    mods/VergilSDTAccumulateRework.cpp
+    mods/VergilSDTAccumulateRework.hpp
 )
 
 set(HOOKS_SRC

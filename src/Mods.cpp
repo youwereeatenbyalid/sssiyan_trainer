@@ -109,7 +109,7 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-    //VPZadov
+    // VPZadov
     // Background
     // Common
     // Gameplay
@@ -122,6 +122,7 @@
        #include "mods/VergilDisableSDTAccumulate.hpp"
        #include "mods/VergilSetMaxJJC.hpp"
        #include "mods/VergilAdditionalJJC.hpp"
+       #include "mods/VergilSDTAccumulateRework.hpp"
 Mods::Mods()
 {
 // Example
@@ -251,6 +252,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
+        m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
