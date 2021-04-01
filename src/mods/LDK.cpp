@@ -817,9 +817,25 @@ void LDK::set_container_limit_blood_only(uint32_t num) {
 
 
 // during load
-void LDK::on_config_load(const utility::Config &cfg) {}
+void LDK::on_config_load(const utility::Config &cfg) {
+  physics_fix_on = cfg.get<bool>("physics_fix_on").value_or(false);
+  hitvfx_fix_on  = cfg.get<bool>("hitvfx_fix_on").value_or(true);
+  default_redorbsdrop_enabled = cfg.get<bool>("default_redorbsdrop_enabled").value_or(true);
+  hardlimit = cfg.get<uint32_t>("hardlimit").value_or(30);
+  softlimit = cfg.get<uint32_t>("softlimit").value_or(25);
+  container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
+  container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
+}
 // during save
-void LDK::on_config_save(utility::Config &cfg) {}
+void LDK::on_config_save(utility::Config &cfg) {
+  cfg.set<bool>("physics_fix_on", physics_fix_on);
+  cfg.set<bool>("hitvfx_fix_on", hitvfx_fix_on);
+  cfg.set<bool>("default_redorbsdrop_enabled", default_redorbsdrop_enabled);
+  cfg.set<uint32_t>("hardlimit", hardlimit);
+  cfg.set<uint32_t>("softlimit", softlimit);
+  cfg.set<uint32_t>("container_limit_damage_only", container_limit_damage_only);
+  cfg.set<uint32_t>("container_limit_all", container_limit_all);
+}
 // do something every frame
 //void LDK::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
