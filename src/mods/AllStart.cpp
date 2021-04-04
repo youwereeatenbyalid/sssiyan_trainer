@@ -121,7 +121,7 @@ std::optional<std::string> AllStart::on_initialize() {
   init_check_box_info();
 
   ischecked          = &AllStart::cheaton;
-  onpage             = enemystep;
+  onpage             = mechanics;
 
   full_name_string   = "AllStart (+)";
   author_string      = "SSSiyan, dr.penguin";
