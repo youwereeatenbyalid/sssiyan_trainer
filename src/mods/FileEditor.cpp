@@ -178,6 +178,7 @@ naked void FileEditor::scroll_list_detour(){
 
     custom_list_size:
         push rcx
+<<<<<<< HEAD
         push rdx
         sub  rsp, 32
         mov  ecx, dword ptr [rdi + 0xE8]
@@ -193,6 +194,17 @@ naked void FileEditor::scroll_list_detour(){
         mov  [r15], rax
         mov  eax, [r15]
         jmp  m_scroll_list_jmp_ret
+=======
+        push r8
+        mov ecx, dword ptr [rdi+0xE8]
+        lea r8, FileEditor::get_costume_list_size
+        call r8
+        pop r8
+        pop rcx
+        mov [r15], rax
+        mov eax, [r15]
+        jmp qword ptr [FileEditor::scroll_list_jmp_ret]
+>>>>>>> 0f809ac66117dd1c2d7765daad8b38bca81d5c62
     }
 }
 
