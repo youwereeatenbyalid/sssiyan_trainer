@@ -178,7 +178,6 @@ naked void FileEditor::scroll_list_detour(){
 
     custom_list_size:
         push rcx
-<<<<<<< HEAD
         push rdx
         sub  rsp, 32
         mov  ecx, dword ptr [rdi + 0xE8]
@@ -194,7 +193,6 @@ naked void FileEditor::scroll_list_detour(){
         mov  [r15], rax
         mov  eax, [r15]
         jmp  m_scroll_list_jmp_ret
-=======
         push r8
         mov ecx, dword ptr [rdi+0xE8]
         lea r8, FileEditor::get_costume_list_size
@@ -203,8 +201,7 @@ naked void FileEditor::scroll_list_detour(){
         pop rcx
         mov [r15], rax
         mov eax, [r15]
-        jmp qword ptr [FileEditor::scroll_list_jmp_ret]
->>>>>>> 0f809ac66117dd1c2d7765daad8b38bca81d5c62
+        jmp qword ptr [m_scroll_list_jmp_ret]
     }
 }
 
@@ -606,7 +603,7 @@ void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_H
 
             if (delta != 0) {
                 int n_next = n + delta;
-                if (!hot_swaps.value()[n]->character && !hot_swaps.value()[n_next]->character && n_next >= 0 && n_next < hot_swaps.value().size())
+                if (n_next >= 0 && n_next < hot_swaps.value().size() && !hot_swaps.value()[n]->character && !hot_swaps.value()[n_next]->character)
                 {
                     std::swap(hot_swaps.value()[n]->priority, hot_swaps.value()[n_next]->priority);
                     std::swap(hot_swaps.value()[n], hot_swaps.value()[n_next]);
@@ -696,27 +693,27 @@ void FileEditor::on_draw_ui() {
         ImGui::Checkbox("EX Costume", &m_load_ex);
         ImGui::SameLine();
         ImGui::Checkbox("Super Costume", &m_load_super);
+
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(ImColor(0, 0, 0, 0)));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(ImColor(0, 0, 0, 0)));
+
+        ImGui::Text("Nero Costumes");
+        costume_swap_ui(m_nero_swaps);
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("Dante Costumes");
+        costume_swap_ui(m_dante_swaps);
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("V Costumes");
+        costume_swap_ui(m_gilver_swaps);
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("Vergil Costumes");
+        costume_swap_ui(m_vergil_swaps);
+
+        ImGui::PopStyleColor(2);
     }
-
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(ImColor(0, 0, 0, 0)));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(ImColor(0, 0, 0, 0)));
-
-    ImGui::Text("Nero Costumes");
-    costume_swap_ui(m_nero_swaps);
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Text("Dante Costumes");
-    costume_swap_ui(m_dante_swaps);
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Text("V Costumes");
-    costume_swap_ui(m_gilver_swaps);
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Text("Vergil Costumes");
-    costume_swap_ui(m_vergil_swaps);
-
-    ImGui::PopStyleColor(2);
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -1018,7 +1015,7 @@ UI_String_t* __fastcall FileEditor::ui_costume_name(uintptr_t RCX, uintptr_t RDX
             for (auto& mod : *m_vergil_swaps) {
                 if(mod->costume_id == costume_id){
                     ui_string = &mod->costume_name.value();
-                    std::wcout << mod->costume_name.value().m_English << std::endl;
+                    //std::wcout << mod->costume_name.value().m_English << std::endl;
                     return;
                 }
             }
@@ -1029,7 +1026,7 @@ UI_String_t* __fastcall FileEditor::ui_costume_name(uintptr_t RCX, uintptr_t RDX
         }
     };_();
 
-    std::cout << m_selected_character << ' ' << costume_id << ' ' << (void*)ui_string << std::endl;
+    //std::cout << m_selected_character << ' ' << costume_id << ' ' << (void*)ui_string << std::endl;
 
 
     return ui_string;
