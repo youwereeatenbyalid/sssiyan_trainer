@@ -157,8 +157,8 @@ set(MODS_SRC
     mods/DTWingsOnly.cpp
     mods/NothingCancelsBubble.hpp 
     mods/NothingCancelsBubble.cpp
-    mods/NeroSuperNoDT.hpp
-    mods/NeroSuperNoDT.cpp
+    mods/NeroSuperMovesNoDT.hpp 
+    mods/NeroSuperMovesNoDT.cpp
 )
 
 set(HOOKS_SRC

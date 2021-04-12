@@ -26,6 +26,7 @@
         #include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
+        #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
     // Dante
     // V
@@ -133,6 +134,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
         m_mods.emplace_back(std::make_unique<ExceedValue>());
+        m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
     // Dante
     // V
     // Vergil

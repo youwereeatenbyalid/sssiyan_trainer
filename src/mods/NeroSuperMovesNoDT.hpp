@@ -1,18 +1,20 @@
 #pragma once
-#if 0
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class NeroSuperNoDT : public Mod {
+class NeroSuperMovesNoDT : public Mod {
 public:
-  NeroSuperNoDT() = default;
+  NeroSuperMovesNoDT() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "NeroSuperNoDT"; }
+  std::string_view get_name() const override { return "NeroSuperMovesNoDT"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
+  uintptr_t static jmp_return;
+  uintptr_t static jmp_return2;
+
   bool static cheaton;
+
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
@@ -30,6 +32,8 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  // std::unique_ptr<FunctionHook> m_function_hook;
+  //function hooks
+  std::unique_ptr<FunctionHook> m_maxbetnodt_hook;
+  std::unique_ptr<FunctionHook> m_showdownnodt_hook;
+
 };
-#endif

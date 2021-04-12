@@ -107,7 +107,7 @@ void BpStageJump::randomize_array(int* array_param, int range_low, int range_hig
 		int temp = array_param[i];
 		int rand = return_normal_floor();
 		array_param[i] = array_param[rand - 1];
-		array_param[rand] = temp;
+		array_param[rand - 1] = temp;
 	}
 }
 
@@ -329,8 +329,7 @@ void BpStageJump::on_draw_ui() {
 			generate_palace(seed);
 		}
 		ImGui::Checkbox("Use seed", &useseed);
-		if (useseed)
-			ImGui::InputInt("Palace Seed",&seed);
+		ImGui::InputInt("Palace Seed",&seed);
 
 	}
 
@@ -339,7 +338,26 @@ void BpStageJump::on_draw_ui() {
 }
 
 void BpStageJump::on_draw_debug_ui(){
-	
+	ImGui::TextWrapped("Floor 01-10: %d %d %d %d %d %d %d %d %d %d", palacearray[0], palacearray[1], palacearray[2], palacearray[3], 
+palacearray[4], palacearray[5], palacearray[6], palacearray[7], palacearray[8], palacearray[9]);
+	ImGui::TextWrapped("Floor 11-20: %d %d %d %d %d %d %d %d %d %d", palacearray[10], palacearray[11], palacearray[12], palacearray[13],
+		palacearray[14], palacearray[15], palacearray[16], palacearray[17], palacearray[18], palacearray[19]);
+	ImGui::TextWrapped("Floor 21-30: %d %d %d %d %d %d %d %d %d %d", palacearray[20], palacearray[21], palacearray[22], palacearray[23],
+		palacearray[24], palacearray[25], palacearray[26], palacearray[27], palacearray[28], palacearray[29]);
+	ImGui::TextWrapped("Floor 31-40: %d %d %d %d %d %d %d %d %d %d", palacearray[30], palacearray[31], palacearray[32], palacearray[33],
+		palacearray[34], palacearray[35], palacearray[36], palacearray[37], palacearray[38], palacearray[39]);
+	ImGui::TextWrapped("Floor 41-50: %d %d %d %d %d %d %d %d %d %d", palacearray[40], palacearray[41], palacearray[42], palacearray[43],
+		palacearray[44], palacearray[45], palacearray[46], palacearray[47], palacearray[48], palacearray[49]);
+	ImGui::TextWrapped("Floor 51-60: %d %d %d %d %d %d %d %d %d %d", palacearray[50], palacearray[51], palacearray[52], palacearray[53],
+		palacearray[54], palacearray[55], palacearray[56], palacearray[57], palacearray[58], palacearray[59]);
+	ImGui::TextWrapped("Floor 61-70: %d %d %d %d %d %d %d %d %d %d", palacearray[60], palacearray[61], palacearray[62], palacearray[63],
+		palacearray[64], palacearray[65], palacearray[66], palacearray[67], palacearray[68], palacearray[69]);
+	ImGui::TextWrapped("Floor 71-80: %d %d %d %d %d %d %d %d %d %d", palacearray[70], palacearray[71], palacearray[72], palacearray[73],
+		palacearray[74], palacearray[75], palacearray[76], palacearray[77], palacearray[78], palacearray[79]);
+	ImGui::TextWrapped("Floor 81-90: %d %d %d %d %d %d %d %d %d %d", palacearray[80], palacearray[81], palacearray[82], palacearray[83],
+		palacearray[84], palacearray[85], palacearray[86], palacearray[87], palacearray[88], palacearray[89]);
+	ImGui::TextWrapped("Floor 91-100: %d %d %d %d %d %d %d %d %d %d", palacearray[90], palacearray[91], palacearray[92], palacearray[93],
+		palacearray[94], palacearray[95], palacearray[96], palacearray[97], palacearray[98], palacearray[99]);
 }
 
 /*

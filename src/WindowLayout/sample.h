@@ -1308,10 +1308,10 @@ void InitSample(ModFramework* mf)
 
 	//ImwWindow* pStyleEditor = new StyleEditorWindow();
     //oMgr.DockWith(pStyleEditor, gameplaywindow);
-	//#ifndef NDEBUG
-	//ImwWindow* pDebugWindow = new DebugWindow(mf);
-    //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
-	//#endif
+	#ifndef NDEBUG
+	ImwWindow* pDebugWindow = new DebugWindow(mf);
+    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+	#endif
 
 	//oMgr.Dock
 	//PageWindow* pWindow2 = new PageWindow(pWindow1);
