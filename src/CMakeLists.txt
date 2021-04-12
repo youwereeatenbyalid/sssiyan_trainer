@@ -159,6 +159,9 @@ set(MODS_SRC
     mods/NothingCancelsBubble.cpp
     mods/NeroSuperMovesNoDT.hpp 
     mods/NeroSuperMovesNoDT.cpp
+    mods/WeightReset.hpp 
+    mods/WeightReset.cpp 
+
 )
 
 set(HOOKS_SRC
