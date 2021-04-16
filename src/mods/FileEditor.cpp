@@ -266,7 +266,7 @@ naked void FileEditor::costume_list_detour() {
 }
 
 FileEditor::FileEditor()
-    :m_mod_roots{{}}, m_hot_swaps{{}}, m_nero_swaps{ {} }, m_dante_swaps{ {} }, m_gilver_swaps{ {} }, m_vergil_swaps{ {} }, m_show_costume_options{ false }
+    :m_mod_roots{{}}, m_hot_swaps{{}}, m_sys_hot_swaps{ {} }, m_nero_swaps{ {} }, m_dante_swaps{ {} }, m_gilver_swaps{ {} }, m_vergil_swaps{ {} }, m_show_costume_options{ false }
 {
 	g_FileEditor = this;
     m_costume_list_size_addr = (uintptr_t)&get_costume_list_size;
@@ -290,6 +290,7 @@ std::optional<std::string> FileEditor::on_initialize() {
   description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
 
   load_mods();
+  load_sys_mods();
 
   auto file_loader_fn = utility::scan(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
   auto costume_list_maker_fn = utility::scan(base, "48 8B C4 55 53 41 55 41 56 48 8D 68 A1");
@@ -449,7 +450,7 @@ void FileEditor::load_mods()
                 m_hot_swaps.value().push_back(std::make_shared<Asset_Hotswap>(
                     Asset_Hotswap{ 
                         false, priority, mod_cfg.get_character(), 
-                        {}, mod_cfg.get_name(), L"FF",
+                        {}, mod_cfg.get_name(), L"Test String",
                         mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(), 
                         mod_cfg.get_version(), mod_cfg.get_author(), path_replacement, 
                         {}, 0
@@ -457,6 +458,7 @@ void FileEditor::load_mods()
                 ));
 
                 auto& mod = m_hot_swaps.value().back();
+                mod->on_ptr = &mod->is_on;
                 if(mod->character){
                     m_show_costume_options = true;
 
@@ -508,7 +510,82 @@ void FileEditor::load_mods()
             }
         }
     }
+    
 }
+
+void FileEditor::load_sys_mods(){
+    const std::string cfg_name = "modinfo";
+    const std::string cfg_ext = ".ini";
+    m_sys_mod_roots = list_dirs("natives/x64/System");
+    if (m_sys_mod_roots) {
+        for (auto mod_root : *m_sys_mod_roots) {
+            // Read Mod Info
+            auto mod_cfg = HotSwapCFG(mod_root / (cfg_name + cfg_ext));
+            //get mod name
+            auto mod_name = mod_root.filename()/*not actually "file" name, but the folder name*/.string();
+            //mod files is a list of all lifes (whats? :/) not including the .ini? yes
+            auto mod_files = list_files(fs::path("natives/x64/System") / mod_root.filename()/*same deal as above*/ / "natives/x64", {}, cfg_ext);
+            if (mod_files) {
+                //getting rid of the stupid extenstions
+                for (auto& file : *mod_files) {
+                    file = file.parent_path() / file.stem();
+                }
+                //converting the path to the format the game uses (starting from insidethe x64 folder as the root)
+                auto original_mod_file_paths = *mod_files;
+                for (auto& file : original_mod_file_paths) {
+                    auto file_path = file.string();
+                    file = file_path.substr(file_path.find("natives/x64/System\\" + mod_root.filename().string()) + (("natives/x64/System\\" + mod_name + "natives/x64\\").size()) + 1);
+                }
+
+                auto replace_mod_file_path = *mod_files;
+                for (auto& file : replace_mod_file_path) {
+                    auto file_path = file.string();
+                    file = file_path.substr(file_path.find("natives/x64/") + (sizeof("natives/x64/") - 1));
+                }
+
+                std::vector<Asset_Path> path_replacement;
+
+                for (UINT i = 0; i < (*mod_files).size(); i++) {
+                    auto org_path = original_mod_file_paths[i].wstring();
+                    std::replace(org_path.begin(), org_path.end(), '\\', '/');
+
+                    auto new_path = replace_mod_file_path[i].wstring();
+                    std::replace(new_path.begin(), new_path.end(), '\\', '/');
+
+                    path_replacement.push_back({ org_path, new_path });
+                }
+
+                //filling the array with our mods
+                auto priority = m_sys_hot_swaps.value().size();
+                //Asset_Hotswap hotswap{ false, priority, mod_cfg.get_character(), {}, mod_cfg.get_name(), mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(), mod_cfg.get_version(), mod_cfg.get_author(), path_replacement};
+                m_sys_hot_swaps.value().push_back(std::make_shared<Asset_Hotswap>(
+                    Asset_Hotswap{
+                        true, priority, mod_cfg.get_character(),
+                        {}, mod_cfg.get_name(), L"Test String",
+                        mod_cfg.get_main_name(), "##" + mod_cfg.get_main_name(), mod_cfg.get_description(),
+                        mod_cfg.get_version(), mod_cfg.get_author(), path_replacement,
+                        {}, 0
+                    }
+                ));
+
+                auto& mod = m_sys_hot_swaps.value().back();
+                mod->on_ptr = &mod->is_on;
+            }
+        }
+    bind_sys_mod("LDK", &LDK::cheaton);
+    }
+}
+
+
+void FileEditor::bind_sys_mod(std::string modname, bool* on_value) {
+    if (m_sys_hot_swaps) {
+        for (auto& asset_mod : *m_sys_hot_swaps) {
+            if (asset_mod->name == modname) {
+                asset_mod->on_ptr = on_value;
+            }
+        }
+    }
+};
 
 // during load
 void FileEditor::on_config_load(const utility::Config &cfg) {
@@ -516,7 +593,7 @@ void FileEditor::on_config_load(const utility::Config &cfg) {
 
     for (auto& asset_mod : *m_hot_swaps) {
         if(!asset_mod->character){
-            asset_mod->is_on = cfg.get<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable").value_or(false);
+            *asset_mod->on_ptr = cfg.get<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable").value_or(false);
             asset_mod->priority = cfg.get<unsigned int>("AssetMod(\"" + asset_mod->main_name + "\")Priority").value_or(asset_mod->priority);
         }
     }
@@ -526,30 +603,30 @@ void FileEditor::on_config_load(const utility::Config &cfg) {
     m_load_ex = cfg.get<bool>("AssetMod_ExCostume").value_or(false);
 
     for (auto& costume : *m_nero_swaps) {
-        costume->is_on = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
-        if(costume->is_on) break;
+        *costume->on_ptr = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
+        if(*costume->on_ptr) break;
     }
 
     for (auto& costume : *m_dante_swaps) {
-        costume->is_on = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
-        if(costume->is_on) break;
+        *costume->on_ptr = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
+        if(*costume->on_ptr) break;
     }
 
     for (auto& costume : *m_gilver_swaps) {
-        costume->is_on = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
-        if(costume->is_on) break;
+        *costume->on_ptr = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
+        if(*costume->on_ptr) break;
     }
 
     for (auto& costume : *m_vergil_swaps) {
-        costume->is_on = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
-        if(costume->is_on) break;
+        *costume->on_ptr = cfg.get<bool>("CostumeMod(\"" + costume->main_name + "\")Enable").value_or(false);
+        if(*costume->on_ptr) break;
     }
 }
 // during save
 void FileEditor::on_config_save(utility::Config &cfg) {
     for (auto& asset_mod : *m_hot_swaps) {
         if(!asset_mod->character){
-            cfg.set<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable", asset_mod->is_on);
+            cfg.set<bool>("AssetMod(\"" + asset_mod->main_name + "\")Enable", *asset_mod->on_ptr);
             cfg.set<unsigned int>("AssetMod(\"" + asset_mod->main_name + "\")Priority", asset_mod->priority);
         }
     }
@@ -558,19 +635,19 @@ void FileEditor::on_config_save(utility::Config &cfg) {
     cfg.set<bool>("AssetMod_ExCostume", m_load_ex);
 
     for (auto& costume : *m_nero_swaps) {
-        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", costume->is_on);
+        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", *costume->on_ptr);
     }
 
     for (auto& costume : *m_dante_swaps) {
-        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", costume->is_on);
+        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", *costume->on_ptr);
     }
 
     for (auto& costume : *m_gilver_swaps) {
-        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", costume->is_on);
+        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", *costume->on_ptr);
     }
 
     for (auto& costume : *m_vergil_swaps) {
-        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", costume->is_on);
+        cfg.set<bool>("CostumeMod(\"" + costume->main_name + "\")Enable", *costume->on_ptr);
     }
 }
 // do something every frame
@@ -586,7 +663,7 @@ void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_H
 
         if(asset_mod->character) continue;
 
-        ImGui::Checkbox(asset_mod->label.c_str(), &asset_mod->is_on);
+        ImGui::Checkbox(asset_mod->label.c_str(), asset_mod->on_ptr);
         ImGui::SameLine(); bool node_open = ImGui::TreeNodeEx(asset_mod->name.c_str());
 
         if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
@@ -639,11 +716,11 @@ void FileEditor::costume_swap_ui(std::optional<std::vector<std::shared_ptr<Asset
     for (UINT n = 0; n < costume_swaps.value().size(); n++) {
         auto& asset_mod = costume_swaps.value()[n];
 
-        if(asset_mod->is_on){
+        if(*asset_mod->on_ptr){
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(253, 215, 1)));
         }
         bool node_open = ImGui::TreeNodeEx(asset_mod->name.c_str());
-        if(asset_mod->is_on){
+        if(*asset_mod->on_ptr){
 
             ImGui::PopStyleColor();
         }
@@ -670,7 +747,7 @@ void FileEditor::on_draw_ui() {
         std::map<std::string, Info_Back> priorities;
         
         for (auto& asset_mod : *m_hot_swaps) {
-            priorities[asset_mod->main_name] = Info_Back{ asset_mod->is_on, asset_mod->priority };
+            priorities[asset_mod->main_name] = Info_Back{ *asset_mod->on_ptr, asset_mod->priority };
         }
         
         load_mods();
@@ -678,7 +755,7 @@ void FileEditor::on_draw_ui() {
         for (auto& asset_mod : *m_hot_swaps) {
             if(priorities.find(asset_mod->main_name) != priorities.end()) {
                 auto& mod_info_back = priorities[asset_mod->main_name];
-                asset_mod->is_on = mod_info_back.is_on;
+                *asset_mod->on_ptr = mod_info_back.is_on;
                 asset_mod->priority = mod_info_back.priority;
             } else {
                 asset_mod->priority = -1;
@@ -738,14 +815,14 @@ void __fastcall FileEditor::selected_costume_processor(uintptr_t RCX, uintptr_t 
         // Enabling the costume that is selected and disabling the rest for that character
         for (auto& mod : *g_FileEditor->m_nero_swaps) {
             if (mod->slot_in_select_menu.value() + m_nero_last_og_costume_count == selected_costume_slot) {
-                mod->is_on = true;
+                *mod->on_ptr = true;
             }
             else {
-                mod->is_on = false;
+                *mod->on_ptr = false;
             }
 
             if (g_FileEditor->m_config)
-                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", mod->is_on);
+                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", *mod->on_ptr);
         }
 
         og_slots = m_nero_last_og_costume_count;
@@ -757,14 +834,14 @@ void __fastcall FileEditor::selected_costume_processor(uintptr_t RCX, uintptr_t 
         // Enabling the costume that is selected and disabling the rest for that character
         for (auto& mod : *g_FileEditor->m_dante_swaps) {
             if (mod->slot_in_select_menu.value() + m_dante_last_og_costume_count == selected_costume_slot) {
-                mod->is_on = true;
+                *mod->on_ptr = true;
             }
             else {
-                mod->is_on = false;
+                *mod->on_ptr = false;
             }
 
             if (g_FileEditor->m_config)
-                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", mod->is_on);
+                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", *mod->on_ptr);
         }
 
         og_slots = m_dante_last_og_costume_count;
@@ -776,14 +853,14 @@ void __fastcall FileEditor::selected_costume_processor(uintptr_t RCX, uintptr_t 
         // Enabling the costume that is selected and disabling the rest for that character
         for (auto& mod : *g_FileEditor->m_gilver_swaps) {
             if (mod->slot_in_select_menu.value() + m_gilver_last_og_costume_count == selected_costume_slot) {
-                mod->is_on = true;
+                *mod->on_ptr = true;
             }
             else {
-                mod->is_on = false;
+                *mod->on_ptr = false;
             }
 
             if (g_FileEditor->m_config)
-                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", mod->is_on);
+                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", *mod->on_ptr);
         }
 
         og_slots = m_gilver_last_og_costume_count;
@@ -795,14 +872,14 @@ void __fastcall FileEditor::selected_costume_processor(uintptr_t RCX, uintptr_t 
         // Enabling the costume that is selected and disabling the rest for that character
         for (auto& mod : *g_FileEditor->m_vergil_swaps) {
             if (mod->slot_in_select_menu.value() + m_vergil_last_og_costume_count == selected_costume_slot) {
-                mod->is_on = true;
+                *mod->on_ptr = true;
             }
             else {
-                mod->is_on = false;
+                *mod->on_ptr = false;
             }
 
             if (g_FileEditor->m_config) 
-                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", mod->is_on);
+                g_FileEditor->m_config.value().set<bool>("CostumeMod(\"" + mod->main_name + "\")Enable", *mod->on_ptr);
         }
 
         og_slots = m_vergil_last_og_costume_count;
@@ -950,10 +1027,25 @@ void __fastcall FileEditor::costume_list_maker_internal(uintptr_t RCX, uintptr_t
 
 void* __fastcall FileEditor::file_loader(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path)
 {
-    auto _ = [&](){
+    auto _sys = [&]() {
+        if (m_sys_hot_swaps) {
+            for (auto& asset_mod : *m_sys_hot_swaps) {
+                if (*asset_mod->on_ptr) {
+                    for (auto& mod_replace_paths : asset_mod->redirection_list) {
+                        if (asset_check(mod_replace_paths.org_path.c_str(), file_path)) {
+                            file_path = mod_replace_paths.new_path.c_str();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }; _sys();
+
+    auto _mod = [&](){
         if(m_is_active && m_hot_swaps){
             for (auto& asset_mod : *m_hot_swaps) {
-                if(asset_mod->is_on){
+                if(*asset_mod->on_ptr){
                     for(auto& mod_replace_paths : asset_mod->redirection_list){
                         if (asset_check(mod_replace_paths.org_path.c_str(), file_path)) {
                             file_path = mod_replace_paths.new_path.c_str();
@@ -963,7 +1055,8 @@ void* __fastcall FileEditor::file_loader(uintptr_t this_p, uintptr_t RDX, const 
                 }
             }
         }
-    };_();
+    }; _mod();
+
 
     auto file_loader_fn = m_file_loader_hook->get_original<decltype(FileEditor::file_loader_internal)>();
 	return file_loader_fn(this_p, RDX, file_path);
@@ -974,13 +1067,15 @@ void* __fastcall FileEditor::file_loader_internal(uintptr_t this_p, uintptr_t RD
     return g_FileEditor->file_loader(this_p, RDX, file_path);
 }
 
+
+
 UI_String_t* __fastcall FileEditor::ui_costume_name(uintptr_t RCX, uintptr_t RDX, uint32_t costume_id)
 {
     //std::cout << "ID: " << costume_id << std::endl;
 
     auto fn_ui_costume_name = m_ui_costume_name_hook->get_original<decltype(FileEditor::ui_costume_name_internal)>();
 
-    UI_String_t* ui_string = fn_ui_costume_name(RCX, RDX, costume_id);;
+    UI_String_t* ui_string = fn_ui_costume_name(RCX, RDX, costume_id);
 
     auto _ = [&](){
         switch (m_selected_character) {

@@ -6,7 +6,7 @@
 
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-
+#include "mods/LDK.hpp"
 // clang-format off
 namespace fs = std::filesystem;
 
@@ -169,6 +169,8 @@ private:
     UI_String_t* __fastcall ui_costume_name(uintptr_t RCX, uintptr_t RDX, uint32_t costume_id);
 
     void load_mods();
+    void load_sys_mods();
+    void bind_sys_mod(std::string modname, bool* on_value);
     inline bool asset_check(const wchar_t* game_path, const wchar_t* mod_path) const;
 
 private: // structs
@@ -194,6 +196,7 @@ private: // structs
         std::vector<Asset_Path> redirection_list;
         std::optional<UI_String_t> costume_name;
         uint32_t costume_id;
+        bool* on_ptr = nullptr;
     };
 
     struct Info_Back{
@@ -278,7 +281,9 @@ private: // structs
 
 private:
     std::optional<std::vector<fs::path>> m_mod_roots{};
+    std::optional<std::vector<fs::path>> m_sys_mod_roots{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_hot_swaps{};
+    std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_sys_hot_swaps{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_nero_swaps{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_dante_swaps{};
     std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> m_gilver_swaps{};
