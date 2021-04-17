@@ -18,6 +18,8 @@
 #include "WindowLayout/sample.h"
 #include "ImWindowDX11/ImwWindowManagerDX11.h"
 
+// clang-format off
+
 std::unique_ptr<ModFramework> g_framework{};
 
 bool draw_imwindow = false;
@@ -25,6 +27,8 @@ bool should_quit = false;
 
 void update_thread_func(ModFramework* mf) {
 	spdlog::info("update thread entry");
+	auto& io = ImGui::GetIO(); (void)io;
+	io.FontDefault = io.Fonts->AddFontFromFileTTF("Collab Trainer/Fonts/Open_Sans/OpenSans-Regular.ttf", 18.0f);
 	while (!should_quit) {
 		if (mf->m_draw_ui) {
 			mf->m_draw_ui = false;

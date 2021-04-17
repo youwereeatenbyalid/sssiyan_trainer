@@ -11,20 +11,21 @@ public:
     void on_frame() const;
     void on_draw_ui() const;
     void on_draw_debug_ui() const;
-    void draw_entry(std::shared_ptr<Mod>&);
-    std::shared_ptr<Mod> get_mod(std::string modname) const;
+    void draw_entry(std::unique_ptr<Mod>&);
+    const std::unique_ptr<Mod>& get_mod(std::string modname) const;
     std::string get_focused_mod() const;
     void on_pagelist_ui(int page);
-    void save_mods() const;
+    void save_mods();
     void load_mods() const;
-    void static addressseek();
-    std::string get_module_path(void* address) const;
+    /*void static addressseek();
+    std::string get_module_path(void* address) const;*/
     const auto& get_mods() const {
         return m_mods;
     }
 
 private:
     mutable std::string focusedmod;
-    mutable bool redrawfocusedwindow = false;
-    std::vector<std::shared_ptr<Mod>> m_mods;
+    mutable bool redrawfocusedwindow;
+    std::vector<std::unique_ptr<Mod>> m_mods;
+    utility::Config m_config;
 };

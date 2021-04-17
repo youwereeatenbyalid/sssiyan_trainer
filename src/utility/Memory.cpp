@@ -6,6 +6,8 @@
 #include "String.hpp"
 #include "Memory.hpp"
 
+// clang-format off
+
 using namespace std;
 
 namespace utility {
@@ -63,5 +65,18 @@ namespace utility {
 
     bool isGoodCodePtr(uintptr_t ptr, size_t len) {
         return isGoodPtr(ptr, len, PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE);
+    }
+
+    // Added by Darkness
+    // Dereference multi level pointers
+    template<typename T>
+    T& deRefMLPTR(uintptr_t base, std::vector<uintptr_t> offsetList) {
+        uintptr_t ptr = *reinterpret_cast<uintptr_t*>(base);
+        
+        for (UINT i = 0; i < offsetList.size() - 1; i++) {
+            ptr = *reinterpret_cast<uintptr_t*>(ptr + offsetList[i]);
+        }
+
+        return *reinterpret_cast<T*>(ptr + offsetList.back());
     }
 }

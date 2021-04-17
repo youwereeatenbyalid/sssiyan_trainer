@@ -22,12 +22,13 @@ void failed() {
 }
 
 void startup_thread() {
-#ifndef NDEBUG
-    AllocConsole();
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#endif
+//#ifndef NDEBUG
+  AllocConsole();
+  freopen("CONIN$", "r", stdin);
+  freopen("CONOUT$", "w", stdout);
+  freopen("CONOUT$", "w", stderr);
+//#endif
+
 
     wchar_t buffer[MAX_PATH]{ 0 };
     if (GetSystemDirectoryW(buffer, MAX_PATH) != 0) {
@@ -45,11 +46,11 @@ void startup_thread() {
 
 BOOL APIENTRY DllMain(HANDLE handle, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
-		#ifndef NDEBUG
+		//#ifndef NDEBUG
 		MessageBox(NULL, 
 			"Now's a good time to attach a debugger if you want.",
 			"Attach", MB_ICONINFORMATION);
-		#endif
+		//#endif
         CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)startup_thread, nullptr, 0, nullptr);
     }
 
