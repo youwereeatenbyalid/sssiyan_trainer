@@ -16,6 +16,7 @@ public:
   static glm::vec3 customplayercoords;
   static glm::vec3 customenemycoords;
   bool static cheaton;
+  bool static bp_cheaton;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

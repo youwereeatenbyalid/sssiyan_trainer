@@ -7,6 +7,7 @@
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
 #include "mods/LDK.hpp"
+#include "mods/SpardaWorkshop.hpp"
 // clang-format off
 namespace fs = std::filesystem;
 
