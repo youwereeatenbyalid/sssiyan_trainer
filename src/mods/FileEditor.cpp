@@ -575,6 +575,8 @@ void FileEditor::load_sys_mods(){
     bind_sys_mod("LDK", &LDK::cheaton);
     bind_sys_mod("SWVoid",&SpardaWorkshop::cheaton);
     bind_sys_mod("SWBP",&SpardaWorkshop::bp_cheaton);
+    bind_sys_mod("SWBP", &SpardaWorkshop::bp_cheaton);
+    bind_sys_mod("BPExtra",&BpStageJump::altfloor);
     }
 }
 
