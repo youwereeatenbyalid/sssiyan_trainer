@@ -12,6 +12,17 @@ namespace utility {
 
         bool load(const std::string& file_path);
         bool save(const std::string& file_path);
+        
+        // Added by Darkness
+        std::string get_path() const {
+            return m_config_path;
+        }
+
+        bool load();
+        bool save();
+
+        Config& operator=(Config& other) { return *this; }
+        const Config& operator=(const Config& other) const { return *this; }
 
         // Helper for differentiating between boolean and arithmetic values.
         template <typename T>
@@ -96,5 +107,8 @@ namespace utility {
 
     private:
         std::map<std::string, std::string> m_key_values;
+        
+        // Added by Darkness
+        const std::string m_config_path;
     };
 }

@@ -22,12 +22,13 @@ void failed() {
 }
 
 void startup_thread() {
-#ifndef NDEBUG
-    AllocConsole();
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#endif
+//#ifndef NDEBUG
+  AllocConsole();
+  freopen("CONIN$", "r", stdin);
+  freopen("CONOUT$", "w", stdout);
+  freopen("CONOUT$", "w", stderr);
+//#endif
+
 
     wchar_t buffer[MAX_PATH]{ 0 };
     if (GetSystemDirectoryW(buffer, MAX_PATH) != 0) {

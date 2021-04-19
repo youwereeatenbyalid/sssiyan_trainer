@@ -4,11 +4,13 @@
 #include "String.hpp"
 #include "Config.hpp"
 
+// clang-format off
+
 using namespace std;
 
 namespace utility {
     Config::Config(const string& filePath)
-        : m_key_values{}
+        : m_key_values{}, m_config_path{ filePath }
     {
         if (!filePath.empty()) {
             load(filePath);
@@ -40,6 +42,15 @@ namespace utility {
         return true;
     }
 
+    // Added by Darkness
+    bool Config::load() { 
+        if (!m_config_path.empty()) {
+            return load(m_config_path);
+        }
+
+        return false;
+    }
+
     bool Config::save(const string& filePath) {
         ofstream f(widen(filePath));
 
@@ -52,6 +63,15 @@ namespace utility {
         }
 
         return true;
+    }
+
+    // Added by Darkness
+    bool Config::save() {
+        if (!m_config_path.empty()) {
+            return save(m_config_path);
+        }
+
+        return false;
     }
 
     optional<string> Config::get(const string& key) const {

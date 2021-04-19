@@ -4,6 +4,7 @@
 uintptr_t SpardaWorkshop::sceneplacer_jmp_ret{NULL};
 uintptr_t SpardaWorkshop::enemyplacer_jmp_ret{NULL};
 bool SpardaWorkshop::cheaton{NULL};
+bool SpardaWorkshop::bp_cheaton{ NULL };
 static glm::vec3 barrelcoords{0.0,0.0,15.0};
 static glm::vec3 playercoords{0.0,0.0,0};
 static glm::vec3 enemycoords{0.0,0.0,7.0};
@@ -347,4 +348,5 @@ void SpardaWorkshop::on_draw_ui() {
         float* z = (float*)PlayerTracker::playertransform + 0xE;
         customplayercoords = { *x,*y,*z };
     }
+    ImGui::Checkbox("Enable workshop in Bloody Palace",&SpardaWorkshop::bp_cheaton);
 }

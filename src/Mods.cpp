@@ -18,7 +18,7 @@
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
-        #include "mods/TextEditor.hpp"
+        //#include "mods/TextEditor.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -28,7 +28,7 @@
         #include "mods/DisableAutoAssist.hpp"
         #include "mods/DisableTitleTimer.hpp"
         #include "mods/SpardaWorkshop.hpp"
-        #include "mods/SCNPathEditor.hpp"
+        //#include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
     // Nero
@@ -123,9 +123,9 @@
        #include "mods/VergilSetMaxJJC.hpp"
        #include "mods/VergilAdditionalJJC.hpp"
        #include "mods/VergilSDTAccumulateRework.hpp"
-Mods::Mods()
-{
-// Example
+Mods::Mods() 
+    : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
+  // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
 // Darkness
     // Background
@@ -144,7 +144,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
-        m_mods.emplace_back(std::make_unique<TextEditor>());
+        //m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
@@ -155,7 +155,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
-        m_mods.emplace_back(std::make_unique<SCNPathEditor>());
+        //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
     // Nero
@@ -253,7 +253,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-
+		  
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
@@ -269,11 +269,11 @@ std::optional<std::string> Mods::on_initialize() const {
         }
     }
 
-    /*utility::Config cfg{ "re2_fw_config.txt" };
+    /*utility::Config m_config{ "re2_fw_config.txt" };
 
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_load()", mod->get_name().data());
-        mod->on_config_load(cfg);
+        mod->on_config_load(m_config);
     }
     */
     load_mods();
@@ -282,11 +282,12 @@ std::optional<std::string> Mods::on_initialize() const {
     return std::nullopt;
 }
 
-std::unique_ptr<Mod>* Mods::get_mod(std::string modname) const {
+
+const std::unique_ptr<Mod>& Mods::get_mod(std::string modname) const {
     //recursive call in case we can't find the mod being looked for
   for (auto& mod : m_mods) {
     if (modname == mod->get_name()) {
-      return (std::unique_ptr<Mod>*)&mod;
+      return mod;
     }
   }
   return get_mod("SimpleMod");
@@ -301,18 +302,18 @@ void Mods::on_frame() const {
         mod->on_frame();
     }
 }
-void Mods::save_mods() const {
-  utility::Config cfg{"DMC2_fw_config.txt"};
+
+void Mods::save_mods() {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
         std::string togglename = std::string{mod->get_name()};
         togglename.append("_on");
         if(mod->ischecked){
-        cfg.set<bool>(togglename, *mod->ischecked);
+            m_config.set<bool>(togglename, *mod->ischecked);
         }else{
-            cfg.set<bool>(togglename, false);
+            m_config.set<bool>(togglename, false);
         }
-        mod->on_config_save(cfg);
+        mod->on_config_save(m_config);
         //and then probably call the rest of the stuff here;
     }
     // dorime
@@ -320,20 +321,18 @@ void Mods::save_mods() const {
     //std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
     //auto m_conf_path             = mypath.string();
     // ameno
-    cfg.save("DMC2_fw_config.txt");
-
+    m_config.save();
 }
 
 
 void Mods::load_mods() const {
-  utility::Config cfg{"DMC2_fw_config.txt"};
   for (auto& mod : m_mods) {
     spdlog::info("{:s}::on_config_load()", mod->get_name().data());
     std::string togglename = std::string{mod->get_name()};
     togglename.append("_on");
 	if (mod->ischecked) {
-		*(mod->ischecked) = cfg.get<bool>(togglename).value_or(false);
-		mod->on_config_load(cfg);
+		*(mod->ischecked) = m_config.get<bool>(togglename).value_or(false);
+		mod->on_config_load(m_config);
 	}
     // and then probably call the rest of the stuff here;
   }
