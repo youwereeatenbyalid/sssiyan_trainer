@@ -10,15 +10,10 @@ public:
   static bool randombosses;
   static bool bossrush;
   static bool endless;
-  static bool altfloor;
-  int static normal_palace_size;
-  int static additional_palace_size;
-  int static palace_size;
   static enum palace_type_enum { BALANCED, PARTIAL, RANDOM };
   int static palace_type;
   int static random_generator(int low, int high);
   // random_generator(1,7), case switch to return a boss floor
-  int static resolve_additional_content(int floor);
   int static return_boss_floor();
   // return non-boss bp floor
   int static return_normal_floor();
@@ -57,8 +52,8 @@ private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-  static int palacearray[118];
-  static int bossarray[9];
+  static int palacearray[100];
+  static int bossarray[8];
   static int counter;
   std::unique_ptr<FunctionHook> m_function_hook;
 };

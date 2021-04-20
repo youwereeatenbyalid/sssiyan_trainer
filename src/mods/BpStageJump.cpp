@@ -10,24 +10,13 @@ int bpstage = 1;
 bool BpStageJump::randombosses = false;
 bool BpStageJump::bossrush = false;
 bool BpStageJump::endless = false;
-bool BpStageJump::altfloor = false;
-int BpStageJump::palacearray[118] = {};
+int BpStageJump::palacearray[100] = {};
 int BpStageJump::counter = 0;
-int BpStageJump::bossarray[9] = {};
-
-int BpStageJump::normal_palace_size = 100;
-int BpStageJump::additional_palace_size = 118;
-int BpStageJump::palace_size = normal_palace_size;
-
-int normal_boss_size = 8;
-int additional_boss_size = 10;
-int boss_size = normal_boss_size;
-
-
+int BpStageJump::bossarray[8] = {};
 bool retrystage;
 bool randomizer;
 bool useseed = false;
-bool additionalcontent = false;
+
 int seed = 0;
 
 bool randomStageToggle;
@@ -37,7 +26,6 @@ int BpStageJump::palace_type = BpStageJump::RANDOM;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-
 int BpStageJump::random_generator(int low, int high)
 {
 	return low + (std::rand() % (high - low + 1));
@@ -46,7 +34,7 @@ int BpStageJump::random_generator(int low, int high)
 // random_generator(1,8), case switch to return a boss floor
 int BpStageJump::return_boss_floor()
 {
-	switch (BpStageJump::random_generator(1, boss_size)) {
+	switch (BpStageJump::random_generator(1, 8)) {
 	case 1:
 		return 20;
 	case 2:
@@ -63,38 +51,10 @@ int BpStageJump::return_boss_floor()
 		return 99;
 	case 8:
 		return 100;
-	case 9:
-		return 110;
-	case 10:
-		return 118;
 	default:
 		return 10;
 	}
 }
-
-
-int BpStageJump::resolve_additional_content(int floor)
-{
-		altfloor = true;
-		if(!additionalcontent){
-			altfloor = false;
-			return floor;
-		}else if(floor < 101){
-			altfloor = false;
-			return floor;
-		}else if(floor < 111){
-			return floor - 70;
-		}else if(floor < 116){
-			return floor - 59;
-		}else if(floor < 119){
-			return floor - 58;
-		}else{
-			return 101;
-		}
-		return 1;
-}
-
-
 
 // return non-boss bp floor
 int BpStageJump::return_normal_floor()
@@ -102,25 +62,19 @@ int BpStageJump::return_normal_floor()
 	int return_floor;
 	do
 	{
-		return_floor = random_generator(1, palace_size);
+		return_floor = random_generator(1, 97);
 	} while (return_floor == 20
 		|| return_floor == 40
 		|| return_floor == 60
 		|| return_floor == 80
-		|| return_floor == 90
-		|| return_floor == 98
-		|| return_floor == 99
-		|| return_floor == 100
-		|| return_floor == 110
-		|| return_floor == 118
-		);
+		|| return_floor == 90);
 	return return_floor;
 }
 
 // Reset counter, palacearray,bossarray
 void BpStageJump::reset_palace()
 {
-	for (int i = 0; i < 118; i++) {
+	for (int i = 0; i < 100; i++) {
 		BpStageJump::palacearray[i] = i + 1;
 	}
 	BpStageJump::bossarray[0] = 20;
@@ -131,7 +85,6 @@ void BpStageJump::reset_palace()
 	BpStageJump::bossarray[5] = 98;
 	BpStageJump::bossarray[6] = 99;
 	BpStageJump::bossarray[7] = 100;
-	BpStageJump::bossarray[8] = 118;
 	BpStageJump::counter = 0;
 	// TODO: Add your implementation code here.
 }
@@ -172,10 +125,6 @@ void BpStageJump::generate_palace(int seed)
 		randomize_array(palacearray, 60, 79);
 		randomize_array(palacearray, 80, 89);
 		randomize_array(palacearray, 90, 97);
-		if(additionalcontent){
-			randomize_array(palacearray,100,109);
-			randomize_array(palacearray,110,117);
-		}
 		break;
 	case palace_type_enum::BALANCED:
 		randomize_array(palacearray, 0, 19, 0, 18);
@@ -187,7 +136,7 @@ void BpStageJump::generate_palace(int seed)
 		break;
 	case palace_type_enum::RANDOM:
 	default:
-		randomize_array(palacearray, 0, palace_size-1, 1, palace_size);
+		randomize_array(palacearray, 0, 99, 1, 100);
 		break;
 	}
 	if (BpStageJump::palace_type == palace_type_enum::PARTIAL or BpStageJump::palace_type == palace_type_enum::BALANCED) {
@@ -210,11 +159,11 @@ int BpStageJump::next_floor()
 	counter++;
 	if (endless) {
 		if (palace_type == BpStageJump::RANDOM) {
-			return resolve_additional_content(random_generator(1, palace_size));
+			return random_generator(1, 100);
 		}
 		else {
 			if (counter % 20 != 0) {
-				return resolve_additional_content(return_normal_floor());
+				return return_normal_floor();
 			}
 			else {
 				return return_boss_floor();
@@ -223,7 +172,7 @@ int BpStageJump::next_floor()
 	}
 	else {
 		if (bossrush) {
-			if (counter > boss_size-1) {
+			if (counter > 8) {
 				return 101;
 			}
 			else {
@@ -231,11 +180,11 @@ int BpStageJump::next_floor()
 			}
 		}
 		else {
-			if (counter > palace_size) {
+			if (counter > 100) {
 				return 101;
 			}
 			else {
-				return resolve_additional_content(palacearray[counter - 1]);
+				return palacearray[counter - 1];
 			}
 		}
 	}
@@ -332,17 +281,6 @@ void BpStageJump::on_config_save(utility::Config& cfg) {
 }
 
 void BpStageJump::on_draw_ui() {
-	if(ImGui::Checkbox("Use additional content",&additionalcontent)){
-		if(additionalcontent){
-			palace_size = additional_palace_size;
-			boss_size = additional_boss_size;
-		}else{
-			palace_size = normal_palace_size;
-			boss_size = normal_boss_size;
-		}
-	}
-
-	ImGui::Checkbox("Please",&altfloor);
     ImGui::Spacing();
     ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
     ImGui::Checkbox("Retry Current Stage", &retrystage);
@@ -420,8 +358,6 @@ palacearray[4], palacearray[5], palacearray[6], palacearray[7], palacearray[8], 
 		palacearray[84], palacearray[85], palacearray[86], palacearray[87], palacearray[88], palacearray[89]);
 	ImGui::TextWrapped("Floor 91-100: %d %d %d %d %d %d %d %d %d %d", palacearray[90], palacearray[91], palacearray[92], palacearray[93],
 		palacearray[94], palacearray[95], palacearray[96], palacearray[97], palacearray[98], palacearray[99]);
-	ImGui::TextWrapped("Floor 101-110: %d %d %d %d %d %d %d %d %d %d", palacearray[100], palacearray[101], palacearray[102], palacearray[103],
-		palacearray[104], palacearray[105], palacearray[106], palacearray[107], palacearray[108], palacearray[109]);
 }
 
 /*
