@@ -7,7 +7,7 @@ enum HitVfxState { DrawAll, DamageOnly, Nothing };
 class LDK : public Mod {
 #define CHAR_HITS 0xD400
 #define CHAR_DAMAGE 0x7798
-#define SAFE_NUMBER 4
+#define SAFE_NUMBER 6
 
 private:
   struct RegAddrBackup {

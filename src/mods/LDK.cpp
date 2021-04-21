@@ -59,6 +59,7 @@ bool LDK::default_redorbsdrop_enabled{true};
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
 bool hardkill_state = false; //For JCE, Judgement;
+bool swap_hitvfx_settings = false;
 
 bool canhitkill = true;
 bool vergilflipper = false;
@@ -569,7 +570,14 @@ static naked void hitvfxskip_detour() {
 
 		damageonly:
 		mov ax, [rbp]
+		cmp byte ptr [swap_hitvfx_settings], 1
+		je swapped_settings
 		cmp ax, CHAR_DAMAGE
+		je skip
+		jmp originalcode
+
+		swapped_settings:
+		cmp ax, CHAR_HITS 
 		je skip
 		jmp originalcode
 
@@ -825,6 +833,7 @@ void LDK::on_config_load(const utility::Config &cfg) {
   softlimit = cfg.get<uint32_t>("softlimit").value_or(25);
   container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
   container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
+  swap_hitvfx_settings = cfg.get<bool>("swap_hitvfx_settings").value_or(false);
 }
 // during save
 void LDK::on_config_save(utility::Config &cfg) {
@@ -835,6 +844,7 @@ void LDK::on_config_save(utility::Config &cfg) {
   cfg.set<uint32_t>("softlimit", softlimit);
   cfg.set<uint32_t>("container_limit_damage_only", container_limit_damage_only);
   cfg.set<uint32_t>("container_limit_all", container_limit_all);
+  cfg.set<bool>("swap_hitvfx_settings", swap_hitvfx_settings);
 }
 // do something every frame
 //void LDK::on_frame() {}
@@ -867,17 +877,21 @@ void LDK::on_draw_ui() {
 
   ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
       "to increase overall performance&stability of LDK mode.\nUnfortunately, "
-      "a few visual effects will be disabled, like Nero's charged shot.");
+      "a few visual effects will be disabled, like Nero's charged shot, explosion of charged shot, etc.");
   ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
 
   ImGui::Text("ContainerNum limit to draw only damage");
-  ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 95);
+  ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 110);
   LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
   
   ImGui::TextWrapped("Set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
   ImGui::Text("ContainerNum limit to draw nothing");
-  ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 110);
+  ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 160);
   LDK::set_container_limit_all(LDK::container_limit_all);
+
+  ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num <= \"ContainerNum limit to draw only damage\".\n"
+	  "This increase hits effects count and may improve overall visual quality, but it also decrease overall performance.");
+  ImGui::Checkbox("Swap hitvfx settings", (bool*)&swap_hitvfx_settings);
 
   ImGui::Separator();
 
