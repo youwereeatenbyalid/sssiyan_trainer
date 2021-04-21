@@ -10,6 +10,7 @@ int bpstage = 1;
 bool BpStageJump::randombosses = false;
 bool BpStageJump::bossrush = false;
 bool BpStageJump::endless = false;
+bool BpStageJump::altfloor = false;
 int BpStageJump::palacearray[100] = {};
 int BpStageJump::counter = 0;
 int BpStageJump::bossarray[8] = {};
@@ -284,6 +285,10 @@ void BpStageJump::on_draw_ui() {
     ImGui::Spacing();
     ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
     ImGui::Checkbox("Retry Current Stage", &retrystage);
+
+	ImGui::Spacing();
+	ImGui::TextWrapped("Tick to use alternate floor layout");
+	ImGui::Checkbox("Use alt floors", &altfloor);
 
     ImGui::Spacing();
     ImGui::Separator();

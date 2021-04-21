@@ -32,6 +32,7 @@ public:
   static uintptr_t cavforcelightning2_jmp_ret;
   static uintptr_t cavcoordinatechange_jmp_ret;
   static uintptr_t missionmanager;
+  static uintptr_t enemygentype;
   static bool cheaton;
 
   static uint32_t number;

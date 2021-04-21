@@ -25,7 +25,7 @@ uintptr_t LDK::cavforcelightning2_jmp_ret{NULL};
 uintptr_t LDK::cavcoordinatechange_jmp_ret{NULL};
 
 uintptr_t LDK::missionmanager{NULL};
-
+uintptr_t LDK::enemygentype{NULL};
 bool LDK::cheaton{NULL};
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
@@ -131,6 +131,7 @@ static naked void gethpoflasthitobject_detour() {
 static naked void multipledeathoptimize_detour() {
 	__asm {
 		push rsi
+		push rdi
 		mov rsi, [rsi+0x98]
 		cmp [PlayerTracker::playerentity], rsi
 		je friendlydeath
@@ -138,6 +139,15 @@ static naked void multipledeathoptimize_detour() {
 		je friendlydeath
 		cmp [PlayerTracker::griffonentity], rsi
 		je friendlydeath
+		test rsi, rsi
+		je code2
+		mov rsi, [rsi]
+		mov rdi, [LDK::enemygentype]
+		cmp [rdi], rsi
+		je friendlydeath
+
+	code2:
+		pop rdi
 		pop rsi
 		cmp byte ptr [LDK::cheaton], 0
 		je originalcode
@@ -158,6 +168,7 @@ static naked void multipledeathoptimize_detour() {
 		jmp originalcode
 	
 	friendlydeath:
+		pop rdi
 		pop rsi
 
 	originalcode:
@@ -445,6 +456,7 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::cavforcevalid_jmp_je = cavforcevalid_addr.value()+0x8;
 
   LDK::missionmanager = staticbase+0x7E836F8;
+  LDK::enemygentype = staticbase+0x58E15A0;
   LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
  
 

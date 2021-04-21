@@ -10,6 +10,7 @@ public:
   static bool randombosses;
   static bool bossrush;
   static bool endless;
+  static bool altfloor;
   static enum palace_type_enum { BALANCED, PARTIAL, RANDOM };
   int static palace_type;
   int static random_generator(int low, int high);
