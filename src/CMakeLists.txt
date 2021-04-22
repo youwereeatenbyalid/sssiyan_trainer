@@ -163,7 +163,18 @@ set(MODS_SRC
     mods/NeroSuperMovesNoDT.cpp
     mods/WeightReset.hpp 
     mods/WeightReset.cpp 
-
+    mods/InfiniteSummonPowerup.hpp 
+    mods/InfiniteSummonPowerup.cpp
+    mods/GilverNoDTCooldown.hpp 
+    mods/GilverNoDTCooldown.cpp
+    mods/EmpoweredCane.hpp 
+    mods/EmpoweredCane.cpp 
+    mods/InfiniteSummonVitality.hpp 
+    mods/InfiniteSummonVitality.cpp
+	mods/InfiniteGambits.hpp
+	mods/InfiniteGambits.cpp
+	mods/PetChargeNoInterrupt.hpp
+	mods/PetChargeNoInterrupt.cpp
 )
 
 set(HOOKS_SRC

@@ -40,6 +40,12 @@
         #include "mods/ExceedValue.hpp"
     // Dante
     // V
+       #include "mods/InfiniteSummonPowerup.hpp"
+       #include "mods/InfiniteSummonVitality.hpp"
+       #include "mods/PetChargeNoInterrupt.hpp"
+       #include "mods/InfiniteGambits.hpp"
+       #include "mods/GilverNoDTCooldown.hpp"
+       #include "mods/EmpoweredCane.hpp"
     // Vergil
         #include "mods/DoppelWeaponSwitcher.hpp"
 // Siyan
@@ -158,6 +164,12 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
     // Dante
     // V
+        m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
+        m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
+        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
+        m_mods.emplace_back(std::make_unique <InfiniteGambits>());
+        m_mods.emplace_back(std::make_unique <GilverNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
 
