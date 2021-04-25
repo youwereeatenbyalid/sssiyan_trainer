@@ -120,6 +120,20 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
+    // VPZadov
+    // Background
+    // Common
+    // Gameplay
+    // Nero
+    // Dante
+    // V
+    // Vergil
+       #include "mods/VergilSDTFormTracker.hpp"
+       #include "mods//VergilNoAfterimages.hpp"
+       #include "mods/VergilDisableSDTAccumulate.hpp"
+       #include "mods/VergilSetMaxJJC.hpp"
+       #include "mods/VergilAdditionalJJC.hpp"
+       #include "mods/VergilSDTAccumulateRework.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
   // Example
@@ -247,6 +261,21 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
+    // VPZadov
+        // Background
+        // Common
+        // Gameplay
+        // Nero
+        // Dante
+        // V
+        //Vergil
+        m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
+        m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
+        m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
+        m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
+        m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
+        m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
+		  
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
@@ -275,6 +304,7 @@ std::optional<std::string> Mods::on_initialize() const {
     return std::nullopt;
 }
 
+
 const std::unique_ptr<Mod>& Mods::get_mod(std::string modname) const {
     //recursive call in case we can't find the mod being looked for
   for (auto& mod : m_mods) {
@@ -294,6 +324,7 @@ void Mods::on_frame() const {
         mod->on_frame();
     }
 }
+
 void Mods::save_mods() {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
