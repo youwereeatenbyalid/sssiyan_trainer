@@ -24,19 +24,69 @@ uintptr_t LDK::cavforcelightning1_jmp_ret{NULL};
 uintptr_t LDK::cavforcelightning2_jmp_ret{NULL};
 uintptr_t LDK::cavcoordinatechange_jmp_ret{NULL};
 
+uintptr_t LDK::sswords_restriction_jmp{NULL};
+uintptr_t LDK::sswords_restriction_jmp_ret{NULL};
+uintptr_t LDK::hitvfxskip_jmp{NULL};
+uintptr_t LDK::hitvfxskip_ret{NULL};
+uintptr_t LDK::containernum_addr{NULL};
+uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
+//uintptr_t enemyspawner_entity = 0x9B38;
+
+
 uintptr_t LDK::missionmanager{NULL};
 uintptr_t LDK::enemygentype{NULL};
 bool LDK::cheaton{NULL};
+bool LDK::pausespawn_enabled{true};
+
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
-uint32_t LDK::softlimit{20};
+uint32_t LDK::softlimit{25};
 uint32_t LDK::limittype{0};
 uint32_t lightningcounter = 0;
+
+uint32_t LDK::container_limit_all{72};
+uint32_t LDK::container_limit_damage_only{50};
+uint32_t LDK::container_num{0};
+uint32_t LDK::hardlimit_temp = LDK::hardlimit;
+uint32_t LDK::enemydeath_count{0};
+
+HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
+
+bool LDK::physics_fix_on{false};
+bool LDK::hitvfx_fix_on{true};
+bool LDK::default_redorbsdrop_enabled{true};
+
+bool is_spawn_paused = false;
+bool is_redorbspawn_paused = false;
+bool hardkill_state = false; //For JCE, Judgement;
+bool swap_hitvfx_settings = false;
+
 bool canhitkill = true;
 bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
+
+LDK::RegAddrBackup LDK::death_func_backup;
+LDK::RegAddrBackup LDK::redorbdrop_backup;
+
+void pause_spawn()
+{
+	if (!is_spawn_paused)
+	{
+		if (LDK::number <= 8) {
+			return;
+		}
+		LDK::hardlimit_temp = LDK::hardlimit;
+		LDK::hardlimit = 0;
+		is_spawn_paused = true;
+		std::thread ([&]{
+		Sleep(LDK::SPAWN_PAUSE_TIME*1000);
+		is_spawn_paused = false;
+		LDK::hardlimit = LDK::hardlimit_temp;}).detach();
+	}
+}
+
 static naked void enemynumber_detour() {
 	__asm {
 		mov eax,[rax+0x70]
@@ -130,6 +180,11 @@ static naked void gethpoflasthitobject_detour() {
 
 static naked void multipledeathoptimize_detour() {
 	__asm {
+		cmp byte ptr [LDK::cheaton], 0
+		je originalcode
+		mov [LDK::enemydeath_count], 0
+		cmp byte ptr [LDK::physics_fix_on], 0
+		je originalcode
 		push rsi
 		push rdi
 		mov rsi, [rsi+0x98]
@@ -149,11 +204,6 @@ static naked void multipledeathoptimize_detour() {
 	code2:
 		pop rdi
 		pop rsi
-		cmp byte ptr [LDK::cheaton], 0
-		je originalcode
-
-		cmp byte ptr [LDK::cheaton], 0
-		je originalcode
 
 		cmp dword ptr [LDK::limittype], 0
 		je originalcode
@@ -176,6 +226,10 @@ static naked void multipledeathoptimize_detour() {
 		cmp qword ptr [rcx+0x18], 00
 		jmp qword ptr [LDK::multipledeathoptimize_jmp_ret]
 
+	belownum:
+        mov r15, 0x00000000
+		jmp originalcode
+
 	physicsdisable:
 		jmp qword ptr [LDK::multipledeathoptimize_jmp_jle]
 	}
@@ -189,24 +243,96 @@ static naked void canlasthitkill_detour() {
 	}
 }
 
+void redorbdrop_pause() {
+  if (!hardkill_state) {
+    hardkill_state = true;
+    std::thread([&] {
+      Sleep(1000);
+      hardkill_state = false;
+    }).detach();
+  }
+}
+
 static naked void nopfunction_detour1() {
-	__asm {
-		cmp byte ptr [LDK::cheaton], 1
-		je cheatcode
+  __asm {
+		cmp byte ptr [LDK::cheaton], 0
+		je original
+		jmp cheatcode
 
-		call [LDK::nopfunction_1_call]		// call DevilMayCry5.exe+59EE90
+		original:
+		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
-	cheatcode:
+		cheatcode:
+		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
+		je noorbs
+		inc [LDK::enemydeath_count]
+		cmp qword ptr [hardkill_state], 1
+		je noorbs
+		cmp [LDK::enemydeath_count], 0x5
+		jae hardkill
+		call [LDK::nopfunction_1_call] // call DevilMayCry5.exe+59EE90
+
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
-	}
+
+		noorbs:
+		mov r8d, 0
+		call [LDK::nopfunction_1_call]
+		cmp byte ptr [LDK::pausespawn_enabled], 1
+		je pausespawn
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+		hardkill:
+		mov [LDK::redorbdrop_backup.rax], rax
+		mov [LDK::redorbdrop_backup.rcx], rcx
+		mov [LDK::redorbdrop_backup.rdx], rdx
+		mov [LDK::redorbdrop_backup.r8], r8
+		mov [LDK::redorbdrop_backup.r9], r9
+		mov [LDK::redorbdrop_backup.r10], r10
+		mov [LDK::redorbdrop_backup.r11], r11
+		call qword ptr [redorbdrop_pause]
+		mov rax, qword ptr [LDK::redorbdrop_backup.rax]
+		mov rcx, qword ptr [LDK::redorbdrop_backup.rcx]
+		mov rdx, qword ptr [LDK::redorbdrop_backup.rdx]
+		mov r8, qword ptr [LDK::redorbdrop_backup.r8] 
+		mov r9, qword ptr [LDK::redorbdrop_backup.r9]
+		mov r10, qword ptr [LDK::redorbdrop_backup.r10] 
+		mov r11, qword ptr [LDK::redorbdrop_backup.r11]
+		jmp noorbs
+
+
+		pausespawn:
+		mov [LDK::death_func_backup.rax], rax
+		mov [LDK::death_func_backup.rcx], rcx
+		mov [LDK::death_func_backup.rdx], rdx
+		mov [LDK::death_func_backup.r8], r8
+		mov [LDK::death_func_backup.r9], r9
+		mov [LDK::death_func_backup.r10], r10
+		mov [LDK::death_func_backup.r11], r11
+		call qword ptr [pause_spawn]
+		mov rax, qword ptr [LDK::death_func_backup.rax]
+		mov rcx, qword ptr [LDK::death_func_backup.rcx]
+		mov rdx, qword ptr [LDK::death_func_backup.rdx]
+		mov r8, qword ptr [LDK::death_func_backup.r8] 
+		mov r9, qword ptr [LDK::death_func_backup.r9]
+		mov r10, qword ptr [LDK::death_func_backup.r10] 
+		mov r11, qword ptr [LDK::death_func_backup.r11]
+		jmp qword ptr[LDK::nopfunction_jmp_ret1]
+
+  }
 }
 
 static naked void nopfunction_detour2() {
 	__asm {
 		cmp byte ptr [LDK::cheaton], 1
+		jne originalcode
+		cmp [hardkill_state], 1
 		je cheatcode
+		jmp originalcode
 
+		originalcode:
 		mov r9, [rax-0x10]
 		call qword ptr [r9+0x58]
 		jmp qword ptr[LDK::nopfunction_jmp_ret2]
@@ -376,6 +502,114 @@ static naked void cavcoordinatechange_detour() {
 	}
 }
 
+static naked void sswords_restriction_detour() { // Only 1 embeded sword in enemy body allowed
+  __asm {
+		cmp byte ptr[LDK::cheaton], 0
+		je originalcode
+		jmp qword ptr [LDK::sswords_restriction_jmp]
+
+		originalcode:
+		cmp eax,[r14+0x18]
+		jl back
+		jmp qword ptr [LDK::sswords_restriction_jmp]
+
+		back:
+		jmp qword ptr [LDK::sswords_restriction_jmp_ret]
+  }
+}
+
+void set_hitvfxstate() {
+  if (LDK::container_limit_all == 0) {
+    LDK::vfx_state = HitVfxState::Nothing;
+    return;
+  }
+
+  /*if (LDK::number > 16) {
+    LDK::vfx_state = HitVfxState::Nothing;
+    return;
+  }*/
+
+  if (LDK::container_num < LDK::container_limit_damage_only)
+    LDK::vfx_state = HitVfxState::DrawAll;
+  else {
+    if (LDK::container_num >= LDK::container_limit_damage_only && LDK::container_num < LDK::container_limit_all)
+      LDK::vfx_state = HitVfxState::DamageOnly;
+    else
+      LDK::vfx_state = HitVfxState::Nothing;
+  }
+}
+
+static naked void hitvfxskip_detour() {
+  __asm {
+    // Can skip prev check 'cause it's depended on thing that doesn't change
+    // in-game itself, only with REFramework
+		cmp byte ptr [LDK::cheaton], 0
+		je originalcode
+		cmp byte ptr [LDK::hitvfx_fix_on], 0
+		je originalcode
+		cmp [LDK::container_limit_all], 0
+		je nothing
+		cmp [hardkill_state], 1
+		je nothing
+		cmp qword ptr [LDK::number], SAFE_NUMBER
+		jbe originalcode
+		jmp containernumcheck
+
+		containernumcheck:
+        // container num 
+		mov rax, [LDK::containernum_addr]
+		mov rax, [rax]
+		mov rax, [rax+0x158]
+		mov rax, [rax+0x638]
+		mov rax, [rax+0x60]
+		mov rax, [rax+0x788]
+		mov rax, [rax+0xE28]
+		mov [LDK::container_num], rax
+        //-------------------------------//
+		push rcx
+		call [set_hitvfxstate]
+		pop rcx
+		cmp [LDK::vfx_state], 0 // DrawAll
+		je drawall
+		cmp [LDK::vfx_state], 1 // DamageOnly
+		je damageonly
+		cmp [LDK::vfx_state], 2 // Nothing
+		je nothing
+
+		drawall:
+		jmp originalcode
+
+		damageonly:
+		mov ax, [rbp]
+		cmp byte ptr [swap_hitvfx_settings], 1
+		je swapped_settings
+		cmp ax, CHAR_DAMAGE
+		je skip
+		jmp originalcode
+
+		swapped_settings:
+		cmp ax, CHAR_HITS 
+		je skip
+		jmp originalcode
+
+		nothing:
+		mov ax, [rbp]
+		cmp ax, CHAR_HITS 
+		je skip
+		cmp ax, CHAR_DAMAGE 
+		je skip
+		jmp originalcode
+
+		originalcode:
+		test rbp,rbp
+		je skip
+		jmp qword ptr [LDK::hitvfxskip_ret]
+
+		skip:
+		jmp qword ptr [LDK::hitvfxskip_jmp]
+  }
+}
+
 
 std::optional<std::string> LDK::on_initialize() {
   init_check_box_info();
@@ -389,6 +623,7 @@ std::optional<std::string> LDK::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
+  LDK::containernum_addr = staticbase + 0x07E836F8;
 
 
   auto enemynumber_addr = utility::scan(base, "8B 40 70 89 87 50 07 00 00");
@@ -447,6 +682,17 @@ std::optional<std::string> LDK::on_initialize() {
   if (!cavcoordinatechange_addr) {
 	  return "Unable to find cavcoordinatechange pattern.";
   }
+
+  auto sswords_restriction_addr =
+      utility::scan(base, "41 3B 46 18 0F 8C A0 01 00 00");
+  if (!sswords_restriction_addr) {
+    return "Unable to find sswords_restriction_jmp_addr pattern.";
+  }
+  auto hitvfxskip_addr = utility::scan(base, "75 F3 48 85 ED");
+  if (!hitvfxskip_addr) {
+    return "Unable to find hitvfxskip_addr pattern.";
+  }
+
   
   LDK::nopfunction_1_call = nopfunction_1_call.value();
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
@@ -459,7 +705,9 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::enemygentype = staticbase+0x58E15A0;
   LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
  
-
+  LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
+  LDK::sswords_restriction_jmp_ret = sswords_restriction_addr.value() + 0x1AA;
+  LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
 
   if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
@@ -500,11 +748,11 @@ std::optional<std::string> LDK::on_initialize() {
 	spdlog::error("[{}] failed to initialize", get_name());
 	return "Failed to initialize nopfunction 1";
   }
-  if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2, &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
+  /*if (!install_hook_absolute(nopfunction_addr2.value(), m_nopfunction_hook2, &nopfunction_detour2, &nopfunction_jmp_ret2, 8)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
 	return "Failed to initialize nopfunction 2";
-  }
+  }*/
 
 
   if (!install_hook_absolute(vergildivebomb_addr.value(), m_vergildivebomb_hook, &vergildivebomb_detour,
@@ -513,8 +761,6 @@ std::optional<std::string> LDK::on_initialize() {
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Vergil Dive bomb";
   }
-
-
 
   if (!install_hook_absolute(cavforcevalid_addr.value(), m_cavforcevalid_hook, &cavforcevalid_detour,
 	  &cavforcevalid_jmp_ret, 6)) {
@@ -543,12 +789,75 @@ std::optional<std::string> LDK::on_initialize() {
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Vergil Dive bomb";
   }
+
+  if (!install_hook_absolute(sswords_restriction_addr.value(), m_ssowrds_restriction_hook, &sswords_restriction_detour, &sswords_restriction_jmp, 10)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize sswords_restriction_addr";
+  }
+
+  if (!install_hook_absolute(hitvfxskip_addr.value(), m_hitvfxskip_hook, &hitvfxskip_detour, &hitvfxskip_ret, 7)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize hitvfxskip_addr";
+  }
+
   return Mod::on_initialize();
 }
+
+void LDK::set_container_limit_all(uint32_t num) {
+  if (num < 0) {
+    LDK::container_limit_all = 2;
+    return;
+  }
+  if (num == 0) {
+    LDK::container_limit_all = 0;
+    return;
+  }
+  if (num <= LDK::container_limit_damage_only)
+    LDK::container_limit_all = LDK::container_limit_damage_only + 1;
+  else
+    LDK::container_limit_all = num;
+}
+
+void LDK::set_container_limit_blood_only(uint32_t num) {
+  if (num < 0) {
+    LDK::container_limit_damage_only = 1;
+    return;
+  }
+  if (LDK::container_limit_all == 0) {
+    LDK::container_limit_damage_only = 0;
+    return;
+  }
+  if (num >= LDK::container_limit_all)
+    LDK::container_limit_damage_only = LDK::container_limit_all - 1;
+  else
+    LDK::container_limit_damage_only = num;
+}
+
+
 // during load
-void LDK::on_config_load(const utility::Config &cfg) {}
+void LDK::on_config_load(const utility::Config &cfg) {
+  physics_fix_on = cfg.get<bool>("physics_fix_on").value_or(false);
+  hitvfx_fix_on  = cfg.get<bool>("hitvfx_fix_on").value_or(true);
+  default_redorbsdrop_enabled = cfg.get<bool>("default_redorbsdrop_enabled").value_or(true);
+  hardlimit = cfg.get<uint32_t>("hardlimit").value_or(30);
+  softlimit = cfg.get<uint32_t>("softlimit").value_or(25);
+  container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
+  container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
+  swap_hitvfx_settings = cfg.get<bool>("swap_hitvfx_settings").value_or(false);
+}
 // during save
-void LDK::on_config_save(utility::Config &cfg) {}
+void LDK::on_config_save(utility::Config &cfg) {
+  cfg.set<bool>("physics_fix_on", physics_fix_on);
+  cfg.set<bool>("hitvfx_fix_on", hitvfx_fix_on);
+  cfg.set<bool>("default_redorbsdrop_enabled", default_redorbsdrop_enabled);
+  cfg.set<uint32_t>("hardlimit", hardlimit);
+  cfg.set<uint32_t>("softlimit", softlimit);
+  cfg.set<uint32_t>("container_limit_damage_only", container_limit_damage_only);
+  cfg.set<uint32_t>("container_limit_all", container_limit_all);
+  cfg.set<bool>("swap_hitvfx_settings", swap_hitvfx_settings);
+}
 // do something every frame
 //void LDK::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
@@ -556,6 +865,9 @@ void LDK::on_draw_debug_ui() {
   ImGui::Text("Enemy Limit type is currently %X", LDK::limittype);
   ImGui::Text("Hard limit is: %X", LDK::hardlimit);
   ImGui::Text("Soft limit is: %X", LDK::softlimit);
+  ImGui::Text("HitVfx states: 0 - draw all; 1 - only damage, 2 - nothing");
+  ImGui::Text("HitVfx state is: %X", LDK::vfx_state);
+  ImGui::Text("Container num: %X", LDK::container_num);
   ImGui::Selectable("Select me?? IDK lol", true);
 }
 
@@ -565,10 +877,41 @@ void LDK::on_draw_ui() {
   ImGui::TextWrapped("This controls the maximum number of enemies that can be active simultaneously in encounters.");
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
+
+  ImGui::Checkbox("Enable physics fix", (bool*)&LDK::physics_fix_on);
   ImGui::Text("Enemy Soft Limit");
   ImGui::TextWrapped("This controls how many enemies can be active simultaneously before optimized death physics are enabled.\n"
 	"Past this point, death animations are disabled to prevent additional stress on the game. "
 	"This currently can cause issues with enemy spawners not being destroyed.");
   
   ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
+  ImGui::Separator();
+
+  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
+      "to increase overall performance&stability of LDK mode.\nUnfortunately, "
+      "a few visual effects will be disabled, like Nero's charged shot, explosion of charged shot, etc.");
+  ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
+
+  ImGui::Text("ContainerNum limit to draw only damage");
+  ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 110);
+  LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
+  
+  ImGui::TextWrapped("Set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
+  ImGui::Text("ContainerNum limit to draw nothing");
+  ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 160);
+  LDK::set_container_limit_all(LDK::container_limit_all);
+
+  ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num <= \"ContainerNum limit to draw only damage\".\n"
+	  "This increase hits effects count and may improve overall visual quality, but it also decrease overall performance.");
+  ImGui::Checkbox("Swap hitvfx settings", (bool*)&swap_hitvfx_settings);
+
+  ImGui::Separator();
+
+  ImGui::TextWrapped("Enable pause for spawn enemies after killing them.");
+  ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+
+  ImGui::Separator();
+
+  ImGui::Text("Enable \"default\" red orbs drop from enemies on ldk.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
+  ImGui::Checkbox("\"Default\" red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }

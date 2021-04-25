@@ -1,7 +1,37 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+
+enum HitVfxState { DrawAll, DamageOnly, Nothing };
+
 class LDK : public Mod {
+#define CHAR_HITS 0xD400
+#define CHAR_DAMAGE 0x7798
+#define SAFE_NUMBER 6
+
+private:
+  struct RegAddrBackup {
+    uintptr_t rax;
+    uintptr_t rbx;
+    uintptr_t rcx;
+    uintptr_t rdx;
+    uintptr_t rsi;
+    uintptr_t rdi;
+    uintptr_t rbp;
+    uintptr_t rsp;
+    uintptr_t r8;
+    uintptr_t r9;
+    uintptr_t r10;
+    uintptr_t r11;
+    uintptr_t r12;
+    uintptr_t r13;
+    uintptr_t r14;
+    uintptr_t r15;
+  };
+
+  void set_container_limit_all(uint32_t num);
+  void set_container_limit_blood_only(uint32_t num);
+
 public:
   LDK() = default;
   // mod name string for config
@@ -35,12 +65,34 @@ public:
   static uintptr_t enemygentype;
   static bool cheaton;
 
+  static uintptr_t hitvfxskip_jmp;
+  static uintptr_t hitvfxskip_ret;
+  static uintptr_t sswords_restriction_jmp;
+  static uintptr_t sswords_restriction_jmp_ret;
+  static uintptr_t containernum_addr;
+  static uintptr_t nopfunction1_jmp_ret2;
+
+  static const uint32_t SPAWN_PAUSE_TIME = 4;
+
+  static bool physics_fix_on;
+  static bool hitvfx_fix_on;
+  static bool pausespawn_enabled;
+  static bool default_redorbsdrop_enabled;
+
   static uint32_t number;
   static uint32_t hardlimit;
   static uint32_t softlimit;
   static uint32_t limittype;
 
   static float hpoflasthitobj;
+
+  static uint32_t hardlimit_temp;
+  static uint32_t container_num;
+  static uint32_t container_limit_all;
+  static uint32_t container_limit_damage_only;
+  static uint32_t enemydeath_count;
+
+  static HitVfxState vfx_state;
 
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
@@ -81,4 +133,10 @@ public:
   std::unique_ptr<FunctionHook> m_cavforcelightning1_hook;
   std::unique_ptr<FunctionHook> m_cavforcelightning2_hook;
   std::unique_ptr<FunctionHook> m_cavcoordinatechange_hook;
+
+  std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
+  std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
+
+  static RegAddrBackup death_func_backup;
+  static RegAddrBackup redorbdrop_backup;
 };

@@ -1036,6 +1036,11 @@ public:
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::vergildoppel);
 		}
+        ImGui::Separator();
+        ImGui::Text("Afterimages");
+        if (p_mf->is_error() && p_mf->is_ready()) {
+             p_mf->get_mods()->on_pagelist_ui(Mod::vergilafterimages);
+        }
 	}
 };
 class ScenarioWindow : public PageWindow {

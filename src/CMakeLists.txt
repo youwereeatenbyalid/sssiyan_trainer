@@ -175,6 +175,17 @@ set(MODS_SRC
 	mods/InfiniteGambits.cpp
 	mods/PetChargeNoInterrupt.hpp
 	mods/PetChargeNoInterrupt.cpp
+    mods/VergilNoAfterimages.hpp
+    mods/VergilNoAfterimages.cpp
+    mods/VergilSDTFormTracker.hpp
+    mods/VergilSdtFormTracker.cpp
+    mods/VergilDisableSDTAccumulate.hpp
+    mods/VergilDisableSDTAccumulate.cpp
+    mods/VergilSetMaxJJC.hpp
+    mods/VergilSetMaxJJC.cpp
+    mods/VergilAdditionalJJC.hpp
+    mods/VergilSDTAccumulateRework.cpp
+    mods/VergilSDTAccumulateRework.hpp
 )
 
 set(HOOKS_SRC
