@@ -286,10 +286,6 @@ void BpStageJump::on_draw_ui() {
     ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
     ImGui::Checkbox("Retry Current Stage", &retrystage);
 
-	ImGui::Spacing();
-	ImGui::TextWrapped("Tick to use alternate floor layout");
-	ImGui::Checkbox("Use alt floors", &altfloor);
-
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();

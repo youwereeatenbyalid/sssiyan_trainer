@@ -282,8 +282,9 @@ void SpardaWorkshop::on_draw_debug_ui() {}
 
 
 void SpardaWorkshop::on_draw_ui() {
-    //ImGui::Text("Here for a quick check");
-
+    ImGui::Spacing();
+    ImGui::Checkbox("Enable workshop in Bloody Palace", &SpardaWorkshop::bp_cheaton);
+    ImGui::Spacing();
     ImGui::Text("Preset Barrel Positions");
     if(ImGui::Combo("##Barrel Positions", &barrelindex, 
         "Position 0\0Position 1\0Position 2\0Position 3\0"
@@ -348,5 +349,4 @@ void SpardaWorkshop::on_draw_ui() {
         float* z = (float*)PlayerTracker::playertransform + 0xE;
         customplayercoords = { *x,*y,*z };
     }
-    ImGui::Checkbox("Enable workshop in Bloody Palace",&SpardaWorkshop::bp_cheaton);
 }

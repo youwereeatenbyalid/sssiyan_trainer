@@ -186,6 +186,8 @@ set(MODS_SRC
     mods/VergilAdditionalJJC.hpp
     mods/VergilSDTAccumulateRework.cpp
     mods/VergilSDTAccumulateRework.hpp
+	mods/DifficultySelect.hpp
+	mods/DifficultySelect.cpp
 )
 
 set(HOOKS_SRC

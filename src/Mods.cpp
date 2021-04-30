@@ -18,7 +18,7 @@
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
-        //#include "mods/TextEditor.hpp"
+        #include "mods/TextEditor.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -31,6 +31,7 @@
         //#include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
+        #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
         #include "mods/DisableBreakaway.hpp"
@@ -155,7 +156,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
-        //m_mods.emplace_back(std::make_unique<TextEditor>());
+        m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
@@ -169,6 +170,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
+        m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());
