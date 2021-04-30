@@ -22,12 +22,12 @@ void failed() {
 }
 
 void startup_thread() {
-//#ifndef NDEBUG
+#ifndef NDEBUG
   AllocConsole();
   freopen("CONIN$", "r", stdin);
   freopen("CONOUT$", "w", stdout);
   freopen("CONOUT$", "w", stderr);
-//#endif
+#endif
 
 
     wchar_t buffer[MAX_PATH]{ 0 };
