@@ -152,6 +152,7 @@ void BpStageJump::generate_palace(int seed)
 		palacearray[98] = bossarray[6];
 		palacearray[99] = bossarray[7];
 	}
+	BpStageJump::counter = 0; //why the fuck is this necessary
 }
 
 // get the next floor
@@ -358,13 +359,13 @@ void BpStageJump::on_draw_ui() {
 		"Ensure everyone follows these instructions in the correct order before you start or your co-op session will NOT work.");
 		ImGui::Checkbox("Use seed", &useseed);
 		ImGui::InputInt("Palace Seed",&seed);
-
 	}
 }
 
-void BpStageJump::on_draw_debug_ui(){
-	ImGui::TextWrapped("Floor 01-10: %d %d %d %d %d %d %d %d %d %d", palacearray[0], palacearray[1], palacearray[2], palacearray[3], 
-palacearray[4], palacearray[5], palacearray[6], palacearray[7], palacearray[8], palacearray[9]);
+void BpStageJump::on_draw_debug_ui()
+{
+	ImGui::TextWrapped("Floor 01-10: %d %d %d %d %d %d %d %d %d %d", palacearray[0], palacearray[1], palacearray[2], palacearray[3],
+		palacearray[4], palacearray[5], palacearray[6], palacearray[7], palacearray[8], palacearray[9]);
 	ImGui::TextWrapped("Floor 11-20: %d %d %d %d %d %d %d %d %d %d", palacearray[10], palacearray[11], palacearray[12], palacearray[13],
 		palacearray[14], palacearray[15], palacearray[16], palacearray[17], palacearray[18], palacearray[19]);
 	ImGui::TextWrapped("Floor 21-30: %d %d %d %d %d %d %d %d %d %d", palacearray[20], palacearray[21], palacearray[22], palacearray[23],
