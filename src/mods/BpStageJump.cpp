@@ -247,18 +247,16 @@ std::optional<std::string> BpStageJump::on_initialize() {
 
   ischecked               = &BpStageJump::cheaton;
   onpage                  = bloodypalace;
-  full_name_string        = "Bp Stage Jump (+)";
-  author_string           = "SSSiyan";
-  description_string      = "Allows you to skip to a BP stage of your choosing.\n"
-                            "Thanks HitchHiker for making the randomizer!";
+  full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
+  author_string           = "SSSiyan, The Hitchhiker";
+  description_string      = "Allows you to skip to a BP stage of your choosing.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "38 4B 79 75 03");
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }
-
-  generate_palace(0);
+  generate_palace((unsigned int)time(NULL));
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 12)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -296,46 +294,72 @@ void BpStageJump::on_draw_ui() {
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
+
+	ImGui::TextWrapped("If Boss Rush and Randomizer are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
+	ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
     ImGui::Checkbox("Bloody Palace Randomizer", &randomStageToggle);
 
     ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
 	if (randomStageToggle){
+		ImGui::TextWrapped("The bloody palace randomizer allows you to fight through all 100 floors of bloody palace in a random order."
+		" This also works on the boss rush. Options for customizing your experience are provided below.");
+		ImGui::Spacing();
+		ImGui::Separator();
+
+		ImGui::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
+
+
+		if (palace_type == BALANCED){
+			ImGui::TextWrapped("Balanced palace randomizes each set of stagees by difficulty. IE, stagees 1-20 will be randomized, then 20-40, etc.");
+		}else if(palace_type == PARTIAL){
+			ImGui::TextWrapped("Partial palace randomizes the stagees while maintaining the structure of the palace. You will always get a boss every 20 stages, and none outside of that.");
+		}else{
+			ImGui::TextWrapped("Truly random palace will completely randomize floors 1-100. You could get a free ride, or every boss in the first 5 floors. Roll those dice and find out.");
+			}
+
+		ImGui::Spacing();
+		ImGui::Separator();
+
 		if(palace_type == RANDOM || palace_type == PARTIAL){
-			ImGui::TextWrapped("Play through an infinite bloody palace");
+			ImGui::TextWrapped("Fight through a never ending palace and see how high you can get.");
 			ImGui::Checkbox("Endless", &endless);
-
+		}
+		if(palace_type == PARTIAL){
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
 		}
+
+
 		if (palace_type == BALANCED || palace_type == PARTIAL) {
-			ImGui::TextWrapped("Bosses will appear in a random order");
+			ImGui::TextWrapped("Bosses will appear in a random order.");
 			ImGui::Checkbox("Randomized boss order", &randombosses);
-			ImGui::Spacing();
-			ImGui::Separator();
-			ImGui::Spacing();
 		}
-
-		ImGui::Combo("Palace Type",&palace_type,"Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
 
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
 
+		ImGui::TextWrapped("You must press \"Randomize Palace\" at the beginning of every run to reset the palace.");
+
 		if (ImGui::Button("Randomize Palace")){
 			if (!useseed)
-				seed = (unsigned int)time(NULL);
+				seed = std::rand();
 			generate_palace(seed);
 		}
+		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
+		"This ensures you are all using the same set of random stages and will not become desynced.\n"
+		"To use the seed, enter your seed into the \Palace Seed\" field, check the \"Use seed\" checkbox, then press \"Randomize Palace\" before starting.\n"
+		"Ensure everyone follows these instructions in the correct order before you start or your co-op session will NOT work.");
 		ImGui::Checkbox("Use seed", &useseed);
 		ImGui::InputInt("Palace Seed",&seed);
 
 	}
-
-    ImGui::TextWrapped("If Boss Rush and Random Stage are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
-    ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 }
 
 void BpStageJump::on_draw_debug_ui(){
