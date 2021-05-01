@@ -713,7 +713,7 @@ public:
 	virtual void OnToolBar()
 	{
 		//ImGui::Text("My tool bar");
-        ImGui::Text("Menu Key: Insert");
+        ImGui::Text("Menu Key: Delete");
 		ImGui::SameLine();
 		if (ImGui::Button("Save Settings")) {
 			p_mf->get_mods()->save_mods();

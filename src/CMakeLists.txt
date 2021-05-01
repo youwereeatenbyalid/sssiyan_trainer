@@ -188,6 +188,8 @@ set(MODS_SRC
     mods/VergilSDTAccumulateRework.hpp
 	mods/DifficultySelect.hpp
 	mods/DifficultySelect.cpp
+	mods/DontHideWeaponWheel.hpp
+	mods/DontHideWeaponWheel.cpp
 )
 
 set(HOOKS_SRC
