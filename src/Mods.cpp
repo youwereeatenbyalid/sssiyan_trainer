@@ -180,6 +180,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
         m_mods.emplace_back(std::make_unique<ExceedValue>());
         m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
+        m_mods.emplace_back(std::make_unique<DTWingsOnly>());
     // Dante
     // V
         m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());

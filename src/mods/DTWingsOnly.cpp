@@ -1,4 +1,3 @@
-#if 0
 #include "DTWingsOnly.hpp"
 #include "mods/PlayerTracker.hpp"
 uintptr_t DTWingsOnly::jmp_ret{NULL};
@@ -60,4 +59,3 @@ void DTWingsOnly::on_frame() {}
 void DTWingsOnly::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void DTWingsOnly::on_draw_ui() {}
-#endif
