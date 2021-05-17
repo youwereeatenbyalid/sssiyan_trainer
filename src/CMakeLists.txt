@@ -151,6 +151,30 @@ set(MODS_SRC
     mods/AllStartManual.cpp 
     mods/DanteVariableGuard.hpp 
     mods/DanteVariableGuard.cpp 
+    mods/CaliburExceed.hpp 
+    mods/CaliburExceed.cpp
+    mods/ExceedValue.hpp 
+    mods/ExceedValue.cpp
+    mods/DTWingsOnly.hpp 
+    mods/DTWingsOnly.cpp
+    mods/NothingCancelsBubble.hpp 
+    mods/NothingCancelsBubble.cpp
+    mods/NeroSuperMovesNoDT.hpp 
+    mods/NeroSuperMovesNoDT.cpp
+    mods/WeightReset.hpp 
+    mods/WeightReset.cpp 
+    mods/InfiniteSummonPowerup.hpp 
+    mods/InfiniteSummonPowerup.cpp
+    mods/GilverNoDTCooldown.hpp 
+    mods/GilverNoDTCooldown.cpp
+    mods/EmpoweredCane.hpp 
+    mods/EmpoweredCane.cpp 
+    mods/InfiniteSummonVitality.hpp 
+    mods/InfiniteSummonVitality.cpp
+	mods/InfiniteGambits.hpp
+	mods/InfiniteGambits.cpp
+	mods/PetChargeNoInterrupt.hpp
+	mods/PetChargeNoInterrupt.cpp
     mods/VergilNoAfterimages.hpp
     mods/VergilNoAfterimages.cpp
     mods/VergilSDTFormTracker.hpp
@@ -162,6 +186,10 @@ set(MODS_SRC
     mods/VergilAdditionalJJC.hpp
     mods/VergilSDTAccumulateRework.cpp
     mods/VergilSDTAccumulateRework.hpp
+	mods/DifficultySelect.hpp
+	mods/DifficultySelect.cpp
+	mods/DontHideWeaponWheel.hpp
+	mods/DontHideWeaponWheel.cpp
 )
 
 set(HOOKS_SRC
@@ -273,10 +301,10 @@ include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fluffymod/Mods
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fluffymod/Mods
-RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/fluffymod/Mods
-RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/fluffymod/Mods
+RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
+RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
+RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
+RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
 OUTPUT_NAME sssiyan)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}

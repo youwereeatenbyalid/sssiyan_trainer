@@ -18,7 +18,7 @@
         #include "mods/PlayerTracker.hpp"
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
-        //#include "mods/TextEditor.hpp"
+        #include "mods/TextEditor.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -28,14 +28,26 @@
         #include "mods/DisableAutoAssist.hpp"
         #include "mods/DisableTitleTimer.hpp"
         #include "mods/SpardaWorkshop.hpp"
+        #include "mods/DontHideWeaponWheel.hpp"
         //#include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
+        #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
         #include "mods/DisableBreakaway.hpp"
+        #include "mods/CaliburExceed.hpp"
+        #include "mods/NothingCancelsBubble.hpp"
+        #include "mods/NeroSuperMovesNoDT.hpp"
+        #include "mods/ExceedValue.hpp"
     // Dante
     // V
+       #include "mods/InfiniteSummonPowerup.hpp"
+       #include "mods/InfiniteSummonVitality.hpp"
+       #include "mods/PetChargeNoInterrupt.hpp"
+       #include "mods/InfiniteGambits.hpp"
+       #include "mods/GilverNoDTCooldown.hpp"
+       #include "mods/EmpoweredCane.hpp"
     // Vergil
         #include "mods/DoppelWeaponSwitcher.hpp"
 // Siyan
@@ -69,6 +81,7 @@
         #include "mods/EnemyInstantDT.hpp"
         #include "mods/WalkOnKeyboard.hpp"
         #include "mods/ChargeChecker.hpp"
+        #include "mods/WeightReset.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -144,7 +157,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
-        //m_mods.emplace_back(std::make_unique<TextEditor>());
+        m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
@@ -155,14 +168,27 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
+        m_mods.emplace_back(std::make_unique<DontHideWeaponWheel>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
+        m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        m_mods.emplace_back(std::make_unique<CaliburExceed>());
+        m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
+        m_mods.emplace_back(std::make_unique<ExceedValue>());
+        m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
+        m_mods.emplace_back(std::make_unique<DTWingsOnly>());
     // Dante
     // V
+        m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
+        m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
+        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
+        m_mods.emplace_back(std::make_unique <InfiniteGambits>());
+        m_mods.emplace_back(std::make_unique <GilverNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
 
@@ -197,6 +223,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
         m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
         // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());   // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<WeightReset>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());

@@ -8,6 +8,7 @@
 #include "sdk/ReClass.hpp"
 #include "mods/LDK.hpp"
 #include "mods/SpardaWorkshop.hpp"
+#include "mods/BpStageJump.hpp"
 // clang-format off
 namespace fs = std::filesystem;
 

@@ -713,7 +713,7 @@ public:
 	virtual void OnToolBar()
 	{
 		//ImGui::Text("My tool bar");
-        ImGui::Text("Menu Key: Insert");
+        ImGui::Text("Menu Key: Delete");
 		ImGui::SameLine();
 		if (ImGui::Button("Save Settings")) {
 			p_mf->get_mods()->save_mods();
@@ -982,6 +982,27 @@ public:
 	}
 	std::string gflystr = "DanteGuardflyWip";
 };
+
+
+
+class GilverWindow : public PageWindow {
+public:
+	typedef PageWindow super;
+	GilverWindow(ModFramework* mf)
+		: super(mf, "V") {}
+	virtual void OnGui() {
+		super::OnGui();
+		ImGui::Separator();
+		ImGui::Text("V cheats");
+		if (p_mf->is_error() && p_mf->is_ready()) {
+			//p_mf->get_mods()->on_draw_ui();
+			p_mf->get_mods()->on_pagelist_ui(Mod::gilver);
+		}
+	}
+};
+
+
+
 class VergilWindow : public PageWindow {
 public:
 	typedef PageWindow super;
@@ -1277,6 +1298,7 @@ void InitSample(ModFramework* mf)
     ImwWindow* dantewindow	= new DanteWindow(mf);
     //ImwWindow* vwindow      = new PageWindow(mf, 4, "V");
     ImwWindow* vergilwindow = new VergilWindow(mf);
+	ImwWindow* gilverwindow = new GilverWindow(mf);
 	//commonwindow->SetClosable(false);
     //commonwindow->SetSize(1280, 720);
 	/*ImwWindow* pWindow2 = new MyImwWindowFillSpace();
@@ -1297,8 +1319,8 @@ void InitSample(ModFramework* mf)
 	//oMgr.DockWith(practicewindow, gameplaywindow);
 	oMgr.DockWith(nerowindow, gameplaywindow);
     oMgr.DockWith(dantewindow, gameplaywindow);
+	oMgr.DockWith(gilverwindow,gameplaywindow);
 	oMgr.DockWith(vergilwindow, gameplaywindow);
-	
     //    oMgr.DockWith(vwindow, commonwindow);
     //oMgr.DockWith(vergilwindow, commonwindow);
 	
@@ -1313,10 +1335,10 @@ void InitSample(ModFramework* mf)
 
 	//ImwWindow* pStyleEditor = new StyleEditorWindow();
     //oMgr.DockWith(pStyleEditor, gameplaywindow);
-	//#ifndef NDEBUG
-	//ImwWindow* pDebugWindow = new DebugWindow(mf);
-    //oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
-	//#endif
+	#ifndef NDEBUG
+	ImwWindow* pDebugWindow = new DebugWindow(mf);
+    oMgr.DockWith(pDebugWindow, pFocusWindow, E_DOCK_ORIENTATION_BOTTOM,0.4f);
+	#endif
 
 	//oMgr.Dock
 	//PageWindow* pWindow2 = new PageWindow(pWindow1);

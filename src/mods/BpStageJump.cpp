@@ -10,11 +10,13 @@ int bpstage = 1;
 bool BpStageJump::randombosses = false;
 bool BpStageJump::bossrush = false;
 bool BpStageJump::endless = false;
+bool BpStageJump::altfloor = false;
 int BpStageJump::palacearray[100] = {};
 int BpStageJump::counter = 0;
 int BpStageJump::bossarray[8] = {};
 bool retrystage;
 bool randomizer;
+bool useseed = false;
 
 int seed = 0;
 
@@ -106,7 +108,7 @@ void BpStageJump::randomize_array(int* array_param, int range_low, int range_hig
 		int temp = array_param[i];
 		int rand = return_normal_floor();
 		array_param[i] = array_param[rand - 1];
-		array_param[rand] = temp;
+		array_param[rand - 1] = temp;
 	}
 }
 
@@ -114,11 +116,8 @@ void BpStageJump::randomize_array(int* array_param, int range_low, int range_hig
 void BpStageJump::generate_palace(int seed)
 {
 	reset_palace();
-	if (seed != 0){
-		std::srand(seed);
-	}else{
-		std::srand((unsigned int)time(NULL));
-	}
+	std::srand(seed);
+
 	switch (BpStageJump::palace_type) {
 	case palace_type_enum::PARTIAL:
 		randomize_array(palacearray, 0, 19);
@@ -153,6 +152,7 @@ void BpStageJump::generate_palace(int seed)
 		palacearray[98] = bossarray[6];
 		palacearray[99] = bossarray[7];
 	}
+	BpStageJump::counter = 0; //why the fuck is this necessary
 }
 
 // get the next floor
@@ -248,18 +248,16 @@ std::optional<std::string> BpStageJump::on_initialize() {
 
   ischecked               = &BpStageJump::cheaton;
   onpage                  = bloodypalace;
-  full_name_string        = "Bp Stage Jump (+)";
-  author_string           = "SSSiyan";
-  description_string      = "Allows you to skip to a BP stage of your choosing.\n"
-                            "Thanks HitchHiker for making the randomizer!";
+  full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
+  author_string           = "SSSiyan, The Hitchhiker";
+  description_string      = "Allows you to skip to a BP stage of your choosing.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "38 4B 79 75 03");
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }
-
-  generate_palace(0);
+  generate_palace((unsigned int)time(NULL));
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 12)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -297,45 +295,95 @@ void BpStageJump::on_draw_ui() {
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-    ImGui::TextWrapped("Tick to be given random stages");
-    ImGui::Checkbox("Random Stage", &randomStageToggle);
+
+	ImGui::TextWrapped("If Boss Rush and Randomizer are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
+	ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+    ImGui::Checkbox("Bloody Palace Randomizer", &randomStageToggle);
 
     ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
+	if (randomStageToggle){
+		ImGui::TextWrapped("The bloody palace randomizer allows you to fight through all 100 floors of bloody palace in a random order."
+		" This also works on the boss rush. Options for customizing your experience are provided below.");
+		ImGui::Spacing();
+		ImGui::Separator();
 
-	ImGui::TextWrapped("Play through an infinite bloody palace");
-	ImGui::Checkbox("Endless", &endless);
+		ImGui::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
 
-	ImGui::TextWrapped("Bosses will appear in a random order");
-	ImGui::Checkbox("Randomized boss order", &randombosses);
+		if (palace_type == BALANCED){
+			ImGui::TextWrapped("Balanced palace randomizes each set of stagees by difficulty. IE, stagees 1-20 will be randomized, then 20-40, etc.");
+		}else if(palace_type == PARTIAL){
+			ImGui::TextWrapped("Partial palace randomizes the stagees while maintaining the structure of the palace. You will always get a boss every 20 stages, and none outside of that.");
+		}else{
+			ImGui::TextWrapped("Truly random palace will completely randomize floors 1-100. You could get a free ride, or every boss in the first 5 floors. Roll those dice and find out.");
+			}
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Separator();
 
-	ImGui::Combo("Palace Type",&palace_type,"Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
+		if(palace_type == RANDOM || palace_type == PARTIAL){
+			ImGui::TextWrapped("Fight through a never ending palace and see how high you can get.");
+			ImGui::Checkbox("Endless", &endless);
+		}
+		if(palace_type == PARTIAL){
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
 
-	if (ImGui::Button("Randomize Palace")){
-		generate_palace(seed);
+		if (palace_type == BALANCED || palace_type == PARTIAL) {
+			ImGui::TextWrapped("Bosses will appear in a random order.");
+			ImGui::Checkbox("Randomized boss order", &randombosses);
+		}
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::TextWrapped("You must press \"Randomize Palace\" at the beginning of every run to reset the palace.");
+
+		if (ImGui::Button("Randomize Palace")){
+			if (!useseed)
+				seed = std::rand();
+			generate_palace(seed);
+		}
+		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
+		"This ensures you are all using the same set of random stages and will not become desynced.\n"
+		"To use the seed, enter your seed into the \Palace Seed\" field, check the \"Use seed\" checkbox, then press \"Randomize Palace\" before starting.\n"
+		"Ensure everyone follows these instructions in the correct order before you start or your co-op session will NOT work.");
+		ImGui::Checkbox("Use seed", &useseed);
+		ImGui::InputInt("Palace Seed",&seed);
 	}
-
-	ImGui::InputInt("Palace Seed",&seed);
-
-    ImGui::TextWrapped("If Boss Rush and Random Stage are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
-    ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 }
 
-void BpStageJump::on_draw_debug_ui(){
-	
+void BpStageJump::on_draw_debug_ui()
+{
+	ImGui::TextWrapped("Floor 01-10: %d %d %d %d %d %d %d %d %d %d", palacearray[0], palacearray[1], palacearray[2], palacearray[3],
+		palacearray[4], palacearray[5], palacearray[6], palacearray[7], palacearray[8], palacearray[9]);
+	ImGui::TextWrapped("Floor 11-20: %d %d %d %d %d %d %d %d %d %d", palacearray[10], palacearray[11], palacearray[12], palacearray[13],
+		palacearray[14], palacearray[15], palacearray[16], palacearray[17], palacearray[18], palacearray[19]);
+	ImGui::TextWrapped("Floor 21-30: %d %d %d %d %d %d %d %d %d %d", palacearray[20], palacearray[21], palacearray[22], palacearray[23],
+		palacearray[24], palacearray[25], palacearray[26], palacearray[27], palacearray[28], palacearray[29]);
+	ImGui::TextWrapped("Floor 31-40: %d %d %d %d %d %d %d %d %d %d", palacearray[30], palacearray[31], palacearray[32], palacearray[33],
+		palacearray[34], palacearray[35], palacearray[36], palacearray[37], palacearray[38], palacearray[39]);
+	ImGui::TextWrapped("Floor 41-50: %d %d %d %d %d %d %d %d %d %d", palacearray[40], palacearray[41], palacearray[42], palacearray[43],
+		palacearray[44], palacearray[45], palacearray[46], palacearray[47], palacearray[48], palacearray[49]);
+	ImGui::TextWrapped("Floor 51-60: %d %d %d %d %d %d %d %d %d %d", palacearray[50], palacearray[51], palacearray[52], palacearray[53],
+		palacearray[54], palacearray[55], palacearray[56], palacearray[57], palacearray[58], palacearray[59]);
+	ImGui::TextWrapped("Floor 61-70: %d %d %d %d %d %d %d %d %d %d", palacearray[60], palacearray[61], palacearray[62], palacearray[63],
+		palacearray[64], palacearray[65], palacearray[66], palacearray[67], palacearray[68], palacearray[69]);
+	ImGui::TextWrapped("Floor 71-80: %d %d %d %d %d %d %d %d %d %d", palacearray[70], palacearray[71], palacearray[72], palacearray[73],
+		palacearray[74], palacearray[75], palacearray[76], palacearray[77], palacearray[78], palacearray[79]);
+	ImGui::TextWrapped("Floor 81-90: %d %d %d %d %d %d %d %d %d %d", palacearray[80], palacearray[81], palacearray[82], palacearray[83],
+		palacearray[84], palacearray[85], palacearray[86], palacearray[87], palacearray[88], palacearray[89]);
+	ImGui::TextWrapped("Floor 91-100: %d %d %d %d %d %d %d %d %d %d", palacearray[90], palacearray[91], palacearray[92], palacearray[93],
+		palacearray[94], palacearray[95], palacearray[96], palacearray[97], palacearray[98], palacearray[99]);
 }
 
 /*

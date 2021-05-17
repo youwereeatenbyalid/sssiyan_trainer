@@ -13,8 +13,8 @@ public:
   uintptr_t static jmp_ret;
   uintptr_t static jmp_jne;
   bool static cheaton;
-  char16_t static const aimap[] ;
-  char16_t static const doujyo[] ;
+  char16_t static const aimap[];
+  char16_t static const doujyo[];
   char16_t static const doujyoprop[];
   char16_t static const enemy[];
 
@@ -30,7 +30,6 @@ public:
   // on_draw_debug_ui() is called when debug window shows up
   void on_draw_debug_ui() override;
 private:
-
   // function hook instance for our detour, convinient wrapper 
   // around minhook
   void init_check_box_info() override;
