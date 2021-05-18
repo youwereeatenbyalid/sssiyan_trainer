@@ -91,6 +91,7 @@
         #include "mods/NeroInfPunchline.hpp"
         #include "mods/NeroSkipCS2.hpp"
         #include "mods/NeroNoDTCooldown.hpp"
+        #include "mods/DTWingsOnly.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
