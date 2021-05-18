@@ -4,31 +4,75 @@
 #include <array>
 
 class EnemySwapper : public Mod {
+
+  private:
+  struct RegAddrBackup {
+    uintptr_t rax;
+    uintptr_t rbx;
+    uintptr_t rcx;
+    uintptr_t rdx;
+    uintptr_t rsi;
+    /*uintptr_t rdi;
+    uintptr_t rbp;
+    uintptr_t rsp;
+    uintptr_t r8;
+    uintptr_t r9;
+    uintptr_t r10;
+    uintptr_t r11;
+    uintptr_t r12;
+    uintptr_t r13;
+    uintptr_t r14;
+    uintptr_t r15;*/
+  };
+
 public:
 
-static const int enemyNum = 41;
+  static inline RegAddrBackup enemySwapBackup1;
+  static inline RegAddrBackup enemySwapBackup2;
+
+static const int enemyListCount = 41;
 
 	struct EnemyId {
   public:
-    uint32_t listIndx;
-    uint32_t id;
-    EnemyId() {}
+    uint32_t curListIndx;//indx in emNames;
+    uint32_t indxToSwap;
+    uint32_t currentId;//id of what swap;
+    uint32_t swapId;//id of to swap;
+    EnemyId() {
+	  curListIndx = 0;
+      indxToSwap  = 0;
+      currentId   = 0;
+      swapId      = 0;
+	}
 
 	  EnemyId(uint32_t selectedIndx) { 
-		  set_id(selectedIndx);
+		  set_current_id(selectedIndx);
 	}
 
-    uint32_t get_id() const { return id; }
-	void set_id(uint32_t selectedIndx) {
-      listIndx = selectedIndx;
-          if (selectedIndx >= 20)
-        id = selectedIndx + 3;
+    inline uint32_t get_current_id() const { return currentId; }
+	inline void set_current_id(uint32_t selectedIndx) {
+      set_id(selectedIndx, currentId);
+	}
+
+	inline void set_swap_id(uint32_t selectedIndx) {
+          set_id(selectedIndx, swapId);
+	}
+
+    inline uint32_t get_selectedIndx() const { return curListIndx; }
+
+	inline uint32_t get_swap_id() const { return swapId; }
+
+      private:
+
+		  inline void set_id(uint32_t curListIndx, uint32_t &id) {
+          this->curListIndx = curListIndx;
+          if (curListIndx >= 20)
+            id = curListIndx + 3;
           else
-            id = selectedIndx;
-          if (selectedIndx == 40)//Dante, but his AI is disabled
+            id = curListIndx;
+          if (curListIndx == 40) // Dante, but his AI is disabled
             id = 55;
 	}
-    uint32_t get_selectedIndx() const { return listIndx; }
   };
 
 static uintptr_t setEnemyDataRet1;
@@ -37,10 +81,12 @@ static uintptr_t setEnemyDataRet2;
 static bool swapAll;
 static bool cheaton;
 
-static uint32_t selectedToSwap[enemyNum];
+static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
+static uint32_t currentEnemyId;
+static uint32_t newEnemyId;;
 
-static std::array<EnemyId, enemyNum> swapSettings;
+static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
 
   EnemySwapper() = default;
@@ -68,7 +114,7 @@ static EnemyId swapForAll;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
 
-  static inline std::array<const char*, enemyNum> emNames{
+  static inline std::array<const char*, enemyListCount> emNames{
 	  "Hell Caina", //0
 	  "Hell Antenora",//1
 	  "Hell Judecca", //2
@@ -98,8 +144,8 @@ static EnemyId swapForAll;
 	  "Cavaliere", //26
 	  "Qliphot Root Boss",//27 
 	  "King Cerberus", //28
-	  "Griffon", //29
-	  "Shadow", //30
+	  "Griffon (NoDie)", //29
+	  "Shadow (NoDie)", //30
 	  "Nightmire", //31
 	  "Urizen 1",//32
       "Urizen 2",//33
@@ -109,7 +155,7 @@ static EnemyId swapForAll;
       "Phantom Artemis",//37
       "Phantom Cavaliere",//38
       "Vergil M20",//39
-      "Dante",//40
-      //"Dente M20"//41 No:)
+      "Dante (AiDisabled)",//40
+      //"Dante M20"//41 No:)
   };
 };
