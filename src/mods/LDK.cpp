@@ -31,6 +31,7 @@ uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
 uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
 //uintptr_t enemyspawner_entity = 0x9B38;
+uintptr_t LDK::waitTimeJmpRet;
 
 
 
@@ -56,6 +57,7 @@ HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 bool LDK::physics_fix_on{false};
 bool LDK::hitvfx_fix_on{true};
 bool LDK::default_redorbsdrop_enabled{true};
+bool LDK::waitTimeEnabled{false};
 
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
@@ -65,6 +67,7 @@ bool swap_hitvfx_settings = false;
 bool canhitkill = true;
 bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
+float LDK::waitTime = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
@@ -611,6 +614,23 @@ static naked void hitvfxskip_detour() {
   }
 }
 
+static naked void wait_time_spawn_detour() {
+	__asm {
+		cmp byte ptr [LDK::waitTimeEnabled], 1
+		je waittime
+
+		originalcode:
+		movsxd rax, dword ptr [r8+0x24]
+		mov [rsp+0x50],rbx
+		jmp qword ptr [LDK::waitTimeJmpRet]
+
+		waittime:
+		movss xmm0, [LDK::waitTime]
+		movss [r8+0x68], xmm0
+		jmp originalcode
+  }
+}
+
 
 std::optional<std::string> LDK::on_initialize() {
   init_check_box_info();
@@ -692,6 +712,11 @@ std::optional<std::string> LDK::on_initialize() {
   auto hitvfxskip_addr = utility::scan(base, "75 F3 48 85 ED");
   if (!hitvfxskip_addr) {
     return "Unable to find hitvfxskip_addr pattern.";
+  }
+
+  auto waittime_addr = utility::scan(base, "49 63 40 24 48 89 5C 24 50");
+  if (!waittime_addr) {
+    return "Unable to find waittime_addr pattern.";
   }
 
   
@@ -803,6 +828,12 @@ std::optional<std::string> LDK::on_initialize() {
     return "Failed to initialize hitvfxskip_addr";
   }
 
+  if (!install_hook_absolute(waittime_addr.value(), m_wait_spawn_time_hook, &wait_time_spawn_detour, &waitTimeJmpRet, 0x9)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize hitvfxskip_addr";
+  }
+
   return Mod::on_initialize();
 }
 
@@ -847,6 +878,8 @@ void LDK::on_config_load(const utility::Config &cfg) {
   container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
   container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
   swap_hitvfx_settings = cfg.get<bool>("swap_hitvfx_settings").value_or(false);
+  waitTime             = cfg.get<float>("LDK_waitTime").value_or(1.8f);
+  waitTimeEnabled      = cfg.get<bool>("LDK_waitTimeEnabled").value_or(false);
 }
 // during save
 void LDK::on_config_save(utility::Config &cfg) {
@@ -858,6 +891,8 @@ void LDK::on_config_save(utility::Config &cfg) {
   cfg.set<uint32_t>("container_limit_damage_only", container_limit_damage_only);
   cfg.set<uint32_t>("container_limit_all", container_limit_all);
   cfg.set<bool>("swap_hitvfx_settings", swap_hitvfx_settings);
+  cfg.set<float>("LDK_waitTime", LDK::waitTime);
+  cfg.set<bool>("LDK_waitTimeEnabled", waitTimeEnabled);
 }
 // do something every frame
 //void LDK::on_frame() {}
@@ -908,8 +943,21 @@ void LDK::on_draw_ui() {
 
   ImGui::Separator();
 
-  ImGui::TextWrapped("Enable pause for spawn enemies after killing them.");
+  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. In coop mode it will cause desync, use wait time spawn option for coop play instead of this.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+  if (pausespawn_enabled)
+    waitTimeEnabled = false;
+
+  ImGui::Separator();
+
+  ImGui::TextWrapped(
+      "Use this when you playing in coop. Enable pause before all enemies "
+      "spawns, include preloaded enemies. Spawn happens by groops of a few "
+      "enemies, that should decrease a load to your PC while LDK + coop.");
+  ImGui::Checkbox("Enable wait time spawn", &waitTimeEnabled);
+  ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f);
+  if (waitTimeEnabled)
+    pausespawn_enabled = false;
 
   ImGui::Separator();
 

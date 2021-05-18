@@ -71,6 +71,7 @@ public:
   static uintptr_t sswords_restriction_jmp_ret;
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
+  static uintptr_t waitTimeJmpRet;
 
   static const uint32_t SPAWN_PAUSE_TIME = 4;
 
@@ -78,6 +79,7 @@ public:
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
   static bool default_redorbsdrop_enabled;
+  static bool waitTimeEnabled;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -91,6 +93,7 @@ public:
   static uint32_t container_limit_all;
   static uint32_t container_limit_damage_only;
   static uint32_t enemydeath_count;
+  static float waitTime;//GenerateEnemyManager.GenerateData.WaitTime. Use for coop insted of pause spawn fix.
 
   static HitVfxState vfx_state;
 
@@ -136,6 +139,7 @@ public:
 
   std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
   std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
+  std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
 
   static RegAddrBackup death_func_backup;
   static RegAddrBackup redorbdrop_backup;
