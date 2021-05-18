@@ -40,6 +40,7 @@
         #include "mods/NothingCancelsBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
+        #include "mods/DTWingsOnly.hpp"
     // Dante
     // V
        #include "mods/InfiniteSummonPowerup.hpp"
@@ -126,6 +127,7 @@
     // Background
     // Common
     // Gameplay
+       #include "mods/EnemySwapper.hpp"
     // Nero
     // Dante
     // V
@@ -280,6 +282,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());
 		  
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

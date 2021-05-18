@@ -190,6 +190,8 @@ set(MODS_SRC
 	mods/DifficultySelect.cpp
 	mods/DontHideWeaponWheel.hpp
 	mods/DontHideWeaponWheel.cpp
+    mods/EnemySwapper.hpp
+    mods/EnemySwapper.cpp
 )
 
 set(HOOKS_SRC
