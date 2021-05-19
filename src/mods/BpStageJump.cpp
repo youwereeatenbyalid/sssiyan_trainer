@@ -266,6 +266,11 @@ std::optional<std::string> BpStageJump::on_initialize() {
 
   BpStageJump::jmp_jne = addr.value() + 8;
 
+  // might as well randomize seed on boot
+  std::srand(std::time(0));
+  seed = std::rand();
+  generate_palace(seed);
+
   return Mod::on_initialize();
 }
 
@@ -273,11 +278,15 @@ void BpStageJump::on_config_load(const utility::Config& cfg) {
   bossrush   = cfg.get<bool>("bp_jump_boss_rush").value_or(false);
   retrystage = cfg.get<bool>("bp_jump_retry_stage").value_or(false);
   randomStageToggle = cfg.get<bool>("bp_jump_random_stage").value_or(false);
+  useseed           = cfg.get<bool>("bp_jump_use_seed").value_or(false);
+  endless           = cfg.get<bool>("bp_jump_endless").value_or(false);
 }
 void BpStageJump::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("bp_jump_boss_rush", bossrush);
   cfg.set<bool>("bp_jump_retry_stage", retrystage);
   cfg.set<bool>("bp_jump_random_stage", randomStageToggle);
+  cfg.set<bool>("bp_jump_use_seed", useseed);
+  cfg.set<bool>("bp_jump_endless", endless);
 }
 
 void BpStageJump::on_draw_ui() {
