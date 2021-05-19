@@ -1,9 +1,12 @@
 #include "EnemySwapper.hpp"
 #include <string>
+//#include <random>
 
 bool EnemySwapper::cheaton{NULL};
 bool EnemySwapper::swapAll{NULL};
-
+bool EnemySwapper::isCustomRandomSettings{false};
+bool EnemySwapper::isCustomSeed{false};
+bool resetSeed = false;
 uintptr_t EnemySwapper::setEnemyDataRet1{NULL};
 uintptr_t EnemySwapper::setEnemyDataRet2{NULL};
 
@@ -140,9 +143,12 @@ void EnemySwapper::on_config_save(utility::Config& cfg) {
 
 void EnemySwapper::on_frame() {}
 
-void restore_default() {
+void EnemySwapper::restore_default_settings() {
   for (int i = 0; i < EnemySwapper::enemyListCount; i++)
     EnemySwapper::selectedToSwap[i] = i;
+  EnemySwapper::curMinIndx = minIndx;
+  EnemySwapper::curMaxIndx = maxIndx;
+  seed       = std::time(nullptr);
 }
 
 void EnemySwapper::on_draw_ui() {
@@ -154,10 +160,34 @@ void EnemySwapper::on_draw_ui() {
   else {
     ImGui::Separator();
     if (ImGui::Button("Restore default", ImVec2(135, 25)))
-      restore_default();
+      restore_default_settings();
+    ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
+    if (isCustomRandomSettings) {
+      ImGui::Checkbox("Use custom seed", &isCustomSeed);
+      if (isCustomSeed) {
+        ImGui::Text("Seed:");
+       resetSeed = ImGui::SliderInt("##seedSlider", &seed, 0, 10000);
+      } else
+        seed = -1;
+      ImGui::Text("Min enemy index:");
+      ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
+      ImGui::Text("Max enemy index:");
+      ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
+      if (curMinIndx >= curMaxIndx)
+        curMinIndx = curMaxIndx - 1;
+    } else {
+      curMinIndx = minIndx;
+      curMaxIndx = maxIndx;
+    }
+    if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
+      if (resetSeed)
+        seed_gen(seed);
+      random_em_swap(curMinIndx, curMaxIndx);
+    }
+
     for (int i = 0; i < emNames.size(); i++) {
       ImGui::Text(emNames[i]);
-      uniqComboStr = std::to_string(i) + "#SwapTo";
+      uniqComboStr = std::to_string(i) + "##SwapTo";
       ImGui::Combo(uniqComboStr.c_str(), (int*)&selectedToSwap[i], emNames.data(), emNames.size(), 20);
       swapSettings[i].set_current_id(i);
       swapSettings[i].set_swap_id(selectedToSwap[i]);
@@ -171,6 +201,22 @@ void EnemySwapper::on_draw_debug_ui() {}
 void EnemySwapper::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
+void EnemySwapper::seed_gen(int seed) {
+  if (resetSeed) {
+    if (seed == -1)
+      gen.seed(rd());
+    else
+      gen.seed(seed);
+  }
+}
+
+void EnemySwapper::random_em_swap(uint32_t min, uint32_t max) {
+  std::uniform_int_distribution<> distrib(min, max);
+  for (int i = 0; i < 20; i++) {//Rand only for regular enemies
+    selectedToSwap[i] = distrib(gen);
+  }
 }
 
 std::optional<std::string> EnemySwapper::on_initialize() {
@@ -201,9 +247,6 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.initAddr2"; 
   }
-
-  /*for (int i = 0; i < enemyListCount; i++) {
-    selectedToSwap[i] = i;
-  }*/
+  seed_gen(-1);
     return Mod::on_initialize();
 }

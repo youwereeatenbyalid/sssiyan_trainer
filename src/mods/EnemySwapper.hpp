@@ -2,6 +2,7 @@
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
 #include <array>
+#include <random>
 
 class EnemySwapper : public Mod {
 
@@ -80,6 +81,8 @@ static uintptr_t setEnemyDataRet2;
 
 static bool swapAll;
 static bool cheaton;
+static bool isCustomRandomSettings;
+static bool isCustomSeed;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -88,6 +91,8 @@ static uint32_t newEnemyId;;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
+
+
 
   EnemySwapper() = default;
 
@@ -158,4 +163,18 @@ static EnemyId swapForAll;
       "Dante (AiDisabled)",//40
       //"Dante M20"//41 No:)
   };
+
+private:
+  void restore_default_settings();
+  static void random_em_swap(uint32_t min, uint32_t max);
+  void seed_gen(int seed = -1);
+  //void set_seed(int seed);
+  static inline std::random_device rd;
+  static inline std::mt19937 gen;
+  int seed    = 0;
+  int prev_seed = 0;
+  int curMinIndx = 0;
+  int curMaxIndx = 19;
+  const int minIndx = 0;
+  const int maxIndx = 19;
 };

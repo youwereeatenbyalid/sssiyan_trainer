@@ -943,7 +943,7 @@ void LDK::on_draw_ui() {
 
   ImGui::Separator();
 
-  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. In coop mode it will cause desync, use wait time spawn option for coop play instead of this.");
+  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. Increases stability. In coop mode it will cause desync, use \"pause spawn for coop\" option for coop play instead of this.");
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
   if (pausespawn_enabled)
     waitTimeEnabled = false;
@@ -951,16 +951,16 @@ void LDK::on_draw_ui() {
   ImGui::Separator();
 
   ImGui::TextWrapped(
-      "Use this when you playing in coop. Enable pause before all enemies "
-      "spawns, include preloaded enemies. Spawn happens by groops of a few "
-      "enemies, that should decrease a load to your PC while LDK + coop.");
-  ImGui::Checkbox("Enable wait time spawn", &waitTimeEnabled);
-  ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f);
+      "Enable pause for spawning enemies before each enemy "
+      "spawns, include preloaded enemies. Enemies will spawn by groops of a few "
+      "enemies after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
+  ImGui::Checkbox("Enable pause spawn for coop", &waitTimeEnabled);
+  ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 
   ImGui::Separator();
 
-  ImGui::Text("Enable \"default\" red orbs drop from enemies on ldk.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
+  ImGui::Text("Enable \"default\" red orbs drop from enemies on LDK.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
   ImGui::Checkbox("\"Default\" red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
 }
