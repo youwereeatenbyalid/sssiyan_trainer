@@ -30,6 +30,7 @@ public:
 
   static inline RegAddrBackup enemySwapBackup1;
   static inline RegAddrBackup enemySwapBackup2;
+  static inline RegAddrBackup spawnPosBackup;
 
 static const int enemyListCount = 41;
 
@@ -78,21 +79,25 @@ static const int enemyListCount = 41;
 
 static uintptr_t setEnemyDataRet1;
 static uintptr_t setEnemyDataRet2;
+static uintptr_t posSpawnRet;
+static uintptr_t posSpawnTestJne;
 
-static bool swapAll;
+static bool isSwapAll;
 static bool cheaton;
 static bool isCustomRandomSettings;
 static bool isCustomSeed;
+static bool isCustomSpawnPos;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
 static uint32_t currentEnemyId;
 static uint32_t newEnemyId;;
 
+static float spawnPosZOffset;
+static float curSpawnPosZ;
+
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
-
-
 
   EnemySwapper() = default;
 
@@ -116,8 +121,11 @@ static EnemyId swapForAll;
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
+
+  static void random_em_swap(uint32_t min, uint32_t max);
+  static void seed_rnd_gen(int seed = -1);
+
+  static void set_swapper_settings(std::array<int, enemyListCount> &settingsList);
 
   static inline std::array<const char*, enemyListCount> emNames{
 	  "Hell Caina", //0
@@ -166,9 +174,7 @@ static EnemyId swapForAll;
 
 private:
   void restore_default_settings();
-  static void random_em_swap(uint32_t min, uint32_t max);
-  void seed_gen(int seed = -1);
-  //void set_seed(int seed);
+  static void set_swapper_setting(int emListIndx);
   static inline std::random_device rd;
   static inline std::mt19937 gen;
   int seed    = 0;
@@ -177,4 +183,9 @@ private:
   int curMaxIndx = 19;
   const int minIndx = 0;
   const int maxIndx = 19;
+
+  
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
+  std::unique_ptr<FunctionHook> m_spawn_pos_hook;
 };
