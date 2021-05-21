@@ -7,8 +7,6 @@ bool EnemySwapper::isCustomRandomSettings{false};
 bool EnemySwapper::isCustomSeed{false};
 bool EnemySwapper::isCustomSpawnPos{NULL};
 
-bool resetSeed = false;
-
 uintptr_t EnemySwapper::setEnemyDataRet1{NULL};
 uintptr_t EnemySwapper::setEnemyDataRet2{NULL};
 uintptr_t EnemySwapper::posSpawnRet{NULL};
@@ -185,16 +183,16 @@ static naked void spawn_pos_detour() {
   }
 }
 
-void EnemySwapper::set_swapper_setting(int emListIndx) {
-  swapSettings[emListIndx].set_current_id(emListIndx);
-  swapSettings[emListIndx].set_swap_id(selectedToSwap[emListIndx]);
+void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
+  selectedToSwap[emListIndx] = swapToIndx;
+  swapSettings[emListIndx].set_current_id(swapToIndx);
+  swapSettings[emListIndx].set_swap_id(selectedToSwap[swapToIndx]);
 }
 
 void EnemySwapper::set_swapper_settings(std::array<int ,enemyListCount> &swapToIndx)
 {
-  for (auto& indx : swapToIndx) {
-    set_swapper_setting(indx);
-  }
+  for (int i = 0; i < swapToIndx.size(); i++)
+    set_swapper_setting(i, swapToIndx[i]);
 }
 
 
@@ -208,7 +206,7 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     key = std::string(EnemySwapper::emNames[i]) + "_swapTo";
     selectedToSwap[i] = cfg.get<uint32_t>(key).value_or(i);
-    set_swapper_setting(i);
+    set_swapper_setting(i, selectedToSwap[i]);
   }
 }
 
@@ -226,21 +224,23 @@ void EnemySwapper::on_frame() {}
 
 void EnemySwapper::restore_default_settings() {
   for (int i = 0; i < EnemySwapper::enemyListCount; i++)
-    EnemySwapper::selectedToSwap[i] = i;
+    set_swapper_setting(i, i);
   EnemySwapper::curMinIndx = minIndx;
   EnemySwapper::curMaxIndx = maxIndx;
   seed       = -1;
 }
 
 void EnemySwapper::on_draw_ui() {
-  ImGui::TextWrapped("Use custom offset to increase z spawn coord to fix spawning flying enemies under the floor. Note that this will affect all enemies.");
   ImGui::Checkbox("Offset for Z spawn coord", &isCustomSpawnPos);
+  ImGui::TextWrapped("Use custom offset to increase z spawn coord to fix spawning flying enemies under the floor. Note that this will affect for all enemies spawn.");
   if (isCustomSpawnPos) {
-    ImGui::TextWrapped("Add Z offset");
+    ImGui::TextWrapped("Z offset");
     ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.01f");
   }
 
   ImGui::Separator();
+  //ImGui::TextWrapped("Vector size is: %d", setDataAddrs->size());
+  //ImGui::Spacing();
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
@@ -249,7 +249,7 @@ void EnemySwapper::on_draw_ui() {
   } 
   else {
     ImGui::Separator();
-    if (ImGui::Button("Restore default", ImVec2(135, 25)))
+    if (ImGui::Button("Restore default swapper settings"))
       restore_default_settings();
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
@@ -275,23 +275,25 @@ void EnemySwapper::on_draw_ui() {
       curMaxIndx = maxIndx;
     }
     if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
-      /*if (resetSeed)
-        seed_rnd_gen(seed);*/
       random_em_swap(curMinIndx, curMaxIndx);
     }
+
+    ImGui::Separator();
 
     for (int i = 0; i < emNames.size(); i++) {
       ImGui::TextWrapped(emNames[i]);
       uniqComboStr = std::to_string(i) + "##SwapTo";
       ImGui::Combo(uniqComboStr.c_str(), (int*)&selectedToSwap[i], emNames.data(), emNames.size(), 20);
-      set_swapper_setting(i);
+      //set_swapper_setting(i, selectedToSwap[i]);
+      swapSettings[i].set_current_id(i);
+      swapSettings[i].set_swap_id(selectedToSwap[i]);
       ImGui::Separator();
     }
   }
 }
 
 void EnemySwapper::on_draw_debug_ui() {
-  ImGui::TextWrapped("Vector size is: %X", setDataAddrs->size());
+  ImGui::TextWrapped("Vector size is: %d", setDataAddrs->size());
 }
 
 void EnemySwapper::init_check_box_info() {
@@ -300,18 +302,16 @@ void EnemySwapper::init_check_box_info() {
 }
 
 void EnemySwapper::seed_rnd_gen(int seed) {
-  if (resetSeed) {
-    if (seed == -1)
-      gen.seed(rd());
-    else
-      gen.seed(seed);
-  }
+  if (seed == -1)
+    gen.seed(rd());
+  else
+    gen.seed(seed);
 }
 
 void EnemySwapper::random_em_swap(uint32_t min, uint32_t max) {
   std::uniform_int_distribution<> distrib(min, max);
   for (int i = 0; i < 20; i++) {//Rand only for regular enemies
-    selectedToSwap[i] = distrib(gen);
+    set_swapper_setting(i, distrib(gen));
   }
 }
 

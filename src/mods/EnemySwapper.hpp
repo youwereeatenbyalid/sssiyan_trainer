@@ -174,7 +174,7 @@ static EnemyId swapForAll;
 
 private:
   void restore_default_settings();
-  static void set_swapper_setting(int emListIndx);
+  static void set_swapper_setting(int emListIndx, int swapToIndx);
   static inline std::random_device rd;
   static inline std::mt19937 gen;
   int seed    = 0;

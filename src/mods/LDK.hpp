@@ -72,6 +72,9 @@ public:
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
   static uintptr_t waitTimeJmpRet;
+  static uintptr_t nohitlns_ret;
+  static uintptr_t nohitlns_ret_je;
+
 
   static const uint32_t SPAWN_PAUSE_TIME = 4;
 
@@ -80,6 +83,7 @@ public:
   static bool pausespawn_enabled;
   static bool default_redorbsdrop_enabled;
   static bool waitTimeEnabled;
+  static bool nohitlines_enabled;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -140,7 +144,9 @@ public:
   std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
   std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
   std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
+  std::unique_ptr<FunctionHook> m_hitvfx_dontdraw_hitlines_hook;
 
   static RegAddrBackup death_func_backup;
   static RegAddrBackup redorbdrop_backup;
+  static RegAddrBackup hitvfx_backup;
 };

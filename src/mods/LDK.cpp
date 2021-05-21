@@ -31,8 +31,9 @@ uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
 uintptr_t LDK::nopfunction1_jmp_ret2{NULL};
 //uintptr_t enemyspawner_entity = 0x9B38;
-uintptr_t LDK::waitTimeJmpRet;
-
+uintptr_t LDK::waitTimeJmpRet{NULL};
+uintptr_t LDK::nohitlns_ret{NULL};
+uintptr_t LDK::nohitlns_ret_je{NULL};
 
 
 uintptr_t LDK::missionmanager{NULL};
@@ -58,6 +59,7 @@ bool LDK::physics_fix_on{false};
 bool LDK::hitvfx_fix_on{true};
 bool LDK::default_redorbsdrop_enabled{true};
 bool LDK::waitTimeEnabled{false};
+bool LDK::nohitlines_enabled{false};
 
 bool is_spawn_paused = false;
 bool is_redorbspawn_paused = false;
@@ -73,6 +75,7 @@ static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
 LDK::RegAddrBackup LDK::death_func_backup;
 LDK::RegAddrBackup LDK::redorbdrop_backup;
+LDK::RegAddrBackup LDK::hitvfx_backup;
 
 void pause_spawn()
 {
@@ -561,6 +564,7 @@ static naked void hitvfxskip_detour() {
 
 		containernumcheck:
         // container num 
+		mov [LDK::hitvfx_backup.rax], rax
 		mov rax, [LDK::containernum_addr]
 		mov rax, [rax]
 		mov rax, [rax+0x158]
@@ -569,10 +573,13 @@ static naked void hitvfxskip_detour() {
 		mov rax, [rax+0x788]
 		mov rax, [rax+0xE28]
 		mov [LDK::container_num], rax
+		mov rax, [LDK::hitvfx_backup.rax]
         //-------------------------------//
-		push rcx
+		mov [LDK::hitvfx_backup.rcx], rcx
+		mov [LDK::hitvfx_backup.rdx], rdx
 		call [set_hitvfxstate]
-		pop rcx
+		mov rcx, [LDK::hitvfx_backup.rcx]
+		mov rdx, [LDK::hitvfx_backup.rdx]
 		cmp [LDK::vfx_state], 0 // DrawAll
 		je drawall
 		cmp [LDK::vfx_state], 1 // DamageOnly
@@ -628,6 +635,24 @@ static naked void wait_time_spawn_detour() {
 		movss xmm0, [LDK::waitTime]
 		movss [r8+0x68], xmm0
 		jmp originalcode
+  }
+}
+
+static naked void hitvfx_nohitlines_detour() {
+	__asm {
+		cmp byte ptr [LDK::cheaton], 0
+		je originalcode
+		cmp byte ptr [LDK::nohitlines_enabled], 0
+		je originalcode
+		jmp qword ptr [LDK::nohitlns_ret]
+
+		originalcode:
+		cmp byte ptr [rax+0x51], 0
+		je ret_je
+		jmp qword ptr [LDK::nohitlns_ret]
+
+		ret_je:
+		jmp qword ptr [LDK::nohitlns_ret_je]
   }
 }
 
@@ -719,6 +744,11 @@ std::optional<std::string> LDK::on_initialize() {
     return "Unable to find waittime_addr pattern.";
   }
 
+  auto dontdrawhitlines_addr = utility::scan(base, "76 80 78 51 00 74 04"); //DevilMayCry5.exe+916E9D
+  if (!dontdrawhitlines_addr) {
+    return "Unable to find LDK.dontdrawhitlines_addr pattern.";
+  }
+
   
   LDK::nopfunction_1_call = nopfunction_1_call.value();
   LDK::capbypass_jmp_jnl = capbypass_addr1.value() + 0x17;
@@ -734,6 +764,7 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
   LDK::sswords_restriction_jmp_ret = sswords_restriction_addr.value() + 0x1AA;
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
+  nohitlns_ret_je                  = dontdrawhitlines_addr.value() + 0xA + 0x1;
 
   if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
@@ -834,6 +865,12 @@ std::optional<std::string> LDK::on_initialize() {
     return "Failed to initialize hitvfxskip_addr";
   }
 
+  if (!install_hook_absolute(dontdrawhitlines_addr.value()+0x1, m_hitvfx_dontdraw_hitlines_hook, &hitvfx_nohitlines_detour, &nohitlns_ret, 0x6)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize LDK.dontdrawhitlines_addr";
+  }
+
   return Mod::on_initialize();
 }
 
@@ -880,6 +917,7 @@ void LDK::on_config_load(const utility::Config &cfg) {
   swap_hitvfx_settings = cfg.get<bool>("swap_hitvfx_settings").value_or(false);
   waitTime             = cfg.get<float>("LDK_waitTime").value_or(1.8f);
   waitTimeEnabled      = cfg.get<bool>("LDK_waitTimeEnabled").value_or(false);
+  nohitlines_enabled = cfg.get<bool>("LDK.nohitlines_enabled").value_or(false);
 }
 // during save
 void LDK::on_config_save(utility::Config &cfg) {
@@ -893,6 +931,7 @@ void LDK::on_config_save(utility::Config &cfg) {
   cfg.set<bool>("swap_hitvfx_settings", swap_hitvfx_settings);
   cfg.set<float>("LDK_waitTime", LDK::waitTime);
   cfg.set<bool>("LDK_waitTimeEnabled", waitTimeEnabled);
+  cfg.set<bool>("LDK.nohitlines_enabled", nohitlines_enabled);
 }
 // do something every frame
 //void LDK::on_frame() {}
@@ -921,46 +960,63 @@ void LDK::on_draw_ui() {
 	"This currently can cause issues with enemy spawners not being destroyed.");
   
   ImGui::SliderInt("##Enemy Soft Limit Slider", (int*)&LDK::softlimit, 1, 50);
+
   ImGui::Separator();
 
-  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
-      "to increase overall performance&stability of LDK mode.\nUnfortunately, "
-      "a few visual effects will be disabled, like Nero's charged shot, explosion of charged shot, etc.");
   ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
 
-  ImGui::Text("ContainerNum limit to draw only damage");
+  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
+      "to increase overall performance&stability of LDK mode. Unfortunately, "
+      "a few non-sword hits visual effects will be disabled after containerNum (overall effects count) reaching \"limit to draw nothing\", like Nero's charged shot, explosion of charged shot, etc. "
+	  "Option take effects when > 6 enemies on a level now, or if \"limit to draw nothing\" = 0.");
+
+  ImGui::TextWrapped("ContainerNum value before last vfx func call: %d", container_num);
+
+  ImGui::Spacing();
+
+  ImGui::TextWrapped("ContainerNum limit to draw only damage. While containerNum value < this, game will draw all hits effects. "
+	  "After reaching this value, game will be draw only white flashes when objects gets hits.");
   ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 110);
   LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
+
+  ImGui::Spacing();
   
-  ImGui::TextWrapped("Set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
+  ImGui::TextWrapped("After reaching this value game will not draw any effects, when objects gets hits. "
+	  "Pro tip: set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
   ImGui::Text("ContainerNum limit to draw nothing");
   ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 160);
   LDK::set_container_limit_all(LDK::container_limit_all);
 
-  ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num <= \"ContainerNum limit to draw only damage\".\n"
-	  "This increase hits effects count and may improve overall visual quality, but it also decrease overall performance.");
+  ImGui::Spacing();
+
+  ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num >= \"ContainerNum limit to draw only damage\". "
+	  "This may improve overall visual quality, but also increase hits effects count, that will decrease overall performance.");
+
   ImGui::Checkbox("Swap hitvfx settings", (bool*)&swap_hitvfx_settings);
 
   ImGui::Separator();
 
-  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. Increases stability. In coop mode it will cause desync, use \"pause spawn for coop\" option for coop play instead of this.");
+  ImGui::TextWrapped("Don't draw hit lines on objects, when they getting hits. This option doesn't depend on \"hitVfx fix\" and can be turned on/off separately of it. Increases performance.");
+  ImGui::Checkbox("Don't draw a hitlines", &nohitlines_enabled);
+
+  ImGui::Separator();
+
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
+  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. Increases stability. In coop mode it will cause desync, use \"pause spawn for coop\" option for coop play instead of this.");
   if (pausespawn_enabled)
     waitTimeEnabled = false;
 
   ImGui::Separator();
 
-  ImGui::TextWrapped(
-      "Enable pause for spawning enemies before each enemy "
-      "spawns, include preloaded enemies. Enemies will spawn by groops of a few "
-      "enemies after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
   ImGui::Checkbox("Enable pause spawn for coop", &waitTimeEnabled);
+  ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
+      "pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
   ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 
   ImGui::Separator();
 
-  ImGui::Text("Enable \"default\" red orbs drop from enemies on LDK.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
   ImGui::Checkbox("\"Default\" red orb drops on LDK", (bool*)&LDK::default_redorbsdrop_enabled);
+  ImGui::Text("Enable \"default\" red orbs drop from enemies on LDK.\nDO NOT USE THIS on enemylimit > 30 without hitvfx and spawn pause fixes.");
 }
