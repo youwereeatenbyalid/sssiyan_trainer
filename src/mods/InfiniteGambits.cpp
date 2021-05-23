@@ -42,7 +42,7 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
   onpage    = gilver;
   full_name_string     = "Infinite Gambits";
   author_string        = "SSSiyan";
-  description_string   = "Infinite # of aerial gambits.";
+  description_string   = "Infinite number of aerial gambits.";
   auto infinitegambit_addr = utility::scan(base, "FF 87 28 18 00 00 48");
 
   if (!infinitegambit_addr) {
