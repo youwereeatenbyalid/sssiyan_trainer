@@ -20,8 +20,7 @@ public:
     onpage           = vergilcheat;
     full_name_string = "Additional JJC in SDT";
     author_string    = "VPZadov";
-    description_string =
-        "Give Vergil an opportunity to perform 4 jjc in a row when him at SDT";
+    description_string = "Allow Vergil to perform an extra JJC while in SDT.";
     if (cheaton)
       VergilSetMaxJJC::cheaton = true;
     return Mod::on_initialize();
