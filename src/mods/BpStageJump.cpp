@@ -160,7 +160,10 @@ int BpStageJump::next_floor()
 {
 	counter++;
 	if (endless) {
-		if (palace_type == BpStageJump::RANDOM) {
+		if (bossrush){
+			return return_boss_floor();
+		}
+		else if (palace_type == BpStageJump::RANDOM) {
 			return random_generator(1, 100);
 		}
 		else {
