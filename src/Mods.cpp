@@ -224,7 +224,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
         m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
-        // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());   // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
         m_mods.emplace_back(std::make_unique<WeightReset>());
         // m_mods.emplace_back(std::make_unique<AerialPushback>());   // commented out while WIP
     // Nero

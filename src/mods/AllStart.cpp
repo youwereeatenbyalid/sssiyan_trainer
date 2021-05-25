@@ -23,7 +23,7 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
 
         mov r10, [PlayerTracker::playerentity]      // r10 will always be entity base
         test r10, r10
-        je code
+        je popcode
                                                     // r11 will always be base of class needed
         mov r11, [r10+0x2E0]                        // (Foot controller)
 

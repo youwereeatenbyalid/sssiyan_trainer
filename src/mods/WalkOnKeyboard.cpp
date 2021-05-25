@@ -2,7 +2,8 @@
 #include "mods/PlayerTracker.hpp"
 uintptr_t WalkOnKeyboard::jmp_ret{NULL};
 bool WalkOnKeyboard::cheaton{NULL};
-float keyboardWalkDiv{0.5f};
+float keyboardWalkDiv{2.0f};
+
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -11,37 +12,23 @@ static naked void detour() {
 	    validation:
             cmp byte ptr [WalkOnKeyboard::cheaton], 1
             jne code
-            cmp [PlayerTracker::playerid], 0
-            je nerocode
-            cmp [PlayerTracker::playerid], 1
-            je dantecode
-            cmp [PlayerTracker::playerid], 2
-            je vcode
-            cmp [PlayerTracker::playerid], 4
-            je vergilcode
-            jmp code
 
-        nerocode:
-            // cmp byte ptr [PlayerTracker::neroentity+0xED0], 1
-            je code
-            jmp divstickpush
-        dantecode:
-            // cmp byte ptr [PlayerTracker::danteentity+0xED0], 1
-            je code
-            jmp divstickpush
-        vcode:
-            // cmp byte ptr [PlayerTracker::ventity+0xED0], 1
-            je code
-            jmp divstickpush
-        vergilcode:
-            // cmp byte ptr [PlayerTracker::vergilentity+0xED0], 1
-            je code
+        // cheatcode
+            push r10
+            mov r10, [PlayerTracker::playerentity]
+            test r10, r10
+            je popcode
+            mov r10, [r10+0xED0]
+            cmp r10d, 1
+            je popcode
             jmp divstickpush
 
         divstickpush:
             divss xmm0, [keyboardWalkDiv]
-            jmp code
+            jmp popcode
 
+        popcode:
+            pop r10
         code:
             movss [r14+30h], xmm0
             jmp qword ptr [WalkOnKeyboard::jmp_ret]        
