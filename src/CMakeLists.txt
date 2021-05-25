@@ -190,6 +190,9 @@ set(MODS_SRC
 	mods/DifficultySelect.cpp
 	mods/DontHideWeaponWheel.hpp
 	mods/DontHideWeaponWheel.cpp
+    mods/AerialPushback.hpp 
+    mods/AerialPushback.cpp 
+
 )
 
 set(HOOKS_SRC
