@@ -192,6 +192,8 @@ set(MODS_SRC
 	mods/DontHideWeaponWheel.cpp
     mods/AerialPushback.hpp 
     mods/AerialPushback.cpp 
+    mods/AerialPushbackVertical.hpp 
+    mods/AerialPushbackVertical.cpp 
 
 )
 
