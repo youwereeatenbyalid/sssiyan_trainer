@@ -1,16 +1,27 @@
 #include "EnemySwapper.hpp"
 #include <string>
+#include "sdk/ReClass.hpp"
 
 bool EnemySwapper::cheaton{NULL};
 bool EnemySwapper::isSwapAll{NULL};
 bool EnemySwapper::isCustomRandomSettings{false};
 bool EnemySwapper::isCustomSeed{false};
 bool EnemySwapper::isCustomSpawnPos{NULL};
+bool isReswap = false;
+bool isSkipNum = false;
+bool checkForReswap = false;
 
 uintptr_t EnemySwapper::setEnemyDataRet1{NULL};
 uintptr_t EnemySwapper::setEnemyDataRet2{NULL};
 uintptr_t EnemySwapper::posSpawnRet{NULL};
 uintptr_t EnemySwapper::posSpawnTestJne{NULL};
+uintptr_t EnemySwapper::setEnemyDataRet3{NULL};
+uintptr_t EnemySwapper::setEnemyDataRet4{NULL};
+uintptr_t EnemySwapper::setEnemyData4Jmp{NULL};
+uintptr_t EnemySwapper::setEnemyDataRet5{NULL};
+uintptr_t EnemySwapper::setEnemyDataRet6{NULL};
+uintptr_t EnemySwapper::setEnemyDataRet7{NULL};
+uintptr_t EnemySwapper::swapIdRet{NULL};
 
 uint32_t EnemySwapper::selectedToSwap[enemyListCount];
 uint32_t EnemySwapper::selectedSwapAll{NULL};
@@ -20,6 +31,12 @@ uint32_t EnemySwapper::newEnemyId     = 0;//Enemy Id to swap in current state
 
 float EnemySwapper::spawnPosZOffset = 0.0f;
 float EnemySwapper::curSpawnPosZ = 0.0f;
+int reswapCount                     = 0;
+float EnemySwapper::waitTimeMin       = 0.0f;
+float EnemySwapper::waitTimeMax       = 0.0f;
+float odds                            = 100.0f;
+int EnemySwapper::enemyNum            = 1;
+
 
 std::string uniqComboStr = "";//For comboboxes
 
@@ -31,37 +48,64 @@ std::vector<uintptr_t> *setDataAddrs;
 
 uintptr_t curSetDataAddr = 0;
 
+std::mutex mtx;
 
- 
- void custom_swap_setup() {
-  EnemySwapper::newEnemyId = EnemySwapper::currentEnemyId;
-   if (setDataAddrs->size() != 0) {
+static bool skip_reswap() {
+  if (setDataAddrs->size() != 0) {
     for (int i = 0; i < setDataAddrs->size(); i++) {
-       if (curSetDataAddr == (*setDataAddrs)[i])
-        return;
+      if (curSetDataAddr == (*setDataAddrs)[i]) {
+        // mtx.lock();
+        reswapCount++;
+        // mtx.unlock();
+        return true;
+      }
     }
   }
+  return false;
+}
+ 
+ static void custom_swap_setup() {
+  //mtx.lock();
+  EnemySwapper::newEnemyId = EnemySwapper::currentEnemyId;
+  //mtx.unlock();
+
+  if (checkForReswap) {
+    if (skip_reswap())
+      return;
+  }
+  
+
  for (int i = 0; i < EnemySwapper::swapSettings.size(); i++) {
-     EnemySwapper::newEnemyId = EnemySwapper::currentEnemyId;
       if (EnemySwapper::currentEnemyId == EnemySwapper::swapSettings[i].get_current_id()) {
        if (EnemySwapper::currentEnemyId != EnemySwapper::swapSettings[i].get_swap_id()) {
+          //mtx.lock();
           EnemySwapper::newEnemyId = EnemySwapper::swapSettings[i].get_swap_id();
-         setDataAddrs->push_back(curSetDataAddr);
+          if (checkForReswap)
+            setDataAddrs->push_back(curSetDataAddr);
+          //mtx.unlock();
        }
-        break;
+        return;
       }
   }
-}
+ //EnemySwapper::newEnemyId = 0;
+
+//mtx.unlock();
+ }
 
 static naked void enemy_swap_detour1() {
     __asm {
         cmp byte ptr [EnemySwapper::cheaton], 0
         je originalcode
         cmp byte ptr [EnemySwapper::isSwapAll], 1
-        je swapall
+        je originalcode
 
         swapsettings:
+        /*cmp dword ptr [rcx+0x54], 0x4
+        je originalcode*/
+        /*cmp byte ptr [r15+0xF8], 0
+        jne originalcode*/
         mov [curSetDataAddr], rcx
+        mov byte ptr [checkForReswap], 1
         mov esi,[rcx+0x10]
         mov [EnemySwapper::currentEnemyId], esi
 
@@ -69,29 +113,58 @@ static naked void enemy_swap_detour1() {
         mov [EnemySwapper::enemySwapBackup1.rbx], rbx
         mov [EnemySwapper::enemySwapBackup1.rcx], rcx
         mov [EnemySwapper::enemySwapBackup1.rdx], rdx
-        //mov [EnemySwapper::enemySwapBackup1.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup1.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup1.r8], r8
+        mov [EnemySwapper::enemySwapBackup1.r9], r9
+        mov [EnemySwapper::enemySwapBackup1.r10], r10
+        mov [EnemySwapper::enemySwapBackup1.r11], r11
 
-        call [custom_swap_setup]
+        call qword ptr [custom_swap_setup]
 
         mov rax, [EnemySwapper::enemySwapBackup1.rax]
         mov rbx, [EnemySwapper::enemySwapBackup1.rbx]
         mov rcx, [EnemySwapper::enemySwapBackup1.rcx]
         mov rdx, [EnemySwapper::enemySwapBackup1.rdx]
-        //mov rsi, [EnemySwapper::enemySwapBackup1.rsi]
+        mov rsi, [EnemySwapper::enemySwapBackup1.rsi]
+        mov r8, [EnemySwapper::enemySwapBackup1.r8]
+        mov r9, [EnemySwapper::enemySwapBackup1.r9]
+        mov r10, [EnemySwapper::enemySwapBackup1.r10]
+        mov r11, [EnemySwapper::enemySwapBackup1.r11]
         mov esi, dword ptr [EnemySwapper::newEnemyId]
         mov [rcx+0x10], esi
+        jmp originalcode//setup
+        //mov byte ptr [r15+0xF8], 0
+        //mov dword ptr [rcx+0x54], 0x4
 
         originalcode:
         mov esi,[rcx+0x10]
         test rax,rax
         jmp qword ptr [EnemySwapper::setEnemyDataRet1]
-        
+
+        setup:
+        //mov byte ptr [r15+0x52], 01 // IsInit
+        // mov byte ptr [r15+0xB2], 00 // isReadSealMode
+       // mov byte ptr [r15+0x55], 01 // IsManualPlayerInTargetArea
+       // mov byte ptr [r15+0x5E], 01 // IsCheckLoadRequest
+        //mov byte ptr [r15+0xCC], 01  // IsPause
+        // mov byte ptr [r15+0x2A], 00 // IsNearThePlayer
+        //mov byte ptr [r15+0xCD], 01 // IsREquestEndGenerate
+        movss xmm1, [odds]
+        movss [rcx+0x24], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMin]
+        movss [rcx+0x2C], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMax]
+        movss [rcx+0x30], xmm1
+        mov esi, [EnemySwapper::enemyNum]
+
+        mov dword ptr [rcx+0x20], esi  // EnemyNum
+        jmp originalcode        
 
         swapall:
         mov esi, [EnemySwapper::swapForAll.swapId]
         mov [rcx+0x10], esi
         //mov dword ptr [rcx+0x20], 4//EnemyNum
-        jmp originalcode
+        jmp originalcode//setup
 
   }
 }
@@ -104,7 +177,12 @@ static naked void enemy_swap_detour2() {
         je swapall
 
         swapsettings:
-        mov r8d,[rcx+0x10]
+        /*cmp dword ptr [rcx+0x54], 0x4
+        je originalcode*/
+        /*cmp byte ptr [r15+0xF8], 0
+        jne originalcode*/
+        mov byte ptr [checkForReswap], 1
+        mov r8d, [rcx+0x10]
         mov [EnemySwapper::currentEnemyId], r8d
         mov qword ptr [curSetDataAddr], rcx
         mov [EnemySwapper::enemySwapBackup2.rax], rax
@@ -112,35 +190,374 @@ static naked void enemy_swap_detour2() {
         mov [EnemySwapper::enemySwapBackup2.rcx], rcx
         mov [EnemySwapper::enemySwapBackup2.rdx], rdx
         mov [EnemySwapper::enemySwapBackup2.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup2.r8], r8
+        mov [EnemySwapper::enemySwapBackup2.r9], r9
+        mov [EnemySwapper::enemySwapBackup2.r10], r10
+        mov [EnemySwapper::enemySwapBackup2.r11], r11
 
-        call [custom_swap_setup]
+        call qword ptr [custom_swap_setup]
 
         mov rax, [EnemySwapper::enemySwapBackup2.rax]
         mov rbx, [EnemySwapper::enemySwapBackup2.rbx]
         mov rcx, [EnemySwapper::enemySwapBackup2.rcx]
         mov rdx, [EnemySwapper::enemySwapBackup2.rdx]
         mov rsi, [EnemySwapper::enemySwapBackup2.rsi]
+        mov r8, [EnemySwapper::enemySwapBackup2.r8]
+        mov r9, [EnemySwapper::enemySwapBackup2.r9]
+        mov r10, [EnemySwapper::enemySwapBackup2.r10]
+        mov r11, [EnemySwapper::enemySwapBackup2.r11]
 
         mov r8d, dword ptr [EnemySwapper::newEnemyId]
         mov [rcx+0x10], r8d
+        jmp originalcode//setup
+        //mov byte ptr [r15+0xF8], 1//isResourceLoad
+        //mov dword ptr [rcx+0x54], 0x4
 
         originalcode:
         mov r8d,[rcx+0x10]
         mov rdx,rdi
         jmp qword ptr [EnemySwapper::setEnemyDataRet2]
 
-        swapall:
-        mov r8d, [EnemySwapper::swapForAll.swapId]
-        mov [rcx+0x10], r8d
-        //mov dword ptr [rcx+0x20], 4//EnemyNum
+        setup:
+        //mov byte ptr [r15+0x52], 01//IsInit
+        //mov byte ptr [r15+0xB2], 00 // isReadSealMode
+        //mov byte ptr [r15+0x55], 00 // IsManualPlayerInTargetArea
+        //mov byte ptr [r15+0x5E], 01 // IsCheckLoadRequest
+        //mov byte ptr [r15+0xCC], 00 // IsPause
+        //mov byte ptr [r15+0x2A], 00 // IsNearThePlayer
+        //mov byte ptr [r15+0xCD], 01 // IsREquestEndGenerate
+        movss xmm1, [odds]
+        movss [rcx+0x24], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMin]
+        movss [rcx+0x2C], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMax]
+        movss [rcx+0x30], xmm1
+        mov r8d, [EnemySwapper::enemyNum]
+        mov dword ptr [rcx+0x20], r8d  // EnemyNum
         jmp originalcode
 
+        swapall:
+        /*cmp byte ptr [r15+0xF8], 0
+        jne originalcode*/
+        /*mov byte ptr [r15+0x5C], 0//Don;t work
+        mov byte ptr [r15+0xF8], 0*/
+        //mov byte ptr [r15+0x51], 00
+        
+        mov r8d, [EnemySwapper::swapForAll.swapId]
+        mov [rcx+0x10], r8d
+        jmp originalcode//setup
+
+  }
+}
+
+static naked void enemy_swap_detour3() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 0
+        je originalcode
+        cmp byte ptr [EnemySwapper::isSwapAll], 1
+        je swapall
+        jmp setup
+
+        swapsettings:
+        /*cmp byte ptr [r15+0xF8], 0
+        jne originalcode*/
+        mov byte ptr [checkForReswap], 1
+        mov ecx, [r14+0x10]
+        mov [EnemySwapper::currentEnemyId], ecx
+        mov qword ptr [curSetDataAddr], r14
+        mov rcx, 0
+        mov [EnemySwapper::enemySwapBackup3.rax], rax
+        mov [EnemySwapper::enemySwapBackup3.rbx], rbx
+        mov [EnemySwapper::enemySwapBackup3.rcx], rcx
+        mov [EnemySwapper::enemySwapBackup3.rdx], rdx
+        mov [EnemySwapper::enemySwapBackup3.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup3.r8], r8
+        mov [EnemySwapper::enemySwapBackup3.r9], r9
+        mov [EnemySwapper::enemySwapBackup3.r10], r10
+        mov [EnemySwapper::enemySwapBackup3.r11], r11
+
+        call [custom_swap_setup]
+
+        mov rax, [EnemySwapper::enemySwapBackup3.rax]
+        mov rbx, [EnemySwapper::enemySwapBackup3.rbx]
+        mov rcx, [EnemySwapper::enemySwapBackup3.rcx]
+        mov rdx, [EnemySwapper::enemySwapBackup3.rdx]
+        mov rsi, [EnemySwapper::enemySwapBackup3.rsi]
+        mov r8, [EnemySwapper::enemySwapBackup3.r8]
+        mov r9, [EnemySwapper::enemySwapBackup3.r9]
+        mov r10, [EnemySwapper::enemySwapBackup3.r10]
+        mov r11, [EnemySwapper::enemySwapBackup3.r11]
+        mov ecx, [EnemySwapper::newEnemyId]
+        mov [r14+0x10], ecx
+        jmp originalcode//setup
+
+        setup:
+        // mov byte ptr [r15+0x52], 01//IsInit
+        // mov byte ptr [r15+0xB2], 00 // isReadSealMode
+        // mov byte ptr [r15+0x55], 00 // IsManualPlayerInTargetArea
+        //mov byte ptr [r15+0x5E], 01 // IsCheckLoadRequest
+        //mov byte ptr [r15+0xCC], 01  // IsPause
+        // mov byte ptr [r15+0x2A], 00 // IsNearThePlayer
+        //mov byte ptr [r15+0xCD], 01 // IsREquestEndGenerate
+        movss xmm1, [odds]
+        movss [r14+0x24], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMin]
+        movss [r14+0x2C], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMax]
+        movss [r14+0x30], xmm1
+        mov ecx, [EnemySwapper::enemyNum]
+        mov dword ptr [r14+0x20], ecx // EnemyNum
+        jmp originalcode
+
+        originalcode:
+        mov ecx,[r14+0x10]
+        test rax, rax
+        jmp qword ptr [EnemySwapper::setEnemyDataRet3]
+
+        swapall:
+        mov ecx, [EnemySwapper::swapForAll.swapId]
+        mov [r14+0x10], ecx
+        jmp setup
+  }
+}
+
+static naked void enemy_swap_detour4() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 0
+        je originalcode
+
+        checkaddr:
+        test rbx, rbx
+        jne originalcode
+        test r8, r8
+        je originalcode
+        push rbx
+        mov rbx, [r8]
+        cmp bx, 0x6CC0 //SetEnemyData or PlayerManager
+        pop rbx
+        je checkstate
+        jmp originalcode
+
+        checkstate:
+        pop rbx
+        cmp byte ptr [EnemySwapper::isSwapAll], 1
+        je swapall
+
+        swapsetup:
+        jmp originalcode
+
+        swapall:
+        mov eax, [EnemySwapper::swapForAll.swapId]
+
+        originalcode:
+        xor rbx, rbx //Non-original line
+        mov [r14], eax
+        jmp qword ptr [EnemySwapper::setEnemyData4Jmp]
+        jmp qword ptr [EnemySwapper::setEnemyDataRet4]
+
+  }
+}
+
+void load_pos_reswap() {
+    for(int i = 0; i < EnemySwapper::emNames.size(); i++) {
+    if (EnemySwapper::currentEnemyId == EnemySwapper::swapSettings[i].get_swap_id())
+        EnemySwapper::newEnemyId = EnemySwapper::swapSettings[i].get_current_id();
+  }
+}
+
+static naked void enemy_swap_detour5() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 0
+        je originalcode
+        cmp byte ptr [EnemySwapper::isSwapAll], 1
+        je swapall
+
+        cheat:
+        mov byte ptr [checkForReswap], 1
+        mov qword ptr [curSetDataAddr], r15
+        mov [EnemySwapper::currentEnemyId], eax
+        //mov [EnemySwapper::enemySwapBackup5.rax], rax
+        mov [EnemySwapper::enemySwapBackup5.rbx], rbx
+        mov [EnemySwapper::enemySwapBackup5.rcx], rcx
+        mov [EnemySwapper::enemySwapBackup5.rdx], rdx
+        mov [EnemySwapper::enemySwapBackup5.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup5.r8], r8
+        mov [EnemySwapper::enemySwapBackup5.r9], r9
+        mov [EnemySwapper::enemySwapBackup5.r10], r10
+        mov [EnemySwapper::enemySwapBackup5.r11], r11
+        call [custom_swap_setup]
+        //mov rax, [EnemySwapper::enemySwapBackup5.rax]
+        mov rbx, [EnemySwapper::enemySwapBackup5.rbx]
+        mov rcx, [EnemySwapper::enemySwapBackup5.rcx]
+        mov rdx, [EnemySwapper::enemySwapBackup5.rdx]
+        mov rsi, [EnemySwapper::enemySwapBackup5.rsi]
+        mov r8, [EnemySwapper::enemySwapBackup5.r8]
+        mov r9, [EnemySwapper::enemySwapBackup5.r9]
+        mov r10, [EnemySwapper::enemySwapBackup5.r10]
+        mov r11, [EnemySwapper::enemySwapBackup5.r11]
+        mov rax, 0
+        mov eax, [EnemySwapper::newEnemyId]
+        mov [r15+0x10], eax
+
+        originalcode:
+        mov [rsi+0x10],eax
+        mov rax,[rdi+0x50]
+        jmp qword ptr [EnemySwapper::setEnemyDataRet5]
+
+        setup:
+        movss xmm1, [odds]
+        movss [r14+0x24], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMin]
+        movss [r14+0x2C], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMax]
+        movss [r14+0x30], xmm1
+        mov eax, [EnemySwapper::enemyNum]
+        mov dword ptr [r14+0x20], eax // EnemyNum
+        mov eax, [r15+0x10]
+        jmp originalcode
+
+        swapall:
+        mov eax, [EnemySwapper::swapForAll.swapId]
+        mov [r15+0x10], eax
+        jmp originalcode
+  }
+}
+
+void swap_set6() {
+  for (int i = 0; i < EnemySwapper::swapSettings.size(); i++) {
+    if (EnemySwapper::currentEnemyId ==
+        EnemySwapper::swapSettings[i].get_current_id()) {
+      if (EnemySwapper::currentEnemyId !=
+          EnemySwapper::swapSettings[i].get_swap_id()) {
+        // mtx.lock();
+        EnemySwapper::newEnemyId = EnemySwapper::swapSettings[i].get_swap_id();
+        setDataAddrs->push_back(curSetDataAddr);
+      }
+      // mtx.unlock();
+      return;
+    }
+  }
+}
+
+static naked void enemy_swap_detour6() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 0
+        je originalcode
+        cmp byte ptr [EnemySwapper::isSwapAll], 1
+        je swapall
+
+        swapsettings:
+        mov byte ptr [checkForReswap], 1
+        mov ebx, [r14+0x10]
+        mov [EnemySwapper::currentEnemyId], ebx
+        mov qword ptr [curSetDataAddr], r14
+        mov [EnemySwapper::enemySwapBackup6.rax], rax
+        mov [EnemySwapper::enemySwapBackup6.rbx], rbx
+        mov [EnemySwapper::enemySwapBackup6.rcx], rcx
+        mov [EnemySwapper::enemySwapBackup6.rdx], rdx
+        mov [EnemySwapper::enemySwapBackup6.rsi], rsi
+        mov [EnemySwapper::enemySwapBackup6.r8], r8
+        mov [EnemySwapper::enemySwapBackup6.r9], r9
+        mov [EnemySwapper::enemySwapBackup6.r10], r10
+        mov [EnemySwapper::enemySwapBackup6.r11], r11
+
+        call [custom_swap_setup]
+
+        mov rax, [EnemySwapper::enemySwapBackup6.rax]
+        mov rbx, [EnemySwapper::enemySwapBackup6.rbx]
+        mov rcx, [EnemySwapper::enemySwapBackup6.rcx]
+        mov rdx, [EnemySwapper::enemySwapBackup6.rdx]
+        mov rsi, [EnemySwapper::enemySwapBackup6.rsi]
+        mov r8, [EnemySwapper::enemySwapBackup6.r8]
+        mov r9, [EnemySwapper::enemySwapBackup6.r9]
+        mov r10, [EnemySwapper::enemySwapBackup6.r10]
+        mov r11, [EnemySwapper::enemySwapBackup6.r11]
+        mov ebx, [EnemySwapper::newEnemyId]
+        mov [r14+0x10], ebx
+        mov ebx, 0
+        jmp originalcode//setup
+
+        check:
+        mov r14d, [EnemySwapper::newEnemyId]
+        mov [rsp+0x40], r15
+        jmp qword ptr [EnemySwapper::setEnemyDataRet6]
+
+        originalcode:
+        mov r14d, [r14+0x10]
+        mov [rsp+0x40], r15
+        jmp [EnemySwapper::setEnemyDataRet6]
+
+        setup:
+        movss xmm1, [odds]
+        movss [r14+0x24], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMin]
+        movss [r14+0x2C], xmm1
+        movss xmm1, [EnemySwapper::waitTimeMax]
+        movss [r14+0x30], xmm1
+        mov ebx, [EnemySwapper::enemyNum]
+        mov dword ptr [r14+0x20], ebx  // EnemyNum
+        mov ebx, 0
+        jmp originalcode
+
+        swapall:
+        mov ebx, [EnemySwapper::swapForAll.swapId]
+        mov [r14+0x10], ebx
+        mov ebx, 0
+        jmp originalcode//setup
+  }
+}
+
+static naked void swap_id_detour() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 0
+        je originalcode
+        cmp byte ptr [EnemySwapper::isSwapAll], 1
+        je swapall
+
+        swapsetup:
+        mov byte ptr [checkForReswap], 0
+        mov r8d, [rax+0x10] 
+        mov [EnemySwapper::currentEnemyId], r8d
+        mov [EnemySwapper::swapIdBackup.rax], rax
+        mov [EnemySwapper::swapIdBackup.rbx], rbx
+        mov [EnemySwapper::swapIdBackup.rcx], rcx
+        mov [EnemySwapper::swapIdBackup.rdx], rdx
+        mov [EnemySwapper::swapIdBackup.rsi], rsi
+        //mov [EnemySwapper::swapIdBackup.r8], r8
+        mov [EnemySwapper::swapIdBackup.r9], r9
+        mov [EnemySwapper::swapIdBackup.r10], r10
+        mov [EnemySwapper::swapIdBackup.r11], r11
+
+        call [custom_swap_setup]
+
+        mov rax, [EnemySwapper::swapIdBackup.rax]
+        mov rbx, [EnemySwapper::swapIdBackup.rbx]
+        mov rcx, [EnemySwapper::swapIdBackup.rcx]
+        mov rdx, [EnemySwapper::swapIdBackup.rdx]
+        mov rsi, [EnemySwapper::swapIdBackup.rsi]
+        //mov r8, [EnemySwapper::swapIdBackup.r8]
+        mov r9, [EnemySwapper::swapIdBackup.r9]
+        mov r10, [EnemySwapper::swapIdBackup.r10]
+        mov r11, [EnemySwapper::swapIdBackup.r11]
+        mov r8d, [EnemySwapper::newEnemyId]
+        mov [rax+0x10], r8d
+
+        originalcode:
+        mov r8d, [rax+0x10]
+        mov rcx, rsi
+        jmp qword ptr [EnemySwapper::swapIdRet]
+
+        swapall:
+        mov r8d, dword ptr [EnemySwapper::swapForAll.swapId]
+        mov [rax+0x10], r8d
+        jmp originalcode
   }
 }
 
 static void clear_setData_addrs() {
   if (setDataAddrs->size() != 0)
     setDataAddrs->clear();
+  reswapCount = 0;
 }
 
 static naked void spawn_pos_detour() {
@@ -153,7 +570,7 @@ static naked void spawn_pos_detour() {
         je cheat
 
         vectorclear:
-        mov [EnemySwapper::spawnPosBackup.rax], rax
+        /*mov [EnemySwapper::spawnPosBackup.rax], rax
         mov [EnemySwapper::spawnPosBackup.rbx], rbx
         mov [EnemySwapper::spawnPosBackup.rcx], rcx
         mov [EnemySwapper::spawnPosBackup.rdx], rdx
@@ -163,7 +580,7 @@ static naked void spawn_pos_detour() {
         mov rbx, [EnemySwapper::spawnPosBackup.rbx]
         mov rcx, [EnemySwapper::spawnPosBackup.rcx]
         mov rdx, [EnemySwapper::spawnPosBackup.rdx]
-        mov rsi, [EnemySwapper::spawnPosBackup.rsi]
+        mov rsi, [EnemySwapper::spawnPosBackup.rsi]*/
         cmp byte ptr [EnemySwapper::isCustomSpawnPos], 0
         je originalcode
 
@@ -197,11 +614,12 @@ void EnemySwapper::set_swapper_settings(std::array<int ,enemyListCount> &swapToI
 
 
 void EnemySwapper::on_config_load(const utility::Config& cfg) {
-  cheaton = cfg.get<bool>("EnemySwapper").value_or(false);
+  //cheaton = cfg.get<bool>("EnemySwapper").value_or(false);
   isSwapAll          = cfg.get<bool>("EnemySwapper.isSwapAll").value_or(false);
   selectedForAllSwap = cfg.get<uint32_t>("SwapAllEnemiesToID").value_or(0);
+  swapForAll.set_swap_id(selectedForAllSwap);
   isCustomSpawnPos = cfg.get<bool>("EnemySwapper.isCustomSpawnPos").value_or(false);
-  spawnPosZOffset  = cfg.get<float>("EnemySwapper.spawnPosZOffset").value_or(0.0f);
+  spawnPosZOffset  = cfg.get<float>("EnemySwapper.spawnPosZOffset").value_or(0.6f);
   std::string key;
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     key = std::string(EnemySwapper::emNames[i]) + "_swapTo";
@@ -211,10 +629,11 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
 }
 
 void EnemySwapper::on_config_save(utility::Config& cfg) {
-  cfg.set<bool>("EnemySwapper", cheaton);
+  //cfg.set<bool>("EnemySwapper", cheaton);
   cfg.set<uint32_t>("SwapAllEnemiesToID", selectedForAllSwap);
   cfg.set<bool>("EnemySwapper.isCustomSpawnPos", isCustomSpawnPos);
   cfg.set<float>("EnemySwapper.spawnPosZOffset", spawnPosZOffset);
+  cfg.set<bool>("EnemySwapper.isSwapAll", isSwapAll);
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     cfg.set<uint32_t>(std::string(EnemySwapper::emNames[i]) + "_swapTo", selectedToSwap[i]);
   }
@@ -232,15 +651,17 @@ void EnemySwapper::restore_default_settings() {
 
 void EnemySwapper::on_draw_ui() {
   ImGui::Checkbox("Offset for Z spawn coord", &isCustomSpawnPos);
-  ImGui::TextWrapped("Use custom offset to increase z spawn coord to fix spawning flying enemies under the floor. Note that this will affect for all enemies spawn.");
+  ImGui::TextWrapped("Use custom offset to increase z spawn coord to fix spawning some enemies under the floor. Note that this will affect for all spawns and can change spawn animations.");
   if (isCustomSpawnPos) {
     ImGui::TextWrapped("Z offset");
     ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.01f");
   }
 
   ImGui::Separator();
-  //ImGui::TextWrapped("Vector size is: %d", setDataAddrs->size());
-  //ImGui::Spacing();
+  ImGui::TextWrapped("Vector size is: %d", setDataAddrs->size());
+  ImGui::Spacing();
+  ImGui::TextWrapped("ReswapCount: %d", reswapCount);
+  ImGui::Spacing();
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
@@ -279,6 +700,16 @@ void EnemySwapper::on_draw_ui() {
     }
 
     ImGui::Separator();
+    /*if (ImGui::Button("Apply")) {
+      for (int i = 0; i < emNames.size(); i++) {
+        set_swapper_setting(i, selectedToSwap[i]);
+      }
+    }*/
+
+    if (ImGui::Button("Clear vector")) {
+      setDataAddrs->clear();
+      reswapCount = 0;
+    }
 
     for (int i = 0; i < emNames.size(); i++) {
       ImGui::TextWrapped(emNames[i]);
@@ -320,7 +751,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &cheaton;
   onpage         = balance;
-  full_name_string   = "Enemy Swapper (+)";
+  full_name_string   = "Enemy Swapper (Beta) (+)";
   author_string      = "VPZadov";
   description_string = "Spawn one enemy instead of another. Need to load mission from a checkpoint or completely restart a mission to take an effect.";
 
@@ -336,18 +767,42 @@ std::optional<std::string> EnemySwapper::on_initialize() {
 
   //auto tempcustomSpawnAddr = g_framework->get_module().as<uintptr_t>() + 0x11C58BC;
 
+  auto initAddr4 = g_framework->get_module().as<uintptr_t>() + 0x259BBC9;
+  setEnemyData4Jmp = g_framework->get_module().as<uintptr_t>() + 0x259B5D4;
+
+   auto initAddr5 = g_framework->get_module().as<uintptr_t>() + 0xCA17A4;
+  
+
   auto customSpawnAddr = utility::scan(base, "F3 41 0F11 4D 34 48 8B 4B 18 48 85 C9 75 10"); // DevilMayCry5.exe+11C58BC
   if (!customSpawnAddr) {
     return "Unanable to find customSpawnAddr pattern.";
   }
+
+  auto initAddr3 = utility::scan(base, "41 8B 4E 10 48 85 C0 74"); // DevilMayCry5.exe+F34255
+  if (!customSpawnAddr) {
+    return "Unanable to find EnemySwapper.initAddr2 pattern.";
+  }
+
+  auto initAddr6 = utility::scan(base, "45 8B 76 10 4C 89 7C 24 40"); // DevilMayCry5.exe+BD4691
+  if (!initAddr6) {
+    return "Unanable to find EnemySwapper.initAddr6 pattern.";
+  }
+
+  auto initAddr7 = utility::scan(base, "45 8B 76 10 4C 89 7C 24 40"); // "DevilMayCry5.exe"+F34255
+  if (!initAddr6) {
+    return "Unanable to find EnemySwapper.initAddr7 pattern.";
+  }
+
+  uintptr_t swapIdAddr = g_framework->get_module().as<uintptr_t>() + 0xF34F6A;
+
   const uintptr_t spawnAddrOffset = 0xA;
 
   posSpawnTestJne = customSpawnAddr.value() + spawnAddrOffset + 0x15;
 
-  if (!install_hook_absolute(initAddr1.value(), m_enemy_swapper_hook1, &enemy_swap_detour1, &setEnemyDataRet1, 0x6)) {
+  /*if (!install_hook_absolute(initAddr1.value(), m_enemy_swapper_hook1, &enemy_swap_detour1, &setEnemyDataRet1, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.initAddr1"; 
-  }
+  }*/
 
   if (!install_hook_absolute(initAddr2.value(), m_enemy_swapper_hook2, &enemy_swap_detour2, &setEnemyDataRet2, 0x7)) {
     spdlog::error("[{}] failed to initialize", get_name());
@@ -358,6 +813,32 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.customSpawnAddr"; 
   }
+
+  if (!install_hook_absolute(initAddr3.value(), m_enemy_swapper_hook3, &enemy_swap_detour3, &setEnemyDataRet3, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.customSpawnAddr"; 
+  }
+
+  /*if (!install_hook_absolute(initAddr4, m_enemy_swapper_hook4, &enemy_swap_detour4, &setEnemyDataRet4, 0x8)) {//BadPointer
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.initAddr4"; 
+  }*/
+
+  /*if (!install_hook_absolute(initAddr5, m_enemy_swapper_hook5, &enemy_swap_detour5, &setEnemyDataRet5, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.initAddr5"; 
+  }*/
+
+  if (!install_hook_absolute(initAddr6.value(), m_enemy_swapper_hook6, &enemy_swap_detour6, &setEnemyDataRet6, 0x9)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.initAddr6"; 
+  }
+
+  /*if (!install_hook_absolute(swapIdAddr, m_enemy_swapper_hook7, &swap_id_detour, &swapIdRet, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.swapIdAddr"; 
+  }*/
+
 
   seed_rnd_gen(-1);
   setDataAddrs = new std::vector<uintptr_t>();

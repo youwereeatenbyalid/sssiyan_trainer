@@ -13,7 +13,7 @@ class EnemySwapper : public Mod {
     uintptr_t rcx;
     uintptr_t rdx;
     uintptr_t rsi;
-    /*uintptr_t rdi;
+    uintptr_t rdi;
     uintptr_t rbp;
     uintptr_t rsp;
     uintptr_t r8;
@@ -23,13 +23,18 @@ class EnemySwapper : public Mod {
     uintptr_t r12;
     uintptr_t r13;
     uintptr_t r14;
-    uintptr_t r15;*/
+    uintptr_t r15;
   };
 
 public:
 
   static inline RegAddrBackup enemySwapBackup1;
   static inline RegAddrBackup enemySwapBackup2;
+  static inline RegAddrBackup enemySwapBackup3;
+  static inline RegAddrBackup enemySwapBackup5;
+  static inline RegAddrBackup enemySwapBackup6;
+  static inline RegAddrBackup enemySwapBackup7;
+  static inline RegAddrBackup swapIdBackup;
   static inline RegAddrBackup spawnPosBackup;
 
 static const int enemyListCount = 41;
@@ -79,6 +84,13 @@ static const int enemyListCount = 41;
 
 static uintptr_t setEnemyDataRet1;
 static uintptr_t setEnemyDataRet2;
+static uintptr_t setEnemyDataRet3;
+static uintptr_t setEnemyDataRet4;
+static uintptr_t setEnemyDataRet5;
+static uintptr_t setEnemyData4Jmp;
+static uintptr_t setEnemyDataRet6;
+static uintptr_t swapIdRet;
+
 static uintptr_t posSpawnRet;
 static uintptr_t posSpawnTestJne;
 
@@ -91,10 +103,13 @@ static bool isCustomSpawnPos;
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
 static uint32_t currentEnemyId;
-static uint32_t newEnemyId;;
+static uint32_t newEnemyId;
 
 static float spawnPosZOffset;
 static float curSpawnPosZ;
+static float waitTimeMin;
+static float waitTimeMax;
+static int enemyNum;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
@@ -121,6 +136,15 @@ static EnemyId swapForAll;
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
+
+  inline static void set_enemy_num(int num) { EnemySwapper::enemyNum = num; }
+  inline static void set_wait_time(float waitTimeMin, float waitTimeMax) {
+    EnemySwapper::waitTimeMin = waitTimeMin;
+    EnemySwapper::waitTimeMax = waitTimeMax;
+  }
+  inline static void set_spawn_pos_offset(float zOffset) {
+    spawnPosZOffset = zOffset;
+  }
 
   static void random_em_swap(uint32_t min, uint32_t max);
   static void seed_rnd_gen(int seed = -1);
@@ -187,5 +211,10 @@ private:
   
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook3;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook4;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook5;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
+  std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
 };
