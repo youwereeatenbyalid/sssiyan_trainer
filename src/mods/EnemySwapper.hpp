@@ -29,13 +29,13 @@ class EnemySwapper : public Mod {
 
 public:
 
-  static inline RegAddrBackup enemySwapBackup1;
+  //static inline RegAddrBackup enemySwapBackup1;
   static inline RegAddrBackup enemySwapBackup2;
   static inline RegAddrBackup enemySwapBackup3;
-  static inline RegAddrBackup enemySwapBackup5;
+  //static inline RegAddrBackup enemySwapBackup5;
   static inline RegAddrBackup enemySwapBackup6;
-  static inline RegAddrBackup enemySwapBackup7;
-  static inline RegAddrBackup swapIdBackup;
+  //static inline RegAddrBackup enemySwapBackup7;
+  //static inline RegAddrBackup swapIdBackup;
   static inline RegAddrBackup spawnPosBackup;
   static inline RegAddrBackup nowFlowBackup;
 
@@ -96,15 +96,15 @@ static const int enemyListCount = 41;
 	static inline std::array<EnemySetting, EnemySwapper::enemyListCount> enemySettings; 
 
 
-static uintptr_t setEnemyDataRet1;
+//static uintptr_t setEnemyDataRet1;
 static uintptr_t setEnemyDataRet2;
 static uintptr_t setEnemyDataRet3;
-static uintptr_t setEnemyDataRet4;
-static uintptr_t setEnemyDataRet5;
-static uintptr_t setEnemyData4Jmp;
+//static uintptr_t setEnemyDataRet4;
+//static uintptr_t setEnemyDataRet5;
+//static uintptr_t setEnemyData4Jmp;
 static uintptr_t setEnemyDataRet6;
 static uintptr_t nowFlowRet;
-static uintptr_t swapIdRet;
+//static uintptr_t swapIdRet;
 
 static uintptr_t posSpawnRet;
 static uintptr_t posSpawnTestJne;
@@ -119,6 +119,7 @@ static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
 static uint32_t currentEnemyId;
 static uint32_t newEnemyId;
+static uint32_t nowFlow;
 
 static float spawnPosZOffset;
 static float curSpawnPosZ;
@@ -235,4 +236,5 @@ private:
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
+  std::unique_ptr<FunctionHook> m_now_flow_hook;
 };

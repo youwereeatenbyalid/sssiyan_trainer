@@ -739,7 +739,7 @@ std::optional<std::string> LDK::on_initialize() {
     return "Unable to find hitvfxskip_addr pattern.";
   }
 
-  auto waittime_addr = utility::scan(base, "49 63 40 24 48 89 5C 24 50");
+  auto waittime_addr = utility::scan(base, "49 63 40 24 48 89 5C 24 50"); //DevilMayCry5.exe+11C5E9C 
   if (!waittime_addr) {
     return "Unable to find waittime_addr pattern.";
   }
