@@ -1,5 +1,6 @@
 #include "AerialPushback.hpp"
 #include "PlayerTracker.hpp"
+#include "AerialPushbackVertical.hpp"
 uintptr_t AerialPushback::jmp_ret{NULL};
 uintptr_t AerialPushback::jmp_ret2{NULL};
 bool AerialPushback::cheaton{NULL};
@@ -62,12 +63,12 @@ std::optional<std::string> AerialPushback::on_initialize() {
   ischecked = &AerialPushback::cheaton;
   onpage    = mechanics;
 
-  full_name_string   = "AerialPushback";
+  full_name_string   = "Shotty pushback";
   author_string      = "SSSiyan";
   description_string = "Dev test.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 11 57 28 48 8B 43 50 48 83 78 18 00 0F");
+  auto addr = AerialPushbackVertical::jmp_ret; // utility::scan(base, "F3 0F 11 57 28 48 8B 43 50 48 83 78 18 00 0F"); // DevilMayCry5.exe+1445670
   if (!addr) {
     return "Unable to find AerialPushback pattern.";
   }

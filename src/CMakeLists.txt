@@ -194,6 +194,8 @@ set(MODS_SRC
     mods/AerialPushback.cpp 
     mods/AerialPushbackVertical.hpp 
     mods/AerialPushbackVertical.cpp 
+    mods/modNeroAlwaysInitialDT.hpp 
+    mods/modNeroAlwaysInitialDT.cpp 
 
 )
 

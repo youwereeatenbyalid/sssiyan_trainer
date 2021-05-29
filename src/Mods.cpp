@@ -94,6 +94,7 @@
         #include "mods/NeroSkipCS2.hpp"
         #include "mods/NeroNoDTCooldown.hpp"
         #include "mods/DTWingsOnly.hpp"
+        #include "mods/modNeroAlwaysInitialDT.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -227,8 +228,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
         m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
         m_mods.emplace_back(std::make_unique<WeightReset>());
-        // m_mods.emplace_back(std::make_unique<AerialPushback>());   // commented out while WIP
         // m_mods.emplace_back(std::make_unique<AerialPushbackVertical>()); // commented out while WIP
+        // m_mods.emplace_back(std::make_unique<AerialPushback>());   // commented out while WIP // init after AerialPushbackVertical
+        
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
@@ -238,6 +240,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
         m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
         m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());

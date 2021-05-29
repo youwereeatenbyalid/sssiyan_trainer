@@ -40,7 +40,7 @@ std::optional<std::string> AerialPushbackVertical::on_initialize() {
   ischecked = &AerialPushbackVertical::cheaton;
   onpage    = mechanics;
 
-  full_name_string   = "AerialPushbackVertical";
+  full_name_string   = "Rainstorm pop";
   author_string      = "SSSiyan";
   description_string = "Dev test.";
 
