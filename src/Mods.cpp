@@ -123,12 +123,13 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-    // VPZadov
+// VPZadov
     // Background
     // Common
     // Gameplay
        #include "mods/EnemySwapper.hpp"
        #include "mods/EnemyDataSettings.hpp"
+       #include "mods/EnemyWaveSettings.hpp"
     // Nero
     // Dante
     // V
@@ -269,12 +270,13 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
-    // VPZadov
+// VPZadov
         // Background
         // Common
         // Gameplay
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         // Nero
         // Dante
         // V

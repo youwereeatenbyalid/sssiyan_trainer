@@ -193,6 +193,8 @@ set(MODS_SRC
     mods/EnemySwapper.hpp
     mods/EnemySwapper.cpp
     mods/EnemyDataSettings.hpp
+    mods/EnemyWaveSettings.hpp
+    mods/EnemyWaveSettings.cpp
 )
 
 set(HOOKS_SRC
