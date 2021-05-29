@@ -192,6 +192,7 @@ set(MODS_SRC
 	mods/DontHideWeaponWheel.cpp
     mods/EnemySwapper.hpp
     mods/EnemySwapper.cpp
+    mods/EnemyDataSettings.hpp
 )
 
 set(HOOKS_SRC

@@ -3,6 +3,7 @@
 #include "sdk/ReClass.hpp"
 #include <array>
 #include <random>
+//#include "EnemyDataSettings.hpp"
 
 class EnemySwapper : public Mod {
 
@@ -36,6 +37,7 @@ public:
   static inline RegAddrBackup enemySwapBackup7;
   static inline RegAddrBackup swapIdBackup;
   static inline RegAddrBackup spawnPosBackup;
+  static inline RegAddrBackup nowFlowBackup;
 
 static const int enemyListCount = 41;
 
@@ -82,6 +84,18 @@ static const int enemyListCount = 41;
 	}
   };
 
+	struct EnemySetting {
+    EnemyId emId;
+    float waitTimeMin;
+    float waitTimeMax;
+    float odds;
+    int enemyNum;
+    bool useDefault;
+  };
+
+	static inline std::array<EnemySetting, EnemySwapper::enemyListCount> enemySettings; 
+
+
 static uintptr_t setEnemyDataRet1;
 static uintptr_t setEnemyDataRet2;
 static uintptr_t setEnemyDataRet3;
@@ -89,6 +103,7 @@ static uintptr_t setEnemyDataRet4;
 static uintptr_t setEnemyDataRet5;
 static uintptr_t setEnemyData4Jmp;
 static uintptr_t setEnemyDataRet6;
+static uintptr_t nowFlowRet;
 static uintptr_t swapIdRet;
 
 static uintptr_t posSpawnRet;
@@ -109,6 +124,7 @@ static float spawnPosZOffset;
 static float curSpawnPosZ;
 static float waitTimeMin;
 static float waitTimeMax;
+static float odds;
 static int enemyNum;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
@@ -133,15 +149,13 @@ static EnemyId swapForAll;
   void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
   void on_draw_debug_ui() override;
-  // function hook instance for our detour, convinient wrapper
-  // around minhook
-  void init_check_box_info() override;
 
   inline static void set_enemy_num(int num) { EnemySwapper::enemyNum = num; }
   inline static void set_wait_time(float waitTimeMin, float waitTimeMax) {
     EnemySwapper::waitTimeMin = waitTimeMin;
     EnemySwapper::waitTimeMax = waitTimeMax;
   }
+  inline static void set_odds(float odds) { EnemySwapper::odds = odds; }
   inline static void set_spawn_pos_offset(float zOffset) {
     spawnPosZOffset = zOffset;
   }
@@ -207,6 +221,10 @@ private:
   int curMaxIndx = 19;
   const int minIndx = 0;
   const int maxIndx = 19;
+
+  // function hook instance for our detour, convinient wrapper
+  // around minhook
+  void init_check_box_info() override;
 
   
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
