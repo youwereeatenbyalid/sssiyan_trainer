@@ -29,7 +29,7 @@ class EnemySwapper : public Mod {
 
 public:
 
-  //static inline RegAddrBackup enemySwapBackup1;
+  static inline RegAddrBackup enemySwapBackup1;
   static inline RegAddrBackup enemySwapBackup2;
   static inline RegAddrBackup enemySwapBackup3;
   //static inline RegAddrBackup enemySwapBackup5;
@@ -96,7 +96,7 @@ static const int enemyListCount = 41;
 	static inline std::array<EnemySetting, EnemySwapper::enemyListCount> enemySettings; 
 
 
-//static uintptr_t setEnemyDataRet1;
+static uintptr_t setEnemyDataRet1;
 static uintptr_t setEnemyDataRet2;
 static uintptr_t setEnemyDataRet3;
 //static uintptr_t setEnemyDataRet4;
@@ -157,9 +157,9 @@ static EnemyId swapForAll;
     EnemySwapper::waitTimeMax = waitTimeMax;
   }
   inline static void set_odds(float odds) { EnemySwapper::odds = odds; }
-  inline static void set_spawn_pos_offset(float zOffset) {
+  /*inline static void set_spawn_pos_offset(float zOffset) {
     spawnPosZOffset = zOffset;
-  }
+  }*/
 
   static void random_em_swap(uint32_t min, uint32_t max);
   static void seed_rnd_gen(int seed = -1);
@@ -211,6 +211,10 @@ static EnemyId swapForAll;
       //"Dante M20"//41 No:)
   };
 
+  static std::vector<uintptr_t>* setDataAddrs;
+  static std::mutex mtx;
+
+
 private:
   void restore_default_settings();
   static void set_swapper_setting(int emListIndx, int swapToIndx);
@@ -222,6 +226,9 @@ private:
   int curMaxIndx = 19;
   const int minIndx = 0;
   const int maxIndx = 19;
+  size_t reservedForReswap = 2000;
+  void reserveReswapVector(size_t newSize);
+
 
   // function hook instance for our detour, convinient wrapper
   // around minhook
