@@ -114,12 +114,14 @@ static bool cheaton;
 static bool isCustomRandomSettings;
 static bool isCustomSeed;
 static bool isCustomSpawnPos;
+static bool isBp;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
 static uint32_t currentEnemyId;
 static uint32_t newEnemyId;
 static uint32_t nowFlow;
+static uint32_t prevFlow;
 
 static float spawnPosZOffset;
 static float curSpawnPosZ;
@@ -211,7 +213,7 @@ static EnemyId swapForAll;
       //"Dante M20"//41 No:)
   };
 
-  static std::vector<uintptr_t>* setDataAddrs;
+  static std::vector<uintptr_t> setDataAddrs;
   static std::mutex mtx;
 
 
