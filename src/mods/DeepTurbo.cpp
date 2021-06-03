@@ -141,9 +141,7 @@ void DeepTurbo::on_draw_ui() {
     m_patch01->toggle(disableTurbo);
   }
   ImGui::SameLine();
-  ShowHelpMarker("Enable this before using the camera tool if you want to use its built in freeze function. "
-                 "Your turbo value will be remembered until the next load screen, where this will need to be disabled "
-                 "if you want to return to turbo speed.");
+  ShowHelpMarker("Enable this before using the camera tool if you want to use its built in freeze function.");
 }
 
 void DeepTurbo::on_draw_debug_ui() {
