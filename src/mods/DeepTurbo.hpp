@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include "utility/Patch.hpp"
 class DeepTurbo : public Mod {
 public:
   DeepTurbo() = default;
@@ -33,4 +34,5 @@ private:
 
   std::unique_ptr<FunctionHook> m_function_hook1;
   std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<Patch> m_patch01;
 };

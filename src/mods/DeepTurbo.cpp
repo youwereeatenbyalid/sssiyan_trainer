@@ -5,8 +5,11 @@ uintptr_t DeepTurbo::jmp_ret2{NULL};
 
 float defscale   = 1.0;
 float turbospeed = 1.2;
+//float menuspeed  = 2.0f;
 int state        = 0;
+//bool shouldMenuSpeedup{NULL};
 bool DeepTurbo::cheaton{NULL};
+bool disableTurbo{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -35,6 +38,16 @@ static naked void detour2() {
         movss xmm0, [rax+00000388h]
         pop rbx
         jmp qword ptr [DeepTurbo::jmp_ret2]
+
+    //menuspeedupcheck:
+        //cmp byte ptr [shouldMenuSpeedup], 1
+        //jne code
+        //push rbx
+        //mov ebx, [menuspeed]
+        //mov [rax+00000388h], ebx
+        //movss xmm0, [rax+00000388h]
+        //pop rbx
+        //jmp qword ptr [DeepTurbo::jmp_ret2]
 
     code:
         push rbx
@@ -74,34 +87,49 @@ std::optional<std::string> DeepTurbo::on_initialize() {
     return "Unable to find DeepTurbo2 pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1,
-                             &jmp_ret1, 7)) {
+  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DeepTurbo1";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2,
-                             &jmp_ret2, 8)) {
+  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DeepTurbo2";
   }
+
+  // save bytes, remember false = detour enabled
+  m_patch01 = Patch::create(addr2.value(), {0xF3, 0x0F, 0x10, 0x80, 0x88, 0x03, 0x00, 0x00}, false);
+
   return Mod::on_initialize();
 }
 void DeepTurbo::on_config_load(const utility::Config& cfg) {
   //ischecked = cfg.get<bool>("deep_turbo_custom").value_or(false);
-   turbospeed = cfg.get<float>("deep_turbo_value").value_or(1.2f);
+  turbospeed = cfg.get<float>("deep_turbo_value").value_or(1.2f);
+  //shouldMenuSpeedup = cfg.get<bool>("menu_speed_enable").value_or(false);
+  //menuspeed         = cfg.get<float>("menu_speed_value").value_or(1.0f);
+  disableTurbo      = cfg.get<bool>("disable_turbo").value_or(false);
+  m_patch01->toggle(disableTurbo);
 }
 void DeepTurbo::on_config_save(utility::Config& cfg) {
   //cfg.set<bool>("deep_turbo_custom", ischecked);
   cfg.set<float>("deep_turbo_value", turbospeed);
+  //(*cfg.set<bool>("menu_speed_enable", shouldMenuSpeedup);
+  //cfg.set<float>("menu_speed_value", menuspeed);
+  cfg.set<bool>("disable_turbo", disableTurbo);
 }
 
 void DeepTurbo::on_draw_ui() {
-  ImGui::Text("Speed");
+  ImGui::Text("Game Speed");
   ImGui::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
+  ImGui::Spacing();
+  ImGui::Text("Menu And Cutscene Speed");
+  /* ImGui::Checkbox("Variable menu/cutscene speed", &shouldMenuSpeedup); // this works but only actually sped up pause screen, cutscenes and load screens
+  ImGui::SliderFloat("##Menu Speed slider", &menuspeed, 0.0f, 2.5f, "%.1f");*/
+  if (ImGui::Checkbox("Disable turbo entirely to allow camera tool to freeze the game", &disableTurbo)) {
+    m_patch01->toggle(disableTurbo);
+  }
 }
-
 
 void DeepTurbo::on_draw_debug_ui() {
   ImGui::Text("Deep Turbo: %.1f", turbospeed);

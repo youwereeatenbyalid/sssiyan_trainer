@@ -90,5 +90,5 @@ void AerialPushbackVertical::on_config_save(utility::Config& cfg) {
 
 void AerialPushbackVertical::on_draw_ui() {
   ImGui::Checkbox("Rainstorm", &shouldRainstormRise);
-  ImGui::Checkbox("Blaster", &shouldBlasterRise);
+  ImGui::Checkbox("Blaster (KA Air Gunslinger)", &shouldBlasterRise);
 }
