@@ -40,6 +40,7 @@ uintptr_t LDK::missionmanager{NULL};
 uintptr_t LDK::enemygentype{NULL};
 bool LDK::cheaton{NULL};
 bool LDK::pausespawn_enabled{true};
+bool LDK::emDtVfxSkipOn = false;
 
 uint32_t LDK::number{0};
 uint32_t LDK::hardlimit{30};
@@ -73,8 +74,8 @@ float LDK::waitTime = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
-LDK::RegAddrBackup LDK::death_func_backup;
-LDK::RegAddrBackup LDK::redorbdrop_backup;
+//LDK::RegAddrBackup LDK::death_func_backup;
+//LDK::RegAddrBackup LDK::redorbdrop_backup;
 LDK::RegAddrBackup LDK::hitvfx_backup;
 
 void pause_spawn()
@@ -274,7 +275,7 @@ static naked void nopfunction_detour1() {
 		cmp byte ptr [LDK::default_redorbsdrop_enabled], 0
 		je noorbs
 		inc [LDK::enemydeath_count]
-		cmp qword ptr [hardkill_state], 1
+		cmp byte ptr [hardkill_state], 1
 		je noorbs
 		cmp [LDK::enemydeath_count], 0x5
 		jae hardkill
@@ -292,40 +293,76 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		hardkill:
-		mov [LDK::redorbdrop_backup.rax], rax
+		/*mov [LDK::redorbdrop_backup.rax], rax
 		mov [LDK::redorbdrop_backup.rcx], rcx
 		mov [LDK::redorbdrop_backup.rdx], rdx
 		mov [LDK::redorbdrop_backup.r8], r8
 		mov [LDK::redorbdrop_backup.r9], r9
 		mov [LDK::redorbdrop_backup.r10], r10
-		mov [LDK::redorbdrop_backup.r11], r11
+		mov [LDK::redorbdrop_backup.r11], r11*/
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push r8
+		push r9
+		push r10
+		push r11
+		sub rsp, 32
 		call qword ptr [redorbdrop_pause]
-		mov rax, qword ptr [LDK::redorbdrop_backup.rax]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		/*mov rax, qword ptr [LDK::redorbdrop_backup.rax]
 		mov rcx, qword ptr [LDK::redorbdrop_backup.rcx]
 		mov rdx, qword ptr [LDK::redorbdrop_backup.rdx]
 		mov r8, qword ptr [LDK::redorbdrop_backup.r8] 
 		mov r9, qword ptr [LDK::redorbdrop_backup.r9]
 		mov r10, qword ptr [LDK::redorbdrop_backup.r10] 
-		mov r11, qword ptr [LDK::redorbdrop_backup.r11]
+		mov r11, qword ptr [LDK::redorbdrop_backup.r11]*/
 		jmp noorbs
 
 
 		pausespawn:
-		mov [LDK::death_func_backup.rax], rax
+		/*mov [LDK::death_func_backup.rax], rax
 		mov [LDK::death_func_backup.rcx], rcx
 		mov [LDK::death_func_backup.rdx], rdx
 		mov [LDK::death_func_backup.r8], r8
 		mov [LDK::death_func_backup.r9], r9
 		mov [LDK::death_func_backup.r10], r10
-		mov [LDK::death_func_backup.r11], r11
+		mov [LDK::death_func_backup.r11], r11*/
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push r8
+		push r9
+		push r10
+		push r11
+		sub rsp, 32
 		call qword ptr [pause_spawn]
-		mov rax, qword ptr [LDK::death_func_backup.rax]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		/*mov rax, qword ptr [LDK::death_func_backup.rax]
 		mov rcx, qword ptr [LDK::death_func_backup.rcx]
 		mov rdx, qword ptr [LDK::death_func_backup.rdx]
 		mov r8, qword ptr [LDK::death_func_backup.r8] 
 		mov r9, qword ptr [LDK::death_func_backup.r9]
 		mov r10, qword ptr [LDK::death_func_backup.r10] 
-		mov r11, qword ptr [LDK::death_func_backup.r11]
+		mov r11, qword ptr [LDK::death_func_backup.r11]*/
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
   }
@@ -550,10 +587,14 @@ static naked void hitvfxskip_detour() {
   __asm {
     // Can skip prev check 'cause it's depended on thing that doesn't change
     // in-game itself, only with REFramework
+	    mov [LDK::hitvfx_backup.rax], rax
 		cmp byte ptr [LDK::cheaton], 0
 		je originalcode
 		cmp byte ptr [LDK::hitvfx_fix_on], 0
 		je originalcode
+		cmp byte ptr [LDK::emDtVfxSkipOn], 1
+		je skipdtvfx
+		settings:
 		cmp [LDK::container_limit_all], 0
 		je nothing
 		cmp [hardkill_state], 1
@@ -564,7 +605,7 @@ static naked void hitvfxskip_detour() {
 
 		containernumcheck:
         // container num 
-		mov [LDK::hitvfx_backup.rax], rax
+		//mov [LDK::hitvfx_backup.rax], rax
 		mov rax, [LDK::containernum_addr]
 		mov rax, [rax]
 		mov rax, [rax+0x158]
@@ -575,11 +616,22 @@ static naked void hitvfxskip_detour() {
 		mov [LDK::container_num], rax
 		mov rax, [LDK::hitvfx_backup.rax]
         //-------------------------------//
-		mov [LDK::hitvfx_backup.rcx], rcx
-		mov [LDK::hitvfx_backup.rdx], rdx
+		/*mov [LDK::hitvfx_backup.rcx], rcx
+		mov [LDK::hitvfx_backup.rdx], rdx*/
+		push rax
+		push rdx
+		push rcx
+		sub rsp, 32
 		call [set_hitvfxstate]
+		add rsp, 32
+		pop rcx
+		pop rdx
+		pop rax
+		/*mov rax, [LDK::hitvfx_backup.rax]
 		mov rcx, [LDK::hitvfx_backup.rcx]
-		mov rdx, [LDK::hitvfx_backup.rdx]
+		mov rdx, [LDK::hitvfx_backup.rdx]*/
+		test rbp,rbp
+		je skip
 		cmp [LDK::vfx_state], 0 // DrawAll
 		je drawall
 		cmp [LDK::vfx_state], 1 // DamageOnly
@@ -591,7 +643,7 @@ static naked void hitvfxskip_detour() {
 		jmp originalcode
 
 		damageonly:
-		mov ax, [rbp]
+		mov ax, word ptr [rbp]
 		cmp byte ptr [swap_hitvfx_settings], 1
 		je swapped_settings
 		cmp ax, CHAR_DAMAGE
@@ -604,12 +656,18 @@ static naked void hitvfxskip_detour() {
 		jmp originalcode
 
 		nothing:
-		mov ax, [rbp]
+		mov ax, word ptr [rbp]
 		cmp ax, CHAR_HITS 
 		je skip
 		cmp ax, CHAR_DAMAGE 
 		je skip
 		jmp originalcode
+
+		skipdtvfx:
+		mov ax, word ptr [rbp]
+		cmp ax, EM_DT
+		je skip
+		jmp settings
 
 		originalcode:
 		test rbp,rbp
@@ -617,6 +675,7 @@ static naked void hitvfxskip_detour() {
 		jmp qword ptr [LDK::hitvfxskip_ret]
 
 		skip:
+		mov rax, [LDK::hitvfx_backup.rax]
 		jmp qword ptr [LDK::hitvfxskip_jmp]
   }
 }
@@ -918,6 +977,7 @@ void LDK::on_config_load(const utility::Config &cfg) {
   waitTime             = cfg.get<float>("LDK_waitTime").value_or(1.8f);
   waitTimeEnabled      = cfg.get<bool>("LDK_waitTimeEnabled").value_or(false);
   nohitlines_enabled = cfg.get<bool>("LDK.nohitlines_enabled").value_or(false);
+  emDtVfxSkipOn      = cfg.get<bool>("LDK.emDtVfxSkipOn").value_or(false);
 }
 // during save
 void LDK::on_config_save(utility::Config &cfg) {
@@ -932,6 +992,7 @@ void LDK::on_config_save(utility::Config &cfg) {
   cfg.set<float>("LDK_waitTime", LDK::waitTime);
   cfg.set<bool>("LDK_waitTimeEnabled", waitTimeEnabled);
   cfg.set<bool>("LDK.nohitlines_enabled", nohitlines_enabled);
+  cfg.set<bool>("LDK.emDtVfxSkipOn", emDtVfxSkipOn);
 }
 // do something every frame
 //void LDK::on_frame() {}
@@ -994,6 +1055,11 @@ void LDK::on_draw_ui() {
 
   ImGui::Checkbox("Swap hitvfx settings", (bool*)&swap_hitvfx_settings);
 
+  ImGui::Spacing();
+
+  ImGui::TextWrapped("Option for those, who uses LDK+DMD(+InstantDT)_(completely mad men). Disable enemy dt vfx to slightly increase performance.");
+  ImGui::Checkbox("Disable enemy DT VFX", &emDtVfxSkipOn);
+
   ImGui::Separator();
 
   ImGui::TextWrapped("Don't draw hit lines on objects, when they getting hits. This option doesn't depend on \"hitVfx fix\" and can be turned on/off separately of it. Increases performance.");
@@ -1003,6 +1069,8 @@ void LDK::on_draw_ui() {
 
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
   ImGui::TextWrapped("Enable pause for spawn enemies after killing them. Increases stability. In coop mode it will cause desync, use \"pause spawn for coop\" option for coop play instead of this.");
+  ImGui::TextWrapped("P.S. this shit actually sets hardlimit to 0 for a few seconds after killing an enemy when current enemy num on a wave > 8. If you skip cutscene after which "
+	  "enemies should spawn when hardlimit = 0, game may be softlocked :(.");
   if (pausespawn_enabled)
     waitTimeEnabled = false;
 

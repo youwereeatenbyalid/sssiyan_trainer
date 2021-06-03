@@ -7,6 +7,7 @@ enum HitVfxState { DrawAll, DamageOnly, Nothing };
 class LDK : public Mod {
 #define CHAR_HITS 0xD400
 #define CHAR_DAMAGE 0x7798
+#define EM_DT 0xE358
 #define SAFE_NUMBER 6
 
 private:
@@ -84,6 +85,7 @@ public:
   static bool default_redorbsdrop_enabled;
   static bool waitTimeEnabled;
   static bool nohitlines_enabled;
+  static bool emDtVfxSkipOn;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -146,7 +148,7 @@ public:
   std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
   std::unique_ptr<FunctionHook> m_hitvfx_dontdraw_hitlines_hook;
 
-  static RegAddrBackup death_func_backup;
-  static RegAddrBackup redorbdrop_backup;
+  //static RegAddrBackup death_func_backup;
+  //static RegAddrBackup redorbdrop_backup;
   static RegAddrBackup hitvfx_backup;
 };

@@ -7,37 +7,8 @@
 
 class EnemySwapper : public Mod {
 
-  private:
-  struct RegAddrBackup {
-    uintptr_t rax;
-    uintptr_t rbx;
-    uintptr_t rcx;
-    uintptr_t rdx;
-    uintptr_t rsi;
-    uintptr_t rdi;
-    uintptr_t rbp;
-    uintptr_t rsp;
-    uintptr_t r8;
-    uintptr_t r9;
-    uintptr_t r10;
-    uintptr_t r11;
-    uintptr_t r12;
-    uintptr_t r13;
-    uintptr_t r14;
-    uintptr_t r15;
-  };
 
 public:
-
-  static inline RegAddrBackup enemySwapBackup1;
-  static inline RegAddrBackup enemySwapBackup2;
-  static inline RegAddrBackup enemySwapBackup3;
-  //static inline RegAddrBackup enemySwapBackup5;
-  static inline RegAddrBackup enemySwapBackup6;
-  //static inline RegAddrBackup enemySwapBackup7;
-  //static inline RegAddrBackup swapIdBackup;
-  static inline RegAddrBackup spawnPosBackup;
-  static inline RegAddrBackup nowFlowBackup;
 
 static const int enemyListCount = 41;
 
@@ -214,7 +185,7 @@ static EnemyId swapForAll;
   };
 
   static std::vector<uintptr_t> setDataAddrs;
-  static std::mutex mtx;
+  //static std::mutex mtx;
 
 
 private:
@@ -228,7 +199,7 @@ private:
   int curMaxIndx = 19;
   const int minIndx = 0;
   const int maxIndx = 19;
-  size_t reservedForReswap = 2000;
+  size_t reservedForReswap = 4000;
   void reserveReswapVector(size_t newSize);
 
 
@@ -240,10 +211,10 @@ private:
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook3;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook4;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook5;
+  //std::unique_ptr<FunctionHook> m_enemy_swapper_hook4;
+  //std::unique_ptr<FunctionHook> m_enemy_swapper_hook5;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
+  //std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
   std::unique_ptr<FunctionHook> m_now_flow_hook;
 };
