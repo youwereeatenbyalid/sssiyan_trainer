@@ -119,16 +119,31 @@ void DeepTurbo::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("disable_turbo", disableTurbo);
 }
 
+static void ShowHelpMarker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered()) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(450.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
 void DeepTurbo::on_draw_ui() {
   ImGui::Text("Game Speed");
   ImGui::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
   ImGui::Spacing();
-  ImGui::Text("Menu And Cutscene Speed");
-  /* ImGui::Checkbox("Variable menu/cutscene speed", &shouldMenuSpeedup); // this works but only actually sped up pause screen, cutscenes and load screens
+  /*ImGui::Text("Menu And Cutscene Speed"); // this works but only actually sped up pause screen, cutscenes and load screens
+  ImGui::Checkbox("Variable menu/cutscene speed", &shouldMenuSpeedup);
   ImGui::SliderFloat("##Menu Speed slider", &menuspeed, 0.0f, 2.5f, "%.1f");*/
-  if (ImGui::Checkbox("Disable turbo entirely to allow camera tool to freeze the game", &disableTurbo)) {
+  if (ImGui::Checkbox("Disable turbo writing to allow camera tool to freeze the game", &disableTurbo)) {
     m_patch01->toggle(disableTurbo);
   }
+  ImGui::SameLine();
+  ShowHelpMarker("Enable this before using the camera tool if you want to use its built in freeze function. "
+                 "Your turbo value will be remembered until the next load screen, where this will need to be disabled "
+                 "if you want to return to turbo speed.");
 }
 
 void DeepTurbo::on_draw_debug_ui() {
