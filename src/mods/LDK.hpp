@@ -79,13 +79,12 @@ public:
 
   static const uint32_t SPAWN_PAUSE_TIME = 4;
 
-  static bool physics_fix_on;
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
-  static bool default_redorbsdrop_enabled;
   static bool waitTimeEnabled;
   static bool nohitlines_enabled;
   static bool emDtVfxSkipOn;
+  static bool showOldFixes;
 
   static uint32_t number;
   static uint32_t hardlimit;
