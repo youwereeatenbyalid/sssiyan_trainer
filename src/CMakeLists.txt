@@ -190,6 +190,11 @@ set(MODS_SRC
 	mods/DifficultySelect.cpp
 	mods/DontHideWeaponWheel.hpp
 	mods/DontHideWeaponWheel.cpp
+    mods/EnemySwapper.hpp
+    mods/EnemySwapper.cpp
+    mods/EnemyDataSettings.hpp
+    mods/EnemyWaveSettings.hpp
+    mods/EnemyWaveSettings.cpp
 )
 
 set(HOOKS_SRC

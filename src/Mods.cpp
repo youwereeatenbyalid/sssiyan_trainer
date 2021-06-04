@@ -40,6 +40,7 @@
         #include "mods/NothingCancelsBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
+        #include "mods/DTWingsOnly.hpp"
     // Dante
     // V
        #include "mods/InfiniteSummonPowerup.hpp"
@@ -122,10 +123,13 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-    // VPZadov
+// VPZadov
     // Background
     // Common
     // Gameplay
+       #include "mods/EnemySwapper.hpp"
+       #include "mods/EnemyDataSettings.hpp"
+       #include "mods/EnemyWaveSettings.hpp"
     // Nero
     // Dante
     // V
@@ -266,10 +270,13 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
-    // VPZadov
+// VPZadov
         // Background
         // Common
         // Gameplay
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
+        m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         // Nero
         // Dante
         // V
@@ -280,7 +287,6 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-		  
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
