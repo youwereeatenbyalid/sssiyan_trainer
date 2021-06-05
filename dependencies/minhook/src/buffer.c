@@ -1,6 +1,6 @@
 ﻿/*
  *  MinHook - The Minimalistic API Hooking Library for x64/x86
- *  Copyright (C) 2009-2017 Tsuda Kageyu.
+ *  Copyright (C) 2009-2016 Tsuda Kageyu.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,10 @@
 #include "buffer.h"
 
 // Size of each memory block. (= page size of VirtualAlloc)
-#define MEMORY_BLOCK_SIZE 0x1000
+#define MEMORY_BLOCK_SIZE 0x4000
 
 // Max range for seeking a memory block. (= 1024MB)
-#define MAX_MEMORY_RANGE 0x40000000
+#define MAX_MEMORY_RANGE 0x80000000
 
 // Memory protection flags to check the executable address.
 #define PAGE_EXECUTE_FLAGS \
@@ -85,7 +85,7 @@ VOID UninitializeBuffer(VOID)
 }
 
 //-------------------------------------------------------------------------
-#if defined(_M_X64) || defined(__x86_64__)
+#ifdef _M_X64
 static LPVOID FindPrevFreeRegion(LPVOID pAddress, LPVOID pMinAddr, DWORD dwAllocationGranularity)
 {
     ULONG_PTR tryAddr = (ULONG_PTR)pAddress;
@@ -116,7 +116,7 @@ static LPVOID FindPrevFreeRegion(LPVOID pAddress, LPVOID pMinAddr, DWORD dwAlloc
 #endif
 
 //-------------------------------------------------------------------------
-#if defined(_M_X64) || defined(__x86_64__)
+#ifdef _M_X64
 static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAllocationGranularity)
 {
     ULONG_PTR tryAddr = (ULONG_PTR)pAddress;
@@ -151,7 +151,7 @@ static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAlloc
 static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
 {
     PMEMORY_BLOCK pBlock;
-#if defined(_M_X64) || defined(__x86_64__)
+#ifdef _M_X64
     ULONG_PTR minAddr;
     ULONG_PTR maxAddr;
 
@@ -174,7 +174,7 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
     // Look the registered blocks for a reachable one.
     for (pBlock = g_pMemoryBlocks; pBlock != NULL; pBlock = pBlock->pNext)
     {
-#if defined(_M_X64) || defined(__x86_64__)
+#ifdef _M_X64
         // Ignore the blocks too far.
         if ((ULONG_PTR)pBlock < minAddr || (ULONG_PTR)pBlock >= maxAddr)
             continue;
@@ -184,7 +184,7 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
             return pBlock;
     }
 
-#if defined(_M_X64) || defined(__x86_64__)
+#ifdef _M_X64
     // Alloc a new block above if not found.
     {
         LPVOID pAlloc = pOrigin;

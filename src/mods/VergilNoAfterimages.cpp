@@ -59,7 +59,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
   onpage           = vergilafterimages;
   full_name_string = "Disable Vergil's afterimages (+)";
   author_string    = "VPZadov";
-  description_string = "Disable afterimages, that Vergil leaves after almost every move.";
+  description_string = "Disable the afterimages Vergil leaves after almost every move.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

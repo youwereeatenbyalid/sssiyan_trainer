@@ -20,18 +20,15 @@ public:
     onpage           = vergilcheat;
     full_name_string = "Additional JJC in SDT";
     author_string    = "VPZadov";
-    description_string =
-        "Give Vergil an opportunity to perform 4 jjc in a row when him at SDT";
+    description_string = "Allow Vergil to perform an extra JJC while in SDT.";
     if (cheaton)
       VergilSetMaxJJC::cheaton = true;
     return Mod::on_initialize();
   }
 
   inline void on_draw_ui() override {
-    ImGui::TextWrapped(
-        "Note, that this mod using \"Set maximum JJC in a row\" mod,\nand "
-        "dynamicaly changed max jjc value, so don't disable it"
-        ", if you are using this :D");
+    ImGui::TextWrapped("This mod uses the \"Set maximum JJC in a row\" mod, and "
+        "dynamically changes the max JJC value, so don't disable it when using this.");
     if (cheaton) {
       VergilSetMaxJJC::cheaton = true;
       VergilInfJdCs::cheaton   = false;

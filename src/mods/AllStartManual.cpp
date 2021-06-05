@@ -22,7 +22,7 @@ static naked void detour() { // "DevilMayCry5.exe"+2C723DF
         je dantecompare
         cmp [PlayerTracker::playerid], 4
         je vergilcompare
-        jmp code
+        jmp popcode
 
     nerocompare:
         cmp byte ptr [enemystepcancels], 1

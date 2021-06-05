@@ -159,9 +159,39 @@ static naked void player_detour() {
 
 	mov r8, [r9+0x40]
 	mov [PlayerTracker::vergilentity], r8
+	//copy address of vergil entity
+    mov r10, r8
 	mov r8, [r8+0x1F0]
 	mov [PlayerTracker::vergiltransform], r8
-
+	//weapon array vergil
+	mov r8, [r10+0x1970]
+    mov r8, [r8+ 0x18]
+	//force edge
+    mov r10, [r8+0x60]
+	mov [PlayerTracker::forceedgemodel], r10
+	//beowulf
+	mov r10, [r8+0x48]
+	mov [PlayerTracker::beowulfmodel], r10
+	//yamato
+	mov r10, [r8+0x30]
+	mov [PlayerTracker::yamatomodel], r10
+	//yamatocommonparameter
+    mov r10, [r10+0x10]
+    mov r10, [r10+0x300]
+	mov [PlayerTracker::yamatocommonparameter], r10
+	//vergil entity 
+	mov r8, [r9+0x40]
+	//doppelganger
+	mov r8, [r8+0x18B0]
+	mov [PlayerTracker::doppelentity], r8
+	//doppelganger transform
+	mov r10, [r8+0x1F0]
+	mov [PlayerTracker::doppeltransform], r10
+	//doppelganger weapon
+	mov r10, [r8+0x1970]
+	mov r10, [r10+0x18]
+	mov r10, [r10+0x30]
+	mov [PlayerTracker::doppelweaponmodel], r10
 
 	playerexit:
 	pop r10
@@ -423,11 +453,11 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize stick threshhold";
   }
-  if (!install_hook_absolute(vergildata_addr.value(), m_vergildata_hook, &vergildata_detour, &vergildata_jmp_ret, 7)) {
-	  //  return a error string in case something goes wrong
-	  spdlog::error("[{}] failed to initialize", get_name());
-	  return "Failed to initialize vergildata";
-  }
+  //if (!install_hook_absolute(vergildata_addr.value(), m_vergildata_hook, &vergildata_detour, &vergildata_jmp_ret, 7)) {
+	//  //  return a error string in case something goes wrong
+	//  spdlog::error("[{}] failed to initialize", get_name());
+	//  return "Failed to initialize vergildata";
+  //}
   PlayerTracker::summon_jmp_je     = summon_addr.value() + 0x15B;
   PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x14;
 

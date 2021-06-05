@@ -317,8 +317,8 @@ public:
 		}
 		printf("Installing offset hook at location: %p\n", location);
 #endif
-		hook = std::make_unique<FunctionHook>(location, detour);
-		if (!hook->create()) {
+		hook = std::make_unique<FunctionHook>(location, detour, next_instruction_offset);
+		if (!hook->queue()) {
 			spdlog::error("Failed to create hook!");
 			return false;
 		}
@@ -340,8 +340,8 @@ public:
 		}
 		printf("Installing absolute hook at location: %p\n", location);
 #endif
-		hook = std::make_unique<FunctionHook>(location, detour);
-		if (!hook->create()) {
+		hook = std::make_unique<FunctionHook>(location, detour, next_instruction_offset);
+		if (!hook->queue()) {
 			spdlog::error("Failed to create hook!");
 			return false;
 		}

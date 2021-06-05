@@ -170,6 +170,8 @@ bool ModFramework::initialize() {
 				}
 			}
 
+			FunctionHook::enable_queued();
+
 			m_game_data_initialized = true;
 		});
 

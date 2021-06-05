@@ -1,17 +1,16 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-#include "utility/Patch.hpp"
-class DeepTurbo : public Mod {
+class AerialPushback : public Mod {
 public:
-  DeepTurbo() = default;
+  AerialPushback() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "DeepTurbo"; }
+  std::string_view get_name() const override { return "AerialPushback"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  static uintptr_t jmp_ret1;
+  static uintptr_t jmp_ret;
   static uintptr_t jmp_ret2;
   static bool cheaton;
 
@@ -25,14 +24,13 @@ public:
   // you are in the imgui window here.
   void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
-  void on_draw_debug_ui() override;
+  // void on_draw_debug_ui() override;
 
 private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_function_hook1;
+  std::unique_ptr<FunctionHook> m_function_hook;
   std::unique_ptr<FunctionHook> m_function_hook2;
-  std::unique_ptr<Patch> m_patch01;
 };
