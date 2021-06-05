@@ -754,7 +754,7 @@ void EnemySwapper::on_draw_ui() {
   ImGui::Spacing();
   ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
 
-  ImGui::Separator();
+  //ImGui::Separator();
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
@@ -766,29 +766,7 @@ void EnemySwapper::on_draw_ui() {
     if (ImGui::Button("Restore default swapper settings"))
       restore_default_settings();
 
-    ImGui::Separator();
-    ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
-    if (isCustomRandomSettings) {
-      ImGui::Checkbox("Use custom seed", &isCustomSeed);
-      if (isCustomSeed) {
-        ImGui::Text("Seed:");
-        if (ImGui::InputInt("##seedInput", &seed))
-          seed_rnd_gen(seed);
-      } else
-        seed = -1;
-      ImGui::TextWrapped("Min enemy index:");
-      ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
-      ImGui::TextWrapped("Max enemy index:");
-      ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
-      if (curMinIndx >= curMaxIndx)
-        curMinIndx = curMaxIndx - 1;
-    } else {
-      curMinIndx = minIndx;
-      curMaxIndx = maxIndx;
-    }
-    if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
-      random_em_swap(curMinIndx, curMaxIndx);
-    }
+
 
     ImGui::Separator();
     /*if (ImGui::Button("Apply")) {
@@ -805,6 +783,36 @@ void EnemySwapper::on_draw_ui() {
       swapSettings[i].set_swap_id(selectedToSwap[i]);
       ImGui::Separator();
     }
+
+    //ImGui::Separator();
+
+    if (ImGui::Button("Randomize enemy swap settings", ImVec2(165, 25))) {
+        random_em_swap(curMinIndx, curMaxIndx);
+    }
+
+    ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
+    if (isCustomRandomSettings) {
+        ImGui::Checkbox("Use custom seed", &isCustomSeed);
+        if (isCustomSeed) {
+            ImGui::Text("Seed:");
+            if (ImGui::InputInt("##seedInput", &seed))
+                seed_rnd_gen(seed);
+        }
+        else
+            seed = -1;
+        ImGui::TextWrapped("Min enemy index:");
+        ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
+        ImGui::TextWrapped("Max enemy index:");
+        ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
+        if (curMinIndx >= curMaxIndx)
+            curMinIndx = curMaxIndx - 1;
+    }
+    else {
+        curMinIndx = minIndx;
+        curMaxIndx = maxIndx;
+    }
+
+
   }
   /*
   ImGui::Separator();

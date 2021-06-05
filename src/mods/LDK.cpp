@@ -837,8 +837,8 @@ void LDK::on_draw_ui() {
   ImGui::Checkbox("Enable pause spawn for coop", &waitTimeEnabled);
   //ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
       //"pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
-  ImGui::TextWrapped("Delay before spawn");
-  ImGui::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
+  //ImGui::TextWrapped("Delay before spawn");
+  //ImGui::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 
