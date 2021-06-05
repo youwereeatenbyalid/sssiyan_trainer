@@ -772,12 +772,8 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Checkbox("Use custom seed", &isCustomSeed);
       if (isCustomSeed) {
         ImGui::Text("Seed:");
-        if (ImGui::SliderInt("##seedSlider", &seed, 0, 10000))
+        if (ImGui::InputInt("##seedInput", &seed))
           seed_rnd_gen(seed);
-        if (ImGui::Button("Use \"std::time(0)\" as a seed")) {
-          seed      = std::time(0);
-          seed_rnd_gen(seed);
-        }
       } else
         seed = -1;
       ImGui::TextWrapped("Min enemy index:");
