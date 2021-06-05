@@ -195,6 +195,8 @@ set(MODS_SRC
     mods/EnemyDataSettings.hpp
     mods/EnemyWaveSettings.hpp
     mods/EnemyWaveSettings.cpp
+	mods/HoldToMash.hpp
+	mods/HoldToMash.cpp
 )
 
 set(HOOKS_SRC
