@@ -190,6 +190,13 @@ set(MODS_SRC
 	mods/DifficultySelect.cpp
 	mods/DontHideWeaponWheel.hpp
 	mods/DontHideWeaponWheel.cpp
+    mods/EnemySwapper.hpp
+    mods/EnemySwapper.cpp
+    mods/EnemyDataSettings.hpp
+    mods/EnemyWaveSettings.hpp
+    mods/EnemyWaveSettings.cpp
+	mods/HoldToMash.hpp
+	mods/HoldToMash.cpp
     mods/AerialPushback.hpp 
     mods/AerialPushback.cpp 
     mods/AerialPushbackVertical.hpp 
@@ -198,7 +205,6 @@ set(MODS_SRC
     mods/modNeroAlwaysInitialDT.cpp 
     mods/DisableGauntletStages.hpp 
     mods/DisableGauntletStages.cpp
-
 )
 
 set(HOOKS_SRC

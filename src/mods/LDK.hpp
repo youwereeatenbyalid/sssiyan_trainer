@@ -7,6 +7,7 @@ enum HitVfxState { DrawAll, DamageOnly, Nothing };
 class LDK : public Mod {
 #define CHAR_HITS 0xD400
 #define CHAR_DAMAGE 0x7798
+#define EM_DT 0xE358
 #define SAFE_NUMBER 6
 
 private:
@@ -71,13 +72,19 @@ public:
   static uintptr_t sswords_restriction_jmp_ret;
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
+  static uintptr_t waitTimeJmpRet;
+  static uintptr_t nohitlns_ret;
+  static uintptr_t nohitlns_ret_je;
 
-  static const uint32_t SPAWN_PAUSE_TIME = 4;
 
-  static bool physics_fix_on;
+  static const uint32_t SPAWN_PAUSE_TIME = 3;
+
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
-  static bool default_redorbsdrop_enabled;
+  static bool waitTimeEnabled;
+  static bool nohitlines_enabled;
+  static bool emDtVfxSkipOn;
+  static bool showOldFixes;
 
   static uint32_t number;
   static uint32_t hardlimit;
@@ -91,6 +98,7 @@ public:
   static uint32_t container_limit_all;
   static uint32_t container_limit_damage_only;
   static uint32_t enemydeath_count;
+  static constexpr float waitTime = 1.0f;//GenerateEnemyManager.GenerateData.WaitTime. Use for coop insted of pause spawn fix.
 
   static HitVfxState vfx_state;
 
@@ -136,7 +144,10 @@ public:
 
   std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
   std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
+  std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
+  std::unique_ptr<FunctionHook> m_hitvfx_dontdraw_hitlines_hook;
 
-  static RegAddrBackup death_func_backup;
-  static RegAddrBackup redorbdrop_backup;
+  //static RegAddrBackup death_func_backup;
+  //static RegAddrBackup redorbdrop_backup;
+  static RegAddrBackup hitvfx_backup;
 };
