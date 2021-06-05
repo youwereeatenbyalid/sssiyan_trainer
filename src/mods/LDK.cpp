@@ -785,8 +785,6 @@ void LDK::on_draw_ui() {
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
 
-  //ImGui::TextWrapped("Old LDK cheats thats can increase performance a little. Thge main settings for memeory usage stored in <GameFolder>\\configs\\runtime.args");
-  ImGui::Separator();
   if (ImGui::CollapsingHeader("Performance Optimization"))
   {
   ImGui::Checkbox("Disable Hit VFX", (bool*)&LDK::hitvfx_fix_on);
