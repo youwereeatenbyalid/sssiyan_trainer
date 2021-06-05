@@ -766,8 +766,6 @@ void EnemySwapper::on_draw_ui() {
     if (ImGui::Button("Restore default swapper settings"))
       restore_default_settings();
 
-
-
     ImGui::Separator();
     /*if (ImGui::Button("Apply")) {
       for (int i = 0; i < emNames.size(); i++) {
@@ -784,36 +782,31 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
     }
 
-    //ImGui::Separator();
-
-    if (ImGui::Button("Randomize enemy swap settings", ImVec2(165, 25))) {
-        random_em_swap(curMinIndx, curMaxIndx);
-    }
-
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
-        ImGui::Checkbox("Use custom seed", &isCustomSeed);
-        if (isCustomSeed) {
-            ImGui::Text("Seed:");
-            if (ImGui::InputInt("##seedInput", &seed))
-                seed_rnd_gen(seed);
-        }
-        else
-            seed = -1;
-        ImGui::TextWrapped("Min enemy index:");
-        ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
-        ImGui::TextWrapped("Max enemy index:");
-        ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
-        if (curMinIndx >= curMaxIndx)
-            curMinIndx = curMaxIndx - 1;
+      ImGui::Checkbox("Use custom seed", &isCustomSeed);
+      if (isCustomSeed) {
+        ImGui::Text("Seed:");
+        if (ImGui::InputInt("##seedInput", &seed))
+          seed_rnd_gen(seed);
+      } else
+        seed = -1;
+      ImGui::TextWrapped("Min enemy index:");
+      ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
+      ImGui::TextWrapped("Max enemy index:");
+      ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
+      if (curMinIndx >= curMaxIndx)
+        curMinIndx = curMaxIndx - 1;
+    } else {
+      curMinIndx = minIndx;
+      curMaxIndx = maxIndx;
     }
-    else {
-        curMinIndx = minIndx;
-        curMaxIndx = maxIndx;
+    if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
+      random_em_swap(curMinIndx, curMaxIndx);
     }
-
-
+    
   }
+  
   /*
   ImGui::Separator();
   ImGui::TextWrapped("Some debug shit");

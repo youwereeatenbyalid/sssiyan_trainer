@@ -67,7 +67,6 @@ bool swap_hitvfx_settings = false;
 bool canhitkill = true;
 bool vergilflipper = false;
 float LDK::hpoflasthitobj = 0.0f;
-float LDK::waitTime = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
@@ -549,14 +548,6 @@ std::optional<std::string> LDK::on_initialize() {
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
   }
-  auto gethpoflasthitobject_addr = utility::scan(base, "C9 F3 0F 11 4F 10 48");
-  if (!gethpoflasthitobject_addr) {
-	  return "Unable to find gethpoflasthitobject pattern.";
-  }
-  auto multipledeathoptimize_addr = utility::scan(base, "48 8B 4B 50 48 83 79 18 00 75 57 83 BF");
-  if (!multipledeathoptimize_addr) {
-	  return "Unable to find  multipledeathoptimize pattern.";
-  }
   auto canlasthitkill_addr = utility::scan(base, "C7 47 10 00 00 80 3F 32");
   if (!canlasthitkill_addr) {
 	  return "Unable to find canlasthitkill pattern.";
@@ -565,22 +556,14 @@ std::optional<std::string> LDK::on_initialize() {
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }
-  auto nopfunction_addr2 = utility::scan(base, "4C 8B 48 F0 41 FF 51 58 48 8B 5C");
-  if (!nopfunction_addr2) {
-	  return "Unable to find nop function 2 pattern.";
-  }
   auto nopfunction_1_call = utility::scan(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
   if (!nopfunction_1_call) {
 	  return "Unable to find nop function call pattern.";
   }
-
-
   auto vergildivebomb_addr = utility::scan(base, "C7 40 10 15 00 00 00 48");
   if (!vergildivebomb_addr) {
 	  return "Unable to find vergildivebomb pattern.";
   }
-
-
   auto cavforcevalid_addr = utility::scan(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
   if (!cavforcevalid_addr) {
 	  return "Unable to find cavforcevalid pattern.";
@@ -592,12 +575,6 @@ std::optional<std::string> LDK::on_initialize() {
   auto cavcoordinatechange_addr = utility::scan(base, "49 8B 4D 10 F3 0F 11 45 90");
   if (!cavcoordinatechange_addr) {
 	  return "Unable to find cavcoordinatechange pattern.";
-  }
-
-  auto sswords_restriction_addr =
-      utility::scan(base, "41 3B 46 18 0F 8C A0 01 00 00");
-  if (!sswords_restriction_addr) {
-    return "Unable to find sswords_restriction_jmp_addr pattern.";
   }
   auto hitvfxskip_addr = utility::scan(base, "75 F3 48 85 ED");
   if (!hitvfxskip_addr) {
@@ -624,10 +601,8 @@ std::optional<std::string> LDK::on_initialize() {
 
   LDK::missionmanager = staticbase+0x7E836F8;
   LDK::enemygentype = staticbase+0x58E15A0;
-  LDK::multipledeathoptimize_jmp_jle = multipledeathoptimize_addr.value()+0x616; //DevilMayCry5.exe+24E4374
  
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
-  LDK::sswords_restriction_jmp_ret = sswords_restriction_addr.value() + 0x1AA;
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
   nohitlns_ret_je                  = dontdrawhitlines_addr.value() + 0xA + 0x1;
 
@@ -746,7 +721,6 @@ void LDK::on_config_load(const utility::Config &cfg) {
   container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
   container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
   swap_hitvfx_settings = cfg.get<bool>("swap_hitvfx_settings").value_or(false);
-  waitTime             = cfg.get<float>("LDK_waitTime").value_or(1.8f);
   waitTimeEnabled      = cfg.get<bool>("LDK_waitTimeEnabled").value_or(false);
   nohitlines_enabled = cfg.get<bool>("LDK.nohitlines_enabled").value_or(false);
   emDtVfxSkipOn      = cfg.get<bool>("LDK.emDtVfxSkipOn").value_or(false);
@@ -759,7 +733,6 @@ void LDK::on_config_save(utility::Config &cfg) {
   cfg.set<uint32_t>("container_limit_damage_only", container_limit_damage_only);
   cfg.set<uint32_t>("container_limit_all", container_limit_all);
   cfg.set<bool>("swap_hitvfx_settings", swap_hitvfx_settings);
-  cfg.set<float>("LDK_waitTime", LDK::waitTime);
   cfg.set<bool>("LDK_waitTimeEnabled", waitTimeEnabled);
   cfg.set<bool>("LDK.nohitlines_enabled", nohitlines_enabled);
   cfg.set<bool>("LDK.emDtVfxSkipOn", emDtVfxSkipOn);
