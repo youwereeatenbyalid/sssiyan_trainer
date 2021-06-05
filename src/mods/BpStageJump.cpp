@@ -205,7 +205,7 @@ static naked void detour() {
         jmp code
 
     cheatcode:
-        // cmp byte ptr [bossrush], 1
+        // cmp byte ptr [bossrush], 1 // This is now all done inside BpStageJump::next_floor()
         // je bossrushstart
         cmp byte ptr [randomStageToggle], 1
         je randomstagestart
@@ -278,8 +278,8 @@ std::optional<std::string> BpStageJump::on_initialize() {
 }
 
 void BpStageJump::on_config_load(const utility::Config& cfg) {
-  bossrush   = cfg.get<bool>("bp_jump_boss_rush").value_or(false);
-  retrystage = cfg.get<bool>("bp_jump_retry_stage").value_or(false);
+  bossrush			= cfg.get<bool>("bp_jump_boss_rush").value_or(false);
+  retrystage		= cfg.get<bool>("bp_jump_retry_stage").value_or(false);
   randomStageToggle = cfg.get<bool>("bp_jump_random_stage").value_or(false);
   useseed           = cfg.get<bool>("bp_jump_use_seed").value_or(false);
   endless           = cfg.get<bool>("bp_jump_endless").value_or(false);
@@ -293,29 +293,8 @@ void BpStageJump::on_config_save(utility::Config& cfg) {
 }
 
 void BpStageJump::on_draw_ui() {
-    ImGui::Spacing();
-    ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
-    ImGui::Checkbox("Retry Current Stage", &retrystage);
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::TextWrapped("Tick before starting BP to skip non boss rooms");
-    ImGui::Checkbox("Boss Rush", &bossrush);
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-	ImGui::TextWrapped("If Boss Rush and Randomizer are unticked, this will teleport you to the room of your choosing when first entering BP or changing stage");
-	ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
-
 	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-    ImGui::Checkbox("Bloody Palace Randomizer", &randomStageToggle);
+	ImGui::Checkbox("Bloody Palace Randomizer and Boss Rush", &randomStageToggle);
 
     ImGui::Spacing();
 	if (randomStageToggle){
@@ -325,15 +304,15 @@ void BpStageJump::on_draw_ui() {
 		ImGui::Separator();
 
 		ImGui::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
-
-
 		if (palace_type == BALANCED){
 			ImGui::TextWrapped("Balanced palace randomizes each set of stagees by difficulty. IE, stagees 1-20 will be randomized, then 20-40, etc.");
-		}else if(palace_type == PARTIAL){
+		}
+		else if(palace_type == PARTIAL){
 			ImGui::TextWrapped("Partial palace randomizes the stagees while maintaining the structure of the palace. You will always get a boss every 20 stages, and none outside of that.");
-		}else{
+		}
+		else{
 			ImGui::TextWrapped("Truly random palace will completely randomize floors 1-100. You could get a free ride, or every boss in the first 5 floors. Roll those dice and find out.");
-			}
+		}
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -347,13 +326,10 @@ void BpStageJump::on_draw_ui() {
 			ImGui::Separator();
 			ImGui::Spacing();
 		}
-
-
 		if (palace_type == BALANCED || palace_type == PARTIAL) {
-			ImGui::TextWrapped("Bosses will appear in a random order.");
 			ImGui::Checkbox("Randomized boss order", &randombosses);
+			ImGui::Checkbox("Boss Rush", &bossrush);
 		}
-
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
@@ -369,11 +345,24 @@ void BpStageJump::on_draw_ui() {
 		}
 		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
 		"This ensures you are all using the same set of random stages and will not become desynced.\n"
-		"To use the seed, enter your seed into the \Palace Seed\" field, check the \"Use seed\" checkbox, then press \"Randomize Palace\" before starting.\n"
+		"To use the seed, enter your seed into the \Palace Seed\" field, check the \"Use Custom Seed\" checkbox, then press \"Randomize Palace\" before starting.\n"
 		"Ensure everyone follows these instructions in the correct order before you start or your co-op session will NOT work.");
-		ImGui::Checkbox("Use seed", &useseed);
+		ImGui::Checkbox("Use Custom Seed", &useseed);
 		ImGui::InputInt("Palace Seed",&seed);
-	}
+    }
+	else {
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+        ImGui::TextWrapped("Stage Jump");
+        ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
+		ImGui::Spacing();
+		ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
+		ImGui::Checkbox("Retry Stage", &retrystage);
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+    }
 }
 
 void BpStageJump::on_draw_debug_ui()
