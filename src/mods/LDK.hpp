@@ -77,7 +77,7 @@ public:
   static uintptr_t nohitlns_ret_je;
 
 
-  static const uint32_t SPAWN_PAUSE_TIME = 4;
+  static const uint32_t SPAWN_PAUSE_TIME = 3;
 
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
@@ -98,7 +98,7 @@ public:
   static uint32_t container_limit_all;
   static uint32_t container_limit_damage_only;
   static uint32_t enemydeath_count;
-  static float waitTime;//GenerateEnemyManager.GenerateData.WaitTime. Use for coop insted of pause spawn fix.
+  static constexpr float waitTime = 1.0f;//GenerateEnemyManager.GenerateData.WaitTime. Use for coop insted of pause spawn fix.
 
   static HitVfxState vfx_state;
 

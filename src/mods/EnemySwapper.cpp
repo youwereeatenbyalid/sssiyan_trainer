@@ -767,6 +767,20 @@ void EnemySwapper::on_draw_ui() {
       restore_default_settings();
 
     ImGui::Separator();
+    /*if (ImGui::Button("Apply")) {
+      for (int i = 0; i < emNames.size(); i++) {
+        set_swapper_setting(i, selectedToSwap[i]);
+      }
+    }*/
+    for (int i = 0; i < emNames.size(); i++) {
+      ImGui::TextWrapped(emNames[i]);
+      uniqComboStr = std::to_string(i) + "##SwapTo";
+      ImGui::Combo(uniqComboStr.c_str(), (int*)&selectedToSwap[i], emNames.data(), emNames.size(), 20);
+      //set_swapper_setting(i, selectedToSwap[i]);
+      swapSettings[i].set_current_id(i);
+      swapSettings[i].set_swap_id(selectedToSwap[i]);
+      ImGui::Separator();
+    }
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
       ImGui::Checkbox("Use custom seed", &isCustomSeed);
@@ -789,23 +803,8 @@ void EnemySwapper::on_draw_ui() {
     if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
       random_em_swap(curMinIndx, curMaxIndx);
     }
-
-    ImGui::Separator();
-    /*if (ImGui::Button("Apply")) {
-      for (int i = 0; i < emNames.size(); i++) {
-        set_swapper_setting(i, selectedToSwap[i]);
-      }
-    }*/
-    for (int i = 0; i < emNames.size(); i++) {
-      ImGui::TextWrapped(emNames[i]);
-      uniqComboStr = std::to_string(i) + "##SwapTo";
-      ImGui::Combo(uniqComboStr.c_str(), (int*)&selectedToSwap[i], emNames.data(), emNames.size(), 20);
-      //set_swapper_setting(i, selectedToSwap[i]);
-      swapSettings[i].set_current_id(i);
-      swapSettings[i].set_swap_id(selectedToSwap[i]);
-      ImGui::Separator();
-    }
   }
+  
   /*
   ImGui::Separator();
   ImGui::TextWrapped("Some debug shit");
