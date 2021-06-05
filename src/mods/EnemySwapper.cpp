@@ -754,7 +754,7 @@ void EnemySwapper::on_draw_ui() {
   ImGui::Spacing();
   ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
 
-  ImGui::Separator();
+  //ImGui::Separator();
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
@@ -781,6 +781,7 @@ void EnemySwapper::on_draw_ui() {
       swapSettings[i].set_swap_id(selectedToSwap[i]);
       ImGui::Separator();
     }
+
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
       ImGui::Checkbox("Use custom seed", &isCustomSeed);
@@ -803,6 +804,7 @@ void EnemySwapper::on_draw_ui() {
     if (ImGui::Button("Random regular enemies", ImVec2(165, 25))) {
       random_em_swap(curMinIndx, curMaxIndx);
     }
+    
   }
   
   /*
