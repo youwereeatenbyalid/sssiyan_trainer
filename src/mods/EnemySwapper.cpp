@@ -3,28 +3,6 @@
 #include "sdk/ReClass.hpp"
 #include "EnemyDataSettings.hpp"
 
-const std::array<const char*, 14> README {
-    //"Custom swap settings don't work in BP at least for now, it will crash the game. Swap all to <enemy> should work, except a few stages with swap to "
-  //"\"Qliphot tentacle\".",
-      "Swap regular enemy to Boss and killing it during the mission may occur some BGM problems.",
-      "After swap enemies on LDK some of them may spawns in XOY plane with Z offset option.", 
-    "Swap bunch of enemies on LDK to Empusa Queen is a bad move (+99.9%% chance of crash). Also swap bunch of enemies to a red empusa isn't good idea on that mode.",
-      "Qliphot root boss will summon Hell Antemora independently of swapper settings.",
-      "Swapper settings affects what enemies Hell Judecca summon.", 
-    "Shadow and Griffon can't be killed.", 
-    "Dante has disabled AI.", 
-    "Nightmire will disappear and spawn as meteor 228 billion meters above your head. You need to wait about ~10 years when he falls.",
-      "\"Vergil and \"Vergil M20\" is a same Vergil if you swap enemy to it.",
-      "Game may softlock if enemies spawns under the floor after cutscene. Use \"Offset to Z spawn coord\" option to prevent it.",
-      //"Unfortunately, there is a high chance that game will crash during load level with enabled swapper :(",
-      //"There is a \"Clear vector\" button. Would be cool, if you sometimes press it after a missions when you are in main menu, when vector size != 0.",
-    "Swap Qliphot root boss to some enemies may not let you end M1.",
-    "Swap M20 Dante cause softlock.",
-    //"Wrong swap sometimes, just press \"clear vector\" button and restart a mission.",
-    "Wrong swap on some BP stages sometimes.",
-    "Some BP stages doesn't want to swap enemies to qliphot tentacles (softlock with that swap)."
-};
-
 bool EnemySwapper::cheaton{NULL};
 bool EnemySwapper::isSwapAll{NULL};
 bool EnemySwapper::isCustomRandomSettings{false};
@@ -34,7 +12,6 @@ bool EnemySwapper::isBp = false;
 bool isReswap = false;
 bool isSkipNum = false;
 bool checkForReswap = false;
-bool showReadme     = false;
 bool defaultEmSetting = true;
 
 uintptr_t EnemySwapper::setEnemyDataRet1{NULL};
@@ -149,7 +126,7 @@ static naked void enemy_swap_detour1() {
         cmp byte ptr [EnemySwapper::isBp], 0
         je originalcode
         mov [curSetDataAddr], rcx
-        mov byte ptr [checkForReswap], 1
+        //mov byte ptr [checkForReswap], 1
         mov esi,[rcx+0x10]
         mov [EnemySwapper::currentEnemyId], esi
 
@@ -223,7 +200,7 @@ static naked void enemy_swap_detour2() {
         swapsettings:
         //cmp byte ptr [EnemySwapper::isBp], 1
         //je originalcode
-        mov byte ptr [checkForReswap], 1
+       // mov byte ptr [checkForReswap], 1
         mov r8d, [rcx+0x10]
         mov [EnemySwapper::currentEnemyId], r8d
         //mov [EnemySwapper::newEnemyId], r8d
@@ -306,7 +283,7 @@ static naked void enemy_swap_detour3() {
         swapsettings:
         cmp byte ptr [EnemySwapper::isBp], 1 //for bp skip
         je checkdataoption
-        mov byte ptr [checkForReswap], 1
+        //mov byte ptr [checkForReswap], 1
         mov ecx, [r14+0x10]
         mov [EnemySwapper::currentEnemyId], ecx
         //mov [EnemySwapper::newEnemyId], ecx
@@ -504,7 +481,7 @@ static naked void enemy_swap_detour6() {
         swapsettings:
         //cmp byte ptr [EnemySwapper::isBp], 1
         //je originalcode
-        mov byte ptr [checkForReswap], 1
+        //mov byte ptr [checkForReswap], 1
         mov ebx, [r14+0x10]
         mov [EnemySwapper::currentEnemyId], ebx
         //mov [EnemySwapper::newEnemyId], ebx
@@ -733,12 +710,16 @@ void EnemySwapper::restore_default_settings() {
 }
 
 void EnemySwapper::on_draw_ui() {
-  ImGui::Checkbox("Readme.txt", &showReadme);
-  if (showReadme) {
-    for (const char *ch : README) {
-      ImGui::TextWrapped(ch);
+  if (ImGui::CollapsingHeader("Current Issues")){
+      ImGui::TextWrapped("Killing enemies swapped with a boss in mission can cause BGM issues.\n"
+          "Shadow and Griffon can't be killed.\n"
+          "Dante has disabled AI.\n"
+          "Nightmare will disappear and spawn as meteor 228 billion meters above your head. You will need to wait a while for him to fall.\n"
+          "Swapping the Qliphot root boss can softlock mission 1.\n"
+          "Swapping Dante can softlock mission 20.\n"
+          "Wrong swap on some BP stages sometimes.\n"
+          "Some BP stages softlock when swapping enemies to qliphod tentacles.");
       ImGui::Spacing();
-    }
   }
 
   /*ImGui::TextWrapped("nowFlow: %d", nowFlow);
@@ -747,8 +728,8 @@ void EnemySwapper::on_draw_ui() {
   ImGui::Spacing();*/
 
   ImGui::Separator();
-  ImGui::Checkbox("Offset for Z spawn coord", &isCustomSpawnPos);
-  ImGui::TextWrapped("Use custom offset to increase z spawn coord to fix spawning some enemies under the floor. Note that this will affect for all spawns and can change spawn animations."
+  ImGui::Checkbox("Increase spawn height", &isCustomSpawnPos);
+  ImGui::TextWrapped("Fixes some enemies spawning under the floor. Note that this will affect for all spawns and can change spawn animations.\n"
       "This option can be changed during the mission.");
   if (isCustomSpawnPos) {
     ImGui::TextWrapped("Z offset");
@@ -759,7 +740,10 @@ void EnemySwapper::on_draw_ui() {
   /*ImGui::TextWrapped("Vector size is: %d", setDataAddrs.size());
   ImGui::Spacing();
   ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
- 
+  ImGui::TextWrapped("Bloody palace fix - check when swapping enemies in bloody palace.");
+  ImGui::Checkbox("BP fix", &isBp);
+
+  ImGui::Separator();
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
@@ -770,6 +754,8 @@ void EnemySwapper::on_draw_ui() {
     ImGui::Separator();
     if (ImGui::Button("Restore default swapper settings"))
       restore_default_settings();
+
+    /*
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
       ImGui::Checkbox("Use custom seed", &isCustomSeed);
@@ -803,8 +789,6 @@ void EnemySwapper::on_draw_ui() {
         set_swapper_setting(i, selectedToSwap[i]);
       }
     }*/
-    ImGui::TextWrapped("Check this if you want use custom settings for each enemy in BP (less shitty swap in BP with that).");
-    ImGui::Checkbox("Use custom swapper settings in BP", &isBp);
     for (int i = 0; i < emNames.size(); i++) {
       ImGui::TextWrapped(emNames[i]);
       uniqComboStr = std::to_string(i) + "##SwapTo";
@@ -815,6 +799,7 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
     }
   }
+  /*
   ImGui::Separator();
   ImGui::TextWrapped("Some debug shit");
   ImGui::Spacing();
@@ -827,6 +812,7 @@ void EnemySwapper::on_draw_ui() {
   if (ImGui::Button("reserve")) {
     reserveReswapVector(reservedForReswap);
   }
+*/
 }
 
 void EnemySwapper::on_draw_debug_ui() {
@@ -869,7 +855,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   onpage         = balance;
   full_name_string   = "Enemy Swapper (Beta) (+)";
   author_string      = "VPZadov";
-  description_string = "Spawn one enemy type to another. Need to load mission from a checkpoint or completely restart a mission to take an effect.";
+  description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
 
   auto initAddr1 = utility::scan(base, "8B 71 10 48 85 C0 0F 84 43");// "DevilMayCry5.exe"+FE568B //For BP custom swap
   if (!initAddr1) {

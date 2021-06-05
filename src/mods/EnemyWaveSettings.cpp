@@ -99,8 +99,8 @@ void EnemyWaveSettings::on_frame()
 void EnemyWaveSettings::on_draw_ui()
 {
 	//ImGui::Checkbox("Use custom generate type setting", &isCustomGenerateType);
-	ImGui::TextWrapped("Change type of order spawns in subwaves.");
-	ImGui::TextWrapped("Change \"generateType\" to: 0 - order, 1 - random, 2 - parallel. With 2 game often don't spawn enemies at all lol.");
+	ImGui::TextWrapped("Change the order of spawns in subwaves.");
+	ImGui::TextWrapped("Change \"generateType\" to: 0 - order, 1 - random, 2 - parallel. Parallel is glitchy and can cause enemies not to spawn.");
 	ImGui::SliderInt("##generateTypeSlider", (int*)&generateType, 0, 2);
 	ImGui::Separator();
 

@@ -103,26 +103,24 @@ public:
 	// on_draw_ui() is called only when the gui shows up
 	// you are in the imgui window here.
 	inline void on_draw_ui() override {
-		ImGui::Checkbox("Readme.txt", &showReadme);
-		if (showReadme) {
-			for (const char* ch : README) {
-				ImGui::TextWrapped(ch);
-				ImGui::Spacing();
-			}
+		if (ImGui::CollapsingHeader("Current Issues")) {
+			ImGui::TextWrapped("The game has a hard limit on the number of enemies that can be present at the same time, which can be removed by enabling LDK.\n"
+			"This mod can cause problems when editing the data for bosses& when setting the enemy multiplier to 0 on certain encounters throughout the campaign & bloody palace.");
 		}
 		ImGui::Separator();
         ImGui::Checkbox("Share settings for all enemies", &shareSettings);
 		if (shareSettings) {
+		  ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting the value to 2 doubles the enemy #, setting it to 3 triples, etc. Setting it to 0 removes all enemies at that spawn point.");
+		  ImGui::InputInt("##enemyNumShared", &enemyNum, 1);
+		  ImGui::Spacing();
+		  ImGui::TextWrapped("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
           ImGui::TextWrapped("Wait time min: ");
           ImGui::InputFloat("##WaitTimeMinShared", &waitTimeMin);
           ImGui::Spacing();
           ImGui::TextWrapped("Wait time max: ");
           ImGui::InputFloat("##WaitTimeMaxShared", &waitTimeMax);
           ImGui::Spacing();
-          ImGui::TextWrapped("Enemy num: ");
-          ImGui::InputInt("##enemyNumShared", &enemyNum, 1);
-          ImGui::Spacing();
-          ImGui::TextWrapped("Odds for spawn (%%): ");
+		  ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
           ImGui::SliderFloat("##enemyOddsShared", &odds, 0.1f, 100.0f, "%.01f");
           validate_values(shareSettings);
           set_all_data_settings(waitTimeMin, waitTimeMax, enemyNum, odds);
@@ -144,16 +142,18 @@ public:
 				ImGui::TextWrapped(EnemySwapper::emNames[i]);
 				ImGui::Checkbox(uniqStr.c_str(), &EnemySwapper::enemySettings[i].useDefault);
 				if (!EnemySwapper::enemySettings[i].useDefault) {
+
+					ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting the value to 2 doubles the enemy #, setting it to 3 triples, etc. Setting it to 0 removes all enemies at that spawn point.");
+					uniqStr = std::string("##EnemyNum" + std::to_string(i));
+					ImGui::InputInt(uniqStr.c_str(), &EnemySwapper::enemySettings[i].enemyNum);
+					ImGui::TextWrapped("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");					
                     ImGui::TextWrapped("Wait time min: ");
 				    uniqStr = std::string("##WaitTimeMin" + std::to_string(i));
 				    ImGui::InputFloat(uniqStr.c_str() , &EnemySwapper::enemySettings[i].waitTimeMin, 0.1F);
                     ImGui::TextWrapped("Wait time max: ");
 				    uniqStr = std::string("##WaitTimeMax" + std::to_string(i));
 				    ImGui::InputFloat(uniqStr.c_str() , &EnemySwapper::enemySettings[i].waitTimeMax, 0.1f);
-                    ImGui::TextWrapped("Enemy num: ");
-					uniqStr = std::string("##EnemyNum" + std::to_string(i));
-				    ImGui::InputInt(uniqStr.c_str() , &EnemySwapper::enemySettings[i].enemyNum);
-					ImGui::TextWrapped("Odds for spawn (%%): ");
+					ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
 					uniqStr = std::string("##Odds" + std::to_string(i));
 				    ImGui::SliderFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[i].odds, 0.1f, 100.0f, "%.01f");
 					validate_values(shareSettings, &EnemySwapper::enemySettings[i]);
@@ -213,21 +213,5 @@ public:
         }
 	}
     std::unique_ptr<FunctionHook> m_enemy_data_settings_hook;
-	const std::array<const char*, 10> README{ 
-			"This mod change enemy num property. You can't spawn less enemies, that placed on level by Capcom as enemy objects, only increase/decrease num property for each enemy"
-		"or completely remove enemy from wave (set \"Enemy num\" to 0). For example, DMD m10 has 3 empusas in first encounter. It placed on level like: empusa with num = 1 "
-		"and empusa with num = 2. So if you set \"Enemy num\" = 3, you will get 6 empusas, if you set \"Enemy num\" = 1, you will get 2 empusas. Same with BP lvl 30: "
-		"it has 9 cainas, plased manually. If you set \"Enemy num\" to 4, you will get  4*9=36 cainas.",
-            "This mod doesn't change enemy limit in encounters, => game will use default limits even if you set enemy num to >, that this setting. "
-		"To change it, enable LDK and set \"hardlimit\" to whatever you need.",
-			"Many BP stages doesn't have enemy limit in encounters, so make a lot of enemies on stage without control enemy limit with LDK option can crash the game.",
-			"Game may be softlocked, if you set \"Enemy num\" to 0 for enemies, that should appears after a cutscene or a blackscreen. Same with low odd chance.",
-			"Using this mod on boss Dante will not let you finish a mission (same with BP Vergil).",
-			"Mod doesn't affect Dante and all Vergil bosses num.",
-			"Game will crash, if you using this mod on Urizen1.",
-			"Mod can be used with coop trainer's boss swap option to both bosses on M20 to prevent end the mission when you kill Dante or Vergil.",
-			"Mod may softlock M19 after killing Vergil.",
-			"If enemy swapper enabled, set some enemy num to 0 may also affect wrong enemy. To prevent that, use wave settings mod and set generate type to \"order\"."
-	};
 };
 

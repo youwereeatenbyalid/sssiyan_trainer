@@ -140,7 +140,7 @@ void BpStageJump::generate_palace(int seed)
 		randomize_array(palacearray, 0, 99, 1, 100);
 		break;
 	}
-	if (BpStageJump::palace_type == palace_type_enum::PARTIAL or BpStageJump::palace_type == palace_type_enum::BALANCED) {
+	if (BpStageJump::palace_type == palace_type_enum::PARTIAL || BpStageJump::palace_type == palace_type_enum::BALANCED) {
 		if (randombosses)
 			randomize_array(bossarray, 0, 7, 0, 7);
 		palacearray[19] = bossarray[0];

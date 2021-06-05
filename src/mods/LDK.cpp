@@ -57,7 +57,7 @@ uint32_t LDK::enemydeath_count{0};
 
 HitVfxState LDK::vfx_state{HitVfxState::DrawAll};
 
-bool LDK::hitvfx_fix_on{true};
+bool LDK::hitvfx_fix_on{false};
 bool LDK::waitTimeEnabled{false};
 bool LDK::nohitlines_enabled{false};
 
@@ -785,65 +785,62 @@ void LDK::on_draw_ui() {
   ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
 
-  ImGui::TextWrapped("Old LDK cheats thats can increase performance a little. Thge main settings for memeory usage stored in <GameFolder>\\configs\\runtime.args");
+  //ImGui::TextWrapped("Old LDK cheats thats can increase performance a little. Thge main settings for memeory usage stored in <GameFolder>\\configs\\runtime.args");
   ImGui::Separator();
-
-  ImGui::Checkbox("Enable hitVfx fix", (bool*)&LDK::hitvfx_fix_on);
-  ImGui::TextWrapped("This will disable some visual effects on objects, when they take damage "
-      "to increase overall performance of LDK mode. Unfortunately, "
-      "a few non-sword hits visual effects will be disabled after containerNum (overall effects count) reaching \"limit to draw nothing\", like Nero's charged shot, explosion of charged shot, etc. "
-	  "Option take effects when > 6 enemies on a level now, or if \"limit to draw nothing\" = 0.");
-  ImGui::TextWrapped("ContainerNum value before last vfx func call: %d", container_num);
-
-  ImGui::Spacing();
-
-  ImGui::TextWrapped("ContainerNum limit to draw only damage. While containerNum value < this, game will draw all hits effects. "
-	  "After reaching this value, game will be draw only white flashes when objects gets hits.");
-  ImGui::SliderInt("##ContainerNum limit to draw only damage slider", (int*)&LDK::container_limit_damage_only, 0, 180);
-  LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
-
-  ImGui::Spacing();
+  if (ImGui::CollapsingHeader("Performance Optimization"))
+  {
+  ImGui::Checkbox("Disable Hit VFX", (bool*)&LDK::hitvfx_fix_on);
+  ImGui::TextWrapped("This will disable some visual effects on objects when they take damage to increase overall performance.");
+  //ImGui::TextWrapped("ContainerNum value before last vfx func call: %d", container_num);
   
-  ImGui::TextWrapped("After reaching this value game will not draw any effects, when objects gets hits. "
-	  "Pro tip: set this to 0 to disable all damage vfx, regardless of ContainerNum value and live enemy num.");
-  ImGui::Text("ContainerNum limit to draw nothing");
-  ImGui::SliderInt("##ContainerNum limit to draw nothing slider", (int*)&LDK::container_limit_all,  0, 310);
-  LDK::set_container_limit_all(LDK::container_limit_all);
-
   ImGui::Spacing();
+  if(LDK::hitvfx_fix_on){
+	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will only draw white hit effects.");
+	  ImGui::SliderInt("##ContainerNum limit to draw only hit effects", (int*)&LDK::container_limit_damage_only, 0, 180);
+	  ImGui::Checkbox("Disable limit", (bool*)&swap_hitvfx_settings);
+	  LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
 
-  ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num >= \"ContainerNum limit to draw only damage\". "
-	  "This may improve overall visual quality, but also increase hits effects count, that will decrease overall performance.");
-  ImGui::Checkbox("Swap hitvfx settings", (bool*)&swap_hitvfx_settings);
+	  ImGui::Spacing();
+  
+	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will not draw any hit effects.");
+	  ImGui::SliderInt("##ContainerNum limit to draw nothing", (int*)&LDK::container_limit_all,  0, 310);
+	  LDK::set_container_limit_all(LDK::container_limit_all);
 
-  ImGui::Spacing();
+	  ImGui::Spacing();
 
-  ImGui::TextWrapped("Option for those, who uses LDK+DMD(+InstantDT)_(completely mad men). Disable enemy dt vfx to slightly increase performance.");
-  ImGui::Checkbox("Disable enemy DT VFX", &emDtVfxSkipOn);
+	  //ImGui::TextWrapped("When this on, the game will draw hits (blood, hit lines, etc.) instead of draw only damage (white flash effects) when container num >= \"ContainerNum limit to draw only damage\". "
+	  //	  "This may improve overall visual quality, but also increase hits effects count, that will decrease overall performance.");
+  
+	  ImGui::TextWrapped("Disable enemy dt visual effects to slightly increase performance.");
+	  ImGui::Checkbox("Disable enemy DT VFX", &emDtVfxSkipOn);
+
+	  ImGui::Spacing();
+  }
+
 
   ImGui::Separator();
 
-  ImGui::TextWrapped("Don't draw hit lines on objects, when they getting hits. This option doesn't depend on \"hitVfx fix\" and can be turned on/off separately of it. Increases performance.");
-  ImGui::Checkbox("Don't draw a hitlines", &nohitlines_enabled);
+  ImGui::TextWrapped("Don't draw hit lines on enemies. Increases performance.");
+  ImGui::Checkbox("Don't draw hitlines", &nohitlines_enabled);
 
   ImGui::Separator();
 
   ImGui::Checkbox("Enable pause spawn", (bool*)&LDK::pausespawn_enabled);
-  ImGui::TextWrapped("Enable pause for spawn enemies after killing them. By default in many waves new enemy will spawn instantly after you killed previous. "
-	  "In coop mode it's cause a desync, use \"pause spawn for coop\" option for coop play instead of this.");
-  ImGui::TextWrapped("P.S. this shit actually sets hardlimit to 0 for a few seconds after killing an enemy when current enemy num on a wave > 8. If you skip cutscene after which "
-	  "enemies should spawn when hardlimit = 0, game may be softlocked :(.");
+  ImGui::TextWrapped("briefly delay enemies spawning after an enemy is killed. Desyncs in Co-op, use \"Co-op pause spawn\" instead.");
+  //ImGui::TextWrapped("P.S. this shit actually sets hardlimit to 0 for a few seconds after killing an enemy when current enemy num on a wave > 8. If you skip cutscene after which "
+  //  "enemies should spawn when hardlimit = 0, game may be softlocked :(.");
   if (pausespawn_enabled)
     waitTimeEnabled = false;
 
   ImGui::Separator();
 
   ImGui::Checkbox("Enable pause spawn for coop", &waitTimeEnabled);
-  ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
-      "pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
-  ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f, "%.1f");
+  //ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
+  //    "pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
+  //ImGui::SliderFloat("Wait time", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 
-  ImGui::Separator();
+  //ImGui::Separator();
+  }
 }
