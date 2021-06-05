@@ -196,6 +196,8 @@ set(MODS_SRC
     mods/AerialPushbackVertical.cpp 
     mods/modNeroAlwaysInitialDT.hpp 
     mods/modNeroAlwaysInitialDT.cpp 
+    mods/DisableGauntletStages.hpp 
+    mods/DisableGauntletStages.cpp
 
 )
 
