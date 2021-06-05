@@ -8,7 +8,6 @@ bool EnemySwapper::isSwapAll{NULL};
 bool EnemySwapper::isCustomRandomSettings{false};
 bool EnemySwapper::isCustomSeed{false};
 bool EnemySwapper::isCustomSpawnPos{NULL};
-bool EnemySwapper::isBp = false;
 bool isReswap = false;
 bool isSkipNum = false;
 bool checkForReswap = false;
@@ -26,6 +25,7 @@ uintptr_t EnemySwapper::setEnemyDataRet6{NULL};
 //uintptr_t EnemySwapper::setEnemyDataRet7{NULL};
 //uintptr_t EnemySwapper::swapIdRet{NULL};
 uintptr_t EnemySwapper::nowFlowRet{NULL};
+uintptr_t EnemySwapper::gameModeRet{NULL};
 
 uint32_t EnemySwapper::selectedToSwap[enemyListCount];
 uint32_t EnemySwapper::selectedSwapAll{NULL};
@@ -35,6 +35,7 @@ uint32_t EnemySwapper::newEnemyId     = 0;//Enemy Id to swap in current state
 uint32_t EnemySwapper::nowFlow        = 0;
 uint32_t EnemySwapper::prevFlow       = 0;
 uint32_t flowTmp = 0;
+uint32_t EnemySwapper::gameMode       = 0;
 
 float EnemySwapper::spawnPosZOffset = 0.0f;
 float EnemySwapper::curSpawnPosZ = 0.0f;
@@ -123,8 +124,8 @@ static naked void enemy_swap_detour1() {
         jmp originalcode*/
 
         swapsettings:
-        cmp byte ptr [EnemySwapper::isBp], 0
-        je originalcode
+        cmp dword ptr [EnemySwapper::gameMode], 3
+        jne originalcode
         mov [curSetDataAddr], rcx
         //mov byte ptr [checkForReswap], 1
         mov esi,[rcx+0x10]
@@ -281,7 +282,7 @@ static naked void enemy_swap_detour3() {
 
 
         swapsettings:
-        cmp byte ptr [EnemySwapper::isBp], 1 //for bp skip
+        cmp dword ptr [EnemySwapper::gameMode], 3 //for bp skip
         je checkdataoption
         //mov byte ptr [checkForReswap], 1
         mov ecx, [r14+0x10]
@@ -661,6 +662,17 @@ static naked void now_flow_detour() {
   }
 }
 
+static naked void gamemode_detour() {
+    __asm {
+        push rcx
+        mov ecx, dword ptr [rax+0x90]
+        mov dword ptr [EnemySwapper::gameMode], ecx
+        pop rcx
+        cmp [rax+0x00000090],edi
+        jmp qword ptr [EnemySwapper::gameModeRet]
+  }
+}
+
 void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
   selectedToSwap[emListIndx] = swapToIndx;
   swapSettings[emListIndx].set_current_id(swapToIndx);
@@ -681,10 +693,11 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   isCustomSpawnPos = cfg.get<bool>("EnemySwapper.isCustomSpawnPos").value_or(false);
   spawnPosZOffset  = cfg.get<float>("EnemySwapper.spawnPosZOffset").value_or(0.6f);
   std::string key;
+  uint32_t swapTo = 0;
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     key = std::string(EnemySwapper::emNames[i]) + "_swapTo";
-    selectedToSwap[i] = cfg.get<uint32_t>(key).value_or(i);
-    set_swapper_setting(i, selectedToSwap[i]);
+    swapTo = cfg.get<uint32_t>(key).value_or(i);
+    set_swapper_setting(i, swapTo);
   }
 }
 
@@ -740,8 +753,6 @@ void EnemySwapper::on_draw_ui() {
   /*ImGui::TextWrapped("Vector size is: %d", setDataAddrs.size());
   ImGui::Spacing();
   ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
-  ImGui::TextWrapped("Bloody palace fix - check when swapping enemies in bloody palace.");
-  ImGui::Checkbox("BP fix", &isBp);
 
   ImGui::Separator();
 
@@ -755,7 +766,7 @@ void EnemySwapper::on_draw_ui() {
     if (ImGui::Button("Restore default swapper settings"))
       restore_default_settings();
 
-    /*
+    ImGui::Separator();
     ImGui::Checkbox("Custom random settings", &isCustomRandomSettings);
     if (isCustomRandomSettings) {
       ImGui::Checkbox("Use custom seed", &isCustomSeed);
@@ -900,6 +911,11 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Unanable to find EnemySwapper.nowFlowAddr pattern.";
   }
 
+  auto gameModeAddr = utility::scan(base, "39 B8 90 00 00 00 48"); //
+  if (!nowFlowAddr) {
+    return "Unanable to find EnemySwapper.gameMode pattern.";
+  }
+
   //uintptr_t swapIdAddr = g_framework->get_module().as<uintptr_t>() + 0xF34F6A;
 
   const uintptr_t spawnAddrOffset = 0xA;
@@ -951,6 +967,10 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Failed to initialize EnemySwapper.swapIdAddr"; 
   }*/
 
+  if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.gameModeAddr"; 
+  }
 
   seed_rnd_gen(-1);
   EnemySwapper::setDataAddrs.reserve(reservedForReswap);

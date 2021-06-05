@@ -75,6 +75,7 @@ static uintptr_t setEnemyDataRet3;
 //static uintptr_t setEnemyData4Jmp;
 static uintptr_t setEnemyDataRet6;
 static uintptr_t nowFlowRet;
+static uintptr_t gameModeRet;
 //static uintptr_t swapIdRet;
 
 static uintptr_t posSpawnRet;
@@ -85,7 +86,6 @@ static bool cheaton;
 static bool isCustomRandomSettings;
 static bool isCustomSeed;
 static bool isCustomSpawnPos;
-static bool isBp;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -93,6 +93,7 @@ static uint32_t currentEnemyId;
 static uint32_t newEnemyId;
 static uint32_t nowFlow;
 static uint32_t prevFlow;
+static uint32_t gameMode;
 
 static float spawnPosZOffset;
 static float curSpawnPosZ;
@@ -217,4 +218,5 @@ private:
   //std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
   std::unique_ptr<FunctionHook> m_now_flow_hook;
+  std::unique_ptr<FunctionHook> m_gamemode_hook;
 };
