@@ -39,7 +39,7 @@ uintptr_t LDK::nohitlns_ret_je{NULL};
 uintptr_t LDK::missionmanager{NULL};
 uintptr_t LDK::enemygentype{NULL};
 bool LDK::cheaton{NULL};
-bool LDK::pausespawn_enabled{true};
+bool LDK::pausespawn_enabled{false};
 bool LDK::emDtVfxSkipOn = false;
 bool LDK::showOldFixes = false;
 
