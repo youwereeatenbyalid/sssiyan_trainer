@@ -116,7 +116,6 @@ void BpStageJump::randomize_array(int* array_param, int range_low, int range_hig
 void BpStageJump::generate_palace(int seed)
 {
 	reset_palace();
-	std::srand(seed);
 
 	switch (BpStageJump::palace_type) {
 	case palace_type_enum::PARTIAL:
@@ -337,10 +336,8 @@ void BpStageJump::on_draw_ui() {
 		ImGui::TextWrapped("You must press \"Randomize Palace\" at the beginning of every run to reset the palace.");
 
 		if (ImGui::Button("Randomize Palace")){
-			if (!useseed) {
-				std::srand(std::time(0)); // if not using user defined seed, get one from system time instead
+			if (!useseed)
 				seed = std::rand();
-			}
 			generate_palace(seed);
 		}
 		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
