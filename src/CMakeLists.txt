@@ -197,6 +197,8 @@ set(MODS_SRC
     mods/EnemyWaveSettings.cpp
 	mods/HoldToMash.hpp
 	mods/HoldToMash.cpp
+    mods/VergilSDTNoConcentrationLose.hpp
+    mods/VergilSDTNoConcentrationLose.cpp
 )
 
 set(HOOKS_SRC

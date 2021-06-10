@@ -7,10 +7,6 @@ uintptr_t LDK::capbypass_jmp_ret1{NULL};
 uintptr_t LDK::capbypass_jmp_ret2{NULL};
 uintptr_t LDK::capbypass_jmp_jnl{NULL};
 uintptr_t LDK::capbypass_jmp_jle{NULL};
-uintptr_t LDK::gethpoflasthitobject_jmp_ret{NULL};
-uintptr_t LDK::multipledeathoptimize_jmp_ret{NULL};
-uintptr_t LDK::multipledeathoptimize_jmp_jle{NULL};
-uintptr_t LDK::canlasthitkill_jmp_ret{NULL};
 uintptr_t LDK::nopfunction_jmp_ret1{NULL};
 uintptr_t LDK::nopfunction_jmp_ret2{NULL};
 uintptr_t LDK::nopfunction_1_call{NULL};
@@ -24,8 +20,6 @@ uintptr_t LDK::cavforcelightning1_jmp_ret{NULL};
 uintptr_t LDK::cavforcelightning2_jmp_ret{NULL};
 uintptr_t LDK::cavcoordinatechange_jmp_ret{NULL};
 
-uintptr_t LDK::sswords_restriction_jmp{NULL};
-uintptr_t LDK::sswords_restriction_jmp_ret{NULL};
 uintptr_t LDK::hitvfxskip_jmp{NULL};
 uintptr_t LDK::hitvfxskip_ret{NULL};
 uintptr_t LDK::containernum_addr{NULL};
@@ -70,9 +64,10 @@ float LDK::hpoflasthitobj = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
-//LDK::RegAddrBackup LDK::death_func_backup;
 //LDK::RegAddrBackup LDK::redorbdrop_backup;
 LDK::RegAddrBackup LDK::hitvfx_backup;
+
+std::mutex LDKmtx;
 
 void pause_spawn()
 {
@@ -81,13 +76,14 @@ void pause_spawn()
 		if (LDK::number <= 8) {
 			return;
 		}
+		is_spawn_paused = true;
 		LDK::hardlimit_temp = LDK::hardlimit;
 		LDK::hardlimit = 0;
-		is_spawn_paused = true;
 		std::thread ([&]{
 		Sleep(LDK::SPAWN_PAUSE_TIME*1000);
+		LDK::hardlimit = LDK::hardlimit_temp;
 		is_spawn_paused = false;
-		LDK::hardlimit = LDK::hardlimit_temp;}).detach();
+		}).detach();
 	}
 }
 
@@ -185,7 +181,9 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		pausespawn:
-		push rax
+		cmp byte ptr [is_spawn_paused], 1
+		je originalcode
+        push rax
 		push rbx
 		push rcx
 		push rdx
@@ -446,7 +444,7 @@ static naked void hitvfxskip_detour() {
 		jmp originalcode
 
 		damageonly:
-		mov ax, word ptr [rbp]
+		//mov ax, word ptr [rbp]
 		cmp byte ptr [swap_hitvfx_settings], 1
 		je swapped_settings
 		cmp ax, CHAR_DAMAGE
@@ -547,10 +545,6 @@ std::optional<std::string> LDK::on_initialize() {
   auto capbypass_addr2 = utility::scan(base, "44 3B F0 7E 52");
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
-  }
-  auto canlasthitkill_addr = utility::scan(base, "C7 47 10 00 00 80 3F 32");
-  if (!canlasthitkill_addr) {
-	  return "Unable to find canlasthitkill pattern.";
   }
   auto nopfunction_addr1 = utility::scan(base, "E8 D7 0C 07 FF");
   if (!nopfunction_addr1) {
@@ -716,7 +710,7 @@ void LDK::set_container_limit_blood_only(uint32_t num) {
 
 // during load
 void LDK::on_config_load(const utility::Config &cfg) {
-  hitvfx_fix_on  = cfg.get<bool>("hitvfx_fix_on").value_or(true);
+  hitvfx_fix_on  = cfg.get<bool>("hitvfx_fix_on").value_or(false);
   hardlimit = cfg.get<uint32_t>("hardlimit").value_or(30);
   container_limit_damage_only = cfg.get<uint32_t>("container_limit_damage_only").value_or(50);
   container_limit_all = cfg.get<uint32_t>("container_limit_all").value_or(72);
