@@ -205,6 +205,8 @@ set(MODS_SRC
     mods/modNeroAlwaysInitialDT.cpp 
     mods/DisableGauntletStages.hpp 
     mods/DisableGauntletStages.cpp
+    mods/VergilSDTNoConcentrationLose.hpp
+    mods/VergilSDTNoConcentrationLose.cpp
 )
 
 set(HOOKS_SRC

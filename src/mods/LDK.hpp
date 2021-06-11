@@ -47,10 +47,6 @@ public:
   static uintptr_t capbypass_jmp_jnl;
   static uintptr_t capbypass_jmp_jle;
 
-  static uintptr_t gethpoflasthitobject_jmp_ret;
-  static uintptr_t multipledeathoptimize_jmp_ret;
-  static uintptr_t multipledeathoptimize_jmp_jle;
-  static uintptr_t canlasthitkill_jmp_ret;
   static uintptr_t nopfunction_jmp_ret1;
   static uintptr_t nopfunction_jmp_ret2;
   static uintptr_t nopfunction_1_call;
@@ -68,8 +64,6 @@ public:
 
   static uintptr_t hitvfxskip_jmp;
   static uintptr_t hitvfxskip_ret;
-  static uintptr_t sswords_restriction_jmp;
-  static uintptr_t sswords_restriction_jmp_ret;
   static uintptr_t containernum_addr;
   static uintptr_t nopfunction1_jmp_ret2;
   static uintptr_t waitTimeJmpRet;
@@ -147,7 +141,5 @@ public:
   std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
   std::unique_ptr<FunctionHook> m_hitvfx_dontdraw_hitlines_hook;
 
-  //static RegAddrBackup death_func_backup;
-  //static RegAddrBackup redorbdrop_backup;
   static RegAddrBackup hitvfx_backup;
 };

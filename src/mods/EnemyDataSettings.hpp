@@ -58,8 +58,6 @@ public:
         shareSettings = cfg.get<bool>("EnemyDataSettings_shareSettings").value_or(true);
         set_all_data_settings(timeMinLd, timeMaxLd, emNumLd, oddsLd);
 		for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
-			if(i == 32 || i == 33 || i == 35 || i == 39 || i == 40)//Vergils and Dante
-				continue;
 			key = std::string(EnemySwapper::emNames[i]) + "_" + "waitTimeMin";
 			EnemySwapper::enemySettings[i].waitTimeMin = cfg.get<float>(key).value_or(0.0f);
 			key = std::string(EnemySwapper::emNames[i]) + "_" + "waitTimeMax";
