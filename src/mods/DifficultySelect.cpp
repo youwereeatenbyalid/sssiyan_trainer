@@ -105,7 +105,7 @@ void DifficultySelect::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void DifficultySelect::on_draw_ui() {
   auto difficultystring =
-      "Human\0Devil Hunter\0Son of Sparda\0Dante Must Die\0Heaven or Hell\0Hell"
+      "Human\0Devil Hunter\0Son of Sparda\0Dante Must Die\0Heaven or Hell\0Hell "
       "and Hell\0";
   ImGui::Combo("Mission Difficulty", (int*)&DifficultySelect::missiondifficulty, difficultystring);
   ImGui::Combo("Bloody Palace Difficulty", (int*)&DifficultySelect::bpdifficulty, difficultystring);

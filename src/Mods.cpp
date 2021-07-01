@@ -27,6 +27,7 @@
         #include "mods/TauntSelector.hpp"
         #include "mods/DisableAutoAssist.hpp"
         #include "mods/DisableTitleTimer.hpp"
+        #include "mods/HoldToMash.hpp"
         #include "mods/SpardaWorkshop.hpp"
         #include "mods/DontHideWeaponWheel.hpp"
         //#include "mods/SCNPathEditor.hpp"
@@ -40,6 +41,7 @@
         #include "mods/NothingCancelsBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
+        #include "mods/DTWingsOnly.hpp"
     // Dante
     // V
        #include "mods/InfiniteSummonPowerup.hpp"
@@ -82,6 +84,9 @@
         #include "mods/WalkOnKeyboard.hpp"
         #include "mods/ChargeChecker.hpp"
         #include "mods/WeightReset.hpp"
+        #include "mods/AerialPushback.hpp"
+        #include "mods/AerialPushbackVertical.hpp"
+        #include "mods/DisableGauntletStages.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -91,6 +96,8 @@
         #include "mods/NeroInfPunchline.hpp"
         #include "mods/NeroSkipCS2.hpp"
         #include "mods/NeroNoDTCooldown.hpp"
+        #include "mods/DTWingsOnly.hpp"
+        #include "mods/modNeroAlwaysInitialDT.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -122,10 +129,13 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-    // VPZadov
+// VPZadov
     // Background
     // Common
     // Gameplay
+       #include "mods/EnemySwapper.hpp"
+       #include "mods/EnemyDataSettings.hpp"
+       #include "mods/EnemyWaveSettings.hpp"
     // Nero
     // Dante
     // V
@@ -136,6 +146,7 @@
        #include "mods/VergilSetMaxJJC.hpp"
        #include "mods/VergilAdditionalJJC.hpp"
        #include "mods/VergilSDTAccumulateRework.hpp"
+       #include "mods/VergilSDTNoConcentrationLose.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
   // Example
@@ -167,6 +178,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
+        m_mods.emplace_back(std::make_unique<HoldToMash>());
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
         m_mods.emplace_back(std::make_unique<DontHideWeaponWheel>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
@@ -222,8 +234,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
         m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
-        // m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());   // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
         m_mods.emplace_back(std::make_unique<WeightReset>());
+        m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
@@ -233,6 +246,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
         m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
         m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
@@ -244,6 +258,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
         m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
         m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
+        m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
+        m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
@@ -266,10 +282,13 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
-    // VPZadov
+// VPZadov
         // Background
         // Common
         // Gameplay
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
+        m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         // Nero
         // Dante
         // V
@@ -280,7 +299,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-		  
+        m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif

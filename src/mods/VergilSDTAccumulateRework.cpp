@@ -90,7 +90,7 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   onpage = vergilsdt;
   full_name_string = "SDT accumulate system rework (WIP?)(+)";
   author_string = "VPZadov";
-  description_string = "Vergil will get SDT points when he gets DT points.";
+  description_string = "Vergil will gain SDT points when he gains DT points.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

@@ -4,10 +4,13 @@
 
 uintptr_t EntitySpeeds::jmp_ret{NULL};
 bool EntitySpeeds::cheaton{NULL};
+
 bool dantemillionstabspeedup;
+bool danteskystarspeedup;
 bool nerosnatchspeedup;
 
 float dantemillionstabstartspeed = 3.0f;
+float danteskystarspeed          = 1.5f;
 float nerosnatchspeed            = 1.5f;
 float nerosnatchpullspeed        = 2.0f;
 
@@ -76,6 +79,8 @@ static naked void detour() {
         je dantemstab
         cmp dword ptr [PlayerTracker::playermoveid], 00DC00F0h // dante ms start dsd
         je dantemstab
+        cmp dword ptr [PlayerTracker::playermoveid], 157C01F4h // dante sky star
+        je danteskystar
         jmp code
 
 // nero mults
@@ -95,6 +100,12 @@ static naked void detour() {
         cmp byte ptr [dantemillionstabspeedup], 1
         jne code
         mulss xmm0, [dantemillionstabstartspeed]
+        jmp code
+
+    danteskystar:
+        cmp byte ptr [danteskystarspeedup], 1
+        jne code
+        mulss xmm0, [danteskystarspeed]
         jmp code
 
 // code
@@ -135,19 +146,22 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
 }
 
 void EntitySpeeds::on_config_load(const utility::Config& cfg) {
-  nerosnatchspeedup = cfg.get<bool>("nero_snatch_speedup").value_or(true);
-  dantemillionstabspeedup = cfg.get<bool>("dante_million_stab_startup_speedup").value_or(true);
+  nerosnatchspeedup = cfg.get<bool>("nero_snatch_speedup").value_or(false);
+  dantemillionstabspeedup = cfg.get<bool>("dante_million_stab_startup_speedup").value_or(false);
+  danteskystarspeedup = cfg.get<bool>("dante_sky_star_speedup").value_or(false);
 }
 
 void EntitySpeeds::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("nero_snatch_speedup", nerosnatchspeedup);
   cfg.set<bool>("dante_million_stab_startup_speedup", dantemillionstabspeedup);
+  cfg.set<bool>("dante_sky_star_speedup", danteskystarspeedup);
 }
 
 void EntitySpeeds::on_draw_ui() {
   ImGui::Text("Nero");
-  ImGui::Checkbox("Nero Snatch Speed Up", &nerosnatchspeedup);
+  ImGui::Checkbox("Snatch Speedup", &nerosnatchspeedup);
   ImGui::Separator();
   ImGui::Text("Dante");
-  ImGui::Checkbox("Dante Million Stab Startup Speed Up", &dantemillionstabspeedup);
+  ImGui::Checkbox("Million Stab Startup Speedup", &dantemillionstabspeedup);
+  ImGui::Checkbox("Sky Star Speedup", &danteskystarspeedup);
 }

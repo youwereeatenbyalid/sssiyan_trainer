@@ -4,9 +4,12 @@
 
 uintptr_t DanteQuickSDT::jmp_ret{NULL};
 bool DanteQuickSDT::cheaton{NULL};
-float sdtspeedup = 3.0f;
+bool danteEvenFasterSDT{true};
 
-// clang-format off
+float sdtspeedup = 3.0f;
+float fastersdtspeedup = 5.0f;
+
+    // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
@@ -19,8 +22,15 @@ static naked void detour() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [danteEvenFasterSDT], 1
+        je cheatcode2
         movss xmm0, [rdi+00000128h]
         mulss xmm0, [sdtspeedup]
+		jmp qword ptr [DanteQuickSDT::jmp_ret]
+
+    cheatcode2:
+        movss xmm0, [rdi+00000128h]
+        mulss xmm0, [fastersdtspeedup]
 		jmp qword ptr [DanteQuickSDT::jmp_ret]
 
     code:
@@ -41,7 +51,7 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
 
   ischecked            = &DanteQuickSDT::cheaton;
   onpage               = dantesdt;
-  full_name_string     = "Quick SDT";
+  full_name_string     = "Quick SDT (+)";
   author_string        = "SSSiyan";
   description_string   = "Reduces the time you have to hold DT to enter SDT.";
 
@@ -59,5 +69,14 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
+void DanteQuickSDT::on_config_load(const utility::Config& cfg) {
+  danteEvenFasterSDT = cfg.get<bool>("dante_even_faster_sdt").value_or(false);
+}
+
+void DanteQuickSDT::on_config_save(utility::Config& cfg) {
+  cfg.set<bool>("dante_even_faster_sdt", danteEvenFasterSDT);
+}
+
 void DanteQuickSDT::on_draw_ui() {
+  ImGui::Checkbox("Even faster SDT", &danteEvenFasterSDT);
 }

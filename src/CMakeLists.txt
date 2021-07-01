@@ -190,6 +190,23 @@ set(MODS_SRC
 	mods/DifficultySelect.cpp
 	mods/DontHideWeaponWheel.hpp
 	mods/DontHideWeaponWheel.cpp
+    mods/EnemySwapper.hpp
+    mods/EnemySwapper.cpp
+    mods/EnemyDataSettings.hpp
+    mods/EnemyWaveSettings.hpp
+    mods/EnemyWaveSettings.cpp
+	mods/HoldToMash.hpp
+	mods/HoldToMash.cpp
+    mods/AerialPushback.hpp 
+    mods/AerialPushback.cpp 
+    mods/AerialPushbackVertical.hpp 
+    mods/AerialPushbackVertical.cpp 
+    mods/modNeroAlwaysInitialDT.hpp 
+    mods/modNeroAlwaysInitialDT.cpp 
+    mods/DisableGauntletStages.hpp 
+    mods/DisableGauntletStages.cpp
+    mods/VergilSDTNoConcentrationLose.hpp
+    mods/VergilSDTNoConcentrationLose.cpp
 )
 
 set(HOOKS_SRC
@@ -301,10 +318,10 @@ include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
-RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
-RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}"/fluffymod/Collab Trainer/Injectors"
+RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug
+RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fluffymod/Collab\ Trainer/Injectors
+RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/RelWithDebInfo
+RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/MinSize
 OUTPUT_NAME sssiyan)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}

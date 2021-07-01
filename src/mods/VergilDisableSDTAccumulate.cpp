@@ -34,7 +34,7 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   onpage             = vergilsdt;
   full_name_string   = "Disable SDT accumulate";
   author_string      = "VPZadov";
-  description_string = "Disable \"accumulate\" skill. Make more sense to use with "
+  description_string = "Disable the \"accumulate\" skill. Works best with the "
                        "accumulate system rework.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
