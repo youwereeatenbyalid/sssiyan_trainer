@@ -225,7 +225,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<AllStartManual>());
         m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
-        // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());    // TESTING
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
