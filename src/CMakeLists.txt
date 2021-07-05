@@ -209,6 +209,8 @@ set(MODS_SRC
     mods/VergilSDTNoConcentrationLose.cpp
     mods/VergilAirTrick.hpp
     mods/VergilAirTrick.cpp
+    mods/VergilSDTTrickEfx.hpp
+    mods/VergilSDTTrickEfx.cpp
 )
 
 set(HOOKS_SRC

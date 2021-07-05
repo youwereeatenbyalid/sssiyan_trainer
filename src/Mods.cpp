@@ -148,6 +148,7 @@
        #include "mods/VergilSDTAccumulateRework.hpp"
        #include "mods/VergilSDTNoConcentrationLose.hpp"
        #include "mods/VergilAirTrick.hpp"
+       #include "mods/VergilSDTTrickEfx.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
   // Example
@@ -302,6 +303,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
         m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
         m_mods.emplace_back(std::make_unique<VergilAirTrick>());
+        m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
