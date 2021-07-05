@@ -207,6 +207,8 @@ set(MODS_SRC
     mods/DisableGauntletStages.cpp
     mods/VergilSDTNoConcentrationLose.hpp
     mods/VergilSDTNoConcentrationLose.cpp
+    mods/VergilAirTrick.hpp
+    mods/VergilAirTrick.cpp
 )
 
 set(HOOKS_SRC
