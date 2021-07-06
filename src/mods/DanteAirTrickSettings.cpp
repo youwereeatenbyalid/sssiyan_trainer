@@ -72,7 +72,7 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Allow to change Z axis appear offset and remove distance restriction.";
 
-	auto distanceAddr0 = utility::scan(base, "F3 0F 10 4A 10 0F 57 C0 F3"); //DevilMayCry5.exe+F24790
+	auto distanceAddr0 = utility::scan(base, "F3 0F 10 4A 10 0F 57 C0 F3 41 0F 5A C2"); //DevilMayCry5.exe+F24790
 	if (!distanceAddr0) {
 		return "Unanable to find DanteAirTrickSettings.distanceAddr0 pattern.";
 	}
@@ -109,14 +109,14 @@ void DanteAirTrickSettings::on_config_load(const utility::Config& cfg)
 {
 	isAddZOffset = cfg.get<bool>("DanteAirTrickSettings.isAddZOffset").value_or(false);
 	isNoDistanceRestriction = cfg.get<bool>("DanteAirTrickSettings.isNoDistanceRestriction").value_or(true);
-	addZOffset = cfg.get<float>("DanteAirTrickSettings.addZOffset").value_or(0);
+	addZOffset = cfg.get<float>("DanteAirTrickSettings.addZOffset").value_or(0.0f);
 }
 
 void DanteAirTrickSettings::on_config_save(utility::Config& cfg)
 {
 	cfg.set<bool>("DanteAirTrickSettings.isAddZOffset", isAddZOffset);
 	cfg.set<bool>("DanteAirTrickSettings.isNoDistanceRestriction", isNoDistanceRestriction);
-	cfg.set<bool>("DanteAirTrickSettings.addZOffset", addZOffset);
+	cfg.set<float>("DanteAirTrickSettings.addZOffset", addZOffset);
 }
 
 void DanteAirTrickSettings::on_frame()
@@ -130,7 +130,7 @@ void DanteAirTrickSettings::on_draw_ui()
 	ImGui::Checkbox("Set custom additional Z offset", &isAddZOffset);
 	if (isAddZOffset) {
 		ImGui::TextWrapped("Additional offset:");
-		ImGui::SliderFloat("##OffssetSlider", &addZOffset, 0, 10, "%.01f");
+		ImGui::SliderFloat("##OffssetSlider", &addZOffset, 0.0f, 10.0f, "%.01f");
 	}
 }
 
