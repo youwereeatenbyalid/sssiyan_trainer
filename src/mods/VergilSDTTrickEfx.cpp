@@ -26,9 +26,9 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	ischecked = &cheaton;
 	onpage = vergilefxsettings;
-	full_name_string = "Force SDT Trick Efx";
+	full_name_string = "SDT Tricks EFX";
 	author_string = "VPZadov";
-	description_string = "Force game to use SDT Trick EFX in all forms.";
+	description_string = "Always use SDT Tricks EFX.";
 
 	auto sdtEfxAddr = utility::scan(base, "8B 86 B0 09 00 00 4C"); //DevilMayCry5.exe+1DDCB5D
     if (!sdtEfxAddr) {

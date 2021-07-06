@@ -211,6 +211,10 @@ set(MODS_SRC
     mods/VergilAirTrick.cpp
     mods/VergilSDTTrickEfx.hpp
     mods/VergilSDTTrickEfx.cpp
+    mods/DanteAirTrickSettings.hpp
+    mods/DanteAirTrickSettings.cpp
+    mods/GroundTrickNoDistanceRestriction.hpp
+    mods/GroundTrickNoDistanceRestriction.cpp
 )
 
 set(HOOKS_SRC

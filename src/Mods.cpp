@@ -138,6 +138,8 @@
        #include "mods/EnemyWaveSettings.hpp"
     // Nero
     // Dante
+       #include "mods/DanteAirTrickSettings.hpp"
+       #include "mods/GroundTrickNoDistanceRestriction.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -293,6 +295,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         // Nero
         // Dante
+        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
+        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
