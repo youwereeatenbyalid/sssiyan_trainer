@@ -6,6 +6,9 @@ public:
 	static bool cheaton;
 
 	static uintptr_t retJmp;
+	static uintptr_t retJe;
+	static uintptr_t yamatoBehaviorRet;
+	static uintptr_t yamatoBehaviorJne;
 
 	VergilSDTTrickEfx() = default;
 
@@ -30,5 +33,6 @@ public:
 private:
 	void init_check_box_info() override;
 	std::unique_ptr<FunctionHook> m_forcesdttrickefx_hook;
+	std::unique_ptr<FunctionHook> m_yamatobehavior_hook;
 };
 
