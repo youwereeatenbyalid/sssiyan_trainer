@@ -215,6 +215,8 @@ set(MODS_SRC
     mods/DanteAirTrickSettings.cpp
     mods/GroundTrickNoDistanceRestriction.hpp
     mods/GroundTrickNoDistanceRestriction.cpp
+    mods/InfiniteTrickUp.cpp
+    mods/InfiniteTrickUp.hpp
 )
 
 set(HOOKS_SRC
