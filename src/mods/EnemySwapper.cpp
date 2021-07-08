@@ -8,6 +8,8 @@ bool EnemySwapper::isSwapAll{NULL};
 bool EnemySwapper::isCustomRandomSettings{false};
 bool EnemySwapper::isCustomSeed{false};
 bool EnemySwapper::isCustomSpawnPos{NULL};
+bool EnemySwapper::isBossDanteAiEnabled{NULL};
+bool EnemySwapper::isDanteM20{NULL};
 bool isReswap = false;
 bool isSkipNum = false;
 bool checkForReswap = false;
@@ -26,6 +28,9 @@ uintptr_t EnemySwapper::setEnemyDataRet6{NULL};
 //uintptr_t EnemySwapper::swapIdRet{NULL};
 uintptr_t EnemySwapper::nowFlowRet{NULL};
 uintptr_t EnemySwapper::gameModeRet{NULL};
+uintptr_t EnemySwapper::bossDanteAiRet{NULL};
+uintptr_t EnemySwapper::bossDanteAiJne{NULL};
+
 
 uint32_t EnemySwapper::selectedToSwap[enemyListCount];
 uint32_t EnemySwapper::selectedSwapAll{NULL};
@@ -45,7 +50,11 @@ uint32_t flowTmp = 0;
 uint32_t EnemySwapper::gameMode       = 0;
 
 float EnemySwapper::spawnPosZOffset = 0.0f;
+float EnemySwapper::spawnPosXOffset = 0.0f;
+float EnemySwapper::spawnPosYOffset = 0.0f;
 float EnemySwapper::curSpawnPosZ = 0.0f;
+float EnemySwapper::curSpawnPosX      = 0.0f;
+float EnemySwapper::curSpawnPosY      = 0.0f;
 int reswapCount                     = 0;
 float EnemySwapper::waitTimeMin       = 0.0f;
 float EnemySwapper::waitTimeMax       = 0.0f;
@@ -616,6 +625,14 @@ static naked void spawn_pos_detour() {
         movss [EnemySwapper::curSpawnPosZ], xmm1
         addss xmm1, [EnemySwapper::spawnPosZOffset]
         movss [r13+0x34], xmm1
+        movss xmm1, [r13+0x30]//X
+        movss [EnemySwapper::curSpawnPosX], xmm1
+        addss xmm1, [EnemySwapper::spawnPosXOffset]
+        movss [r13+0x30], xmm1
+        movss xmm0, [r13+0x38] // Y
+        movss [EnemySwapper::curSpawnPosY], xmm0
+        addss xmm0, [EnemySwapper::spawnPosYOffset]
+        movss [r13+0x38], xmm0
 
         originalcode:
         test rcx,rcx
@@ -691,6 +708,32 @@ static naked void gamemode_detour() {
   }
 }
 
+static naked void load_Dante_ai_detour() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        cmp byte ptr [EnemySwapper::isBossDanteAiEnabled], 00
+        je originalcode
+
+        cheat:
+        cmp byte ptr [EnemySwapper::isDanteM20], 01
+        je dante_m19
+        mov dword ptr [rax+0x7C], 0x13
+
+        originalcode:
+        cmp dword ptr [rax+0x7C], 0x13
+        je ret_je
+        jmp qword ptr [EnemySwapper::bossDanteAiRet]
+
+        dante_m19:
+        mov dword ptr [rax+0x7C], 0x14
+        jmp originalcode
+
+        ret_je:
+        jmp qword ptr [EnemySwapper::bossDanteAiJne]
+  }
+}
+
 void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
   selectedToSwap[emListIndx] = swapToIndx;
   swapSettings[emListIndx].set_current_id(swapToIndx);
@@ -710,6 +753,11 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   swapForAll.set_swap_id(selectedForAllSwap);
   isCustomSpawnPos = cfg.get<bool>("EnemySwapper.isCustomSpawnPos").value_or(false);
   spawnPosZOffset  = cfg.get<float>("EnemySwapper.spawnPosZOffset").value_or(0.6f);
+  spawnPosXOffset  = cfg.get<float>("EnemySwapper.spawnPosXOffset").value_or(0.0f);
+  spawnPosYOffset  = cfg.get<float>("EnemySwapper.spawnPosYOffset").value_or(0.0f);
+
+  isBossDanteAiEnabled = cfg.get<bool>("EnemySwapper.isBossDanteAiEnabled").value_or(false);
+  isDanteM20 = cfg.get<bool>("EnemySwapper.isDanteM20").value_or(false);
   std::string key;
   uint32_t swapTo = 0;
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
@@ -720,11 +768,14 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
 }
 
 void EnemySwapper::on_config_save(utility::Config& cfg) {
-  //cfg.set<bool>("EnemySwapper", cheaton);
   cfg.set<uint32_t>("SwapAllEnemiesToID", selectedForAllSwap);
   cfg.set<bool>("EnemySwapper.isCustomSpawnPos", isCustomSpawnPos);
   cfg.set<float>("EnemySwapper.spawnPosZOffset", spawnPosZOffset);
+  cfg.set<float>("EnemySwapper.spawnPosXOffset", spawnPosXOffset);
+  cfg.set<float>("EnemySwapper.spawnPosYOffset", spawnPosYOffset);
   cfg.set<bool>("EnemySwapper.isSwapAll", isSwapAll);
+  cfg.set<bool>("EnemySwapper.isBossDanteAiEnabled", isBossDanteAiEnabled);
+  cfg.set<bool>("EnemySwapper.isDanteM20", isDanteM20);
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     cfg.set<uint32_t>(std::string(EnemySwapper::emNames[i]) + "_swapTo", selectedToSwap[i]);
   }
@@ -740,11 +791,26 @@ void EnemySwapper::restore_default_settings() {
   seed       = -1;
 }
 
+void set_Dante_ai() {
+    ImGui::TextWrapped("Use this option if you want to swap some enemies to boss Dante. Can't be changed during gameplay.");
+    ImGui::Checkbox("Enable boss Dante AI fix/Enable boss Vergil mission AI", &EnemySwapper::isBossDanteAiEnabled);
+    if (EnemySwapper::isBossDanteAiEnabled) {
+        ImGui::TextWrapped("Select this to use boss Dante/Vergil M20 AI type. By default mod using M19 AI type.\n"
+            "Killing boss Vergil with m19 AI on missions/BP will cause a soft lock.");
+        ImGui::Checkbox("Use boss Dante/Vergil M20 AI", &EnemySwapper::isDanteM20);
+    }
+}
+
 void EnemySwapper::on_draw_ui() {
   if (ImGui::CollapsingHeader("Current Issues")){
       ImGui::TextWrapped("Killing enemies swapped with a boss in mission can cause BGM issues.\n"
           "Shadow and Griffon can't be killed.\n"
-          "Dante has disabled AI.\n"
+          "Only 1 type of Dante's/Vergil's AI can be loaded for mission/BP floor.\n"
+          "Dante AI fix doesn't work on most of BP stages.\n"
+          "Bp stages will not end with Dante boss.\n"
+          "Some of battle arenas may be softlocked with boss Dante.\n"
+          "Game may softlock if you skip swapped Dante boss fight with AI fix.\n"
+          "Enemy Dante doesn't dealloc memory after his death. So swap all enemies to Dante on missions can crash the game. Also Dante's bodies doesn't disappears.\n"
           "Nightmare will disappear and spawn as meteor 228 billion meters above your head. You will need to wait a while for him to fall.\n"
           "Swapping the Qliphot root boss can softlock mission 1.\n"
           "Swapping Dante can softlock mission 20.\n"
@@ -753,18 +819,26 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Spacing();
   }
 
+  set_Dante_ai();
+  ImGui::Separator();
+
   /*ImGui::TextWrapped("nowFlow: %d", nowFlow);
   ImGui::Spacing();
   ImGui::TextWrapped("prevFlow: %d", prevFlow);
   ImGui::Spacing();*/
 
   ImGui::Separator();
-  ImGui::Checkbox("Increase spawn height", &isCustomSpawnPos);
+  ImGui::Checkbox("Increase spawn XYZ coords", &isCustomSpawnPos);
   ImGui::TextWrapped("Fixes some enemies spawning under the floor. Note that this will affect for all spawns and can change spawn animations.\n"
       "This option can be changed during the mission.");
   if (isCustomSpawnPos) {
     ImGui::TextWrapped("Z offset");
     ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.1f");
+    ImGui::TextWrapped("Changing x,y coords can fix spawn enemy behind invisible walls (for example swap Urizen 1, Nidhogg or Qliphot roots boss to some another enemies).");
+    ImGui::TextWrapped("X offset");
+    ImGui::SliderFloat("##spawnPosXOffsetSlider", &spawnPosXOffset, -12.0f, 12.0f, "%.1f");
+    ImGui::TextWrapped("Y offset");
+    ImGui::SliderFloat("##spawnPosYOffsetSlider", &spawnPosYOffset, -12.0f, 12.0f, "%.1f");
   }
 
   ImGui::Separator();
@@ -931,11 +1005,17 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Unanable to find EnemySwapper.gameMode pattern.";
   }
 
+  auto m19CheckAddr = utility::scan(base, "83 78 7C 13 75 11"); //DevilMayCry5.exe+1D47B50
+  if (!m19CheckAddr) {
+    return "Unanable to find EnemySwapper.m19CheckAddr pattern.";
+  }
+
   //uintptr_t swapIdAddr = g_framework->get_module().as<uintptr_t>() + 0xF34F6A;
 
   const uintptr_t spawnAddrOffset = 0xA;
 
   posSpawnTestJne = customSpawnAddr.value() + spawnAddrOffset + 0x15;
+  bossDanteAiJne  = m19CheckAddr.value() + 0x17;
 
   if (!install_hook_absolute(initAddr1.value(), m_enemy_swapper_hook1, &enemy_swap_detour1, &setEnemyDataRet1, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
@@ -983,6 +1063,11 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   }*/
 
   if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.gameModeAddr"; 
+  }
+
+  if (!install_hook_absolute(m19CheckAddr.value(), m_m19check_hook, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.gameModeAddr"; 
   }

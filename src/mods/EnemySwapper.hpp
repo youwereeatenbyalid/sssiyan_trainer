@@ -80,12 +80,16 @@ static uintptr_t gameModeRet;
 
 static uintptr_t posSpawnRet;
 static uintptr_t posSpawnTestJne;
+static uintptr_t bossDanteAiRet;
+static uintptr_t bossDanteAiJne;
 
 static bool isSwapAll;
 static bool cheaton;
 static bool isCustomRandomSettings;
 static bool isCustomSeed;
 static bool isCustomSpawnPos;
+static bool isBossDanteAiEnabled;
+static bool isDanteM20;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -101,7 +105,11 @@ static uint32_t prevFlow;
 static uint32_t gameMode;
 
 static float spawnPosZOffset;
+static float spawnPosXOffset;
+static float spawnPosYOffset;
 static float curSpawnPosZ;
+static float curSpawnPosX;
+static float curSpawnPosY;
 static float waitTimeMin;
 static float waitTimeMax;
 static float odds;
@@ -186,7 +194,7 @@ static EnemyId swapForAll;
       "Phantom Artemis",//37
       "Phantom Cavaliere",//38
       "Vergil M20",//39
-      "Dante (AiDisabled)",//40
+      "Dante (Ai disabled by default)",//40
       //"Dante M20"//41 No:)
   };
 
@@ -224,4 +232,5 @@ private:
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
   std::unique_ptr<FunctionHook> m_now_flow_hook;
   std::unique_ptr<FunctionHook> m_gamemode_hook;
+  std::unique_ptr<FunctionHook> m_m19check_hook;
 };

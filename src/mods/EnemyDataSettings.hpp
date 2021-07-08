@@ -80,7 +80,7 @@ public:
 		cfg.set<bool>("EnemyDataSettings_shareSettings", shareSettings);
 
 		for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
-			if(i == 32 || i == 33 || i == 35 || i == 39 || i == 40)
+			if(i == 32 || i == 33)
 				continue;
 			key = std::string(EnemySwapper::emNames[i]) + "_" + "waitTimeMin";
 			cfg.set<float>(key, EnemySwapper::enemySettings[i].waitTimeMin);
@@ -134,7 +134,7 @@ public:
 			}
 			ImGui::Separator();
 			for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
-				if(i == 32 || i == 33 || i == 35 || i == 39 || i == 40)//Vergils and Dante
+				if(i == 32 || i == 33)//Urizens
 					continue;
 				uniqStr = std::string("Use default game settings ##" + std::to_string(i));
 				ImGui::TextWrapped(EnemySwapper::emNames[i]);
