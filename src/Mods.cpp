@@ -138,6 +138,8 @@
        #include "mods/EnemyWaveSettings.hpp"
     // Nero
     // Dante
+       #include "mods/DanteAirTrickSettings.hpp"
+       #include "mods/GroundTrickNoDistanceRestriction.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -147,6 +149,9 @@
        #include "mods/VergilAdditionalJJC.hpp"
        #include "mods/VergilSDTAccumulateRework.hpp"
        #include "mods/VergilSDTNoConcentrationLose.hpp"
+       #include "mods/VergilAirTrick.hpp"
+       //#include "mods/VergilSDTTrickEfx.hpp" //Removed intil better times
+       #include "mods//InfiniteTrickUp.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
   // Example
@@ -224,7 +229,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<AllStartManual>());
         m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
-        // m_mods.emplace_back(std::make_unique<DamageMultiplier>());
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());    // TESTING
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
@@ -291,6 +296,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         // Nero
         // Dante
+        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
+        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
@@ -300,6 +307,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
         m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
+        m_mods.emplace_back(std::make_unique<VergilAirTrick>());
+        //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
+        m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif

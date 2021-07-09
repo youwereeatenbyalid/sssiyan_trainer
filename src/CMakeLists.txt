@@ -207,6 +207,16 @@ set(MODS_SRC
     mods/DisableGauntletStages.cpp
     mods/VergilSDTNoConcentrationLose.hpp
     mods/VergilSDTNoConcentrationLose.cpp
+    mods/VergilAirTrick.hpp
+    mods/VergilAirTrick.cpp
+    mods/VergilSDTTrickEfx.hpp
+    mods/VergilSDTTrickEfx.cpp
+    mods/DanteAirTrickSettings.hpp
+    mods/DanteAirTrickSettings.cpp
+    mods/GroundTrickNoDistanceRestriction.hpp
+    mods/GroundTrickNoDistanceRestriction.cpp
+    mods/InfiniteTrickUp.cpp
+    mods/InfiniteTrickUp.hpp
 )
 
 set(HOOKS_SRC

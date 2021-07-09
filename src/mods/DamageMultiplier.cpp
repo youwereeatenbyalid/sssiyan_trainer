@@ -15,12 +15,12 @@ float DamageMultiplier::enemyhpvalue = 0.0f;
 
 static naked void detour() {
 	__asm {                                // Compares will play out even without cheat enabled so we can get a backup of last hit entitiy's HP
-        cmp dword ptr [rdi+134h], 7077968  // 'Pl' in 'Play'
-        je enemydamageoutput
-        cmp dword ptr [rdi-18Ch], 6225996  // 'L_' in L_B_Hand'
-        je enemydamageoutput
-        cmp dword ptr [rdi-16Ch], 6881357  // 'Mi' in 'Miss'
-        je BPcheck
+        // cmp dword ptr [rdi+134h], 7077968  // 'Pl' in 'Play'
+        // je enemydamageoutput
+        // cmp dword ptr [rdi-18Ch], 6225996  // 'L_' in L_B_Hand'
+        // je enemydamageoutput
+        // cmp dword ptr [rdi-16Ch], 6881357  // 'Mi' in 'Miss'
+        // je BPcheck
         jmp playerdamageoutput
 
     BPcheck:

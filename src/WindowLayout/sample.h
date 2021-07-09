@@ -1037,9 +1037,9 @@ public:
 			p_mf->get_mods()->on_pagelist_ui(Mod::vergildoppel);
 		}
         ImGui::Separator();
-        ImGui::Text("Afterimages");
+        ImGui::Text("EFX settings");
         if (p_mf->is_error() && p_mf->is_ready()) {
-             p_mf->get_mods()->on_pagelist_ui(Mod::vergilafterimages);
+             p_mf->get_mods()->on_pagelist_ui(Mod::vergilefxsettings);
         }
 	}
 };
