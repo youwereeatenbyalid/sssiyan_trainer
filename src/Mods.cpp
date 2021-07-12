@@ -136,6 +136,8 @@
        #include "mods/EnemySwapper.hpp"
        #include "mods/EnemyDataSettings.hpp"
        #include "mods/EnemyWaveSettings.hpp"
+       #include "mods/CheckpointPos.hpp"
+       #include "mods/MissionManager.hpp"
     // Nero
     // Dante
        #include "mods/DanteAirTrickSettings.hpp"
@@ -291,9 +293,11 @@ Mods::Mods()
         // Background
         // Common
         // Gameplay
+        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
+        m_mods.emplace_back(std::make_unique<CheckpointPos>());
         // Nero
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());

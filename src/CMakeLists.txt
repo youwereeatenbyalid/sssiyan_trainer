@@ -217,6 +217,10 @@ set(MODS_SRC
     mods/GroundTrickNoDistanceRestriction.cpp
     mods/InfiniteTrickUp.cpp
     mods/InfiniteTrickUp.hpp
+    mods/CheckpointPos.hpp
+    mods/CheckpointPos.cpp
+    mods/MissionManager.cpp
+    mods/MissionManager.hpp
 )
 
 set(HOOKS_SRC

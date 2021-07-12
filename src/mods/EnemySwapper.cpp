@@ -3,13 +3,16 @@
 #include "sdk/ReClass.hpp"
 #include "EnemyDataSettings.hpp"
 
-bool EnemySwapper::cheaton{NULL};
-bool EnemySwapper::isSwapAll{NULL};
+bool EnemySwapper::cheaton{false};
+bool EnemySwapper::isSwapAll{false};
 bool EnemySwapper::isCustomRandomSettings{false};
 bool EnemySwapper::isCustomSeed{false};
-bool EnemySwapper::isCustomSpawnPos{NULL};
-bool EnemySwapper::isBossDanteAiEnabled{NULL};
-bool EnemySwapper::isDanteM20{NULL};
+bool EnemySwapper::isCustomSpawnPos{false};
+bool EnemySwapper::isBossDanteAiEnabled{false};
+bool EnemySwapper::isDanteM20{false};
+bool EnemySwapper::canKillGriffon{false};
+bool EnemySwapper::canKillShadow{false};
+bool EnemySwapper::isNightmareFix{false};
 bool isReswap = false;
 bool isSkipNum = false;
 bool checkForReswap = false;
@@ -30,7 +33,12 @@ uintptr_t EnemySwapper::nowFlowRet{NULL};
 uintptr_t EnemySwapper::gameModeRet{NULL};
 uintptr_t EnemySwapper::bossDanteAiRet{NULL};
 uintptr_t EnemySwapper::bossDanteAiJne{NULL};
-
+uintptr_t EnemySwapper::killShadowRet{NULL};
+uintptr_t EnemySwapper::killGriffonRet{NULL};
+uintptr_t EnemySwapper::nightmareStartingPosRet{NULL};
+uintptr_t EnemySwapper::nightmareArrivalPosRet{NULL};
+uintptr_t EnemySwapper::plPosBase{NULL};
+uintptr_t plPosX;
 
 uint32_t EnemySwapper::selectedToSwap[enemyListCount];
 uint32_t EnemySwapper::selectedSwapAll{NULL};
@@ -61,7 +69,6 @@ float EnemySwapper::waitTimeMax       = 0.0f;
 float EnemySwapper::odds              = 100.0f;
 int EnemySwapper::enemyNum            = 1;
 
-
 std::string uniqComboStr = "";//For comboboxes
 
 std::array<EnemySwapper::EnemyId, EnemySwapper::enemyListCount> EnemySwapper::swapSettings;//cur id - id to swap
@@ -70,10 +77,9 @@ EnemySwapper::EnemyId EnemySwapper::swapForAll;
 
 std::vector<uintptr_t> EnemySwapper::setDataAddrs;// = new std::vector<uintptr_t>();
 
-uintptr_t curSetDataAddr = 0;
-//std::mutex mtx;
+Vector3f EnemySwapper::nightmareStartPosOffs;
 
-//std::mutex EnemySwapper::mtx;
+uintptr_t curSetDataAddr = 0;
 
  bool skip_reswap() {
   if (EnemySwapper::setDataAddrs.size() != 0) {
@@ -734,6 +740,92 @@ static naked void load_Dante_ai_detour() {
   }
 }
 
+static naked void kill_griffon_detour() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        cmp byte ptr [EnemySwapper::canKillGriffon], 00
+        je originalcode
+        jmp qword ptr [EnemySwapper::killGriffonRet]
+
+        originalcode:
+        cmp byte ptr [rdi+0x00000F48],00
+        jmp qword ptr [EnemySwapper::killGriffonRet]
+  }
+}
+
+static naked void kill_shadow_detour() {
+  __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        cmp byte ptr [EnemySwapper::canKillShadow], 00
+        je originalcode
+        jmp qword ptr [EnemySwapper::killShadowRet]
+
+        originalcode:
+        cmp byte ptr [rdi+0x00000F60], 00
+        jmp qword ptr [EnemySwapper::killShadowRet]
+  }
+}
+
+static naked void nightmire_starting_detour() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        cmp byte ptr [EnemySwapper::isNightmareFix], 00
+        je originalcode
+
+        cheat:
+        push r10
+        mov r10, [EnemySwapper::plPosBase]
+        mov r10, [r10]
+        mov r10, [r10+0x70]
+        mov r10, [r10+0xC70]
+        mov r10, [r10+0x40]
+        mov r10, [r10+0xE40]
+        mov r10, [r10+0x80]
+        movss xmm0, [r10+0x30]//plCoords
+        movss xmm1, [r10+0x34]
+        movss xmm2, [r10+0x38]
+        pop r10
+        addss xmm0, [EnemySwapper::nightmareStartPosOffs.x]
+        addss xmm1, [EnemySwapper::nightmareStartPosOffs.z]
+        addss xmm2, [EnemySwapper::nightmareStartPosOffs.y]
+
+        originalcode:
+        mov rdx, rdi
+        movss [rbp-0x69], xmm0
+        jmp qword ptr [EnemySwapper::nightmareStartingPosRet]
+  }
+}
+
+static naked void nightmire_arrival_detour() {
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        cmp byte ptr [EnemySwapper::isNightmareFix], 00
+        je originalcode
+
+        cheat:
+        push r10
+        mov r10, [EnemySwapper::plPosBase]
+        mov r10, [r10]
+        mov r10, [r10+0x70]
+        mov r10, [r10+0xC70]
+        mov r10, [r10+0x40]
+        mov r10, [r10+0xE40]
+        mov r10, [r10+0x80]
+        movss xmm10, [r10+0x30] // plCoords
+        movss xmm11, [r10+0x34]
+        movss xmm12, [r10+0x38]
+        pop r10
+
+        originalcode:
+        movss [rax+0x30], xmm10
+        jmp qword ptr [EnemySwapper::nightmareArrivalPosRet]
+  }
+}
+
 void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
   selectedToSwap[emListIndx] = swapToIndx;
   swapSettings[emListIndx].set_current_id(swapToIndx);
@@ -755,9 +847,14 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   spawnPosZOffset  = cfg.get<float>("EnemySwapper.spawnPosZOffset").value_or(0.6f);
   spawnPosXOffset  = cfg.get<float>("EnemySwapper.spawnPosXOffset").value_or(0.0f);
   spawnPosYOffset  = cfg.get<float>("EnemySwapper.spawnPosYOffset").value_or(0.0f);
-
   isBossDanteAiEnabled = cfg.get<bool>("EnemySwapper.isBossDanteAiEnabled").value_or(false);
   isDanteM20 = cfg.get<bool>("EnemySwapper.isDanteM20").value_or(false);
+  canKillGriffon = cfg.get<bool>("EnemySwapper.canKillGriffon").value_or(false);
+  canKillShadow = cfg.get<bool>("EnemySwapper.canKillShadow").value_or(false);
+  isNightmareFix  = cfg.get<bool>("EnemySwapper.isNightmareFix").value_or(false);
+  nightmareStartPosOffs.x = cfg.get<float>("EnemySwapper.nightmareStartPosOffsX").value_or(135.83f);
+  nightmareStartPosOffs.y = cfg.get<float>("EnemySwapper.nightmareStartPosOffsY").value_or(-112.45f);
+  nightmareStartPosOffs.z = cfg.get<float>("EnemySwapper.nightmareStartPosOffsZ").value_or(82.784f);
   std::string key;
   uint32_t swapTo = 0;
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
@@ -775,7 +872,13 @@ void EnemySwapper::on_config_save(utility::Config& cfg) {
   cfg.set<float>("EnemySwapper.spawnPosYOffset", spawnPosYOffset);
   cfg.set<bool>("EnemySwapper.isSwapAll", isSwapAll);
   cfg.set<bool>("EnemySwapper.isBossDanteAiEnabled", isBossDanteAiEnabled);
-  cfg.set<bool>("EnemySwapper.isDanteM20", isDanteM20);
+  cfg.set<bool>("EnemySwapper.canKillGriffon", canKillGriffon);
+  cfg.set<bool>("EnemySwapper.canKillShadow", canKillShadow);
+  cfg.set<bool>("EnemySwapper.isNightmareFix", isNightmareFix);
+  cfg.set<float>("EnemySwapper.nightmareStartPosOffsX", nightmareStartPosOffs.x);
+  cfg.set<float>("EnemySwapper.nightmareStartPosOffsY", nightmareStartPosOffs.y);
+  cfg.set<float>("EnemySwapper.nightmareStartPosOffsZ", nightmareStartPosOffs.z);
+
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     cfg.set<uint32_t>(std::string(EnemySwapper::emNames[i]) + "_swapTo", selectedToSwap[i]);
   }
@@ -801,26 +904,43 @@ void set_Dante_ai() {
     }
 }
 
+void print_issues(const char* str) {
+    ImGui::TextWrapped(str);
+  ImGui::Spacing();
+}
+
 void EnemySwapper::on_draw_ui() {
   if (ImGui::CollapsingHeader("Current Issues")){
-      ImGui::TextWrapped("Killing enemies swapped with a boss in mission can cause BGM issues.\n"
-          "Shadow and Griffon can't be killed.\n"
-          "Only 1 type of Dante's/Vergil's AI can be loaded for mission/BP floor.\n"
-          "Dante AI fix doesn't work on most of BP stages.\n"
-          "Bp stages will not end with Dante boss.\n"
-          "Some of battle arenas may be softlocked with boss Dante.\n"
-          "Game may softlock if you skip swapped Dante boss fight with AI fix.\n"
-          "Enemy Dante doesn't dealloc memory after his death. So swap all enemies to Dante on missions can crash the game. Also Dante's bodies doesn't disappears.\n"
-          "Nightmare will disappear and spawn as meteor 228 billion meters above your head. You will need to wait a while for him to fall.\n"
-          "Swapping the Qliphot root boss can softlock mission 1.\n"
-          "Swapping Dante can softlock mission 20.\n"
-          "Wrong swap on some BP stages sometimes.\n"
-          "Some BP stages softlock when swapping enemies to qliphod tentacles.");
-      ImGui::Spacing();
+    print_issues("Killing enemies swapped with a boss in mission can cause BGM issues.");
+    print_issues("Only 1 type of Dante's/Vergil's AI can be loaded for mission/BP floor.");
+    print_issues("Dante AI fix doesn't work on most of BP stages.");
+    print_issues("Bp stages will not end with Dante boss. Same with Griffon and Shadow.");
+    print_issues("Some of battle arenas may be softlocked with boss Dante.");
+    print_issues("Game may softlock if you skip swapped Dante boss fight with AI fix.");
+    print_issues("Enemy Dante doesn't dealloc memory after his death. So swap all enemies to Dante on missions can crash the game. Also Dante's bodies doesn't disappears.");
+    print_issues("Nightmare fix can make meteor fast. Too fast.");
+    print_issues("Griffon and Shadow bodies with kill fixes doesn't disappears.");
+    print_issues("Force killing Griffon and Shadow can broke mission 18.");
+    print_issues("Nightmare can teleports to nowhere to heal familiars if they also in a fight.");
+    print_issues("Swapping the Qliphoth root boss can softlock mission 1.");
+    print_issues("Swapping Dante can softlock mission 20.");
+    print_issues("Wrong swap on some BP stages sometimes.");
+    print_issues("Some BP stages softlock when swapping enemies to qliphoth tentacles.");
+    ImGui::Separator();
   }
 
   set_Dante_ai();
   ImGui::Separator();
+  ImGui::TextWrapped("Familiars options can be changed during gameplay.");
+  ImGui::Checkbox("Enable kill shadow", &canKillShadow);
+  ImGui::Checkbox("Enable kill griffon", &canKillGriffon);
+  ImGui::Checkbox("Nightmare meteor fix", &isNightmareFix);
+  if (isNightmareFix) {
+    ImGui::TextWrapped("Offset to current player position for meteor starting. Affect meteor speed.");
+    ImGui::InputFloat("X offset", &nightmareStartPosOffs.x, 0.0f, 0.0f, 3);
+    ImGui::InputFloat("Y offset", &nightmareStartPosOffs.y, 0.0f, 0.0f, 3);
+    ImGui::InputFloat("Z offset", &nightmareStartPosOffs.z, 0.0f, 0.0f, 3);
+  }
 
   /*ImGui::TextWrapped("nowFlow: %d", nowFlow);
   ImGui::Spacing();
@@ -833,7 +953,7 @@ void EnemySwapper::on_draw_ui() {
       "This option can be changed during the mission.");
   if (isCustomSpawnPos) {
     ImGui::TextWrapped("Z offset");
-    ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.1f");
+    ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 12.0f, "%.1f");
     ImGui::TextWrapped("Changing x,y coords can fix spawn enemy behind invisible walls (for example swap Urizen 1, Nidhogg or Qliphot roots boss to some another enemies).");
     ImGui::TextWrapped("X offset");
     ImGui::SliderFloat("##spawnPosXOffsetSlider", &spawnPosXOffset, -12.0f, 12.0f, "%.1f");
@@ -951,11 +1071,14 @@ void EnemySwapper::random_em_swap(uint32_t min, uint32_t max) {
 std::optional<std::string> EnemySwapper::on_initialize() {
   init_check_box_info();
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
+
   ischecked = &cheaton;
   onpage         = balance;
   full_name_string   = "Enemy Swapper (Beta) (+)";
   author_string      = "VPZadov";
   description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
+
+  plPosBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
   auto initAddr1 = utility::scan(base, "8B 71 10 48 85 C0 0F 84 43");// "DevilMayCry5.exe"+FE568B //For BP custom swap
   if (!initAddr1) {
@@ -1008,6 +1131,26 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   auto m19CheckAddr = utility::scan(base, "83 78 7C 13 75 11"); //DevilMayCry5.exe+1D47B50
   if (!m19CheckAddr) {
     return "Unanable to find EnemySwapper.m19CheckAddr pattern.";
+  }
+
+  auto griffonKillAddr = utility::scan(base, "80 BF 48 0F 00 00 00"); //DevilMayCry5.exe+F9E17B
+  if (!griffonKillAddr) {
+    return "Unanable to find EnemySwapper.griffonKillAddr pattern.";
+  }
+
+  auto shadowKillAddr = utility::scan(base, "80 BF 60 0F 00 00 00"); //DevilMayCry5.exe+F5B07B
+  if (!shadowKillAddr) {
+    return "Unanable to find EnemySwapper.shadowKillAddr pattern.";
+  }
+
+  auto nightmireStartingAddr = utility::scan(base, "48 8B D7 F3 0F 11 45 97 F3 0F 11"); //DevilMayCry5.exe+20DEFFD
+  if (!nightmireStartingAddr) {
+    return "Unanable to find EnemySwapper.nightmareStartingMeteorPosAddr pattern.";
+  }
+
+  auto nightmireArrivalAddr = utility::scan(base, "12 F3 44 0F 11 50 30"); //DevilMayCry5.exe+16A13EB
+  if (!nightmireArrivalAddr) {
+    return "Unanable to find EnemySwapper.nightmareArrivalAddr pattern.";
   }
 
   //uintptr_t swapIdAddr = g_framework->get_module().as<uintptr_t>() + 0xF34F6A;
@@ -1070,6 +1213,26 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   if (!install_hook_absolute(m19CheckAddr.value(), m_m19check_hook, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.gameModeAddr"; 
+  }
+
+  if (!install_hook_absolute(griffonKillAddr.value(), m_griffon_hook, &kill_griffon_detour, &killGriffonRet, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.griffonKill"; 
+  }
+
+  if (!install_hook_absolute(shadowKillAddr.value(), m_shadow_hook, &kill_shadow_detour, &killShadowRet, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.griffonKill"; 
+  }
+
+  if (!install_hook_absolute(nightmireStartingAddr.value(), m_nightmire_starting_hook, &nightmire_starting_detour, &nightmareStartingPosRet, 0x8)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.nightmireStartingMeteorPos"; 
+  }
+
+  if (!install_hook_absolute(nightmireArrivalAddr.value()+0x1, m_nightmire_arrival_hook, &nightmire_arrival_detour, &nightmareArrivalPosRet, 0x6)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.nightmireArrivalMeteorPos"; 
   }
 
   seed_rnd_gen(-1);
