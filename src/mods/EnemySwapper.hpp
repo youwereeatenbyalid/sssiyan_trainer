@@ -82,6 +82,11 @@ static uintptr_t posSpawnRet;
 static uintptr_t posSpawnTestJne;
 static uintptr_t bossDanteAiRet;
 static uintptr_t bossDanteAiJne;
+static uintptr_t killShadowRet;
+static uintptr_t killGriffonRet;
+static uintptr_t nightmareStartingPosRet;
+static uintptr_t nightmareArrivalPosRet;
+static uintptr_t plPosBase;
 
 static bool isSwapAll;
 static bool cheaton;
@@ -90,6 +95,9 @@ static bool isCustomSeed;
 static bool isCustomSpawnPos;
 static bool isBossDanteAiEnabled;
 static bool isDanteM20;
+static bool canKillShadow;
+static bool canKillGriffon;
+static bool isNightmareFix;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -117,6 +125,8 @@ static int enemyNum;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
+
+static Vector3f nightmareStartPosOffs;
 
   EnemySwapper() = default;
 
@@ -173,7 +183,7 @@ static EnemyId swapForAll;
 	  "Death Scrissors",//16
 	  "Hellbat", //17
 	  "Pyrobat", //18
-	  "Qliphot's tentacle",//19 
+	  "Qliphoth's tentacle",//19 
 	  "Goliath", //20
 	  "Malphas", //21
 	  "Nidhogg", //22
@@ -181,11 +191,11 @@ static EnemyId swapForAll;
 	  "Gilgamesh", //24
 	  "Elder Geryon Knight",//25
 	  "Cavaliere", //26
-	  "Qliphot Root Boss",//27 
+	  "Qliphoth Root Boss",//27 
 	  "King Cerberus", //28
 	  "Griffon (NoDie)", //29
 	  "Shadow (NoDie)", //30
-	  "Nightmire", //31
+	  "Nightmare", //31
 	  "Urizen 1",//32
       "Urizen 2",//33
       "Urizen 3",//34
@@ -233,4 +243,8 @@ private:
   std::unique_ptr<FunctionHook> m_now_flow_hook;
   std::unique_ptr<FunctionHook> m_gamemode_hook;
   std::unique_ptr<FunctionHook> m_m19check_hook;
+  std::unique_ptr<FunctionHook> m_griffon_hook;
+  std::unique_ptr<FunctionHook> m_shadow_hook;
+  std::unique_ptr<FunctionHook> m_nightmire_starting_hook;
+  std::unique_ptr<FunctionHook> m_nightmire_arrival_hook;
 };
