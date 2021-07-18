@@ -31,6 +31,7 @@ void load_boss_checkpoint() {
       if (CheckpointPos::mPosData[i].mNumber == MissionManager::missionNumber) {
       CheckpointPos::isNoBoss = false;
         CheckpointPos::newRestartPos = CheckpointPos::mPosData[i].pos;
+      return;
       }
   }
 }
