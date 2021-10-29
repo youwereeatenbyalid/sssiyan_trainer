@@ -11,19 +11,11 @@ bool DisableGauntletStages::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        // cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
-        // jne code
-		cmp byte ptr [DisableGauntletStages::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-		jmp qword ptr [DisableGauntletStages::jmp_jne]
-
-    code:
-        cmp [rax+00000E64h], ebx
         jne jnecode
-        jmp qword ptr [DisableGauntletStages::jmp_ret]
+
+		cmp byte ptr [DisableGauntletStages::cheaton], 1
+        je jnecode
+        jmp [DisableGauntletStages::jmp_ret]
 
     jnecode:
         jmp qword ptr [DisableGauntletStages::jmp_jne]
@@ -48,14 +40,14 @@ std::optional<std::string> DisableGauntletStages::on_initialize() {
   description_string = "Recommended for use with Breaker Switcher or Infinite Breakers.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "39 98 64 0E 00 00"); // DevilMayCry5.exe+367DAB
+  auto addr = utility::scan(base, "0F 85 5D 02 00 00 38"); // DevilMayCry5.exe+367DB1
   if (!addr) {
     return "Unable to find DisableGauntletStages pattern.";
   }
 
-  DisableGauntletStages::jmp_jne = addr.value() + 617;
+  DisableGauntletStages::jmp_jne = addr.value() + 611;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 12)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DisableGauntletStages";

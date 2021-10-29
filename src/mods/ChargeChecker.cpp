@@ -141,15 +141,15 @@ void ChargeChecker::on_config_save(utility::Config& cfg) {
 
 void ChargeChecker::on_draw_ui() {
   ImGui::Text("Sword Charge Speed Multiplier");
-  ImGui::SliderFloat("##swordmultslider", &neroSwordMult, 0.5f, 3.0f, "%.1f");
+  ImGui::InputFloat("##swordmultslider", &neroSwordMult, 0.1f);
   ImGui::Text("Gun Charge Speed Multiplier");
-  ImGui::SliderFloat("##gunmultslider", &neroGunMult, 0.5f, 3.0f, "%.1f");
+  ImGui::InputFloat("##gunmultslider", &neroGunMult, 0.1f);
   ImGui::Text("Breaker Charge Speed Multiplier");
-  ImGui::SliderFloat("##breakermultslider", &neroBreakerMult, 0.5f, 3.0f, "%.1f");
+  ImGui::InputFloat("##breakermultslider", &neroBreakerMult, 0.1f);
   ImGui::Spacing();
   ImGui::Separator();
   ImGui::Spacing();
   ImGui::Checkbox("Standardize Breaker Charge Times", &standardizeBreakerCharges);
   ImGui::Text("Breaker Charge Time (Gerbera default is 120)");
-  ImGui::SliderFloat("##maxbreakerchargeslider", &breakerChargeMax, 0.0f, 200.0f, "%.0f");
+  ImGui::InputFloat("##maxbreakerchargeslider", &breakerChargeMax, 0.1f);
 }

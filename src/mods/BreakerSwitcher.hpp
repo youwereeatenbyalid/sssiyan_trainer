@@ -12,9 +12,24 @@ public:
   std::optional<std::string> on_initialize() override;
   static uintptr_t breakersize_jmp_ret;
   static uintptr_t nextbreaker_jmp_ret;
-  static uintptr_t breakerui_jmp_ret;
-  static bool cheaton;
+  uintptr_t static breakercontrol_jmp_ret;
+  uintptr_t static jmp_bringer_ret;
+  uintptr_t static jne_bringer_ret;
+  uintptr_t static jmp_uireturn;
+  uintptr_t static jne_uireturn;
+  static uintptr_t call_nero_creategauntlet;
 
+  uintptr_t static breaker_busy;
+  uintptr_t static buffered_breaker_input;
+  uintptr_t static primary_breaker;
+  uintptr_t static do_ui_update;
+  uintptr_t static secondary_breaker;
+  uintptr_t static switcher_mode;
+  uint32_t static breakaway_type;
+
+  static bool cheaton;
+  static bool use_secondary;
+  static bool infinite_breakers;
   static uint32_t breakers[8];
   static uint32_t nextbreaker;
   void static breakerpress_detour(); 
@@ -37,5 +52,7 @@ private:
 
   std::unique_ptr<FunctionHook> m_breakersize_hook;
   std::unique_ptr<FunctionHook> m_nextbreaker_hook;
-  std::unique_ptr<FunctionHook> m_breakerui_hook;
+  std::unique_ptr<FunctionHook> m_breakerinputcontrol_hook;
+  std::unique_ptr<FunctionHook> m_NeroUIOverride_hook;
+  std::unique_ptr<FunctionHook> m_bringerinputcontroller_hook;
 };
