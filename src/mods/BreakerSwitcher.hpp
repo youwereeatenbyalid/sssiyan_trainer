@@ -26,6 +26,7 @@ public:
   uintptr_t static secondary_breaker;
   uintptr_t static switcher_mode;
   uint32_t static breakaway_type;
+  uintptr_t static breakaway_button;
 
   static bool cheaton;
   static bool use_secondary;

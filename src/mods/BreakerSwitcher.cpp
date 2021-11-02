@@ -1,5 +1,7 @@
 #include "BreakerSwitcher.hpp"
 #include "mods/PlayerTracker.hpp"
+uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpad,Mod::deviltrigger,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::lefttrigger,Mod::resetcamera,Mod::SDT };
+int breakaway_index = {0};
 uintptr_t BreakerSwitcher::breakersize_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::nextbreaker_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::breakercontrol_jmp_ret{ NULL };
@@ -16,7 +18,7 @@ uintptr_t BreakerSwitcher::do_ui_update{ 0 };
 uintptr_t BreakerSwitcher::secondary_breaker{ 0 };
 uintptr_t BreakerSwitcher::switcher_mode{ 1 };
 uint32_t BreakerSwitcher::breakaway_type{0};
-
+uintptr_t BreakerSwitcher::breakaway_button{0x1000};
 bool BreakerSwitcher::infinite_breakers{false};
 bool BreakerSwitcher::use_secondary{false};
 
@@ -331,17 +333,17 @@ static naked void breakerui_detour() {
         push r9
         push rdi
         //get array
-        mov rdi, [rdi + 0x108]
-        mov rdi, [rdi + 0x1790]
-        xor r8, r8
-        xor r9, r9
+        //mov rdi, [rdi + 0x108]
+        //mov rdi, [rdi + 0x1790]
+        //xor r8, r8
+        //xor r9, r9
         //get primary and second breakers
-        mov r8d, [BreakerSwitcher::primary_breaker]
-        mov r9d, [BreakerSwitcher::secondary_breaker]
+        //mov r8d, [BreakerSwitcher::primary_breaker]
+        //mov r9d, [BreakerSwitcher::secondary_breaker]
 
         //add breakers back to first & second slots.
-        mov [rdi + 0x20], r8d
-        mov [rdi + 0x24], r9d
+        //mov [rdi + 0x20], r8d
+        //mov [rdi + 0x24], r9d
 
         pop rdi
         pop r9
@@ -509,27 +511,42 @@ naked void BreakerSwitcher::breakerpress_detour() {
         breakerwrite:
         mov [r11], r8d
         mov [BreakerSwitcher::do_ui_update], 0x1
+
+        mov r12, [PlayerTracker::playerentity]
+        test r12, r12
+        je breakerpressexit
+        mov r12, [r12+0x1790]
+        test r12, r12
+        je breakerpressexit
+        mov r8d, [BreakerSwitcher::primary_breaker]
+        mov r9d, [BreakerSwitcher::secondary_breaker]
+        //add breakers back to first & second slots.
+        mov [r12 + 0x20], r8d
+        mov [r12 + 0x24], r9d
+
         jmp breakerpressexit
 
 
 
     CheckBreakawayType:
         mov r12, [PlayerTracker::playerentity]
+        test r12, r12
+        je breakerpressexit
         //# of breakers
         xor r13,r13
         mov r13d, [r12+0x17CC]
 
         mov r12, [r12 +0x1790] //get array
+        test r12, r12
+        je breakerpressexit
         //if never breakaway, go to cycle breakers
         cmp dword ptr [BreakerSwitcher::breakaway_type], 0x0
         je CycleBreakers
 
-        //check for breaker hold
-        shr r10, 0xC
-        and r10, 0x1
-
+        //check for breakaway button
+        test r10, [BreakerSwitcher::breakaway_button]
         //if held, skip cycle and trigger breakaway
-        jne breakerpressexit
+        ja breakerpressexit
 
         //if always breakaway, skip cycle.
         cmp [BreakerSwitcher::breakaway_type], 2
@@ -676,12 +693,22 @@ void BreakerSwitcher::on_config_load(const utility::Config& cfg) {
     BreakerSwitcher::breakers[i] =
         cfg.get<int>("breaker_slot_" + std::to_string(i)).value_or(0);
   }
+  BreakerSwitcher::switcher_mode = cfg.get<int>("switcher_mode").value_or(0);
+  BreakerSwitcher::breakaway_type = cfg.get<int>("breakaway_type").value_or(0);
+  breakaway_index = cfg.get<int>("breakaway_button").value_or(0);
+  BreakerSwitcher::infinite_breakers = cfg.get<bool>("infinite_breakers").value_or(false);
+  BreakerSwitcher::use_secondary = cfg.get<bool>("use_secondary").value_or(false);
 }
 // during save
 void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   for (int i = 0; i < 8; i++) {
     cfg.set<int>("breaker_slot_" + std::to_string(i), BreakerSwitcher::breakers[i]);
   }
+  cfg.set<int>("switcher_mode", BreakerSwitcher::switcher_mode);
+  cfg.set<int>("breakaway_type", BreakerSwitcher::breakaway_type);
+  cfg.set<int>("breakaway_button", breakaway_index);
+  cfg.set<bool>("infinite_breakers",BreakerSwitcher::infinite_breakers);
+  cfg.set<bool>("use_secondary", BreakerSwitcher::use_secondary);
 }
 // do something every frame
 void BreakerSwitcher::on_frame() {}
@@ -696,7 +723,15 @@ void BreakerSwitcher::on_draw_ui() {
 ImGui::Combo("Breaker Type", (int*)&BreakerSwitcher::switcher_mode,"Off\0Switcher\0Cycler\0");
 
 ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold Breaker\0On\0");
-
+if (BreakerSwitcher::breakaway_type == 1){
+    if (ImGui::Combo("Override button", &breakaway_index,
+        "Sword\0Gun\0Jump\0Taunt\0"
+        "Lock-on\0Change Target\0Breakaway\0Devil Trigger\0"
+        "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"
+        "Breaker Action\0Exceed\0Buster\0Reset Camera\0")) {
+        BreakerSwitcher::breakaway_button = bsinputs[breakaway_index];
+    }
+}
 ImGui::Checkbox("Use Secondary Breaker", (bool*)&BreakerSwitcher::use_secondary);
 ImGui::Checkbox("Infinite Breakers", (bool*)&BreakerSwitcher::infinite_breakers);
 
