@@ -221,6 +221,8 @@ set(MODS_SRC
     mods/CheckpointPos.cpp
     mods/MissionManager.cpp
     mods/MissionManager.hpp
+    mods/BossDanteSetup.hpp
+    mods/BossDanteSetup.cpp
 )
 
 set(HOOKS_SRC
