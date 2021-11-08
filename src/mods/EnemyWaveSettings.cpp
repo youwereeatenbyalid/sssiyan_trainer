@@ -101,13 +101,13 @@ void EnemyWaveSettings::on_draw_ui()
 	//ImGui::Checkbox("Use custom generate type setting", &isCustomGenerateType);
 	ImGui::TextWrapped("Change the order of spawns in subwaves.");
 	ImGui::TextWrapped("Change \"generateType\" to: 0 - order, 1 - random, 2 - parallel. Parallel is glitchy and can cause enemies not to spawn.");
-	ImGui::SliderInt("##generateTypeSlider", (int*)&generateType, 0, 2);
+	UI::SliderInt("##generateTypeSlider", (int*)&generateType, 0, 2);
 	ImGui::Separator();
 
 	/*ImGui::TextWrapped("(?) Controls, how many enemies can attack at the same time in a wave (?).");
 	ImGui::Checkbox("Use custom attack permit settings. ", &isCustomPermitSetting);
 	ImGui::TextWrapped("(?)Enemies num, that can start attak at the same time:(?)");//no
-	ImGui::SliderInt("##permitNumSlider", (int*)&permitNum, 0, 25);*/
+	UI::SliderInt("##permitNumSlider", (int*)&permitNum, 0, 25);*/
 }
 
 void EnemyWaveSettings::on_draw_debug_ui()

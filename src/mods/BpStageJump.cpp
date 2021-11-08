@@ -352,7 +352,7 @@ void BpStageJump::on_draw_ui() {
 		ImGui::Separator();
 		ImGui::Spacing();
         ImGui::TextWrapped("Stage Jump");
-        ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
+        UI::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 		ImGui::Spacing();
 		ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
 		ImGui::Checkbox("Retry Stage", &retrystage);

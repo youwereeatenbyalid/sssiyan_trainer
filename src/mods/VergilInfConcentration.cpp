@@ -86,5 +86,5 @@ void VergilInfConcentration::on_config_save(utility::Config& cfg) {
 
 void VergilInfConcentration::on_draw_ui() {
   ImGui::Text("Concentration level");
-  ImGui::SliderInt("##concentrationslider", &concentrationLevel, 0, 2);
+  UI::SliderInt("##concentrationslider", &concentrationLevel, 0, 2);
 }

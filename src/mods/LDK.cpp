@@ -749,7 +749,7 @@ void LDK::on_draw_debug_ui() {
 void LDK::on_draw_ui() {
   ImGui::Text("Enemy Hard Limit");
   ImGui::TextWrapped("This controls the maximum number of enemies that can be active simultaneously in encounters.");
-  ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
+  UI::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
 
   if (ImGui::CollapsingHeader("Performance Optimization"))
@@ -761,14 +761,14 @@ void LDK::on_draw_ui() {
   ImGui::Spacing();
   if(LDK::hitvfx_fix_on){
 	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will only draw white hit effects.");
-	  ImGui::SliderInt("##ContainerNum limit to draw only hit effects", (int*)&LDK::container_limit_damage_only, 0, 180);
+	  UI::SliderInt("##ContainerNum limit to draw only hit effects", (int*)&LDK::container_limit_damage_only, 0, 180);
 	  ImGui::Checkbox("Disable limit", (bool*)&swap_hitvfx_settings);
 	  LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
 
 	  ImGui::Spacing();
   
 	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will not draw any hit effects.");
-	  ImGui::SliderInt("##ContainerNum limit to draw nothing", (int*)&LDK::container_limit_all,  0, 310);
+	  UI::SliderInt("##ContainerNum limit to draw nothing", (int*)&LDK::container_limit_all,  0, 310);
 	  LDK::set_container_limit_all(LDK::container_limit_all);
 
 	  ImGui::Spacing();
@@ -803,7 +803,7 @@ void LDK::on_draw_ui() {
   //ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
       //"pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
   //ImGui::TextWrapped("Delay before spawn");
-  //ImGui::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
+  //UI::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 

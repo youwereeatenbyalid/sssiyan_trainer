@@ -132,11 +132,11 @@ static void ShowHelpMarker(const char* desc) {
 
 void DeepTurbo::on_draw_ui() {
   ImGui::Text("Game Speed");
-  ImGui::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
+  UI::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
   ImGui::Spacing();
   /*ImGui::Text("Menu And Cutscene Speed"); // this works but only actually sped up pause screen, cutscenes and load screens
   ImGui::Checkbox("Variable menu/cutscene speed", &shouldMenuSpeedup);
-  ImGui::SliderFloat("##Menu Speed slider", &menuspeed, 0.0f, 2.5f, "%.1f");*/
+  UI::SliderFloat("##Menu Speed slider", &menuspeed, 0.0f, 2.5f, "%.1f");*/
   if (ImGui::Checkbox("Disable turbo writing to allow camera tool to freeze the game", &disableTurbo)) {
     m_patch01->toggle(disableTurbo);
   }

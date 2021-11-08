@@ -350,8 +350,8 @@ void CameraSettings::on_draw_ui() {
   ImGui::Checkbox("Allow Keyboard Camera Movement While Locked On", &keyboardhorizontalenable);
   ImGui::Spacing();
   ImGui::Text("Field of View (65 default)");
-  ImGui::SliderFloat("##fovslider", &fov, 0.0f, 120.0f, "%.0f");
+  UI::SliderFloat("##fovslider", &fov, 0.0f, 120.0f, "%.0f");
   ImGui::Spacing();
   ImGui::Text("Horizontal Sensitivity (3.25 default)");
-  ImGui::SliderFloat("##horizontalsensslider", &horizontalsens, 3.25f, 10.0f, "%.2f");
+  UI::SliderFloat("##horizontalsensslider", &horizontalsens, 3.25f, 10.0f, "%.2f");
 }

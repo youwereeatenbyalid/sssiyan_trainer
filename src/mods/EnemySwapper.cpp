@@ -764,7 +764,7 @@ void EnemySwapper::on_draw_ui() {
       "This option can be changed during the mission.");
   if (isCustomSpawnPos) {
     ImGui::TextWrapped("Z offset");
-    ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.1f");
+    UI::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 6.0f, "%.1f");
   }
 
   ImGui::Separator();
@@ -810,9 +810,9 @@ void EnemySwapper::on_draw_ui() {
       } else
         seed = -1;
       ImGui::TextWrapped("Min enemy index:");
-      ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
+      UI::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
       ImGui::TextWrapped("Max enemy index:");
-      ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
+      UI::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
       if (curMinIndx >= curMaxIndx)
         curMinIndx = curMaxIndx - 1;
     } else {

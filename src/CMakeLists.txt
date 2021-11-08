@@ -224,6 +224,8 @@ set(HOOKS_SRC
     DInputHook.cpp
     D3D11Hook.hpp
     D3D11Hook.cpp
+    D3D12Hook.hpp
+    D3D12Hook.cpp
     WindowsMessageHook.hpp
     WindowsMessageHook.cpp
     PositionHooks.hpp
@@ -265,47 +267,28 @@ set(FRAMEWORK_SRC
     ModFramework.hpp
     ModFramework.cpp
     Config.hpp
+	stb_image.h
+	stb_image_resize.h
 )
 
-option(HOOK_D3D "Hook direct3D" OFF)
-
-if(HOOK_D3D)
 set(IMGUI_SRC
+	fw-imgui/font_robotomedium.hpp
     fw-imgui/imgui_impl_win32.h
     fw-imgui/imgui_impl_win32.cpp
     fw-imgui/imgui_impl_dx11.h
     fw-imgui/imgui_impl_dx11.cpp
+    fw-imgui/imgui_impl_dx12.h
+    fw-imgui/imgui_impl_dx12.cpp
+    fw-imgui/ui.cpp
+    fw-imgui/ui.hpp
 )
-else()
-set(IM_WINDOW_DX11
-    ImWindowDX11/ImwPlatformWindowDX11.cpp  
-    ImWindowDX11/ImwPlatformWindowDX11.h
-    ImWindowDX11/ImwWindowManagerDX11.cpp   
-    ImWindowDX11/ImwWindowManagerDX11.h  
-    ImWindowDX11/Win32MessageHelper.cpp
-    ImWindowDX11/Win32MessageHelper.h
-)
-
-set(IM_WINDOW_EASY_WINDOW
-    ImWindowEasyWindow/ImwPlatformWindowEasyWindow.cpp  
-    ImWindowEasyWindow/ImwPlatformWindowEasyWindow.h    
-    ImWindowEasyWindow/ImwWindowManagerEasyWindow.cpp
-    ImWindowEasyWindow/ImwWindowManagerEasyWindow.h
-)
-endif()
 
 source_group("Hooks" FILES ${HOOKS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
 source_group("SDK" FILES ${SDK_SRC})
 source_group("Utility" FILES ${UTILITY_SRC})
 source_group("Framework" FILES ${FRAMEWORK_SRC})
-
-if(HOOK_D3D)
-    source_group("imgui", FILES ${IMGUI_SRC})
-else()
-    source_group("ImWindowDX11" FILES ${IM_WINDOW_DX11})
-    source_group("ImWindowEasyWindow" FILES ${IM_WINDOW_EASY_WINDOW})
-endif()
+source_group("FW-ImGui" FILES ${IMGUI_SRC})
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
             Main.cpp
@@ -315,12 +298,10 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             ${HOOKS_SRC}
             ${IMGUI_SRC}
             ${UTILITY_SRC}
-            ${IM_WINDOW_DX11}
-            ${IM_WINDOW_EASY_WINDOW}
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 glm_static jsonstthm imwindow easywindow shlwapi)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
@@ -336,7 +317,7 @@ OUTPUT_NAME sssiyan)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
                    POST_BUILD
-                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)fluffymod\\" /E /Y /R VERBATIM)
+                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\..\\fluffymod\\" /E /Y /R VERBATIM)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)
     target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)

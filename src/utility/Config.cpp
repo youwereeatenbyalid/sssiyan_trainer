@@ -38,7 +38,7 @@ namespace utility {
 
             set(key, value);
         }
-        f.close();
+
         return true;
     }
 
@@ -62,7 +62,6 @@ namespace utility {
             f << keyValue.first << "=" << keyValue.second << endl;
         }
 
-        f.close();
         return true;
     }
 

@@ -66,7 +66,7 @@ void VergilSetMaxJJC::on_draw_ui() {
   }
   ImGui::TextWrapped("\"Infinite Just Judgement Cuts\" mod will be disabled if this mod active.");
   ImGui::TextWrapped("Set maximum jjc:");
-  ImGui::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
+  UI::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
 }
 
 void VergilSetMaxJJC::on_draw_debug_ui() {}

@@ -374,7 +374,7 @@ void VergilAirTrick::on_draw_ui()
 	ImGui::Checkbox("Change delay before Air Trick.", &isCustomWaitTime);
 	if (isCustomWaitTime) {
           ImGui::TextWrapped("Set delay before start trick movement. 6 - game default.");
-          ImGui::SliderFloat("##WaitTimeSlider", &waitTime, 0.0f, 20.0f, "%.1f");
+          UI::SliderFloat("##WaitTimeSlider", &waitTime, 0.0f, 20.0f, "%.1f");
 	}
 	ImGui::Separator();
 
@@ -382,7 +382,7 @@ void VergilAirTrick::on_draw_ui()
 	ImGui::Checkbox("Faster Air Trick", &isSpeedUp);
 	if (isSpeedUp) {
 		ImGui::TextWrapped("High speed value can occur movement glitches during trick. 0.7 - default game value.");
-          ImGui::SliderFloat("Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
+          UI::SliderFloat("Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
 	}
 	ImGui::Separator();
 
@@ -397,7 +397,7 @@ void VergilAirTrick::on_draw_ui()
 	ImGui::TextWrapped("Set Z axis offset for finish Air Trick");
 	ImGui::Checkbox("Use custom finish Z offset", &isCustomOffset);
 	if (isCustomOffset) {
-		ImGui::SliderFloat("Z offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
+		UI::SliderFloat("Z offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
 	}
 }
 

@@ -290,7 +290,30 @@ protected:
     using ValueList = std::vector<std::reference_wrapper<IModValue>>;
 
 public:
-    enum page_enum {breaker,wiresnatch,nero,dantesdt,dantecheat,commoncheat,vergilsdt,vergiltrick,vergildoppel,vergilcheat,vergilefxsettings,gamemode,bloodypalace,balance,camera,qol,mechanics,enemystep,animation,taunt, gilver};
+    enum page_enum : uint32_t {
+        breaker,
+        wiresnatch,
+        nero,
+        dantesdt,
+        dantecheat,
+        commoncheat,
+        vergilsdt,
+        vergiltrick,
+        vergildoppel,
+        vergilcheat,
+        vergilefxsettings,
+        gamemode,
+        bloodypalace,
+        balance,
+        camera,
+        qol,
+        mechanics,
+        enemystep,
+        animation,
+        taunt, 
+        gilver
+    };
+
     enum input_enum {sword = 0x1, gun = 0x2, jump = 0x4, tauntinput =0x8, lockon = 0x10, changetarget = 0x20, 
                     dpad = 0x40, deviltrigger = 0x80, dpadup = 0x100, dpaddown = 0x200, dpadleft = 0x400, dpadright = 0x800, 
                     style = 0x1000,righttrigger=0x4000,lefttrigger=0x2000, resetcamera = 0x8000,SDT = 0x10000};
@@ -317,8 +340,8 @@ public:
 		}
 		printf("Installing offset hook at location: %p\n", location);
 #endif
-		hook = std::make_unique<FunctionHook>(location, detour, next_instruction_offset);
-		if (!hook->queue()) {
+		hook = std::make_unique<FunctionHook>(location, detour);
+		if (!hook->create()) {
 			spdlog::error("Failed to create hook!");
 			return false;
 		}
@@ -340,8 +363,8 @@ public:
 		}
 		printf("Installing absolute hook at location: %p\n", location);
 #endif
-		hook = std::make_unique<FunctionHook>(location, detour, next_instruction_offset);
-		if (!hook->queue()) {
+		hook = std::make_unique<FunctionHook>(location, detour);
+		if (!hook->create()) {
 			spdlog::error("Failed to create hook!");
 			return false;
 		}
