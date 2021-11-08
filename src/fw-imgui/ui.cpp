@@ -244,7 +244,9 @@ bool UI_SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_type, T
 	SIGNEDTYPE v_range = (v_min < v_max ? v_max - v_min : v_min - v_max);
     if (!is_floating_point && v_range >= 0)                                             // v_range < 0 may happen on integer overflows
         grab_sz = ImMax((float)(grab_thickness/*slider_sz / (v_range + 1)*/), style.GrabMinSize);  // For integer sliders: if possible have the grab size represent 1 unit
-	grab_sz = ImMin(grab_sz, slider_sz);
+	else
+        grab_sz = grab_thickness;
+    grab_sz = ImMin(grab_sz, slider_sz);
 	const float slider_usable_sz = slider_sz - grab_sz;
 	const float slider_usable_pos_min = bb.Min[axis] + grab_padding + grab_sz * 0.5f;
 	const float slider_usable_pos_max = bb.Max[axis] - grab_padding - grab_sz * 0.5f;
