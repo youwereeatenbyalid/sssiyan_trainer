@@ -317,7 +317,7 @@ OUTPUT_NAME sssiyan)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
                    POST_BUILD
-                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\..\\fluffymod\\" /E /Y /R VERBATIM)
+                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)
     target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
