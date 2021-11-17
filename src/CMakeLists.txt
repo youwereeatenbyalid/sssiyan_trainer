@@ -280,6 +280,11 @@ set(LISTEDITOR_SRC
     ListEditor/MimicMngObj.hpp
 )
 
+set(GAME_FUNC_SRC
+    Mods/GameFunctions/GameFunc.hpp
+    Mods/GameFunctions/PrefabInstantiate.hpp
+)
+
 option(HOOK_D3D "Hook direct3D" OFF)
 
 if(HOOK_D3D)
@@ -310,6 +315,7 @@ endif()
 source_group("Hooks" FILES ${HOOKS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
 source_group("ListEditor" FILES ${LISTEDITOR_SRC})
+source_group("Mods/GameFunctions" FILES ${GAME_FUNC_SRC})
 source_group("SDK" FILES ${SDK_SRC})
 source_group("Utility" FILES ${UTILITY_SRC})
 source_group("Framework" FILES ${FRAMEWORK_SRC})
@@ -326,6 +332,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             LicenseStrings.hpp
             ${SDK_SRC}
             ${MODS_SRC}
+            ${GAME_FUNC_SRC}
             ${LISTEDITOR_SRC}
             ${HOOKS_SRC}
             ${IMGUI_SRC}
