@@ -201,7 +201,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
   auto breakerui_addr = utility::scan(base, "41 89 04 0B 48 8B 96 08 01 00 00");
   if (!breakersize_addr) {
-    return "Unable to find breaker size pattern.";
+    return "Unable to find breaker itemSize pattern.";
   }
   if (!nextbreaker_addr) {
     return "Unable to find next breaker pattern.";

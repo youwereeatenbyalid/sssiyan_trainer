@@ -138,6 +138,8 @@
        #include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
        #include "mods/MissionManager.hpp"
+       #include "mods/EnemyWaveEditor.hpp"
+       #include "mods/SecretMissionTimer.hpp"
     // Nero
     // Dante
        #include "mods/DanteAirTrickSettings.hpp"
@@ -152,7 +154,7 @@
        #include "mods/VergilSDTAccumulateRework.hpp"
        #include "mods/VergilSDTNoConcentrationLose.hpp"
        #include "mods/VergilAirTrick.hpp"
-       //#include "mods/VergilSDTTrickEfx.hpp" //Removed intil better times
+       //#include "mods/VergilSDTTrickEfx.hpp" //Removed until better times
        #include "mods//InfiniteTrickUp.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
@@ -211,7 +213,7 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
 
-// Siyan
+//// Siyan
     // Background
         m_mods.emplace_back(std::make_unique<DamageTypeLean>());
     // Common
@@ -278,7 +280,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
         m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
 
-// Dr.penguin
+//// Dr.penguin
     // Background
     // Common
     // Gameplay
@@ -298,6 +300,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         // Nero
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());

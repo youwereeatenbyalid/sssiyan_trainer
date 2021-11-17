@@ -13,6 +13,20 @@ bool EnemySwapper::isDanteM20{false};
 bool EnemySwapper::canKillGriffon{false};
 bool EnemySwapper::canKillShadow{false};
 bool EnemySwapper::isNightmareFix{false};
+bool EnemySwapper::isInMission{false};
+bool EnemySwapper::isCavFixEnabled{false};
+bool EnemySwapper::isVergilFixEnabled{false};
+bool EnemySwapper::isFastDiveBombAttack{false};
+bool EnemySwapper::isGoliathFixEnabled{false};
+bool EnemySwapper::isArtemisFixEnabled{false};
+bool EnemySwapper::isArtemisPlayersXY{false};
+bool EnemySwapper::isUrizen3FixEnabled{false};
+bool EnemySwapper::isMalphasFixEnabled{false};
+bool EnemySwapper::malphasFixPlPos{false};
+bool EnemySwapper::isCerberusFixEnabled{false};
+bool EnemySwapper::cerberusFixPlPos{false};
+bool EnemySwapper::cerberusThunderWavePlPos {false};
+
 bool isReswap = false;
 bool isSkipNum = false;
 bool checkForReswap = false;
@@ -38,7 +52,20 @@ uintptr_t EnemySwapper::killGriffonRet{NULL};
 uintptr_t EnemySwapper::nightmareStartingPosRet{NULL};
 uintptr_t EnemySwapper::nightmareArrivalPosRet{NULL};
 uintptr_t EnemySwapper::plPosBase{NULL};
-uintptr_t plPosX;
+uintptr_t EnemySwapper::cavFixRet{NULL};
+uintptr_t EnemySwapper::vergilFixRet{NULL};
+uintptr_t EnemySwapper::vergilFixJs{NULL};
+uintptr_t EnemySwapper::airRaidControllerRet{NULL};
+uintptr_t EnemySwapper::goliathLeaveJmpRet{NULL};
+uintptr_t EnemySwapper::goliathSuckJmpRet{NULL};
+uintptr_t EnemySwapper::artemisFixRet{NULL};
+uintptr_t EnemySwapper::urizen3TpRet{NULL};
+uintptr_t EnemySwapper::urizen3TpJne{NULL};
+uintptr_t EnemySwapper::malphasRet{NULL};
+uintptr_t EnemySwapper::cerberusFixRet{NULL};
+uintptr_t EnemySwapper::cerberusThunderWaveRet{NULL};
+uintptr_t EnemySwapper::cerberusThunderBallJmp{NULL};
+uintptr_t EnemySwapper::cerberusThunderBallRet{NULL};
 
 uint32_t EnemySwapper::selectedToSwap[enemyListCount];
 uint32_t EnemySwapper::selectedSwapAll{NULL};
@@ -68,6 +95,10 @@ float EnemySwapper::waitTimeMin       = 0.0f;
 float EnemySwapper::waitTimeMax       = 0.0f;
 float EnemySwapper::odds              = 100.0f;
 int EnemySwapper::enemyNum            = 1;
+float EnemySwapper::divebombDistanceGroundCheck = 100.0f; // default = 5
+float EnemySwapper::divebombHeightOfArenaSide = -100.5f; // default = 1.5
+float EnemySwapper::divebombHeightOfOutside = -100.0f; // default = 8
+float EnemySwapper::cerberusThunderWaveZ = 0.0f; 
 
 std::string uniqComboStr = "";//For comboboxes
 
@@ -152,7 +183,7 @@ static naked void enemy_swap_detour1() {
         swapsettings:
         cmp dword ptr [EnemySwapper::gameMode], 3
         jne originalcode
-        mov byte ptr [r15+0x5C], 00  // IsEndSaveData
+        //mov byte ptr [r15+0x5C], 00  // IsEndSaveData
         mov [curSetDataAddr], rcx
         //mov byte ptr [checkForReswap], 1
         mov esi,[rcx+0x10]
@@ -231,7 +262,7 @@ static naked void enemy_swap_detour2() {
        // mov byte ptr [checkForReswap], 1
         cmp dword ptr [EnemySwapper::gameMode], 3
         jne originalcode
-        mov byte ptr [r15+0x5C], 00 // IsEndSaveData
+        //mov byte ptr [r15+0x5C], 00 // IsEndSaveData
 
         mov r8d, [rcx+0x10]
         mov [EnemySwapper::currentEnemyId], r8d
@@ -566,53 +597,6 @@ static naked void enemy_swap_detour6() {
   }
 }
 
-/*static naked void swap_id_detour() {
-    __asm {
-        cmp byte ptr [EnemySwapper::cheaton], 0
-        je originalcode
-        cmp byte ptr [EnemySwapper::isSwapAll], 1
-        je swapall
-
-        swapsetup:
-        mov byte ptr [checkForReswap], 0
-        mov r8d, [rax+0x10] 
-        mov [EnemySwapper::currentEnemyId], r8d
-        mov [EnemySwapper::swapIdBackup.rax], rax
-        mov [EnemySwapper::swapIdBackup.rbx], rbx
-        mov [EnemySwapper::swapIdBackup.rcx], rcx
-        mov [EnemySwapper::swapIdBackup.rdx], rdx
-        mov [EnemySwapper::swapIdBackup.rsi], rsi
-        //mov [EnemySwapper::swapIdBackup.r8], r8
-        mov [EnemySwapper::swapIdBackup.r9], r9
-        mov [EnemySwapper::swapIdBackup.r10], r10
-        mov [EnemySwapper::swapIdBackup.r11], r11
-
-        call [custom_swap_setup]
-
-        mov rax, [EnemySwapper::swapIdBackup.rax]
-        mov rbx, [EnemySwapper::swapIdBackup.rbx]
-        mov rcx, [EnemySwapper::swapIdBackup.rcx]
-        mov rdx, [EnemySwapper::swapIdBackup.rdx]
-        mov rsi, [EnemySwapper::swapIdBackup.rsi]
-        //mov r8, [EnemySwapper::swapIdBackup.r8]
-        mov r9, [EnemySwapper::swapIdBackup.r9]
-        mov r10, [EnemySwapper::swapIdBackup.r10]
-        mov r11, [EnemySwapper::swapIdBackup.r11]
-        mov r8d, [EnemySwapper::newEnemyId]
-        mov [rax+0x10], r8d
-
-        originalcode:
-        mov r8d, [rax+0x10]
-        mov rcx, rsi
-        jmp qword ptr [EnemySwapper::swapIdRet]
-
-        swapall:
-        mov r8d, dword ptr [EnemySwapper::swapForAll.swapId]
-        mov [rax+0x10], r8d
-        jmp originalcode
-  }
-}*/
-
 static void clear_setData_addrs() {
   if (EnemySwapper::setDataAddrs.size() != 0)
     EnemySwapper::setDataAddrs.clear();
@@ -621,8 +605,11 @@ static void clear_setData_addrs() {
 
 static naked void spawn_pos_detour() {
     __asm {
+        cmp byte ptr[WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je ewe_check
         cmp byte ptr [EnemySwapper::cheaton], 0
         je originalcode
+        ewe_check:
         cmp byte ptr [EnemySwapper::isCustomSpawnPos], 1
         je cheat
         jmp originalcode
@@ -651,13 +638,28 @@ static naked void spawn_pos_detour() {
   }
 }
 
+void restore_em_list()
+{
+    //if (EnemySwapper::nowFlow == 23)//MissionRes
+    //{
+        WaveEditorMod::EnemyWaveEditor::mimObjManager.restore_all_data();
+        WaveEditorMod::EnemyWaveEditor::mimObjManager.dealloc_all();
+        WaveEditorMod::EnemyWaveEditor::emSetterCounter = 0;
+        WaveEditorMod::EnemyWaveEditor::isPfbLoadRequested = false;
+        //mimObjManager.dealloc_all();
+    //}
+}
+
 static naked void now_flow_detour() {
     __asm {
         mov dword ptr [EnemySwapper::nowFlow], eax
+        mov eax, [rdx+0x88]
+        mov [EnemySwapper::isInMission], ah
+        mov eax, dword ptr [rdx + 0x54]//nowFlow
         cmp [flowTmp], eax
         jne changeprev
-        cmp byte ptr [EnemySwapper::cheaton], 0
-        je originalcode
+        //cmp byte ptr [EnemySwapper::cheaton], 0
+        //je em_list_check//originalcode
         jmp check
 
         changeprev:
@@ -665,13 +667,17 @@ static naked void now_flow_detour() {
         mov [EnemySwapper::prevFlow], eax
         mov eax, dword ptr [EnemySwapper::nowFlow]
         mov [flowTmp], eax
-        cmp byte ptr [EnemySwapper::cheaton], 0
-        je originalcode
+        //cmp byte ptr [EnemySwapper::cheaton], 0
+        //je em_list_check//originalcode
 
         check:
         cmp eax, 0xE //14-MainMenu
         je clear
+        /*cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 1
+        je reset_em_list*/
+        //jmp em_list_check//originalcode
         jmp originalcode
+
 
         clear:
         cmp byte ptr [EnemySwapper::prevFlow], 0x16 // 22-Game
@@ -696,10 +702,36 @@ static naked void now_flow_detour() {
 		pop rbx
 		pop rax
 
+        /*em_list_check:
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 1
+        je reset_em_list*/
+
         originalcode:
         mov rbx,rdx
         mov rdi,rcx
         jmp qword ptr [EnemySwapper::nowFlowRet]
+
+        /*reset_em_list:
+        cmp dword ptr [EnemySwapper::nowFlow], 0x17
+        jne originalcode
+        push rax
+        push rcx
+        push rdx
+		push r8
+		push r9
+		push r10
+		push r11
+        sub rsp, 32
+        call [restore_em_list]
+        add rsp, 32
+        pop r11
+		pop r10
+	    pop r9
+		pop r8
+        pop rdx
+		pop rcx
+		pop rax
+        jmp originalcode*/
   }
 }
 
@@ -716,14 +748,17 @@ static naked void gamemode_detour() {
 
 static naked void load_Dante_ai_detour() {
     __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
+        option_check:
         cmp byte ptr [EnemySwapper::isBossDanteAiEnabled], 00
         je originalcode
 
         cheat:
         cmp byte ptr [EnemySwapper::isDanteM20], 01
-        je dante_m19
+        je dante_m20
         mov dword ptr [rax+0x7C], 0x13
 
         originalcode:
@@ -731,7 +766,7 @@ static naked void load_Dante_ai_detour() {
         je ret_je
         jmp qword ptr [EnemySwapper::bossDanteAiRet]
 
-        dante_m19:
+        dante_m20:
         mov dword ptr [rax+0x7C], 0x14
         jmp originalcode
 
@@ -742,8 +777,11 @@ static naked void load_Dante_ai_detour() {
 
 static naked void kill_griffon_detour() {
     __asm {
+        cmp byte ptr[WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
+        option_check:
         cmp byte ptr [EnemySwapper::canKillGriffon], 00
         je originalcode
         jmp qword ptr [EnemySwapper::killGriffonRet]
@@ -756,8 +794,11 @@ static naked void kill_griffon_detour() {
 
 static naked void kill_shadow_detour() {
   __asm {
+        cmp byte ptr[WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
+        option_check:
         cmp byte ptr [EnemySwapper::canKillShadow], 00
         je originalcode
         jmp qword ptr [EnemySwapper::killShadowRet]
@@ -770,8 +811,11 @@ static naked void kill_shadow_detour() {
 
 static naked void nightmire_starting_detour() {
     __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
+        option_check:
         cmp byte ptr [EnemySwapper::isNightmareFix], 00
         je originalcode
 
@@ -801,8 +845,11 @@ static naked void nightmire_starting_detour() {
 
 static naked void nightmire_arrival_detour() {
     __asm {
+        cmp byte ptr[WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
+        option_check:
         cmp byte ptr [EnemySwapper::isNightmareFix], 00
         je originalcode
 
@@ -824,6 +871,410 @@ static naked void nightmire_arrival_detour() {
         movss [rax+0x30], xmm10
         jmp qword ptr [EnemySwapper::nightmareArrivalPosRet]
   }
+}
+
+static naked void cavtele_detour()//need to find where it calc distance
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isCavFixEnabled], 00
+        je originalcode
+
+        cheat:
+        //--------PlayerPos--------//
+        push r10
+        mov r10, [EnemySwapper::plPosBase]
+        mov r10, [r10]
+        mov r10, [r10+0x70]
+        mov r10, [r10+0xC70]
+        mov r10, [r10+0x40]
+        mov r10, [r10+0xE40]
+        mov r10, [r10+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [r10+0x30]
+        addss xmm0, [EnemySwapper::cavOffset.x]
+        movss xmm1, [r10+0x34]
+        addss xmm1, [EnemySwapper::cavOffset.z]
+        movss xmm2, [r10+0x38]
+        addss xmm2, [EnemySwapper::cavOffset.y]
+        pop r10
+        movss [rdi+0x10], xmm0
+        movss [rdi+0x14], xmm1
+        movss [rdi+0x18], xmm2
+
+        originalcode:
+        //movss [r13+0x00000E20], xmm0
+        movss xmm0, [rdi+0x10]
+        jmp qword ptr [EnemySwapper::cavFixRet]
+    }
+}
+
+static naked void vergil_centerfloor_detour()//for dive bomb
+{
+    __asm {
+        cmp byte ptr[WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isVergilFixEnabled], 00
+        je originalcode
+
+        cheat:
+        //--------PlayerPos--------//
+        push rbx
+        mov rbx, [EnemySwapper::plPosBase]
+        mov rbx, [rbx]
+        mov rbx, [rbx+0x70]
+        mov rbx, [rbx+0xC70]
+        mov rbx, [rbx+0x40]
+        mov rbx, [rbx+0xE40]
+        mov rbx, [rbx+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [rbx+0x30]
+        movss xmm1, [rbx+0x34]
+        movss xmm2, [rbx+0x38]
+        mov rbx, rax
+        mov rbx, [rbx+0x108]//AirRaid
+        push r8
+        mov r8, [EnemySwapper::divebombHeightOfOutside]
+        mov [rbx+0x7C], r8
+        mov r8, [EnemySwapper::divebombHeightOfArenaSide]
+        mov [rbx+0x78], r8
+        mov r8, [EnemySwapper::divebombDistanceGroundCheck]
+        mov [rbx+0x80], r8
+        /*mov r8, [EnemySwapper::radiusOfArea]
+        mov [rbx+0x70], r8
+        mov r8, [EnemySwapper::radiusOfRevolution]
+        mov [rbx+0x74], r8*/
+        pop r8
+        pop rbx
+        movss [rax+0x000000A0], xmm0
+        movss [rax+0x000000A4], xmm1
+        movss [rax+0x000000A8], xmm2
+        jmp qword ptr [EnemySwapper::vergilFixJs]
+
+        originalcode:
+        movss xmm0, [rax+0x000000A0]
+        jmp qword ptr [EnemySwapper::vergilFixRet]
+    }
+}
+
+static naked void airraid_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isVergilFixEnabled], 00
+        je originalcode
+
+        cheat:
+        cmp byte ptr [EnemySwapper::isFastDiveBombAttack], 0
+        je originalcode
+        cmp byte ptr [rsi+0x32], 1
+        je originalcode
+        cmp byte ptr [rsi+0x31], 0
+        je originalcode
+        mov byte ptr [rsi+0x32], 1
+
+        originalcode:
+        movss xmm7, [rax+0x000000A0]
+        jmp qword ptr [EnemySwapper::airRaidControllerRet]
+    }
+}
+
+static naked void goliath_jmpsuck_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isGoliathFixEnabled], 00
+        je originalcode
+
+        cheat:
+        //--------PlayerPos--------//
+        push rax
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [rax+0x30]
+        movss xmm1, [rax+0x34]
+        movss xmm2, [rax+0x38]
+        pop rax
+
+        originalcode:
+        movss [rdx+0x00000D40], xmm0
+        jmp qword ptr [EnemySwapper::goliathSuckJmpRet]
+    }
+}
+
+static naked void goliath_jmpleave_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isGoliathFixEnabled], 00
+        je originalcode
+
+        cheat:
+        //--------PlayerPos--------//
+        push rax
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [rax+0x30]
+        movss xmm1, [rax+0x34]
+        movss xmm2, [rax+0x38]
+        pop rax
+
+        originalcode:
+        movss [r14+0x00000D30], xmm0
+        jmp qword ptr [EnemySwapper::goliathLeaveJmpRet]
+    }
+}
+
+static naked void artemis_centerfloor_fix()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isArtemisFixEnabled], 00
+        je originalcode
+
+        cheat:
+        mov eax, dword ptr [EnemySwapper::artemisCenterOfFloor.z]
+        mov [rcx+0x14], eax
+        cmp byte ptr [EnemySwapper::isArtemisPlayersXY], 1
+        je plposload
+        mov eax, dword ptr [EnemySwapper::artemisCenterOfFloor.x]
+        mov [rcx+0x10], eax
+        mov eax, dword ptr [EnemySwapper::artemisCenterOfFloor.y]
+        mov [rcx+0x18], eax
+        jmp originalcode
+
+        plposload:
+         //--------PlayerPos--------//
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        push rbx
+        mov ebx, dword ptr [rax+0x30]
+        mov [rcx+0x10], ebx
+        mov ebx, dword ptr [rax+0x38]
+        mov [rcx+0x18], ebx
+        pop rbx
+
+        originalcode:
+        movss xmm3, [rcx + 0x10]
+        jmp qword ptr [EnemySwapper::artemisFixRet]
+    }
+}
+
+static naked void urizen3tp_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isUrizen3FixEnabled], 00
+        je originalcode
+
+        cheat:
+        jmp qword ptr [EnemySwapper::urizen3TpJne]
+
+        originalcode:
+        cmp qword ptr [rax+0x18], 00
+        jne cheat
+        jmp qword ptr [EnemySwapper::urizen3TpRet]
+    }
+}
+
+static naked void malphas_tp_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isMalphasFixEnabled], 00
+        je originalcode
+
+        cheat:
+        cmp byte ptr [EnemySwapper::malphasFixPlPos], 00
+        je load_pos
+        //--------PlayerPos--------//
+        push rax
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [rax+0x30]
+        movss xmm1, [rax+0x34]
+        movss xmm2, [rax+0x38]
+        pop rax
+        movss [rdi+0x00000090], xmm0
+        movss [rdi+0x00000094], xmm1
+        movss [rdi+0x00000098], xmm2
+        jmp originalcode
+
+        load_pos:
+        movss xmm0, dword ptr [EnemySwapper::malphasCenterOfFloor.x]
+        movss xmm1, dword ptr [EnemySwapper::malphasCenterOfFloor.z]
+        movss xmm2, dword ptr [EnemySwapper::malphasCenterOfFloor.y]
+        movss [rdi+0x00000090], xmm0
+        movss [rdi+0x00000094], xmm1
+        movss [rdi+0x00000098], xmm2
+
+        originalcode:
+        movss xmm0, [rdi + 0x00000090]
+        jmp qword ptr [EnemySwapper::malphasRet]
+    }
+}
+
+static naked void cerberus_pos_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isCerberusFixEnabled], 00
+        je originalcode
+
+        cheat:
+        cmp byte ptr [EnemySwapper::cerberusFixPlPos], 00
+        je load_pos
+        //--------PlayerPos--------//
+        push rax
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        movss xmm8, [rax+0x30]
+        movss xmm9, [rax+0x34]
+        movss xmm10, [rax+0x38]
+        pop rax
+        movss [rdx+0x10], xmm8
+        movss [rdx+0x14], xmm9
+        movss [rdx+0x18], xmm10
+        jmp originalcode
+
+        load_pos:
+        movss xmm8, [EnemySwapper::cerberusCenterOfFloor.x]
+        movss xmm9, [EnemySwapper::cerberusCenterOfFloor.z]
+        movss xmm10, [EnemySwapper::cerberusCenterOfFloor.y]
+        movss [rdx+0x10], xmm8
+        movss [rdx+0x14], xmm9
+        movss [rdx+0x18], xmm10
+
+        originalcode:
+        movss xmm10, [rdx+0x18]
+        jmp qword ptr [EnemySwapper::cerberusFixRet]
+    }
+}
+
+static naked void cerberus_thunderwave_detour()
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isCerberusFixEnabled], 00
+        je originalcode
+
+        cheat:
+        cmp byte ptr [EnemySwapper::cerberusThunderWavePlPos], 0
+        je thunderstatic
+        //--------PlayerPos--------//
+        push rax
+        mov rax, [EnemySwapper::plPosBase]
+        mov rax, [rax]
+        mov rax, [rax+0x70]
+        mov rax, [rax+0xC70]
+        mov rax, [rax+0x40]
+        mov rax, [rax+0xE40]
+        mov rax, [rax+0x80]
+        //--------PlayerPos--------//
+        movss xmm0, [rax+0x34]
+        pop rax
+        jmp change
+
+        thunderstatic:
+        movss xmm0, [EnemySwapper::cerberusThunderWaveZ]
+
+        change:
+        movss [rdi+0x24], xmm0
+        movss [rdi+0x28], xmm0
+        jmp qword ptr [EnemySwapper::cerberusThunderWaveRet]
+
+        originalcode:
+        maxss xmm0, [rdi+0x24]
+        jmp qword ptr [EnemySwapper::cerberusThunderWaveRet]
+    }
+}
+
+static naked void cerberus_thunderball_detour()//fu, capcom
+{
+    __asm {
+        cmp byte ptr [WaveEditorMod::EnemyWaveEditor::cheaton], 01
+        je option_check
+        cmp byte ptr [EnemySwapper::cheaton], 00
+        je originalcode
+        option_check:
+        cmp byte ptr [EnemySwapper::isCerberusFixEnabled], 00
+        je originalcode
+
+        jmp qword ptr [EnemySwapper::cerberusThunderBallJmp]
+
+        originalcode:
+        cmp [rax+0x00000FA9], r14d//r14l
+        jmp qword ptr [EnemySwapper::cerberusThunderBallRet]
+    }
 }
 
 void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
@@ -852,9 +1303,34 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   canKillGriffon = cfg.get<bool>("EnemySwapper.canKillGriffon").value_or(false);
   canKillShadow = cfg.get<bool>("EnemySwapper.canKillShadow").value_or(false);
   isNightmareFix  = cfg.get<bool>("EnemySwapper.isNightmareFix").value_or(false);
+  isCavFixEnabled = cfg.get<bool>("EnemySwapper.isCavFixEnabled").value_or(false);
+  isVergilFixEnabled = cfg.get<bool>("EnemySwapper.isVergilFixEnabled").value_or(false);
+  isFastDiveBombAttack = cfg.get<bool>("EnemySwapper.isFastDiveBombAttack").value_or(false);
+  isGoliathFixEnabled = cfg.get<bool>("EnemySwapper.isGoliathFixEnabled").value_or(false);
+  isArtemisFixEnabled = cfg.get<bool>("EnemySwapper.isArtemisFixEnabled").value_or(false);
+  isArtemisPlayersXY = cfg.get<bool>("EnemySwapper.isArtemisPlayersXY").value_or(false);
+  isUrizen3FixEnabled = cfg.get<bool>("EnemySwapper.isUrizen3FixEnabled").value_or(false);
+  isMalphasFixEnabled = cfg.get<bool>("EnemySwapper.isMalphasFixEnabled").value_or(false);
+  isCerberusFixEnabled = cfg.get<bool>("EnemySwapper.isCerberusFixEnabled").value_or(false);
+  cerberusFixPlPos = cfg.get<bool>("EnemySwapper.cerberusFixPlPos").value_or(false);
+  cerberusThunderWavePlPos = cfg.get<bool>("EnemySwapper.cerberusThunderWavePlPos").value_or(true);
   nightmareStartPosOffs.x = cfg.get<float>("EnemySwapper.nightmareStartPosOffsX").value_or(135.83f);
   nightmareStartPosOffs.y = cfg.get<float>("EnemySwapper.nightmareStartPosOffsY").value_or(-112.45f);
   nightmareStartPosOffs.z = cfg.get<float>("EnemySwapper.nightmareStartPosOffsZ").value_or(82.784f);
+  divebombHeightOfArenaSide = cfg.get<float>("EnemySwapper.divebombHeightOfArenaSide").value_or(-95.5f);
+  divebombHeightOfOutside = cfg.get<float>("EnemySwapper.divebombHeightOfOutside").value_or(-95.0f);
+  divebombDistanceGroundCheck = cfg.get<float>("EnemySwapper.divebombDistanceGroundCheck").value_or(100.0f);
+  artemisCenterOfFloor.x = cfg.get<float>("EnemySwapper.artemisCenterOfFloorX").value_or(-368.0f);
+  artemisCenterOfFloor.y = cfg.get<float>("EnemySwapper.artemisCenterOfFloorY").value_or(-308.5f);
+  artemisCenterOfFloor.z = cfg.get<float>("EnemySwapper.artemisCenterOfFloorZ").value_or(1.15f);
+  malphasCenterOfFloor.x = cfg.get<float>("EnemySwapper.malphasCenterOfFloorX").value_or(0.0f);
+  malphasCenterOfFloor.y = cfg.get<float>("EnemySwapper.malphasCenterOfFloorY").value_or(0.0f);
+  malphasCenterOfFloor.z = cfg.get<float>("EnemySwapper.malphasCenterOfFloorZ").value_or(0.0f);
+  cerberusCenterOfFloor.x = cfg.get<float>("EnemySwapper.cerberusCenterOfFloorX").value_or(0.0f);
+  cerberusCenterOfFloor.y = cfg.get<float>("EnemySwapper.cerberusCenterOfFloorY").value_or(0.0f);
+  cerberusCenterOfFloor.z = cfg.get<float>("EnemySwapper.cerberusCenterOfFloorZ").value_or(-0.1f);
+  cerberusThunderWaveZ = cfg.get<float>("EnemySwapper.cerberusThunderWaveZ").value_or(-0.1f);
+
   std::string key;
   uint32_t swapTo = 0;
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
@@ -875,9 +1351,33 @@ void EnemySwapper::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("EnemySwapper.canKillGriffon", canKillGriffon);
   cfg.set<bool>("EnemySwapper.canKillShadow", canKillShadow);
   cfg.set<bool>("EnemySwapper.isNightmareFix", isNightmareFix);
+  cfg.set<bool>("EnemySwapper.isCavFixEnabled", isCavFixEnabled);
+  cfg.set<bool>("EnemySwapper.isVergilFixEnabled", isVergilFixEnabled);
+  cfg.set<bool>("EnemySwapper.isFastDiveBombAttack", isFastDiveBombAttack);
+  cfg.set<bool>("EnemySwapper.isGoliathFixEnabled", isGoliathFixEnabled);
+  cfg.set<bool>("EnemySwapper.isArtemisFixEnabled", isArtemisFixEnabled);
+  cfg.set<bool>("EnemySwapper.isArtemisPlayersXY", isArtemisPlayersXY);
+  cfg.set<bool>("EnemySwapper.isUrizen3FixEnabled", isUrizen3FixEnabled);
+  cfg.set<bool>("EnemySwapper.isMalphasFixEnabled", isMalphasFixEnabled);
+  cfg.set<bool>("EnemySwapper.isCerberusFixEnabled", isCerberusFixEnabled);
+  cfg.set<bool>("EnemySwapper.cerberusFixPlPos", cerberusFixPlPos);
+  cfg.set<bool>("EnemySwapper.cerberusThunderWavePlPos", cerberusThunderWavePlPos);
   cfg.set<float>("EnemySwapper.nightmareStartPosOffsX", nightmareStartPosOffs.x);
   cfg.set<float>("EnemySwapper.nightmareStartPosOffsY", nightmareStartPosOffs.y);
   cfg.set<float>("EnemySwapper.nightmareStartPosOffsZ", nightmareStartPosOffs.z);
+  cfg.set<float>("EnemySwapper.divebombHeightOfArenaSide", divebombHeightOfArenaSide);
+  cfg.set<float>("EnemySwapper.divebombHeightOfOutside", divebombHeightOfOutside);
+  cfg.set<float>("EnemySwapper.divebombDistanceGroundCheck", divebombDistanceGroundCheck);
+  cfg.set<float>("EnemySwapper.artemisCenterOfFloorX", artemisCenterOfFloor.x);
+  cfg.set<float>("EnemySwapper.artemisCenterOfFloorY", artemisCenterOfFloor.y);
+  cfg.set<float>("EnemySwapper.artemisCenterOfFloorZ", artemisCenterOfFloor.z);
+  cfg.set<float>("EnemySwapper.malphasCenterOfFloorX", malphasCenterOfFloor.x);
+  cfg.set<float>("EnemySwapper.malphasCenterOfFloorY", malphasCenterOfFloor.y);
+  cfg.set<float>("EnemySwapper.malphasCenterOfFloorZ", malphasCenterOfFloor.z);
+  cfg.set<float>("EnemySwapper.cerberusCenterOfFloorX", cerberusCenterOfFloor.x);
+  cfg.set<float>("EnemySwapper.cerberusCenterOfFloorY", cerberusCenterOfFloor.y);
+  cfg.set<float>("EnemySwapper.cerberusCenterOfFloorZ", cerberusCenterOfFloor.z);
+  cfg.set<float>("EnemySwapper.cerberusThunderWaveZ", cerberusThunderWaveZ);
 
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     cfg.set<uint32_t>(std::string(EnemySwapper::emNames[i]) + "_swapTo", selectedToSwap[i]);
@@ -895,12 +1395,19 @@ void EnemySwapper::restore_default_settings() {
 }
 
 void set_Dante_ai() {
-    ImGui::TextWrapped("Use this option if you want to swap some enemies to boss Dante. Can't be changed during gameplay.");
+    ImGui::TextWrapped("Use this option if you want to swap some enemies to boss Dante. Don't work on BP stages >=20. Can't be changed during gameplay.");
     ImGui::Checkbox("Enable boss Dante AI fix/Enable boss Vergil mission AI", &EnemySwapper::isBossDanteAiEnabled);
     if (EnemySwapper::isBossDanteAiEnabled) {
         ImGui::TextWrapped("Select this to use boss Dante/Vergil M20 AI type. By default mod using M19 AI type.\n"
             "Killing boss Vergil with m19 AI on missions/BP will cause a soft lock.");
-        ImGui::Checkbox("Use boss Dante/Vergil M20 AI", &EnemySwapper::isDanteM20);
+        //ImGui::Checkbox("Use boss Dante/Vergil M20 AI", &EnemySwapper::isDanteM20);
+        if(ImGui::RadioButton("Use M19 AI", !EnemySwapper::isDanteM20))
+            EnemySwapper::isDanteM20 = false;
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Use M20 AI", EnemySwapper::isDanteM20))
+            EnemySwapper::isDanteM20 = true;
     }
 }
 
@@ -926,9 +1433,11 @@ void EnemySwapper::on_draw_ui() {
     print_issues("Swapping Dante can softlock mission 20.");
     print_issues("Wrong swap on some BP stages sometimes.");
     print_issues("Some BP stages softlock when swapping enemies to qliphoth tentacles.");
-    ImGui::Separator();
   }
-
+  ImGui::Separator();
+  ImGui::Separator();
+  ImGui::BulletText("Enemy fixes");
+  ImGui::Spacing();
   set_Dante_ai();
   ImGui::Separator();
   ImGui::TextWrapped("Familiars options can be changed during gameplay.");
@@ -941,13 +1450,110 @@ void EnemySwapper::on_draw_ui() {
     ImGui::InputFloat("Y offset", &nightmareStartPosOffs.y, 0.0f, 0.0f, 3);
     ImGui::InputFloat("Z offset", &nightmareStartPosOffs.z, 0.0f, 0.0f, 3);
   }
-
-  /*ImGui::TextWrapped("nowFlow: %d", nowFlow);
-  ImGui::Spacing();
-  ImGui::TextWrapped("prevFlow: %d", prevFlow);
-  ImGui::Spacing();*/
-
   ImGui::Separator();
+  ImGui::Spacing();
+  ImGui::Checkbox("Cavaliere teleports fix", &isCavFixEnabled);
+  ImGui::SameLine();
+  help_marker("By defauld cav uses a precoded coords for bossfight arena to teleport. Because of that on other areas it almost always teleport behind the map and dies. This will swap capcom's coords to player coords. "
+  "Can stuck in teleport state :(. Can be changed during gameplay.");
+  if (isCavFixEnabled)
+  {
+      ImGui::TextWrapped("X offset");
+      ImGui::InputFloat("##cavXOffst", &cavOffset.x, 0, 0, 2);
+      ImGui::TextWrapped("Y offset");
+      ImGui::InputFloat("##cavYOffst", &cavOffset.y, 0, 0, 2);
+      ImGui::TextWrapped("Z offset");
+      ImGui::InputFloat("##cavZOffst", &cavOffset.z, 0, 0, 2);
+  }
+  if(isVergilFixEnabled)
+      ImGui::Separator();
+  ImGui::Checkbox("Dive bomb fix",&isVergilFixEnabled);
+  ImGui::SameLine();
+  help_marker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb preparing teleport to take an effect.");
+  if (isVergilFixEnabled)
+  {
+      ImGui::TextWrapped("Height of arena side (default = 1.5)");
+      ImGui::InputFloat("##divebombHeightOfArenaSide", &divebombHeightOfArenaSide, 0, 0, 1);
+      ImGui::TextWrapped("Height of outside (default = 8)");
+      ImGui::InputFloat("##divebombHeightOfOutside", &divebombHeightOfOutside, 0, 0, 1);
+      ImGui::TextWrapped("Distance of ground check (default = 5)");
+      ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, 1);
+      ImGui::Checkbox("Fast divebomb attack", &isFastDiveBombAttack);
+      ImGui::SameLine();
+      help_marker("Force Vergil to start ram you after he fly ~pi/3 of his way. It's make a harder to dodje him 'cause he will literally using \"lock on\" on you an all time of fly. Can help in a case if he start infinitely circle flying. "
+      "Can be enabled during gameplay.");
+      ImGui::Separator();
+      ImGui::Spacing();
+  }
+  ImGui::Checkbox("Goliath jumps fix", &isGoliathFixEnabled);
+  ImGui::SameLine();
+  help_marker("Goliath will jump right to player, not to precoded capcom's coords. Can be changed during gameplay.");
+
+  ImGui::Checkbox("Artemis fly pos fix", &isArtemisFixEnabled);
+  if (isArtemisFixEnabled)
+  {
+      ImGui::Separator();
+      ImGui::Spacing();
+      ImGui::Checkbox("Use player position for XY center of arena coords", &isArtemisPlayersXY);
+      ImGui::SameLine();
+      help_marker("Artemis will always use current player XY coords as center of arena wich will force her to fly away from player when he gets close.");
+      if (!isArtemisPlayersXY)
+      {
+          ImGui::Spacing();
+          btn_set_plpos_to(artemisCenterOfFloor, "Set center of floor to current player position ##Art");
+          ImGui::Spacing();
+          ImGui::InputFloat("X coord of center of arena ##Art", &artemisCenterOfFloor.x, 0.1f, 0, 2);
+          ImGui::InputFloat("Y coord of center of arena ##Art", &artemisCenterOfFloor.y, 0.1f, 0, 2);
+      }
+      ImGui::InputFloat("Z coord of center of arena ##Art", &artemisCenterOfFloor.z, 0.1f, 0, 2);
+      ImGui::Separator();
+      ImGui::Spacing();
+  }
+  ImGui::Checkbox("Urizen 3 teleports fix", &isUrizen3FixEnabled);
+  ImGui::SameLine();
+  help_marker("Prevent Urizen 3 stuck in teleport phase by disabling changing coords when he use teleport for change his position while changing battle state.");
+  ImGui::Checkbox("Malphas portals fix", &isMalphasFixEnabled);
+  ImGui::SameLine();
+  help_marker("Chicken will not insta die.");
+  if (isMalphasFixEnabled)
+  {
+      ImGui::Spacing();
+      ImGui::Separator();
+      ImGui::Checkbox("Use current player pos as center of arena", &malphasFixPlPos);
+      ImGui::SameLine();
+      help_marker("Teleports also have an offsets to current player pos, so if this enabled and player stands on the edge of the arena, chicken still can fall and die. I recommend to set custom center coords for different areas manually.");
+      if (!malphasFixPlPos)
+      {
+          btn_set_plpos_to(malphasCenterOfFloor, "Set center of floor to current player position ##Malph");
+          ImGui::InputFloat("X coord of center of arena ##Malph", &malphasCenterOfFloor.x, 0.1f, 0, 2);
+          ImGui::InputFloat("Y coord of center of arena ##Malph", &malphasCenterOfFloor.y, 0.1f, 0, 2);
+          ImGui::InputFloat("Z coord of center of arena ##Malph", &malphasCenterOfFloor.z, 0.1f, 0, 2);
+      }
+      ImGui::Separator();
+      ImGui::Spacing();
+  }
+  ImGui::Checkbox("Cerberus fix", &isCerberusFixEnabled); ImGui::SameLine();
+  help_marker("Fixes for jumps in fire state and shells in thunder state. No fix for ice wall :(");
+  if (isCerberusFixEnabled)
+  {
+      ImGui::Spacing();
+      ImGui::Separator();
+      ImGui::Checkbox("Use current player pos as center of arena ##cerberus", &cerberusFixPlPos);
+      if (!cerberusFixPlPos)
+      {
+          btn_set_plpos_to(cerberusCenterOfFloor, "Set center of floor to current player position ##Cerberus");
+          ImGui::InputFloat("X coord of center of arena ##Cerberus", &cerberusCenterOfFloor.x, 0.1f, 0, 2);
+          ImGui::InputFloat("Y coord of center of arena ##Cerberus", &cerberusCenterOfFloor.y, 0.1f, 0, 2);
+          ImGui::InputFloat("Z coord of center of arena ##Cerberus", &cerberusCenterOfFloor.z, 0.1f, 0, 2);
+      }
+      ImGui::Checkbox("Use current player z coord to spawn thunder wave attack", &cerberusThunderWavePlPos);
+      if (!cerberusThunderWavePlPos)
+          ImGui::InputFloat("Z for thunder wave", &cerberusThunderWaveZ, 0.1f, 0.0f, 2);
+      ImGui::Separator();
+      ImGui::Spacing();
+  }
+  ImGui::Separator();
+  ImGui::Spacing();
   ImGui::Checkbox("Increase spawn XYZ coords", &isCustomSpawnPos);
   ImGui::TextWrapped("Fixes some enemies spawning under the floor. Note that this will affect for all spawns and can change spawn animations.\n"
       "This option can be changed during the mission.");
@@ -962,7 +1568,7 @@ void EnemySwapper::on_draw_ui() {
   }
 
   ImGui::Separator();
-  /*ImGui::TextWrapped("Vector size is: %d", setDataAddrs.size());
+  /*ImGui::TextWrapped("Vector itemSize is: %d", setDataAddrs.itemSize());
   ImGui::Spacing();
   ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
 
@@ -980,7 +1586,7 @@ void EnemySwapper::on_draw_ui() {
 
     ImGui::Separator();
     /*if (ImGui::Button("Apply")) {
-      for (int i = 0; i < emNames.size(); i++) {
+      for (int i = 0; i < emNames.itemSize(); i++) {
         set_swapper_setting(i, selectedToSwap[i]);
       }
     }*/
@@ -1035,8 +1641,17 @@ void EnemySwapper::on_draw_ui() {
 */
 }
 
+void EnemySwapper::btn_set_plpos_to(Vector3f& to, const char* btnContent)
+{
+    if (ImGui::Button(btnContent))
+    {
+        if (nowFlow == 22)
+            to = CheckpointPos::get_player_coords();
+    }
+}
+
 void EnemySwapper::on_draw_debug_ui() {
-  //ImGui::TextWrapped("Vector size is: %d", setDataAddrs.size());
+  //ImGui::TextWrapped("Vector itemSize is: %d", setDataAddrs.itemSize());
   /*ImGui::TextWrapped("nowFlow: %d", nowFlow);
   ImGui::Spacing();
   ImGui::TextWrapped("prevFlow: %d", prevFlow);
@@ -1118,16 +1733,6 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Unanable to find EnemySwapper.initAddr7 pattern.";
   }*/
 
-  auto nowFlowAddr = utility::scan(base, "48 8B DA 48 8B F9 83 F8 1A"); // 
-  if (!nowFlowAddr) {
-    return "Unanable to find EnemySwapper.nowFlowAddr pattern.";
-  }
-
-  auto gameModeAddr = utility::scan(base, "39 B8 90 00 00 00 48"); //
-  if (!nowFlowAddr) {
-    return "Unanable to find EnemySwapper.gameMode pattern.";
-  }
-
   auto m19CheckAddr = utility::scan(base, "83 78 7C 13 75 11"); //DevilMayCry5.exe+1D47B50
   if (!m19CheckAddr) {
     return "Unanable to find EnemySwapper.m19CheckAddr pattern.";
@@ -1153,12 +1758,104 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Unanable to find EnemySwapper.nightmareArrivalAddr pattern.";
   }
 
+  //auto cavTeleportPosAddr = utility::scan(base, "F3 41 0F 11 85 20 0E 00 00 F3 41"); //DevilMayCry5.exe+1290351
+  //if (!cavTeleportPosAddr)
+  //{
+  //    return "Unanable to find EnemySwapper.cavTeleportPosAddr pattern.";
+  //}
+
+  auto cavTeleportPosAddr = utility::scan(base, "73 FD FF FF F3 0F 10 47 10"); //DevilMayCry5.exe+1290342 (-0x4)
+  if (!cavTeleportPosAddr)
+  {
+      return "Unanable to find EnemySwapper.cavTeleportPosAddr pattern.";
+  }
+
+  auto vergilCenterFloorAddr = utility::scan(base, "04 00 00 F3 0F 10 80 A0 00 00 00 F3"); //DevilMayCry5.exe+9AE0B7 (-0x3);
+  if (!vergilCenterFloorAddr)
+  {
+      return "Unanable to find EnemySwapper.vergilCenterFloorAddr pattern.";
+  }
+  //auto vergilCenterFloor1Addr = utility::scan(base, "E3 F3 0F 10 80 A0 00 00 00"); // DevilMayCry5.exe+1CBB022 (-0x1);
+  //if (!vergilCenterFloor1Addr)
+  //{
+  //    return "Unanable to find EnemySwapper.vergilCenterFloor1Addr pattern.";
+  //}
+
+  auto vergilAirRaidControllerAddr = utility::scan(base, "F3 0F 10 B8 A0 00 00 00 F3"); //DevilMayCry5.exe+1CBD779
+  if (!vergilAirRaidControllerAddr)
+  {
+      return "Unanable to find EnemySwapper.vergilAirRaidControllerAddr pattern.";
+  }
+
+  auto goliathSuckJmpAddr = utility::scan(base, "00 F3 0F 11 82 40 0D 00 00"); //DevilMayCry5.exe+12F2545 (-0x1)
+  if (!goliathSuckJmpAddr)
+  {
+      return "Unanable to find EnemySwapper.goliathSuckJmpAddr pattern.";
+  }
+
+  auto goliathLeaveJmpAddr = utility::scan(base, "F3 41 0F 11 86 30 0D 00 00"); //DevilMayCry5.exe+12F2455
+  if (!goliathLeaveJmpAddr)
+  {
+      return "Unanable to find EnemySwapper.goliathLeaveJmpAddr pattern.";
+  }
+
+  auto artemisCenterOfFloorAddr = utility::scan(base, "B7 F3 0F 10 59 10"); //DevilMayCry5.exe+1E9CC1D (-0x1)
+  if (!artemisCenterOfFloorAddr)
+  {
+      return "Unanable to find EnemySwapper.artemisCenterOfFloorAddr pattern.";
+  }
+
+  auto urizen3TpAddr = utility::scan(base, "48 83 78 18 00 75 93 F3 0F 10 87 E0"); //DevilMayCry5.exe+1189760
+  if (!urizen3TpAddr)
+  {
+      return "Unanable to find EnemySwapper.urizen3TpAddr pattern.";
+  }
+
+  auto malphasAddr = utility::scan(base, "F3 0F 10 87 90 00 00 00 F3 0F 11 4D B4"); //DevilMayCry5.exe+105B4C3
+  if (!urizen3TpAddr)
+  {
+      return "Unanable to find EnemySwapper.malphasAddr pattern.";
+  }
+
+  auto cerberusAddr = utility::scan(base, "F3 44 0F 10 52 18 48 8B D3"); //DevilMayCry5.exe+111D60E
+  if (!cerberusAddr)
+  {
+      return "Unanable to find EnemySwapper.cerberusAddr pattern.";
+  }
+
+  auto cerberusThunderWaveAddr = utility::scan(base, "F3 0F 5F 47 24"); //DevilMayCry5.exe+1121E1B
+  if (!cerberusThunderWaveAddr)
+  {
+      return "Unanable to find EnemySwapper.cerberusThunderWaveAddr pattern.";
+  }
+
+  auto cerberusThunderBallAddr = utility::scan(base, "44 38 B0 A9 0F 00 00"); //DevilMayCry5.exe+1F39983
+  if (!cerberusThunderBallAddr)
+  {
+      return "Unanable to find EnemySwapper.cerberusThunderBallAddr pattern.";
+  }
+
+  auto nowFlowAddr = utility::scan(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+89429E 
+  if (!nowFlowAddr)
+  {
+      return "Unanable to find EnemySwapper.nowFlowAddr pattern.";
+  }
+
+  auto gameModeAddr = utility::scan(base, "39 B8 90 00 00 00 48"); // DevilMayCry5.exe+132B592
+  if (!nowFlowAddr)
+  {
+      return "Unanable to find EnemySwapper.gameMode pattern.";
+  }
+
   //uintptr_t swapIdAddr = g_framework->get_module().as<uintptr_t>() + 0xF34F6A;
 
   const uintptr_t spawnAddrOffset = 0xA;
 
   posSpawnTestJne = customSpawnAddr.value() + spawnAddrOffset + 0x15;
   bossDanteAiJne  = m19CheckAddr.value() + 0x17;
+  vergilFixJs = vergilCenterFloorAddr.value() + 0x3 + 0x18;
+  urizen3TpJne = urizen3TpAddr.value() - 0x66;
+  cerberusThunderBallJmp = cerberusThunderBallAddr.value() + 0x1C6;
 
   if (!install_hook_absolute(initAddr1.value(), m_enemy_swapper_hook1, &enemy_swap_detour1, &setEnemyDataRet1, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
@@ -1195,21 +1892,6 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Failed to initialize EnemySwapper.initAddr6"; 
   }
 
-  if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6)) {
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemySwapper.nowFlowAddr"; 
-  }
-
-  /*if (!install_hook_absolute(swapIdAddr, m_enemy_swapper_hook7, &swap_id_detour, &swapIdRet, 0x7)) {
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemySwapper.swapIdAddr"; 
-  }*/
-
-  if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6)) {
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemySwapper.gameModeAddr"; 
-  }
-
   if (!install_hook_absolute(m19CheckAddr.value(), m_m19check_hook, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.gameModeAddr"; 
@@ -1235,8 +1917,110 @@ std::optional<std::string> EnemySwapper::on_initialize() {
     return "Failed to initialize EnemySwapper.nightmireArrivalMeteorPos"; 
   }
 
+  /*if (!install_hook_absolute(cavTeleportPosAddr.value(), m_cavfix_hook, &cavtele_detour, &cavFixRet, 0x9))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.cavTeleportPos";
+  }*/
+
+  if (!install_hook_absolute(cavTeleportPosAddr.value()+0x4, m_cavfix_hook, &cavtele_detour, &cavFixRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.cavTeleportPos";
+  }
+
+  if (!install_hook_absolute(vergilCenterFloorAddr.value() + 0x3, m_vergilcenterfloor_hook, &vergil_centerfloor_detour, &vergilFixRet, 0x8))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.vergilCenterFloor";
+  }
+
+  if (!install_hook_absolute(vergilAirRaidControllerAddr.value(), m_airraid_controller_hook, &airraid_detour, &airRaidControllerRet, 0x8))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.vergilAirRaidController";
+  }
+
+  if (!install_hook_absolute(goliathSuckJmpAddr.value()+0x1, m_goliath_suctionjmp_hook, &goliath_jmpsuck_detour, &goliathSuckJmpRet, 0x8))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.goliathSuckJmp";
+  }
+
+  if (!install_hook_absolute(goliathLeaveJmpAddr.value(), m_goliath_leavejmp_hook, &goliath_jmpleave_detour, &goliathLeaveJmpRet, 0x9))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.goliathLeaveJmp";
+  }
+
+  if (!install_hook_absolute(artemisCenterOfFloorAddr.value()+0x1, m_artemis_centerfloor_hook, &artemis_centerfloor_fix, &artemisFixRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.artemisCenterOfFloor";
+  }
+
+  if (!install_hook_absolute(urizen3TpAddr.value(), m_urizen3_tp_hook, &urizen3tp_detour, &urizen3TpRet, 0x7))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.urizen3Tp";
+  }
+
+  if (!install_hook_absolute(malphasAddr.value(), m_malphas_tp_hook, &malphas_tp_detour, &malphasRet, 0x8))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.malphas";
+  }
+
+  if (!install_hook_absolute(cerberusAddr.value(), m_cerberus_pos_hook, &cerberus_pos_detour, &cerberusFixRet, 0x6))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.cerberus";
+  }
+
+  if (!install_hook_absolute(cerberusThunderWaveAddr.value(), m_cerberus_thunderwave_hook, &cerberus_thunderwave_detour, &cerberusThunderWaveRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.cerberusThunderWave";
+  }
+
+  if (!install_hook_absolute(cerberusThunderBallAddr.value(), m_cerberus_thunderball_hook, &cerberus_thunderball_detour, &cerberusThunderBallRet, 0x7))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.cerberusThunderWave";
+  }
+
+  if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.nowFlowAddr";
+  }
+
+  /*if (!install_hook_absolute(swapIdAddr, m_enemy_swapper_hook7, &swap_id_detour, &swapIdRet, 0x7)) {
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize EnemySwapper.swapIdAddr";
+  }*/
+
+  if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemySwapper.gameModeAddr";
+  }
+
   seed_rnd_gen(-1);
   EnemySwapper::setDataAddrs.reserve(reservedForReswap);
   //setDataAddrs = new std::vector<uintptr_t>();
     return Mod::on_initialize();
+}
+
+void EnemySwapper::help_marker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }

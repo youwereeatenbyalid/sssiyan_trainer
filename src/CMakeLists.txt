@@ -221,6 +221,10 @@ set(MODS_SRC
     mods/CheckpointPos.cpp
     mods/MissionManager.cpp
     mods/MissionManager.hpp
+    mods/EnemyWaveEditor.hpp
+    mods/EnemyWaveEditor.cpp
+    mods/SecretMissionTimer.hpp
+    mods/SecretMissionTimer.cpp
 )
 
 set(HOOKS_SRC
@@ -271,6 +275,11 @@ set(FRAMEWORK_SRC
     Config.hpp
 )
 
+set(LISTEDITOR_SRC
+    ListEditor/AllocatedData.hpp
+    ListEditor/MimicMngObj.hpp
+)
+
 option(HOOK_D3D "Hook direct3D" OFF)
 
 if(HOOK_D3D)
@@ -300,6 +309,7 @@ endif()
 
 source_group("Hooks" FILES ${HOOKS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
+source_group("ListEditor" FILES ${LISTEDITOR_SRC})
 source_group("SDK" FILES ${SDK_SRC})
 source_group("Utility" FILES ${UTILITY_SRC})
 source_group("Framework" FILES ${FRAMEWORK_SRC})
@@ -316,6 +326,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             LicenseStrings.hpp
             ${SDK_SRC}
             ${MODS_SRC}
+            ${LISTEDITOR_SRC}
             ${HOOKS_SRC}
             ${IMGUI_SRC}
             ${UTILITY_SRC}

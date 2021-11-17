@@ -3,6 +3,8 @@
 #include "sdk/ReClass.hpp"
 #include <array>
 #include <random>
+#include "EnemyWaveEditor.hpp"
+#include "CheckpointPos.hpp"
 //#include "EnemyDataSettings.hpp"
 
 class EnemySwapper : public Mod {
@@ -10,7 +12,7 @@ class EnemySwapper : public Mod {
 
 public:
 
-static const int enemyListCount = 41;
+static const int enemyListCount = 40;
 
 	struct EnemyId {
   public:
@@ -50,7 +52,7 @@ static const int enemyListCount = 41;
             id = curListIndx + 3;
           else
             id = curListIndx;
-          if (curListIndx == 40) // Dante, but his AI is disabled
+          if (curListIndx == 39) // Dante, but his AI is disabled
             id = 55;
 	}
   };
@@ -87,6 +89,20 @@ static uintptr_t killGriffonRet;
 static uintptr_t nightmareStartingPosRet;
 static uintptr_t nightmareArrivalPosRet;
 static uintptr_t plPosBase;
+static uintptr_t cavFixRet;
+static uintptr_t vergilFixRet;
+static uintptr_t vergilFixJs;
+static uintptr_t airRaidControllerRet;
+static uintptr_t goliathSuckJmpRet;
+static uintptr_t goliathLeaveJmpRet;
+static uintptr_t artemisFixRet;
+static uintptr_t urizen3TpRet;
+static uintptr_t urizen3TpJne;
+static uintptr_t malphasRet;
+static uintptr_t cerberusFixRet;
+static uintptr_t cerberusThunderWaveRet;
+static uintptr_t cerberusThunderBallRet;
+static uintptr_t cerberusThunderBallJmp;
 
 static bool isSwapAll;
 static bool cheaton;
@@ -98,6 +114,19 @@ static bool isDanteM20;
 static bool canKillShadow;
 static bool canKillGriffon;
 static bool isNightmareFix;
+static bool isInMission;//NowFlow.isOnMission
+static bool isCavFixEnabled;
+static bool isVergilFixEnabled;
+static bool isFastDiveBombAttack;
+static bool isGoliathFixEnabled;
+static bool isArtemisFixEnabled;
+static bool isArtemisPlayersXY;
+static bool isUrizen3FixEnabled;
+static bool isMalphasFixEnabled;
+static bool malphasFixPlPos;
+static bool isCerberusFixEnabled;
+static bool cerberusFixPlPos;
+static bool cerberusThunderWavePlPos;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -108,7 +137,7 @@ static uint32_t newEnemyId2;
 static uint32_t newEnemyId3;
 static uint32_t newEnemyId5;
 static uint32_t newEnemyId6;
-static uint32_t nowFlow;
+static uint32_t nowFlow;//22-game, 17 - start
 static uint32_t prevFlow;
 static uint32_t gameMode;
 
@@ -121,12 +150,23 @@ static float curSpawnPosY;
 static float waitTimeMin;
 static float waitTimeMax;
 static float odds;
+static float divebombDistanceGroundCheck; // default = 5
+static float divebombHeightOfArenaSide; // default = 1.5
+static float divebombHeightOfOutside;// default = 8
+//static float inline radiusOfArea = 15.0f;//43.0
+//static float inline radiusOfRevolution = 35.0f;//80
+static float cerberusThunderWaveZ;
+
 static int enemyNum;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
 
 static Vector3f nightmareStartPosOffs;
+static inline Vector3f cavOffset{1.5f, 2.32f, -0.8f};
+static inline Vector3f artemisCenterOfFloor{-368.0f, -308.5f, -10.35f};
+static inline Vector3f malphasCenterOfFloor{0.0f,0.0f,0.0f};
+static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
 
   EnemySwapper() = default;
 
@@ -203,7 +243,7 @@ static Vector3f nightmareStartPosOffs;
 	  "Phantom Goliath",//36
       "Phantom Artemis",//37
       "Phantom Cavaliere",//38
-      "Vergil M20",//39
+      //"Vergil M20",//39
       "Dante (Ai disabled by default)",//40
       //"Dante M20"//41 No:)
   };
@@ -225,12 +265,13 @@ private:
   const int maxIndx = 19;
   size_t reservedForReswap = 4000;
   void reserveReswapVector(size_t newSize);
+  static void btn_set_plpos_to(Vector3f &to, const char* btnContent = "Set center of floor to current player position");
 
 
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-
+  void help_marker(const char* desc);// from ocornut github: https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
   
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
@@ -247,4 +288,15 @@ private:
   std::unique_ptr<FunctionHook> m_shadow_hook;
   std::unique_ptr<FunctionHook> m_nightmire_starting_hook;
   std::unique_ptr<FunctionHook> m_nightmire_arrival_hook;
+  std::unique_ptr<FunctionHook> m_cavfix_hook;
+  std::unique_ptr<FunctionHook> m_vergilcenterfloor_hook;
+  std::unique_ptr<FunctionHook> m_airraid_controller_hook;
+  std::unique_ptr<FunctionHook> m_goliath_suctionjmp_hook;
+  std::unique_ptr<FunctionHook> m_goliath_leavejmp_hook;
+  std::unique_ptr<FunctionHook> m_artemis_centerfloor_hook;
+  std::unique_ptr<FunctionHook> m_urizen3_tp_hook;
+  std::unique_ptr<FunctionHook> m_malphas_tp_hook;
+  std::unique_ptr<FunctionHook> m_cerberus_pos_hook;
+  std::unique_ptr<FunctionHook> m_cerberus_thunderwave_hook;
+  std::unique_ptr<FunctionHook> m_cerberus_thunderball_hook;
 };

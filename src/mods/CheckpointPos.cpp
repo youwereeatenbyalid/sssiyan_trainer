@@ -126,7 +126,7 @@ void CheckpointPos::on_draw_ui() {
     ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, 3);
     if (ImGui::Button("Get current player position (don't click it if you are not in a mission)")) {
       if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
-        get_player_coords();
+        playerPos = get_player_coords();
       }
     ImGui::TextWrapped("X: %.3f", playerPos.x);
     ImGui::TextWrapped("Y: %.3f", playerPos.y);
@@ -161,22 +161,24 @@ bool CheckpointPos::is_null_ptr(uintptr_t ptr) {
     playerPos.y = 0.0f;
     playerPos.z = 0.0f;
     return true;
-  } else
+  }
     return false;
 }
 
-void CheckpointPos::get_player_coords() {
+Vector3f CheckpointPos::get_player_coords() {
     uintptr_t lastOffset;
   uintptr_t offs = coordsOffsets[coordsOffsets.size() - 1];
-   uintptr_t res;
+   uintptr_t resHex;
+   Vector3f res{0,0,0};
    auto address = *(uintptr_t*)plCoordBase;
    lastOffset = get_player_coords_ptr(address);
    if (is_null_ptr(lastOffset))
-     return;
-   res          = *(uintptr_t*)(lastOffset + offs);
-   playerPos.x  = *((float*)&res);
-   res          = *(uintptr_t*)(lastOffset + offs + 0x4);
-   playerPos.z  = *((float*)&res);
-   res          = *(uintptr_t*)(lastOffset + offs + 0x8);
-   playerPos.y  = *((float*)&res);
+     return res;
+   resHex = *(uintptr_t*)(lastOffset + offs);
+   res.x  = *((float*)&resHex);
+   resHex = *(uintptr_t*)(lastOffset + offs + 0x4);
+   res.z  = *((float*)&resHex);
+   resHex = *(uintptr_t*)(lastOffset + offs + 0x8);
+   res.y  = *((float*)&resHex);
+   return res;
 }

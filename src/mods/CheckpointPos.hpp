@@ -23,6 +23,9 @@ public:
     CheckpointPosData(int mNum, Vector3f coords) : mNumber(mNum), pos(coords){}
   };
 
+  static Vector3f get_player_coords();
+
+
   static inline std::array<CheckpointPosData, 15> mPosData {//x, y, z
       CheckpointPosData(0, Vector3f(0.1704f, -80.5705f, -5.2691f)),
       CheckpointPosData(1, Vector3f(1.63f, -64.902f, - 0.091f)),
@@ -63,9 +66,8 @@ public:
 
 private:
   void init_check_box_info() override;
-  uintptr_t get_player_coords_ptr(uintptr_t addr);
-  void get_player_coords();
-  bool is_null_ptr(uintptr_t ptr);
+  static uintptr_t get_player_coords_ptr(uintptr_t addr);
+  static bool is_null_ptr(uintptr_t ptr);
   std::unique_ptr<FunctionHook> m_checkpointpos_hook;
   std::unique_ptr<FunctionHook> m_startpos_hook;
 };

@@ -118,8 +118,8 @@ public:
           ImGui::TextWrapped("Wait time max: ");
           ImGui::InputFloat("##WaitTimeMaxShared", &waitTimeMax);
           ImGui::Spacing();
-		  ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
-          ImGui::SliderFloat("##enemyOddsShared", &odds, 0.1f, 100.0f, "%.01f");
+		  ImGui::TextWrapped("Spawn chance (%%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
+          ImGui::SliderFloat("##enemyOddsShared", &odds, 0.0f, 100.0f, "%.1f");
           validate_values(shareSettings);
           set_all_data_settings(waitTimeMin, waitTimeMax, enemyNum, odds);
 		}

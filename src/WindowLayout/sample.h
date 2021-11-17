@@ -52,7 +52,7 @@ public:
 
 		ImGui::PushItemWidth(100.f);
 		ImGui::DragFloat("Drag margin ratio", &oConfig.m_fDragMarginRatio, 0.01f, 0.f, 1.f);
-		ImGui::DragFloat("Drag margin size ratio", &oConfig.m_fDragMarginSizeRatio, 0.01f, 0.f, 1.f);
+		ImGui::DragFloat("Drag margin itemSize ratio", &oConfig.m_fDragMarginSizeRatio, 0.01f, 0.f, 1.f);
 		ImGui::PopItemWidth();
 
 		ImGui::Checkbox("Show tab border", &oConfig.m_bShowTabBorder);
@@ -602,7 +602,7 @@ public:
 			ImGui::ColorEdit3("##color", &node->Color.x);
 			ImGui::EndGroup();
 
-			// Save the size of what we have emitted and whether any of the widgets are being used
+			// Save the itemSize of what we have emitted and whether any of the widgets are being used
 			bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
 			node->Size = ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING;
 			ImVec2 node_rect_max = node_rect_min + node->Size;
@@ -1067,6 +1067,12 @@ public:
 		ImGui::Text("Game Balance");
 		if (p_mf->is_error() && p_mf->is_ready()) {
 			p_mf->get_mods()->on_pagelist_ui(Mod::balance);
+		}
+		ImGui::Separator();
+		ImGui::Text("Secret missions");
+		if (p_mf->is_error() && p_mf->is_ready())
+		{
+			p_mf->get_mods()->on_pagelist_ui(Mod::secretmission);
 		}
 	}
 };
