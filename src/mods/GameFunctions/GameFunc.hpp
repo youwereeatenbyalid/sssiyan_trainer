@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "Mod.hpp"
 //clang-format off
 namespace GameFunctions
 {
@@ -8,54 +9,64 @@ namespace GameFunctions
 		float x = 0.0f;
 		float z = 0.0f;
 		float y = 0.0f;
-		Vec3(){ }
-		Vec3(float x, float y, float z) : x(x), y(y), z(z){ }
+		Vec3()
+		{
+		}
+		Vec3(float x, float y, float z) : x(x), y(y), z(z)
+		{
+		}
 	};
 
 	struct Quaternion
 	{
+	public:
 		float x = 0;
 		float y = 0;
 		float z = 0;
 		float w = 0;
-		static Quaternion identity;
 
 		Quaternion()
 		{
-			identity.w = 1.0f;
+			//GameFunctions::Quaternion::identity.w = 1.0f;
 		}
 
-		Quaternion(float x, float y, float z, float w) : Quaternion()
+		Quaternion(float x, float y, float z, float w)
 		{
 			this->x = x;
 			this->y = y;
 			this->z = z;
 			this->w = w;
 		}
+
 	};
 
+	/// <summary>
+	/// Abstract class
+	/// </summary>
+	/// <typeparam name="T">Type of ret value.</typeparam>
+	template <typename T>
 	class GameFunc
 	{
 	protected:
-		void* fAddr;
-		uintptr_t staticBase;
-		uintptr_t fOffs;
+		uintptr_t fAddr;
 
 	public:
 		//typedef func here
 
-		GameFunc(uintptr_t gameStaticBase)
+		GameFunc()//Add func offset to fAddr in child constructor and init typedef func
 		{
-			staticBase = gameStaticBase;
-			fAddr = (void*)(staticBase + fOffs);
+			fAddr = g_framework->get_module().as<uintptr_t>();
 		}
 
-		uintptr_t get_address() const {return (uintptr_t)fAddr; }
-
-		virtual void execute() = 0;
-		virtual void operator()()
+		uintptr_t get_address() const
 		{
-			execute();
+			return fAddr;
+		}
+
+		virtual T invoke() = 0;
+		virtual T operator()()
+		{
+			return invoke();
 		}
 	};
 }
