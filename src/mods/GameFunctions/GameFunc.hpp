@@ -40,6 +40,44 @@ namespace GameFunctions
 
 	};
 
+	class PtrController
+	{
+	private:
+		static bool is_bad_ptr(uintptr_t ptr)
+		{
+			return (bool)IsBadReadPtr((void*)ptr, 0x8);
+		}
+
+	public:
+		template <typename T, size_t offsCount>
+		static T get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool& isBadPtr)
+		{
+			int count = offsets.size() - 1;
+			if (!is_bad_ptr(base))
+			{
+				base = *(uintptr_t*)base;
+				for (int i = 0; i < count; i++)
+				{
+					if (!is_bad_ptr(base))
+						base = *(uintptr_t*)(base + offsets[i]);
+					else
+					{
+						isBadPtr = true;
+						return 0;
+					}
+				}
+				if (!is_bad_ptr((base + offsets[count])))
+				{
+					T res = *(T*)(base + offsets[count]);
+					isBadPtr = false;
+					return res;
+				}
+			}
+			isBadPtr = true;
+			return 0;
+		}
+	};
+
 	/// <summary>
 	/// Abstract class
 	/// </summary>

@@ -42,7 +42,7 @@ namespace GameFunctions
 
 		uintptr_t invoke(uintptr_t prefab, const Vec3& pos)
 		{
-			pfb = prefab;
+			//pfb = prefab;
 			if (fAddr != NULL && pfb != 0)
 				return prefab_instantiate(NULL, (void*)pfb, pos);
 			return 0;
@@ -96,16 +96,35 @@ namespace GameFunctions
 
 		uintptr_t invoke(uintptr_t prefab, const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		{
-			pfb = prefab;
+			/*pfb = prefab;
 			pos = position;
 			rot = rotation;
-			this->scale = scale;
-			return invoke();
+			this->scale = scale;*/
+			//return invoke();
+			if (fAddr != 0 && prefab != 0)
+				return prefab_instantiate_scale(NULL, (void*)prefab, position, rotation, scale);
+			return 0;
 		}
 
 		uintptr_t operator()(uintptr_t prefab, const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		{
 			return invoke(prefab, position, rotation, scale);
+		}
+
+		uintptr_t invoke(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
+		{
+			/*pos = position;
+			rot = rotation;
+			this->scale = scale;
+			return invoke();*/
+			if (fAddr != 0 && pfb != 0)
+				return prefab_instantiate_scale(NULL, (void*)pfb, position, rotation, scale);
+			return 0;
+		}
+
+		uintptr_t operator()(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
+		{
+			return invoke(position, rotation, scale);
 		}
 	};
 }

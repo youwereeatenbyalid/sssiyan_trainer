@@ -225,6 +225,8 @@ set(MODS_SRC
     mods/EnemyWaveEditor.cpp
     mods/SecretMissionTimer.hpp
     mods/SecretMissionTimer.cpp
+    mods/DMC3JCE.hpp
+    mods/DMC3JCE.cpp
 )
 
 set(HOOKS_SRC

@@ -4,7 +4,6 @@ uintptr_t DeepTurbo::jmp_ret1{NULL};
 uintptr_t DeepTurbo::jmp_ret2{NULL};
 
 float defscale   = 1.0;
-float turbospeed = 1.2;
 //float menuspeed  = 2.0f;
 int state        = 0;
 //bool shouldMenuSpeedup{NULL};
@@ -33,7 +32,7 @@ static naked void detour2() {
         xor byte ptr [state], 0
         jnz code
         push rbx
-        mov ebx, [turbospeed]
+        mov ebx, [DeepTurbo::turbospeed]
         mov [rax+00000388h], ebx
         movss xmm0, [rax+00000388h]
         pop rbx
