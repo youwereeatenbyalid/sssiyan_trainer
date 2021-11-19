@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "Mod.hpp"
+#include <type_traits>
 //clang-format off
 namespace GameFunctions
 {
@@ -48,6 +49,13 @@ namespace GameFunctions
 			return (bool)IsBadReadPtr((void*)ptr, 0x8);
 		}
 
+		template<typename T>
+		struct isValidImageFormat
+		{
+			constexpr static bool value =
+				std::is_same<T, uintptr_t>::value;
+		};
+
 	public:
 		template <typename T, size_t offsCount>
 		static T get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool& isBadPtr)
@@ -93,7 +101,7 @@ namespace GameFunctions
 
 		GameFunc()//Add func offset to fAddr in child constructor and init typedef func
 		{
-			fAddr = g_framework->get_module().as<uintptr_t>();
+			fAddr = g_framework->get_module().as<uintptr_t>();//it's not good relative to "static" behavior
 		}
 
 		uintptr_t get_address() const
