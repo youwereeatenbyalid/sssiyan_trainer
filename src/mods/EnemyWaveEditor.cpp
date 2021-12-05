@@ -367,6 +367,7 @@ static naked void bp_forceload_detour()
 
         originalcode:
         mov eax, [rcx+0x60]
+        mov dword ptr [EnemyWaveEditor::bpFlowId], eax
         sub eax, 0x16
         jmp qword ptr [EnemyWaveEditor::bpRetJmp]
 

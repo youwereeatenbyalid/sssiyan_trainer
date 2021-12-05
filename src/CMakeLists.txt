@@ -285,6 +285,7 @@ set(LISTEDITOR_SRC
 set(GAME_FUNC_SRC
     Mods/GameFunctions/GameFunc.hpp
     Mods/GameFunctions/PrefabInstantiate.hpp
+    Mods/GameFunctions/CreateShell.hpp
 )
 
 option(HOOK_D3D "Hook direct3D" OFF)

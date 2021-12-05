@@ -163,163 +163,163 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<SimpleMod>());
 //// Darkness
 //    // Background
-//        m_mods.emplace_back(std::make_unique<FileEditor>());
-//    // Common
-//    // Gameplay
-//    // Nero
-//    // Dante
-//    // V
-//      // Yeah sure :idk:
-//    // Vergil
-//// Hitch
-//    // Background
-//        m_mods.emplace_back(std::make_unique<PlayerTracker>());
-//        m_mods.emplace_back(std::make_unique<StyleRank>());
-//        //m_mods.emplace_back(std::make_unique<SinCoordinate>());
-//        //m_mods.emplace_back(std::make_unique<CosCoordinate>());
-//        //m_mods.emplace_back(std::make_unique<MoveID>());
-//        m_mods.emplace_back(std::make_unique<TextEditor>());
-//        m_mods.emplace_back(std::make_unique<GameInput>());
-//    // Common
-//        m_mods.emplace_back(std::make_unique<HeavyDay>());
-//        m_mods.emplace_back(std::make_unique<MoveReplacer>());
-//        m_mods.emplace_back(std::make_unique<Inertia>());
-//        m_mods.emplace_back(std::make_unique<LDK>());
-//        m_mods.emplace_back(std::make_unique<TauntSelector>());
-//        m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
-//        m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
-//        m_mods.emplace_back(std::make_unique<HoldToMash>());
-//        m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
-//        m_mods.emplace_back(std::make_unique<DontHideWeaponWheel>());
-//        //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
-//    // Gameplay
-//        m_mods.emplace_back(std::make_unique<AllOrNothing>());
-//        m_mods.emplace_back(std::make_unique<DifficultySelect>());
-//    // Nero
-//        m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
-//        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
-//        m_mods.emplace_back(std::make_unique<CaliburExceed>());
-//        m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
-//        m_mods.emplace_back(std::make_unique<ExceedValue>());
-//        m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
-//        m_mods.emplace_back(std::make_unique<DTWingsOnly>());
-//    // Dante
-//    // V
-//        m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
-//        m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
-//        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
-//        m_mods.emplace_back(std::make_unique <InfiniteGambits>());
-//        m_mods.emplace_back(std::make_unique <GilverNoDTCooldown>());
-//        m_mods.emplace_back(std::make_unique <EmpoweredCane>());
-//    // Vergil
-//        m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
-//
-////// Siyan
-//    // Background
-//        m_mods.emplace_back(std::make_unique<DamageTypeLean>());
-//    // Common
+        m_mods.emplace_back(std::make_unique<FileEditor>());
+    // Common
+    // Gameplay
+    // Nero
+    // Dante
+    // V
+      // Yeah sure :idk:
+    // Vergil
+// Hitch
+    // Background
+        m_mods.emplace_back(std::make_unique<PlayerTracker>());
+        m_mods.emplace_back(std::make_unique<StyleRank>());
+        //m_mods.emplace_back(std::make_unique<SinCoordinate>());
+        //m_mods.emplace_back(std::make_unique<CosCoordinate>());
+        //m_mods.emplace_back(std::make_unique<MoveID>());
+        m_mods.emplace_back(std::make_unique<TextEditor>());
+        m_mods.emplace_back(std::make_unique<GameInput>());
+    // Common
+        m_mods.emplace_back(std::make_unique<HeavyDay>());
+        m_mods.emplace_back(std::make_unique<MoveReplacer>());
+        m_mods.emplace_back(std::make_unique<Inertia>());
+        m_mods.emplace_back(std::make_unique<LDK>());
+        m_mods.emplace_back(std::make_unique<TauntSelector>());
+        m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
+        m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
+        m_mods.emplace_back(std::make_unique<HoldToMash>());
+        m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
+        m_mods.emplace_back(std::make_unique<DontHideWeaponWheel>());
+        //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
+    // Gameplay
+        m_mods.emplace_back(std::make_unique<AllOrNothing>());
+        m_mods.emplace_back(std::make_unique<DifficultySelect>());
+    // Nero
+        m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
+        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        m_mods.emplace_back(std::make_unique<CaliburExceed>());
+        m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
+        m_mods.emplace_back(std::make_unique<ExceedValue>());
+        m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
+        m_mods.emplace_back(std::make_unique<DTWingsOnly>());
+    // Dante
+    // V
+        m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
+        m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
+        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
+        m_mods.emplace_back(std::make_unique <InfiniteGambits>());
+        m_mods.emplace_back(std::make_unique <GilverNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique <EmpoweredCane>());
+    // Vergil
+        m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
+
+//// Siyan
+    // Background
+        m_mods.emplace_back(std::make_unique<DamageTypeLean>());
+    // Common
         m_mods.emplace_back(std::make_unique<DeepTurbo>());
-//        m_mods.emplace_back(std::make_unique<BpStageJump>());
-//        m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
-//        m_mods.emplace_back(std::make_unique<NoScreenShake>());
-//        m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
-//        m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
-//        m_mods.emplace_back(std::make_unique<HideHUD>());
-//        m_mods.emplace_back(std::make_unique<CameraSettings>());
-//    // Gameplay
-//        m_mods.emplace_back(std::make_unique<BufferedReversals>());
-//        m_mods.emplace_back(std::make_unique<OriginalReversals>());
-//        m_mods.emplace_back(std::make_unique<NoJCCooldown>());
-//        m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
-//        m_mods.emplace_back(std::make_unique<AllStart>());
-//        m_mods.emplace_back(std::make_unique<AllStartManual>());
-//        m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
-//        m_mods.emplace_back(std::make_unique<DamageMultiplier>());    // TESTING
-//        m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
-//        m_mods.emplace_back(std::make_unique<InfDT>());
-//        m_mods.emplace_back(std::make_unique<EntitySpeeds>());
-//        m_mods.emplace_back(std::make_unique<FileFrameCuts>());
-//        m_mods.emplace_back(std::make_unique<SprintInBattle>());
-//        m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
-//        m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
-//        m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
-//        m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
-//        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
-//        m_mods.emplace_back(std::make_unique<WeightReset>());
-//        m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
-//    // Nero
-//        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
-//        m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
-//        m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
-//        m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
-//        m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
-//        m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
-//        m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
-//        m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
-//        m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
-//    // Dante
-//        m_mods.emplace_back(std::make_unique<BypassBPCav>());
-//        m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
-//        m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
-//        m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
-//        m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
-//        m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
-//        m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
-//        m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
-//        m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
-//        m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
-//        m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
-//        m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
-//    // V
-//    // Vergil
-//        m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
-//        m_mods.emplace_back(std::make_unique<VergilDirectionalMappings>());
-//        m_mods.emplace_back(std::make_unique<VergilInfJdCs>());
-//        m_mods.emplace_back(std::make_unique<VergilInfSDT>());
-//        m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
-//        m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
-//        m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
-//        m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
-//
-////// Dr.penguin
-//    // Background
-//    // Common
-//    // Gameplay
-//    // Nero
-//        m_mods.emplace_back(std::make_unique<NeroGP01overGerberaPickup>());
-//    // Dante
-//    // V
-//    // Vergil
-//        m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
-//
-//// VPZadov
-//        // Background
-//        // Common
-//        // Gameplay
-//        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
-//        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
-//        m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
-//        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
+        m_mods.emplace_back(std::make_unique<BpStageJump>());
+        m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
+        m_mods.emplace_back(std::make_unique<NoScreenShake>());
+        m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
+        m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
+        m_mods.emplace_back(std::make_unique<HideHUD>());
+        m_mods.emplace_back(std::make_unique<CameraSettings>());
+    // Gameplay
+        m_mods.emplace_back(std::make_unique<BufferedReversals>());
+        m_mods.emplace_back(std::make_unique<OriginalReversals>());
+        m_mods.emplace_back(std::make_unique<NoJCCooldown>());
+        m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
+        m_mods.emplace_back(std::make_unique<AllStart>());
+        m_mods.emplace_back(std::make_unique<AllStartManual>());
+        m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());    // TESTING
+        m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
+        m_mods.emplace_back(std::make_unique<InfDT>());
+        m_mods.emplace_back(std::make_unique<EntitySpeeds>());
+        m_mods.emplace_back(std::make_unique<FileFrameCuts>());
+        m_mods.emplace_back(std::make_unique<SprintInBattle>());
+        m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
+        m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
+        m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
+        m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
+        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<WeightReset>());
+        m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
+    // Nero
+        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
+        m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
+        m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
+        m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
+        m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
+        m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
+    // Dante
+        m_mods.emplace_back(std::make_unique<BypassBPCav>());
+        m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
+        m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
+        m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
+        m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
+        m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
+        m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
+        m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
+        m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
+        m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
+    // V
+    // Vergil
+        m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());
+        m_mods.emplace_back(std::make_unique<VergilDirectionalMappings>());
+        m_mods.emplace_back(std::make_unique<VergilInfJdCs>());
+        m_mods.emplace_back(std::make_unique<VergilInfSDT>());
+        m_mods.emplace_back(std::make_unique<VergilInstantSDT>());
+        m_mods.emplace_back(std::make_unique<VergilInfConcentration>());
+        m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
+        m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
+
+//// Dr.penguin
+    // Background
+    // Common
+    // Gameplay
+    // Nero
+        m_mods.emplace_back(std::make_unique<NeroGP01overGerberaPickup>());
+    // Dante
+    // V
+    // Vergil
+        m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
+
+// VPZadov
+        // Background
+        // Common
+        // Gameplay
+        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
+        m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
-//        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
-//        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
-//        // Nero
-//        // Dante
-//        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
-//        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
-//        // V
-//        //Vergil
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        // Nero
+        // Dante
+        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
+        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
+        // V
+        //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
         m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
-//        m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
-//        m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
-//        m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
-//        m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-//        m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
-//        m_mods.emplace_back(std::make_unique<VergilAirTrick>());
-//        //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
-//        m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
-        m_mods.emplace_back(std::make_unique<DMC3JCE>());
+        m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
+        m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
+        m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
+        m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
+        m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
+        m_mods.emplace_back(std::make_unique<VergilAirTrick>());
+        //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
+        m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
+        m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

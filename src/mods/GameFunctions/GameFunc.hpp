@@ -10,11 +10,43 @@ namespace GameFunctions
 		float x = 0.0f;
 		float z = 0.0f;
 		float y = 0.0f;
-		Vec3()
+		Vec3() {}
+		Vec3(float x, float y, float z) : x(x), y(y), z(z){}
+
+		Vec3(const Vector3f& vec)
 		{
+			x = vec.x;
+			y = vec.y;
+			z = vec.z;
 		}
-		Vec3(float x, float y, float z) : x(x), y(y), z(z)
+
+		Vec3(const Vector3f&& vec)
 		{
+			x = vec.x;
+			y = vec.y;
+			z = vec.z;
+		}
+
+		Vec3& operator = (const Vector3f& vec)
+		{
+			x = vec.x;
+			y = vec.y;
+			z = vec.z;
+			return *this;
+		}
+
+		static float vec_length(const Vec3 &v1, const Vec3 &v2)
+		{
+			return sqrt(((v2.x - v1.x) * (v2.x - v1.x)) + ((v2.y - v1.y) * (v2.y - v1.y)) + ((v2.z - v1.z) * (v2.z - v1.z)));
+		}
+
+		Vector3f to_vector3f()
+		{
+			Vector3f res;
+			res.x = x;
+			res.y = y;
+			res.z = z;
+			return res;
 		}
 	};
 
@@ -24,12 +56,9 @@ namespace GameFunctions
 		float x = 0;
 		float y = 0;
 		float z = 0;
-		float w = 0;
+		float w = 1.0f;
 
-		Quaternion()
-		{
-			//GameFunctions::Quaternion::identity.w = 1.0f;
-		}
+		Quaternion() { /*GameFunctions::Quaternion::identity.w = 1.0f;*/ }
 
 		Quaternion(float x, float y, float z, float w)
 		{
@@ -46,19 +75,12 @@ namespace GameFunctions
 	private:
 		static bool is_bad_ptr(uintptr_t ptr)
 		{
-			return (bool)IsBadReadPtr((void*)ptr, 0x8);
+			return (bool)IsBadReadPtr((void*)ptr, 0x8);// not thread safe?
 		}
-
-		template<typename T>
-		struct isValidImageFormat
-		{
-			constexpr static bool value =
-				std::is_same<T, uintptr_t>::value;
-		};
 
 	public:
 		template <typename T, size_t offsCount>
-		static T get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool& isBadPtr)
+		static T get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool& isBadPtr, bool get_addr = false)
 		{
 			int count = offsets.size() - 1;
 			if (!is_bad_ptr(base))
@@ -76,9 +98,14 @@ namespace GameFunctions
 				}
 				if (!is_bad_ptr((base + offsets[count])))
 				{
-					T res = *(T*)(base + offsets[count]);
-					isBadPtr = false;
-					return res;
+					if (!get_addr)
+					{
+						T res = *(T*)(base + offsets[count]);
+						isBadPtr = false;
+						return res;
+					}
+					else
+						return base;
 				}
 			}
 			isBadPtr = true;
@@ -87,7 +114,7 @@ namespace GameFunctions
 	};
 
 	/// <summary>
-	/// Abstract class
+	/// Abstract class. Wrap to smart pointer if u want to make static object and init it in mod init function.
 	/// </summary>
 	/// <typeparam name="T">Type of ret value.</typeparam>
 	template <typename T>

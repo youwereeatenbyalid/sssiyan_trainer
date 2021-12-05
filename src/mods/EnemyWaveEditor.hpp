@@ -453,6 +453,7 @@ namespace WaveEditorMod
 		static int selectedMimicListItem;
 		static int addListInRangeMin;
 		static int addListInRangeMax;
+		static inline uint32_t bpFlowId = 0;
 
 		static bool cheaton;
 		static bool isAllAllocCorrectly;
