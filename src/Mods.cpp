@@ -429,11 +429,14 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
 }
 
 
-void Mods::on_pagelist_ui(int page){
+void Mods::on_pagelist_ui(int page, float indent) {
   for (auto& mod : m_mods) {
     if (page == mod->onpage) {
-        draw_entry(mod);
+      if (indent != 0.f) {
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
       }
+      draw_entry(mod);
+    }
       //mod->modkeytoggle.draw(mod->get_name());
   }
 }

@@ -87,7 +87,7 @@ void VergilNoAfterimages::on_config_save(utility::Config& cfg) {
 
 void VergilNoAfterimages::on_draw_ui() {
   ImGui::Text("Set value to disable afterimages: 0 - only in human form, \n1 - only in SDT, 2 - in all forms.");
-  ImGui::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 2);
+  UI::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 2);
 }
 
 void VergilNoAfterimages::on_draw_debug_ui() {}

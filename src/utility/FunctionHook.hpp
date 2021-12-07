@@ -10,17 +10,14 @@ public:
     FunctionHook() = delete;
     FunctionHook(const FunctionHook& other) = delete;
     FunctionHook(FunctionHook&& other) = delete;
-    FunctionHook(Address target, Address destination, UINT8 size = 5);
+    FunctionHook(Address target, Address destination);
     virtual ~FunctionHook();
 
     bool create();
-    bool queue();
 
     // Called automatically by the destructor, but you can call it explicitly
     // if you need to remove the hook.
     bool remove();
-
-    static bool enable_queued();
 
     auto get_original() const {
         return m_original;

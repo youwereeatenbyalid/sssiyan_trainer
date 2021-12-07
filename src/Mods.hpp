@@ -14,7 +14,7 @@ public:
     void draw_entry(std::unique_ptr<Mod>&);
     const std::unique_ptr<Mod>& get_mod(std::string modname) const;
     std::string get_focused_mod() const;
-    void on_pagelist_ui(int page);
+    void on_pagelist_ui(int page, float indent = 0.f);
     void save_mods();
     void load_mods() const;
     /*void static addressseek();

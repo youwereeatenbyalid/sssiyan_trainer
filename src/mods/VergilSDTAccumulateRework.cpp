@@ -123,7 +123,7 @@ void VergilSDTAccumulateRework::on_draw_ui() {
                      "\"Infinite DT\" and \"Infinite SDT\" mods.");
   ImGui::Separator();
   ImGui::TextWrapped("Set num of SDT points, that Vergil will get with DT points:");
-  ImGui::SliderFloat("##SDT Points Slider", &sdtPointsToAdd, 50.0, 180.0, "%.2f");
+  UI::SliderFloat("##SDT Points Slider", &sdtPointsToAdd, 50.0, 180.0, "%.2f");
 
   if (VergilInfSDT::cheaton|| InfDT::cheaton)
     VergilSDTAccumulateRework::cheaton = false;

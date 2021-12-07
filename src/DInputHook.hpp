@@ -42,7 +42,8 @@ private:
     HWND m_wnd;
 
     std::unique_ptr<FunctionHook> m_get_device_state_hook;
-
+    
+    std::array<uint8_t, 256> m_null_keys = {0};
     bool m_is_ignoring_input;
     bool m_do_once;
 

@@ -71,5 +71,5 @@ void DanteVariableGuard::on_config_save(utility::Config& cfg) {
 
 void DanteVariableGuard::on_draw_ui() {
   ImGui::Text("Guard level");
-  ImGui::SliderFloat("##guardlevelslider", &inputGuardValue, 0.0f, 10.0f, "%.0f");
+  UI::SliderFloat("##guardlevelslider", &inputGuardValue, 0.0f, 10.0f, "%.0f");
 }

@@ -130,7 +130,7 @@ void DanteAirTrickSettings::on_draw_ui()
 	ImGui::Checkbox("Set custom additional Z offset", &isAddZOffset);
 	if (isAddZOffset) {
 		ImGui::TextWrapped("Additional offset:");
-		ImGui::SliderFloat("##OffssetSlider", &addZOffset, 0.0f, 10.0f, "%.01f");
+		UI::SliderFloat("##OffssetSlider", &addZOffset, 0.0f, 10.0f, "%.01f");
 	}
 }
 
