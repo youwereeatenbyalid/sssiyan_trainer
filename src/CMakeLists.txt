@@ -227,6 +227,8 @@ set(MODS_SRC
     mods/SecretMissionTimer.cpp
     mods/DMC3JCE.hpp
     mods/DMC3JCE.cpp
+    mods/JCENoMotivationLimit.hpp
+    mods/JCENoMotivationLimit.cpp
 )
 
 set(HOOKS_SRC

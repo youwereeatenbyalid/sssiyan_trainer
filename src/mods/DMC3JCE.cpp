@@ -87,6 +87,8 @@ static naked void jceprefab_detour()
 		jmp qword ptr[DMC3JCE::jcePfbRet]
 
 		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
 		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		jne originalcode
 		mov r8, 0
@@ -107,6 +109,8 @@ static naked void jceprefab1_detour()
 		jmp qword ptr [DMC3JCE::jcePfb1Ret]
 
 		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
 		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		jne originalcode
 		jmp qword ptr [DMC3JCE::jcePfbJeJmp]
@@ -143,6 +147,8 @@ static naked void jce_exetime_detour()
 		jmp qword ptr [DMC3JCE::jceTimerRet]
 
 		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
 		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		jne originalcode
 		push rax
@@ -154,26 +160,26 @@ static naked void jce_exetime_detour()
 		ja jce_continue
 
 		push rax
-		//push rbx
-		push rcx
-		//push rdx
-		mov [rdx_back_s] , rdx
-		push r8
-		push r9
-		push r10
-		push r11
+		////push rbx
+		//push rcx
+		////push rdx
+		//mov [rdx_back_s] , rdx
+		//push r8
+		//push r9
+		//push r10
+		//push r11
 		sub rsp, 32
 		call qword ptr [DMC3JCE::stop_jce_asm]
 		add rsp, 32
-		pop r11
-		pop r10
-		pop r9
-		pop r8
-		//pop rdx
-		pop rcx
-		//pop rbx
+		//pop r11
+		//pop r10
+		//pop r9
+		//pop r8
+		////pop rdx
+		//pop rcx
+		////pop rbx
 		pop rax
-		mov rdx, [rdx_back_s]
+		//mov rdx, [rdx_back_s]
 
 		jmp qword ptr [DMC3JCE::stopJceTimerRet]
 		//jmp qword ptr [DMC3JCE::jceTimerRet]
@@ -220,6 +226,8 @@ static naked void crashpoint_detour()//this mb not good idk
 		jmp qword ptr [DMC3JCE::crashPointRet]
 
 		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
 		cmp byte ptr [DMC3JCE::isCrashFixEnabled], 0
 		je originalcode
 		cmp byte ptr [DMC3JCE::isJceRunning], 0
@@ -244,6 +252,8 @@ static naked void finish_pfb_detour()
 		jmp qword ptr [DMC3JCE::jceFinishPfbRet]
 
 		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
 		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		jne originalcode
 		mov rsi, 0
@@ -384,6 +394,7 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 	jceController.set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
 	jcTypeUi = jceController.get_jce_type();
 	isCrashFixEnabled = cfg.get<bool>("DMC3JCE.isCrashFixEnabled").value_or(true);
+	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
@@ -403,6 +414,7 @@ void DMC3JCE::on_draw_ui()
 	ImGui::TextWrapped("If after Vergil's disappear jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
 	ImGui::Separator();
 	ImGui::Spacing();
+	ImGui::Checkbox("Use default jce in human form", &isUseDefaultJce);
 	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
 	ImGui::TextWrapped("Select DMC3 JCE type:");
 

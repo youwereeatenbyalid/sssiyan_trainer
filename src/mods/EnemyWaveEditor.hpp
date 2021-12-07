@@ -438,7 +438,7 @@ namespace WaveEditorMod
 			Mod,
 			ViewUserData,
 			ReadGameData,
-			RunTimeEdit,
+			//RunTimeEdit,
 			Serialization
 		};
 		static Mode mode;
@@ -512,11 +512,11 @@ namespace WaveEditorMod
 
 	private:
 
-		inline static const std::array<const char*, 5> modeNames {
+		inline static const std::array<const char*, 4> modeNames {
 			"Add/change enemy data",
 			"View all custom data",
 			"Read game enemy data",
-			"Run-time edit",
+			//"Run-time edit",
 			"Import profile"
 		};
 

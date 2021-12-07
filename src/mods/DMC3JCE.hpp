@@ -222,7 +222,7 @@ public:
 							lockOnPos = pPos;
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
 
-						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 51);
+						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 0);
 
 						while (get_condition(isBadPtr))
 						{
@@ -281,7 +281,7 @@ public:
 							return;
 						}
 						func::Quaternion defaultRot;
-						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 51);
+						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 0);
 						isBadPtr = false;
 						uintptr_t jcShell;
 						float distance = 0.0f;
@@ -364,6 +364,7 @@ public:
 	static inline bool cheaton = true;
 	static inline bool isJceRunning = false;
 	static inline bool isCrashFixEnabled = true;
+	static inline bool isUseDefaultJce = false;
 
 	static inline uintptr_t canExeJceRet = 0;
 	static inline uintptr_t canExeJceRet1 = 0;

@@ -157,6 +157,7 @@
        //#include "mods/VergilSDTTrickEfx.hpp" //Removed until better times
        #include "mods//InfiniteTrickUp.hpp"
        #include "mods/DMC3JCE.hpp"
+       #include "mods/JCENoMotivationLimit.hpp" // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
   // Example
@@ -320,6 +321,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
         m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
         m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
+        m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

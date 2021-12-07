@@ -181,29 +181,29 @@ void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
             read_em_data_asm(lstAddr);
             break;
         }
-        case EnemyWaveEditor::Mode::RunTimeEdit:
-        {
-            mtx.lock();
-            isRtReady = false;
-            std::unique_lock<std::mutex> lock(mt);
-            if(EnemySwapper::gameMode == 3)//BP
-                break;
-            if(!mimObjManager.is_all_allocated())
-                break;
-            read_em_data_asm(lstAddr);
-            while(!isRtReady)
-                cv.wait(lock);//(lock, [] {return isRtReady;});
-            auto mimList = mimObjManager.get_mimic_list_ptr(selectedMimicListItem);
-            if (!isDefaultGameData && !mimList->isUsedByRtEdit)
-            {
-                mimList->isUsedByRtEdit = true;
-                selectedMimicListItem = 0;
-                set_em_data_asm(mimList, lstAddr);
-            }
-            lock.unlock();
-            mtx.unlock();
-            break;
-        }
+        //case EnemyWaveEditor::Mode::RunTimeEdit:
+        //{
+        //    mtx.lock();
+        //    isRtReady = false;
+        //    std::unique_lock<std::mutex> lock(mt);
+        //    if(EnemySwapper::gameMode == 3)//BP
+        //        break;
+        //    if(!mimObjManager.is_all_allocated())
+        //        break;
+        //    read_em_data_asm(lstAddr);
+        //    while(!isRtReady)
+        //        cv.wait(lock);//(lock, [] {return isRtReady;});
+        //    auto mimList = mimObjManager.get_mimic_list_ptr(selectedMimicListItem);
+        //    if (!isDefaultGameData && !mimList->isUsedByRtEdit)
+        //    {
+        //        mimList->isUsedByRtEdit = true;
+        //        selectedMimicListItem = 0;
+        //        set_em_data_asm(mimList, lstAddr);
+        //    }
+        //    lock.unlock();
+        //    mtx.unlock();
+        //    break;
+        //}
 
         default:
             break;
@@ -571,7 +571,7 @@ void EnemyWaveEditor::on_draw_ui() {
         print_spacing("Game can change an order of loading data for same mission. If you didn't get game data for mission, mod will sort custom data in ascending order by load id and swap data in that order. "
         "Otherwise your custom data will be \"bind\" to original game's enemy list by load id (wrong swap still can orrurs if mission have same enemy lists);");
         print_spacing("After you finish setup enemy data, press \"Allocate all custom enemy data\" button;");
-        print_spacing("(Optional) If you want to swap game's data manually during the loading process, use \"Run-time edit\" mode;");
+        //print_spacing("(Optional) If you want to swap game's data manually during the loading process, use \"Run-time edit\" mode;");
         print_spacing("(Re)Load mission;");
         print_spacing("If you want to quit/reload mission/secret mission from pause menu or from game over menu, press \"Restore all game list's data\" button before it. Restarting mission from checkpoint "
         "(from pause or game over menu) or retrying it from game over menu doesn't requires restoring data from the trainer;");
@@ -658,7 +658,7 @@ void EnemyWaveEditor::on_draw_ui() {
     print_emlist_data();
     break;
   }
-  case EnemyWaveEditor::RunTimeEdit:
+  /*case EnemyWaveEditor::RunTimeEdit:
   {
       ImGui::SameLine();
       help_marker("Swap original enemy lists with custom in run-time when game loading a mission. You need to allocate custom data first. Each list can be used for 1 swap. Doesn't work in BP. This option will freeze "
@@ -716,7 +716,7 @@ void EnemyWaveEditor::on_draw_ui() {
           ImGui::Separator();
       }
       break;
-  }
+  }*/
 
   case EnemyWaveEditor::Serialization:
   {
