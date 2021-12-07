@@ -107,7 +107,7 @@ void SecretMissionTimer::on_frame()
 void SecretMissionTimer::on_draw_ui()
 {
 	ImGui::TextWrapped("Timer value: ");
-	ImGui::InputFloat("##timerInput", &timer,0.0f, 0.0f, 2);
+	ImGui::InputFloat("##timerInput", &timer, 0.0f, 0.0f, "%.2f");
 	ImGui::Checkbox("Disable sm9 no ground start timer", &isM9NoStart);
 }
 

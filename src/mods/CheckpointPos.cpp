@@ -121,9 +121,9 @@ void CheckpointPos::on_draw_ui() {
   ImGui::Separator();
   ImGui::Checkbox("Use cutom checkpoint position", &isCustomPos);
   if (isCustomPos) {
-    ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, 3);
-    ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, 3);
-    ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, 3);
+    ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, "%.3f");
+    ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, "%.3f");
+    ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, "%.3f");
     if (ImGui::Button("Get current player position (don't click it if you are not in a mission)")) {
       if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
         playerPos = get_player_coords();

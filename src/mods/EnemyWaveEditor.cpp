@@ -718,7 +718,7 @@ void EnemyWaveEditor::on_draw_ui() {
       break;
   }*/
 
-  case EnemyWaveEditor::Serialization:
+  /*case EnemyWaveEditor::Serialization:
   {
       ImGui::SameLine();
       help_marker("Load enemy data from .json file.");
@@ -755,7 +755,7 @@ void EnemyWaveEditor::on_draw_ui() {
           help_marker("This will remove your current custom data and load data from selected profile. Memory shouldn't be allocated before this stage.");
       }
       break;
-  }
+  }*/
 
   default:
     break;
@@ -803,9 +803,9 @@ void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Wait time min:");
   ImGui::SameLine();
   help_marker("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
-  ImGui::InputFloat("##WaitTimeMin", &data.waitTimeMin, 0.1f, 0.5f, 1);
+  ImGui::InputFloat("##WaitTimeMin", &data.waitTimeMin, 0.1f, 0.5f, "%.1f");
   ImGui::TextWrapped("Wait time max:");
-  ImGui::InputFloat("##WaitTimeMax", &data.waitTimeMax, 0.1f, 0.5f, 1);
+  ImGui::InputFloat("##WaitTimeMax", &data.waitTimeMax, 0.1f, 0.5f, "%.1f");
   ImGui::Checkbox("Don't set orbs", &data.isDontSetOrb);
   ImGui::Spacing();
   ImGui::Checkbox("Is near player(?)", &data.isNearPlayer);

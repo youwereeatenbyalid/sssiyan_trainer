@@ -429,7 +429,7 @@ void DMC3JCE::on_draw_ui()
 		case JCEController::Type::Random:
 		{
 			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game:");
-			ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450);
+			ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##0"))
 				jceController.set_rndspawn_delay(rndDelay);
 			break;
@@ -437,7 +437,7 @@ void DMC3JCE::on_draw_ui()
 		case JCEController::Type::Track:
 		{
 			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game and make this OP as fuck:");
-			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450);
+			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##1"))
 				jceController.set_trackspawn_delay(trackDelay);
 			break;

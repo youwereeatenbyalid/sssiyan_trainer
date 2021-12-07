@@ -19,6 +19,13 @@ add_library(minhook STATIC
             minhook/src/hde/table32.h
             minhook/src/hde/table64.h)
 
+project(jsonstthm)
+
+add_library(jsonstthm STATIC
+            JsonStthm/JsonStthm.cpp
+            JsonStthm/JsonStthm.h
+            JsonStthm/JsonStthmConfig.h)
+
 project(imgui)
 
 add_library(imgui STATIC

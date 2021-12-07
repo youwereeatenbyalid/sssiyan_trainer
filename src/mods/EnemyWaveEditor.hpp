@@ -512,12 +512,12 @@ namespace WaveEditorMod
 
 	private:
 
-		inline static const std::array<const char*, 4> modeNames {
+		inline static const std::array<const char*, 3> modeNames {
 			"Add/change enemy data",
 			"View all custom data",
 			"Read game enemy data",
 			//"Run-time edit",
-			"Import profile"
+			//"Import profile"
 		};
 
 		enum SetupEmMode
@@ -562,7 +562,7 @@ namespace WaveEditorMod
 		std::unique_ptr<FunctionHook> m_exitproc1_hook;
 
 
-		class ProfileManager
+		/*class ProfileManager
 		{
 		private:
 			std::vector<std::string> profileNames;
@@ -651,7 +651,7 @@ namespace WaveEditorMod
 				return &profileNames[indx];
 			}
 		};
-		ProfileManager prflManager {};
+		ProfileManager prflManager {};*/
 	};
 }
 

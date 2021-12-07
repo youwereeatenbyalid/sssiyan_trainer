@@ -1446,9 +1446,9 @@ void EnemySwapper::on_draw_ui() {
   ImGui::Checkbox("Nightmare meteor fix", &isNightmareFix);
   if (isNightmareFix) {
     ImGui::TextWrapped("Offset to current player position for meteor starting. Affect meteor speed.");
-    ImGui::InputFloat("X offset", &nightmareStartPosOffs.x, 0.0f, 0.0f, 3);
-    ImGui::InputFloat("Y offset", &nightmareStartPosOffs.y, 0.0f, 0.0f, 3);
-    ImGui::InputFloat("Z offset", &nightmareStartPosOffs.z, 0.0f, 0.0f, 3);
+    ImGui::InputFloat("X offset", &nightmareStartPosOffs.x, 0.0f, 0.0f, "%.2f");
+    ImGui::InputFloat("Y offset", &nightmareStartPosOffs.y, 0.0f, 0.0f, "%.2f");
+    ImGui::InputFloat("Z offset", &nightmareStartPosOffs.z, 0.0f, 0.0f, "%.2f");
   }
   ImGui::Separator();
   ImGui::Spacing();
@@ -1459,11 +1459,11 @@ void EnemySwapper::on_draw_ui() {
   if (isCavFixEnabled)
   {
       ImGui::TextWrapped("X offset");
-      ImGui::InputFloat("##cavXOffst", &cavOffset.x, 0, 0, 2);
+      ImGui::InputFloat("##cavXOffst", &cavOffset.x, 0, 0, "%.2f");
       ImGui::TextWrapped("Y offset");
-      ImGui::InputFloat("##cavYOffst", &cavOffset.y, 0, 0, 2);
+      ImGui::InputFloat("##cavYOffst", &cavOffset.y, 0, 0, "%.2f");
       ImGui::TextWrapped("Z offset");
-      ImGui::InputFloat("##cavZOffst", &cavOffset.z, 0, 0, 2);
+      ImGui::InputFloat("##cavZOffst", &cavOffset.z, 0, 0, "%.2f");
   }
   if(isVergilFixEnabled)
       ImGui::Separator();
@@ -1473,11 +1473,11 @@ void EnemySwapper::on_draw_ui() {
   if (isVergilFixEnabled)
   {
       ImGui::TextWrapped("Height of arena side (default = 1.5)");
-      ImGui::InputFloat("##divebombHeightOfArenaSide", &divebombHeightOfArenaSide, 0, 0, 1);
+      ImGui::InputFloat("##divebombHeightOfArenaSide", &divebombHeightOfArenaSide, 0, 0, "%.1f");
       ImGui::TextWrapped("Height of outside (default = 8)");
-      ImGui::InputFloat("##divebombHeightOfOutside", &divebombHeightOfOutside, 0, 0, 1);
+      ImGui::InputFloat("##divebombHeightOfOutside", &divebombHeightOfOutside, 0, 0, "%.1f");
       ImGui::TextWrapped("Distance of ground check (default = 5)");
-      ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, 1);
+      ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, "%.1f");
       ImGui::Checkbox("Fast divebomb attack", &isFastDiveBombAttack);
       ImGui::SameLine();
       help_marker("Force Vergil to start ram you after he fly ~pi/3 of his way. It's make a harder to dodje him 'cause he will literally using \"lock on\" on you an all time of fly. Can help in a case if he start infinitely circle flying. "
@@ -1502,10 +1502,10 @@ void EnemySwapper::on_draw_ui() {
           ImGui::Spacing();
           btn_set_plpos_to(artemisCenterOfFloor, "Set center of floor to current player position ##Art");
           ImGui::Spacing();
-          ImGui::InputFloat("X coord of center of arena ##Art", &artemisCenterOfFloor.x, 0.1f, 0, 2);
-          ImGui::InputFloat("Y coord of center of arena ##Art", &artemisCenterOfFloor.y, 0.1f, 0, 2);
+          ImGui::InputFloat("X coord of center of arena ##Art", &artemisCenterOfFloor.x, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Y coord of center of arena ##Art", &artemisCenterOfFloor.y, 0.1f, 0, "%.2f");
       }
-      ImGui::InputFloat("Z coord of center of arena ##Art", &artemisCenterOfFloor.z, 0.1f, 0, 2);
+      ImGui::InputFloat("Z coord of center of arena ##Art", &artemisCenterOfFloor.z, 0.1f, 0, "%.2f");
       ImGui::Separator();
       ImGui::Spacing();
   }
@@ -1525,9 +1525,9 @@ void EnemySwapper::on_draw_ui() {
       if (!malphasFixPlPos)
       {
           btn_set_plpos_to(malphasCenterOfFloor, "Set center of floor to current player position ##Malph");
-          ImGui::InputFloat("X coord of center of arena ##Malph", &malphasCenterOfFloor.x, 0.1f, 0, 2);
-          ImGui::InputFloat("Y coord of center of arena ##Malph", &malphasCenterOfFloor.y, 0.1f, 0, 2);
-          ImGui::InputFloat("Z coord of center of arena ##Malph", &malphasCenterOfFloor.z, 0.1f, 0, 2);
+          ImGui::InputFloat("X coord of center of arena ##Malph", &malphasCenterOfFloor.x, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Y coord of center of arena ##Malph", &malphasCenterOfFloor.y, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Z coord of center of arena ##Malph", &malphasCenterOfFloor.z, 0.1f, 0, "%.2f");
       }
       ImGui::Separator();
       ImGui::Spacing();
@@ -1542,13 +1542,13 @@ void EnemySwapper::on_draw_ui() {
       if (!cerberusFixPlPos)
       {
           btn_set_plpos_to(cerberusCenterOfFloor, "Set center of floor to current player position ##Cerberus");
-          ImGui::InputFloat("X coord of center of arena ##Cerberus", &cerberusCenterOfFloor.x, 0.1f, 0, 2);
-          ImGui::InputFloat("Y coord of center of arena ##Cerberus", &cerberusCenterOfFloor.y, 0.1f, 0, 2);
-          ImGui::InputFloat("Z coord of center of arena ##Cerberus", &cerberusCenterOfFloor.z, 0.1f, 0, 2);
+          ImGui::InputFloat("X coord of center of arena ##Cerberus", &cerberusCenterOfFloor.x, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Y coord of center of arena ##Cerberus", &cerberusCenterOfFloor.y, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Z coord of center of arena ##Cerberus", &cerberusCenterOfFloor.z, 0.1f, 0, "%.2f");
       }
       ImGui::Checkbox("Use current player z coord to spawn thunder wave attack", &cerberusThunderWavePlPos);
       if (!cerberusThunderWavePlPos)
-          ImGui::InputFloat("Z for thunder wave", &cerberusThunderWaveZ, 0.1f, 0.0f, 2);
+          ImGui::InputFloat("Z for thunder wave", &cerberusThunderWaveZ, 0.1f, 0.0f, "%.2f");
       ImGui::Separator();
       ImGui::Spacing();
   }
