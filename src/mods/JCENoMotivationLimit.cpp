@@ -78,7 +78,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";
 	}
 
-	auto devilConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E8 1A");//DevilMayCry5.exe+1C0A5CD
+	auto devilConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E9 38");//DevilMayCry5.exe+1C0A5CD
 	if (!devilConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.devilConcetrationAddr pattern.";

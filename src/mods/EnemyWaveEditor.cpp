@@ -718,7 +718,7 @@ void EnemyWaveEditor::on_draw_ui() {
       break;
   }*/
 
-  /*case EnemyWaveEditor::Serialization:
+  case EnemyWaveEditor::Serialization:
   {
       ImGui::SameLine();
       help_marker("Load enemy data from .json file.");
@@ -755,7 +755,7 @@ void EnemyWaveEditor::on_draw_ui() {
           help_marker("This will remove your current custom data and load data from selected profile. Memory shouldn't be allocated before this stage.");
       }
       break;
-  }*/
+  }
 
   default:
     break;
