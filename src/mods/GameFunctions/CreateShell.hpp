@@ -35,8 +35,8 @@ namespace GameFunctions
 
 		
 		//typedef uintptr_t(__cdecl* spawnShell)(void* rcxArg, void* shellManager, void* prefab, const Vec3 &pos, const Quaternion &rotation, void* owner, int level, int id, const void* delayParam/*, void* a5, void* a6, void *a7, void *a8, void* a9*/);
-		typedef uintptr_t(__cdecl* f_CreateShell)(uintptr_t rcxArg, uintptr_t shellManager, uintptr_t prefab, Vec3 pos, Quaternion rotation, uintptr_t owner, int &level, int &id, DelayParam* delay);
-		f_CreateShell create_shell;
+		typedef uintptr_t(__cdecl* f_CreateShell)(uintptr_t rcxArg, uintptr_t shellManager, uintptr_t prefab, Vec3 pos, Quaternion rotation, uintptr_t owner, int level, int id, DelayParam* delay);
+		static inline f_CreateShell create_shell{};
 
 		uintptr_t pfb = 0;
 		uintptr_t owner = 0;

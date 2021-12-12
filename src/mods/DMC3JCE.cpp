@@ -151,10 +151,10 @@ static naked void jce_exetime_detour()
 		je originalcode
 		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		jne originalcode
-		push rax
-		mov rax, [DMC3JCE::pJceExeTime]
-		movss xmm0, [rax]
-		pop rax
+		/*push rax
+		mov rax, [DMC3JCE::pJceExeTime]*/
+		movss xmm0, [DMC3JCE::JCEController::executionTimeAsm]
+		//pop rax
 		comiss xmm0, xmm1
 		movss [rdi+0x6C], xmm1
 		ja jce_continue
@@ -230,8 +230,8 @@ static naked void crashpoint_detour()//this mb not good idk
 		je originalcode
 		cmp byte ptr [DMC3JCE::isCrashFixEnabled], 0
 		je originalcode
-		cmp byte ptr [DMC3JCE::isJceRunning], 0
-		je originalcode
+		/*cmp byte ptr [DMC3JCE::isJceRunning], 0
+		je originalcode*/
 		cmp rax, 0
 		jne originalcode
 
@@ -329,7 +329,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	jceTimerContinue = jceTimerAddr.value() + 0x2A;
 	crashPointJeJmp = crashPointAddr.value() + 0xB;
 	jceController.init_ptrs_base(dmc5Base);
-	pJceExeTime = &jceController.executionTime;
+	//pJceExeTime = &jceController.executionTimeAsm;
 	jcePfbJeJmp = jcePrefab1Addr.value() + 0x18FB;
 
 	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
@@ -395,6 +395,7 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 	jcTypeUi = jceController.get_jce_type();
 	isCrashFixEnabled = cfg.get<bool>("DMC3JCE.isCrashFixEnabled").value_or(true);
 	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
+	jceController.rndEmTrackInterval = cfg.get<byte>("DMC3JCE.rndEmTrackInterval").value_or(22);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
@@ -403,6 +404,7 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 	cfg.set<int>("DMC3JCE.trackDelayTime", jceController.trackDelayTime);
 	cfg.set<int>("DMC3JCE.jceType", jceController.get_jce_type());
 	cfg.set<bool>("DMC3JCE.isCrashFixEnabled", isCrashFixEnabled);
+	cfg.set<byte>("DMC3JCE.rndEmTrackInterval", jceController.rndEmTrackInterval);
 }
 
 void DMC3JCE::on_frame()
@@ -414,7 +416,7 @@ void DMC3JCE::on_draw_ui()
 	ImGui::TextWrapped("If after Vergil's disappear jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
 	ImGui::Separator();
 	ImGui::Spacing();
-	ImGui::Checkbox("Use default jce in human form", &isUseDefaultJce);
+	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUseDefaultJce);
 	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
 	ImGui::TextWrapped("Select DMC3 JCE type:");
 
@@ -432,11 +434,13 @@ void DMC3JCE::on_draw_ui()
 			ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##0"))
 				jceController.set_rndspawn_delay(rndDelay);
+			ImGui::TextWrapped("Interval of spawned jc between 1 jc will spawn exactly in lock on position:");
+			ImGui::SliderInt("##rndInterval", (int*)&jceController.rndEmTrackInterval, 1, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
 			break;
 		}
 		case JCEController::Type::Track:
 		{
-			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game and make this OP as fuck:");
+			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game and make this OP as fuck vs single target:");
 			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##1"))
 				jceController.set_trackspawn_delay(trackDelay);

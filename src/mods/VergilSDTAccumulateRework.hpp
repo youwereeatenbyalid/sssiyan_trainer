@@ -3,6 +3,7 @@
 #include "sdk/ReClass.hpp"
 #include "VergilInfSDT.hpp"
 #include "InfDT.hpp"
+#include "DMC3JCE.hpp"
 class VergilSDTAccumulateRework : public Mod {
 public:
   static bool cheaton;
@@ -13,6 +14,7 @@ public:
   static constexpr float maxSdt = 10000.0;
 
   static bool isNeedToAddStdPoints;
+  static inline bool isConstInc = false; 
 
   static uintptr_t dtchange_jmp_ret;
   static uintptr_t sdtchange_jmp_ret;
@@ -41,5 +43,4 @@ private:
   // around minhook
   void init_check_box_info() override;
   std::unique_ptr<FunctionHook> m_dtchange_hook;
-  std::unique_ptr<FunctionHook> m_sdtchange_hook;
 };

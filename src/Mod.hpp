@@ -312,7 +312,7 @@ public:
         animation,
         taunt, 
         gilver,
-		  secretmission
+		secretmission
     };
 
     enum input_enum {sword = 0x1, gun = 0x2, jump = 0x4, tauntinput =0x8, lockon = 0x10, changetarget = 0x20, 

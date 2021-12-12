@@ -26,6 +26,8 @@ add_library(jsonstthm STATIC
             JsonStthm/JsonStthm.h
             JsonStthm/JsonStthmConfig.h)
 
+#pragma comment(lib, "jsonstthm.lib")
+
 project(imgui)
 
 add_library(imgui STATIC

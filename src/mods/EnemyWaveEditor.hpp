@@ -1,4 +1,7 @@
 #pragma once
+
+#pragma comment(lib, "../lib/jsonstthm.lib")
+
 #include "Mod.hpp"
 #include "EnemySwapper.hpp"
 #include <string>
@@ -137,7 +140,7 @@ namespace WaveEditorMod
 		int loadId = 0;
 		GameListEditor::MimicMngObj<SetEmData> mimicList { (size_t)0x8 };
 		bool isUsedByRtEdit = false;
-		GameEmList *bindedEmData = NULL;
+		GameEmList *bindedEmData = nullptr;
 		bool isSwapped = false;
 	};
 

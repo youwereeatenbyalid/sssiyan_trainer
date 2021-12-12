@@ -1469,7 +1469,7 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
   ImGui::Checkbox("Dive bomb fix",&isVergilFixEnabled);
   ImGui::SameLine();
-  help_marker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb preparing teleport to take an effect.");
+  help_marker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb's preparing teleport to take an effect.");
   if (isVergilFixEnabled)
   {
       ImGui::TextWrapped("Height of arena side (default = 1.5)");
@@ -1545,10 +1545,13 @@ void EnemySwapper::on_draw_ui() {
           ImGui::InputFloat("X coord of center of arena ##Cerberus", &cerberusCenterOfFloor.x, 0.1f, 0, "%.2f");
           ImGui::InputFloat("Y coord of center of arena ##Cerberus", &cerberusCenterOfFloor.y, 0.1f, 0, "%.2f");
           ImGui::InputFloat("Z coord of center of arena ##Cerberus", &cerberusCenterOfFloor.z, 0.1f, 0, "%.2f");
+          cerberusThunderWaveZ = cerberusCenterOfFloor.z;
+          cerberusThunderWavePlPos = false;
       }
-      ImGui::Checkbox("Use current player z coord to spawn thunder wave attack", &cerberusThunderWavePlPos);
+      else cerberusThunderWavePlPos = true;
+      /*ImGui::Checkbox("Use current player z coord to spawn thunder wave attack", &cerberusThunderWavePlPos);
       if (!cerberusThunderWavePlPos)
-          ImGui::InputFloat("Z for thunder wave", &cerberusThunderWaveZ, 0.1f, 0.0f, "%.2f");
+          ImGui::InputFloat("Z for thunder wave", &cerberusThunderWaveZ, 0.1f, 0.0f, "%.2f");*/
       ImGui::Separator();
       ImGui::Spacing();
   }
@@ -1576,7 +1579,7 @@ void EnemySwapper::on_draw_ui() {
 
   ImGui::Checkbox("Swap all enemies to:", &isSwapAll);
   if (isSwapAll) {
-    ImGui::Combo("", (int*)&selectedForAllSwap, emNames.data(), emNames.size(),20);
+    ImGui::Combo("##SwapAll", (int*)&selectedForAllSwap, emNames.data(), emNames.size(),20);
     swapForAll.set_swap_id(selectedForAllSwap);
   } 
   else {

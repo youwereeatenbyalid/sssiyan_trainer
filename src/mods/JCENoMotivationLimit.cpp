@@ -38,7 +38,7 @@ static naked void no_motivation2_detour()
 		je cheat
 
 		originalcode:
-		cmp dword ptr [rdx+0x00001B58], 02
+		cmp dword ptr [rbx+0x00001B58], 02
 		jmp qword ptr [JCENoMotivationLimit::yamatoHumanConcRet]
 
 		cheat:
@@ -53,7 +53,7 @@ static naked void no_motivation3_detour()
 		je cheat
 
 		originalcode:
-		cmp dword ptr [rdx+0x00001B58], 02
+		cmp dword ptr [rbx+0x00001B58], 02
 		jmp qword ptr [JCENoMotivationLimit::yamatoSdtConcRet]
 
 		cheat:
@@ -72,7 +72,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	author_string = "akasha51";
 	description_string = "Allow to perform jce with any consentration level.";
 
-	auto humanConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9");//"DevilMayCry5.exe"+1C0A520
+	auto humanConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85");//"DevilMayCry5.exe"+1C0A520
 	if (!humanConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";

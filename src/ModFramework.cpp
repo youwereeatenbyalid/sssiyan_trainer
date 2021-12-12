@@ -1172,7 +1172,7 @@ void ModFramework::draw_panel(PanelID panelID)
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
-                    ImGui::Text("Dark Slayer");
+                    ImGui::Text("Cheats");
                     m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 

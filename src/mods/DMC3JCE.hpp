@@ -24,7 +24,7 @@ public:
 		func::Vec3 stratPosOffs;
 		func::Vec3 moveTrackStepOffs;
 
-		std::default_random_engine rndGen;
+		std::mt19937 rndGen{};
 
 		std::shared_ptr<func::CreateShell> jcSpawn;
 
@@ -36,6 +36,8 @@ public:
 
 		uintptr_t isPauseBase;
 		uintptr_t jcPrefabBase;
+
+		std::mutex mt;
 
 		std::atomic_bool executing;
 
@@ -104,7 +106,7 @@ public:
 
 		bool get_condition(bool isBadPtr)
 		{
-			if (EnemySwapper::nowFlow == 0x16 && executing && !isBadPtr)
+			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr)
 			{
 				if (EnemySwapper::gameMode == 3)
 				{
@@ -147,13 +149,15 @@ public:
 	private:
 		Type jceType;
 	public:
-		const int defaultRndDelay = 100;
+		const int defaultRndDelay = 120;
 		const int defaultTrackDelay = 187;
 
 		int rndDelayTime = defaultRndDelay;//ms
 		int trackDelayTime = defaultTrackDelay;//ms
 
-		float executionTime;
+		static inline float executionTimeAsm;
+		byte rndEmTrackInterval = 22;
+
 		const float rndExeTimeModDefault = 6.8f;
 		const float trackExeTimeModDefault = 5.65f;
 		const float rndAttackRate = 2.5f;
@@ -174,7 +178,7 @@ public:
 			executing = false;
 			jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
 			isPauseBase = 0x07E55910;
-			executionTime = rndExeTimeModDefault;
+			JCEController::executionTimeAsm = rndExeTimeModDefault;
 			isPtrBaseInit = false;
 		}
 
@@ -189,7 +193,7 @@ public:
 			{
 				case JCEController::Random:
 				{
-					std::thread([&]
+					std::thread([this]
 					{
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
 						bool isBadPtr = false;
@@ -210,7 +214,7 @@ public:
 						func::Vec3 curPos;
 						func::Vec3 prevPos;
 						isBadPtr = false;
-						uintptr_t jcShell;
+						uintptr_t jcShell = 0;
 
 						std::uniform_real_distribution<float> xDist(minOffset.x, maxOffset.x);
 						std::uniform_real_distribution<float> yDist(minOffset.y, maxOffset.y);
@@ -221,23 +225,35 @@ public:
 						if(nullLockOn)
 							lockOnPos = pPos;
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-
-						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 0);
+						byte jcNum = 0;
+						int id = 0;
+						byte tryIter = 0;
+						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, id);
+						//std::this_thread::yield();//?
 
 						while (get_condition(isBadPtr))
 						{
 							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst, isBadPtr);
 							if (isPause)
 								continue;
-							if (EnemySwapper::nowFlow != 0x16 || executing == false)//check this again
+							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-							jcShell = jcSpawn->invoke(curPos, defaultRot);
-							if (jcShell == 0)
+							rcx = jcSpawn->get_rcx_arg_ptr();
+							if(!rcx.has_value())
 								break;
-							*(bool*)(jcShell + 0x440) = isRndJust; //isJust
-							*(float*)(jcShell + 0x444) = rndAttackRate; //attackRate
-							jcShell = 0;
-
+							//jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, id);
+							{
+								std::lock_guard<std::mutex> lck(mt);
+								jcShell = jcSpawn->invoke(curPos, defaultRot);
+								if (jcShell == 0)
+									continue;
+								if(!IsBadReadPtr((void*)(jcShell+0x440), 8))
+									*(bool*)(jcShell + 0x440) = isRndJust; //isJust
+								if(!IsBadReadPtr((void*)(jcShell + 0x444), 8))
+									*(float*)(jcShell + 0x444) = rndAttackRate; //attackRate
+							}
+							//jcShell = 0;
+							jcNum++;
 							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));
 
 							prevPos = curPos;
@@ -245,12 +261,22 @@ public:
 							lockOnPos = get_lockon_pos(nullLockOn);
 							if (nullLockOn || func::Vec3::vec_length(pPos, lockOnPos) > rndEmMaxDist)
 								lockOnPos = pPos;
-
-							do 
+							if (jcNum >= rndEmTrackInterval)
 							{
-								rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-							} while(func::Vec3::vec_length(curPos, prevPos) < 5.1f && executing);
-
+								jcNum = 0;
+								lockOnPos.z += zTrackOffs;
+								curPos = lockOnPos;
+							}
+							else
+							{
+								tryIter = 0;
+								do
+								{
+									tryIter++;
+									rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
+								} while (func::Vec3::vec_length(curPos, prevPos) < 4.5f && tryIter <= 20);
+							}
+							id++;
 						}
 						update_status(false);
 					}).detach();
@@ -259,7 +285,7 @@ public:
 				}
 				case JCEController::Track:
 				{
-					std::thread([&]
+					std::thread([=]
 					{
 						auto pPos = CheckpointPos::get_player_coords();
 						func::Vec3 prevPos;
@@ -342,13 +368,13 @@ public:
 			{
 				case DMC3JCE::JCEController::Random:
 				{
-					executionTime = rndExeTimeModDefault;
+					JCEController::executionTimeAsm = rndExeTimeModDefault;
 					break;
 				}
 					
 				case DMC3JCE::JCEController::Track:
 				{
-					executionTime = trackExeTimeModDefault;
+					JCEController::executionTimeAsm = trackExeTimeModDefault;
 					break;
 				}
 				default:
@@ -384,7 +410,7 @@ public:
 	static inline float humanJCECost = 3000.0f;
 	static inline float minSdt = 3000.0f;
 
-	static inline float *pJceExeTime = nullptr;
+	//static inline float *pJceExeTime = nullptr;
 
 	static inline int rndDelay = 0;
 	static inline int trackDelay = 0;
