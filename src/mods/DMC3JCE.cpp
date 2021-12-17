@@ -293,7 +293,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	description_string = "Change duration, amount of SDT expended to perform JCE and overall virgin DMC5 human JCE to chad DMC3 boss Vergil JCE. Can be executed without full STD bar. This mod can crash the game :(";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
 
-	jceTimerStaticBase = dmc5Base + 0x45F0360;
+	jceTimerStaticBase = dmc5Base + 0x45F0390;//0x45F0360;
 	jceTimerStaticBase = *(uintptr_t*)jceTimerStaticBase;
 	rayCastAddr = dmc5Base + 0x7E53744;
 
