@@ -1142,7 +1142,7 @@ void ModFramework::draw_panel(PanelID panelID)
 
                 if (m_error.empty() && m_game_data_initialized) {
                     ImGui::Text("V cheats");
-	            	m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
+	            	m_mods->on_pagelist_ui(Mod::gilver, modListIndent);
                 }
                 else if (!m_game_data_initialized) {
                     ImGui::TextWrapped("Trainer is currently initializing...");

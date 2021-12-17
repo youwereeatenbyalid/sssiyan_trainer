@@ -72,13 +72,13 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	author_string = "akasha51";
 	description_string = "Allow to perform jce with any consentration level.";
 
-	auto humanConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85");//"DevilMayCry5.exe"+1C0A520
+	auto humanConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00");//"DevilMayCry5.exe"+1C0A520
 	if (!humanConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";
 	}
 
-	auto devilConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E9 38");//DevilMayCry5.exe+1C0A5CD
+	auto devilConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E9 B8");//DevilMayCry5.exe+1C0A5CD
 	if (!devilConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.devilConcetrationAddr pattern.";

@@ -52,7 +52,7 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
     return "Unable to find VergilAirTrickNoSS pattern.";
   }
 
-  VergilAirTrickNoSS::jmp_je = utility::scan(base, "F3 0F 10 15 93 D6 09 04").value();
+  VergilAirTrickNoSS::jmp_je = addr.value() + 0x1C6; //utility::scan(base, "F3 0F 10 15 93 D6 09 04").value();
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
     //  return a error string in case something goes wrong

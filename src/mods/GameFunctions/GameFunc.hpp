@@ -136,8 +136,8 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		virtual T invoke() = 0;
-		virtual T operator()()
+		virtual T __cdecl invoke() = 0;
+		virtual T __cdecl operator()()
 		{
 			return invoke();
 		}

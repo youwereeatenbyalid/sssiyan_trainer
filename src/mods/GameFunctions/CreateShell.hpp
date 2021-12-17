@@ -11,7 +11,7 @@ namespace GameFunctions
 			struct SoundData
 			{
 				byte mngOffs[0xF] = "";
-				std::string* triggerName = new std::string("JudgementCut");
+				std::string* triggerName = new std::string("____JudgementCut");
 				Vec3 position;
 				~SoundData()
 				{
@@ -32,11 +32,10 @@ namespace GameFunctions
 					delete sound;
 				}
 			};
-
 		
 		//typedef uintptr_t(__cdecl* spawnShell)(void* rcxArg, void* shellManager, void* prefab, const Vec3 &pos, const Quaternion &rotation, void* owner, int level, int id, const void* delayParam/*, void* a5, void* a6, void *a7, void *a8, void* a9*/);
-		typedef uintptr_t(__cdecl* f_CreateShell)(uintptr_t rcxArg, uintptr_t shellManager, uintptr_t prefab, Vec3 pos, Quaternion rotation, uintptr_t owner, int level, int id, DelayParam* delay);
-		static inline f_CreateShell create_shell{};
+		typedef uintptr_t(__cdecl* f_CreateShell)(void* rcxArg, void* shellManager, const void* prefab, const Vec3 *pos, const Quaternion *rotation, const void *owner, int *level, int *id, DelayParam* delay);
+		f_CreateShell create_shell;
 
 		uintptr_t pfb = 0;
 		uintptr_t owner = 0;
@@ -49,10 +48,6 @@ namespace GameFunctions
 		int id = 0;
 
 		DelayParam *delay;
-
-		std::mutex mtx;
-
-		void* pRcx;
 
 		public:
 		const std::array<uintptr_t, 5> fancyRcx {0x70, 0x50, 0x408, 0x80, 0x0}; //{0x498, 0x60, 0xC0, 0x0};
@@ -92,7 +87,6 @@ namespace GameFunctions
 		void set_rcx(uintptr_t rcxParam) 
 		{
 			rcx = rcxParam;
-			pRcx = (void*)(*(uintptr_t*)rcxParam);
 		}
 
 		uintptr_t get_prefab() const {return pfb; }
@@ -111,13 +105,13 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke() override
+		uintptr_t __cdecl invoke() override
 		{
 			uintptr_t res = 0;
 			if (pfb != 0 && fAddr != NULL)
 			{
 				uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-				if(shellMng == 0)
+				if(shellMng == 0 || IsBadReadPtr((void*)shellMng, 8))
 					return 0;
 				if (rcx == 0)
 				{
@@ -127,7 +121,7 @@ namespace GameFunctions
 					else 
 						rcx = rcxOpt.value();
 				}
-				res = create_shell(rcx, shellMng, pfb, pos, rot, owner, lvl, id, delay);
+				res = create_shell((void*)rcx, (void*)shellMng, (void*)pfb, &pos, &rot, (void*)owner, &lvl, &id, nullptr);
 				//delete(delay);
 			}
 			return res;
@@ -135,7 +129,7 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		uintptr_t __cdecl invoke(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
 			set_params(rcxParam, prefab, spawnPos, spawnRot, owner, level, id);
 			return invoke();
@@ -143,14 +137,14 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t operator ()(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		uintptr_t __cdecl operator ()(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
 			return invoke(rcxParam, prefab, spawnPos, spawnRot, owner, level, id);
 		}
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke(const Vec3 &spawnPos, const Quaternion &spawnRot)
+		uintptr_t __cdecl invoke(const Vec3 &spawnPos, const Quaternion &spawnRot)
 		{
 			pos = spawnPos;
 			rot = spawnRot;
@@ -159,7 +153,7 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t operator()(const Vec3& spawnPos, const Quaternion& spawnRot)
+		uintptr_t __cdecl operator()(const Vec3& spawnPos, const Quaternion& spawnRot)
 		{
 			return invoke(spawnPos, spawnRot);
 		}

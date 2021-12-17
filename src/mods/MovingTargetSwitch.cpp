@@ -47,7 +47,7 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   description_string   = "Allows you to switch targets while moving the left stick";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "0F 2F 05 81 DF F6 02");
+  auto addr = utility::scan(base, "0F 2F 05 81 DF F6 02");//Broken by copyright update
   if (!addr) {
     return "Unable to find MovingTargetSwitch pattern.";
   }

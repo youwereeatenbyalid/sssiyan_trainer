@@ -117,19 +117,41 @@ static naked void jceprefab1_detour()
 	}
 }
 
-
-void DMC3JCE::stop_jce_asm()
+static naked void jceprefab2_detour()
 {
-	jceController.stop_jce();
-	isJceRunning = false;
+	__asm {
+		cmp byte ptr [DMC3JCE::cheaton], 1
+		je cheat
+
+		originalcode:
+		cmp [rax+0x18], rdi
+		jne jne_ret
+		jmp qword ptr [DMC3JCE::jcePfb2Ret]
+
+		cheat:
+		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		je originalcode
+		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		jne originalcode
+
+		jne_ret:
+		jmp qword ptr [DMC3JCE::jcePfbJneJmp]
+	}
 }
 
-void DMC3JCE::start_jce_asm()
+
+void __cdecl DMC3JCE::stop_jce_asm()
 {
-	if (!jceController.is_executing())
+	jceController->stop_jce();
+	//isJceRunning = false;
+}
+
+void __cdecl DMC3JCE::start_jce_asm()
+{
+	if (!jceController->is_executing())
 	{
-		isJceRunning = true;
-		jceController.start_jce();
+		//isJceRunning = true;
+		jceController->start_jce();
 	}
 }
 
@@ -301,13 +323,19 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	//	return "Unable to find DMC3JCE.jcePrefabAddr pattern.";
 	//}
 
-	auto jcePrefab1Addr = utility::scan(base, "4C 8D 4D 20 48 8B D3 4C 8D 45 30 48 8D 8D D0");//DevilMayCry5.exe+1C07374
-	if (!jcePrefab1Addr)
+	//auto jcePrefab1Addr = utility::scan(base, "4C 8D 4D 20 48 8B D3 4C 8D 45 30 48 8D 8D D0");//DevilMayCry5.exe+1C07374
+	//if (!jcePrefab1Addr)
+	//{
+	//	return "Unable to find DMC3JCE.jcePrefab1Addr pattern.";
+	//}
+
+	auto jcePrefab2Addr = utility::scan(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
+	if (!jcePrefab2Addr)
 	{
-		return "Unable to find DMC3JCE.jcePrefab1Addr pattern.";
+		return "Unable to find DMC3JCE.jcePrefab2Addr pattern.";
 	}
 
-	auto jceTimerAddr = utility::scan(base, "F3 0F 10 05 66 67 1E 04");//DevilMayCry5.exe+409BF2
+	auto jceTimerAddr = utility::scan(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
 	if (!jceTimerAddr)
 	{
 		return "Unable to find DMC3JCE.jceTimerAddr pattern.";
@@ -328,9 +356,12 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	stopJceTimerRet = jceTimerAddr.value() + 0x12;
 	jceTimerContinue = jceTimerAddr.value() + 0x2A;
 	crashPointJeJmp = crashPointAddr.value() + 0xB;
-	jceController.init_ptrs_base(dmc5Base);
+	//jceController.init_ptrs_base(dmc5Base);
+	jceController = std::make_unique<JCEController>();
 	//pJceExeTime = &jceController.executionTimeAsm;
-	jcePfbJeJmp = jcePrefab1Addr.value() + 0x18FB;
+	// 
+	//jcePfbJeJmp = jcePrefab1Addr.value() + 0x18FB;
+	jcePfbJneJmp = jcePrefab2Addr.value() + 0x18D2;
 
 	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
 	{
@@ -356,10 +387,16 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Failed to initialize DMC3JCE.jcePrefab";
 	}*/
 
-	if (!install_hook_absolute(jcePrefab1Addr.value(), m_jce_prefab1_hook, &jceprefab1_detour, &jcePfb1Ret, 0x7))
+	/*if (!install_hook_absolute(jcePrefab1Addr.value(), m_jce_prefab1_hook, &jceprefab1_detour, &jcePfb1Ret, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.jcePrefab1";
+	}*/
+
+	if (!install_hook_absolute(jcePrefab2Addr.value(), m_jce_prefab2_hook, &jceprefab2_detour, &jcePfb2Ret, 0xA))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize DMC3JCE.jcePrefab2";
 	}
 
 	if (!install_hook_absolute(jceTimerAddr.value(), m_jce_timer_hook, &jce_exetime_detour, &jceTimerRet, 0x8))
@@ -387,24 +424,24 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 void DMC3JCE::on_config_load(const utility::Config& cfg)
 {
-	jceController.rndDelayTime = cfg.get<int>("DMC3JCE.rndDelayTime").value_or(jceController.defaultRndDelay);
-	rndDelay = jceController.rndDelayTime;
-	jceController.trackDelayTime = cfg.get<int>("DMC3JCE.trackDelayTime").value_or(jceController.defaultTrackDelay);
-	trackDelay = jceController.trackDelayTime;
-	jceController.set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
-	jcTypeUi = jceController.get_jce_type();
+	jceController->rndDelayTime = cfg.get<int>("DMC3JCE.rndDelayTime").value_or(jceController->defaultRndDelay);
+	rndDelay = jceController->rndDelayTime;
+	jceController->trackDelayTime = cfg.get<int>("DMC3JCE.trackDelayTime").value_or(jceController->defaultTrackDelay);
+	trackDelay = jceController->trackDelayTime;
+	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
+	jcTypeUi = jceController->get_jce_type();
 	isCrashFixEnabled = cfg.get<bool>("DMC3JCE.isCrashFixEnabled").value_or(true);
 	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
-	jceController.rndEmTrackInterval = cfg.get<byte>("DMC3JCE.rndEmTrackInterval").value_or(22);
+	jceController->rndEmTrackInterval = cfg.get<byte>("DMC3JCE.rndEmTrackInterval").value_or((byte)22);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
 {
-	cfg.set<int>("DMC3JCE.rndDelayTime", jceController.rndDelayTime);
-	cfg.set<int>("DMC3JCE.trackDelayTime", jceController.trackDelayTime);
-	cfg.set<int>("DMC3JCE.jceType", jceController.get_jce_type());
+	cfg.set<int>("DMC3JCE.rndDelayTime", jceController->rndDelayTime);
+	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->trackDelayTime);
+	cfg.set<int>("DMC3JCE.jceType", jceController->get_jce_type());
 	cfg.set<bool>("DMC3JCE.isCrashFixEnabled", isCrashFixEnabled);
-	cfg.set<byte>("DMC3JCE.rndEmTrackInterval", jceController.rndEmTrackInterval);
+	cfg.set<byte>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
 }
 
 void DMC3JCE::on_frame()
@@ -421,21 +458,21 @@ void DMC3JCE::on_draw_ui()
 	ImGui::TextWrapped("Select DMC3 JCE type:");
 
 	if( ImGui::RadioButton("Random", (int*)&jcTypeUi, 0) )
-		jceController.set_jce_type(jcTypeUi);
+		jceController->set_jce_type(jcTypeUi);
 	ImGui::SameLine(); ImGui::Spacing();
 	if(ImGui::RadioButton("Track", (int*)&jcTypeUi, 1))
-		jceController.set_jce_type(jcTypeUi);
+		jceController->set_jce_type(jcTypeUi);
 
-	switch (jceController.get_jce_type())
+	switch (jceController->get_jce_type())
 	{
 		case JCEController::Type::Random:
 		{
 			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game:");
 			ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##0"))
-				jceController.set_rndspawn_delay(rndDelay);
-			ImGui::TextWrapped("Interval of spawned jc between 1 jc will spawn exactly in lock on position:");
-			ImGui::SliderInt("##rndInterval", (int*)&jceController.rndEmTrackInterval, 1, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
+				jceController->set_rndspawn_delay(rndDelay);
+			ImGui::TextWrapped("Interval between spawn on lock on position:");
+			ImGui::SliderInt("##rndInterval", (int*)&jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
 			break;
 		}
 		case JCEController::Type::Track:
@@ -443,7 +480,7 @@ void DMC3JCE::on_draw_ui()
 			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game and make this OP as fuck vs single target:");
 			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##1"))
-				jceController.set_trackspawn_delay(trackDelay);
+				jceController->set_trackspawn_delay(trackDelay);
 			break;
 		}
 		default:
@@ -458,14 +495,14 @@ void DMC3JCE::on_draw_ui()
 	if (ImGui::Button("Stop 3 jce"))
 	{
 		isJceRunning = false;
-		jceController.stop_jce();
+		jceController->stop_jce();
 		
 	}
 	ImGui::Separator();
 	ImGui::TextWrapped("Start spawning jce. Keep this here only for fun.");
 	if (ImGui::Button("Start 3 jce"))
 	{
-		jceController.start_jce();
+		jceController->start_jce();
 	}
 }
 

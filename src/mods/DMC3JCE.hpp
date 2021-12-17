@@ -5,6 +5,7 @@
 #include "mods/GameFunctions/CreateShell.hpp"
 #include "EnemySwapper.hpp"
 #include <atomic>
+#include <condition_variable>
 #include "VergilSDTFormTracker.hpp"
 #include "PlayerTracker.hpp"
 #include "EnemyWaveEditor.hpp"
@@ -24,9 +25,9 @@ public:
 		func::Vec3 stratPosOffs;
 		func::Vec3 moveTrackStepOffs;
 
-		std::mt19937 rndGen{};
+		std::mt19937 rndGen;
 
-		std::shared_ptr<func::CreateShell> jcSpawn;
+		func::CreateShell jcSpawn;
 
 		const float zTrackOffs = 0.94f;
 		const float rndEmMaxDist = 34.5f;
@@ -40,6 +41,8 @@ public:
 		std::mutex mt;
 
 		std::atomic_bool executing;
+
+		std::condition_variable cv;
 
 		bool isPtrBaseInit;
 		const bool isRndJust = true;
@@ -164,11 +167,11 @@ public:
 
 		JCEController()
 		{
-			maxOffset.x = 10.3f;
-			maxOffset.y = 10.2;
+			maxOffset.x = 10.7f;
+			maxOffset.y = 10.6;
 			maxOffset.z = 4.21f;
-			minOffset.x = -10.3f;
-			minOffset.y = -10.2f;
+			minOffset.x = -10.7f;
+			minOffset.y = -10.6f;
 			minOffset.z = 0.96f;
 
 			moveTrackStepOffs.x = 1.18f;
@@ -179,21 +182,26 @@ public:
 			jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
 			isPauseBase = 0x07E55910;
 			JCEController::executionTimeAsm = rndExeTimeModDefault;
-			isPtrBaseInit = false;
+			auto base = g_framework->get_module().as<uintptr_t>();
+			jcPrefabBase += base;
+			isPauseBase += base;
+			isPtrBaseInit = true;
 		}
 
-		void start_jce()
+		void __cdecl start_jce()
 		{
 			if(executing.load())
 				return;
 			if(!isPtrBaseInit)
 				return;
+			int id = 105;
+			int lvl = 1;
 			update_status(true);
 			switch (jceType)
 			{
 				case JCEController::Random:
 				{
-					std::thread([this]
+					std::thread([=]
 					{
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
 						bool isBadPtr = false;
@@ -204,7 +212,7 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn->get_rcx_arg_ptr();
+						auto rcx = jcSpawn.get_rcx_arg_ptr();
 						if(!rcx.has_value())
 						{
 							bad_ptr_stop();
@@ -226,9 +234,8 @@ public:
 							lockOnPos = pPos;
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
 						byte jcNum = 0;
-						int id = 0;
 						byte tryIter = 0;
-						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, id);
+						jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						//std::this_thread::yield();//?
 
 						while (get_condition(isBadPtr))
@@ -238,15 +245,15 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-							rcx = jcSpawn->get_rcx_arg_ptr();
+							rcx = jcSpawn.get_rcx_arg_ptr();
 							if(!rcx.has_value())
 								break;
-							//jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, id);
+							//jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 2, id);
 							{
-								std::lock_guard<std::mutex> lck(mt);
-								jcShell = jcSpawn->invoke(curPos, defaultRot);
+								jcShell = jcSpawn(curPos, defaultRot);
 								if (jcShell == 0)
 									continue;
+								//std::unique_lock<std::mutex> lck(mt);
 								if(!IsBadReadPtr((void*)(jcShell+0x440), 8))
 									*(bool*)(jcShell + 0x440) = isRndJust; //isJust
 								if(!IsBadReadPtr((void*)(jcShell + 0x444), 8))
@@ -254,8 +261,8 @@ public:
 							}
 							//jcShell = 0;
 							jcNum++;
-							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));
-
+							//std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
+							Sleep(rndDelayTime);
 							prevPos = curPos;
 
 							lockOnPos = get_lockon_pos(nullLockOn);
@@ -274,9 +281,9 @@ public:
 								{
 									tryIter++;
 									rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-								} while (func::Vec3::vec_length(curPos, prevPos) < 4.5f && tryIter <= 20);
+								} while (func::Vec3::vec_length(curPos, prevPos) < 4.5f && tryIter <= 60);
 							}
-							id++;
+							//id++;
 						}
 						update_status(false);
 					}).detach();
@@ -300,14 +307,14 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn->get_rcx_arg_ptr();
+						auto rcx = jcSpawn.get_rcx_arg_ptr();
 						if (!rcx.has_value())
 						{
 							bad_ptr_stop();
 							return;
 						}
 						func::Quaternion defaultRot;
-						jcSpawn->set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 0, 0);
+						jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						uintptr_t jcShell;
 						float distance = 0.0f;
@@ -318,12 +325,13 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16)//check this again
 								break;
-							jcShell = jcSpawn->invoke(curPos, defaultRot);
+							jcShell = jcSpawn(curPos, defaultRot);
 							if (jcShell == 0)
 								break;
 							*(bool*)(jcShell + 0x440) = isTrackJust; //isJust
 							jcShell = 0;
-							std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
+							//std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
+							Sleep(trackDelayTime);
 							track_pos_update(curPos);
 						}
 						update_status(false);
@@ -337,7 +345,7 @@ public:
 			}
 		}
 
-		void stop_jce()
+		void __cdecl stop_jce()
 		{
 			update_status(false);
 		}
@@ -352,7 +360,7 @@ public:
 			jcPrefabBase += dmc5base;
 			isPauseBase += dmc5base;
 			isPtrBaseInit = true;
-			jcSpawn = std::make_shared<func::CreateShell>();
+			//jcSpawn = std::make_shared<func::CreateShell>();
 		}
 
 		bool is_ptr_init() const {return isPtrBaseInit; }
@@ -386,7 +394,7 @@ public:
 
 	};
 
-    static inline JCEController jceController{};
+    static inline std::unique_ptr<JCEController> jceController{nullptr};
 	static inline bool cheaton = true;
 	static inline bool isJceRunning = false;
 	static inline bool isCrashFixEnabled = true;
@@ -398,6 +406,9 @@ public:
 	static inline uintptr_t jcePfbRet = 0;
 	static inline uintptr_t jcePfb1Ret = 0;
 	static inline uintptr_t jcePfbJeJmp = 0;
+	static inline uintptr_t jcePfbJneJmp = 0;
+	static inline uintptr_t jcePfb2Ret = 0;
+
 	static inline uintptr_t jceTimerRet = 0;
 	static inline uintptr_t jceTimerStaticBase = 0;
 	static inline uintptr_t stopJceTimerRet = 0;
@@ -419,8 +430,8 @@ public:
 
 	static inline JCEController::Type jcTypeUi{};
 
-	static void start_jce_asm();
-	static void stop_jce_asm();
+	static void __cdecl start_jce_asm();
+	static void __cdecl stop_jce_asm();
 
 	//PlVergil +1978 - curWeapon;
 
@@ -459,11 +470,12 @@ private:
 	std::unique_ptr<FunctionHook> m_can_exe_jce_hook;
 	std::unique_ptr<FunctionHook> m_can_exe_jce1_hook;
 	std::unique_ptr<FunctionHook> m_sub_human_jce_hook;
-	std::unique_ptr<FunctionHook> m_jce_prefab_hook;
+	//std::unique_ptr<FunctionHook> m_jce_prefab_hook;
 	std::unique_ptr<FunctionHook> m_jce_timer_hook;
 	std::unique_ptr<FunctionHook> m_jce_crashpoint_hook;
 	std::unique_ptr<FunctionHook> m_jce_finishpfb_hook;
-	std::unique_ptr<FunctionHook> m_jce_prefab1_hook;
+	//std::unique_ptr<FunctionHook> m_jce_prefab1_hook;
+	std::unique_ptr<FunctionHook> m_jce_prefab2_hook;
 
 };
 //clang-format on
