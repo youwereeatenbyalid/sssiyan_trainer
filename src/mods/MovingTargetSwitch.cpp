@@ -47,14 +47,14 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   description_string   = "Allows you to switch targets while moving the left stick";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "0F 2F 05 81 DF F6 02");//Broken by copyright update
+  auto addr = utility::scan(base, "CF F3 0F 10 41 30");
   if (!addr) {
     return "Unable to find MovingTargetSwitch pattern.";
   }
 
   MovingTargetSwitch::jmp_jae = utility::scan(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
+  if (!install_hook_absolute(addr.value()+6, m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize MovingTargetSwitch";
