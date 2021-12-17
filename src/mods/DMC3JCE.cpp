@@ -143,14 +143,12 @@ static naked void jceprefab2_detour()
 void __cdecl DMC3JCE::stop_jce_asm()
 {
 	jceController->stop_jce();
-	//isJceRunning = false;
 }
 
 void __cdecl DMC3JCE::start_jce_asm()
 {
 	if (!jceController->is_executing())
 	{
-		//isJceRunning = true;
 		jceController->start_jce();
 	}
 }

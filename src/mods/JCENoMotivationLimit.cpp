@@ -78,7 +78,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";
 	}
 
-	auto devilConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E9 B8");//DevilMayCry5.exe+1C0A5CD
+	auto devilConcetrationAddr = utility::scan(base, "5F C3 83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22");//DevilMayCry5.exe+1C0A5CD
 	if (!devilConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.devilConcetrationAddr pattern.";
@@ -97,7 +97,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	}
 
 	humanConcSkip = humanConcetrationAddr.value() + 0xD;
-	devilConcSkip = devilConcetrationAddr.value() + 0x9;
+	devilConcSkip = devilConcetrationAddr.value() + 0x2 + 0x9;
 	yamatoHumanConcSkip = yamatoConcetrationAddr.value() + 0x9;
 	yamatoSdtConcSkip = yamatoSdtConcetrationAddr.value() + 0xD;
 
@@ -107,7 +107,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 		return "Failed to initialize JCENoMotivationLimit.humanConcetration";
 	}
 
-	if (!install_hook_absolute(devilConcetrationAddr.value(), m_devil_motivation_hook, &no_motivation1_detour, &devilConcRet, 0x7))
+	if (!install_hook_absolute(devilConcetrationAddr.value() + 0x2, m_devil_motivation_hook, &no_motivation1_detour, &devilConcRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.devilConcetration";
