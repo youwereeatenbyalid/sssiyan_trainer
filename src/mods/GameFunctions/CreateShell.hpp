@@ -51,7 +51,6 @@ namespace GameFunctions
 
 		public:
 		const std::array<uintptr_t, 5> fancyRcx {0x70, 0x50, 0x408, 0x80, 0x0}; //{0x498, 0x60, 0xC0, 0x0};
-		//uintptr_t owner;
 
 		CreateShell()
 		{
@@ -66,11 +65,10 @@ namespace GameFunctions
 			pfb = prefab;
 		}
 
-		std::optional<uintptr_t> get_rcx_arg_ptr()
+		std::optional<uintptr_t> get_rcx_ptr() override
 		{
-			bool isBadPtr = false;
-			auto ptrAddr = GameFunctions::PtrController::get_ptr<uintptr_t>(rcxBase, fancyRcx, isBadPtr, true);
-			return isBadPtr ? std::nullopt : std::optional<uintptr_t>{ptrAddr};
+			auto ptrAddr = GameFunctions::PtrController::get_ptr<uintptr_t>(rcxBase, fancyRcx, true);
+			return ptrAddr;
 		}
 
 		void set_params(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
@@ -84,11 +82,6 @@ namespace GameFunctions
 			this->owner = owner;
 		}
 
-		void set_rcx(uintptr_t rcxParam) 
-		{
-			rcx = rcxParam;
-		}
-
 		uintptr_t get_prefab() const {return pfb; }
 
 		uintptr_t get_owner() const {return owner; }
@@ -96,8 +89,6 @@ namespace GameFunctions
 		Vec3 get_spawn_pos() const {return pos; }
 
 		Quaternion get_spawn_rot() const {return rot; }
-
-		uintptr_t get_cur_rcx() const {return rcx; }
 
 		int get_level() const {return lvl; }
 
@@ -115,7 +106,7 @@ namespace GameFunctions
 					return 0;
 				if (rcx == 0)
 				{
-					auto rcxOpt = get_rcx_arg_ptr();
+					auto rcxOpt = get_rcx_ptr();
 					if(!rcxOpt.has_value())
 						return 0;
 					else 

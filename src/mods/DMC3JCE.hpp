@@ -22,7 +22,6 @@ public:
 	private:
 		func::Vec3 maxOffset;
 		func::Vec3 minOffset;
-		func::Vec3 stratPosOffs;
 		func::Vec3 moveTrackStepOffs;
 
 		std::mt19937 rndGen;
@@ -131,8 +130,8 @@ public:
 			}
 			else
 			{
-				isJceRunning = false;
 				executing.store(false);
+				isJceRunning = false;
 				//*(int*)rayCastAddr = prevRayCastSize;
 			}
 		}
@@ -159,7 +158,7 @@ public:
 		int trackDelayTime = defaultTrackDelay;//ms
 
 		static inline float executionTimeAsm;
-		byte rndEmTrackInterval = 22;
+		int rndEmTrackInterval = 22;
 
 		const float rndExeTimeModDefault = 6.8f;
 		const float trackExeTimeModDefault = 5.65f;
@@ -205,14 +204,14 @@ public:
 					{
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
 						bool isBadPtr = false;
-						bool isPause = false;
-						uintptr_t jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
-						if (isBadPtr || jcPrefab == 0)
+						std::optional<bool> isPause;
+						auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
+						if (!jcPrefab.has_value() || jcPrefab.value() == 0)
 						{
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_rcx_arg_ptr();
+						auto rcx = jcSpawn.get_rcx_ptr();
 						if(!rcx.has_value())
 						{
 							bad_ptr_stop();
@@ -233,36 +232,36 @@ public:
 						if(nullLockOn)
 							lockOnPos = pPos;
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-						byte jcNum = 0;
-						byte tryIter = 0;
-						jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
+						int jcNum = 0;
+						int tryIter = 0;
+						jcSpawn.set_params(rcx.value(), jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						//std::this_thread::yield();//?
 
 						while (get_condition(isBadPtr))
 						{
-							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst, isBadPtr);
-							if (isPause)
+							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst);
+							if (!isPause.has_value())
+							{
+								isBadPtr = true;
+								break;
+							}
+							if (isPause.value())
 								continue;
 							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-							rcx = jcSpawn.get_rcx_arg_ptr();
+							/*rcx = jcSpawn.get_rcx_ptr();
 							if(!rcx.has_value())
-								break;
-							//jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, 2, id);
-							{
-								jcShell = jcSpawn(curPos, defaultRot);
-								if (jcShell == 0)
-									continue;
-								//std::unique_lock<std::mutex> lck(mt);
-								if(!IsBadReadPtr((void*)(jcShell+0x440), 8))
-									*(bool*)(jcShell + 0x440) = isRndJust; //isJust
-								if(!IsBadReadPtr((void*)(jcShell + 0x444), 8))
-									*(float*)(jcShell + 0x444) = rndAttackRate; //attackRate
-							}
-							//jcShell = 0;
+								break;*/
+							jcShell = jcSpawn(curPos, defaultRot);
+							if (jcShell == 0)
+								continue;
+							if(!IsBadReadPtr((void*)(jcShell+0x440), 8))
+								*(bool*)(jcShell + 0x440) = isRndJust; //isJust
+							if(!IsBadReadPtr((void*)(jcShell + 0x444), 8))
+								*(float*)(jcShell + 0x444) = rndAttackRate; //attackRate
+							jcShell = 0;
 							jcNum++;
-							//std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
-							Sleep(rndDelayTime);
+							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
 							prevPos = curPos;
 
 							lockOnPos = get_lockon_pos(nullLockOn);
@@ -281,9 +280,8 @@ public:
 								{
 									tryIter++;
 									rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-								} while (func::Vec3::vec_length(curPos, prevPos) < 4.5f && tryIter <= 60);
+								} while (func::Vec3::vec_length(curPos, prevPos) < 4.65f && tryIter <= 60);
 							}
-							//id++;
 						}
 						update_status(false);
 					}).detach();
@@ -300,28 +298,34 @@ public:
 						curPos.z += zTrackOffs;
 						func::Vec3 emPos;
 						bool isBadPtr = false;
-						bool isPause = false;
-						uintptr_t jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
-						if (isBadPtr || jcPrefab == 0)
+						std::optional<bool> isPause;
+						auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets);
+						if (!jcPrefab.has_value())
 						{
+							isBadPtr = true;
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_rcx_arg_ptr();
+						auto rcx = jcSpawn.get_rcx_ptr();
 						if (!rcx.has_value())
 						{
+							isBadPtr = true;
 							bad_ptr_stop();
 							return;
 						}
 						func::Quaternion defaultRot;
-						jcSpawn.set_params(rcx.value(), jcPrefab, curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
+						jcSpawn.set_params(rcx.value(), jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						uintptr_t jcShell;
-						float distance = 0.0f;
 						while (get_condition(isBadPtr))
 						{
-							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst, isBadPtr);
-							if (isPause)
+							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst);
+							if (!isPause.has_value())
+							{
+								isBadPtr = true;
+								break;
+							}
+							if (isPause.value())
 								continue;
 							if (EnemySwapper::nowFlow != 0x16)//check this again
 								break;
@@ -330,8 +334,7 @@ public:
 								break;
 							*(bool*)(jcShell + 0x440) = isTrackJust; //isJust
 							jcShell = 0;
-							//std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
-							Sleep(trackDelayTime);
+							std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
 							track_pos_update(curPos);
 						}
 						update_status(false);
@@ -360,7 +363,6 @@ public:
 			jcPrefabBase += dmc5base;
 			isPauseBase += dmc5base;
 			isPtrBaseInit = true;
-			//jcSpawn = std::make_shared<func::CreateShell>();
 		}
 
 		bool is_ptr_init() const {return isPtrBaseInit; }
@@ -421,8 +423,6 @@ public:
 	static inline float humanJCECost = 3000.0f;
 	static inline float minSdt = 3000.0f;
 
-	//static inline float *pJceExeTime = nullptr;
-
 	static inline int rndDelay = 0;
 	static inline int trackDelay = 0;
 	static inline int prevRayCastSize = 64;
@@ -470,13 +470,10 @@ private:
 	std::unique_ptr<FunctionHook> m_can_exe_jce_hook;
 	std::unique_ptr<FunctionHook> m_can_exe_jce1_hook;
 	std::unique_ptr<FunctionHook> m_sub_human_jce_hook;
-	//std::unique_ptr<FunctionHook> m_jce_prefab_hook;
 	std::unique_ptr<FunctionHook> m_jce_timer_hook;
 	std::unique_ptr<FunctionHook> m_jce_crashpoint_hook;
 	std::unique_ptr<FunctionHook> m_jce_finishpfb_hook;
-	//std::unique_ptr<FunctionHook> m_jce_prefab1_hook;
 	std::unique_ptr<FunctionHook> m_jce_prefab2_hook;
-
 };
 //clang-format on
 

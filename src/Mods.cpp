@@ -138,8 +138,9 @@
        #include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
        #include "mods/MissionManager.hpp"
-       //#include "mods/EnemyWaveEditor.hpp"
+       #include "mods/EnemyWaveEditor.hpp"
        #include "mods/SecretMissionTimer.hpp"
+       #include "mods/BossDanteSetup.hpp"
     // Nero
     // Dante
        #include "mods/DanteAirTrickSettings.hpp"
@@ -304,6 +305,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         // Nero
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());

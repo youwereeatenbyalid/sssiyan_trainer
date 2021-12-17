@@ -13,7 +13,12 @@ static naked void can_exe_jce_detour()
 		jmp qword ptr [DMC3JCE::canExeJceRet]
 
 		cheat:
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		cmp dword ptr [rbx + 0x1978], 0 //isYamato
 		jne originalcode
@@ -36,7 +41,12 @@ static naked void can_exe_jce_detour1()//need to check cur weapon too
 		jmp qword ptr [DMC3JCE::canExeJceRet1]
 
 		cheat:
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		movss xmm0, [rdx+0x1B20]//CurSdtVal
 		comiss xmm0, [DMC3JCE::minSdt]
@@ -63,7 +73,12 @@ static naked void jcehuman_sub_sdt_detour()
 		jmp qword ptr [DMC3JCE::subSdtRet]
 
 		cheat:
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		cmp dword ptr [r8+0x1978], 0
 		jne originalcode
@@ -89,7 +104,12 @@ static naked void jceprefab_detour()
 		cheat:
 		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
 		je originalcode
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		mov r8, 0
 		lea rax, [rbp-0x4C]
@@ -111,7 +131,12 @@ static naked void jceprefab1_detour()
 		cheat:
 		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
 		je originalcode
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		jmp qword ptr [DMC3JCE::jcePfbJeJmp]
 	}
@@ -131,7 +156,12 @@ static naked void jceprefab2_detour()
 		cheat:
 		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
 		je originalcode
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 
 		jne_ret:
@@ -169,37 +199,23 @@ static naked void jce_exetime_detour()
 		cheat:
 		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
 		je originalcode
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
-		/*push rax
-		mov rax, [DMC3JCE::pJceExeTime]*/
 		movss xmm0, [DMC3JCE::JCEController::executionTimeAsm]
-		//pop rax
 		comiss xmm0, xmm1
 		movss [rdi+0x6C], xmm1
 		ja jce_continue
 
 		push rax
-		////push rbx
-		//push rcx
-		////push rdx
-		//mov [rdx_back_s] , rdx
-		//push r8
-		//push r9
-		//push r10
-		//push r11
 		sub rsp, 32
 		call qword ptr [DMC3JCE::stop_jce_asm]
 		add rsp, 32
-		//pop r11
-		//pop r10
-		//pop r9
-		//pop r8
-		////pop rdx
-		//pop rcx
-		////pop rbx
 		pop rax
-		//mov rdx, [rdx_back_s]
 
 		jmp qword ptr [DMC3JCE::stopJceTimerRet]
 		//jmp qword ptr [DMC3JCE::jceTimerRet]
@@ -208,10 +224,8 @@ static naked void jce_exetime_detour()
 		cmp byte ptr [DMC3JCE::isJceRunning], 1
 		je jmp_ret
 		push rax
-		//push rbx
 		push rcx
 		mov [rdx_back_c], rdx
-		//push rdx
 		push r8
 		push r9
 		push r10
@@ -223,10 +237,8 @@ static naked void jce_exetime_detour()
 		pop r10
 		pop r9
 		pop r8
-		//pop rdx
 		mov rdx, [rdx_back_c]
 		pop rcx
-		//pop rbx
 		pop rax
 
 		jmp_ret:
@@ -250,8 +262,6 @@ static naked void crashpoint_detour()//this mb not good idk
 		je originalcode
 		cmp byte ptr [DMC3JCE::isCrashFixEnabled], 0
 		je originalcode
-		/*cmp byte ptr [DMC3JCE::isJceRunning], 0
-		je originalcode*/
 		cmp rax, 0
 		jne originalcode
 
@@ -274,7 +284,12 @@ static naked void finish_pfb_detour()
 		cheat:
 		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
 		je originalcode
-		cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
+		push rax
+		mov rax, [PlayerTracker::vergilentity]
+		mov eax, dword ptr [rax+0x09B0]
+		cmp eax, 0
+		pop rax
 		jne originalcode
 		mov rsi, 0
 		jmp originalcode
@@ -315,18 +330,6 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Unable to find DMC3JCE.subHumanJceAddr pattern.";
 	}
 
-	//auto jcePrefabAddr = utility::scan(base, "4C 8B 46 10 48 8D 45 B4");//DevilMayCry5.sub_141C07070+337
-	//if (!jcePrefabAddr)
-	//{
-	//	return "Unable to find DMC3JCE.jcePrefabAddr pattern.";
-	//}
-
-	//auto jcePrefab1Addr = utility::scan(base, "4C 8D 4D 20 48 8B D3 4C 8D 45 30 48 8D 8D D0");//DevilMayCry5.exe+1C07374
-	//if (!jcePrefab1Addr)
-	//{
-	//	return "Unable to find DMC3JCE.jcePrefab1Addr pattern.";
-	//}
-
 	auto jcePrefab2Addr = utility::scan(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
 	if (!jcePrefab2Addr)
 	{
@@ -354,11 +357,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	stopJceTimerRet = jceTimerAddr.value() + 0x12;
 	jceTimerContinue = jceTimerAddr.value() + 0x2A;
 	crashPointJeJmp = crashPointAddr.value() + 0xB;
-	//jceController.init_ptrs_base(dmc5Base);
 	jceController = std::make_unique<JCEController>();
-	//pJceExeTime = &jceController.executionTimeAsm;
-	// 
-	//jcePfbJeJmp = jcePrefab1Addr.value() + 0x18FB;
 	jcePfbJneJmp = jcePrefab2Addr.value() + 0x18D2;
 
 	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
@@ -378,18 +377,6 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.subHumanJce";
 	}
-
-	/*if (!install_hook_absolute(jcePrefabAddr.value(), m_jce_prefab_hook, &jceprefab_detour, &jcePfbRet, 0x8))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.jcePrefab";
-	}*/
-
-	/*if (!install_hook_absolute(jcePrefab1Addr.value(), m_jce_prefab1_hook, &jceprefab1_detour, &jcePfb1Ret, 0x7))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.jcePrefab1";
-	}*/
 
 	if (!install_hook_absolute(jcePrefab2Addr.value(), m_jce_prefab2_hook, &jceprefab2_detour, &jcePfb2Ret, 0xA))
 	{
@@ -430,7 +417,9 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 	jcTypeUi = jceController->get_jce_type();
 	isCrashFixEnabled = cfg.get<bool>("DMC3JCE.isCrashFixEnabled").value_or(true);
 	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
-	jceController->rndEmTrackInterval = cfg.get<byte>("DMC3JCE.rndEmTrackInterval").value_or((byte)22);
+	jceController->rndEmTrackInterval = cfg.get<int>("DMC3JCE.rndEmTrackInterval").value_or(22);
+	humanJCECost = cfg.get<float>("DMC3JCE.humanJCECost").value_or(3000.0f);
+	minSdt = cfg.get<float>("DMC3JCE.minSdt").value_or(3000.0f);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
@@ -439,7 +428,9 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->trackDelayTime);
 	cfg.set<int>("DMC3JCE.jceType", jceController->get_jce_type());
 	cfg.set<bool>("DMC3JCE.isCrashFixEnabled", isCrashFixEnabled);
-	cfg.set<byte>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
+	cfg.set<int>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
+	cfg.set<float>("DMC3JCE.humanJCECost", humanJCECost);
+	cfg.set<float>("DMC3JCE.minSdt", minSdt);
 }
 
 void DMC3JCE::on_frame()
@@ -453,6 +444,13 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Spacing();
 	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUseDefaultJce);
 	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
+	ImGui::Separator();
+	ImGui::TextWrapped("SDT cost for performing JCE in human form:");
+	ImGui::SliderFloat("##subSdtSlider", &humanJCECost, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Spacing();
+	ImGui::TextWrapped("Minimum sdt to perform JCE in human form:");
+	ImGui::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Separator();
 	ImGui::TextWrapped("Select DMC3 JCE type:");
 
 	if( ImGui::RadioButton("Random", (int*)&jcTypeUi, 0) )
@@ -470,7 +468,7 @@ void DMC3JCE::on_draw_ui()
 			if (ImGui::Button("Apply delay settings ##0"))
 				jceController->set_rndspawn_delay(rndDelay);
 			ImGui::TextWrapped("Interval between spawn on lock on position:");
-			ImGui::SliderInt("##rndInterval", (int*)&jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
+			ImGui::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
 			break;
 		}
 		case JCEController::Type::Track:

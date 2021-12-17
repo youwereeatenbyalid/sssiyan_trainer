@@ -1692,7 +1692,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
 
   ischecked = &cheaton;
   onpage         = balance;
-  full_name_string   = "Enemy Swapper (Beta) (+)";
+  full_name_string   = "Enemy Swapper(+)";
   author_string      = "VPZadov";
   description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
 

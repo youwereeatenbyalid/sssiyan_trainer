@@ -229,6 +229,8 @@ set(MODS_SRC
     mods/DMC3JCE.cpp
     mods/JCENoMotivationLimit.hpp
     mods/JCENoMotivationLimit.cpp
+    mods/BossDanteSetup.hpp
+    mods/BossDanteSetup.cpp
 )
 
 set(HOOKS_SRC

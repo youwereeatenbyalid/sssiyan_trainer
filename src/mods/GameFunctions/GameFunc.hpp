@@ -1,7 +1,6 @@
 #pragma once
-#include <stdint.h>
 #include "Mod.hpp"
-#include <type_traits>
+#include <optional>
 //clang-format off
 namespace GameFunctions
 {
@@ -79,8 +78,16 @@ namespace GameFunctions
 		}
 
 	public:
+		/// <summary>
+		/// Return nullopt if win.h isBadReadPtr() happened.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="offsets">Other offsets.</param>
+		/// <param name="get_addr">Set true if u want to get addres, not ptr value itself.</param>
+		/// <returns></returns>
 		template <typename T, size_t offsCount>
-		static T get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool& isBadPtr, bool get_addr = false)
+		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false)
 		{
 			int count = offsets.size() - 1;
 			if (!is_bad_ptr(base))
@@ -92,8 +99,8 @@ namespace GameFunctions
 						base = *(uintptr_t*)(base + offsets[i]);
 					else
 					{
-						isBadPtr = true;
-						return 0;
+						//isBadPtr = true;
+						return std::nullopt;
 					}
 				}
 				if (!is_bad_ptr((base + offsets[count])))
@@ -101,15 +108,15 @@ namespace GameFunctions
 					if (!get_addr)
 					{
 						T res = *(T*)(base + offsets[count]);
-						isBadPtr = false;
-						return res;
+						//isBadPtr = false;
+						return std::optional<T>(res);
 					}
 					else
-						return base;
+						return std::optional<T>(base);
 				}
 			}
-			isBadPtr = true;
-			return 0;
+			//isBadPtr = true;
+			return std::nullopt;
 		}
 	};
 
@@ -122,6 +129,8 @@ namespace GameFunctions
 	{
 	protected:
 		uintptr_t fAddr;
+		//ptr to some managed stuff idk. Sometimes it can be be null, but some times not. In second case u need check what argument function use in-game and make ptr scan for it.
+		uintptr_t rcx = 0;
 
 	public:
 		//typedef func here
@@ -135,6 +144,12 @@ namespace GameFunctions
 		{
 			return fAddr;
 		}
+
+		virtual std::optional<uintptr_t> get_rcx_ptr() { return std::nullopt; }
+
+		virtual uintptr_t get_cur_rcx() const { return rcx; }
+
+		virtual void set_rcx(uintptr_t param) { rcx = param; }
 
 		virtual T __cdecl invoke() = 0;
 		virtual T __cdecl operator()()
