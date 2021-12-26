@@ -131,12 +131,14 @@ void ChargeChecker::on_config_load(const utility::Config& cfg) {
   neroGunMult = cfg.get<float>("nero_gun_charge").value_or(1.0f);
   neroBreakerMult = cfg.get<float>("nero_breaker_charge").value_or(1.0f);
   breakerChargeMax = cfg.get<float>("nero_breaker_charge_max").value_or(120.0f);
+  standardizeBreakerCharges = cfg.get<bool>("standardize_breaker_charges").value_or(false);
 }
 void ChargeChecker::on_config_save(utility::Config& cfg) {
   cfg.set<float>("nero_sword_charge", neroSwordMult);
   cfg.set<float>("nero_gun_charge", neroGunMult);
   cfg.set<float>("nero_breaker_charge", neroBreakerMult);
   cfg.set<float>("nero_breaker_charge_max", breakerChargeMax);
+  cfg.set<bool>("standardize_breaker_charges", standardizeBreakerCharges);
 }
 
 void ChargeChecker::on_draw_ui() {
