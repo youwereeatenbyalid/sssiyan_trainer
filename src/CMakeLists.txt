@@ -231,6 +231,8 @@ set(MODS_SRC
     mods/JCENoMotivationLimit.cpp
     mods/BossDanteSetup.hpp
     mods/BossDanteSetup.cpp
+    mods/LandCancels.hpp 
+    mods/LandCancels.cpp 
     mods/TrickDodgeNoDisappear.hpp
     mods/TrickDodgeNoDisappear.cpp
 )

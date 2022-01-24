@@ -63,6 +63,7 @@
         #include "mods/MovingTargetSwitch.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
+        #include "mods/LandCancels.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
         #include "mods/BufferedReversalsOriginal.hpp"
@@ -228,6 +229,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
+        m_mods.emplace_back(std::make_unique<LandCancels>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<OriginalReversals>());
