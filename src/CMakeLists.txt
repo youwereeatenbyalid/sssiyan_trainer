@@ -231,6 +231,8 @@ set(MODS_SRC
     mods/JCENoMotivationLimit.cpp
     mods/BossDanteSetup.hpp
     mods/BossDanteSetup.cpp
+    mods/TrickDodgeNoDisappear.hpp
+    mods/TrickDodgeNoDisappear.cpp
 )
 
 set(HOOKS_SRC
@@ -294,6 +296,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/GameFunc.hpp
     Mods/GameFunctions/PrefabInstantiate.hpp
     Mods/GameFunctions/CreateShell.hpp
+    Mods/GameFunctions/PositionController.hpp
 )
 
 set(IMGUI_SRC

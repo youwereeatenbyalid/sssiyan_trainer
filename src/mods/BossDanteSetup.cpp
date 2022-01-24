@@ -183,8 +183,7 @@ void BossDanteSetup::on_draw_ui()
 	ImGui::Checkbox("Modify dt & sdt timers", &isDtsTimerSkip);
 	if(isDtsTimerSkip)
 	{
-		ImGui::TextWrapped("By default after boss enabled dt or sdt game count to 30 sec. Before this boss doesn't enter to demon form. You can change timer value to reduce or complitely remove cooldown of (s)dt.");
-		ImGui::TextWrapped("Custom timer delay:");
+		ImGui::TextWrapped("Reactivation DT/SDT timer (depends of current mission):");
 		ImGui::SliderFloat("##customTimerDelay", &dtTimer, 0.1f, 30.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
 		//dtTimerStartPoint = 30.0f - dtTimer + 0.08f;
 	}

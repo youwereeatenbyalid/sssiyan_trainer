@@ -4,21 +4,12 @@ bool VergilAirTrick::cheaton = false;
 bool VergilAirTrick::isSpeedUp = false;
 bool VergilAirTrick::isCustomOffset = false;
 bool VergilAirTrick::isCustomWaitTime = false;
-//bool VergilAirTrick::isTeleport = false;
-
 
 float VergilAirTrick::initSpeed = 0.0f;
 float VergilAirTrick::finishOffsetZ = 0.0f;
 float VergilAirTrick::waitTime      = 0.0f;
-//float VergilAirTrick::emCoordX      = 0.0f;
-//float VergilAirTrick::emCoordY      = 0.0f;
-//float VergilAirTrick::emCoordZ      = 0.0f;
-//float VergilAirTrick::playerCoordX  = 0.0f;
-//float VergilAirTrick::playerCoordY  = 0.0f;
-//float VergilAirTrick::playerCoordZ  = 0.0f;
 
 float specTeleportOffset = 0.25f;
-
 
 uintptr_t VergilAirTrick::airTrickRet{NULL};
 uintptr_t VergilAirTrick::finishOffsetRet{NULL};
@@ -27,12 +18,11 @@ uintptr_t VergilAirTrick::maxXZRet{NULL};
 uintptr_t VergilAirTrick::maxSpeedZRet{NULL};
 uintptr_t VergilAirTrick::speedAccRet{NULL};
 uintptr_t VergilAirTrick::initSpeedRet{NULL};
-//uintptr_t VergilAirTrick::teleportRet{NULL};
-//uintptr_t VergilAirTrick::teleportRet2{NULL};
-//uintptr_t VergilAirTrick::transformRet{NULL};
+uintptr_t VergilAirTrick::routineStartRet{NULL};
+uintptr_t VergilAirTrick::finishRangeRet{NULL};
 
-//uintptr_t VergilAirTrick::playerTransformAddr{NULL};
-
+volatile uintptr_t rsi_b = 0;
+//volatile uintptr_t rbx_b = 0;
 
 static naked void waittime_detour() {
 	__asm {
@@ -42,11 +32,11 @@ static naked void waittime_detour() {
 		je originalcode
 
 		cheat:
-		mov eax, [VergilAirTrick::waitTime]
+		mov eax, dword ptr [VergilAirTrick::waitTime]
 		jmp qword ptr [VergilAirTrick::waitTimeRet]
 
 		originalcode:
-		mov eax,[rsi+0x000000B8]
+		mov eax, [rsi+0x000000B8]
 		jmp qword ptr [VergilAirTrick::waitTimeRet]
   }
 }
@@ -76,8 +66,8 @@ static naked void initspeed_detour() {
 	__asm {
 		cmp byte ptr[VergilAirTrick::cheaton], 0
 		je originalcode
-		//cmp byte ptr [VergilAirTrick::isTeleport], 0
-		//je originalcode
+		cmp byte ptr[VergilAirTrick::isTeleport], 1
+		je teleport
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
 
@@ -86,19 +76,96 @@ static naked void initspeed_detour() {
 		jmp qword ptr [VergilAirTrick::initSpeedRet]
 
 		originalcode:
-		mov eax,[rsi+0x000000A0]
+		mov eax, dword ptr [rsi+0x000000A0]
 		jmp qword ptr [VergilAirTrick::initSpeedRet]
 
-		/*teleport:
+		teleport:
 		mov eax, 0
-		jmp qword ptr [VergilAirTrick::initSpeedRet]*/
+		jmp qword ptr [VergilAirTrick::initSpeedRet]
 	}
 }
+
+void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
+{
+	if(PlayerTracker::vergilentity == 0 || trickAction == 0)
+		return;
+	uintptr_t vergil = *(uintptr_t*)(trickAction + 0x60);//Also for doppel when he summoned;
+	if(vergil == 0)
+		return;
+	GameFunctions::Vec3 targetPos = *(GameFunctions::Vec3*)(trickAction + 0xF0);
+	auto gameObj = *(uintptr_t*)(vergil + 0x10);
+	auto transformGameObj = *(uintptr_t*)(gameObj + 0x18);
+	float xTmp, yTmp;
+
+	void *transform = (void*)(*(uintptr_t*)(vergil + 0x1F0));
+	auto pPos = *(GameFunctions::Vec3*)((uintptr_t)transform + 0x30);
+
+	GameFunctions::Vec3 trickVec(targetPos.x - pPos.x, targetPos.y - pPos.y, targetPos.z - pPos.z);
+	float trickVecLen = GameFunctions::Vec3::vec_length(pPos, targetPos);
+
+	switch (trickType)
+	{
+		case VergilAirTrick::Front:
+		{
+			xTmp = pPos.x + (trickVecLen - trickCorrection) * trickVec.x / (float)trickVecLen;
+			yTmp = pPos.y + (trickVecLen - trickCorrection) * trickVec.y / (float)trickVecLen;
+			break;
+		}
+		case VergilAirTrick::Behind:
+		{
+			xTmp = pPos.x + (trickVecLen + trickCorrection) * trickVec.x / (float)trickVecLen;
+			yTmp = pPos.y + (trickVecLen + trickCorrection) * trickVec.y / (float)trickVecLen;
+			break;
+		}
+		default:
+			break;
+	}
+	targetPos.x = xTmp;
+	targetPos.y = yTmp;
+	float oldTargetZ = targetPos.z;
+	targetPos.z += teleportZOffs;
+
+	auto cachedCharController = *(uintptr_t*)(vergil + 0x2F0);
+	auto cachedSubCharController = *(uintptr_t*)(vergil + 0x2F8);
+	if(cachedCharController == 0 || cachedSubCharController == 0)
+		return;
+	*(bool*)(cachedCharController + 0x30) = false;
+	*(bool*)(cachedSubCharController + 0x30) = false;
+	GameFunctions::Transform_SetPosition set_pos{transform};
+	set_pos(targetPos);
+	targetPos.z = oldTargetZ;
+
+	//------------------This stuff can ignore walls, whats no good, especially for back step trick-----------------//
+	// Actually code above do this too, but seems little more safer;
+	//void *posCorPtr = (void*)(*(uintptr_t*)(vergil + 0x8E8));
+	//////*(uintptr_t*)((uintptr_t)posCorPtr+0x18) = 0;
+	//GameFunctions::PositionErrorCorrector posCor{posCorPtr};
+	//posCor.set_rcx(posCor.get_rcx_ptr().value());
+	//posCor.set_position(targetPos);
+	//-------------------------------------------------------------------------------------------------------------//
+
+	*(GameFunctions::Vec3*)(cachedCharController + 0x140) = targetPos;
+	*(GameFunctions::Vec3*)(cachedCharController + 0x150) = targetPos;
+	*(GameFunctions::Vec3*)(cachedCharController + 0x160) = targetPos;
+
+	*(GameFunctions::Vec3*)(cachedSubCharController + 0x140) = targetPos;
+	*(GameFunctions::Vec3*)(cachedSubCharController + 0x150) = targetPos;
+	*(GameFunctions::Vec3*)(cachedSubCharController + 0x160) = targetPos;
+
+	*(bool*)(cachedCharController + 0x30) = true;
+	*(bool*)(cachedSubCharController + 0x30) = true;
+
+	*(bool*)(trickAction + 0x144) = true; //isPushHit;
+	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
+}
+
 
 static naked void speed_acc_detour() {
   __asm {
 		cmp byte ptr[VergilAirTrick::cheaton], 0
 		je originalcode
+		cmp byte ptr[VergilAirTrick::isTeleport], 1
+		je teleport
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
 
@@ -107,14 +174,21 @@ static naked void speed_acc_detour() {
 		jmp qword ptr [VergilAirTrick::speedAccRet]
 
 		originalcode:
-		movss xmm1,[rsi+0x000000A4]
+		movss xmm1, [rsi+0x000000A4]
 		jmp qword ptr [VergilAirTrick::speedAccRet]
+
+		teleport:
+		movss xmm1, dword ptr [VergilAirTrick::modSpeedAcc]
+		jmp qword ptr [VergilAirTrick::speedAccRet]
+
   }
 }
 
 static naked void maxspeedz_detour() {
 	__asm {
-		cmp byte ptr[VergilAirTrick::cheaton], 0
+		cmp byte ptr [VergilAirTrick::cheaton], 0
+		je originalcode
+		cmp byte ptr [VergilAirTrick::isTeleport], 1
 		je originalcode
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
@@ -131,7 +205,9 @@ static naked void maxspeedz_detour() {
 
 static naked void max_xz_detour() {
 	__asm {
-		cmp byte ptr[VergilAirTrick::cheaton], 0
+		cmp byte ptr [VergilAirTrick::cheaton], 0
+		je originalcode
+		cmp byte ptr[VergilAirTrick::isTeleport], 1
 		je originalcode
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
@@ -146,104 +222,61 @@ static naked void max_xz_detour() {
   }
 }
 
+volatile uintptr_t r9_b = 0;
+static naked void air_trick_routine3_detour()
+{
+	__asm {
+		cmp byte ptr [VergilAirTrick::cheaton], 0
+		je originalcode
+		cmp byte ptr [VergilAirTrick::isTeleport], 0
+		je originalcode
 
-//static naked void teleport_detour() {
-//	__asm {
-//		cmp byte ptr[VergilAirTrick::cheaton], 0
-//		je originalcode
-//		cmp byte ptr [VergilAirTrick::isTeleport], 0
-//		je originalcode
-//
-//		cheat:
-//		mov r8, rax
-//		mov rax,[rax+0x000019B0]
-//		test rax, rax
-//		je cheatret
-//		push r10
-//		//mov r10, [rax+0x20]//EnemyGameObj
-//		//test r10, r10
-//		//je badptr
-//		mov r10, [r15+0x1F0]//Transform
-//		test r10, r10
-//		je badptr
-//		/*mov r8, [r10+0x30]
-//		mov r8, qword ptr [r8]
-//		mov qword ptr [VergilAirTrick::emCoordX], r8
-//		mov r8, [r10+0x34]
-//		mov r8, qword ptr [r8]
-//		mov qword ptr [VergilAirTrick::emCoordZ], r8
-//		mov r8, [r10+0x38]
-//		mov r8, qword ptr [r8]
-//		mov qword ptr [VergilAirTrick::emCoordY], r8*/
-//		movss xmm0, [r10+0x30]
-//		movss xmm1, [r10+0x34]
-//		addss xmm1, [specTeleportOffset]
-//		movss xmm2, [r10+0x38]
-//		mov r8, [r8+0x1F0]//Transform
-//		movss [r8+0x30], xmm0
-//		movss [r8+0x34], xmm1
-//		movss [r8+0x38], xmm2
-//		mov r8, [r8+0x78]
-//		test r8, r8
-//		je badptr
-//		movss [r8+0x30], xmm0
-//		movss [r8+0x34], xmm1
-//		movss [r8+0x38], xmm2
-//		//mov r8d, 0x2
-//		pop r10
-//		jmp cheatret
-//
-//		originalcode:
-//		//movss xmm0,[rax+0x30]
-//		mov rax,[rax+0x000019B0]
-//		jmp qword ptr [VergilAirTrick::teleportRet]
-//
-//		badptr:
-//		pop r10
-//        // pop r8
-//
-//		cheatret:
-//		mov r8d, 0x2
-//		jmp qword ptr [VergilAirTrick::teleportRet]
-//
-//  }
-//}
+		cheat:
+		push rax
+		//mov [rbx_b], rbx
+		push rcx
+		push rdx
+		mov [rsi_b], rsi
+		push r8
+		mov [r9_b], r9
+		//push r9
+		mov rcx, rdi
+		sub rsp, 32
+		call qword ptr [VergilAirTrick::change_pos_asm]
+		add rsp, 32
+		mov r9, qword ptr [r9_b]
+		//pop r9
+		pop r8
+		mov rsi, qword ptr [rsi_b]
+		pop rdx
+		pop rcx
+		//mov rbx, qword ptr [rbx_b]
+		pop rax
 
-//static naked void teleport2_detour() {
-//	__asm {
-//		cmp byte ptr[VergilAirTrick::cheaton], 0
-//    	je originalcode
-//    	cmp byte ptr [VergilAirTrick::isTeleport], 0
-//    	je originalcode
-//
-//		cheat:
-//		mov rsi, [rdx+0x150] // EmObj
-//		test rsi, rsi
-//		je cheatret
-//		mov rsi, [rsi+0x18]  // emTransform
-//		test rsi, rsi
-//		je cheatret
-//		movss xmm0, [rsi+0x30]
-//   		movss xmm1, [rsi+0x34]
-//        // addss xmm1, [specTeleportOffset]
-//   		movss xmm2, [rsi+0x38]
-//		mov rsi, [rdx+0x30]//Player Transform
-//		test rsi, rsi
-//		je cheatret
-//  		movss [rsi+0x30], xmm0
-//        movss [rsi+0x34], xmm1
-//        movss [rsi+0x38], xmm2
-//
-//		cheatret:
-//		mov esi, 0x3
-//		jmp originalcode
-//
-//		originalcode:
-//		mov r15,r8
-//        mov rsi,rdx
-//		jmp qword ptr [VergilAirTrick::teleportRet2]
-//  }
-//}
+		originalcode:
+		mov dword ptr [rdi + 0x68], 0x3
+		jmp qword ptr [VergilAirTrick::routineStartRet]
+	}
+}
+
+static naked void finish_range_detour()
+{
+	__asm {
+		cmp byte ptr [VergilAirTrick::cheaton], 0
+		je originalcode
+		cmp byte ptr [VergilAirTrick::isTeleport], 0
+		je originalcode
+
+		cheat:
+		movss xmm0, [VergilAirTrick::trickCorrection]
+		jmp qword ptr [VergilAirTrick::finishRangeRet]
+
+
+		originalcode:
+		movss xmm0, [r14 + 0x000000AC]
+		jmp qword ptr [VergilAirTrick::finishRangeRet]
+	}
+}
 
 std::optional<std::string> VergilAirTrick::on_initialize()
 {
@@ -285,19 +318,17 @@ std::optional<std::string> VergilAirTrick::on_initialize()
           return "Unanable to find AirTrick.speedAccAddr pattern.";
     }
 
-	//auto teleport2Addr = utility::scan(base, "4D 8B F8 48 8B F2 48 8B F9 E8 8D"); //DevilMayCry5.exe+1DDC915
- //   if (!teleport2Addr) {
- //         return "Unanable to find AirTrick.teleport2Addr pattern.";
- //   }
+	auto routine3Addr = utility::scan(base, "03 00 00 C7 47 68 03 00 00 00"); //DevilMayCry5.exe+1DE0427
+	if (!routine3Addr)
+	{
+		return "Unanable to find AirTrick.routine3Addr pattern.";
+	}
 
-	//auto transformAddr = utility::scan(base, "14 41 8B 06 89 47 30 41 8B 46 04"); //DevilMayCry5.exe+1DDC915
- //   if (!transformAddr) {
- //         return "Unanable to find AirTrick.transformAddr pattern.";
- //   }
-
-	//uintptr_t teleportAddr = finishOffsetAddr.value() + 0x1 + 0x30;
-
-	//--------------------------------------------------------------//
+	auto finishRangeAddr = utility::scan(base, "F3 41 0F 10 86 AC 00 00 00"); //DevilMayCry5.exe+1DDE979
+	if (!routine3Addr)
+	{
+		return "Unanable to find AirTrick.finishRangeAddr pattern.";
+	}
 
 	if (!install_hook_absolute(initSpeedAddr.value()+0x3, m_initspeed_hook, &initspeed_detour, &initSpeedRet, 0x6)) {
       spdlog::error("[{}] failed to initialize", get_name());
@@ -329,15 +360,16 @@ std::optional<std::string> VergilAirTrick::on_initialize()
           return "Failed to initialize VergilAirTrick.speedAcc"; 
     }
 
-	/*if (!install_hook_absolute(teleport2Addr.value(), m_teleport2_hook, &teleport2_detour, &teleportRet2, 0x6)) {
+	if (!install_hook_absolute(routine3Addr.value()+0x3, m_teleport_hook, &air_trick_routine3_detour, &routineStartRet, 0x7)) {
       spdlog::error("[{}] failed to initialize", get_name());
-          return "Failed to initialize VergilAirTrick.teleport2"; 
-    }*/
+          return "Failed to initialize VergilAirTrick.routine3"; 
+    }
 
-	/*if (!install_hook_absolute(teleportAddr, m_teleport_hook, &teleport_detour, &teleportRet, 0x7)) {
+	if (!install_hook_absolute(finishRangeAddr.value(), m_finish_range_hook, &finish_range_detour, &finishRangeRet, 0x9)) {
       spdlog::error("[{}] failed to initialize", get_name());
-          return "Failed to initialize VergilAirTrick.teleport"; 
-    }*/
+          return "Failed to initialize VergilAirTrick.finishRange"; 
+    }
+
 
 	return Mod::on_initialize();
 }
@@ -350,8 +382,10 @@ void VergilAirTrick::on_config_load(const utility::Config& cfg)
 	isSpeedUp = cfg.get<bool>("VergilAirTrick.isSpeedUp").value_or(true);
 	isCustomWaitTime = cfg.get<bool>("VergilAirTrick.isCustomWaitTime").value_or(true);
 	isCustomOffset = cfg.get<bool>("VergilAirTrick.isCustomOffset").value_or(false);
-	//isTeleport = cfg.get<bool>("VergilAirTrick.isTeleport").value_or(false);
-
+	isTeleport = cfg.get<bool>("VergilAirTrick.isTeleport").value_or(false);
+	trickType = (TeleportType)cfg.get<int>("VergilAirTrick.trickType").value_or(Front);
+	trickCorrection = cfg.get<float>("VergilAirTrick.trickCorrection").value_or(1.8f);
+	teleportZOffs = cfg.get<float>("VergilAirTrick.teleportZOffs").value_or(-1.3f);
 }
 
 void VergilAirTrick::on_config_save(utility::Config& cfg)
@@ -362,7 +396,10 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 	cfg.set<bool>("VergilAirTrick.isCustomWaitTime", isCustomWaitTime);
 	cfg.set<bool>("VergilAirTrick.isSpeedUp", isSpeedUp);
 	cfg.set<bool>("VergilAirTrick.isCustomOffset", isCustomOffset);
-	//cfg.set<bool>("VergilAirTrick.isTeleport", isTeleport);
+	cfg.set<bool>("VergilAirTrick.isTeleport", isTeleport);
+	cfg.set<int>("VergilAirTrick.trickType", (int)trickType);
+	cfg.set<float>("VergilAirTrick.trickCorrection", trickCorrection);
+	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
 }
 
 void VergilAirTrick::on_frame()
@@ -386,12 +423,20 @@ void VergilAirTrick::on_draw_ui()
 	}
 	ImGui::Separator();
 
-	/*ImGui::TextWrapped("(UNFINISHED) Default Air Trick mechanic force Vergil to move with high speed. This instantly changes Vergil's coords and teleports him to enemy.");
-	ImGui::Checkbox("Instant teleport", &isTeleport);
-    if (isTeleport) {
-		isSpeedUp = false;
-    }*/
-
+	ImGui::TextWrapped("A bit dangerous option: instead moving with high speed, this will insta change (delay before trick still working) player pos with it's colliders. Can move you out of bounds.");
+	ImGui::Checkbox("Use teleport", &isTeleport);
+	if (isTeleport)
+	{
+		ImGui::Spacing();
+		ImGui::TextWrapped("Try to teleport:");
+		ImGui::RadioButton("In front of enemy", (int*)&trickType, 0);
+		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+		ImGui::RadioButton("Behind enemy", (int*)&trickType, 1);
+		ImGui::TextWrapped("Correction finish range:");
+		ImGui::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", ImGuiSliderFlags_None);
+		ImGui::TextWrapped("Correction finish Z offset. This option does't change colliders Z pos, so you won't fall under the floor.");
+		ImGui::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", ImGuiSliderFlags_None);
+	}
 	ImGui::Separator();
 
 	ImGui::TextWrapped("Set Z axis offset for finish Air Trick");

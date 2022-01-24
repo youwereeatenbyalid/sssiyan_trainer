@@ -170,12 +170,12 @@ static naked void jceprefab2_detour()
 }
 
 
-void __cdecl DMC3JCE::stop_jce_asm()
+void DMC3JCE::stop_jce_asm()
 {
 	jceController->stop_jce();
 }
 
-void __cdecl DMC3JCE::start_jce_asm()
+void DMC3JCE::start_jce_asm()
 {
 	if (!jceController->is_executing())
 	{
@@ -183,13 +183,13 @@ void __cdecl DMC3JCE::start_jce_asm()
 	}
 }
 
-uintptr_t rdx_back_c = 0;//i guess it's have smth bad with std::vector allocator
-uintptr_t rdx_back_s = 0;//i guess it's have smth bad with std::vector allocator
+volatile uintptr_t rdx_back_c = 0;//i guess it's have smth bad with std::vector allocator
+volatile uintptr_t rdx_back_s = 0;//i guess it's have smth bad with std::vector allocator
 
 static naked void jce_exetime_detour()
 {
 	__asm {
-		cmp byte ptr[DMC3JCE::cheaton], 1
+		cmp byte ptr [DMC3JCE::cheaton], 1
 		je cheat
 
 		originalcode:
@@ -221,11 +221,11 @@ static naked void jce_exetime_detour()
 		//jmp qword ptr [DMC3JCE::jceTimerRet]
 
 		jce_continue:
-		cmp byte ptr [DMC3JCE::isJceRunning], 1
-		je jmp_ret
+		//cmp byte ptr [DMC3JCE::isJceRunning], 1
+		//je jmp_ret
 		push rax
 		push rcx
-		mov [rdx_back_c], rdx
+		mov qword ptr [rdx_back_c], rdx
 		push r8
 		push r9
 		push r10
@@ -237,7 +237,7 @@ static naked void jce_exetime_detour()
 		pop r10
 		pop r9
 		pop r8
-		mov rdx, [rdx_back_c]
+		mov rdx, qword ptr [rdx_back_c]
 		pop rcx
 		pop rax
 
@@ -450,7 +450,18 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Spacing();
 	ImGui::TextWrapped("Minimum sdt to perform JCE in human form:");
 	ImGui::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-	ImGui::Separator();
+
+	//--------------This should be removed----------------//
+	/*ImGui::Separator();
+	if(ImGui::Button("Set 64 capacity"))
+		jceController->set_capacity(64);
+	ImGui::Separator();*/
+
+	/*ImGui::Separator();
+	ImGui::Checkbox("Set cutom capacity", &isSetCustomCapacity);
+	ImGui::SliderInt("Custom capacity:", &newCapacity, 64, 256);
+	ImGui::Separator();*/
+	//----------------------------------------------------//
 	ImGui::TextWrapped("Select DMC3 JCE type:");
 
 	if( ImGui::RadioButton("Random", (int*)&jcTypeUi, 0) )
@@ -482,7 +493,7 @@ void DMC3JCE::on_draw_ui()
 		default:
 			break;
 	}
-	ImGui::Spacing();
+	ImGui::Separator();
 	ImGui::TextWrapped("Enable this if game crashes with low delay between jc spawn. Can screw up some enemy projectiles while performing dmc3 jce.");
 	ImGui::Checkbox("Enable crash fix", &isCrashFixEnabled);
 	//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);

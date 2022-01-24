@@ -1,4 +1,3 @@
-
 #include <spdlog/spdlog.h>
 #include "Mods.hpp"
 // Example
@@ -159,8 +158,9 @@
        #include "mods//InfiniteTrickUp.hpp"
        #include "mods/DMC3JCE.hpp"
        #include "mods/JCENoMotivationLimit.hpp" // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
+       #include "mods/TrickDodgeNoDisappear.hpp"
 Mods::Mods() 
-    : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
+    : redrawfocusedwindow{ false }, m_config{ "DMC2_fw_config.txt" } {
   // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
 //// Darkness
@@ -324,6 +324,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
         m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
         m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
+        m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

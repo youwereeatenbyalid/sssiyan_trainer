@@ -725,7 +725,7 @@ void EnemyWaveEditor::on_draw_ui() {
       ImGui::Separator();
       ImGui::TextWrapped(std::string("Place save-file here: " + jsonEmDataPath).c_str());
       ImGui::SameLine();
-      help_marker("You can change path to save file (and it's name) in trainer's config file. Open \"DMC2_fw_config.txt\" and add line without quotes: \"EnemyWaveEditor.jsonEmDataPath = <YourPathToFileWithFileName.json>\"");
+      help_marker("You can change path to save file (and it's name) in trainer's config file. Open \"DMC5_fw_config.txt\" and add line without quotes: \"EnemyWaveEditor.jsonEmDataPath = <YourPathToFileWithFileName.json>\"");
       if (ImGui::Button("Read enemy data settings"))
       {
           prflManager.read_data(jsonEmDataPath.c_str());

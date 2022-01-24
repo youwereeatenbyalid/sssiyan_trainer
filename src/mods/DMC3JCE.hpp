@@ -125,12 +125,12 @@ public:
 			if (run)
 			{
 				isJceRunning = true;
-				executing.store(true);
+				executing.store(true, std::memory_order_relaxed);
 				//*(int*)rayCastAddr = curRayCastSize;
 			}
 			else
 			{
-				executing.store(false);
+				executing.store(false, std::memory_order_relaxed);
 				isJceRunning = false;
 				//*(int*)rayCastAddr = prevRayCastSize;
 			}
@@ -140,6 +140,12 @@ public:
 		{
 			stop_jce();
 			cheaton = false;
+		}
+
+		int filterException(int code, PEXCEPTION_POINTERS ex)
+		{
+			std::cout << "Filtering " << std::hex << code << std::endl;
+			return EXCEPTION_EXECUTE_HANDLER;
 		}
 
 	public:
@@ -187,7 +193,9 @@ public:
 			isPtrBaseInit = true;
 		}
 
-		void __cdecl start_jce()
+		bool set_capacity(int newCap){ return jcSpawn.set_list_shell_capacity(newCap); }
+
+		void  start_jce()
 		{
 			if(executing.load())
 				return;
@@ -196,16 +204,18 @@ public:
 			int id = 105;
 			int lvl = 1;
 			update_status(true);
+
+			bool isBadPtr = false;
+			std::optional<bool> isPause;
+			auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
 			switch (jceType)
 			{
 				case JCEController::Random:
 				{
-					std::thread([=]
+					std::thread([this, id, lvl, isBadPtr, isPause, jcPrefab]() mutable
 					{
+						bool rcxFlag = true;
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
-						bool isBadPtr = false;
-						std::optional<bool> isPause;
-						auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
 						if (!jcPrefab.has_value() || jcPrefab.value() == 0)
 						{
 							bad_ptr_stop();
@@ -221,7 +231,7 @@ public:
 						func::Vec3 curPos;
 						func::Vec3 prevPos;
 						isBadPtr = false;
-						uintptr_t jcShell = 0;
+						volatile void* jcShell = 0;
 
 						std::uniform_real_distribution<float> xDist(minOffset.x, maxOffset.x);
 						std::uniform_real_distribution<float> yDist(minOffset.y, maxOffset.y);
@@ -236,6 +246,22 @@ public:
 						int tryIter = 0;
 						jcSpawn.set_params(rcx.value(), jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						//std::this_thread::yield();//?
+						/*if (isSetCustomCapacity)
+						{
+							if (jcSpawn.get_list_shell_capacity() < newCapacity)
+							{
+								__try
+								{
+									jcSpawn.set_list_shell_capacity(newCapacity);
+								}
+								__except (EXCEPTION_EXECUTE_HANDLER)
+								{
+									isBadPtr = true;
+									bad_ptr_stop();
+									return;
+								}
+							}
+						}*/
 
 						while (get_condition(isBadPtr))
 						{
@@ -249,17 +275,28 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-							/*rcx = jcSpawn.get_rcx_ptr();
+
+							rcx = rcxFlag ? jcSpawn.get_rcx_ptr() : jcSpawn.get_rcx_ptr(1);//This may be completely bullshit, idk 
+							rcxFlag = !rcxFlag;
 							if(!rcx.has_value())
-								break;*/
-							jcShell = jcSpawn(curPos, defaultRot);
+								continue;
+							jcSpawn.set_rcx(rcx.value());
+							__try
+							{
+								jcShell = (volatile void*)jcSpawn(curPos, defaultRot);
+							}
+							__except (EXCEPTION_EXECUTE_HANDLER)
+							{
+								isBadPtr = true;
+								bad_ptr_stop();
+								break;
+							}
 							if (jcShell == 0)
 								continue;
-							if(!IsBadReadPtr((void*)(jcShell+0x440), 8))
-								*(bool*)(jcShell + 0x440) = isRndJust; //isJust
-							if(!IsBadReadPtr((void*)(jcShell + 0x444), 8))
-								*(float*)(jcShell + 0x444) = rndAttackRate; //attackRate
-							jcShell = 0;
+							if(!IsBadReadPtr((void*)((uintptr_t)jcShell+0x440), 8))
+								*(bool*)((uintptr_t)jcShell + 0x440) = isRndJust; //isJust
+							if(!IsBadReadPtr((void*)((uintptr_t)jcShell + 0x444), 8))
+								*(float*)((uintptr_t)jcShell + 0x444) = rndAttackRate; //attackRate
 							jcNum++;
 							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
 							prevPos = curPos;
@@ -290,16 +327,13 @@ public:
 				}
 				case JCEController::Track:
 				{
-					std::thread([=]
+					std::thread([&, id, lvl, isBadPtr, isPause, jcPrefab]() mutable
 					{
 						auto pPos = CheckpointPos::get_player_coords();
 						func::Vec3 prevPos;
 						func::Vec3 curPos = CheckpointPos::get_player_coords();
 						curPos.z += zTrackOffs;
 						func::Vec3 emPos;
-						bool isBadPtr = false;
-						std::optional<bool> isPause;
-						auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets);
 						if (!jcPrefab.has_value())
 						{
 							isBadPtr = true;
@@ -329,7 +363,16 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16)//check this again
 								break;
-							jcShell = jcSpawn(curPos, defaultRot);
+							__try
+							{
+								jcShell = jcSpawn(curPos, defaultRot);
+							}
+							__except (EXCEPTION_EXECUTE_HANDLER)
+							{
+								isBadPtr = true;
+								bad_ptr_stop();
+								break;
+							}
 							if (jcShell == 0)
 								break;
 							*(bool*)(jcShell + 0x440) = isTrackJust; //isJust
@@ -401,6 +444,7 @@ public:
 	static inline bool isJceRunning = false;
 	static inline bool isCrashFixEnabled = true;
 	static inline bool isUseDefaultJce = false;
+	static inline bool isSetCustomCapacity = false;
 
 	static inline uintptr_t canExeJceRet = 0;
 	static inline uintptr_t canExeJceRet1 = 0;
@@ -427,6 +471,7 @@ public:
 	static inline int trackDelay = 0;
 	static inline int prevRayCastSize = 64;
 	static inline int curRayCastSize = 64;
+	static inline int newCapacity = 256;
 
 	static inline JCEController::Type jcTypeUi{};
 
