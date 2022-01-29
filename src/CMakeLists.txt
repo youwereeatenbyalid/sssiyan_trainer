@@ -235,6 +235,8 @@ set(MODS_SRC
     mods/LandCancels.cpp 
     mods/TrickDodgeNoDisappear.hpp
     mods/TrickDodgeNoDisappear.cpp
+    mods/VergilWalkingGuard.hpp
+    mods/VergilWalkingGuard.cpp
 )
 
 set(HOOKS_SRC

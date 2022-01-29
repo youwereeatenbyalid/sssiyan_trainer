@@ -67,7 +67,7 @@ static naked void initspeed_detour() {
 		cmp byte ptr[VergilAirTrick::cheaton], 0
 		je originalcode
 		cmp byte ptr[VergilAirTrick::isTeleport], 1
-		je teleport
+		je originalcode//teleport
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
 
@@ -88,6 +88,17 @@ static naked void initspeed_detour() {
 void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 {
 	if(PlayerTracker::vergilentity == 0 || trickAction == 0)
+		return;
+	uint16_t trickOffsAddr = 0;
+	__asm (
+	"movq %1, %%rax;"
+	"movq (%%rax), %%rax;"
+	"mov %%ax, %0"
+	:"=m"(trickOffsAddr)
+	:"g"(trickAction)
+	:"rax"
+	);
+	if (trickOffsAddr == 0xF208)
 		return;
 	uintptr_t vergil = *(uintptr_t*)(trickAction + 0x60);//Also for doppel when he summoned;
 	if(vergil == 0)
@@ -129,8 +140,9 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	auto cachedSubCharController = *(uintptr_t*)(vergil + 0x2F8);
 	if(cachedCharController == 0 || cachedSubCharController == 0)
 		return;
-	*(bool*)(cachedCharController + 0x30) = false;
-	*(bool*)(cachedSubCharController + 0x30) = false;
+	//*(bool*)(cachedCharController + 0x30) = false;
+	//*(bool*)(cachedSubCharController + 0x30) = false;
+
 	GameFunctions::Transform_SetPosition set_pos{transform};
 	set_pos(targetPos);
 	targetPos.z = oldTargetZ;
@@ -152,10 +164,10 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	*(GameFunctions::Vec3*)(cachedSubCharController + 0x150) = targetPos;
 	*(GameFunctions::Vec3*)(cachedSubCharController + 0x160) = targetPos;
 
-	*(bool*)(cachedCharController + 0x30) = true;
-	*(bool*)(cachedSubCharController + 0x30) = true;
+	//*(bool*)(cachedCharController + 0x30) = true;
+	//*(bool*)(cachedSubCharController + 0x30) = true;
 
-	*(bool*)(trickAction + 0x144) = true; //isPushHit;
+	//*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
 }
 
@@ -165,7 +177,7 @@ static naked void speed_acc_detour() {
 		cmp byte ptr[VergilAirTrick::cheaton], 0
 		je originalcode
 		cmp byte ptr[VergilAirTrick::isTeleport], 1
-		je teleport
+		je originalcode//teleport
 		cmp byte ptr [VergilAirTrick::isSpeedUp], 0
 		je originalcode
 
@@ -232,6 +244,7 @@ static naked void air_trick_routine3_detour()
 		je originalcode
 
 		cheat:
+		je originalcode
 		push rax
 		//mov [rbx_b], rbx
 		push rcx

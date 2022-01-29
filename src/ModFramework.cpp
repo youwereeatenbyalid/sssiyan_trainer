@@ -466,7 +466,7 @@ void ModFramework::on_frame_d3d12() {
     m_last_draw_ui = m_draw_ui;
 
     ImGui::EndFrame();
-    ImGui::UpdatePlatformWindows();
+    //ImGui::UpdatePlatformWindows();
     ImGui::Render();
 
 	//Rendering

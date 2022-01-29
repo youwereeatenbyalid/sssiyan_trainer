@@ -160,6 +160,7 @@
        #include "mods/DMC3JCE.hpp"
        #include "mods/JCENoMotivationLimit.hpp" // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
        #include "mods/TrickDodgeNoDisappear.hpp"
+       #include "mods/VergilWalkingGuard.hpp"
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{ "DMC2_fw_config.txt" } {
   // Example
@@ -226,7 +227,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
-        m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
+        //m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
@@ -327,6 +328,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
         m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
         m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
+        m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
