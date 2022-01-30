@@ -112,7 +112,7 @@ void VergilNoAfterimages::on_config_save(utility::Config& cfg) {
 
 void VergilNoAfterimages::on_draw_ui() {
   ImGui::Text("Set value to disable afterimages: 0 - only in human form, \n1 - only in SDT, 2 - in all forms; 3 - default.");
-  UI::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 3, "%d", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 3, "%d", ImGuiSliderFlags_AlwaysClamp);
   ImGui::Separator();
   ImGui::TextWrapped("If you want to disable just looping afterimages while tricks or JCE, set slider above to \"3\" and tick next option.");
   ImGui::Checkbox("Disable afterimages when Vergil body isn't drawing (like while tricks, doges or JCE);", &isNoDrawIfObjHidden);
