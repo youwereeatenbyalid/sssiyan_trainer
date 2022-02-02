@@ -161,6 +161,9 @@
        #include "mods/JCENoMotivationLimit.hpp" // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
        #include "mods/TrickDodgeNoDisappear.hpp"
        #include "mods/VergilWalkingGuard.hpp"
+       #include "mods/VergilGuardYamatoBlock.hpp"
+       #include "mods/AirTrickDodge.hpp"
+
 Mods::Mods() 
     : redrawfocusedwindow{ false }, m_config{ "DMC2_fw_config.txt" } {
   // Example
@@ -329,6 +332,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
         m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
         m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
+        m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
+        m_mods.emplace_back(std::make_unique<AirTrickDodge>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

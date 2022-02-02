@@ -18,6 +18,7 @@ public:
 	static bool isCustomOffset;
 	static bool isCustomWaitTime;
 	static inline bool isTeleport = false;
+	static inline bool isDoppelOppositeTeleport = false;
 
 	/*static constexpr float defaultInitSpeed = 0.7f;
 	static constexpr float defaultFinishRange = 1.2f;
@@ -72,6 +73,7 @@ public:
 
 private:
 	void init_check_box_info() override;
+	static void xypos_teleport(uintptr_t vergil, TeleportType type, float &x, float &y, GameFunctions::Vec3 pPos, float trickX, float trickY, float trickLen);
 	//static inline std::unique_ptr<GameFunctions::Transform_SetPosition> set_pos{nullptr};
 	std::unique_ptr<FunctionHook> m_airtrick_hook;
     std::unique_ptr<FunctionHook> m_initspeed_hook;

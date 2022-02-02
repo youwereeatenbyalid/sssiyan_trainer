@@ -85,6 +85,31 @@ static naked void initspeed_detour() {
 	}
 }
 
+void VergilAirTrick::xypos_teleport(uintptr_t vergil, TeleportType type, float& x, float& y, GameFunctions::Vec3 pPos, float trickX, float trickY, float trickLen)
+{
+	switch (type)
+	{
+		case VergilAirTrick::Front:
+		{
+			x = pPos.x + (trickLen - trickCorrection) * trickX / (float)trickLen;
+			y = pPos.y + (trickLen - trickCorrection) * trickY / (float)trickLen;
+			break;
+		}
+		case VergilAirTrick::Behind:
+		{
+			x = pPos.x + (trickLen + trickCorrection) * trickX / (float)trickLen;
+			y = pPos.y + (trickLen + trickCorrection) * trickY / (float)trickLen;
+			break;
+		}
+		default:
+		{
+			x = pPos.x + (trickLen - trickCorrection) * trickX / (float)trickLen;
+			y = pPos.y + (trickLen - trickCorrection) * trickY / (float)trickLen;
+			break;
+		}
+	}
+}
+
 void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 {
 	if(PlayerTracker::vergilentity == 0 || trickAction == 0)
@@ -103,6 +128,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	uintptr_t vergil = *(uintptr_t*)(trickAction + 0x60);//Also for doppel when he summoned;
 	if(vergil == 0)
 		return;
+	bool isDoppel = *(bool*)(vergil + 0x17F0);
 	GameFunctions::Vec3 targetPos = *(GameFunctions::Vec3*)(trickAction + 0xF0);
 	auto gameObj = *(uintptr_t*)(vergil + 0x10);
 	auto transformGameObj = *(uintptr_t*)(gameObj + 0x18);
@@ -113,8 +139,20 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 
 	GameFunctions::Vec3 trickVec(targetPos.x - pPos.x, targetPos.y - pPos.y, targetPos.z - pPos.z);
 	float trickVecLen = GameFunctions::Vec3::vec_length(pPos, targetPos);
+	TeleportType curType = trickType;
 
-	switch (trickType)
+	if (isDoppelOppositeTeleport)
+	{
+		if (isDoppel)
+		{
+			if(trickType == Front)
+				curType = Behind;
+			else
+				curType = Front;
+		}
+	}
+	xypos_teleport(vergil, curType, xTmp, yTmp, pPos, trickVec.x, trickVec.y, trickVecLen);
+	/*switch (trickType)
 	{
 		case VergilAirTrick::Front:
 		{
@@ -129,8 +167,12 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 			break;
 		}
 		default:
+		{
+			xTmp = pPos.x + (trickVecLen - trickCorrection) * trickVec.x / (float)trickVecLen;
+			yTmp = pPos.y + (trickVecLen - trickCorrection) * trickVec.y / (float)trickVecLen;
 			break;
-	}
+		}
+	}*/
 	targetPos.x = xTmp;
 	targetPos.y = yTmp;
 	float oldTargetZ = targetPos.z;
@@ -396,6 +438,7 @@ void VergilAirTrick::on_config_load(const utility::Config& cfg)
 	isCustomWaitTime = cfg.get<bool>("VergilAirTrick.isCustomWaitTime").value_or(true);
 	isCustomOffset = cfg.get<bool>("VergilAirTrick.isCustomOffset").value_or(false);
 	isTeleport = cfg.get<bool>("VergilAirTrick.isTeleport").value_or(false);
+	isDoppelOppositeTeleport = cfg.get<bool>("VergilAirTrick.isDoppelOppositeTeleport").value_or(false);
 	trickType = (TeleportType)cfg.get<int>("VergilAirTrick.trickType").value_or(Front);
 	trickCorrection = cfg.get<float>("VergilAirTrick.trickCorrection").value_or(1.8f);
 	teleportZOffs = cfg.get<float>("VergilAirTrick.teleportZOffs").value_or(-1.3f);
@@ -410,6 +453,7 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 	cfg.set<bool>("VergilAirTrick.isSpeedUp", isSpeedUp);
 	cfg.set<bool>("VergilAirTrick.isCustomOffset", isCustomOffset);
 	cfg.set<bool>("VergilAirTrick.isTeleport", isTeleport);
+	cfg.set<bool>("VergilAirTrick.isDoppelOppositeTeleport", isDoppelOppositeTeleport);
 	cfg.set<int>("VergilAirTrick.trickType", (int)trickType);
 	cfg.set<float>("VergilAirTrick.trickCorrection", trickCorrection);
 	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
@@ -445,6 +489,7 @@ void VergilAirTrick::on_draw_ui()
 		ImGui::RadioButton("In front of enemy", (int*)&trickType, 0);
 		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("Behind enemy", (int*)&trickType, 1);
+		ImGui::Checkbox("Doppelganger opposite teleport", &isDoppelOppositeTeleport);
 		ImGui::TextWrapped("Correction finish range:");
 		ImGui::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", ImGuiSliderFlags_None);
 		ImGui::TextWrapped("Correction finish Z offset. This option does't change colliders Z pos, so you won't fall under the floor.");
@@ -468,3 +513,4 @@ void VergilAirTrick::init_check_box_info()
 	m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 	m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 }
+

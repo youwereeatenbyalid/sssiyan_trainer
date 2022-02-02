@@ -237,6 +237,10 @@ set(MODS_SRC
     mods/TrickDodgeNoDisappear.cpp
     mods/VergilWalkingGuard.hpp
     mods/VergilWalkingGuard.cpp
+    mods/VergilGuardYamatoBlock.hpp
+    mods/VergilGuardYamatoBlock.cpp
+    mods/AirTrickDodge.hpp
+    mods/AirTrickDodge.cpp
 )
 
 set(HOOKS_SRC
@@ -301,6 +305,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PrefabInstantiate.hpp
     Mods/GameFunctions/CreateShell.hpp
     Mods/GameFunctions/PositionController.hpp
+    Mods/GameFunctions/PlayerCheckNormalJump.hpp
 )
 
 set(IMGUI_SRC
@@ -354,7 +359,8 @@ OUTPUT_NAME sssiyan)
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
                    POST_BUILD
                    COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
+                   target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)
-    target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
+    #target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 endif()

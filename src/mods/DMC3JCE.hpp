@@ -142,12 +142,6 @@ public:
 			cheaton = false;
 		}
 
-		int filterException(int code, PEXCEPTION_POINTERS ex)
-		{
-			std::cout << "Filtering " << std::hex << code << std::endl;
-			return EXCEPTION_EXECUTE_HANDLER;
-		}
-
 	public:
 		enum Type
 		{
@@ -201,10 +195,9 @@ public:
 				return;
 			if(!isPtrBaseInit)
 				return;
+			update_status(true);
 			int id = 105;
 			int lvl = 1;
-			update_status(true);
-
 			bool isBadPtr = false;
 			std::optional<bool> isPause;
 			auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
