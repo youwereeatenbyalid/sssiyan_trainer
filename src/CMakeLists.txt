@@ -241,6 +241,8 @@ set(MODS_SRC
     mods/VergilGuardYamatoBlock.cpp
     mods/AirTrickDodge.hpp
     mods/AirTrickDodge.cpp
+    mods/DanteNoSdtStun.hpp
+    mods/DanteNoSdtStun.cpp
 )
 
 set(HOOKS_SRC

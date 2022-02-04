@@ -152,27 +152,6 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 		}
 	}
 	xypos_teleport(vergil, curType, xTmp, yTmp, pPos, trickVec.x, trickVec.y, trickVecLen);
-	/*switch (trickType)
-	{
-		case VergilAirTrick::Front:
-		{
-			xTmp = pPos.x + (trickVecLen - trickCorrection) * trickVec.x / (float)trickVecLen;
-			yTmp = pPos.y + (trickVecLen - trickCorrection) * trickVec.y / (float)trickVecLen;
-			break;
-		}
-		case VergilAirTrick::Behind:
-		{
-			xTmp = pPos.x + (trickVecLen + trickCorrection) * trickVec.x / (float)trickVecLen;
-			yTmp = pPos.y + (trickVecLen + trickCorrection) * trickVec.y / (float)trickVecLen;
-			break;
-		}
-		default:
-		{
-			xTmp = pPos.x + (trickVecLen - trickCorrection) * trickVec.x / (float)trickVecLen;
-			yTmp = pPos.y + (trickVecLen - trickCorrection) * trickVec.y / (float)trickVecLen;
-			break;
-		}
-	}*/
 	targetPos.x = xTmp;
 	targetPos.y = yTmp;
 	float oldTargetZ = targetPos.z;
