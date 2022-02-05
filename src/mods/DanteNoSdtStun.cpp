@@ -1,8 +1,13 @@
 #include "DanteNoSdtStun.hpp"
+#include "BossDanteSetup.hpp"
 
 static naked void detour()
 {
 	__asm {
+		test rdx, rdx
+		je originalcode
+		cmp byte ptr [rdx + 0x1AD8], 1//isEnemyDante
+		je bossDante
 		cmp byte ptr [DanteNoSdtStun::cheaton], 0
 		je originalcode
 		mov al, 1
@@ -11,6 +16,14 @@ static naked void detour()
 		movzx ecx, al
 		mov rax, [rbx + 0x50]
 		jmp qword ptr [DanteNoSdtStun::ret]
+
+		bossDante:
+		cmp byte ptr [BossDanteSetup::cheaton], 1
+		jne originalcode
+		cmp byte ptr [BossDanteSetup::isNoFinishSdtStun], 1
+		jne originalcode
+		mov al, 1
+		jmp originalcode
 	}
 }
 

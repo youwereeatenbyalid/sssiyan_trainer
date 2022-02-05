@@ -81,6 +81,29 @@ static naked void dt_duration_detour()
 	}
 }
 
+static naked void motion_delay_detour()
+{
+	__asm {
+		cmp byte ptr [BossDanteSetup::cheaton], 0
+		je originalcode
+		cmp byte ptr [BossDanteSetup::isNoMovesDelay], 0
+		je originalcode
+
+		cheat:
+		cmp byte ptr [rdi + 0x1AD8], 0//isEmDante, check just in case
+		je originalcode
+		jmp qword ptr [BossDanteSetup::emDanteDelayJmpRet]
+
+		originalcode:
+		test rax, rax
+		jne jne_ret 
+		jmp qword ptr [BossDanteSetup::emDanteDelayRet]
+
+		jne_ret:
+		jmp qword ptr [BossDanteSetup::emDanteDelayJneRet]
+	}
+}
+
 std::optional<std::string> BossDanteSetup::on_initialize()
 {
 	init_check_box_info();
@@ -115,7 +138,15 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		return "Unanable to find BossDanteSetup.dtDurationAddr pattern.";
 	}
 
+	auto charUpdateDelayAddr = utility::scan(base, "32 48 85 C0 75 10"); // DevilMayCry5.exe+19BD0C4 (0x1)
+	if (!charUpdateDelayAddr)
+	{
+		return "Unanable to find BossDanteSetup.charUpdateDelayAddr pattern.";
+	}
+
 	dtRegenJe = dtAddr.value() + 0x20B;
+	emDanteDelayJmpRet = charUpdateDelayAddr.value() + 0x37 + 0x1;
+	emDanteDelayJneRet = charUpdateDelayAddr.value() + 0x15 + 0x1;
 
 	if (!install_hook_absolute(dtAddr.value(), m_dtregen_hook, &dtregen_detour, &dtRegenRet, 0xA))
 	{
@@ -141,6 +172,12 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		return "Failed to initialize BossDanteSetup.dtDuration";
 	}
 
+	if (!install_hook_absolute(charUpdateDelayAddr.value()+ 0x1, m_emdante_delay_hook, &motion_delay_detour, &emDanteDelayRet, 0x5))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize BossDanteSetup.charUpdateDelay";
+	}
+
 	return Mod::on_initialize();
 }
 
@@ -150,6 +187,8 @@ void BossDanteSetup::on_config_load(const utility::Config& cfg)
 	isSdtTransformSetup = cfg.get<bool>("BossDanteSetup.isSdtTransformSetup").value_or(true);
 	isDtsTimerSkip = cfg.get<bool>("BossDanteSetup.isDtsTimerSkip").value_or(true);
 	isCustomDtDuration = cfg.get<bool>("BossDanteSetup.isCustomDtDuration").value_or(true);
+	isNoFinishSdtStun = cfg.get<bool>("BossDanteSetup.isNoFinishSdtStun").value_or(true);
+	isNoMovesDelay = cfg.get<bool>("BossDanteSetup.isNoMovesDelay").value_or(true);
 	sdtTransformMode = cfg.get<uint32_t>("BossDanteSetup.sdtTransformMode").value_or(0);
 	dtTimer = cfg.get<float>("BossDanteSetup.dtTimer").value_or(15.0f);
 	dtDuration = cfg.get<float>("BossDanteSetup.dtDuration").value_or(40.0f);
@@ -161,6 +200,8 @@ void BossDanteSetup::on_config_save(utility::Config& cfg)
 	cfg.set<bool>("BossDanteSetup.isSdtTransformSetup", isSdtTransformSetup);
 	cfg.set<bool>("BossDanteSetup.isDtsTimerSkip", isDtsTimerSkip);
 	cfg.set<bool>("BossDanteSetup.isCustomDtDuration", isCustomDtDuration);
+	cfg.set<bool>("BossDanteSetup.isNoFinishSdtStun", isNoFinishSdtStun);
+	cfg.set<bool>("BossDanteSetup.isNoMovesDelay", isNoMovesDelay);
 	cfg.set<uint32_t>("BossDanteSetup.sdtTransformMode", sdtTransformMode);
 	cfg.set<float>("BossDanteSetup.dtTimer", dtTimer);
 	cfg.set<float>("BossDanteSetup.dtDuration", dtDuration);
@@ -193,6 +234,8 @@ void BossDanteSetup::on_draw_ui()
 		ImGui::TextWrapped("Set dt duration on m19 (game's default - 15):");
 		ImGui::InputFloat("##dtDurationSlider", &dtDuration, 1.0f, 2.0f, "%.1f");
 	}
+	ImGui::Checkbox("No stun after end of SDT;", &isNoFinishSdtStun);
+	ImGui::Checkbox("Disable boss moves delay;", &isNoMovesDelay);
 }
 
 void BossDanteSetup::on_draw_debug_ui()

@@ -8,6 +8,8 @@ public:
 	inline static bool isSdtTransformSetup = false;
 	inline static bool isDtsTimerSkip = false;
 	inline static bool isCustomDtDuration = false;
+	inline static bool isNoFinishSdtStun = false;
+	inline static bool isNoMovesDelay = false;
 
 	inline static uint32_t sdtTransformMode = 1; //0 - normal, 1 - allFast; 2 - firstNormalOtherFast;
 	
@@ -16,6 +18,9 @@ public:
 	inline static uintptr_t sdtTransformRet = 0x0;
 	inline static uintptr_t dtTimerRet = 0x0;
 	inline static uintptr_t dtDurationRet = 0x0;
+	inline static uintptr_t emDanteDelayRet = 0x0;
+	inline static uintptr_t emDanteDelayJmpRet = 0x0;
+	inline static uintptr_t emDanteDelayJneRet = 0x0;
 
 	inline static float dtTimer = 5.0f;
 	inline static float dtTimerStartPoint = 0.0f;
@@ -58,5 +63,6 @@ private:
 	std::unique_ptr<FunctionHook> m_sdttransform_hook;
 	std::unique_ptr<FunctionHook> m_dttimer_hook;
 	std::unique_ptr<FunctionHook> m_dtduration_hook;
+	std::unique_ptr<FunctionHook> m_emdante_delay_hook;
 };
 
