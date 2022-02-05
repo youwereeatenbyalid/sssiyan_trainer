@@ -13,6 +13,7 @@
 #include "JsonStthm.h"
 #include <filesystem>
 #include <map>
+#include "ImGuiExtensions/ImGuiExtensions.h"
 
 namespace json = JsonStthm;
 
@@ -540,7 +541,6 @@ namespace WaveEditorMod
 		void draw_emlist_combo();
 		void draw_mimiclist_items(int i);
 		void print_emlist_data();
-		void help_marker(const char* desc);// from ocornut github: https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 		void emlist_btn();
 		static void clear_emlist();
 		static void edit_gamelists_asm(uintptr_t lstAddr);

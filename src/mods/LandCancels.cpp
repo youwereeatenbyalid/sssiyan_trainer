@@ -100,17 +100,6 @@ std::optional<std::string> LandCancels::on_initialize() {
   return Mod::on_initialize();
 }
 
-static void ShowHelpMarker(const char* desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered()) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(450.0f);
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
-  }
-}
-
 void LandCancels::on_config_load(const utility::Config& cfg) {
   timedChargeShotCancels = cfg.get<bool>("timed_charge_shot_cancels").value_or(false);
 }
@@ -121,6 +110,5 @@ void LandCancels::on_config_save(utility::Config& cfg) {
 void LandCancels::on_draw_ui() {
   ImGui::TextWrapped("Nero");
   ImGui::Checkbox("Timed Charge Shot Cancels", &timedChargeShotCancels);
-  ImGui::SameLine();
-  ShowHelpMarker("Enabling this will disable land cancelling charge shots until the bullet has come out.");
+  ImGui::ShowHelpMarker("Enabling this will disable land cancelling charge shots until the bullet has come out.", 450.0F);
 }

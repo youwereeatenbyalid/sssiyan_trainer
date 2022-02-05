@@ -1,4 +1,5 @@
 #pragma once
+#include "ImGuiExtensions/ImGuiExtensions.h"
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
 #include "utility/Patch.hpp"

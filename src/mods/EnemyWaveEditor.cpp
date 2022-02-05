@@ -560,8 +560,7 @@ void EnemyWaveEditor::on_draw_ui() {
   switch (mode) {
   case EnemyWaveEditor::Mod: 
   {
-    ImGui::SameLine();
-    help_marker("Create custom enemy lists for swap its with originals game's lists.");
+    ImGui::ShowHelpMarker("Create custom enemy lists for swap its with originals game's lists.");
     ImGui::Separator();
     if (ImGui::CollapsingHeader("How-to-use & Current issues"))
     {
@@ -599,15 +598,14 @@ void EnemyWaveEditor::on_draw_ui() {
     }
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::TextWrapped("Choose an enemy from original game's list, whoose settings will be used for spawn position and animation for custom lists:"); ImGui::SameLine();
-    help_marker("Each enemy has a list with settings of spawn pos & spawn animation. You can choose from what enemy from original list mod should take settings. Desync may happend in coop if settings not shared between players.");
+    ImGui::TextWrapped("Choose an enemy from original game's list, whoose settings will be used for spawn position and animation for custom lists:");
+    ImGui::ShowHelpMarker("Each enemy has a list with settings of spawn pos & spawn animation. You can choose from what enemy from original list mod should take settings. Desync may happend in coop if settings not shared between players.");
     ImGui::RadioButton("First", (int*)&setupEmMode, 0); ImGui::SameLine();
     ImGui::Spacing(); ImGui::SameLine();
     ImGui::RadioButton("Last", (int*)&setupEmMode, 1);
     ImGui::Separator();
     ImGui::Checkbox("BP load fix", &isBPFixRequested);
-    ImGui::SameLine();
-    help_marker("If you have blackscreen after load bp stage, but BGM started playing and enemies started action, try this one. May not help with some stages and some enemies. "
+    ImGui::ShowHelpMarker("If you have blackscreen after load bp stage, but BGM started playing and enemies started action, try this one. May not help with some stages and some enemies. "
         "After finishing stage with this bug, you should quit from it and re-enter from warm up menu, otherwise you will get blackscreen again even with fix :(");
     if (isBPFixRequested)
     {
@@ -615,14 +613,12 @@ void EnemyWaveEditor::on_draw_ui() {
         {
             isRequestEndBpStage = true;
         }
-        ImGui::SameLine();
-        help_marker("Force game to end the stage and show menu with retry/quit options. Use this if you retried stage with black screen bug. Don't forget to restore list data.");
+        ImGui::ShowHelpMarker("Force game to end the stage and show menu with retry/quit options. Use this if you retried stage with black screen bug. Don't forget to restore list data.");
         if (isRequestEndBpStage)
             ImGui::TextWrapped("End stage requested...");
     }
     ImGui::Checkbox("Bp alloc mode", &isBpAllocation);
-    ImGui::SameLine();
-    help_marker("Select this before allocate data if want to go to BP. Creates 107 lists and copy data from first list to them.");
+    ImGui::ShowHelpMarker("Select this before allocate data if want to go to BP. Creates 107 lists and copy data from first list to them.");
 
     ImGui::Separator();
     draw_mimic_list_ui();
@@ -632,8 +628,7 @@ void EnemyWaveEditor::on_draw_ui() {
   }
   case EnemyWaveEditor::ViewUserData: 
   {
-    ImGui::SameLine();
-    help_marker("View all custom enemy lists data.");
+    ImGui::ShowHelpMarker("View all custom enemy lists data.");
     ImGui::Separator();
     if (!isBpAllocation)
     {
@@ -650,8 +645,7 @@ void EnemyWaveEditor::on_draw_ui() {
     break;
   }
   case EnemyWaveEditor::ReadGameData: {
-    ImGui::SameLine();
-    help_marker("Check all original enemy lists data after load mission.");
+    ImGui::ShowHelpMarker("Check all original enemy lists data after load mission.");
     ImGui::Separator();
     emlist_btn();
     ImGui::Separator();
@@ -660,8 +654,7 @@ void EnemyWaveEditor::on_draw_ui() {
   }
   /*case EnemyWaveEditor::RunTimeEdit:
   {
-      ImGui::SameLine();
-      help_marker("Swap original enemy lists with custom in run-time when game loading a mission. You need to allocate custom data first. Each list can be used for 1 swap. Doesn't work in BP. This option will freeze "
+      ImGui::ShowHelpMarker("Swap original enemy lists with custom in run-time when game loading a mission. You need to allocate custom data first. Each list can be used for 1 swap. Doesn't work in BP. This option will freeze "
       "game thread during mission load, make sure that trainer window was opened before that.\nThe loading game's data and list of custom enemy lists will to choose will appears when mission will be loading.");
       ImGui::Separator();
       if (mimObjManager.is_all_allocated() && !isRtReady)
@@ -673,8 +666,7 @@ void EnemyWaveEditor::on_draw_ui() {
               cv.notify_all();
               isRtReady = true;
           }
-          ImGui::SameLine();
-          help_marker("Swap current game list with selected and load next enemy list.");
+          ImGui::ShowHelpMarker("Swap current game list with selected and load next enemy list.");
           ImGui::Spacing();
           if (ImGui::Button("Skip all next"))
           {
@@ -683,8 +675,7 @@ void EnemyWaveEditor::on_draw_ui() {
               isRtReady = true;
               mode = Mode::ReadGameData;
           }
-          ImGui::SameLine();
-          help_marker("Swap current game list with selected and load all next lists as default. Some times game thread still freezed after pressing button. Select run-time edit mode and press \"Skip all next\" again.");
+          ImGui::ShowHelpMarker("Swap current game list with selected and load all next lists as default. Some times game thread still freezed after pressing button. Select run-time edit mode and press \"Skip all next\" again.");
           ImGui::Separator();
           ImGui::TextWrapped("Current game enemy data");
           ImGui::Spacing();
@@ -704,8 +695,7 @@ void EnemyWaveEditor::on_draw_ui() {
           {
               ImGui::TextWrapped("Select list to swap with: ");
               draw_emlist_combo();
-              ImGui::SameLine();
-              help_marker("You can use every custom list for swap only once.");
+              ImGui::ShowHelpMarker("You can use every custom list for swap only once.");
           }
          
           if (!isDefaultGameData)
@@ -720,12 +710,10 @@ void EnemyWaveEditor::on_draw_ui() {
 
   case EnemyWaveEditor::Serialization:
   {
-      ImGui::SameLine();
-      help_marker("Load enemy data from .json file.");
+      ImGui::ShowHelpMarker("Load enemy data from .json file.");
       ImGui::Separator();
       ImGui::TextWrapped(std::string("Place save-file here: " + jsonEmDataPath).c_str());
-      ImGui::SameLine();
-      help_marker("You can change path to save file (and it's name) in trainer's config file. Open \"DMC5_fw_config.txt\" and add line without quotes: \"EnemyWaveEditor.jsonEmDataPath = <YourPathToFileWithFileName.json>\"");
+      ImGui::ShowHelpMarker("You can change path to save file (and it's name) in trainer's config file. Open \"DMC5_fw_config.txt\" and add line without quotes: \"EnemyWaveEditor.jsonEmDataPath = <YourPathToFileWithFileName.json>\"");
       if (ImGui::Button("Read enemy data settings"))
       {
           prflManager.read_data(jsonEmDataPath.c_str());
@@ -751,8 +739,7 @@ void EnemyWaveEditor::on_draw_ui() {
               prflManager.import_data(selectedProfile);
               mode = Mode::Mod;
           }
-          ImGui::SameLine();
-          help_marker("This will remove your current custom data and load data from selected profile. Memory shouldn't be allocated before this stage.");
+          ImGui::ShowHelpMarker("This will remove your current custom data and load data from selected profile. Memory shouldn't be allocated before this stage.");
       }
       break;
   }
@@ -785,8 +772,7 @@ void EnemyWaveEditor::draw_mimiclist_items(int i)
 void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Enemy:");
   ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, EnemySwapper::emNames.data(), EnemySwapper::emNames.size(), 20);
-  ImGui::SameLine();
-  help_marker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
+  ImGui::ShowHelpMarker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
   data.emId = get_em_id(data.selectedItem);
   ImGui::Spacing();
   ImGui::TextWrapped("Enemy num:");
@@ -801,16 +787,14 @@ void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::Spacing();
   //ImGui::TextWrapped("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
   ImGui::TextWrapped("Wait time min:");
-  ImGui::SameLine();
-  help_marker("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
+  ImGui::ShowHelpMarker("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
   ImGui::InputFloat("##WaitTimeMin", &data.waitTimeMin, 0.1f, 0.5f, "%.1f");
   ImGui::TextWrapped("Wait time max:");
   ImGui::InputFloat("##WaitTimeMax", &data.waitTimeMax, 0.1f, 0.5f, "%.1f");
   ImGui::Checkbox("Don't set orbs", &data.isDontSetOrb);
   ImGui::Spacing();
   ImGui::Checkbox("Is near player(?)", &data.isNearPlayer);
-  ImGui::SameLine();
-  help_marker("Sometimes it's work and place enemies near player and remove bloody portal spawn animation if it exist on current list. But sometimes it's not lol.");
+  ImGui::ShowHelpMarker("Sometimes it's work and place enemies near player and remove bloody portal spawn animation if it exist on current list. But sometimes it's not lol.");
   ImGui::Spacing();
   if(ImGui::Button("Set default"))
       data.set_default();
@@ -837,17 +821,6 @@ int EnemyWaveEditor::get_em_name_indx(int emId) {
   if (emId >=23)
   return emId - 3;
   return emId;
-}
-
-void EnemyWaveEditor::help_marker(const char* desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered()) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
-  }
 }
 
 void EnemyWaveEditor::print_emlist_data()
@@ -877,8 +850,7 @@ void EnemyWaveEditor::emlist_btn()
     {
         if (ImGui::Button("Clear list and reset counter"))
             clear_emlist();
-        ImGui::SameLine();
-        help_marker("Data must be deallocated before that.");
+        ImGui::ShowHelpMarker("Data must be deallocated before that.");
         ImGui::Spacing();
         if (ImGui::Button("Copy to clipboard"))
         {
@@ -930,8 +902,7 @@ void EnemyWaveEditor::draw_copy_list_data()
         else
             mimObjManager.copy_to(fromLst, toLst);
     }
-    ImGui::SameLine();
-    help_marker("You need to input list's load id, not it's num on list of all custom lists. And you can't copy data to the same list.");
+    ImGui::ShowHelpMarker("You need to input list's load id, not it's num on list of all custom lists. And you can't copy data to the same list.");
     if(ImGui::Button("Copy to all"))
     {
         if(mimObjManager.get_mimic_list_ptr(fromLst, true) == nullptr)
@@ -954,8 +925,7 @@ void EnemyWaveEditor::draw_copy_list_data()
         }
         
     }
-    ImGui::SameLine();
-    help_marker("Copy and append from 1 list to all another.");
+    ImGui::ShowHelpMarker("Copy and append from 1 list to all another.");
 }
 
 void EnemyWaveEditor::draw_emlist_combo()
@@ -1018,8 +988,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 selectedMimicListItem = mimObjManager.count() - 1;
             }
         }
-        ImGui::SameLine();
-        help_marker("Create a few enemy lists with identificators on setted range");
+        ImGui::ShowHelpMarker("Create a few enemy lists with identificators on setted range");
         ImGui::Separator();
         ImGui::Spacing();
         if (mimObjManager.count() != 0)
@@ -1032,8 +1001,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 {
                     ImGui::Separator();
                     ImGui::InputInt("New load id", &newLoadId);
-                    ImGui::SameLine();
-                    help_marker("Load id must be >=0. If not all id's is unique, after pressing allocate button this field will be \"-2\".");
+                    ImGui::ShowHelpMarker("Load id must be >=0. If not all id's is unique, after pressing allocate button this field will be \"-2\".");
                     if (ImGui::Button("Change load id"))
                     {
                         if(newLoadId >= 0)
@@ -1066,8 +1034,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                     selectedEmDataItem = mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count() - 1;
                 if (selectedEmDataItem >= mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count())
                     selectedEmDataItem = -1;
-                ImGui::SameLine();
-                help_marker("To edit existing enemy list item input it index. To add new enemy data to list input \"-1\"");
+                ImGui::ShowHelpMarker("To edit existing enemy list item input it index. To add new enemy data to list input \"-1\"");
                 if (selectedEmDataItem == -1)
                 {
                     print_emdata_input(curCustomEmData);
@@ -1105,8 +1072,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 }
                 else mimObjManager.alloc_all();
             }
-            ImGui::SameLine();
-            help_marker("Allocate memory for custom enemy lists. After that you can't edit list's data. All load ids must be unique before allocation.");
+            ImGui::ShowHelpMarker("Allocate memory for custom enemy lists. After that you can't edit list's data. All load ids must be unique before allocation.");
         }
     }
     else
@@ -1124,8 +1090,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
             mimObjManager.restore_all_data();
             emSetterCounter = 0;
         }
-        ImGui::SameLine();
-        help_marker("Press this every time before you quit from the mission/restart mission; going to secret mission from story mission/exit from secret mission; exit from bp stage from pause menu.");
+        ImGui::ShowHelpMarker("Press this every time before you quit from the mission/restart mission; going to secret mission from story mission/exit from secret mission; exit from bp stage from pause menu.");
     }
 }
 

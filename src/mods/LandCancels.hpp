@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class LandCancels : public Mod {
 public:
   LandCancels() = default;

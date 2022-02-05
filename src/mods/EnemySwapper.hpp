@@ -5,6 +5,7 @@
 #include <random>
 #include "EnemyWaveEditor.hpp"
 #include "CheckpointPos.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 //#include "EnemyDataSettings.hpp"
 
 class EnemySwapper : public Mod {
@@ -271,7 +272,6 @@ private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-  void help_marker(const char* desc);// from ocornut github: https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
   
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;

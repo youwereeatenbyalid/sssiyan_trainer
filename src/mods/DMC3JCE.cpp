@@ -439,7 +439,7 @@ void DMC3JCE::on_frame()
 
 void DMC3JCE::on_draw_ui()
 {
-	ImGui::TextWrapped("If after Vergil's disappear jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
+	ImGui::TextWrapped("If after Vergil's disappear, jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
 	ImGui::Separator();
 	ImGui::Spacing();
 	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUseDefaultJce);

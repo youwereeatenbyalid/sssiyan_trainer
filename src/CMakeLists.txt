@@ -258,6 +258,11 @@ set(HOOKS_SRC
     PositionHooks.cpp
 )
 
+set(IMGUI_EXTENSIONS_SRC
+    ImGuiExtensions/ImGuiExtensions.h
+    ImGuiExtensions/ImGuiExtensions.cpp
+)
+
 set(SDK_SRC
     sdk/ReClass.hpp
     sdk/ReClass_Internal.hpp
@@ -323,6 +328,7 @@ set(IMGUI_SRC
 )
 
 source_group("Hooks" FILES ${HOOKS_SRC})
+source_group("ImGuiExtensions" FILES ${IMGUI_EXTENSIONS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
 source_group("ListEditor" FILES ${LISTEDITOR_SRC})
 source_group("Mods/GameFunctions" FILES ${GAME_FUNC_SRC})
@@ -335,6 +341,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             Main.cpp
             LicenseStrings.hpp
             ${SDK_SRC}
+            ${IMGUI_EXTENSIONS_SRC}
             ${MODS_SRC}
             ${GAME_FUNC_SRC}
             ${LISTEDITOR_SRC}

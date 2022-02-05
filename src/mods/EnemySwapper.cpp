@@ -1453,8 +1453,7 @@ void EnemySwapper::on_draw_ui() {
   ImGui::Separator();
   ImGui::Spacing();
   ImGui::Checkbox("Cavaliere teleports fix", &isCavFixEnabled);
-  ImGui::SameLine();
-  help_marker("By defauld cav uses a precoded coords for bossfight arena to teleport. Because of that on other areas it almost always teleport behind the map and dies. This will swap capcom's coords to player coords. "
+  ImGui::ShowHelpMarker("By defauld cav uses a precoded coords for bossfight arena to teleport. Because of that on other areas it almost always teleport behind the map and dies. This will swap capcom's coords to player coords. "
   "Can stuck in teleport state :(. Can be changed during gameplay.");
   if (isCavFixEnabled)
   {
@@ -1468,8 +1467,7 @@ void EnemySwapper::on_draw_ui() {
   if(isVergilFixEnabled)
       ImGui::Separator();
   ImGui::Checkbox("Dive bomb fix",&isVergilFixEnabled);
-  ImGui::SameLine();
-  help_marker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb's preparing teleport to take an effect.");
+  ImGui::ShowHelpMarker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb's preparing teleport to take an effect.");
   if (isVergilFixEnabled)
   {
       ImGui::TextWrapped("Height of arena side (default = 1.5)");
@@ -1479,15 +1477,13 @@ void EnemySwapper::on_draw_ui() {
       ImGui::TextWrapped("Distance of ground check (default = 5)");
       ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, "%.1f");
       ImGui::Checkbox("Fast divebomb attack", &isFastDiveBombAttack);
-      ImGui::SameLine();
-      help_marker("Force Vergil to start ram you after he fly ~pi/3 of his way. It's make a harder to dodje him 'cause he will literally using \"lock on\" on you an all time of fly. Can help in a case if he start infinitely circle flying. "
+      ImGui::ShowHelpMarker("Force Vergil to start ram you after he fly ~pi/3 of his way. It's make a harder to dodje him 'cause he will literally using \"lock on\" on you an all time of fly. Can help in a case if he start infinitely circle flying. "
       "Can be enabled during gameplay.");
       ImGui::Separator();
       ImGui::Spacing();
   }
   ImGui::Checkbox("Goliath jumps fix", &isGoliathFixEnabled);
-  ImGui::SameLine();
-  help_marker("Goliath will jump right to player, not to precoded capcom's coords. Can be changed during gameplay.");
+  ImGui::ShowHelpMarker("Goliath will jump right to player, not to precoded capcom's coords. Can be changed during gameplay.");
 
   ImGui::Checkbox("Artemis fly pos fix", &isArtemisFixEnabled);
   if (isArtemisFixEnabled)
@@ -1495,8 +1491,7 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
       ImGui::Spacing();
       ImGui::Checkbox("Use player position for XY center of arena coords", &isArtemisPlayersXY);
-      ImGui::SameLine();
-      help_marker("Artemis will always use current player XY coords as center of arena wich will force her to fly away from player when he gets close.");
+      ImGui::ShowHelpMarker("Artemis will always use current player XY coords as center of arena wich will force her to fly away from player when he gets close.");
       if (!isArtemisPlayersXY)
       {
           ImGui::Spacing();
@@ -1510,18 +1505,15 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Spacing();
   }
   ImGui::Checkbox("Urizen 3 teleports fix", &isUrizen3FixEnabled);
-  ImGui::SameLine();
-  help_marker("Prevent Urizen 3 stuck in teleport phase by disabling changing coords when he use teleport for change his position while changing battle state.");
+  ImGui::ShowHelpMarker("Prevent Urizen 3 stuck in teleport phase by disabling changing coords when he use teleport for change his position while changing battle state.");
   ImGui::Checkbox("Malphas portals fix", &isMalphasFixEnabled);
-  ImGui::SameLine();
-  help_marker("Chicken will not insta die.");
+  ImGui::ShowHelpMarker("Chicken will not insta die.");
   if (isMalphasFixEnabled)
   {
       ImGui::Spacing();
       ImGui::Separator();
       ImGui::Checkbox("Use current player pos as center of arena", &malphasFixPlPos);
-      ImGui::SameLine();
-      help_marker("Teleports also have an offsets to current player pos, so if this enabled and player stands on the edge of the arena, chicken still can fall and die. I recommend to set custom center coords for different areas manually.");
+      ImGui::ShowHelpMarker("Teleports also have an offsets to current player pos, so if this enabled and player stands on the edge of the arena, chicken still can fall and die. I recommend to set custom center coords for different areas manually.");
       if (!malphasFixPlPos)
       {
           btn_set_plpos_to(malphasCenterOfFloor, "Set center of floor to current player position ##Malph");
@@ -1532,8 +1524,8 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
       ImGui::Spacing();
   }
-  ImGui::Checkbox("Cerberus fix", &isCerberusFixEnabled); ImGui::SameLine();
-  help_marker("Fixes for jumps in fire state and shells in thunder state. No fix for ice wall :(");
+  ImGui::Checkbox("Cerberus fix", &isCerberusFixEnabled);
+  ImGui::ShowHelpMarker("Fixes for jumps in fire state and shells in thunder state. No fix for ice wall :(");
   if (isCerberusFixEnabled)
   {
       ImGui::Spacing();
@@ -2013,17 +2005,4 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   EnemySwapper::setDataAddrs.reserve(reservedForReswap);
   //setDataAddrs = new std::vector<uintptr_t>();
     return Mod::on_initialize();
-}
-
-void EnemySwapper::help_marker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
 }
