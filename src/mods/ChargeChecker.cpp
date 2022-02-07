@@ -94,12 +94,14 @@ void ChargeChecker::init_check_box_info() {
 std::optional<std::string> ChargeChecker::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &ChargeChecker::cheaton;
-  onpage             = nero;
+  m_is_enabled          = &ChargeChecker::cheaton;
+  m_on_page             = nero;
 
   full_name_string   = "Faster Charges (+)";
   author_string      = "SSSiyan";
   description_string = "Speed up or slow down charges bound to hold inputs.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 4F 5C 0F 57 C0 0F 5A C9 F3"); // "DevilMayCry5.exe"+20BE39E

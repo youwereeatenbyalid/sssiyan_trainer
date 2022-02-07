@@ -28,11 +28,13 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergilcheat;
-	full_name_string = "SDT no concentration lose";
-	author_string = "VPZadov";
-	description_string = "Don't decrease a concentration gauge when Vergil takes damage in SDT.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergilcheat;
+	m_full_name_string = "SDT no concentration lose";
+	m_author_string = "VPZadov";
+	m_description_string = "Don't decrease a concentration gauge when Vergil takes damage in SDT.";
+
+  set_up_hotkey();
 
 	auto initAddr1 = utility::scan(base, "2B FF FF FF F3 0F 10 90 8C 00 00 00");// DevilMayCry5.exe+572C5D
 	if (!initAddr1) {

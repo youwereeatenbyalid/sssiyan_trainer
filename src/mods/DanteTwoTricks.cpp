@@ -36,12 +36,14 @@ void DanteTwoTricks::init_check_box_info() {
 std::optional<std::string> DanteTwoTricks::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DanteTwoTricks::cheaton;
-  onpage             = dantecheat;
+  m_is_enabled          = &DanteTwoTricks::cheaton;
+  m_on_page             = dantecheat;
 
-  full_name_string   = "Always Get 2 Tricks";
-  author_string      = "SSSiyan";
-  description_string = "Allows non DT Dante to trick twice.";
+  m_full_name_string   = "Always Get 2 Tricks";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Allows non DT Dante to trick twice.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 BE 98 00 00 00 00 0F 95 C0 48 85 C9 75 9D 8B 4F 44");

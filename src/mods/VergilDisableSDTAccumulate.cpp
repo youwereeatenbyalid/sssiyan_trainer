@@ -30,12 +30,14 @@ void VergilDisableSDTAccumulate::init_check_box_info() {
 
 std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   init_check_box_info();
-  ischecked          = &VergilDisableSDTAccumulate::cheaton;
-  onpage             = vergilsdt;
-  full_name_string   = "Disable SDT accumulate";
-  author_string      = "VPZadov";
-  description_string = "Disable the \"accumulate\" skill. Works best with the "
+  m_is_enabled          = &VergilDisableSDTAccumulate::cheaton;
+  m_on_page             = vergilsdt;
+  m_full_name_string   = "Disable SDT accumulate";
+  m_author_string      = "VPZadov";
+  m_description_string = "Disable the \"accumulate\" skill. Works best with the "
                        "accumulate system rework.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

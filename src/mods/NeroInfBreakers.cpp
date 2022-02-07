@@ -87,13 +87,15 @@ void NeroInfBreakers::init_check_box_info() {
 std::optional<std::string> NeroInfBreakers::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NeroInfBreakers::cheaton;
-  onpage             = breaker;
+  m_is_enabled          = &NeroInfBreakers::cheaton;
+  m_on_page             = breaker;
 
-  full_name_string   = "Infinite Devil Breakers";
-  author_string      = "DeepDarkKapustka";
-  description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
+  m_full_name_string   = "Infinite Devil Breakers";
+  m_author_string      = "DeepDarkKapustka";
+  m_description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
                        "When using less than 8, this will bug and give you Overtures.";
+
+  set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "FF 41 8B 44 12 04");

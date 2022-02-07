@@ -40,12 +40,14 @@ void DisableEnemyAI::init_check_box_info() {
 std::optional<std::string> DisableEnemyAI::on_initialize() {
   init_check_box_info();
 
-  ischecked               = &DisableEnemyAI::cheaton;
-  onpage                  = commoncheat;
+  m_is_enabled               = &DisableEnemyAI::cheaton;
+  m_on_page                  = commoncheat;
 
-  full_name_string        = "Disable Enemy AI";
-  author_string           = "SSSiyan";
-  description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
+  m_full_name_string        = "Disable Enemy AI";
+  m_author_string           = "SSSiyan";
+  m_description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 B8 9C 00 00 00 00 74 11");

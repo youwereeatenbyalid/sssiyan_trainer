@@ -59,11 +59,13 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &NeroSuperMovesNoDT::cheaton;
-  onpage    = nero;
-  full_name_string     = "Super Moves outside of DT";
-  author_string        = "The Hitchhiker";
-  description_string   = "Use Max Bet & Showdown outside of Devil Trigger.";
+  m_is_enabled = &NeroSuperMovesNoDT::cheaton;
+  m_on_page    = nero;
+  m_full_name_string     = "Super Moves outside of DT";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Use Max Bet & Showdown outside of Devil Trigger.";
+
+  set_up_hotkey();
   auto maxbetnodt_addr = utility::scan(base, "83 BA B0 09 00 00 01 0F 85 CE");
 
   if (!maxbetnodt_addr) {

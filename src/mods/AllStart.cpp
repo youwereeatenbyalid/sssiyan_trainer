@@ -120,12 +120,14 @@ void AllStart::init_check_box_info() {
 std::optional<std::string> AllStart::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &AllStart::cheaton;
-  onpage             = mechanics;
+  m_is_enabled          = &AllStart::cheaton;
+  m_on_page             = mechanics;
 
-  full_name_string   = "AllStart (+)";
-  author_string      = "SSSiyan, dr.penguin";
-  description_string = "Allows you to cancel out of a selection of moves with any other move.";
+  m_full_name_string   = "AllStart (+)";
+  m_author_string      = "SSSiyan, dr.penguin";
+  m_description_string = "Allows you to cancel out of a selection of moves with any other move.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "66 C7 47 5E 00 00");

@@ -1,5 +1,7 @@
 #include <spdlog/spdlog.h>
 #include "Mods.hpp"
+#include "Config.hpp"
+#include "imgui_internal.h"
 // Example
          #include "mods/SimpleMod.hpp"
 // Darkness
@@ -165,8 +167,12 @@
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
 
+
+static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+
 Mods::Mods() 
-    : redrawfocusedwindow{ false }, m_config{ "DMC2_fw_config.txt" } {
+    : m_config{CONFIG_FILENAME}
+{
   // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
 //// Darkness
@@ -389,36 +395,36 @@ void Mods::on_frame() const {
 void Mods::save_mods() {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
-        std::string togglename = std::string{mod->get_name()};
+        std::string togglename = std::string(mod->get_name());
         togglename.append("_on");
-        if(mod->ischecked){
-            m_config.set<bool>(togglename, *mod->ischecked);
+
+        if(mod->m_is_enabled){
+            m_config.set<bool>(togglename, *mod->m_is_enabled);
         }else{
             m_config.set<bool>(togglename, false);
         }
+
         mod->on_config_save(m_config);
-        //and then probably call the rest of the stuff here;
     }
-    // dorime
-    //namespace fs = std::filesystem;
-    //std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
-    //auto m_conf_path             = mypath.string();
-    // ameno
-    m_config.save();
 }
 
 
-void Mods::load_mods() const {
-  for (auto& mod : m_mods) {
-    spdlog::info("{:s}::on_config_load()", mod->get_name().data());
-    std::string togglename = std::string{mod->get_name()};
-    togglename.append("_on");
-	if (mod->ischecked) {
-		*(mod->ischecked) = m_config.get<bool>(togglename).value_or(false);
-		mod->on_config_load(m_config);
-	}
-    // and then probably call the rest of the stuff here;
-  }
+void Mods::load_mods(const std::optional<utility::Config>& cfg) const {
+    if(cfg)
+    {
+        m_config = *cfg;
+    }
+
+    for (auto& mod : m_mods) {
+        spdlog::info("{:s}::on_config_load()", mod->get_name().data());
+        std::string togglename = std::string(mod->get_name());
+        togglename.append("_on");
+
+	    if (mod->m_is_enabled) {
+	    	*mod->m_is_enabled = m_config.get<bool>(togglename).value_or(false);
+	    	mod->on_config_load(m_config);
+	    }
+    }
 }
 
 void Mods::on_draw_debug_ui() const {
@@ -435,17 +441,34 @@ void Mods::on_draw_ui() const {
 
 void Mods::draw_entry(std::unique_ptr<Mod>& mod){
     //mod->get_hotkey_name()
-    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->ischecked);
+    auto window = ImGui::GetCurrentWindow();
+
+    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
-    if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    if (ImGui::Selectable(mod->m_full_name_string.c_str(), focusedmod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
         focusedmod = mod->get_name();
+    }
+
+    ImRect areaOfModName(cursorPos, ImVec2(window->Pos.x + window->Size.x, cursorPos.y + ImGui::GetItemRectSize().y));
+
+    auto mousePos = ImGui::GetMousePos();
+
+    bool isHovered = mousePos.x > areaOfModName.Min.x && mousePos.y > areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
+
+    if (isHovered) {
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.0f * g_framework->get_scale());
+    	KeyBindButton(mod->m_raw_full_name, std::string(mod->get_name()), g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
+		ImGui::PopStyleVar(1);
     }
 }
 
 
 void Mods::on_pagelist_ui(int page, float indent) {
   for (auto& mod : m_mods) {
-    if (page == mod->onpage) {
+    if (page == mod->m_on_page) {
       if (indent != 0.f) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
       }

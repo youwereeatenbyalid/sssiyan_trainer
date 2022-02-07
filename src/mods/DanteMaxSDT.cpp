@@ -38,12 +38,14 @@ void DanteMaxSDT::init_check_box_info() {
 std::optional<std::string> DanteMaxSDT::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DanteMaxSDT::cheaton;
-  onpage               = dantesdt;
+  m_is_enabled            = &DanteMaxSDT::cheaton;
+  m_on_page               = dantesdt;
 
-  full_name_string     = "Infinite SDT";
-  author_string        = "SSSiyan";
-  description_string   = "Sets the SDT Bar to maximum.";
+  m_full_name_string     = "Infinite SDT";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Sets the SDT Bar to maximum.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");

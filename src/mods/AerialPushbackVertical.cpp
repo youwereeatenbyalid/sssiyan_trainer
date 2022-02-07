@@ -58,12 +58,14 @@ void AerialPushbackVertical::init_check_box_info() {
 std::optional<std::string> AerialPushbackVertical::on_initialize() {
   init_check_box_info();
 
-  ischecked = &AerialPushbackVertical::cheaton;
-  onpage    = dantecheat;
+  m_is_enabled = &AerialPushbackVertical::cheaton;
+  m_on_page    = dantecheat;
 
   full_name_string   = "Move Height Edits (+)";
   author_string      = "SSSiyan";
   description_string = "Your character will rise more when performing certain moves.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr =

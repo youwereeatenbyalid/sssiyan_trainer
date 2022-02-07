@@ -74,6 +74,8 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   author_string = "VPZadov";
   description_string = "Vergil will gain SDT points when he gains DT points.";
 
+  set_up_hotkey();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   auto dtchange_addr = utility::scan(base, "F3 0F 11 A5 10 11 00 00");

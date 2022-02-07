@@ -40,11 +40,13 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
   init_check_box_info();
 
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-   ischecked = &NeroGP01overGerberaPickup::cheaton;
-   onpage    = bloodypalace;
-   full_name_string     = "GP01 over Gerbera Pickup";
-   author_string        = "Dr. Penguin, Siyan";
-   description_string   = "Replace all Gerbera picked up in BP with GP01.";
+   m_is_enabled = &NeroGP01overGerberaPickup::cheaton;
+   m_on_page    = bloodypalace;
+   m_full_name_string     = "GP01 over Gerbera Pickup";
+   m_author_string        = "Dr. Penguin, Siyan";
+   m_description_string   = "Replace all Gerbera picked up in BP with GP01.";
+
+  set_up_hotkey();
 
    auto addr = utility::scan(base, "44 89 59 20 41 B9 01 00 00 00");
    if (!addr) {

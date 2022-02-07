@@ -212,11 +212,13 @@ std::optional<std::string> MoveReplacer::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &MoveReplacer::cheaton;
-  onpage    = -1;
-  full_name_string     = "MoveReplacer";
-  author_string        = "The Hitchhiker";
-  description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
+  m_is_enabled = &MoveReplacer::cheaton;
+  m_on_page    = -1;
+  m_full_name_string     = "MoveReplacer";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "41 8B 1E 49 8B CD");
   auto filtercalladdr = utility::scan(base, "FE FE FF FF 48 83 C3 04 48 FF C7");

@@ -38,15 +38,18 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   init_check_box_info();
 
   
-  ischecked                  = &BufferedReversals::cheaton;
-  onpage                     = mechanics;
-  full_name_string           = "Reversals (+)";
-  author_string              = "Nekupaska, socks";
-  description_string		 = "Allows you to use directional moves in any direction.\n\n"
+  m_is_enabled                  = &BufferedReversals::cheaton;
+  m_on_page                     = mechanics;
+  m_full_name_string           = "Reversals (+)";
+  m_author_string              = "Nekupaska, socks";
+  m_description_string		 = "Allows you to use directional moves in any direction.\n\n"
 							   "During the recovery of a move, buffer a directional attack, then "
 							   "push the stick in a new direction and let go of lock on before the "
 							   "buffered attack comes out to change the direction it points.\n\n"
 							   "if 'Bufferless Reversals' is unticked, you will get buffered reversals instead.";
+							   
+  set_up_hotkey();
+							   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "48 89 87 40 17 00 00");
   if (!addr) {

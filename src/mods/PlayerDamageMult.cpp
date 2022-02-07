@@ -66,11 +66,13 @@ void PlayerDamageMult::init_check_box_info() {
 std::optional<std::string> PlayerDamageMult::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &PlayerDamageMult::cheaton;
-  onpage             = balance;
-  full_name_string   = "Damage Multiplier (+)";
-  author_string      = "Dante";
-  description_string = "Adjust the damage output of players and enemies.";
+  m_is_enabled          = &PlayerDamageMult::cheaton;
+  m_on_page             = balance;
+  m_full_name_string   = "Damage Multiplier (+)";
+  m_author_string      = "Dante";
+  m_description_string = "Adjust the damage output of players and enemies.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 5C 81 20");

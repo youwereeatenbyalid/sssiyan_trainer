@@ -104,13 +104,15 @@ void DeepTurbo::init_check_box_info() {
 std::optional<std::string> DeepTurbo::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DeepTurbo::cheaton;
-  onpage             = mechanics;
+  m_is_enabled          = &DeepTurbo::cheaton;
+  m_on_page             = mechanics;
 
-  full_name_string   = "Turbo (+)";
-  author_string      = "DeepDarkKapustka";
-  description_string = "Change the game speed by adjusting the slider.\n\n"
+  m_full_name_string   = "Turbo (+)";
+  m_author_string      = "DeepDarkKapustka";
+  m_description_string = "Change the game speed by adjusting the slider.\n\n"
                        "1.2 is the value used in DMC3 and DMC4.";
+
+  set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "89 46 68 44 89 6E 6C");

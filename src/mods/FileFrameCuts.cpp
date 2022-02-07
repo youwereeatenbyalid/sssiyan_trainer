@@ -102,12 +102,14 @@ void FileFrameCuts::init_check_box_info() {
 std::optional<std::string> FileFrameCuts::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &FileFrameCuts::cheaton;
-  onpage               = animation;
+  m_is_enabled            = &FileFrameCuts::cheaton;
+  m_on_page               = animation;
 
-  full_name_string     = "Frame Cuts (+)";
-  author_string        = "SSSiyan";
-  description_string   = "Cuts frames from various moves.";
+  m_full_name_string     = "Frame Cuts (+)";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Cuts frames from various moves.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 42 58 66 85 C0 74 0E");

@@ -56,12 +56,14 @@ void NeroSwapSidesteps::init_check_box_info() {
 std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NeroSwapSidesteps::cheaton;
-  onpage               = nero;
+  m_is_enabled            = &NeroSwapSidesteps::cheaton;
+  m_on_page               = nero;
 
-  full_name_string     = "Swap Sidesteps with Table Hopper";
-  author_string        = "SSSiyan";
-  description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
+  m_full_name_string     = "Swap Sidesteps with Table Hopper";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C7 40 10 1F 08 00 00");

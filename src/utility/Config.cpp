@@ -65,6 +65,14 @@ namespace utility {
         return true;
     }
 
+    void Config::append(const Config& other)
+    {
+        for(const auto& entry : other.get_key_values())
+        {
+            m_key_values[entry.first] = entry.second;
+        }
+    }
+
     // Added by Darkness
     bool Config::save() {
         if (!m_config_path.empty()) {
@@ -89,4 +97,5 @@ namespace utility {
             m_key_values[key] = value;
         }
     }
+
 }

@@ -33,12 +33,14 @@ void VergilInfJdCs::init_check_box_info() {
 std::optional<std::string> VergilInfJdCs::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilInfJdCs::cheaton;
-  onpage               = vergilcheat;
+  m_is_enabled            = &VergilInfJdCs::cheaton;
+  m_on_page               = vergilcheat;
 
-  full_name_string     = "Infinite Just Judgement Cuts";
-  author_string        = "SSSiyan";
-  description_string   = "Remove the consecutive Just Judgement Cut limit.";
+  m_full_name_string     = "Infinite Just Judgement Cuts";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Remove the consecutive Just Judgement Cut limit.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "FF 87 E0 18 00 00");

@@ -38,11 +38,13 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteGambits::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Gambits";
-  author_string        = "SSSiyan";
-  description_string   = "Infinite number of aerial gambits.";
+  m_is_enabled = &InfiniteGambits::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Gambits";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Infinite number of aerial gambits.";
+
+  set_up_hotkey();
   auto infinitegambit_addr = utility::scan(base, "FF 87 28 18 00 00 48");
 
   if (!infinitegambit_addr) {

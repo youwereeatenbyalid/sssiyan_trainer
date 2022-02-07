@@ -466,17 +466,17 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
-  ischecked = &DoppelWeaponSwitcher::cheaton;
-  onpage    = vergildoppel;
-  full_name_string     = "Doppelganger Weapon Switcher";
-  author_string        = "The HitchHiker";
-  description_string   = "Assign different weapons to the Doppelganger.\n"
+  m_is_enabled = &DoppelWeaponSwitcher::cheaton;
+  m_on_page    = vergildoppel;
+  m_full_name_string     = "Doppelganger Weapon Switcher";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Assign different weapons to the Doppelganger.\n"
                         "The Doppelganger will use the weapon you had equipped when you summoned it."
                         "Recalling the Doppelganger using the dpad will update its weapon.\n"
                         "Just Judgement Cuts can be performed at any time regardless of the weapon the"
                         "Doppelganger has equipped.";
   
-  
+  set_up_hotkey();
 
   DoppelWeaponSwitcher::yamatotype = staticbase+0x59DF358;
 

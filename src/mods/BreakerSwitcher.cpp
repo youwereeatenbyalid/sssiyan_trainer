@@ -189,13 +189,15 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &BreakerSwitcher::cheaton;
-  onpage    = breaker;
+  m_is_enabled = &BreakerSwitcher::cheaton;
+  m_on_page    = breaker;
 
-  full_name_string     = "Breaker Switcher (+)";
-  author_string        = "The Hitchhiker (original version by Nino)";
-  description_string   = "Make sure your d-pad is bound to breakaway, then "
+  m_full_name_string     = "Breaker Switcher (+)";
+  m_author_string        = "The Hitchhiker (original version by Nino)";
+  m_description_string   = "Make sure your d-pad is bound to breakaway, then "
                          "press a button on the d-pad to switch breakers.";
+
+  set_up_hotkey();
 
   auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");

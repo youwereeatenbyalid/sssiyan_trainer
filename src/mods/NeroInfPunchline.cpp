@@ -38,12 +38,14 @@ void NeroInfPunchline::init_check_box_info() {
 std::optional<std::string> NeroInfPunchline::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NeroInfPunchline::cheaton;
-  onpage               = nero;
+  m_is_enabled            = &NeroInfPunchline::cheaton;
+  m_on_page               = nero;
 
-  full_name_string     = "Infinite Punchline Duration";
-  author_string        = "SSSiyan";
-  description_string   = "Removes the ride timer on Punchline.";
+  m_full_name_string     = "Infinite Punchline Duration";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Removes the ride timer on Punchline.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "83 B8 B0 00 00 00 05");

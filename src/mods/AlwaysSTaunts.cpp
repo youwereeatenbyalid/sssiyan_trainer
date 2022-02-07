@@ -88,12 +88,14 @@ void AlwaysSTaunts::init_check_box_info() {
 std::optional<std::string> AlwaysSTaunts::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &AlwaysSTaunts::cheaton;
-  onpage             = taunt;
+  m_is_enabled          = &AlwaysSTaunts::cheaton;
+  m_on_page             = taunt;
 
-  full_name_string   = "Always S+ Taunts (+)";
-  author_string      = "SSSiyan";
-  description_string = "Restricts your taunts to those that play when at S rank or above.";
+  m_full_name_string   = "Always S+ Taunts (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Restricts your taunts to those that play when at S rank or above.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "8B 88 B0 00 00 00 48 8B 15");

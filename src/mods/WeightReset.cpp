@@ -136,12 +136,14 @@ void WeightReset::init_check_box_info() {
 std::optional<std::string> WeightReset::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &WeightReset::cheaton;
-  onpage               = mechanics;
+  m_is_enabled            = &WeightReset::cheaton;
+  m_on_page               = mechanics;
 
-  full_name_string     = "Reset Weight";
-  author_string        = "SSSiyan";
-  description_string   = "Air Hikes and Divekick will reset your weight";
+  m_full_name_string     = "Reset Weight";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Air Hikes and Divekick will reset your weight";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "88 43 24 48 8B 42 38");

@@ -40,12 +40,14 @@ void DanteVariableGuard::init_check_box_info() {
 std::optional<std::string> DanteVariableGuard::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DanteVariableGuard::cheaton;
-  onpage               = dantecheat;
+  m_is_enabled            = &DanteVariableGuard::cheaton;
+  m_on_page               = dantecheat;
 
-  full_name_string     = "Guard Meter Lock (+)";
-  author_string        = "SSSiyan";
-  description_string   = "Lock Guard meter to whatever level you want.";
+  m_full_name_string     = "Guard Meter Lock (+)";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Lock Guard meter to whatever level you want.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 5A 28 0F 57");

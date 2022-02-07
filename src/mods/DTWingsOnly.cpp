@@ -31,11 +31,13 @@ std::optional<std::string> DTWingsOnly::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DTWingsOnly::cheaton;
-  onpage               = commoncheat;
-  full_name_string     = "Nero Wings only DT";
-  author_string        = "The Hitchhiker";
-  description_string   = "Nero DT only wings.";
+  m_is_enabled = &DTWingsOnly::cheaton;
+  m_on_page               = commoncheat;
+  m_full_name_string     = "Nero Wings only DT";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Nero DT only wings.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "48 83 78 18 00 0F 94 C0 48 8B 6C 24 50");
   if (!addr) {

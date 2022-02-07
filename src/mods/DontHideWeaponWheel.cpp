@@ -42,11 +42,13 @@ std::optional<std::string> DontHideWeaponWheel::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DontHideWeaponWheel::cheaton;
-  onpage    = camera;
-  full_name_string     = "Never Hide Guns/Weapons HUD";
-  author_string        = "SSSiyan";
-  description_string   = "The weapon wheel always stays out.";
+  m_is_enabled = &DontHideWeaponWheel::cheaton;
+  m_on_page    = camera;
+  m_full_name_string     = "Never Hide Guns/Weapons HUD";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "The weapon wheel always stays out.";
+
+  set_up_hotkey();
   auto donthideweaponandgun_addr = utility::scan(base, "F3 0F 11 4F 40 77");
 
   if (!donthideweaponandgun_addr) {

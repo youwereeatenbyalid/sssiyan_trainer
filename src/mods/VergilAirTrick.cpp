@@ -316,11 +316,13 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergiltrick;
-	full_name_string = "Air Trick settings (+)";
-	author_string = "VPZadov";
-	description_string = "Change air trick's speed, finish offset and delay before perform.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergiltrick;
+	m_full_name_string = "Air Trick settings (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Change air trick's speed, finish offset and delay before perform.";
+
+  set_up_hotkey();
 
 	auto waitTimeAddr = utility::scan(base, "07 00 00 8B 86 B8 00 00 00"); //DevilMayCry5.exe+1DDCB5D
     if (!waitTimeAddr) {

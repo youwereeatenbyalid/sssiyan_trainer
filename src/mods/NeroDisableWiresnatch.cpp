@@ -65,12 +65,14 @@ void NeroDisableWiresnatch::init_check_box_info() {
 std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NeroDisableWiresnatch::cheaton;
-  onpage             = wiresnatch;
+  m_is_enabled          = &NeroDisableWiresnatch::cheaton;
+  m_on_page             = wiresnatch;
 
-  full_name_string   = "Disable Wiresnatch";
-  author_string      = "SSSiyan";
-  description_string = "Disables Wiresnatch to allow breaker abilities while locked on.";
+  m_full_name_string   = "Disable Wiresnatch";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Disables Wiresnatch to allow breaker abilities while locked on.";
+
+  set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "80 BA D0 0E 00 00 00 75 21");

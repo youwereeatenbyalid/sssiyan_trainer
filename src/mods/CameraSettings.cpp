@@ -214,12 +214,14 @@ void CameraSettings::init_check_box_info() {
 std::optional<std::string> CameraSettings::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &CameraSettings::cheaton;
-  onpage             = camera;
+  m_is_enabled          = &CameraSettings::cheaton;
+  m_on_page             = camera;
 
-  full_name_string   = "Camera Settings (+)";
-  author_string      = "SSSiyan";
-  description_string = "Change various camera settings.";
+  m_full_name_string   = "Camera Settings (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Change various camera settings.";
+
+  set_up_hotkey();
 
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE

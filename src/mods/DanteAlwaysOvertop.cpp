@@ -72,12 +72,14 @@ void DanteAlwaysOvertop::init_check_box_info() {
 std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DanteAlwaysOvertop::cheaton;
-  onpage             = dantecheat;
+  m_is_enabled          = &DanteAlwaysOvertop::cheaton;
+  m_on_page             = dantecheat;
 
-  full_name_string   = "Always Overtop";
-  author_string      = "SSSiyan";
-  description_string = "Forces Cavaliere to always use its highest gear.";
+  m_full_name_string   = "Always Overtop";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Forces Cavaliere to always use its highest gear.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "89 B7 40 03 00 00 48 8B");

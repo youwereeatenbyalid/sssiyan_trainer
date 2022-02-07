@@ -62,6 +62,8 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   full_name_string     = "Select Enemy Difficulty (+)";
   author_string        = "The Hitchhiker";
   description_string   = "Set the difficulty of enemies in combat.";
+
+  set_up_hotkey();
   auto missionenemydifficulty_addr = utility::scan(base, "89 B8 8C 00 00 00");
 
   if (!missionenemydifficulty_addr) {

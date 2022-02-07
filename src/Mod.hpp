@@ -381,20 +381,22 @@ public:
 
     // Called when ModFramework::initialize finishes in the first render frame
     // Returns an error string if it fails
-    virtual std::optional<std::string> on_initialize() { return std::nullopt; };
+    virtual std::optional<std::string> on_initialize() { return std::nullopt; }
 
     // Functionally equivalent, but on_frame will always get called, on_draw_ui can be disabled by ModFramework
-    virtual void on_frame() {};
-    virtual void on_draw_ui() {};
-	virtual void on_draw_debug_ui() {};
-    bool* ischecked;
-    int onpage =-1;
-    ModKey modkeytoggle = ModKey("hotkey_on");
-    std::string full_name_string = "Mod Name";
-    std::string author_string = "Author Name";
-    std::string description_string = "Description of the mod.\nNew line commands should work";
-    virtual void on_config_load(const utility::Config& cfg) {};
-    virtual void on_config_save(utility::Config& cfg) {};
+    virtual void on_frame() {}
+    virtual void on_draw_ui() {}
+	virtual void on_draw_debug_ui() {}
+    bool* m_is_enabled{ nullptr };
+    //bool& m_is_enabled = *ischecked;
+    int m_on_page =-1;
+    //ModKey modkeytoggle = ModKey("hotkey_on");
+    std::string m_full_name_string = "Mod Name";
+    std::string m_raw_full_name = "Mod Name";
+    std::string m_author_string = "Author Name";
+    std::string m_description_string = "Description of the mod.\nNew line commands should work";
+    virtual void on_config_load(const utility::Config& cfg) {}
+    virtual void on_config_save(utility::Config& cfg) {}
     // Game-specific callbacks
     /*
     virtual void on_pre_update_transform(RETransform* transform) {};
@@ -415,5 +417,31 @@ public:
 public:
     virtual void init_check_box_info() { return; };
     virtual std::string get_checkbox_name() { return "UnknownMod"; };
-    virtual std::string get_hotkey_name() { return "UnknownMod"; };
+	virtual std::string get_hotkey_name() { return "UnknownMod"; };
+
+
+	virtual void set_up_hotkey() {
+        m_raw_full_name = m_full_name_string;
+
+        // Not ideal
+        if (m_raw_full_name.size() > 4) {
+            if (m_raw_full_name.substr(m_raw_full_name.size() - 4, 4) == " (+)") {
+                m_raw_full_name = m_raw_full_name.substr(0, m_raw_full_name.size() - 4);
+            }
+        }
+
+		g_keyBinds.Get()->AddBind(std::string(get_name()),
+			[this]() {
+
+				if(m_is_enabled != nullptr) *m_is_enabled = !*m_is_enabled;
+
+                {
+                    ImGuiToast toast(*m_is_enabled ? ImGuiToastType_Success : ImGuiToastType_Error, 500);
+
+                    toast.set_title("%s: %s", m_raw_full_name.c_str(), *m_is_enabled ? "Activated!" : "Deactivated!");
+
+                    g_framework->queue_notification(toast);
+                }
+			}, OnState_Press);
+	}
 };

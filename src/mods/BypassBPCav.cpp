@@ -38,12 +38,14 @@ void BypassBPCav::init_check_box_info() {
 std::optional<std::string> BypassBPCav::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &BypassBPCav::cheaton;
-  onpage             = bloodypalace;
+  m_is_enabled          = &BypassBPCav::cheaton;
+  m_on_page             = bloodypalace;
 
-  full_name_string   = "Bypass BP Cavaliere Restriction";
-  author_string      = "SSSiyan";
-  description_string = "Allows you to take Cavaliere R into Bloody Palace.";
+  m_full_name_string   = "Bypass BP Cavaliere Restriction";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Allows you to take Cavaliere R into Bloody Palace.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "C8 00 EB 44 3B 70 1C 72 11");

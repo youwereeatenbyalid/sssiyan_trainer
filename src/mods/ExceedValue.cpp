@@ -45,6 +45,8 @@ std::optional<std::string> ExceedValue::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Set/Lock Nero's Exceed.";
 
+  set_up_hotkey();
+
   auto addr = utility::scan(base, "48 8B 88 48 19 00 00 33 F6 48 85");
   if (!addr) {
     return "Unable to find ExceedValue pattern.";

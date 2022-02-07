@@ -5,6 +5,9 @@
 
 using namespace std;
 
+bool D3D11Hook::m_execute_present_detour{ true };
+bool D3D11Hook::m_execute_resize_buffer_detour{ true };
+
 static D3D11Hook* g_d3d11_hook = nullptr;
 
 D3D11Hook::~D3D11Hook() {
@@ -64,17 +67,35 @@ bool D3D11Hook::unhook() {
     return false;
 }
 
+void D3D11Hook::skip_detours(const std::function<void()>& code)
+{
+    const bool back_present         = m_execute_present_detour;
+    const bool back_resize_buffer   = m_execute_resize_buffer_detour;
+
+    m_execute_present_detour        = false;
+    m_execute_resize_buffer_detour  = false;
+
+    code();
+
+    m_execute_present_detour        = back_present;
+    m_execute_resize_buffer_detour  = back_resize_buffer;
+}
+
 HRESULT WINAPI D3D11Hook::present(IDXGISwapChain* swap_chain, UINT sync_interval, UINT flags) {
     auto d3d11 = g_d3d11_hook;
 
-    d3d11->m_swap_chain = swap_chain;
-    swap_chain->GetDevice(__uuidof(d3d11->m_device), (void**)&d3d11->m_device);
-    
     // This line must be called before calling our detour function because we might have to unhook the function inside our detour.
     auto present_fn = d3d11->m_present_hook->get_original<decltype(D3D11Hook::present)>();
 
-    if (d3d11->m_on_present) {
-        d3d11->m_on_present(*d3d11);
+    if (m_execute_present_detour) {
+        D3D11HOOK_INTERNAL({
+            d3d11->m_swap_chain = swap_chain;
+            swap_chain->GetDevice(__uuidof(d3d11->m_device), (void**)&d3d11->m_device);
+
+            if (d3d11->m_on_present) {
+                d3d11->m_on_present(*d3d11);
+            }
+        });
     }
 
     return present_fn(swap_chain, sync_interval, flags);
@@ -83,11 +104,15 @@ HRESULT WINAPI D3D11Hook::present(IDXGISwapChain* swap_chain, UINT sync_interval
 HRESULT WINAPI D3D11Hook::resize_buffers(IDXGISwapChain* swap_chain, UINT buffer_count, UINT width, UINT height, DXGI_FORMAT new_format, UINT swap_chain_flags) {
     auto d3d11 = g_d3d11_hook;
 
-    if (d3d11->m_on_resize_buffers) {
-        d3d11->m_on_resize_buffers(*d3d11);
-    }
-
     auto resize_buffers_fn = d3d11->m_resize_buffers_hook->get_original<decltype(D3D11Hook::resize_buffers)>();
+
+    if (m_execute_resize_buffer_detour) {
+        D3D11HOOK_INTERNAL({
+            if (d3d11->m_on_resize_buffers) {
+                d3d11->m_on_resize_buffers(*d3d11);
+            }
+        });
+    }
 
     return resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "Mod.hpp"
 #include <filesystem>
+#include "fw-imgui/ui.hpp"
+
 class Mods {
 public:
     Mods();
@@ -16,16 +18,20 @@ public:
     std::string get_focused_mod() const;
     void on_pagelist_ui(int page, float indent = 0.f);
     void save_mods();
-    void load_mods() const;
+    void load_mods(const std::optional<utility::Config>& cfg = std::nullopt) const;
     /*void static addressseek();
     std::string get_module_path(void* address) const;*/
-    const auto& get_mods() const {
+    auto& get_config()
+    {
+        return m_config;
+    }
+
+	const auto& get_mods() const {
         return m_mods;
     }
 
 private:
     mutable std::string focusedmod;
-    mutable bool redrawfocusedwindow;
     std::vector<std::unique_ptr<Mod>> m_mods;
     utility::Config m_config;
 };

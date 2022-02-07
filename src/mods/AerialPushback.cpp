@@ -79,12 +79,13 @@ void AerialPushback::init_check_box_info() {
 std::optional<std::string> AerialPushback::on_initialize() {
     init_check_box_info();
 
-  ischecked = &AerialPushback::cheaton;
-  onpage    = dantecheat;
-
+  m_is_enabled = &AerialPushback::cheaton;
+  m_on_page    = dantecheat;
   full_name_string   = "Move Pushback Edits (+)";
   author_string      = "SSSiyan";
   description_string = "Your character will be pushed back more than usual when performing certain moves.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   /*auto addr = AerialPushbackVertical::jmp_ret; // utility::scan(base, "F3 0F 11 57 28 48 8B 43 50 48 83 78 18 00 0F"); // DevilMayCry5.exe+1445670

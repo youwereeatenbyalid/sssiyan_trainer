@@ -40,12 +40,14 @@ void DanteAlwaysQ4SDT::init_check_box_info() {
 std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DanteAlwaysQ4SDT::cheaton;
-  onpage             = dantesdt;
+  m_is_enabled          = &DanteAlwaysQ4SDT::cheaton;
+  m_on_page             = dantesdt;
 
-  full_name_string   = "Always Quadruple S";
-  author_string      = "SSSiyan";
-  description_string = "Removes the style requirement for Quadruple S.";
+  m_full_name_string   = "Always Quadruple S";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Removes the style requirement for Quadruple S.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "83 B8 B0 00 00 00 07");

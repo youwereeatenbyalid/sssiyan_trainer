@@ -33,16 +33,19 @@ std::optional<std::string> OriginalReversals::on_initialize() {
   init_check_box_info();
 
   
-  ischecked                  = &OriginalReversals::cheaton;
-  onpage                     = mechanics;
-  full_name_string           = "Original Reversals";
-  author_string              = "SSSiyan";
-  description_string		 = "Allows you to use directional moves in any direction.\n\n"
+  m_is_enabled                  = &OriginalReversals::cheaton;
+  m_on_page                     = mechanics;
+  m_full_name_string           = "Original Reversals";
+  m_author_string              = "SSSiyan";
+  m_description_string		 = "Allows you to use directional moves in any direction.\n\n"
 							   "During the recovery of a move, buffer a directional attack, then "
 							   "push the stick in a new direction and let go of lock on before the "
 							   "buffered attack comes out to change the direction it points.\n\n"
 							   "When using only this checkbox, reversals will work identically to how they did in the demo.\n\n"
 							   "This is added as a separate checkbox so you can stack it with the old reversals as there may be some unique possiblities.";
+							   
+  set_up_hotkey();
+							   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 BF D0 0E 00 00 00 8B");
   if (!addr) {

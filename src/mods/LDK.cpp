@@ -522,12 +522,14 @@ static naked void hitvfx_nohitlines_detour() {
 std::optional<std::string> LDK::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &LDK::cheaton;
-  onpage               = gamemode;
+  m_is_enabled            = &LDK::cheaton;
+  m_on_page               = gamemode;
 
-  full_name_string     = "Legendary Dark Knights (+)";
-  author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
-  description_string   = "Enables the Legendary Dark Knights Gamemode.";
+  m_full_name_string     = "Legendary Dark Knights (+)";
+  m_author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
+  m_description_string   = "Enables the Legendary Dark Knights Gamemode.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
