@@ -41,7 +41,7 @@ std::optional<std::string> ExceedValue::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &ExceedValue::cheaton;
   onpage    = nero;
-  full_name_string     = "Set Exceed Level";
+  full_name_string     = "Set Exceed Level (+)";
   author_string        = "The Hitchhiker";
   description_string   = "Set/Lock Nero's Exceed.";
 

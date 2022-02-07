@@ -285,7 +285,7 @@ std::optional<std::string> FileEditor::on_initialize() {
   ischecked = &m_is_active;
   onpage    = gamemode;
 
-  full_name_string     = "Asset Swapper";
+  full_name_string     = "Asset Swapper (+)";
   author_string        = "Darkness (TheDarkness704)";
   description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
 

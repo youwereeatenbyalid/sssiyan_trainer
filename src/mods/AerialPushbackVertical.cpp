@@ -61,7 +61,7 @@ std::optional<std::string> AerialPushbackVertical::on_initialize() {
   ischecked = &AerialPushbackVertical::cheaton;
   onpage    = dantecheat;
 
-  full_name_string   = "Move Height Edits";
+  full_name_string   = "Move Height Edits (+)";
   author_string      = "SSSiyan";
   description_string = "Your character will rise more when performing certain moves.";
 

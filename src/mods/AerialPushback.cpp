@@ -82,7 +82,7 @@ std::optional<std::string> AerialPushback::on_initialize() {
   ischecked = &AerialPushback::cheaton;
   onpage    = dantecheat;
 
-  full_name_string   = "Move Pushback Edits";
+  full_name_string   = "Move Pushback Edits (+)";
   author_string      = "SSSiyan";
   description_string = "Your character will be pushed back more than usual when performing certain moves.";
 

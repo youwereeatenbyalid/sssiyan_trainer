@@ -59,7 +59,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   ischecked = &DifficultySelect::cheaton;
   onpage    = balance;
-  full_name_string     = "Select Enemy Difficulty";
+  full_name_string     = "Select Enemy Difficulty (+)";
   author_string        = "The Hitchhiker";
   description_string   = "Set the difficulty of enemies in combat.";
   auto missionenemydifficulty_addr = utility::scan(base, "89 B8 8C 00 00 00");

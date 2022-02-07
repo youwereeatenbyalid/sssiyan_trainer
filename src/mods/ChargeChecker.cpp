@@ -97,7 +97,7 @@ std::optional<std::string> ChargeChecker::on_initialize() {
   ischecked          = &ChargeChecker::cheaton;
   onpage             = nero;
 
-  full_name_string   = "Faster Charges";
+  full_name_string   = "Faster Charges (+)";
   author_string      = "SSSiyan";
   description_string = "Speed up or slow down charges bound to hold inputs.";
 

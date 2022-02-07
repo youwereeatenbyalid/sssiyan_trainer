@@ -78,7 +78,7 @@ std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   ischecked          = &NeroSwapWiresnatch::cheaton;
   onpage             = wiresnatch;
 
-  full_name_string   = "Angel and Devil Snatch";
+  full_name_string   = "Angel and Devil Snatch (+)";
   author_string      = "SSSiyan";
   description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
 
