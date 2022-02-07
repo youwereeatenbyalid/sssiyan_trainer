@@ -255,7 +255,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   description_string      = "Allows you to skip to a BP stage of your choosing.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "38 4B 79 75 03");
+  auto addr = patterns.find_addr(base, "38 4B 79 75 03");
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }

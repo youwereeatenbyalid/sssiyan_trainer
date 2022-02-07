@@ -66,11 +66,11 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
   description_string   = "Sets ignition to full when you switch modes.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F2 0F 5C C8 66 0F 5A D1 F3 0F 11 97 68 03 00 00 48 8B 43 50 48 39 68 18 0F 85 17");
+  auto addr = patterns.find_addr(base, "F2 0F 5C C8 66 0F 5A D1 F3 0F 11 97 68 03 00 00 48 8B 43 50 48 39 68 18 0F 85 17");
   if (!addr) {
     return "Unable to find DanteInfIgnition pattern.";
   }
-  auto addr2 = utility::scan(base, "65 8B 83 74 03 00 00 0F 57 C0 0F 57 D2 F2 48 0F 2A C0 8B 83 78 03 00 00");
+  auto addr2 = patterns.find_addr(base, "65 8B 83 74 03 00 00 0F 57 C0 0F 57 D2 F2 48 0F 2A C0 8B 83 78 03 00 00");
   if (!addr2) {
     return "Unable to find DanteInfIgnition2 pattern.";
   }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include <filesystem>
+#include "InitPatternsManager.hpp"
 class Mods {
 public:
     Mods();

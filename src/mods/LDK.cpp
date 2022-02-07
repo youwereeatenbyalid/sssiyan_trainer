@@ -534,53 +534,53 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::containernum_addr = staticbase + 0x07E836F8;
 
 
-  auto enemynumber_addr = utility::scan(base, "8B 40 70 89 87 50 07 00 00");
+  auto enemynumber_addr = patterns.find_addr(base, "8B 40 70 89 87 50 07 00 00");
   if (!enemynumber_addr) {
     return "Unable to find Enemy Number pattern.";
   }
-  auto capbypass_addr1 = utility::scan(base, "3B 41 30 7D 12");
+  auto capbypass_addr1 = patterns.find_addr(base, "3B 41 30 7D 12");
   if (!capbypass_addr1) {
     return "Unable to find Cap bypass 1 pattern.";
   }
-  auto capbypass_addr2 = utility::scan(base, "44 3B F0 7E 52");
+  auto capbypass_addr2 = patterns.find_addr(base, "44 3B F0 7E 52");
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
   }
-  auto nopfunction_addr1 = utility::scan(base, "E8 D7 0C 07 FF");
+  auto nopfunction_addr1 = patterns.find_addr(base, "E8 D7 0C 07 FF");
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }
-  auto nopfunction_1_call = utility::scan(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
+  auto nopfunction_1_call = patterns.find_addr(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
   if (!nopfunction_1_call) {
 	  return "Unable to find nop function call pattern.";
   }
-  auto vergildivebomb_addr = utility::scan(base, "C7 40 10 15 00 00 00 48");
+  auto vergildivebomb_addr = patterns.find_addr(base, "C7 40 10 15 00 00 00 48");
   if (!vergildivebomb_addr) {
 	  return "Unable to find vergildivebomb pattern.";
   }
-  auto cavforcevalid_addr = utility::scan(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
+  auto cavforcevalid_addr = patterns.find_addr(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
   if (!cavforcevalid_addr) {
 	  return "Unable to find cavforcevalid pattern.";
   }
-  auto cavforcelightning_addr = utility::scan(base, "41 89 8D 30 0E 00 00");
+  auto cavforcelightning_addr = patterns.find_addr(base, "41 89 8D 30 0E 00 00");
   if (!cavforcelightning_addr) {
 	  return "Unable to find cavforcelightning pattern.";
   }
-  auto cavcoordinatechange_addr = utility::scan(base, "49 8B 4D 10 F3 0F 11 45 90");
+  auto cavcoordinatechange_addr = patterns.find_addr(base, "49 8B 4D 10 F3 0F 11 45 90");
   if (!cavcoordinatechange_addr) {
 	  return "Unable to find cavcoordinatechange pattern.";
   }
-  auto hitvfxskip_addr = utility::scan(base, "75 F3 48 85 ED");
+  auto hitvfxskip_addr = patterns.find_addr(base, "75 F3 48 85 ED");
   if (!hitvfxskip_addr) {
     return "Unable to find hitvfxskip_addr pattern.";
   }
 
-  auto waittime_addr = utility::scan(base, "49 63 40 24 48 89 5C 24 50"); //DevilMayCry5.exe+11C5E9C 
+  auto waittime_addr = patterns.find_addr(base, "49 63 40 24 48 89 5C 24 50"); //DevilMayCry5.exe+11C5E9C 
   if (!waittime_addr) {
     return "Unable to find waittime_addr pattern.";
   }
 
-  auto dontdrawhitlines_addr = utility::scan(base, "76 80 78 51 00 74 04"); //DevilMayCry5.exe+916E9D
+  auto dontdrawhitlines_addr = patterns.find_addr(base, "76 80 78 51 00 74 04"); //DevilMayCry5.exe+916E9D
   if (!dontdrawhitlines_addr) {
     return "Unable to find LDK.dontdrawhitlines_addr pattern.";
   }

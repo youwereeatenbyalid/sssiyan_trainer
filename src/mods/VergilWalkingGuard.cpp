@@ -41,7 +41,7 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Vergil can perform block while he moving.";
 
-	auto isPadInputAddr = utility::scan(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)
+	auto isPadInputAddr = patterns.find_addr(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)
 	if (!isPadInputAddr)
 	{
 		return "Unanable to find VergilWalkingGuard.isPadInputAddr pattern.";

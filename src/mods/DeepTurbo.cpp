@@ -113,16 +113,16 @@ std::optional<std::string> DeepTurbo::on_initialize() {
                        "1.2 is the value used in DMC3 and DMC4.";
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "89 46 68 44 89 6E 6C");
+  auto addr1 = patterns.find_addr(base, "89 46 68 44 89 6E 6C");
   if (!addr1) {
     return "Unable to find DeepTurbo1 pattern.";
   }
-  auto addr2 = utility::scan(base, "F3 0F 10 80 88 03 00 00 48");
+  auto addr2 = patterns.find_addr(base, "F3 0F 10 80 88 03 00 00 48");
   if (!addr2) {
     return "Unable to find DeepTurbo2 pattern.";
   }
 
-  auto isCutsceneAddr = utility::scan(base, "88 8E 94 00 00 00");//DevilMayCry5.exe+FD9606
+  auto isCutsceneAddr = patterns.find_addr(base, "88 8E 94 00 00 00");//DevilMayCry5.exe+FD9606
   if (!isCutsceneAddr)
   {
       return "Unable to find DeepTurbo.isCutsceneAddr.";

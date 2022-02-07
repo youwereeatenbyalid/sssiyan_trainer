@@ -64,7 +64,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
   full_name_string     = "Super Moves outside of DT";
   author_string        = "The Hitchhiker";
   description_string   = "Use Max Bet & Showdown outside of Devil Trigger.";
-  auto maxbetnodt_addr = utility::scan(base, "83 BA B0 09 00 00 01 0F 85 CE");
+  auto maxbetnodt_addr = patterns.find_addr(base, "83 BA B0 09 00 00 01 0F 85 CE");
 
   if (!maxbetnodt_addr) {
     return "Unable to find maxbetnodt pattern.";
@@ -74,7 +74,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize maxbetnodt";
   }
-  auto showdownnodt_addr = utility::scan(base, "83 BA B0 09 00 00 01 0F 85 17");
+  auto showdownnodt_addr = patterns.find_addr(base, "83 BA B0 09 00 00 01 0F 85 17");
 
   if (!showdownnodt_addr) {
     return "Unable to find showdownnodt pattern.";

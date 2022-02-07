@@ -49,7 +49,7 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   description_string = "Set the maximum number of Just Judgement Cuts Vergil can perform in a row.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto init_addr = utility::scan(base, "8B 47 48 39 81 E0 18 00 00");
+  auto init_addr = patterns.find_addr(base, "8B 47 48 39 81 E0 18 00 00");
   if (!init_addr)
     return "Unable to find VergilSetMaxJJC pattern.";
 

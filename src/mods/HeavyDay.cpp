@@ -709,22 +709,22 @@ std::optional<std::string> HeavyDay::on_initialize() {
   description_string   = "Enables PVP Combat between players."
       "All players must have the cheat enabled for the mod to work correctly.";
 
-  auto enemystep_addr = utility::scan(base, "85 C9 0F 84 AA 00 00 00 F3 0F 10 8B");
-  auto lockon_addr = utility::scan(base, "39 82 08 01 00 00 0F");
-  auto targetswitch_addr = utility::scan(base, "44 85 A7 90 00 00 00");
-  auto damageall_addr = utility::scan(base, "41 8B 40 20 83 F9 01");
-  auto pvp1_addr = utility::scan(base, "83 BB F4 00 00 00 01");
-  auto pvp2_addr         = utility::scan(base, "41 8B 86 F4 00 00 00");
-  auto danteclientside_addr = utility::scan(base, "8B 42 5C 83 F8 10 74 36");
-  auto dtenable_addr = utility::scan(base, "0F 87 60 01 00 00 A9");
-  auto rgenable_addr = utility::scan(base, "41 80 B8 CA 0E 00 00 00 74 58");
-  auto rgmod_addr = utility::scan(base, "4D F3 0F 10 4A 28");
-  auto combatmode_addr = utility::scan(base, "41 88 86 93 00 00 00");
-  auto dantefix_addr = utility::scan(base, "41 8D 50 38 E8 23 F4 76 01");
+  auto enemystep_addr = patterns.find_addr(base, "85 C9 0F 84 AA 00 00 00 F3 0F 10 8B");
+  auto lockon_addr = patterns.find_addr(base, "39 82 08 01 00 00 0F");
+  auto targetswitch_addr = patterns.find_addr(base, "44 85 A7 90 00 00 00");
+  auto damageall_addr = patterns.find_addr(base, "41 8B 40 20 83 F9 01");
+  auto pvp1_addr = patterns.find_addr(base, "83 BB F4 00 00 00 01");
+  auto pvp2_addr         = patterns.find_addr(base, "41 8B 86 F4 00 00 00");
+  auto danteclientside_addr = patterns.find_addr(base, "8B 42 5C 83 F8 10 74 36");
+  auto dtenable_addr = patterns.find_addr(base, "0F 87 60 01 00 00 A9");
+  auto rgenable_addr = patterns.find_addr(base, "41 80 B8 CA 0E 00 00 00 74 58");
+  auto rgmod_addr = patterns.find_addr(base, "4D F3 0F 10 4A 28");
+  auto combatmode_addr = patterns.find_addr(base, "41 88 86 93 00 00 00");
+  auto dantefix_addr = patterns.find_addr(base, "41 8D 50 38 E8 23 F4 76 01");
 
-  auto styleenable1_addr = utility::scan(base, "83 F8 39 0F 84 95 08 00 00");
-  auto styleenable2_addr = utility::scan(base, "0F 87 4C 0D 00 00");
-  auto styleenableend_addr = utility::scan(base,"23 00 00 44 0F 28 4C 24 70");
+  auto styleenable1_addr = patterns.find_addr(base, "83 F8 39 0F 84 95 08 00 00");
+  auto styleenable2_addr = patterns.find_addr(base, "0F 87 4C 0D 00 00");
+  auto styleenableend_addr = patterns.find_addr(base,"23 00 00 44 0F 28 4C 24 70");
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
   }

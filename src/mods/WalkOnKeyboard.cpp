@@ -52,7 +52,7 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
   author_string        = "SSSiyan";
   description_string   = "Your character will walk rather than run.";
 
-  auto addr = utility::scan(base, "F3 41 0F 11 46 30 48 8B 46");
+  auto addr = patterns.find_addr(base, "F3 41 0F 11 46 30 48 8B 46");
   if (!addr) {
     return "Unable to find WalkOnKeyboard pattern.";
   }

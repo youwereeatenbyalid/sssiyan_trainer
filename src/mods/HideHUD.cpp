@@ -77,7 +77,7 @@ std::optional<std::string> HideHUD::on_initialize() {
   description_string      = "Disables elements of the Heads Up Display.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "89 83 C4 00 00 00 F3");
+  auto addr = patterns.find_addr(base, "89 83 C4 00 00 00 F3");
   if (!addr) {
     return "Unable to find HideHUD pattern.";
   }

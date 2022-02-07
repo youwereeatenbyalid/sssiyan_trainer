@@ -72,17 +72,17 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Allow to change Z axis appear offset and remove distance restriction.";
 
-	auto distanceAddr0 = utility::scan(base, "F3 0F 10 4A 10 0F 57 C0 F3 41 0F 5A C2"); //DevilMayCry5.exe+F24790
+	auto distanceAddr0 = patterns.find_addr(base, "F3 0F 10 4A 10 0F 57 C0 F3 41 0F 5A C2"); //DevilMayCry5.exe+F24790
 	if (!distanceAddr0) {
 		return "Unanable to find DanteAirTrickSettings.distanceAddr0 pattern.";
 	}
 
-	auto distanceAddr1 = utility::scan(base, "F3 41 0F 10 40 10 0F 5A C0 48 85 C0"); //DevilMayCry5.exe+F256F3
+	auto distanceAddr1 = patterns.find_addr(base, "F3 41 0F 10 40 10 0F 5A C0 48 85 C0"); //DevilMayCry5.exe+F256F3
 	if (!distanceAddr1) {
 		return "Unanable to find DanteAirTrickSettings.distanceAddr1 pattern.";
 	}
 
-	auto offsetAddr = utility::scan(base, "F3 0F 10 4F 68 48 8D 47"); //DevilMayCry5.exe+F25034
+	auto offsetAddr = patterns.find_addr(base, "F3 0F 10 4F 68 48 8D 47"); //DevilMayCry5.exe+F25034
 	if (!offsetAddr) {
 		return "Unanable to find DanteAirTrickSettings.offsetAddr pattern.";
 	}

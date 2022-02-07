@@ -47,12 +47,12 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   description_string   = "Allows you to trick to enemies without using an embedded sword.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
+  auto addr = patterns.find_addr(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
   if (!addr) {
     return "Unable to find VergilAirTrickNoSS pattern.";
   }
 
-  VergilAirTrickNoSS::jmp_je = addr.value() + 0x1C6; //utility::scan(base, "F3 0F 10 15 93 D6 09 04").value();
+  VergilAirTrickNoSS::jmp_je = addr.value() + 0x1C6; //patterns.find_addr(base, "F3 0F 10 15 93 D6 09 04").value();
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
     //  return a error string in case something goes wrong

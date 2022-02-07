@@ -48,7 +48,7 @@ std::optional<std::string> DisableGauntletStages::on_initialize() {
   description_string = "Recommended for use with Breaker Switcher or Infinite Breakers.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "39 98 64 0E 00 00"); // DevilMayCry5.exe+367DAB
+  auto addr = patterns.find_addr(base, "39 98 64 0E 00 00"); // DevilMayCry5.exe+367DAB
   if (!addr) {
     return "Unable to find DisableGauntletStages pattern.";
   }

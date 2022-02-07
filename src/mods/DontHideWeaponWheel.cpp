@@ -47,7 +47,7 @@ std::optional<std::string> DontHideWeaponWheel::on_initialize() {
   full_name_string     = "Never Hide Guns/Weapons HUD";
   author_string        = "SSSiyan";
   description_string   = "The weapon wheel always stays out.";
-  auto donthideweaponandgun_addr = utility::scan(base, "F3 0F 11 4F 40 77");
+  auto donthideweaponandgun_addr = patterns.find_addr(base, "F3 0F 11 4F 40 77");
 
   if (!donthideweaponandgun_addr) {
     return "Unable to find donthideweaponandgun pattern.";

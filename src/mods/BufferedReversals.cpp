@@ -48,7 +48,7 @@ std::optional<std::string> BufferedReversals::on_initialize() {
 							   "buffered attack comes out to change the direction it points.\n\n"
 							   "if 'Bufferless Reversals' is unticked, you will get buffered reversals instead.";
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "48 89 87 40 17 00 00");
+  auto addr = patterns.find_addr(base, "48 89 87 40 17 00 00");
   if (!addr) {
     return "Unable to find BufferedReversals pattern.";
   }

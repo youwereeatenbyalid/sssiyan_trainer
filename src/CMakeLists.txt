@@ -300,6 +300,7 @@ set(FRAMEWORK_SRC
     Config.hpp
 	stb_image.h
 	stb_image_resize.h
+    InitPatternsManager.hpp
 )
 
 set(LISTEDITOR_SRC

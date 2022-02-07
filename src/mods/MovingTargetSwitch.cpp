@@ -47,12 +47,12 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   description_string   = "Allows you to switch targets while moving the left stick";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "0F 2F 05 B1 DF F6 02");
+  auto addr = patterns.find_addr(base, "0F 2F 05 B1 DF F6 02");
   if (!addr) {
     return "Unable to find MovingTargetSwitch pattern.";
   }
 
-  MovingTargetSwitch::jmp_jae = utility::scan(base, "3E 00 00 48 85 C9 75 12").value()+3;
+  MovingTargetSwitch::jmp_jae = patterns.find_addr(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
   if (!install_hook_absolute(addr.value()+6, m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

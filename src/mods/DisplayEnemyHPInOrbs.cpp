@@ -50,8 +50,8 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   description_string   = "Displays the last hit enemy's HP in the orb counter on the top right.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "8B 6A 78 EB 02");
-  DisplayEnemyHPInOrbs::jmp_cont = utility::scan(base, "44 8B 05 D5 FC 9E 05").value();
+  auto addr = patterns.find_addr(base, "8B 6A 78 EB 02");
+  DisplayEnemyHPInOrbs::jmp_cont = patterns.find_addr(base, "44 8B 05 D5 FC 9E 05").value();
   // DisplayEnemyHPInOrbs::jmp_cont = (base + 0x02494A0C); // ?? 
 
   if (!addr) {

@@ -47,7 +47,7 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   full_name_string     = "Empowered Cane";
   author_string        = "SSSiyan";
   description_string   = "Extends the duration of V's BP Taunt to infinity.";
-  auto bettercane_addr = utility::scan(base, "77 5B 89 53 20");
+  auto bettercane_addr = patterns.find_addr(base, "77 5B 89 53 20");
   EmpoweredCane::ja_return = bettercane_addr.value()+0x5D;
   if (!bettercane_addr) {
     return "Unable to find bettercane pattern.";

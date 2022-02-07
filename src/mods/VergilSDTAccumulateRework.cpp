@@ -76,7 +76,7 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto dtchange_addr = utility::scan(base, "F3 0F 11 A5 10 11 00 00");
+  auto dtchange_addr = patterns.find_addr(base, "F3 0F 11 A5 10 11 00 00");
   if (!dtchange_addr) {
     return "Unanable to find VergilSDTAccum::dtchange_addr pattern.";
   }

@@ -46,7 +46,7 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
   description_string   = "Sets the SDT Bar to maximum.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
+  auto addr = patterns.find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
   if (!addr) {
     return "Unable to find DanteMaxSDT pattern.";
   }

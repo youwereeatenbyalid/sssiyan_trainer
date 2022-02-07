@@ -37,7 +37,7 @@ std::optional<std::string> DanteNoSdtStun::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Dante wont be stunned when regular SDT mode is over.";
 
-	auto sdtCancellableAddr = utility::scan(base, "77 FE FF 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+1973ABE (-0x3)
+	auto sdtCancellableAddr = patterns.find_addr(base, "77 FE FF 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+1973ABE (-0x3)
 	if (!sdtCancellableAddr)
 	{
 		return "Unanable to find DanteNoSdtStun.sdtCancellableAddr pattern.";

@@ -144,7 +144,7 @@ std::optional<std::string> WeightReset::on_initialize() {
   description_string   = "Air Hikes and Divekick will reset your weight";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "88 43 24 48 8B 42 38");
+  auto addr = patterns.find_addr(base, "88 43 24 48 8B 42 38");
   if (!addr) {
     return "Unable to find WeightReset pattern.";
   }

@@ -44,7 +44,7 @@ std::optional<std::string> OriginalReversals::on_initialize() {
 							   "When using only this checkbox, reversals will work identically to how they did in the demo.\n\n"
 							   "This is added as a separate checkbox so you can stack it with the old reversals as there may be some unique possiblities.";
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BF D0 0E 00 00 00 8B");
+  auto addr = patterns.find_addr(base, "80 BF D0 0E 00 00 00 8B");
   if (!addr) {
     return "Unable to find OriginalReversals pattern.";
   }

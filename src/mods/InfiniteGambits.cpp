@@ -43,7 +43,7 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
   full_name_string     = "Infinite Gambits";
   author_string        = "SSSiyan";
   description_string   = "Infinite number of aerial gambits.";
-  auto infinitegambit_addr = utility::scan(base, "FF 87 28 18 00 00 48");
+  auto infinitegambit_addr = patterns.find_addr(base, "FF 87 28 18 00 00 48");
 
   if (!infinitegambit_addr) {
     return "Unable to find infinitegambit pattern.";
