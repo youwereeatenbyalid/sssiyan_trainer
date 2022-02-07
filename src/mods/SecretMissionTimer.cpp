@@ -53,11 +53,11 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-	ischecked = &cheaton;
-	onpage = secretmission;
-	full_name_string = "Freeze secret missions timer (+)";
-	author_string = "VPZadov";
-	description_string = "Also can prevent starting \"no ground\" timer on sm9.";
+	m_is_enabled= &cheaton;
+	m_on_page = secretmission;
+	m_full_name_string = "Freeze secret missions timer (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Also can prevent starting \"no ground\" timer on sm9.";
 
 	auto timerAddr = utility::scan(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0
 	if (!timerAddr)

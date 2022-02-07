@@ -79,12 +79,12 @@ void LandCancels::init_check_box_info() {
 std::optional<std::string> LandCancels::on_initialize() {
   init_check_box_info();
 
-  ischecked = &LandCancels::cheaton;
-  onpage    = mechanics;
+  m_is_enabled = &LandCancels::cheaton;
+  m_on_page    = mechanics;
 
-  full_name_string = "Land Cancels (+)";
-  author_string    = "SSSiyan";
-  description_string = "Touching the floor will cancel your current aerial attack.";
+  m_full_name_string = "Land Cancels (+)";
+  m_author_string    = "SSSiyan";
+  m_description_string = "Touching the floor will cancel your current aerial attack.";
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C7 42 34 00 00 00 00 C3 CC CC 48");

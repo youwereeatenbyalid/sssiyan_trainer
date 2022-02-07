@@ -78,11 +78,11 @@ void VergilNoAfterimages::init_check_box_info() {
 
 std::optional<std::string> VergilNoAfterimages::on_initialize() {
   init_check_box_info();
-  ischecked        = &VergilNoAfterimages::cheaton;
-  onpage           = vergilefxsettings;
-  full_name_string = "Disable Vergil's afterimages (+)";
-  author_string    = "VPZadov";
-  description_string = "Disable the afterimages that Vergil leaves after almost every move.";
+  m_is_enabled        = &VergilNoAfterimages::cheaton;
+  m_on_page           = vergilefxsettings;
+  m_full_name_string = "Disable Vergil's afterimages (+)";
+  m_author_string    = "VPZadov";
+  m_description_string = "Disable the afterimages that Vergil leaves after almost every move.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

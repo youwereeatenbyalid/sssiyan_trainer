@@ -301,11 +301,11 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-	ischecked = &cheaton;
-	onpage = vergiltrick;
-	full_name_string = "Enhanced human JCE mechanic (DMC3 JCE) (+)";
-	author_string = "VPZadov";
-	description_string = "Change duration, amount of SDT expended to perform JCE and overall virgin DMC5 human JCE to chad DMC3 boss Vergil JCE. Can be executed without full STD bar. This mod can crash the game :(";
+	m_is_enabled = &cheaton;
+	m_on_page = vergiltrick;
+	m_full_name_string = "Enhanced human JCE mechanic (DMC3 JCE) (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Change duration, amount of SDT expended to perform JCE and overall virgin DMC5 human JCE to chad DMC3 boss Vergil JCE. Can be executed without full STD bar. This mod can crash the game :(";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
 
 	jceTimerStaticBase = dmc5Base + 0x45F0390;//0x45F0360;

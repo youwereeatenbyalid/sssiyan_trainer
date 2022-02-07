@@ -81,9 +81,9 @@ std::optional<std::string> AerialPushback::on_initialize() {
 
   m_is_enabled = &AerialPushback::cheaton;
   m_on_page    = dantecheat;
-  full_name_string   = "Move Pushback Edits (+)";
-  author_string      = "SSSiyan";
-  description_string = "Your character will be pushed back more than usual when performing certain moves.";
+  m_full_name_string   = "Move Pushback Edits (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Your character will be pushed back more than usual when performing certain moves.";
 
   set_up_hotkey();
 

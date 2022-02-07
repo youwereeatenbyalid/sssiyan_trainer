@@ -29,11 +29,11 @@ std::optional<std::string> DanteNoSdtStun::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = dantesdt;
-	full_name_string = "No SDT finish stun";
-	author_string = "VPZadov";
-	description_string = "Dante wont be stunned when regular SDT mode is over.";
+	m_is_enabled = &cheaton;
+	m_on_page = dantesdt;
+	m_full_name_string = "No SDT finish stun";
+	m_author_string = "VPZadov";
+	m_description_string = "Dante wont be stunned when regular SDT mode is over.";
 
 	auto sdtCancellableAddr = utility::scan(base, "77 FE FF 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+1973ABE (-0x3)
 	if (!sdtCancellableAddr)

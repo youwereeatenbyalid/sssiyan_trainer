@@ -452,11 +452,11 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  ischecked        = &cheaton;
-  onpage           = balance;
-  full_name_string = "Enemy wave editor (+)";
-  author_string    = "VPZadov";
-  description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
+  m_is_enabled        = &cheaton;
+  m_on_page           = balance;
+  m_full_name_string = "Enemy wave editor (+)";
+  m_author_string    = "VPZadov";
+  m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 
   fadeStaticBase = g_framework->get_module().as<uintptr_t>() + 0x7E836F8;
   auto emDataLstAddr = utility::scan(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583

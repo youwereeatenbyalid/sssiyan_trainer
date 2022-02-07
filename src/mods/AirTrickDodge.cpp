@@ -18,11 +18,12 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergiltrick;
-	full_name_string = "Air trick dodge";
-	author_string = "VPZadov";
-	description_string = "Allow use trick dodge in the air.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergiltrick;
+	m_full_name_string = "Air trick dodge";
+	m_author_string = "VPZadov";
+	m_description_string = "Allow use trick dodge in the air.";
+	set_up_hotkey();
 
 	auto isInAirAddr = utility::scan(base, "0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 75 63 85 D2 0F 84 01"); //DevilMayCry5.exe+55088C
 	if (!isInAirAddr)

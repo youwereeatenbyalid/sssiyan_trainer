@@ -108,11 +108,11 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = balance;
-	full_name_string = "Boss Dante settings (+)";
-	author_string = "VPZadov";
-	description_string = "Vergil's nightmare begins here.";
+	m_is_enabled = &cheaton;
+	m_on_page = balance;
+	m_full_name_string = "Boss Dante settings (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Vergil's nightmare begins here.";
 
 	auto dtAddr = utility::scan(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
 	if (!dtAddr)

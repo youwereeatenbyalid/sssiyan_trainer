@@ -21,11 +21,11 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergilefxsettings;
-	full_name_string = "Trick dodge no disappear";
-	author_string = "VPZadov";
-	description_string = "Vergil's body will be not disappear while trick dodge.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergilefxsettings;
+	m_full_name_string = "Trick dodge no disappear";
+	m_author_string = "VPZadov";
+	m_description_string = "Vergil's body will be not disappear while trick dodge.";
 
 	auto getEndDrawOffAddr = utility::scan(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
 	if (!getEndDrawOffAddr)

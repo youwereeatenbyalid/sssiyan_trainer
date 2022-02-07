@@ -97,9 +97,9 @@ std::optional<std::string> ChargeChecker::on_initialize() {
   m_is_enabled          = &ChargeChecker::cheaton;
   m_on_page             = nero;
 
-  full_name_string   = "Faster Charges (+)";
-  author_string      = "SSSiyan";
-  description_string = "Speed up or slow down charges bound to hold inputs.";
+  m_full_name_string   = "Faster Charges (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Speed up or slow down charges bound to hold inputs.";
 
   set_up_hotkey();
 

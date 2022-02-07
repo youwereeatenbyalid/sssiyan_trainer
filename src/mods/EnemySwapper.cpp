@@ -1682,11 +1682,11 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   init_check_box_info();
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  ischecked = &cheaton;
-  onpage         = balance;
-  full_name_string   = "Enemy Swapper(+)";
-  author_string      = "VPZadov";
-  description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
+  m_is_enabled = &cheaton;
+  m_on_page         = balance;
+  m_full_name_string   = "Enemy Swapper(+)";
+  m_author_string      = "VPZadov";
+  m_description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
 
   plPosBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 

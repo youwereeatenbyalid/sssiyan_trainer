@@ -17,11 +17,11 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergilefxsettings;
-	full_name_string = "Always Yamato shot guard";
-	author_string = "VPZadov";
-	description_string = "Always use Yamato shot guard animation while block.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergilefxsettings;
+	m_full_name_string = "Always Yamato shot guard";
+	m_author_string = "VPZadov";
+	m_description_string = "Always use Yamato shot guard animation while block.";
 
 	auto setActionAddr = utility::scan(base, "F3 0F 11 44 24 20 E8 F4 F3"); //DevilMayCry5.exe+5762A1
 	if (!setActionAddr)

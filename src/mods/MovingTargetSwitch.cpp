@@ -39,12 +39,12 @@ void MovingTargetSwitch::init_check_box_info() {
 std::optional<std::string> MovingTargetSwitch::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &MovingTargetSwitch::cheaton;
-  onpage               = mechanics;
+  m_is_enabled            = &MovingTargetSwitch::cheaton;
+  m_on_page               = mechanics;
 
-  full_name_string     = "Moving Target Switch";
-  author_string        = "SSSiyan";
-  description_string   = "Allows you to switch targets while moving the left stick";
+  m_full_name_string     = "Moving Target Switch";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Allows you to switch targets while moving the left stick";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "0F 2F 05 B1 DF F6 02");

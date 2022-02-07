@@ -39,12 +39,12 @@ void VergilAirTrickNoSS::init_check_box_info() {
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilAirTrickNoSS::cheaton;
-  onpage               = vergiltrick;
+  m_is_enabled = &VergilAirTrickNoSS::cheaton;
+  m_on_page = vergiltrick;
 
-  full_name_string     = "Disable Embedded Swords";
-  author_string        = "VPZadov";
-  description_string   = "Allows you to trick to enemies without using an embedded sword.";
+  m_full_name_string = "Disable Embedded Swords";
+  m_author_string        = "VPZadov";
+  m_description_string   = "Allows you to trick to enemies without using an embedded sword.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");

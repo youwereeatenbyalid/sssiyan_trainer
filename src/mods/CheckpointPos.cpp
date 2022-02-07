@@ -77,11 +77,11 @@ static naked void restart_pos_detour() {
 std::optional<std::string> CheckpointPos::on_initialize() {
   init_check_box_info();
   auto base        = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked        = &cheaton;
-  onpage           = gamemode;
-  full_name_string = "Load boss checkpoint (+)";
-  author_string    = "VPZadov";
-  description_string = "Loading from a checkpoint force game to load \"boss checkpoint\" or custom position checkpoint.";
+  m_is_enabled        = &cheaton;
+  m_on_page           = gamemode;
+  m_full_name_string = "Load boss checkpoint (+)";
+  m_author_string    = "VPZadov";
+  m_description_string = "Loading from a checkpoint force game to load \"boss checkpoint\" or custom position checkpoint.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 

@@ -78,9 +78,9 @@ std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   m_is_enabled          = &NeroSwapWiresnatch::cheaton;
   m_on_page             = wiresnatch;
 
-  full_name_string   = "Angel and Devil Snatch (+)";
-  author_string      = "SSSiyan";
-  description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
+  m_full_name_string   = "Angel and Devil Snatch (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
 
   set_up_hotkey();
   

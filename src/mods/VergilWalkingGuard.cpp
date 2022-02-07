@@ -35,11 +35,11 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergiltrick;
-	full_name_string = "Walking guard (+)";
-	author_string = "VPZadov";
-	description_string = "Vergil can perform block while he moving.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergiltrick;
+	m_full_name_string = "Walking guard (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Vergil can perform block while he moving.";
 
 	auto isPadInputAddr = utility::scan(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)
 	if (!isPadInputAddr)
