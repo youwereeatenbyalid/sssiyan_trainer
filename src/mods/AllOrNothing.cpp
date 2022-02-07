@@ -96,12 +96,14 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  onpage    = gamemode;
-  ischecked = &AllOrNothing::cheaton;
+  m_on_page    = gamemode;
+  m_is_enabled = &AllOrNothing::cheaton;
 
-  full_name_string     = "Must Style / Damage Toggles (+)";
-  author_string        = "The Hitchhiker";
-  description_string   = "Disable damage altogether or when below a certain Style Rank.";
+  m_full_name_string     = "Must Style / Damage Toggles (+)";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Disable damage altogether or when below a certain Style Rank.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
   if (!addr) {

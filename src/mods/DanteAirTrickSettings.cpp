@@ -66,11 +66,13 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = dantecheat;
-	full_name_string = "Air Trick settings (+)";
-	author_string = "VPZadov";
-	description_string = "Allow to change Z axis appear offset and remove distance restriction.";
+	m_is_enabled = &cheaton;
+	m_on_page = dantecheat;
+	m_full_name_string = "Air Trick settings (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Allow to change Z axis appear offset and remove distance restriction.";
+
+  set_up_hotkey();
 
 	auto distanceAddr0 = utility::scan(base, "F3 0F 10 4A 10 0F 57 C0 F3 41 0F 5A C2"); //DevilMayCry5.exe+F24790
 	if (!distanceAddr0) {

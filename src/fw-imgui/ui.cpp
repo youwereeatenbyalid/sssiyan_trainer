@@ -11,6 +11,8 @@
 #include "fw-imgui/imgui_impl_dx12.h"
 #include "fw-imgui/imgui_impl_win32.h"
 
+#include "ModFramework.hpp"
+
 // clang-format off
 
 // Those MIN/MAX values are not define because we need to point to them
@@ -118,21 +120,21 @@ static unsigned int stb_adler32(unsigned int adler32, unsigned char *buffer, uns
     return (unsigned int)(s2 << 16) + (unsigned int)s1;
 }
 
-static inline ImVec2 operator*(const ImVec2& lhs, const float rhs)              { return ImVec2(lhs.x * rhs, lhs.y * rhs); }
-static inline ImVec2 operator/(const ImVec2& lhs, const float rhs)              { return ImVec2(lhs.x / rhs, lhs.y / rhs); }
-static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
-static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
-static inline ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y); }
-static inline ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y); }
-static inline ImVec2& operator*=(ImVec2& lhs, const float rhs)                  { lhs.x *= rhs; lhs.y *= rhs; return lhs; }
-static inline ImVec2& operator/=(ImVec2& lhs, const float rhs)                  { lhs.x /= rhs; lhs.y /= rhs; return lhs; }
-static inline ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
-static inline ImVec2& operator-=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
-static inline ImVec2& operator*=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
-static inline ImVec2& operator/=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
-static inline ImVec4 operator+(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
-static inline ImVec4 operator-(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
-static inline ImVec4 operator*(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
+static ImVec2 operator*(const ImVec2& lhs, const float rhs)              { return ImVec2(lhs.x * rhs, lhs.y * rhs); }
+static ImVec2 operator/(const ImVec2& lhs, const float rhs)              { return ImVec2(lhs.x / rhs, lhs.y / rhs); }
+static ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+static ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+static ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+static ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs)            { return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y); }
+static ImVec2& operator*=(ImVec2& lhs, const float rhs)                  { lhs.x *= rhs; lhs.y *= rhs; return lhs; }
+static ImVec2& operator/=(ImVec2& lhs, const float rhs)                  { lhs.x /= rhs; lhs.y /= rhs; return lhs; }
+static ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
+static ImVec2& operator-=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
+static ImVec2& operator*=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
+static ImVec2& operator/=(ImVec2& lhs, const ImVec2& rhs)                { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+static ImVec4 operator+(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
+static ImVec4 operator-(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
+static ImVec4 operator*(const ImVec4& lhs, const ImVec4& rhs)            { return ImVec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
 
 static const char* PatchFormatStringFloatToInt(const char* fmt) {
   if (fmt[0] == '%' && fmt[1] == '.' && fmt[2] == '0' && fmt[3] == 'f' &&
@@ -237,7 +239,7 @@ bool UI_TempInputScalar(const ImRect& bb, ImGuiID id, const char* label, ImGuiDa
 		memcpy(&data_backup, p_data, data_type_size);
 
 		// Apply new value (or operations) then clamp
-		DataTypeApplyOpFromText(data_buf, g.InputTextState.InitialTextA.Data, data_type, p_data, NULL);
+		DataTypeApplyOpFromText(data_buf, g.InputTextState.InitialTextA.Data, data_type, p_data, nullptr);
 		if (p_clamp_min || p_clamp_max)
 		{
 			if (p_clamp_min && p_clamp_max && DataTypeCompare(data_type, p_clamp_min, p_clamp_max) > 0)
@@ -726,6 +728,1787 @@ bool UI::SliderInt(const char* label, int* v, int v_min, int v_max, const char* 
     return ret;
 }
 
+BtnIndex_ UI::REGPKeyToBtnIndex(const REGPK_Flag& key)
+{
+	BtnIndex_ ret = BtnIndex_None;
+	switch(key)
+	{
+	case REGPK_LUp:
+		ret = BtnIndex_Xbox_DPadUp;
+		break;
+	case REGPK_LDown:
+		ret = BtnIndex_Xbox_DPadDown;
+		break;
+	case REGPK_LLeft:
+		ret = BtnIndex_Xbox_DPadLeft;
+		break;
+	case REGPK_LRight:
+		ret = BtnIndex_Xbox_DPadRight;
+		break;
+	case REGPK_RUp:
+		ret = BtnIndex_Xbox_Y;
+		break;
+	case REGPK_RDown:
+		ret = BtnIndex_Xbox_A;
+		break;
+	case REGPK_RLeft:
+		ret = BtnIndex_Xbox_X;
+		break;
+	case REGPK_RRight:
+		ret = BtnIndex_Xbox_B;
+		break;
+	case REGPK_LTrigTop:
+		ret = BtnIndex_Xbox_LBumper;
+		break;
+	case REGPK_LTrigBottom:
+		ret = BtnIndex_Xbox_LTrigger;
+		break;
+	case REGPK_RTrigTop:
+		ret = BtnIndex_Xbox_RBumper;
+		break;
+	case REGPK_RTrigBottom:
+		ret = BtnIndex_Xbox_RTrigger;
+		break;
+	case REGPK_LStickPush:
+		ret = BtnIndex_Xbox_LeftStickClick;
+		break;
+	case REGPK_RStickPush:
+		ret = BtnIndex_Xbox_RightStickClick;
+		break;
+	case REGPK_CLeft:
+		ret = BtnIndex_Xbox_Select;
+		break;
+	case REGPK_CRight:
+		ret = BtnIndex_Xbox_Start;
+		break;
+	}
+
+	return ret;
+}
+
+ImVec2 CalcDMC5BtnSize(std::string label, const float& scale = 1.0f, ImVec2 size = { 0, 0 }, float borderSize = 2.0f) {
+	auto keyShapeSizeGiven = size;
+	auto keyNameSize = ImGui::CalcTextSize(label.c_str(), nullptr, true);
+	auto keySizeByName = keyNameSize + ImVec2(borderSize + 3.0f, borderSize + 5.0f) * 2;
+	keyShapeSizeGiven = ImVec2(keyShapeSizeGiven.x < keySizeByName.x ? keySizeByName.x : keyShapeSizeGiven.x,
+		keyShapeSizeGiven.y < keySizeByName.y ? keySizeByName.y : keyShapeSizeGiven.y);
+	auto keyShapeSizeMin = (ImVec2(42.0f, 42.0f) / 1.2f) * scale;
+
+	if (label == "Shift" || label == "LShift" || label == "RShift") {
+		keyShapeSizeMin = (ImVec2(108.0f, 42.0f) / 1.2f) * scale;
+	}
+	else if (label == "Alt" || label == "LAlt" || label == "RAlt"
+		|| label == "Ctrl" || label == "LCtrl" || label == "RCtrl"
+		|| label == "Tab")
+	{
+		keyShapeSizeMin = (ImVec2(64.0f, 42.0f) / 1.2f) * scale;
+	}
+	else if (label == "Enter"
+		|| label == "Backspace")
+	{
+		keyShapeSizeMin = (ImVec2(84.0f, 42.0f) / 1.2f) * scale;
+	}
+	else if (label == "CapsLock") {
+		keyShapeSizeMin = (ImVec2(88.0f, 42.0f) / 1.2f) * scale;
+	}
+
+	auto keyShapeSize = ImVec2(keyShapeSizeGiven.x < keyShapeSizeMin.x ? keyShapeSizeMin.x : keyShapeSizeGiven.x,
+		keyShapeSizeGiven.y < keyShapeSizeMin.y ? keyShapeSizeMin.y : keyShapeSizeGiven.y);
+
+	return keyShapeSize;
+}
+
+ImVec2 CalcDMC5BtnSize(BtnIndex_ index, const float& scale = 1.0f, ImVec2 size = { 0, 0 }) {
+	const auto icons = g_framework->get_icons();
+	ImRect uvRegion;
+
+	ImVec2 keyShapeSize{ 0.0f, 0.0f };
+
+	switch (index) {
+	case 0:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.000000f), ImVec2(0.078125f, 0.039063f));
+		break;
+	case 1:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.000000f), ImVec2(0.156250f, 0.039063f));
+		break;
+	case 2:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.000000f), ImVec2(0.234375f, 0.039063f));
+		break;
+	case 3:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.000000f), ImVec2(0.312500f, 0.039063f));
+		break;
+	case 4:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.000000f), ImVec2(0.390625f, 0.039063f));
+		break;
+	case 5:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.000000f), ImVec2(0.468750f, 0.039063f));
+		break;
+	case 6:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.039063f), ImVec2(0.078125f, 0.078125f));
+		break;
+	case 7:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.039063f), ImVec2(0.156250f, 0.078125f));
+		break;
+	case 8:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.039063f), ImVec2(0.234375f, 0.078125f));
+		break;
+	case 9:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.039063f), ImVec2(0.312500f, 0.078125f));
+		break;
+	case 10:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.039063f), ImVec2(0.390625f, 0.078125f));
+		break;
+	case 11:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.039063f), ImVec2(0.468750f, 0.078125f));
+		break;
+	case 12:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.078125f), ImVec2(0.078125f, 0.117188f));
+		break;
+	case 13:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.078125f), ImVec2(0.156250f, 0.117188f));
+		break;
+	case 14:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.078125f), ImVec2(0.234375f, 0.117188f));
+		break;
+	case 15:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.078125f), ImVec2(0.312500f, 0.117188f));
+		break;
+	case 16:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.078125f), ImVec2(0.390625f, 0.117188f));
+		break;
+	case 17:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.078125f), ImVec2(0.468750f, 0.117188f));
+		break;
+	case 18:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.117188f), ImVec2(0.078125f, 0.156250f));
+		break;
+	case 19:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.117188f), ImVec2(0.156250f, 0.156250f));
+		break;
+	case 20:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.117188f), ImVec2(0.234375f, 0.156250f));
+		break;
+	case 21:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.117188f), ImVec2(0.312500f, 0.156250f));
+		break;
+	case 22:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.117188f), ImVec2(0.390625f, 0.156250f));
+		break;
+	case 23:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.117188f), ImVec2(0.468750f, 0.156250f));
+		break;
+	case 24:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.156250f), ImVec2(0.078125f, 0.195313f));
+		break;
+	case 25:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.156250f), ImVec2(0.156250f, 0.195313f));
+		break;
+	case 26:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.156250f), ImVec2(0.234375f, 0.195313f));
+		break;
+	case 27:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.156250f), ImVec2(0.312500f, 0.195313f));
+		break;
+	case 28:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.156250f), ImVec2(0.390625f, 0.195313f));
+		break;
+	case 29:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.156250f), ImVec2(0.468750f, 0.195313f));
+		break;
+	case 30:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.195313f), ImVec2(0.078125f, 0.234375f));
+		break;
+	case 31:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.195313f), ImVec2(0.156250f, 0.234375f));
+		break;
+	case 32:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.195313f), ImVec2(0.234375f, 0.234375f));
+		break;
+	case 33:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.195313f), ImVec2(0.312500f, 0.234375f));
+		break;
+	case 34:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.195313f), ImVec2(0.390625f, 0.234375f));
+		break;
+	case 35:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.195313f), ImVec2(0.468750f, 0.234375f));
+		break;
+	case 36:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.000000f), ImVec2(0.546875f, 0.039063f));
+		break;
+	case 37:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.000000f), ImVec2(0.625000f, 0.039063f));
+		break;
+	case 38:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.000000f), ImVec2(0.703125f, 0.039063f));
+		break;
+	case 39:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.000000f), ImVec2(0.781250f, 0.039063f));
+		break;
+	case 40:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.000000f), ImVec2(0.859375f, 0.039063f));
+		break;
+	case 41:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.000000f), ImVec2(0.937500f, 0.039063f));
+		break;
+	case 42:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.039063f), ImVec2(0.546875f, 0.078125f));
+		break;
+	case 43:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.039063f), ImVec2(0.625000f, 0.078125f));
+		break;
+	case 44:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.039063f), ImVec2(0.703125f, 0.078125f));
+		break;
+	case 45:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.039063f), ImVec2(0.781250f, 0.078125f));
+		break;
+	case 46:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.039063f), ImVec2(0.859375f, 0.078125f));
+		break;
+	case 47:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.039063f), ImVec2(0.937500f, 0.078125f));
+		break;
+	case 48:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.078125f), ImVec2(0.546875f, 0.117188f));
+		break;
+	case 49:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.078125f), ImVec2(0.625000f, 0.117188f));
+		break;
+	case 50:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.078125f), ImVec2(0.703125f, 0.117188f));
+		break;
+	case 51:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.078125f), ImVec2(0.781250f, 0.117188f));
+		break;
+	case 52:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.078125f), ImVec2(0.859375f, 0.117188f));
+		break;
+	case 53:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.078125f), ImVec2(0.937500f, 0.117188f));
+		break;
+	case 54:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.117188f), ImVec2(0.546875f, 0.156250f));
+		break;
+	case 55:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.117188f), ImVec2(0.625000f, 0.156250f));
+		break;
+	case 56:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.117188f), ImVec2(0.703125f, 0.156250f));
+		break;
+	case 57:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.117188f), ImVec2(0.781250f, 0.156250f));
+		break;
+	case 58:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.117188f), ImVec2(0.859375f, 0.156250f));
+		break;
+	case 59:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.117188f), ImVec2(0.937500f, 0.156250f));
+		break;
+	case 60:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.156250f), ImVec2(0.546875f, 0.195313f));
+		break;
+	case 61:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.156250f), ImVec2(0.625000f, 0.195313f));
+		break;
+	case 62:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.156250f), ImVec2(0.703125f, 0.195313f));
+		break;
+	case 63:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.156250f), ImVec2(0.781250f, 0.195313f));
+		break;
+	case 64:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.156250f), ImVec2(0.859375f, 0.195313f));
+		break;
+	case 65:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.156250f), ImVec2(0.937500f, 0.195313f));
+		break;
+	case 66:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.195313f), ImVec2(0.546875f, 0.234375f));
+		break;
+	case 67:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.195313f), ImVec2(0.625000f, 0.234375f));
+		break;
+	case 68:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.195313f), ImVec2(0.703125f, 0.234375f));
+		break;
+	case 69:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.195313f), ImVec2(0.781250f, 0.234375f));
+		break;
+	case 70:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.195313f), ImVec2(0.859375f, 0.234375f));
+		break;
+	case 71:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.195313f), ImVec2(0.937500f, 0.234375f));
+		break;
+	case 72:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.234375f), ImVec2(0.078125f, 0.273438f));
+		break;
+	case 73:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.234375f), ImVec2(0.156250f, 0.273438f));
+		break;
+	case 74:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.234375f), ImVec2(0.234375f, 0.273438f));
+		break;
+	case 75:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.234375f), ImVec2(0.312500f, 0.273438f));
+		break;
+	case 76:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.234375f), ImVec2(0.390625f, 0.273438f));
+		break;
+	case 77:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.234375f), ImVec2(0.468750f, 0.273438f));
+		break;
+	case 78:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.234375f), ImVec2(0.546875f, 0.273438f));
+		break;
+	case 79:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.234375f), ImVec2(0.625000f, 0.273438f));
+		break;
+	case 80:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.234375f), ImVec2(0.703125f, 0.273438f));
+		break;
+	case 81:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.234375f), ImVec2(0.781250f, 0.273438f));
+		break;
+	case 82:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.234375f), ImVec2(0.859375f, 0.273438f));
+		break;
+	case 83:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.234375f), ImVec2(0.937500f, 0.273438f));
+		break;
+	case 84:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.273438f), ImVec2(0.078125f, 0.312500f));
+		break;
+	case 85:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.273438f), ImVec2(0.156250f, 0.312500f));
+		break;
+	case 86:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.273438f), ImVec2(0.234375f, 0.312500f));
+		break;
+	case 87:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.273438f), ImVec2(0.312500f, 0.312500f));
+		break;
+	case 88:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.273438f), ImVec2(0.390625f, 0.312500f));
+		break;
+	case 89:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.273438f), ImVec2(0.468750f, 0.312500f));
+		break;
+	case 90:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.273438f), ImVec2(0.546875f, 0.312500f));
+		break;
+	case 91:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.273438f), ImVec2(0.625000f, 0.312500f));
+		break;
+	case 92:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.273438f), ImVec2(0.703125f, 0.312500f));
+		break;
+	case 93:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.273438f), ImVec2(0.781250f, 0.312500f));
+		break;
+	case 94:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.273438f), ImVec2(0.859375f, 0.312500f));
+		break;
+	case 95:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.273438f), ImVec2(0.937500f, 0.312500f));
+		break;
+	case 96:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.312500f), ImVec2(0.078125f, 0.351562f));
+		break;
+	case 97:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.312500f), ImVec2(0.156250f, 0.351562f));
+		break;
+	case 98:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.312500f), ImVec2(0.234375f, 0.351562f));
+		break;
+	case 99:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.312500f), ImVec2(0.312500f, 0.351562f));
+		break;
+	case 100:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.312500f), ImVec2(0.390625f, 0.351562f));
+		break;
+	case 101:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.312500f), ImVec2(0.468750f, 0.351562f));
+		break;
+	case 102:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.312500f), ImVec2(0.546875f, 0.351562f));
+		break;
+	case 103:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.312500f), ImVec2(0.625000f, 0.351562f));
+		break;
+	case 104:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.312500f), ImVec2(0.703125f, 0.351562f));
+		break;
+	case 105:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.312500f), ImVec2(0.781250f, 0.351562f));
+		break;
+	case 106:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.312500f), ImVec2(0.859375f, 0.351562f));
+		break;
+	case 107:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.312500f), ImVec2(0.937500f, 0.351562f));
+		break;
+	case 108:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.351562f), ImVec2(0.078125f, 0.390625f));
+		break;
+	case 109:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.351562f), ImVec2(0.156250f, 0.390625f));
+		break;
+	case 110:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.351562f), ImVec2(0.234375f, 0.390625f));
+		break;
+	case 111:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.351562f), ImVec2(0.312500f, 0.390625f));
+		break;
+	case 112:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.351562f), ImVec2(0.390625f, 0.390625f));
+		break;
+	case 113:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.351562f), ImVec2(0.468750f, 0.390625f));
+		break;
+	case 114:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.351562f), ImVec2(0.546875f, 0.390625f));
+		break;
+	case 115:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.351562f), ImVec2(0.625000f, 0.390625f));
+		break;
+	case 116:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.351562f), ImVec2(0.703125f, 0.390625f));
+		break;
+	case 117:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.351562f), ImVec2(0.781250f, 0.390625f));
+		break;
+	case 118:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.351562f), ImVec2(0.859375f, 0.390625f));
+		break;
+	case 119:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.351562f), ImVec2(0.937500f, 0.390625f));
+		break;
+	case 120:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.390625f), ImVec2(0.078125f, 0.429688f));
+		break;
+	case 121:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.390625f), ImVec2(0.156250f, 0.429688f));
+		break;
+	case 122:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.390625f), ImVec2(0.234375f, 0.429688f));
+		break;
+	case 123:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.390625f), ImVec2(0.312500f, 0.429688f));
+		break;
+	case 124:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.390625f), ImVec2(0.390625f, 0.429688f));
+		break;
+	case 125:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.390625f), ImVec2(0.468750f, 0.429688f));
+		break;
+	case 126:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.390625f), ImVec2(0.546875f, 0.429688f));
+		break;
+	case 127:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.390625f), ImVec2(0.625000f, 0.429688f));
+		break;
+	case 128:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.390625f), ImVec2(0.703125f, 0.429688f));
+		break;
+	case 129:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.390625f), ImVec2(0.781250f, 0.429688f));
+		break;
+	case 130:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.390625f), ImVec2(0.859375f, 0.429688f));
+		break;
+	case 131:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.390625f), ImVec2(0.937500f, 0.429688f));
+		break;
+	case 132:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.429688f), ImVec2(0.078125f, 0.468750f));
+		break;
+	case 133:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.429688f), ImVec2(0.156250f, 0.468750f));
+		break;
+	case 134:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.429688f), ImVec2(0.234375f, 0.468750f));
+		break;
+	case 135:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.429688f), ImVec2(0.312500f, 0.468750f));
+		break;
+	case 136:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.429688f), ImVec2(0.390625f, 0.468750f));
+		break;
+	case 137:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.429688f), ImVec2(0.468750f, 0.468750f));
+		break;
+	case 138:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.429688f), ImVec2(0.546875f, 0.468750f));
+		break;
+	case 139:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.429688f), ImVec2(0.625000f, 0.468750f));
+		break;
+	case 140:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.429688f), ImVec2(0.703125f, 0.468750f));
+		break;
+	case 141:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.429688f), ImVec2(0.781250f, 0.468750f));
+		break;
+	case 142:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.429688f), ImVec2(0.859375f, 0.468750f));
+		break;
+	case 143:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.429688f), ImVec2(0.937500f, 0.468750f));
+		break;
+	case 144:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.468750f), ImVec2(0.078125f, 0.507813f));
+		break;
+	case 145:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.468750f), ImVec2(0.156250f, 0.507813f));
+		break;
+	case 146:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.468750f), ImVec2(0.234375f, 0.507813f));
+		break;
+	case 147:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.468750f), ImVec2(0.312500f, 0.507813f));
+		break;
+	case 148:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.468750f), ImVec2(0.390625f, 0.507813f));
+		break;
+	case 149:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.468750f), ImVec2(0.468750f, 0.507813f));
+		break;
+	case 150:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.468750f), ImVec2(0.546875f, 0.507813f));
+		break;
+	case 151:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.468750f), ImVec2(0.625000f, 0.507813f));
+		break;
+	case 152:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.468750f), ImVec2(0.703125f, 0.507813f));
+		break;
+	case 153:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.468750f), ImVec2(0.781250f, 0.507813f));
+		break;
+	case 154:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.468750f), ImVec2(0.859375f, 0.507813f));
+		break;
+	case 155:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.468750f), ImVec2(0.937500f, 0.507813f));
+		break;
+	case 156:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.507813f), ImVec2(0.078125f, 0.546875f));
+		break;
+	case 157:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.507813f), ImVec2(0.156250f, 0.546875f));
+		break;
+	case 158:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.507813f), ImVec2(0.234375f, 0.546875f));
+		break;
+	default:
+		uvRegion = ImRect(ImVec2(0, 0), ImVec2(0, 0));
+		break;
+	}
+
+	if (g_framework->is_dx11()) {
+		const auto size = icons.keyIconsDX11.GetSize<float>();
+		const auto& width = size.x;
+		const auto& height = size.y;
+
+		keyShapeSize = ImVec2(uvRegion.Max.x* width, uvRegion.Max.y* height) - ImVec2(uvRegion.Min.x * width, uvRegion.Min.y * height);
+			
+	}
+	else if (g_framework->is_dx12()) {
+		const auto size = icons.keyIconsDX12.GetSize<float>();
+		const auto& width = size.x;
+		const auto& height = size.y;
+
+		keyShapeSize = ImVec2(uvRegion.Max.x * width, uvRegion.Max.y * height) - ImVec2(uvRegion.Min.x * width, uvRegion.Min.y * height);
+	}
+
+	return keyShapeSize;
+}
+
+void UI::KeyCaptureWindow(KCWBuffers& kcwBuffers, bool closeBtn /*= false*/)
+{
+	auto windowCenter = (ImGui::GetMainViewport()->Pos + ImGui::GetMainViewport()->Size / 2);
+	auto windowSize = kcwBuffers.windowSizeBuffer + kcwBuffers.windowSizeAddBuffer;
+	auto windowPos = windowCenter - windowSize / 2;
+	auto& padding = ImGui::GetStyle().FramePadding;
+
+	ImGui::SetNextWindowPos(windowPos);
+	ImGui::SetNextWindowSize(windowSize);
+	kcwBuffers.windowSizeAddBuffer = ImVec2(0.0f, 0.0f);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 3.0f);
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	ImGui::PushStyleColor(ImGuiCol_Text, 0xFFE7BE4D);
+
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus
+		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	ImGui::Begin((kcwBuffers.windowTitle + "##Key Capture Window").c_str(), (closeBtn? &kcwBuffers.drawWindow : nullptr), windowFlags);
+
+	ImGui::PopStyleColor();
+
+	auto& io = ImGui::GetIO();
+
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+
+	if (!kcwBuffers.needConfirmBuffer) {
+		ImGui::InputInt("Key Count", &kcwBuffers.pressedCountBuffer);
+		if (kcwBuffers.pressedCountBuffer < 1) {
+			kcwBuffers.pressedCountBuffer = 1;
+		}
+		if (kcwBuffers.pressedCountBuffer > 15) {
+			kcwBuffers.pressedCountBuffer = 15;
+		}
+
+		ImGui::TextWrapped("Press");
+		ImGui::SameLine();
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		DMC5LayoutStyleButton("Backspace", 'M', 0.9);
+		ImGui::PopItemFlag();
+		ImGui::SameLine();
+		ImGui::TextWrapped("to cancel and clear.");
+	} else
+	{
+		auto confirmPrompt = "Are you sure?";
+		auto confirmPromptSize = ImGui::CalcTextSize(confirmPrompt);
+		ImGui::SetCursorScreenPos({ windowCenter.x - (confirmPromptSize.x + padding.x * 2) / 2,  ImGui::GetCursorScreenPos().y + 20.f });
+		ImGui::Text(confirmPrompt);
+	}
+
+	const auto& keyboardState = KeyBinder::GetKeyboardState();
+	const auto controllerState = KeyBinder::GetControllerKeys(kcwBuffers.gpPressedBuffer = KeyBinder::GPKeyBitToListArray());
+
+	if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+		if (!kcwBuffers.needConfirmBuffer) {
+			for (size_t i = 0; i < keyboardState.size(); i++) {
+				if (!io.WantTextInput && keyboardState[i] && i != DIK_BACKSPACE) {
+					if (std::find(kcwBuffers.kbPressedBufferList.begin(), kcwBuffers.kbPressedBufferList.end(), i) == kcwBuffers.kbPressedBufferList.end()) {
+						kcwBuffers.kbPressedBufferList.push_back(i);
+					}
+				}
+			}
+
+			for (auto it = kcwBuffers.kbPressedBufferList.begin(); it != kcwBuffers.kbPressedBufferList.end();) {
+				if (!keyboardState[*it]) {
+					it = kcwBuffers.kbPressedBufferList.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+	}
+	else
+	{
+		if (!kcwBuffers.needConfirmBuffer) {
+			for (const auto& key : controllerState) {
+				if (std::find(kcwBuffers.gpPressedBufferList.begin(), kcwBuffers.gpPressedBufferList.end(), key) == kcwBuffers.gpPressedBufferList.end()) {
+					kcwBuffers.gpPressedBufferList.push_back(static_cast<REGPK_Flag>(key));
+				}
+			}
+
+			for (auto it = kcwBuffers.gpPressedBufferList.begin(); it != kcwBuffers.gpPressedBufferList.end();) {
+				if (!(kcwBuffers.gpPressedBuffer & *it)) {
+					it = kcwBuffers.gpPressedBufferList.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+	}
+
+	ImVec2 btnsDisplayAreaSize(0, 0);
+
+	auto plusSize = ImGui::CalcTextSize("+");
+
+	std::vector<bool> isNewLine;
+	float lastLineMaxWidth = 0.0f;
+	float lastLineMaxHeight = 0.0f;
+	std::vector<float> buttonRowWidths;
+	std::vector<float> buttonRowHeights;
+
+	if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+		for (auto& key : kcwBuffers.kbPressedBufferList) {
+			size_t i = &key - kcwBuffers.kbPressedBufferList.data();
+
+			auto btnSize = CalcDMC5BtnSize(std::string(KeyBinder::DIKToS(key)));
+			auto nthButtonWidth = i ? plusSize.x + padding.x * 2 + btnSize.x + padding.x * 2 : btnSize.x;
+
+			if (btnsDisplayAreaSize.x + nthButtonWidth < window->Size.x - 40.0f * g_framework->get_scale()) {
+				btnsDisplayAreaSize.x += nthButtonWidth;
+				lastLineMaxWidth = btnsDisplayAreaSize.x;
+				if (btnsDisplayAreaSize.y < btnSize.y) {
+					btnsDisplayAreaSize.y = btnSize.y;
+					lastLineMaxHeight = btnsDisplayAreaSize.y;
+				}
+				isNewLine.push_back(false);
+			}
+			else {
+				buttonRowWidths.push_back(btnsDisplayAreaSize.x);
+				buttonRowHeights.push_back(btnsDisplayAreaSize.y);
+				isNewLine.push_back(true);
+				btnsDisplayAreaSize = ImVec2(0.0f, 0.0f);
+
+				btnsDisplayAreaSize.x += btnSize.x;
+				lastLineMaxWidth = btnsDisplayAreaSize.x;
+				if (btnsDisplayAreaSize.y < btnSize.y) {
+					btnsDisplayAreaSize.y = btnSize.y;
+					lastLineMaxHeight = btnsDisplayAreaSize.y;
+				}
+			}
+		}
+		buttonRowWidths.push_back(lastLineMaxWidth);
+		buttonRowHeights.push_back(lastLineMaxHeight);
+	} else
+	{
+		for (auto& key : kcwBuffers.gpPressedBufferList) {
+			size_t i = &key - kcwBuffers.gpPressedBufferList.data();
+
+			auto btnSize = CalcDMC5BtnSize(REGPKeyToBtnIndex(key));
+			auto nthButtonWidth = i ? plusSize.x + padding.x * 2 + btnSize.x + padding.x * 2 : btnSize.x;
+
+			if (btnsDisplayAreaSize.x + nthButtonWidth < window->Size.x - 40.0f * g_framework->get_scale()) {
+				btnsDisplayAreaSize.x += nthButtonWidth;
+				lastLineMaxWidth = btnsDisplayAreaSize.x;
+				if (btnsDisplayAreaSize.y < btnSize.y) {
+					btnsDisplayAreaSize.y = btnSize.y;
+					lastLineMaxHeight = btnsDisplayAreaSize.y;
+				}
+				isNewLine.push_back(false);
+			}
+			else {
+				buttonRowWidths.push_back(btnsDisplayAreaSize.x);
+				buttonRowHeights.push_back(btnsDisplayAreaSize.y);
+				isNewLine.push_back(true);
+				btnsDisplayAreaSize = ImVec2(0.0f, 0.0f);
+
+				btnsDisplayAreaSize.x += btnSize.x;
+				lastLineMaxWidth = btnsDisplayAreaSize.x;
+				if (btnsDisplayAreaSize.y < btnSize.y) {
+					btnsDisplayAreaSize.y = btnSize.y;
+					lastLineMaxHeight = btnsDisplayAreaSize.y;
+				}
+			}
+		}
+		buttonRowWidths.push_back(lastLineMaxWidth);
+		buttonRowHeights.push_back(lastLineMaxHeight);
+	}
+
+	// Get max width
+	for (auto& rowWidth : buttonRowWidths) {
+		if (btnsDisplayAreaSize.x < rowWidth) {
+			btnsDisplayAreaSize.x = rowWidth;
+		}
+	}
+
+	float plusWidthOffset = 0.0f;
+
+	// Add the size of the + sign after each line to the total width
+	if (buttonRowHeights.size() > 1) {
+		plusWidthOffset = plusSize.x + padding.x * 2;
+		btnsDisplayAreaSize.x += plusWidthOffset;
+	}
+
+	// Get total height
+	btnsDisplayAreaSize.y = 0.0f;
+	for (auto& rowHeight : buttonRowHeights) {
+		btnsDisplayAreaSize.y += rowHeight;
+	}
+
+	// Add the padding size to the height
+	if (buttonRowHeights.size() > 1) {
+		btnsDisplayAreaSize.y += (buttonRowHeights.size() - 1) * padding.x * 2;
+	}
+
+	auto btnsDrawPosition =	ImVec2(windowCenter.x - buttonRowWidths[0] / 2 - plusWidthOffset / 2, ImGui::GetCursorScreenPos().y + 15.0f/*capWinCenter.y - btnsDisplayAreaSize.y / 2*/);
+
+	auto reservedHeight = btnsDrawPosition.y - window->Pos.y;
+
+	if (reservedHeight + btnsDisplayAreaSize.y > kcwBuffers.windowSizeBuffer.y) {
+		auto btnCanvasHeight = reservedHeight + btnsDisplayAreaSize.y - kcwBuffers.windowSizeBuffer.y;
+
+		kcwBuffers.windowSizeAddBuffer = ImVec2(0.0f, btnCanvasHeight + 10.0f);
+	}
+
+	ImGui::PushStyleColor(ImGuiCol_Text, 0xFFE7BE4D);
+
+	ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+
+	ImGui::SetCursorScreenPos(btnsDrawPosition);
+
+	if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+		size_t currentLine = 0;
+		for (auto& key : kcwBuffers.kbPressedBufferList) {
+			if (size_t i = &key - kcwBuffers.kbPressedBufferList.data()) {
+				ImGui::SameLine();
+				auto posBeforePlus = ImGui::GetCursorScreenPos();
+				ImGui::SetCursorScreenPos(ImVec2{ posBeforePlus.x, posBeforePlus.y + (buttonRowHeights[currentLine] / 2 - (plusSize.y + padding.y * 2) / 2) });
+				ImGui::Text("+");
+				if (isNewLine[i]) {
+					currentLine++;
+					ImGui::SetCursorScreenPos(ImVec2(windowCenter.x - buttonRowWidths[currentLine] / 2, ImGui::GetCursorScreenPos().y));
+				}
+				else {
+					ImGui::SameLine();
+					ImGui::SetCursorScreenPos(ImVec2{ ImGui::GetCursorScreenPos().x, posBeforePlus.y });
+				}
+			}
+			char side = 'M';
+			std::string_view keyLabel = KeyBinder::DIKToS(key);
+
+			if (keyLabel == "LAlt" || keyLabel == "LCtrl" ||
+				keyLabel == "LShift" || keyLabel == "LAlt" ||
+				keyLabel == "LWin") {
+				side = 'L';
+			}
+			else if (keyLabel == "RAlt" || keyLabel == "RCtrl" ||
+				keyLabel == "RShift" || keyLabel == "RAlt" ||
+				keyLabel == "RWin") {
+				side = 'R';
+			}
+
+			DMC5LayoutStyleButton(std::string(keyLabel), side);
+		}
+	}
+	else
+	{
+		size_t currentLine = 0;
+
+		for (const auto& key : kcwBuffers.gpPressedBufferList) {
+			if (size_t i = &key - kcwBuffers.gpPressedBufferList.data()) {
+				ImGui::SameLine();
+				auto posBeforePlus = ImGui::GetCursorScreenPos();
+				ImGui::SetCursorScreenPos(ImVec2{ posBeforePlus.x, posBeforePlus.y + (buttonRowHeights[currentLine] / 2 - (plusSize.y + padding.y * 2) / 2) });
+				ImGui::Text("+");
+				if (isNewLine[i]) {
+					currentLine++;
+					ImGui::SetCursorScreenPos(ImVec2(windowCenter.x - buttonRowWidths[currentLine] / 2, ImGui::GetCursorScreenPos().y));
+				}
+				else {
+					ImGui::SameLine();
+					ImGui::SetCursorScreenPos(ImVec2{ ImGui::GetCursorScreenPos().x, posBeforePlus.y });
+				}
+			}
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0, 0 });
+			DMC5ControlsButton(REGPKeyToBtnIndex(key));
+			ImGui::PopStyleVar();
+		}
+	}
+
+	ImGui::PopItemFlag();
+
+	ImGui::PopStyleColor();
+
+	if (kcwBuffers.needConfirmBuffer) {
+		if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+			const auto& otherBinds = KeyBinder::GetKBBindsOf(kcwBuffers.kbPressedBufferList);
+
+			if (!otherBinds.empty()) {
+				auto nodeTitle = "Already in use";
+				ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(nodeTitle).x + 8 * padding.x) / 2, ImGui::GetCursorScreenPos().y });
+				auto beforePos = ImGui::GetCursorScreenPos();
+
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, 0);
+				ImGui::PushStyleColor(ImGuiCol_HeaderActive, 0);
+
+				if (ImGui::TreeNode(nodeTitle)) {
+					for (const auto& bind : otherBinds)
+					{
+						ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(bind.c_str()).x + padding.x * 2) / 2, ImGui::GetCursorScreenPos().y });
+						ImGui::Text(bind.c_str());
+					}
+				}
+
+				ImGui::PopStyleColor(2);
+
+				auto afterPos = ImGui::GetCursorScreenPos();
+
+				kcwBuffers.windowSizeAddBuffer.y += afterPos.y - beforePos.y;
+			}
+		}
+		else
+		{
+			const auto& otherBinds = KeyBinder::GetBindsOf(kcwBuffers.gpPressedBuffer);
+
+			if (!otherBinds.empty()) {
+				auto nodeTitle = "Already in use";
+				ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(nodeTitle).x + 8 * padding.x) / 2, ImGui::GetCursorScreenPos().y });
+				auto beforePos = ImGui::GetCursorScreenPos();
+
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, 0);
+				ImGui::PushStyleColor(ImGuiCol_HeaderActive, 0);
+
+				if (ImGui::TreeNode(nodeTitle)) {
+					for (const auto& bind : otherBinds)
+					{
+						ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(bind.c_str()).x + padding.x * 2) / 2, ImGui::GetCursorScreenPos().y });
+						ImGui::Text(bind.c_str());
+					}
+				}
+
+				ImGui::PopStyleColor(2);
+
+				auto afterPos = ImGui::GetCursorScreenPos();
+
+				kcwBuffers.windowSizeAddBuffer.y += afterPos.y - beforePos.y;
+			}
+		}
+	}
+
+	// Debug: Show the area the buttons take
+	// window->DrawList->AddRectFilled(btnsDrawPosition, btnsDrawPosition + btnsDisplayAreaSize, 0xAAFFFFFF, 3.0f);
+
+	if (!io.WantTextInput && keyboardState[DIK_BACKSPACE]) {
+		KeyBinder::SetKBKeys(kcwBuffers.bindName, {});
+		KeyBinder::SetGPKeys(kcwBuffers.bindName, REGPK_None);
+		g_framework->clear_kc_bind_name();
+		kcwBuffers.needConfirmBuffer = false;
+		kcwBuffers.drawWindow = false;
+	}
+
+	if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+		if (!kcwBuffers.kbPressedBufferList.empty() && kcwBuffers.kbPressedBufferList.size() == kcwBuffers.pressedCountBuffer) {
+			kcwBuffers.needConfirmBuffer = true;
+		}
+	} else
+	{
+		if (!kcwBuffers.gpPressedBufferList.empty() && kcwBuffers.gpPressedBufferList.size() == kcwBuffers.pressedCountBuffer) {
+			kcwBuffers.needConfirmBuffer = true;
+		}
+	}
+
+	if(kcwBuffers.needConfirmBuffer)
+	{
+		auto borderDistance = windowSize.x / 20.0f;
+		ImGui::SetCursorScreenPos({ windowPos.x + borderDistance, windowPos.y + windowSize.y - 10.0f - ImGui::CalcTextSize("Yes Remove Other(s) Cancel").y - padding.y * 2});
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.50f, 0.93f, 0.93f, 0.40f));
+		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0.50f, 0.93f, 0.93f, 0.40f));
+
+		ImVec2 buttonSize = {windowSize.x/3.5f, 0.0f};
+
+		if (ImGui::Button("Yes", buttonSize)) {
+			if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+				KeyBinder::SetKBKeys(kcwBuffers.bindName, kcwBuffers.kbPressedBufferList);
+			} else
+			{
+				KeyBinder::SetGPKeys(kcwBuffers.bindName, KeyBinder::GPKeyListArrayToBit(kcwBuffers.gpPressedBufferList));
+			}
+			g_framework->clear_kc_bind_name();
+			kcwBuffers.drawWindow = false;
+
+			kcwBuffers.needConfirmBuffer = false;
+		}
+
+		buttonSize = ImGui::GetItemRectSize();
+
+		ImGui::SameLine();
+		if (kcwBuffers.keyMode == KeyMode_t::Keyboard) {
+			const auto& otherBinds = KeyBinder::GetKBBindsOf(kcwBuffers.kbPressedBufferList);
+
+			if(!otherBinds.empty())
+			{
+				auto btnLabel = "Remove Other(s)";
+				const auto btnLabelRatio = buttonSize.x / (ImGui::CalcTextSize(btnLabel).x + padding.x * 2);
+
+				if(btnLabelRatio < 1.0f)
+				{
+					ImGui::SetWindowFontScale(btnLabelRatio);
+				}
+
+				ImGui::SetCursorScreenPos({ windowCenter.x - buttonSize.x / 2, ImGui::GetCursorScreenPos().y });
+				if (ImGui::Button(btnLabel, buttonSize)) {
+					KeyBinder::SetKBKeys(kcwBuffers.bindName, kcwBuffers.kbPressedBufferList);
+					KeyBinder::RemoveDuplicatesOf(kcwBuffers.kbPressedBufferList, kcwBuffers.bindName);
+					g_framework->clear_kc_bind_name();
+					kcwBuffers.drawWindow = false;
+
+					kcwBuffers.needConfirmBuffer = false;
+				}
+
+				if (btnLabelRatio < 1.0f)
+				{
+					ImGui::SetWindowFontScale(1.0f);
+				}
+			}
+		} else
+		{
+			const auto& otherBinds = KeyBinder::GetBindsOf(kcwBuffers.gpPressedBuffer);
+
+			if (!otherBinds.empty())
+			{
+				auto btnLabel = "Remove Other(s)";
+				const auto btnLabelRatio = buttonSize.x / (ImGui::CalcTextSize(btnLabel).x + padding.x * 2);
+
+				if (btnLabelRatio < 1.0f)
+				{
+					ImGui::SetWindowFontScale(btnLabelRatio);
+				}
+
+				ImGui::SetCursorScreenPos({ windowCenter.x - buttonSize.x / 2, ImGui::GetCursorScreenPos().y });
+				if (ImGui::Button(btnLabel, buttonSize)) {
+					KeyBinder::SetGPKeys(kcwBuffers.bindName, kcwBuffers.gpPressedBuffer);
+					KeyBinder::RemoveDuplicatesOf(kcwBuffers.gpPressedBuffer, kcwBuffers.bindName);
+					g_framework->clear_kc_bind_name();
+					kcwBuffers.drawWindow = false;
+
+					kcwBuffers.needConfirmBuffer = false;
+				}
+
+				if (btnLabelRatio < 1.0f)
+				{
+					ImGui::SetWindowFontScale(1.0f);
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		ImGui::SetCursorScreenPos({ windowPos.x + windowSize.x - borderDistance - buttonSize.x, ImGui::GetCursorScreenPos().y });
+
+		if (ImGui::Button("Cancel", buttonSize)) {
+			kcwBuffers.needConfirmBuffer = false;
+		}
+
+		ImGui::PopStyleColor(2);
+
+		ImGui::PopStyleVar(2);
+
+		kcwBuffers.windowSizeAddBuffer.y += ImGui::GetItemRectSize().y + 10.0f;
+	}
+
+	ImGui::End();
+
+	ImGui::PopStyleColor(2);
+	ImGui::PopStyleVar(2);
+}
+
+void UI::KeyBindButton(const std::string& windowTitle, const std::string& bindName, KCWBuffers& kcwBuffers, const float& scale, bool fitHeight, ImVec4 tint_col, bool showBtnsOnHover)
+{
+	auto& icons = g_framework->get_icons();
+
+    bool isBtnHovered = false;
+    bool isBtnPressed = false;
+
+    if (g_framework->is_dx11()) {
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+
+		ImVec2 size = icons.kbIconDX11.GetSize(scale);
+		if(fitHeight)
+		{
+			size = icons.kbIconDX11.GetSize(ImGui::GetItemRectSize().y / size.y);
+		}
+
+		float x = ImGui::GetCursorPosX();
+
+        isBtnPressed = ImGui::InvisibleButton(bindName.c_str(), size + ImGui::GetStyle().FramePadding * 2);
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(x);
+
+		isBtnHovered = ImGui::IsItemHovered();
+
+		if (isBtnHovered) {
+			ImGui::SetCursorPos(ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding);
+			ImGui::Image(icons.kbIconActiveDX11, size, { 0,0 }, { 1,1 }, tint_col);
+		}
+		else {
+			ImGui::SetCursorPos(ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding);
+			ImGui::Image(icons.kbIconDX11, size, { 0,0 }, { 1,1 }, tint_col);
+		}
+
+		ImGui::PopStyleColor(4);
+    }
+    else if (g_framework->is_dx12()) {
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+
+        ImVec2 size = icons.kbIconDX12.GetSize(scale);
+		if (fitHeight)
+		{
+			size = icons.kbIconDX12.GetSize(ImGui::GetItemRectSize().y / size.y);
+		}
+		float x = ImGui::GetCursorPosX();
+
+        isBtnPressed = ImGui::InvisibleButton(bindName.c_str(), size + ImGui::GetStyle().FramePadding * 2);
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(x);
+
+        isBtnHovered = ImGui::IsItemHovered();
+
+        if (isBtnHovered) {
+            ImGui::SetCursorPos(ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding);
+            ImGui::Image(icons.kbIconActiveDX12, size, { 0,0 }, { 1,1 }, tint_col);
+        }
+        else {
+            ImGui::SetCursorPos(ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding);
+            ImGui::Image(icons.kbIconDX12, size, { 0,0 }, { 1,1 }, tint_col);
+        }
+
+        ImGui::PopStyleColor(4);
+    }
+    else { return; }
+
+	if (isBtnHovered && showBtnsOnHover) {
+		std::string kbButtons = "<Not Bound>";
+
+		const auto& rKBKeys = KeyBinder::GetKeyboardKeysStr(bindName);
+		if (!rKBKeys.empty()) {
+			kbButtons.clear();
+			bool first = true;
+			for (auto& key : rKBKeys) {
+				if (first) {
+					kbButtons += key;
+					first = false;
+				}
+				else {
+					kbButtons += " + " + key;
+				}
+			}
+		}
+
+		std::string xbButtons = "<Not Bound>";
+
+		const auto& rXboxKeys = KeyBinder::GetXboxConterllerKeysStr(bindName);
+		if (!rXboxKeys.empty()) {
+			xbButtons.clear();
+			bool first = true;
+			for (auto& key : rXboxKeys) {
+				if (first) {
+					xbButtons += key;
+					first = false;
+				}
+				else {
+					xbButtons += " + " + key;
+				}
+			}
+		}
+
+		ImGui::BeginTooltip();
+		ImGui::Text("KB: %s\nGP: %s", kbButtons.c_str(), xbButtons.c_str());
+		ImGui::EndTooltip();
+	}
+
+	if (isBtnPressed) {
+		if (bindName == g_framework->get_last_kc_bind_name()) {
+			g_framework->clear_kc_bind_name();
+			kcwBuffers.drawWindow = false;
+		}
+		else {
+			g_framework->set_kcw_name(windowTitle);
+			g_framework->set_current_kc_bind_name(bindName);
+			kcwBuffers.drawWindow = true;
+		}
+
+		kcwBuffers.needConfirmBuffer = false;
+	}
+}
+
+bool UI::DMC5LayoutStyleButton(std::string label, char side /*= 'M'*/, const float& scale /*= 1.0f*/, ImVec2 size /*= ImVec2(0.0f, 0.0f)*/)
+{
+    bool ret = false;
+
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+	auto borderSize = 2.0f;
+
+    ImGui::SetWindowFontScale(scale);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, borderSize);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, 0xFF533B17);
+	ImGui::PushStyleColor(ImGuiCol_Border, 0xFFE7BE4D);
+	ImGui::PushStyleColor(ImGuiCol_BorderShadow, 0);
+
+    auto keyNameSize = ImGui::CalcTextSize(label.c_str(), nullptr, true);
+	auto keyShapeSize = CalcDMC5BtnSize(label, scale, size, borderSize);
+
+	const auto defPos = ImGui::GetCursorScreenPos();
+    ret = ImGui::Button("##", keyShapeSize);
+    //ret = ImGui::ColorButton("##", ImGui::ColorConvertU32ToFloat4(0xFF533B17), ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoDragDrop, keyShapeSize);
+
+	auto middleRect = ImRect(defPos + ImVec2(3.0f + borderSize, borderSize), defPos + keyShapeSize - ImVec2(3.0f + borderSize, 8.0f + borderSize));
+	auto middleRectSize = middleRect.Max - middleRect.Min;
+
+	window->DrawList->AddRectFilled(middleRect.Min, middleRect.Max, 0xFF2E1B08, 3.0f);
+
+    ImVec2 labelPos = ImVec2(0.0f, 0.0f);
+
+    switch (side) {
+    case 'L':
+    case 'l':
+    {
+        labelPos = ImVec2(middleRect.Min.x + 1.0f, middleRect.Max.y - keyNameSize.y - 1.0f);
+    }
+        break;
+
+    case 'R':
+    case 'r':
+    {
+        labelPos = ImVec2(middleRect.Max.x - keyNameSize.x - 1.0f, middleRect.Max.y - keyNameSize.y - 1.0f);
+    }
+        break;
+
+    case 'M':
+    case 'm':
+    default:
+    {
+		auto middleRectCenter = (middleRect.Min + middleRect.Max) / 2;
+        labelPos =  middleRectCenter - keyNameSize / 2;
+    }
+        break;
+    }
+
+    window->DrawList->AddText(labelPos, 0xFFE7BE4D, label.c_str());
+
+	ImGui::PopStyleColor(3);
+
+	ImGui::PopStyleVar(2);
+
+    ImGui::SetWindowFontScale(1.0f);
+
+    return ret;
+}
+
+bool UI::DMC5ControlsButton(BtnIndex_ index, const float& scale)
+{
+	const auto icons = g_framework->get_icons();
+	bool ret = false;
+	ImRect uvRegion;
+
+    switch (index) {
+	case 0:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.000000f), ImVec2(0.078125f, 0.039063f));
+		break;
+	case 1:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.000000f), ImVec2(0.156250f, 0.039063f));
+		break;
+	case 2:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.000000f), ImVec2(0.234375f, 0.039063f));
+		break;
+	case 3:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.000000f), ImVec2(0.312500f, 0.039063f));
+		break;
+	case 4:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.000000f), ImVec2(0.390625f, 0.039063f));
+		break;
+	case 5:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.000000f), ImVec2(0.468750f, 0.039063f));
+		break;
+	case 6:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.039063f), ImVec2(0.078125f, 0.078125f));
+		break;
+	case 7:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.039063f), ImVec2(0.156250f, 0.078125f));
+		break;
+	case 8:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.039063f), ImVec2(0.234375f, 0.078125f));
+		break;
+	case 9:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.039063f), ImVec2(0.312500f, 0.078125f));
+		break;
+	case 10:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.039063f), ImVec2(0.390625f, 0.078125f));
+		break;
+	case 11:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.039063f), ImVec2(0.468750f, 0.078125f));
+		break;
+	case 12:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.078125f), ImVec2(0.078125f, 0.117188f));
+		break;
+	case 13:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.078125f), ImVec2(0.156250f, 0.117188f));
+		break;
+	case 14:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.078125f), ImVec2(0.234375f, 0.117188f));
+		break;
+	case 15:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.078125f), ImVec2(0.312500f, 0.117188f));
+		break;
+	case 16:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.078125f), ImVec2(0.390625f, 0.117188f));
+		break;
+	case 17:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.078125f), ImVec2(0.468750f, 0.117188f));
+		break;
+	case 18:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.117188f), ImVec2(0.078125f, 0.156250f));
+		break;
+	case 19:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.117188f), ImVec2(0.156250f, 0.156250f));
+		break;
+	case 20:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.117188f), ImVec2(0.234375f, 0.156250f));
+		break;
+	case 21:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.117188f), ImVec2(0.312500f, 0.156250f));
+		break;
+	case 22:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.117188f), ImVec2(0.390625f, 0.156250f));
+		break;
+	case 23:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.117188f), ImVec2(0.468750f, 0.156250f));
+		break;
+	case 24:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.156250f), ImVec2(0.078125f, 0.195313f));
+		break;
+	case 25:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.156250f), ImVec2(0.156250f, 0.195313f));
+		break;
+	case 26:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.156250f), ImVec2(0.234375f, 0.195313f));
+		break;
+	case 27:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.156250f), ImVec2(0.312500f, 0.195313f));
+		break;
+	case 28:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.156250f), ImVec2(0.390625f, 0.195313f));
+		break;
+	case 29:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.156250f), ImVec2(0.468750f, 0.195313f));
+		break;
+	case 30:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.195313f), ImVec2(0.078125f, 0.234375f));
+		break;
+	case 31:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.195313f), ImVec2(0.156250f, 0.234375f));
+		break;
+	case 32:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.195313f), ImVec2(0.234375f, 0.234375f));
+		break;
+	case 33:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.195313f), ImVec2(0.312500f, 0.234375f));
+		break;
+	case 34:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.195313f), ImVec2(0.390625f, 0.234375f));
+		break;
+	case 35:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.195313f), ImVec2(0.468750f, 0.234375f));
+		break;
+	case 36:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.000000f), ImVec2(0.546875f, 0.039063f));
+		break;
+	case 37:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.000000f), ImVec2(0.625000f, 0.039063f));
+		break;
+	case 38:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.000000f), ImVec2(0.703125f, 0.039063f));
+		break;
+	case 39:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.000000f), ImVec2(0.781250f, 0.039063f));
+		break;
+	case 40:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.000000f), ImVec2(0.859375f, 0.039063f));
+		break;
+	case 41:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.000000f), ImVec2(0.937500f, 0.039063f));
+		break;
+	case 42:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.039063f), ImVec2(0.546875f, 0.078125f));
+		break;
+	case 43:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.039063f), ImVec2(0.625000f, 0.078125f));
+		break;
+	case 44:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.039063f), ImVec2(0.703125f, 0.078125f));
+		break;
+	case 45:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.039063f), ImVec2(0.781250f, 0.078125f));
+		break;
+	case 46:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.039063f), ImVec2(0.859375f, 0.078125f));
+		break;
+	case 47:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.039063f), ImVec2(0.937500f, 0.078125f));
+		break;
+	case 48:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.078125f), ImVec2(0.546875f, 0.117188f));
+		break;
+	case 49:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.078125f), ImVec2(0.625000f, 0.117188f));
+		break;
+	case 50:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.078125f), ImVec2(0.703125f, 0.117188f));
+		break;
+	case 51:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.078125f), ImVec2(0.781250f, 0.117188f));
+		break;
+	case 52:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.078125f), ImVec2(0.859375f, 0.117188f));
+		break;
+	case 53:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.078125f), ImVec2(0.937500f, 0.117188f));
+		break;
+	case 54:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.117188f), ImVec2(0.546875f, 0.156250f));
+		break;
+	case 55:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.117188f), ImVec2(0.625000f, 0.156250f));
+		break;
+	case 56:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.117188f), ImVec2(0.703125f, 0.156250f));
+		break;
+	case 57:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.117188f), ImVec2(0.781250f, 0.156250f));
+		break;
+	case 58:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.117188f), ImVec2(0.859375f, 0.156250f));
+		break;
+	case 59:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.117188f), ImVec2(0.937500f, 0.156250f));
+		break;
+	case 60:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.156250f), ImVec2(0.546875f, 0.195313f));
+		break;
+	case 61:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.156250f), ImVec2(0.625000f, 0.195313f));
+		break;
+	case 62:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.156250f), ImVec2(0.703125f, 0.195313f));
+		break;
+	case 63:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.156250f), ImVec2(0.781250f, 0.195313f));
+		break;
+	case 64:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.156250f), ImVec2(0.859375f, 0.195313f));
+		break;
+	case 65:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.156250f), ImVec2(0.937500f, 0.195313f));
+		break;
+	case 66:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.195313f), ImVec2(0.546875f, 0.234375f));
+		break;
+	case 67:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.195313f), ImVec2(0.625000f, 0.234375f));
+		break;
+	case 68:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.195313f), ImVec2(0.703125f, 0.234375f));
+		break;
+	case 69:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.195313f), ImVec2(0.781250f, 0.234375f));
+		break;
+	case 70:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.195313f), ImVec2(0.859375f, 0.234375f));
+		break;
+	case 71:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.195313f), ImVec2(0.937500f, 0.234375f));
+		break;
+	case 72:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.234375f), ImVec2(0.078125f, 0.273438f));
+		break;
+	case 73:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.234375f), ImVec2(0.156250f, 0.273438f));
+		break;
+	case 74:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.234375f), ImVec2(0.234375f, 0.273438f));
+		break;
+	case 75:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.234375f), ImVec2(0.312500f, 0.273438f));
+		break;
+	case 76:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.234375f), ImVec2(0.390625f, 0.273438f));
+		break;
+	case 77:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.234375f), ImVec2(0.468750f, 0.273438f));
+		break;
+	case 78:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.234375f), ImVec2(0.546875f, 0.273438f));
+		break;
+	case 79:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.234375f), ImVec2(0.625000f, 0.273438f));
+		break;
+	case 80:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.234375f), ImVec2(0.703125f, 0.273438f));
+		break;
+	case 81:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.234375f), ImVec2(0.781250f, 0.273438f));
+		break;
+	case 82:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.234375f), ImVec2(0.859375f, 0.273438f));
+		break;
+	case 83:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.234375f), ImVec2(0.937500f, 0.273438f));
+		break;
+	case 84:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.273438f), ImVec2(0.078125f, 0.312500f));
+		break;
+	case 85:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.273438f), ImVec2(0.156250f, 0.312500f));
+		break;
+	case 86:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.273438f), ImVec2(0.234375f, 0.312500f));
+		break;
+	case 87:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.273438f), ImVec2(0.312500f, 0.312500f));
+		break;
+	case 88:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.273438f), ImVec2(0.390625f, 0.312500f));
+		break;
+	case 89:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.273438f), ImVec2(0.468750f, 0.312500f));
+		break;
+	case 90:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.273438f), ImVec2(0.546875f, 0.312500f));
+		break;
+	case 91:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.273438f), ImVec2(0.625000f, 0.312500f));
+		break;
+	case 92:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.273438f), ImVec2(0.703125f, 0.312500f));
+		break;
+	case 93:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.273438f), ImVec2(0.781250f, 0.312500f));
+		break;
+	case 94:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.273438f), ImVec2(0.859375f, 0.312500f));
+		break;
+	case 95:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.273438f), ImVec2(0.937500f, 0.312500f));
+		break;
+	case 96:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.312500f), ImVec2(0.078125f, 0.351562f));
+		break;
+	case 97:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.312500f), ImVec2(0.156250f, 0.351562f));
+		break;
+	case 98:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.312500f), ImVec2(0.234375f, 0.351562f));
+		break;
+	case 99:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.312500f), ImVec2(0.312500f, 0.351562f));
+		break;
+	case 100:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.312500f), ImVec2(0.390625f, 0.351562f));
+		break;
+	case 101:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.312500f), ImVec2(0.468750f, 0.351562f));
+		break;
+	case 102:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.312500f), ImVec2(0.546875f, 0.351562f));
+		break;
+	case 103:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.312500f), ImVec2(0.625000f, 0.351562f));
+		break;
+	case 104:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.312500f), ImVec2(0.703125f, 0.351562f));
+		break;
+	case 105:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.312500f), ImVec2(0.781250f, 0.351562f));
+		break;
+	case 106:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.312500f), ImVec2(0.859375f, 0.351562f));
+		break;
+	case 107:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.312500f), ImVec2(0.937500f, 0.351562f));
+		break;
+	case 108:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.351562f), ImVec2(0.078125f, 0.390625f));
+		break;
+	case 109:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.351562f), ImVec2(0.156250f, 0.390625f));
+		break;
+	case 110:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.351562f), ImVec2(0.234375f, 0.390625f));
+		break;
+	case 111:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.351562f), ImVec2(0.312500f, 0.390625f));
+		break;
+	case 112:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.351562f), ImVec2(0.390625f, 0.390625f));
+		break;
+	case 113:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.351562f), ImVec2(0.468750f, 0.390625f));
+		break;
+	case 114:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.351562f), ImVec2(0.546875f, 0.390625f));
+		break;
+	case 115:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.351562f), ImVec2(0.625000f, 0.390625f));
+		break;
+	case 116:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.351562f), ImVec2(0.703125f, 0.390625f));
+		break;
+	case 117:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.351562f), ImVec2(0.781250f, 0.390625f));
+		break;
+	case 118:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.351562f), ImVec2(0.859375f, 0.390625f));
+		break;
+	case 119:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.351562f), ImVec2(0.937500f, 0.390625f));
+		break;
+	case 120:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.390625f), ImVec2(0.078125f, 0.429688f));
+		break;
+	case 121:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.390625f), ImVec2(0.156250f, 0.429688f));
+		break;
+	case 122:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.390625f), ImVec2(0.234375f, 0.429688f));
+		break;
+	case 123:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.390625f), ImVec2(0.312500f, 0.429688f));
+		break;
+	case 124:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.390625f), ImVec2(0.390625f, 0.429688f));
+		break;
+	case 125:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.390625f), ImVec2(0.468750f, 0.429688f));
+		break;
+	case 126:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.390625f), ImVec2(0.546875f, 0.429688f));
+		break;
+	case 127:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.390625f), ImVec2(0.625000f, 0.429688f));
+		break;
+	case 128:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.390625f), ImVec2(0.703125f, 0.429688f));
+		break;
+	case 129:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.390625f), ImVec2(0.781250f, 0.429688f));
+		break;
+	case 130:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.390625f), ImVec2(0.859375f, 0.429688f));
+		break;
+	case 131:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.390625f), ImVec2(0.937500f, 0.429688f));
+		break;
+	case 132:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.429688f), ImVec2(0.078125f, 0.468750f));
+		break;
+	case 133:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.429688f), ImVec2(0.156250f, 0.468750f));
+		break;
+	case 134:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.429688f), ImVec2(0.234375f, 0.468750f));
+		break;
+	case 135:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.429688f), ImVec2(0.312500f, 0.468750f));
+		break;
+	case 136:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.429688f), ImVec2(0.390625f, 0.468750f));
+		break;
+	case 137:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.429688f), ImVec2(0.468750f, 0.468750f));
+		break;
+	case 138:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.429688f), ImVec2(0.546875f, 0.468750f));
+		break;
+	case 139:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.429688f), ImVec2(0.625000f, 0.468750f));
+		break;
+	case 140:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.429688f), ImVec2(0.703125f, 0.468750f));
+		break;
+	case 141:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.429688f), ImVec2(0.781250f, 0.468750f));
+		break;
+	case 142:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.429688f), ImVec2(0.859375f, 0.468750f));
+		break;
+	case 143:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.429688f), ImVec2(0.937500f, 0.468750f));
+		break;
+	case 144:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.468750f), ImVec2(0.078125f, 0.507813f));
+		break;
+	case 145:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.468750f), ImVec2(0.156250f, 0.507813f));
+		break;
+	case 146:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.468750f), ImVec2(0.234375f, 0.507813f));
+		break;
+	case 147:
+		uvRegion = ImRect(ImVec2(0.234375f, 0.468750f), ImVec2(0.312500f, 0.507813f));
+		break;
+	case 148:
+		uvRegion = ImRect(ImVec2(0.312500f, 0.468750f), ImVec2(0.390625f, 0.507813f));
+		break;
+	case 149:
+		uvRegion = ImRect(ImVec2(0.390625f, 0.468750f), ImVec2(0.468750f, 0.507813f));
+		break;
+	case 150:
+		uvRegion = ImRect(ImVec2(0.468750f, 0.468750f), ImVec2(0.546875f, 0.507813f));
+		break;
+	case 151:
+		uvRegion = ImRect(ImVec2(0.546875f, 0.468750f), ImVec2(0.625000f, 0.507813f));
+		break;
+	case 152:
+		uvRegion = ImRect(ImVec2(0.625000f, 0.468750f), ImVec2(0.703125f, 0.507813f));
+		break;
+	case 153:
+		uvRegion = ImRect(ImVec2(0.703125f, 0.468750f), ImVec2(0.781250f, 0.507813f));
+		break;
+	case 154:
+		uvRegion = ImRect(ImVec2(0.781250f, 0.468750f), ImVec2(0.859375f, 0.507813f));
+		break;
+	case 155:
+		uvRegion = ImRect(ImVec2(0.859375f, 0.468750f), ImVec2(0.937500f, 0.507813f));
+		break;
+	case 156:
+		uvRegion = ImRect(ImVec2(0.000000f, 0.507813f), ImVec2(0.078125f, 0.546875f));
+		break;
+	case 157:
+		uvRegion = ImRect(ImVec2(0.078125f, 0.507813f), ImVec2(0.156250f, 0.546875f));
+		break;
+	case 158:
+		uvRegion = ImRect(ImVec2(0.156250f, 0.507813f), ImVec2(0.234375f, 0.546875f));
+		break;
+	default:
+		uvRegion = ImRect(ImVec2(0, 0), ImVec2(0, 0));
+		break;
+    }
+
+	ImGui::PushStyleColor(ImGuiCol_Button, 0);
+
+	if (g_framework->is_dx11()) {
+		const auto size = icons.keyIconsDX11.GetSize<float>();
+		const auto& width = size.x;
+		const auto& height = size.y;
+
+		ImRect uvRegionAbsolute(
+			ImVec2(uvRegion.Min.x * width, uvRegion.Min.y * height),
+			ImVec2(uvRegion.Max.x * width, uvRegion.Max.y * height)
+		);
+
+		ret = ImGui::ImageButton(icons.keyIconsDX11,
+			(uvRegionAbsolute.Max - uvRegionAbsolute.Min) * scale,
+			uvRegion.Min, uvRegion.Max);
+	}
+	else if (g_framework->is_dx12()) {
+		const auto size = icons.keyIconsDX12.GetSize<float>();
+		const auto& width = size.x;
+		const auto& height = size.y;
+
+		ImRect uvRegionAbsolute(
+			ImVec2(uvRegion.Min.x * width, uvRegion.Min.y * height),
+			ImVec2(uvRegion.Max.x * width, uvRegion.Max.y * height)
+		);
+
+		ret = ImGui::ImageButton(icons.keyIconsDX12,
+			(uvRegionAbsolute.Max - uvRegionAbsolute.Min) * scale,
+			uvRegion.Min, uvRegion.Max);
+	}
+	else { ret = false; }
+
+	ImGui::PopStyleColor();
+
+	return ret;
+}
+
 // Copied straight from CE
 template <typename T>
 bool UI::Combo(const char* label, const char** items, T count, T& var, T pos, bool save)
@@ -819,9 +2602,9 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     m_is_loaded = Commit();
 }
 
- inline bool UI::Texture2DDX11::Commit()
+ bool UI::Texture2DDX11::Commit()
 {
-    if (m_image_data == NULL)
+    if (m_image_data == nullptr)
         return false;
 
     // Create texture
@@ -837,7 +2620,7 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     desc.CPUAccessFlags = 0;
 
-    ID3D11Texture2D *pTexture = NULL;
+    WRL::ComPtr<ID3D11Texture2D> pTexture;
     D3D11_SUBRESOURCE_DATA subResource;
     subResource.pSysMem = m_image_data;
     subResource.SysMemPitch = desc.Width * 4;
@@ -851,62 +2634,67 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = desc.MipLevels;
     srvDesc.Texture2D.MostDetailedMip = 0;
-    m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &m_srv);
-    pTexture->Release();
+    m_pd3dDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, &m_srv);
 
     return true;
 }
 
- UI::Texture2DDX12::Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
      : m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
 {
     m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
-    m_srv_cpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    
+    m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+    m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
+    
     m_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
-    m_texture_srv_gpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    m_texture_srv_gpu_handle.ptr += (m_handle_increment * descIndexInHeap);
 
     // Load from disk into a raw RGBA buffer
-    m_image_data = stbi_load(filename, &m_width, &m_height, NULL, 4);
+    m_image_data = stbi_load(filename, &m_width, &m_height, nullptr, 4);
 
     m_is_loaded = Commit();
 
     stbi_image_free(m_image_data);
 }
 
- UI::Texture2DDX12::Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
     : m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
 {
     m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
-    m_srv_cpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    
+    m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+    m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
+    
     m_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
-    m_texture_srv_gpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    m_texture_srv_gpu_handle.ptr += (m_handle_increment * descIndexInHeap);
 
     // Load from memory as raw RGBA buffer
-    m_image_data = stbi_load_from_memory(image_data, image_size, &m_width, &m_height, NULL, 4);
+    m_image_data = stbi_load_from_memory(image_data, image_size, &m_width, &m_height, nullptr, 4);
 
     m_is_loaded = Commit();
 
     stbi_image_free(m_image_data);
 }
 
- UI::Texture2DDX12::Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
     : m_image_data(image_data), m_width(width), m_height(height), m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
 {
     m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
-    m_srv_cpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    
+    m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+    m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
+    
     m_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
-    m_texture_srv_gpu_handle.ptr += (m_handle_increment * m_descriptor_index);
+    m_texture_srv_gpu_handle.ptr += (m_handle_increment * descIndexInHeap);
 
     // Upload the RGBA buffer into VRam
     m_is_loaded = Commit();
 }
 
- inline bool UI::Texture2DDX12::Commit()
+bool UI::Texture2DDX12::Commit()
 {
-    if (m_image_data == NULL)
+    if (m_image_data == nullptr)
         return false;
 
     // Create texture resource
@@ -930,9 +2718,9 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-    ID3D12Resource* pTexture = NULL;
+    WRL::ComPtr<ID3D12Resource> pTexture;
     m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&pTexture));
 
     // Create a temporary upload resource to move the data in
     UINT uploadPitch = (m_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
@@ -953,23 +2741,22 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
     props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
-    ID3D12Resource* uploadBuffer = NULL;
+    WRL::ComPtr<ID3D12Resource> uploadBuffer;
     HRESULT hr = m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
-        D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
-    IM_ASSERT(SUCCEEDED(hr));
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadBuffer));
 
     // Write pixels into the upload resource
-    void* mapped = NULL;
+    void* mapped = nullptr;
     D3D12_RANGE range = { 0, uploadSize };
     hr = uploadBuffer->Map(0, &range, &mapped);
-    IM_ASSERT(SUCCEEDED(hr));
+
     for (int y = 0; y < m_height; y++)
         memcpy((void*)((uintptr_t)mapped + y * uploadPitch), m_image_data + y * m_width * 4, m_width * 4);
     uploadBuffer->Unmap(0, &range);
 
     // Copy the upload resource content into the real resource
     D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-    srcLocation.pResource = uploadBuffer;
+    srcLocation.pResource = uploadBuffer.Get();
     srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
     srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     srcLocation.PlacedFootprint.Footprint.Width = m_width;
@@ -978,65 +2765,53 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
 
     D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-    dstLocation.pResource = pTexture;
+    dstLocation.pResource = pTexture.Get();
     dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
     dstLocation.SubresourceIndex = 0;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = pTexture;
+    barrier.Transition.pResource = pTexture.Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
     // Create a temporary command queue to do the copy with
-    ID3D12Fence* fence = NULL;
+    WRL::ComPtr<ID3D12Fence> fence;
     hr = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-    IM_ASSERT(SUCCEEDED(hr));
 
     HANDLE event = CreateEvent(0, 0, 0, 0);
-    IM_ASSERT(event != NULL);
 
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.NodeMask = 1;
 
-    ID3D12CommandQueue* cmdQueue = NULL;
+    WRL::ComPtr<ID3D12CommandQueue> cmdQueue;
     hr = m_pd3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
-    IM_ASSERT(SUCCEEDED(hr));
 
-    ID3D12CommandAllocator* cmdAlloc = NULL;
+    WRL::ComPtr<ID3D12CommandAllocator> cmdAlloc;
     hr = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
-    IM_ASSERT(SUCCEEDED(hr));
 
-    ID3D12GraphicsCommandList* cmdList = NULL;
-    hr = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
-    IM_ASSERT(SUCCEEDED(hr));
+    WRL::ComPtr<ID3D12GraphicsCommandList> cmdList;
+    hr = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc.Get(), nullptr, IID_PPV_ARGS(&cmdList));
 
-    cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+    cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
     cmdList->ResourceBarrier(1, &barrier);
 
     hr = cmdList->Close();
-    IM_ASSERT(SUCCEEDED(hr));
 
     // Execute the copy
-    cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&cmdList);
-    hr = cmdQueue->Signal(fence, 1);
-    IM_ASSERT(SUCCEEDED(hr));
+    cmdQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(cmdList.GetAddressOf()));
+    hr = cmdQueue->Signal(fence.Get(), 1);
 
     // Wait for everything to complete
     fence->SetEventOnCompletion(1, event);
     WaitForSingleObject(event, INFINITE);
 
     // Tear down our temporary command queue and release the upload resource
-    cmdList->Release();
-    cmdAlloc->Release();
-    cmdQueue->Release();
     CloseHandle(event);
-    fence->Release();
-    uploadBuffer->Release();
 
     // Create a shader resource view for the texture
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -1046,8 +2821,8 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     srvDesc.Texture2D.MipLevels = desc.MipLevels;
     srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, m_srv_cpu_handle);
-
+    m_pd3dDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, m_texture_srv_cpu_handle);
+	
     // Return results
     m_tex_resource = pTexture;
     

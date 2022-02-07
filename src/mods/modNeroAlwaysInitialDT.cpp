@@ -38,12 +38,14 @@ void NeroAlwaysInitialDT::init_check_box_info() {
 std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   init_check_box_info();
 
-  ischecked = &NeroAlwaysInitialDT::cheaton;
-  onpage    = nero;
+  m_is_enabled = &NeroAlwaysInitialDT::cheaton;
+  m_on_page    = nero;
 
-  full_name_string   = "Nero always uses initial DT anim";
-  author_string      = "SSSiyan";
-  description_string = "Note: the voice line will only play the first time you use this each run of M20.";
+  m_full_name_string   = "Nero always uses initial DT anim";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Note: the voice line will only play the first time you use this each run of M20.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "80 BF B0 1A 00 00 00"); // DevilMayCry5.exe+2104DE2 Vergil exe

@@ -56,11 +56,13 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = balance;
-	full_name_string = "Enemy waves settings (+)";
-	author_string = "VPZadov";
-	description_string = "Change some enemy waves settings.";
+	m_is_enabled = &cheaton;
+	m_on_page = balance;
+	m_full_name_string = "Enemy waves settings (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Change some enemy waves settings.";
+
+  set_up_hotkey();
 
 	auto initAddr1 = utility::scan(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
 	if (!initAddr1) {

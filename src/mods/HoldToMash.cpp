@@ -41,11 +41,13 @@ std::optional<std::string> HoldToMash::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &HoldToMash::cheaton;
-  onpage    = qol;
-  full_name_string     = "Hold To Mash";
-  author_string        = "The Hitchhiker";
-  description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
+  m_is_enabled = &HoldToMash::cheaton;
+  m_on_page    = qol;
+  m_full_name_string     = "Hold To Mash";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
+
+  set_up_hotkey();
   auto holdtomash_addr = utility::scan(base, "41 85 40 48 0F 97 C0");
 
   if (!holdtomash_addr) {

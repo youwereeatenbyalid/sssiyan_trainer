@@ -47,13 +47,15 @@ std::optional<std::string> DisableBreakaway::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DisableBreakaway::cheaton;
-  onpage    = breaker;
+  m_is_enabled = &DisableBreakaway::cheaton;
+  m_on_page    = breaker;
 
-  full_name_string     = "Disable Breakaway (+)";
-  author_string        = "Lidemi & The Hitchhiker";
-  description_string   = "Disables the Breakaway animation."
+  m_full_name_string     = "Disable Breakaway (+)";
+  m_author_string        = "Lidemi & The Hitchhiker";
+  m_description_string   = "Disables the Breakaway animation."
                          "Hold the assigned input while pressing breakaway to force a breakaway.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
   if (!addr) {

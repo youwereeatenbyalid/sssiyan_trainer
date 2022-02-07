@@ -81,9 +81,11 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
   // ischecked             = &DamageMultiplier::cheaton;
   // onpage                = gamemode;
 
-  full_name_string      = "Damage Multiplier (+)";
-  author_string         = "SSSiyan";
-  description_string    = "Allows you to adjust the damage output of players and enemies.";
+  m_full_name_string      = "Damage Multiplier (+)";
+  m_author_string         = "SSSiyan";
+  m_description_string    = "Allows you to adjust the damage output of players and enemies.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "C9 F3 0F 11 4F 10 48");

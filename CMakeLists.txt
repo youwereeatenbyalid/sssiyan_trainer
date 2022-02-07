@@ -43,13 +43,13 @@ execute_process(COMMAND
         OUTPUT_VARIABLE GIT_COMMITTER_DATE
 ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(LOG_FILENAME "${CMAKE_PROJECT_NAME}_framework_log.txt")
+set(LOG_FILENAME "Collab Trainer/Log/${CMAKE_PROJECT_NAME}_framework_log.txt")
 set(LOG_ENTRY "${CMAKE_PROJECT_NAME} ModFramework entry")
-set(CONFIG_FILENAME "${CMAKE_PROJECT_NAME}_fw_config.txt")
+set(CONFIG_FILENAME "Collab Trainer/Configs/${CMAKE_PROJECT_NAME}_fw_config.ini")
+set(KEYBIND_CONFIG_FILENAME "Collab Trainer/Configs/Keys.ini")
 set(GIT_HASH ${GIT_COMMIT_HASH})
 set(GIT_DATE ${GIT_COMMITTER_DATE})
 configure_file(Config.hpp.in ${CMAKE_SOURCE_DIR}/src/Config.hpp @ONLY)
-
 # Statically compile runtime
 #string(REGEX REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 #string(REGEX REPLACE "/Ob2" "/Ob1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")

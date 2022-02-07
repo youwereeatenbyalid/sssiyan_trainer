@@ -86,11 +86,13 @@ void VergilSDTAccumulateRework::on_config_save(utility::Config &cfg) {
 
 std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   init_check_box_info();
-  ischecked = &VergilSDTAccumulateRework::cheaton;
-  onpage = vergilsdt;
-  full_name_string = "SDT accumulate system rework (WIP?)(+)";
-  author_string = "VPZadov";
-  description_string = "Vergil will gain SDT points when he gains DT points.";
+  m_is_enabled = &VergilSDTAccumulateRework::cheaton;
+  m_on_page = vergilsdt;
+  m_full_name_string = "SDT accumulate system rework (WIP?)(+)";
+  m_author_string = "VPZadov";
+  m_description_string = "Vergil will gain SDT points when he gains DT points.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

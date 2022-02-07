@@ -46,12 +46,14 @@ void VergilDirectionalMappings::init_check_box_info() {
 std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilDirectionalMappings::cheaton;
-  onpage               = vergiltrick;
+  m_is_enabled            = &VergilDirectionalMappings::cheaton;
+  m_on_page               = vergiltrick;
   
-  full_name_string     = "Down Trick on Back + Trick";
-  author_string        = "The Hitchhiker";
-  description_string   = "Down Trick input moved to Back + B / O.";
+  m_full_name_string     = "Down Trick on Back + Trick";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Down Trick input moved to Back + B / O.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 57 10 48 85 C0 0F 84 67");

@@ -46,11 +46,13 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &WalkOnKeyboard::cheaton;
-  onpage               = mechanics;
-  full_name_string     = "Walk On Keyboard";
-  author_string        = "SSSiyan";
-  description_string   = "Your character will walk rather than run.";
+  m_is_enabled = &WalkOnKeyboard::cheaton;
+  m_on_page               = mechanics;
+  m_full_name_string     = "Walk On Keyboard";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Your character will walk rather than run.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "F3 41 0F 11 46 30 48 8B 46");
   if (!addr) {

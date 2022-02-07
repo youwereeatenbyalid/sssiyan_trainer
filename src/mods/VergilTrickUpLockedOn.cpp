@@ -111,12 +111,14 @@ void VergilTrickUpLockedOn::init_check_box_info() {
 std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilTrickUpLockedOn::cheaton;
-  onpage               = vergiltrick;
+  m_is_enabled            = &VergilTrickUpLockedOn::cheaton;
+  m_on_page               = vergiltrick;
 
-  full_name_string     = "Trick Up On Forward + Trick";
-  author_string        = "SSSiyan";
-  description_string   = "Trick Up without letting go of Lock On.";
+  m_full_name_string     = "Trick Up On Forward + Trick";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Trick Up without letting go of Lock On.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "40 38 B2 D0 0E 00 00 75");

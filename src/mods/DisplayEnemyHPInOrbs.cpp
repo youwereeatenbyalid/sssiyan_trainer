@@ -42,12 +42,14 @@ void DisplayEnemyHPInOrbs::init_check_box_info() {
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DisplayEnemyHPInOrbs::cheaton;
-  onpage               = camera;
+  m_is_enabled            = &DisplayEnemyHPInOrbs::cheaton;
+  m_on_page               = camera;
 
-  full_name_string     = "Display Enemy HP in Orbs";
-  author_string        = "SSSiyan";
-  description_string   = "Displays the last hit enemy's HP in the orb counter on the top right.";
+  m_full_name_string     = "Display Enemy HP in Orbs";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Displays the last hit enemy's HP in the orb counter on the top right.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "8B 6A 78 EB 02");

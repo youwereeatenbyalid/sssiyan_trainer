@@ -1,6 +1,0 @@
----
-AlignConsecutiveAssignments: 'true'
-AlignOperands: 'true'
-BreakBeforeBraces: Attach
-PointerAlignment: Left
-...

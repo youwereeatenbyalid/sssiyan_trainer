@@ -125,11 +125,13 @@ void EntitySpeeds::init_check_box_info() {
 std::optional<std::string> EntitySpeeds::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &EntitySpeeds::cheaton;
-  onpage             = animation;
-  full_name_string   = "Entity Speeds (+)";
-  author_string      = "SSSiyan";
-  description_string = "Adjust the speed of various moves.";
+  m_is_enabled          = &EntitySpeeds::cheaton;
+  m_on_page             = animation;
+  m_full_name_string   = "Entity Speeds (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Adjust the speed of various moves.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 11 41 4C 48 8B 5C");

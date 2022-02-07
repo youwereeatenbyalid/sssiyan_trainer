@@ -877,11 +877,13 @@ void EnemySwapper::random_em_swap(uint32_t min, uint32_t max) {
 std::optional<std::string> EnemySwapper::on_initialize() {
   init_check_box_info();
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &cheaton;
-  onpage         = balance;
-  full_name_string   = "Enemy Swapper (Beta) (+)";
-  author_string      = "VPZadov";
-  description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
+  m_is_enabled = &cheaton;
+  m_on_page         = balance;
+  m_full_name_string   = "Enemy Swapper (Beta) (+)";
+  m_author_string      = "VPZadov";
+  m_description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
+
+  set_up_hotkey();
 
   auto initAddr1 = utility::scan(base, "8B 71 10 48 85 C0 0F 84 43");// "DevilMayCry5.exe"+FE568B //For BP custom swap
   if (!initAddr1) {

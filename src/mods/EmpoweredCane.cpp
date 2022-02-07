@@ -42,11 +42,13 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &EmpoweredCane::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Empowered Cane";
-  author_string        = "SSSiyan";
-  description_string   = "Extends the duration of V's BP Taunt to infinity.";
+  m_is_enabled = &EmpoweredCane::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Empowered Cane";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Extends the duration of V's BP Taunt to infinity.";
+
+  set_up_hotkey();
   auto bettercane_addr = utility::scan(base, "77 5B 89 53 20");
   EmpoweredCane::ja_return = bettercane_addr.value()+0x5D;
   if (!bettercane_addr) {

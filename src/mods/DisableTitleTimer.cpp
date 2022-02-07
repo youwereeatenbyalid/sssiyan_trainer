@@ -36,11 +36,13 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DisableTitleTimer::cheaton;
-  onpage    = qol;
-  full_name_string     = "Disable Titlescreen Timer";
-  author_string        = "The Hitchhiker";
-  description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
+  m_is_enabled = &DisableTitleTimer::cheaton;
+  m_on_page    = qol;
+  m_full_name_string     = "Disable Titlescreen Timer";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {

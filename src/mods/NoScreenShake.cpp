@@ -31,12 +31,14 @@ void NoScreenShake::init_check_box_info() {
 std::optional<std::string> NoScreenShake::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NoScreenShake::cheaton;
-  onpage               = camera;
+  m_is_enabled            = &NoScreenShake::cheaton;
+  m_on_page               = camera;
 
-  full_name_string     = "No Screen Shake";
-  author_string        = "DeepDarkKapustka";
-  description_string   = "Disables screen shake completely.";
+  m_full_name_string     = "No Screen Shake";
+  m_author_string        = "DeepDarkKapustka";
+  m_description_string   = "Disables screen shake completely.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr      = utility::scan(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");

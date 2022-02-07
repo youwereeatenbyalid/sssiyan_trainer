@@ -281,11 +281,13 @@ std::optional<std::string> GameInput::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &GameInput::cheaton;
-  onpage    = -1;
-  full_name_string     = "Game Input Hook";
-  author_string        = "The HitchHiker";
-  description_string   = "Hooks the virtual inputs.";
+  m_is_enabled = &GameInput::cheaton;
+  m_on_page    = -1;
+  m_full_name_string     = "Game Input Hook";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Hooks the virtual inputs.";
+
+  set_up_hotkey();
 
   auto validcontrol_addr    = utility::scan(base, "A1 01 00 00 48 8B 97 C0 00 00 00 48 8B CB 48 85 D2");
   auto hold_addr            = utility::scan(base, "44 85 82 98 00 00 00");

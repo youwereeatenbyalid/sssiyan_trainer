@@ -108,8 +108,19 @@ HRESULT DInputHook::get_device_state_internal(IDirectInputDevice* device, DWORD 
         g_framework->on_direct_input_keys(*(std::array<uint8_t, 256>*)data);
     }
 
+    bool are_menu_keys_down = false;
+
+    auto menu_keys = g_framework->get_menu_key();
+
+    if (!menu_keys.empty()) {
+        are_menu_keys_down = true;
+        for (auto key : menu_keys) {
+            are_menu_keys_down = are_menu_keys_down && (*(std::array<uint8_t, 256>*)data)[key];
+        }
+    }
+
     // When ignoring or opening the menu we return this error so the game doesn't read the key inputs provided by DInput
-    if(is_input_valid && (m_is_ignoring_input || (*(std::array<uint8_t, 256>*)data)[g_framework->get_menu_key()])) 
+    if(is_input_valid && (m_is_ignoring_input || are_menu_keys_down)) 
         res = HRESULT_FROM_WIN32(ERROR_READ_FAULT);
 
     return res;

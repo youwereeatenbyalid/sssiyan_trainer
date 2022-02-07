@@ -33,11 +33,13 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &NothingCancelsBubble::cheaton;
-  onpage    = nero;
-  full_name_string     = "Nothing cancels ragtime bubble";
-  author_string        = "The HitchHiker";
-  description_string   = "Prevents ragtime bubble from being destroyed prematurely.";
+  m_is_enabled = &NothingCancelsBubble::cheaton;
+  m_on_page    = nero;
+  m_full_name_string     = "Nothing cancels ragtime bubble";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Prevents ragtime bubble from being destroyed prematurely.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
   if (!addr) {

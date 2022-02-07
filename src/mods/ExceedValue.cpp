@@ -39,11 +39,13 @@ std::optional<std::string> ExceedValue::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &ExceedValue::cheaton;
-  onpage    = nero;
-  full_name_string     = "Set Exceed Level";
-  author_string        = "The Hitchhiker";
-  description_string   = "Set/Lock Nero's Exceed.";
+  m_is_enabled = &ExceedValue::cheaton;
+  m_on_page    = nero;
+  m_full_name_string     = "Set Exceed Level";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Set/Lock Nero's Exceed.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "48 8B 88 48 19 00 00 33 F6 48 85");
   if (!addr) {

@@ -150,11 +150,13 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
   init_check_box_info();
 
   auto base          = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked          = &VergilDoppelBanish::cheaton;
-  onpage             = vergildoppel;
-  full_name_string   = "Disable Doppel Banish (+)";
-  author_string      = "Dr.penguin";
-  description_string = "Stops doppelganger from despawning while doing certain actions.";
+  m_is_enabled          = &VergilDoppelBanish::cheaton;
+  m_on_page             = vergildoppel;
+  m_full_name_string   = "Disable Doppel Banish (+)";
+  m_author_string      = "Dr.penguin";
+  m_description_string = "Stops doppelganger from despawning while doing certain actions.";
+
+  set_up_hotkey();
 
   auto addr = utility::scan(base, "80 BF A8 18 00 00 00 74 1D"); // No Dismiss on leaving SDT // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
   if (!addr) {

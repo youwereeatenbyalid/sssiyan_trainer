@@ -1860,8 +1860,8 @@ ImGuiIO::ImGuiIO() {
   DisplaySize             = ImVec2(-1.0f, -1.0f);
   DeltaTime               = 1.0f / 60.0f;
   IniSavingRate           = 5.0f;
-  IniFilename             = "Collab Trainer/Configs/UI_config.ini";
-  LogFilename             = "Collab Trainer/Logs/UI_log.txt";
+  IniFilename             = "imgui.ini"; // Important: "imgui.ini" is relative to current working dir, most apps will want to lock this to an absolute path (e.g. same path as executables).
+  LogFilename             = "imgui_log.txt";
   MouseDoubleClickTime    = 0.30f;
   MouseDoubleClickMaxDist = 6.0f;
   for (int i = 0; i < ImGuiKey_COUNT; i++)
@@ -13206,7 +13206,6 @@ void ImGui::LogToFile(int auto_open_depth, const char* filename) {
     filename = g.IO.LogFilename;
   if (!filename || !filename[0])
     return;
-  CreateDirectory("Collab Trainer/Logs", NULL);
   ImFileHandle f = ImFileOpen(filename, "ab");
   if (!f) {
     IM_ASSERT(0);
@@ -13498,7 +13497,6 @@ void ImGui::UpdateSettings() {
   }
 
   void ImGui::SaveIniSettingsToDisk(const char* ini_filename) {
-    CreateDirectory("Collab Trainer/Configs", NULL);
     ImGuiContext& g      = *GImGui;
     g.SettingsDirtyTimer = 0.0f;
     if (!ini_filename)

@@ -23,11 +23,11 @@ public:
 	inline std::optional<std::string> on_initialize() override {
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-		ischecked = &cheaton;
-		onpage = balance;
-		full_name_string = "Enemy data settings (+)";
-		author_string = "VPZadov";
-		description_string = "Change enemy num in waves, delay for spawn and spawn odds.";
+		m_is_enabled = &cheaton;
+		m_on_page = balance;
+		m_full_name_string = "Enemy data settings (+)";
+		m_author_string = "VPZadov";
+		m_description_string = "Change enemy num in waves, delay for spawn and spawn odds.";
 
 		for (int i = 0; i < EnemySwapper::enemySettings.size(); i++) {
 			EnemySwapper::enemySettings[i].emId.set_current_id(i);

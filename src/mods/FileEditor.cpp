@@ -282,12 +282,14 @@ std::optional<std::string> FileEditor::on_initialize() {
   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  ischecked = &m_is_active;
-  onpage    = gamemode;
+  m_is_enabled = &m_is_active;
+  m_on_page    = gamemode;
 
-  full_name_string     = "Asset Swapper";
-  author_string        = "Darkness (TheDarkness704)";
-  description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
+  m_full_name_string     = "Asset Swapper (+)";
+  m_author_string        = "Darkness (TheDarkness704)";
+  m_description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
+
+  set_up_hotkey();
 
   load_mods();
   load_sys_mods();

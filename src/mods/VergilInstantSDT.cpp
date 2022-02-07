@@ -105,12 +105,14 @@ void VergilInstantSDT::init_check_box_info() {
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilInstantSDT::cheaton;
-  onpage               = vergilsdt;
+  m_is_enabled            = &VergilInstantSDT::cheaton;
+  m_on_page               = vergilsdt;
 
-  full_name_string     = "Instant SDT";
-  author_string        = "SSSiyan";
-  description_string   = "Removes the need to hold the DT button to enter SDT.";
+  m_full_name_string     = "Instant SDT";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Removes the need to hold the DT button to enter SDT.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr1 = utility::scan(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");

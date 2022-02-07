@@ -69,12 +69,14 @@ void HideHUD::init_check_box_info() {
 std::optional<std::string> HideHUD::on_initialize() {
   init_check_box_info();
 
-  ischecked               = &HideHUD::cheaton  ;
-  onpage                  = camera;
+  m_is_enabled               = &HideHUD::cheaton  ;
+  m_on_page                  = camera;
 
-  full_name_string        = "Hide HUD (+)";
-  author_string           = "SSSiyan";
-  description_string      = "Disables elements of the Heads Up Display.";
+  m_full_name_string        = "Hide HUD (+)";
+  m_author_string           = "SSSiyan";
+  m_description_string      = "Disables elements of the Heads Up Display.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "89 83 C4 00 00 00 F3");

@@ -220,6 +220,8 @@ set(MODS_SRC
 )
 
 set(HOOKS_SRC
+	ControllerHook.hpp
+	ControllerHook.cpp
     DInputHook.hpp
     DInputHook.cpp
     D3D11Hook.hpp
@@ -230,6 +232,8 @@ set(HOOKS_SRC
     WindowsMessageHook.cpp
     PositionHooks.hpp
     PositionHooks.cpp
+	XInputHook.hpp
+	XInputHook.cpp
 )
 
 set(SDK_SRC
@@ -237,6 +241,8 @@ set(SDK_SRC
     sdk/ReClass_Internal.hpp
     sdk/Enums_Internal.hpp
     sdk/Offsets.hpp
+    sdk/REContext.cpp
+    sdk/REContext.hpp
 )
 
 set(UTILITY_SRC
@@ -269,16 +275,23 @@ set(FRAMEWORK_SRC
     Config.hpp
 	stb_image.h
 	stb_image_resize.h
+	KeyBinder.hpp
+	KeyBinder.cpp
+	logo.hpp
+	icons.hpp
 )
 
 set(IMGUI_SRC
 	fw-imgui/font_robotomedium.hpp
+    fw-imgui/fa_solid_900.h
+    fw-imgui/font_awesome_5.h
     fw-imgui/imgui_impl_win32.h
     fw-imgui/imgui_impl_win32.cpp
     fw-imgui/imgui_impl_dx11.h
     fw-imgui/imgui_impl_dx11.cpp
     fw-imgui/imgui_impl_dx12.h
     fw-imgui/imgui_impl_dx12.cpp
+    fw-imgui/imgui_notify.h
     fw-imgui/ui.cpp
     fw-imgui/ui.hpp
 )

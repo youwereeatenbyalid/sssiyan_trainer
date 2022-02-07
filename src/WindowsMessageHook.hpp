@@ -10,7 +10,7 @@
 // messages sent to the window.
 class WindowsMessageHook {
 public:
-    std::function<bool(HWND, UINT, WPARAM, LPARAM)> on_message;
+    std::function<bool(HWND&, UINT&, WPARAM&, LPARAM&)> on_message;
 
     WindowsMessageHook() = delete;
     WindowsMessageHook(const WindowsMessageHook& other) = delete;

@@ -413,7 +413,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   if (!cos_addr) {
     return "Unable to find Cos pattern.";
   }
-  auto threshhold_addr = utility::scan(base, "72 12 F3 0F 10 05 87 9D AC 02");
+  auto threshhold_addr = utility::scan(base, "45 F3 0F 10 4A 30");
   if (!threshhold_addr) {
     return "Unable to find threshhold pattern.";
   }
@@ -448,7 +448,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cos coordinate";
   }
-  if (!install_hook_absolute(threshhold_addr.value(), m_threshhold_hook, &threshhold_detour, &threshhold_jmp_ret, 10)) {
+  if (!install_hook_absolute(threshhold_addr.value() + 0x11, m_threshhold_hook, &threshhold_detour, &threshhold_jmp_ret, 10)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize stick threshhold";
@@ -458,8 +458,8 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	//  spdlog::error("[{}] failed to initialize", get_name());
 	//  return "Failed to initialize vergildata";
   //}
-  PlayerTracker::summon_jmp_je     = summon_addr.value() + 0x15B;
-  PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x14;
+  summon_jmp_je     = summon_addr.value() + 0x15B;
+  threshhold_jmp_jb = threshhold_addr.value() + 0x11 + 0x14;
 
   return Mod::on_initialize();
 }

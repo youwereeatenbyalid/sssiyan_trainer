@@ -36,11 +36,13 @@ void EnemyStepBanHeight::init_check_box_info() {
 std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &EnemyStepBanHeight::cheaton;
-  onpage               = enemystep;
-  full_name_string     = "Remove Enemy Step Height Restriction";
-  author_string        = "SSSiyan";
-  description_string   = "Allows you to enemy step as close to the floor as possible.";
+  m_is_enabled            = &EnemyStepBanHeight::cheaton;
+  m_on_page               = enemystep;
+  m_full_name_string     = "Remove Enemy Step Height Restriction";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Allows you to enemy step as close to the floor as possible.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = utility::scan(base, "F3 0F 10 40 14 0F 5A C0 66 0F 2F F0 76");
