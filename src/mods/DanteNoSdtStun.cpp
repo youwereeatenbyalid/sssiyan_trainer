@@ -4,9 +4,7 @@
 static naked void detour()
 {
 	__asm {
-		test rdx, rdx
-		je originalcode
-		cmp byte ptr [rdx + 0x1AD8], 1//isEnemyDante
+		cmp byte ptr [rdi + 0x1AD8], 1//isEnemyDante
 		je bossDante
 		cmp byte ptr [DanteNoSdtStun::cheaton], 0
 		je originalcode
