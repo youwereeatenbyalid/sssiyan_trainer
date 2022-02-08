@@ -44,7 +44,7 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "F3 0F 10 05 CF FF 45 06");
+  auto addr = patterns->find_addr(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {
     return "Unable to find DisableTitleTimer pattern.";
   }

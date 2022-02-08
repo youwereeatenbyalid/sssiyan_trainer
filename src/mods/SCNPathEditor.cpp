@@ -166,7 +166,7 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "75 F5 48 83 C1 68");
+  auto addr = patterns->find_addr(base, "75 F5 48 83 C1 68");
   if (!addr) {
     return "Unable to find SCNPathEditor pattern.";
   }

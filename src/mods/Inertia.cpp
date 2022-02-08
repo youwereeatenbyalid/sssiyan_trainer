@@ -130,7 +130,7 @@ std::optional<std::string> Inertia::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "48 8B 41 08 44 8B 40 78");
+  auto addr = patterns->find_addr(base, "48 8B 41 08 44 8B 40 78");
   if (!addr) {
     return "Unable to find Inertia pattern.";
   }

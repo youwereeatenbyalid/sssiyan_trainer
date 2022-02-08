@@ -114,31 +114,31 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	m_author_string = "VPZadov";
 	m_description_string = "Vergil's nightmare begins here.";
 
-	auto dtAddr = utility::scan(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
+	auto dtAddr = patterns->find_addr(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
 	if (!dtAddr)
 	{
 		return "Unanable to find BossDanteSetup.dtAddr pattern.";
 	}
 
-	auto sdtTransformAddr = utility::scan(base, "8B 49 10 85 C9 74 35"); // DevilMayCry5.exe+19C637C
+	auto sdtTransformAddr = patterns->find_addr(base, "8B 49 10 85 C9 74 35"); // DevilMayCry5.exe+19C637C
 	if (!sdtTransformAddr)
 	{
 		return "Unanable to find BossDanteSetup.sdtTransformAddr pattern.";
 	}
 
-	auto dtTimerAddr = utility::scan(base, "F3 0F 11 4A 18 48 8B"); // DevilMayCry5.exe+318477
+	auto dtTimerAddr = patterns->find_addr(base, "F3 0F 11 4A 18 48 8B"); // DevilMayCry5.exe+318477
 	if (!dtTimerAddr)
 	{
 		return "Unanable to find BossDanteSetup.dtTimerAddr pattern.";
 	}
 
-	auto dtDurationAddr = utility::scan(base, "F3 0F 10 40 14 48 8B 43 50 0F 5A C8"); // DevilMayCry5.exe+19C304E
+	auto dtDurationAddr = patterns->find_addr(base, "F3 0F 10 40 14 48 8B 43 50 0F 5A C8"); // DevilMayCry5.exe+19C304E
 	if (!dtDurationAddr)
 	{
 		return "Unanable to find BossDanteSetup.dtDurationAddr pattern.";
 	}
 
-	auto charUpdateDelayAddr = utility::scan(base, "32 48 85 C0 75 10"); // DevilMayCry5.exe+19BD0C4 (0x1)
+	auto charUpdateDelayAddr = patterns->find_addr(base, "32 48 85 C0 75 10"); // DevilMayCry5.exe+19BD0C4 (0x1)
 	if (!charUpdateDelayAddr)
 	{
 		return "Unanable to find BossDanteSetup.charUpdateDelayAddr pattern.";

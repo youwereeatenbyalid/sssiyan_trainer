@@ -154,7 +154,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "80 7F 20 00 48 8B CB 44");
+  auto addr = patterns->find_addr(base, "80 7F 20 00 48 8B CB 44");
   if (!addr) {
     return "Unable to find TauntSelector pattern.";
   }

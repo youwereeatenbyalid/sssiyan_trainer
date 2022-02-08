@@ -6,19 +6,19 @@ static naked void detour()
 	__asm {
 		cmp byte ptr [rdi + 0x1AD8], 1//isEnemyDante
 		je bossDante
-		cmp byte ptr [DanteNoSdtStun::cheaton], 0
+		cmp byte ptr[DanteNoSdtStun::cheaton], 0
 		je originalcode
 		mov al, 1
 
 		originalcode:
 		movzx ecx, al
 		mov rax, [rbx + 0x50]
-		jmp qword ptr [DanteNoSdtStun::ret]
+		jmp qword ptr[DanteNoSdtStun::ret]
 
-		bossDante:
-		cmp byte ptr [BossDanteSetup::cheaton], 1
+		bossDante :
+		cmp byte ptr[BossDanteSetup::cheaton], 1
 		jne originalcode
-		cmp byte ptr [BossDanteSetup::isNoFinishSdtStun], 1
+		cmp byte ptr[BossDanteSetup::isNoFinishSdtStun], 1
 		jne originalcode
 		mov al, 1
 		jmp originalcode
@@ -35,7 +35,7 @@ std::optional<std::string> DanteNoSdtStun::on_initialize()
 	m_author_string = "VPZadov";
 	m_description_string = "Dante wont be stunned when regular SDT mode is over.";
 
-	auto sdtCancellableAddr = utility::scan(base, "77 FE FF 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+1973ABE (-0x3)
+	auto sdtCancellableAddr = patterns->find_addr(base, "77 FE FF 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+1973ABE (-0x3)
 	if (!sdtCancellableAddr)
 	{
 		return "Unanable to find DanteNoSdtStun.sdtCancellableAddr pattern.";

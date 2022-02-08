@@ -130,7 +130,7 @@ std::optional<std::string> AllStart::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "66 C7 47 5E 00 00");
+  auto addr      = patterns->find_addr(base, "66 C7 47 5E 00 00");
   if (!addr) {
     return "Unable to find AllStart pattern.";
   }

@@ -48,7 +48,7 @@ std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BF B0 1A 00 00 00"); // DevilMayCry5.exe+2104DE2 Vergil exe
+  auto addr = patterns->find_addr(base, "80 BF B0 1A 00 00 00"); // DevilMayCry5.exe+2104DE2 Vergil exe
   if (!addr) {
     return "Unable to find NeroAlwaysInitialDT pattern.";
   }

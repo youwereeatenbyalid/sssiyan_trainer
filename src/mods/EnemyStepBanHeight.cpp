@@ -45,7 +45,7 @@ std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 40 14 0F 5A C0 66 0F 2F F0 76");
+  auto addr = patterns->find_addr(base, "F3 0F 10 40 14 0F 5A C0 66 0F 2F F0 76");
   if (!addr) {
     return "Unable to find EnemyStepBanHeight pattern.";
   }

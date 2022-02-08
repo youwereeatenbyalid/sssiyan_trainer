@@ -310,6 +310,7 @@ set(FRAMEWORK_SRC
 	KeyBinder.cpp
 	logo.hpp
 	icons.hpp
+    InitPatternsManager.hpp
 )
 
 set(LISTEDITOR_SRC

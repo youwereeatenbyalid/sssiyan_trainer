@@ -45,7 +45,7 @@ std::optional<std::string> NoJCCooldown::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 11 87 34 13 00 00 48 8B 43 50 48 83 78 18 00 0F 85 F8");
+  auto addr = patterns->find_addr(base, "F3 0F 11 87 34 13 00 00 48 8B 43 50 48 83 78 18 00 0F 85 F8");
   if (!addr) {
     return "Unable to find NoJCCooldown pattern.";
   }

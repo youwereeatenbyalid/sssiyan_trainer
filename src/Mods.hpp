@@ -2,7 +2,7 @@
 #include "Mod.hpp"
 #include <filesystem>
 #include "fw-imgui/ui.hpp"
-
+#include "InitPatternsManager.hpp"
 class Mods {
 public:
     Mods();

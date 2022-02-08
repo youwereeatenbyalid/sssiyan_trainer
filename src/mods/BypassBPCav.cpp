@@ -48,12 +48,12 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "C8 00 EB 44 3B 70 1C 72 11");
+  auto addr      = patterns->find_addr(base, "C8 00 EB 44 3B 70 1C 72 11");
   if (!addr) {
     return "Unable to find BypassBPCav pattern.";
   }
     
-   BypassBPCav::jmp_jb = utility::scan(base, "42 89 0C 30 EB 28").value();
+   BypassBPCav::jmp_jb = patterns->find_addr(base, "42 89 0C 30 EB 28").value();
 
   if (!install_hook_absolute(addr.value()+4, m_function_hook, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong

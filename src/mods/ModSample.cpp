@@ -42,7 +42,7 @@ std::optional<std::string> ModSample::on_initialize() {
 
   //set_up_hotkey();
 
-  //auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
+  //auto addr = patterns->find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
   //if (!addr) {
   //  return "Unable to find ModSample pattern.";
   //}

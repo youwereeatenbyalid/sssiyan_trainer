@@ -43,7 +43,7 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "FF 87 E0 18 00 00");
+  auto addr = patterns->find_addr(base, "FF 87 E0 18 00 00");
   if (!addr) {
     return "Unable to find VergilInfJdCs pattern.";
   }

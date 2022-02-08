@@ -86,7 +86,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = utility::scan(base, "4C 39 78 18 0F 85 03 03 00 00 48");//DevilMayCry5.exe+58B450 
+  auto init_addr = patterns->find_addr(base, "4C 39 78 18 0F 85 03 03 00 00 48");//DevilMayCry5.exe+58B450 
   if (!init_addr) {
     return "Unanable to find VergilNoAfterimages pattern.";
   }

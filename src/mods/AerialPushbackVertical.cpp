@@ -69,7 +69,7 @@ std::optional<std::string> AerialPushbackVertical::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr =
-      utility::scan(base, "F3 44 0F 11 77 24 F3 44 0F 11 7F"); // DevilMayCry5.exe+144566A Vergil exe
+      patterns->find_addr(base, "F3 44 0F 11 77 24 F3 44 0F 11 7F"); // DevilMayCry5.exe+144566A Vergil exe
   if (!addr) {
     return "Unable to find AerialPushbackVertical pattern.";
   }

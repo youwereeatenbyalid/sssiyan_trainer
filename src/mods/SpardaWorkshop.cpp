@@ -131,12 +131,12 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
                          "Use the advanced options to set player, barrel & enemy spawn positions.";
 
   set_up_hotkey();
-
-  auto sceneplacer_addr = utility::scan(base, "8B 42 08 89 41 38 80");
+  
+  auto sceneplacer_addr = patterns->find_addr(base, "8B 42 08 89 41 38 80");
   if (!sceneplacer_addr) {
     return "Unable to find sceneplacer pattern.";
   }
-  auto enemyplacer_addr = utility::scan(base, "01 00 00 F3 0F 10 86 80 00 00 00 F3");
+  auto enemyplacer_addr = patterns->find_addr(base, "01 00 00 F3 0F 10 86 80 00 00 00 F3");
   if (!enemyplacer_addr) {
       return "Unable to find enemyplacer pattern.";
   }

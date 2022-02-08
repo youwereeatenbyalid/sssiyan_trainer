@@ -98,16 +98,16 @@ std::optional<std::string> AlwaysSTaunts::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "8B 88 B0 00 00 00 48 8B 15");
+  auto addr      = patterns->find_addr(base, "8B 88 B0 00 00 00 48 8B 15");
   if (!addr) {
     return "Unable to find AlwaysSTaunts pattern.";
   }
-  auto addr2 = utility::scan(
+  auto addr2 = patterns->find_addr(
       base, "8B 80 B0 00 00 00 83 E8 05 83 F8 02 0F 96 C1 EB D0 48");
   if (!addr2) {
     return "Unable to find AlwaysSTaunts2 pattern.";
   }
-  auto addr3 = utility::scan(
+  auto addr3 = patterns->find_addr(
       base, "8B 80 B0 00 00 00 83 E8 05 83 F8 02 0F 96 C1 EB D0 41");
   if (!addr3) {
     return "Unable to find AlwaysSTaunts3 pattern.";

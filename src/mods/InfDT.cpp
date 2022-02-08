@@ -44,7 +44,7 @@ std::optional<std::string> InfDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "F3 0F 5D 87 10 11 00 00");
+  auto addr      = patterns->find_addr(base, "F3 0F 5D 87 10 11 00 00");
   if (!addr) {
     return "Unable to find InfDT pattern.";
   }

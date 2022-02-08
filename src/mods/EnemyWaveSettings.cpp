@@ -64,7 +64,7 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 
   set_up_hotkey();
 
-	auto initAddr1 = utility::scan(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
+	auto initAddr1 = patterns->find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
 	if (!initAddr1) {
 		return "Unanable to find EnemyWaveSettings pattern.";
 	}

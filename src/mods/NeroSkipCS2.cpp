@@ -49,7 +49,7 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "FF 47 58 48 8B 43 50 48 39");
+  auto addr = patterns->find_addr(base, "FF 47 58 48 8B 43 50 48 39");
   if (!addr) {
     return "Unable to find NeroSkipCS2 pattern.";
   }

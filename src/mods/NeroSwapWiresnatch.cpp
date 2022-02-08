@@ -85,11 +85,11 @@ std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   set_up_hotkey();
   
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "C7 40 10 1A 00 00 00 E9");
+  auto addr1 = patterns->find_addr(base, "C7 40 10 1A 00 00 00 E9");
   if (!addr1) {
     return "Unable to find NeroSwapWiresnatch pattern.";
   }
-  auto addr2 = utility::scan(base, "C7 40 10 19 00 00 00 48 8B D0");
+  auto addr2 = patterns->find_addr(base, "C7 40 10 19 00 00 00 48 8B D0");
   if (!addr2) {
     return "Unable to find NeroSwapWiresnatch pattern.";
   }

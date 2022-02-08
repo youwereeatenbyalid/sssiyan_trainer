@@ -45,7 +45,7 @@ std::optional<std::string> EnemyInstantDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 48 10 0F 5A C0 0F 5A C9 66 41 0F 2E C0 7A 16 75 14 ? ? C0 48 ? ? 41 8D 50 39 E8 ? ? ? ? 0F 57 C0 EB 08 F2 0F 5E C8 66 0F 5A C1 48 8B 43 50 48 39");
+  auto addr = patterns->find_addr(base, "F3 0F 10 48 10 0F 5A C0 0F 5A C9 66 41 0F 2E C0 7A 16 75 14 ? ? C0 48 ? ? 41 8D 50 39 E8 ? ? ? ? 0F 57 C0 EB 08 F2 0F 5E C8 66 0F 5A C1 48 8B 43 50 48 39");
   if (!addr) {
     return "Unable to find EnemyInstantDT pattern.";
   }

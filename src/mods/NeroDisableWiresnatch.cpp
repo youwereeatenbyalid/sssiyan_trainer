@@ -75,11 +75,11 @@ std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "80 BA D0 0E 00 00 00 75 21");
+  auto addr1 = patterns->find_addr(base, "80 BA D0 0E 00 00 00 75 21");
   if (!addr1) {
     return "Unable to find NeroDisableWiresnatch1 pattern.";
   }
-  auto addr2 = utility::scan(base, "80 BA D0 0E 00 00 00 75 2A");
+  auto addr2 = patterns->find_addr(base, "80 BA D0 0E 00 00 00 75 2A");
   if (!addr2) {
     return "Unable to find NeroDisableWiresnatch2 pattern.";
   }

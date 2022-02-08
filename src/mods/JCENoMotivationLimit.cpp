@@ -72,25 +72,25 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	m_author_string = "akasha51";
 	m_description_string = "Allow to perform jce with any consentration level.";
 
-	auto humanConcetrationAddr = utility::scan(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9 0F 5A C0");//"DevilMayCry5.exe"+1C0A520
+	auto humanConcetrationAddr = patterns->find_addr(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9 0F 5A C0");//"DevilMayCry5.exe"+1C0A520
 	if (!humanConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";
 	}
 
-	auto devilConcetrationAddr = g_framework->get_module().as<uintptr_t>() + 0x1C0A5CD;//utility::scan(base, "5F C3 83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22");//DevilMayCry5.exe+1C0A5CD
+	auto devilConcetrationAddr = g_framework->get_module().as<uintptr_t>() + 0x1C0A5CD;//patterns->find_addr(base, "5F C3 83 BA 58 1B 00 00 02 75 50 45 33 C0 48 8B CB 48 85 D2 74 22");//DevilMayCry5.exe+1C0A5CD
 	/*if (!devilConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.devilConcetrationAddr pattern.";
 	}*/
 
-	auto yamatoConcetrationAddr = utility::scan(base, "83 BB 58 1B 00 00 02 75");//DevilMayCry5.exe+54F45E
+	auto yamatoConcetrationAddr = patterns->find_addr(base, "83 BB 58 1B 00 00 02 75");//DevilMayCry5.exe+54F45E
 	if (!yamatoConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.yamatoConcetrationAddr pattern.";
 	}
 
-	auto yamatoSdtConcetrationAddr = utility::scan(base, "83 BB 58 1B 00 00 02 0F 85 76 FF FF FF 48 8B 5C 24 30");//DevilMayCry5.exe+54F495
+	auto yamatoSdtConcetrationAddr = patterns->find_addr(base, "83 BB 58 1B 00 00 02 0F 85 76 FF FF FF 48 8B 5C 24 30");//DevilMayCry5.exe+54F495
 	if (!yamatoSdtConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.yamatoSdtConcetrationAddr pattern.";

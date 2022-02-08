@@ -357,7 +357,9 @@ std::optional<std::string> Mods::on_initialize() const {
             return e;
         }
     }
-
+    if(Mod::patterns->is_changed())
+        Mod::patterns->save();
+    Mod::patterns->free();
     /*utility::Config m_config{ "re2_fw_config.txt" };
 
     for (auto& mod : m_mods) {

@@ -132,7 +132,7 @@ std::optional<std::string> AllStartManual::on_initialize() {
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   constexpr ptrdiff_t addr = 0x2C723DF;
   //auto addr = base + 0x2C723DF;
-  // auto addr      = utility::scan(base, "66 C7 47 5E 00 00");
+  // auto addr      = patterns->find_addr(base, "66 C7 47 5E 00 00");
   // if (!addr) {
   //   return "Unable to find AllStartManual pattern.";
   // }

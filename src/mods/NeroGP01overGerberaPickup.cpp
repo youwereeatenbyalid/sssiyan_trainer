@@ -48,7 +48,7 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
 
   set_up_hotkey();
 
-   auto addr = utility::scan(base, "44 89 59 20 41 B9 01 00 00 00");
+   auto addr = patterns->find_addr(base, "44 89 59 20 41 B9 01 00 00 00");
    if (!addr) {
     return "Unable to find NeroGP01overGerberaPickup pattern.";
   }

@@ -39,7 +39,7 @@ std::optional<std::string> DTWingsOnly::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "48 83 78 18 00 0F 94 C0 48 8B 6C 24 50");
+  auto addr = patterns->find_addr(base, "48 83 78 18 00 0F 94 C0 48 8B 6C 24 50");
   if (!addr) {
     return "Unable to find DTWingsOnly pattern.";
   }

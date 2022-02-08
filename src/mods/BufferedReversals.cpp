@@ -51,7 +51,7 @@ std::optional<std::string> BufferedReversals::on_initialize() {
   set_up_hotkey();
 							   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "48 89 87 40 17 00 00");
+  auto addr = patterns->find_addr(base, "48 89 87 40 17 00 00");
   if (!addr) {
     return "Unable to find BufferedReversals pattern.";
   }

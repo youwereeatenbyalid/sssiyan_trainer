@@ -50,7 +50,7 @@ std::optional<std::string> SprintInBattle::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BA CA 0E 00 00 00 0F 85 1E");
+  auto addr = patterns->find_addr(base, "80 BA CA 0E 00 00 00 0F 85 1E");
   if (!addr) {
     return "Unable to find SprintInBattle pattern.";
   }

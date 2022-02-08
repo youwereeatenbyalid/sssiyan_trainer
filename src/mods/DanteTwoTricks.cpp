@@ -46,7 +46,7 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BE 98 00 00 00 00 0F 95 C0 48 85 C9 75 9D 8B 4F 44");
+  auto addr = patterns->find_addr(base, "80 BE 98 00 00 00 00 0F 95 C0 48 85 C9 75 9D 8B 4F 44");
   if (!addr) {
     return "Unable to find DanteTwoTricks pattern.";
   }

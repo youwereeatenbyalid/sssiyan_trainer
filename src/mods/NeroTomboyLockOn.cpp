@@ -51,7 +51,7 @@ std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "20 85 C9 75 15 48 8B D3");
+  auto addr = patterns->find_addr(base, "20 85 C9 75 15 48 8B D3");
   if (!addr) {
     return "Unable to find NeroTomboyLockOn pattern.";
   }

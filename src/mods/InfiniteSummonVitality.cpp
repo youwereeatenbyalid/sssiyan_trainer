@@ -48,7 +48,7 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   m_description_string   = "Pet health is locked at max.";
 
   set_up_hotkey();
-  auto infsummonvitality_addr = utility::scan(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
+  auto infsummonvitality_addr = patterns->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
 
   if (!infsummonvitality_addr) {
     return "Unable to find infsummonvitality pattern.";

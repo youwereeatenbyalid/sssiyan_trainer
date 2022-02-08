@@ -43,7 +43,7 @@ std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "80 B9 A8 00 00 00 00 0F");
+  auto addr      = patterns->find_addr(base, "80 B9 A8 00 00 00 00 0F");
   if (!addr) {
     return "Unable to find VergilNoTrickRestriction pattern.";
   }

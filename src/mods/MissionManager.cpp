@@ -17,7 +17,7 @@ std::optional<std::string> MissionManager::on_initialize() {
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto missionNumAddr = utility::scan(base, "89 43 7C 48 8B 5C 24 40");//DevilMayCry5.exe+24A9311
+  auto missionNumAddr = patterns->find_addr(base, "89 43 7C 48 8B 5C 24 40");//DevilMayCry5.exe+24A9311
   if (!missionNumAddr) {
     return "Unanable to find missionNumAddr pattern.";
   }

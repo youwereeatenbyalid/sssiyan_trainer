@@ -56,7 +56,7 @@ std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "8B 57 10 48 85 C0 0F 84 67");
+  auto addr = patterns->find_addr(base, "8B 57 10 48 85 C0 0F 84 67");
   if (!addr) {
     return "Unable to find VergilDirectionalMappings pattern.";
   }

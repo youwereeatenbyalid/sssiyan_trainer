@@ -198,10 +198,10 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
                          "press a button on the d-pad to switch breakers.";
 
   set_up_hotkey();
-
-  auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
-  auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
-  auto breakerui_addr = utility::scan(base, "41 89 04 0B 48 8B 96 08 01 00 00");
+  auto breakersize_addr = patterns->find_addr(base, "8B 8E CC 17 00 00 48 85");
+  auto nextbreaker_addr = patterns->find_addr(base, "4C 63 60 20 48 85 D2");
+  auto breakerui_addr = patterns->find_addr(base, "41 89 04 0B 48 8B 96 08 01 00 00");
+  
   if (!breakersize_addr) {
     return "Unable to find breaker itemSize pattern.";
   }

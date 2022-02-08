@@ -41,7 +41,7 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
+  auto addr      = patterns->find_addr(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
   if (!addr) {
     return "Unable to find NoScreenShake pattern.";
   }

@@ -31,7 +31,7 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
 
   set_up_hotkey();
 
-	auto trickUpAddr = utility::scan(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
+	auto trickUpAddr = patterns->find_addr(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
 	if (!trickUpAddr) {
 		return "Unanable to find InfiniteTrickUp.trickUpAddr pattern.";
 	}

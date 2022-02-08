@@ -46,12 +46,12 @@ std::optional<std::string> GroundTrickNoDistanceRestriction::on_initialize()
 
   set_up_hotkey();
 
-	auto distanceAddr0 = utility::scan(base, "F3 0F 10 41 14 48 8B 4F"); //DevilMayCry5.exe+10BFE80
+	auto distanceAddr0 = patterns->find_addr(base, "F3 0F 10 41 14 48 8B 4F"); //DevilMayCry5.exe+10BFE80
 	if (!distanceAddr0) {
 		return "Unanable to find GroundTrickNoDistanceRestriction.distanceAddr0 pattern.";
 	}
 
-	auto distanceAddr1 = utility::scan(base, "74 C0 F3 0F 10 48 14"); //DevilMayCry5.exe+10C18E8
+	auto distanceAddr1 = patterns->find_addr(base, "74 C0 F3 0F 10 48 14"); //DevilMayCry5.exe+10C18E8
 	if (!distanceAddr1) {
 		return "Unanable to find GroundTrickNoDistanceRestriction.distanceAddr1 pattern.";
 	}

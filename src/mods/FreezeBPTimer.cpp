@@ -45,7 +45,7 @@ std::optional<std::string> FreezeBPTimer::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
+  auto addr      = patterns->find_addr(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
   if (!addr) {
     return "Unable to find FreezeBPTimer pattern.";
   }

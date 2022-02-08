@@ -87,7 +87,7 @@ std::optional<std::string> LandCancels::on_initialize() {
   m_description_string = "Touching the floor will cancel your current aerial attack.";
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "C7 42 34 00 00 00 00 C3 CC CC 48");
+  auto addr = patterns->find_addr(base, "C7 42 34 00 00 00 00 C3 CC CC 48");
   if (!addr) {
     return "Unable to find LandCancels pattern.";
   }

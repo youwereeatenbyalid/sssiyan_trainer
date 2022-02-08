@@ -41,7 +41,7 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
+  auto addr = patterns->find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
   if (!addr) {
     return "Unable to find NothingCancelsBubble pattern.";
   }

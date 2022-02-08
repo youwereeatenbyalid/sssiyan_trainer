@@ -40,7 +40,7 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "BE 89 48 14 48 8B 5C 24 30");
+  auto addr = patterns->find_addr(base, "BE 89 48 14 48 8B 5C 24 30");
   if (!addr) {
     return "Unable to find DisableAutoAssist pattern.";
   }

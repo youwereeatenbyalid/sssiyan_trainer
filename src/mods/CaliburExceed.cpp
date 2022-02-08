@@ -44,7 +44,7 @@ std::optional<std::string> CaliburExceed::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = utility::scan(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  auto addr = patterns->find_addr(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
   if (!addr) {
     return "Unable to find CaliburExceed pattern.";
   }

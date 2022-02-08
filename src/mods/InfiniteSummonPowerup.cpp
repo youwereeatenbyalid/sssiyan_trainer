@@ -45,7 +45,7 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
   m_description_string   = "Summon powerup state lasts forever.";
 
   set_up_hotkey();
-  auto infinitesummonpowerupduration_addr = utility::scan(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
+  auto infinitesummonpowerupduration_addr = patterns->find_addr(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
 
   if (!infinitesummonpowerupduration_addr) {
     return "Unable to find infinitesummonpowerupduration pattern.";

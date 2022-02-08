@@ -47,7 +47,7 @@ std::optional<std::string> OriginalReversals::on_initialize() {
   set_up_hotkey();
 							   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BF D0 0E 00 00 00 8B");
+  auto addr = patterns->find_addr(base, "80 BF D0 0E 00 00 00 8B");
   if (!addr) {
     return "Unable to find OriginalReversals pattern.";
   }

@@ -58,7 +58,7 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "FF F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");
+  auto addr = patterns->find_addr(base, "FF F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");
   if (!addr) {
     return "Unable to find DanteQuickSDT pattern.";
   }

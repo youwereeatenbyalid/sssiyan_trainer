@@ -225,50 +225,50 @@ std::optional<std::string> CameraSettings::on_initialize() {
 
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "F3 0F 10 57 30 48 8B D6");
+  auto addr1 = patterns->find_addr(base, "F3 0F 10 57 30 48 8B D6");
   if (!addr1) {
     return "Unable to find CameraSettings1 pattern.";
   }
 
-  auto addr2 = utility::scan(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 0F");
+  auto addr2 = patterns->find_addr(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 0F");
   if (!addr2) {
     return "Unable to find CameraSettings2 pattern.";
   }
 
-  auto addr3 = utility::scan(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 E8");
+  auto addr3 = patterns->find_addr(base, "F3 0F 10 B2 B0 00 00 00 0F 5A F6 E8");
   if (!addr3) {
     return "Unable to find CameraSettings3 pattern.";
   }
 
-  auto addr4 = utility::scan(base, "74 17 89 8B 98 02 00 00");
+  auto addr4 = patterns->find_addr(base, "74 17 89 8B 98 02 00 00");
   if (!addr4) {
     return "Unable to find CameraSettings4 pattern.";
   }
   CameraSettings::jmp_jeKeyboardHorizontalEnable = addr4.value() + 25;
 
-  auto addr5 = utility::scan(base, "48 83 78 18 00 0F 85 5D 01 00 00 C6");
+  auto addr5 = patterns->find_addr(base, "48 83 78 18 00 0F 85 5D 01 00 00 C6");
   if (!addr5) {
     return "Unable to find CameraSettings5 pattern.";
   }
   CameraSettings::jmp_jneSiyansCamFix1 = addr5.value() + 360;
 
-  auto addr6 = utility::scan(base, "80 BB 94 04 00 00 00 0F 85 6F");
+  auto addr6 = patterns->find_addr(base, "80 BB 94 04 00 00 00 0F 85 6F");
   if (!addr6) {
     return "Unable to find CameraSettings6 pattern.";
   }
   CameraSettings::jmp_jneCloseAutoCorrect = addr6.value() + 380;
 
-  auto addr7 = utility::scan(base, "89 87 80 02 00 00 48 8B 43 50 48 83");
+  auto addr7 = patterns->find_addr(base, "89 87 80 02 00 00 48 8B 43 50 48 83");
   if (!addr7) {
     return "Unable to find CameraSettings7 pattern.";
   }
 
-  auto addr8 = utility::scan(base, "F3 0F 11 87 80 02 00 00 48 8B 43 50 48 8B");
+  auto addr8 = patterns->find_addr(base, "F3 0F 11 87 80 02 00 00 48 8B 43 50 48 8B");
   if (!addr8) {
     return "Unable to find CameraHeightBasedAutocorrects pattern.";
   }
 
-  auto addr9 = utility::scan(base, "F3 0F 11 87 80 02 00 00 48 83");
+  auto addr9 = patterns->find_addr(base, "F3 0F 11 87 80 02 00 00 48 83");
   if (!addr9) {
     return "Unable to find CameraMovementBasedAutocorrects pattern.";
   }

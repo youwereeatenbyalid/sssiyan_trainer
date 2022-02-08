@@ -85,7 +85,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
-  auto restartPosAddr = utility::scan(base, "44 0F 29 4C 24 70 F3 44 0F 10 48"); // DevilMayCry5.exe+24A4DB7
+  auto restartPosAddr = patterns->find_addr(base, "44 0F 29 4C 24 70 F3 44 0F 10 48"); // DevilMayCry5.exe+24A4DB7
   if (!restartPosAddr) {
     return "Unanable to find CheckpointPos.restartPosAddr pattern.";
   }
