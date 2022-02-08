@@ -47,7 +47,7 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   description_string   = "Removes the time limit on the Quadruple S Exit window.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "47 50 48 83 78 18 00 75 2E F3 0F 5A");
+  auto addr = patterns->find_addr(base, "47 50 48 83 78 18 00 75 2E F3 0F 5A");
   if (!addr) {
     return "Unable to find DanteInfQ4ExitWindow pattern.";
   }

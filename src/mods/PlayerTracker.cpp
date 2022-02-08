@@ -391,33 +391,33 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   //player tracker
-  auto player_addr = patterns.find_addr(base, "4C 8B C9 41 83 F8 FF 74");
+  auto player_addr = patterns->find_addr(base, "4C 8B C9 41 83 F8 FF 74");
   if (!player_addr) {
     return "Unable to find Player Tracker pattern.";
   }
   //summon tracker
-  auto summon_addr = patterns.find_addr(base, "39 6F 64 0F 84 52 01 00 00");
+  auto summon_addr = patterns->find_addr(base, "39 6F 64 0F 84 52 01 00 00");
   if (!summon_addr) {
     return "Unable to find Summon Tracker pattern.";
   }
-  auto incombat_addr = patterns.find_addr(base, "40 38 B0 CA 0E 00 00 0F 84 04");
+  auto incombat_addr = patterns->find_addr(base, "40 38 B0 CA 0E 00 00 0F 84 04");
   if (!incombat_addr) {
     return "Unable to find In Combat pattern.";
   }
-  auto sin_addr = patterns.find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
+  auto sin_addr = patterns->find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
   if (!sin_addr) {
     return "Unable to find Sin pattern.";
   }
 
-  auto cos_addr = patterns.find_addr(base, "F3 0F 59 87 88 0F 00 00");
+  auto cos_addr = patterns->find_addr(base, "F3 0F 59 87 88 0F 00 00");
   if (!cos_addr) {
     return "Unable to find Cos pattern.";
   }
-  auto threshhold_addr = patterns.find_addr(base, "45 F3 0F 10 4A 30");//Broken by copyright update
+  auto threshhold_addr = patterns->find_addr(base, "45 F3 0F 10 4A 30");//Broken by copyright update
   if (!threshhold_addr) {
     return "Unable to find threshhold pattern.";
   }
-  auto vergildata_addr = patterns.find_addr(base, "48 8B 7F 10 4D 85 DB");
+  auto vergildata_addr = patterns->find_addr(base, "48 8B 7F 10 4D 85 DB");
   if (!vergildata_addr) {
 	  return "Unable to find vergildata pattern.";
   }

@@ -3,6 +3,8 @@
 #include <windows.h>
 
 #include "ModFramework.hpp"
+#include "Mod.hpp"
+#include "InitPatternsManager.hpp"
 
 HMODULE g_dinput = 0;
 
@@ -36,7 +38,7 @@ void startup_thread() {
         if ((g_dinput = LoadLibraryW((std::wstring{ buffer } + L"\\dinput8.dll").c_str())) == NULL) {
             failed();
         }
-
+        Mod::patterns = std::make_unique<InitPatternsManager>("patternsList.txt", "IsUsePatternsList");
         g_framework = std::make_unique<ModFramework>();
     }
     else {

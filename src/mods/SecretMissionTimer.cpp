@@ -59,13 +59,13 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Also can prevent starting \"no ground\" timer on sm9.";
 
-	auto timerAddr = patterns.find_addr(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0
+	auto timerAddr = patterns->find_addr(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0
 	if (!timerAddr)
 	{
 		return "Unanable to find timerAddr pattern.";
 	}
 
-	auto m9Addr = patterns.find_addr(base, "3F 48 8B 56 28 48 8B CB 48 85 D2 75 1B");// DevilMayCry5.exe+1FA2CC9; +0x8
+	auto m9Addr = patterns->find_addr(base, "3F 48 8B 56 28 48 8B CB 48 85 D2 75 1B");// DevilMayCry5.exe+1FA2CC9; +0x8
 	if (!m9Addr)
 	{
 		return "Unanable to find m9Addr pattern.";

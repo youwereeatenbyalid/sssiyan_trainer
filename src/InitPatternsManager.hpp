@@ -86,5 +86,10 @@ public:
 
 	bool is_changed() const noexcept { return IsChangesWasMade; }
 
-	void free() { delete patternsCfg; };
+	void free()
+	{
+		if(patternsCfg != nullptr)
+			delete patternsCfg;
+		patternsCfg = nullptr;
+	};
 };

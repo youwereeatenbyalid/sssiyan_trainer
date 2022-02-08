@@ -128,7 +128,7 @@ std::optional<std::string> Inertia::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Redirect inertia through air hikes & enemy steps.";
 
-  auto addr = patterns.find_addr(base, "48 8B 41 08 44 8B 40 78");
+  auto addr = patterns->find_addr(base, "48 8B 41 08 44 8B 40 78");
   if (!addr) {
     return "Unable to find Inertia pattern.";
   }

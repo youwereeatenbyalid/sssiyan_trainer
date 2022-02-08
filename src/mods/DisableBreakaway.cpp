@@ -55,7 +55,7 @@ std::optional<std::string> DisableBreakaway::on_initialize() {
   description_string   = "Disables the Breakaway animation."
                          "Hold the assigned input while pressing breakaway to force a breakaway.";
 
-  auto addr = patterns.find_addr(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
+  auto addr = patterns->find_addr(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
   if (!addr) {
     return "Unable to find DisableBreakaway pattern.";
   }

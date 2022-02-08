@@ -34,7 +34,7 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Don't decrease a concentration gauge when Vergil takes damage in SDT.";
 
-	auto initAddr1 = patterns.find_addr(base, "2B FF FF FF F3 0F 10 90 8C 00 00 00");// DevilMayCry5.exe+572C5D
+	auto initAddr1 = patterns->find_addr(base, "2B FF FF FF F3 0F 10 90 8C 00 00 00");// DevilMayCry5.exe+572C5D
 	if (!initAddr1) {
 		return "Unanable to find VergilSDTNoConcentrationLose pattern.";
 	}

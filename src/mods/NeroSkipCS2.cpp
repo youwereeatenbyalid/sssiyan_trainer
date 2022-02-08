@@ -47,7 +47,7 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   description_string   = "Bypasses Charge Shot 2 when charging Blue Rose.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "FF 47 58 48 8B 43 50 48 39");
+  auto addr = patterns->find_addr(base, "FF 47 58 48 8B 43 50 48 39");
   if (!addr) {
     return "Unable to find NeroSkipCS2 pattern.";
   }

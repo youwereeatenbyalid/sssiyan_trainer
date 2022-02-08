@@ -24,7 +24,7 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Allow use trick dodge in the air.";
 
-	auto isInAirAddr = patterns.find_addr(base, "0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 75 63 85 D2 0F 84 01"); //DevilMayCry5.exe+55088C
+	auto isInAirAddr = patterns->find_addr(base, "0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 75 63 85 D2 0F 84 01"); //DevilMayCry5.exe+55088C
 	if (!isInAirAddr)
 	{
 		return "Unanable to find AirTrickDodge.isInAirAddr pattern.";

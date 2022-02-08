@@ -48,7 +48,7 @@ std::optional<std::string> DanteVariableGuard::on_initialize() {
   description_string   = "Lock Guard meter to whatever level you want.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "F3 0F 10 5A 28 0F 57");
+  auto addr = patterns->find_addr(base, "F3 0F 10 5A 28 0F 57");
   if (!addr) {
     return "Unable to find DanteVariableGuard pattern.";
   }

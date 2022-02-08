@@ -46,7 +46,7 @@ std::optional<std::string> HoldToMash::on_initialize() {
   full_name_string     = "Hold To Mash";
   author_string        = "The Hitchhiker";
   description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
-  auto holdtomash_addr = patterns.find_addr(base, "41 85 40 48 0F 97 C0");
+  auto holdtomash_addr = patterns->find_addr(base, "41 85 40 48 0F 97 C0");
 
   if (!holdtomash_addr) {
     return "Unable to find holdtomash pattern.";

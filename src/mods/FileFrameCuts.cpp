@@ -110,7 +110,7 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
   description_string   = "Cuts frames from various moves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "F3 0F 10 42 58 66 85 C0 74 0E");
+  auto addr = patterns->find_addr(base, "F3 0F 10 42 58 66 85 C0 74 0E");
   if (!addr) {
     return "Unable to find FileFrameCuts pattern.";
   }

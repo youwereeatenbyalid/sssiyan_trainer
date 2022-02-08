@@ -1690,12 +1690,12 @@ std::optional<std::string> EnemySwapper::on_initialize() {
 
   plPosBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
-  auto initAddr1 = patterns.find_addr(base, "8B 71 10 48 85 C0 0F 84 43");// "DevilMayCry5.exe"+FE568B //For BP custom swap
+  auto initAddr1 = patterns->find_addr(base, "8B 71 10 48 85 C0 0F 84 43");// "DevilMayCry5.exe"+FE568B //For BP custom swap
   if (!initAddr1) {
     return "Unanable to find EnemySwapper pattern.";
   }
 
-  auto initAddr2 = patterns.find_addr(base, "44 8B 41 10 48 8B D7 48 8B CB E8 F8"); // DevilMayCry5.exe+FE57A9 //1st op
+  auto initAddr2 = patterns->find_addr(base, "44 8B 41 10 48 8B D7 48 8B CB E8 F8"); // DevilMayCry5.exe+FE57A9 //1st op
   if (!initAddr2) {
     return "Unanable to find EnemySwapper pattern.";
   }
@@ -1708,135 +1708,135 @@ std::optional<std::string> EnemySwapper::on_initialize() {
    auto initAddr5 = g_framework->get_module().as<uintptr_t>() + 0xCA17A4;
   
 
-  auto customSpawnAddr = patterns.find_addr(base, "F3 41 0F11 4D 34 48 8B 4B 18 48 85 C9 75 10"); // DevilMayCry5.exe+11C58BC
+  auto customSpawnAddr = patterns->find_addr(base, "F3 41 0F11 4D 34 48 8B 4B 18 48 85 C9 75 10"); // DevilMayCry5.exe+11C58BC
   if (!customSpawnAddr) {
     return "Unanable to find customSpawnAddr pattern.";
   }
 
-  auto initAddr3 = patterns.find_addr(base, "41 8B 4E 10 48 85 C0 74"); // DevilMayCry5.exe+F34255
+  auto initAddr3 = patterns->find_addr(base, "41 8B 4E 10 48 85 C0 74"); // DevilMayCry5.exe+F34255
   if (!customSpawnAddr) {
     return "Unanable to find EnemySwapper.initAddr2 pattern.";
   }
 
-  auto initAddr6 = patterns.find_addr(base, "45 8B 76 10 4C 89 7C 24 40"); // DevilMayCry5.exe+BD4691
+  auto initAddr6 = patterns->find_addr(base, "45 8B 76 10 4C 89 7C 24 40"); // DevilMayCry5.exe+BD4691
   if (!initAddr6) {
     return "Unanable to find EnemySwapper.initAddr6 pattern.";
   }
 
-  /*auto initAddr7 = patterns.find_addr(base, "45 8B 76 10 4C 89 7C 24 40"); // 
+  /*auto initAddr7 = patterns->find_addr(base, "45 8B 76 10 4C 89 7C 24 40"); // 
   if (!initAddr6) {
     return "Unanable to find EnemySwapper.initAddr7 pattern.";
   }*/
 
-  auto m19CheckAddr = patterns.find_addr(base, "83 78 7C 13 75 11"); //DevilMayCry5.exe+1D47B50
+  auto m19CheckAddr = patterns->find_addr(base, "83 78 7C 13 75 11"); //DevilMayCry5.exe+1D47B50
   if (!m19CheckAddr) {
     return "Unanable to find EnemySwapper.m19CheckAddr pattern.";
   }
 
-  auto griffonKillAddr = patterns.find_addr(base, "80 BF 48 0F 00 00 00"); //DevilMayCry5.exe+F9E17B
+  auto griffonKillAddr = patterns->find_addr(base, "80 BF 48 0F 00 00 00"); //DevilMayCry5.exe+F9E17B
   if (!griffonKillAddr) {
     return "Unanable to find EnemySwapper.griffonKillAddr pattern.";
   }
 
-  auto shadowKillAddr = patterns.find_addr(base, "80 BF 60 0F 00 00 00"); //DevilMayCry5.exe+F5B07B
+  auto shadowKillAddr = patterns->find_addr(base, "80 BF 60 0F 00 00 00"); //DevilMayCry5.exe+F5B07B
   if (!shadowKillAddr) {
     return "Unanable to find EnemySwapper.shadowKillAddr pattern.";
   }
 
-  auto nightmireStartingAddr = patterns.find_addr(base, "48 8B D7 F3 0F 11 45 97 F3 0F 11"); //DevilMayCry5.exe+20DEFFD
+  auto nightmireStartingAddr = patterns->find_addr(base, "48 8B D7 F3 0F 11 45 97 F3 0F 11"); //DevilMayCry5.exe+20DEFFD
   if (!nightmireStartingAddr) {
     return "Unanable to find EnemySwapper.nightmareStartingMeteorPosAddr pattern.";
   }
 
-  auto nightmireArrivalAddr = patterns.find_addr(base, "12 F3 44 0F 11 50 30"); //DevilMayCry5.exe+16A13EB
+  auto nightmireArrivalAddr = patterns->find_addr(base, "12 F3 44 0F 11 50 30"); //DevilMayCry5.exe+16A13EB
   if (!nightmireArrivalAddr) {
     return "Unanable to find EnemySwapper.nightmareArrivalAddr pattern.";
   }
 
-  //auto cavTeleportPosAddr = patterns.find_addr(base, "F3 41 0F 11 85 20 0E 00 00 F3 41"); //DevilMayCry5.exe+1290351
+  //auto cavTeleportPosAddr = patterns->find_addr(base, "F3 41 0F 11 85 20 0E 00 00 F3 41"); //DevilMayCry5.exe+1290351
   //if (!cavTeleportPosAddr)
   //{
   //    return "Unanable to find EnemySwapper.cavTeleportPosAddr pattern.";
   //}
 
-  auto cavTeleportPosAddr = patterns.find_addr(base, "73 FD FF FF F3 0F 10 47 10"); //DevilMayCry5.exe+1290342 (-0x4)
+  auto cavTeleportPosAddr = patterns->find_addr(base, "73 FD FF FF F3 0F 10 47 10"); //DevilMayCry5.exe+1290342 (-0x4)
   if (!cavTeleportPosAddr)
   {
       return "Unanable to find EnemySwapper.cavTeleportPosAddr pattern.";
   }
 
-  auto vergilCenterFloorAddr = patterns.find_addr(base, "04 00 00 F3 0F 10 80 A0 00 00 00 F3"); //DevilMayCry5.exe+9AE0B7 (-0x3);
+  auto vergilCenterFloorAddr = patterns->find_addr(base, "04 00 00 F3 0F 10 80 A0 00 00 00 F3"); //DevilMayCry5.exe+9AE0B7 (-0x3);
   if (!vergilCenterFloorAddr)
   {
       return "Unanable to find EnemySwapper.vergilCenterFloorAddr pattern.";
   }
-  //auto vergilCenterFloor1Addr = patterns.find_addr(base, "E3 F3 0F 10 80 A0 00 00 00"); // DevilMayCry5.exe+1CBB022 (-0x1);
+  //auto vergilCenterFloor1Addr = patterns->find_addr(base, "E3 F3 0F 10 80 A0 00 00 00"); // DevilMayCry5.exe+1CBB022 (-0x1);
   //if (!vergilCenterFloor1Addr)
   //{
   //    return "Unanable to find EnemySwapper.vergilCenterFloor1Addr pattern.";
   //}
 
-  auto vergilAirRaidControllerAddr = patterns.find_addr(base, "F3 0F 10 B8 A0 00 00 00 F3"); //DevilMayCry5.exe+1CBD779
+  auto vergilAirRaidControllerAddr = patterns->find_addr(base, "F3 0F 10 B8 A0 00 00 00 F3"); //DevilMayCry5.exe+1CBD779
   if (!vergilAirRaidControllerAddr)
   {
       return "Unanable to find EnemySwapper.vergilAirRaidControllerAddr pattern.";
   }
 
-  auto goliathSuckJmpAddr = patterns.find_addr(base, "00 F3 0F 11 82 40 0D 00 00"); //DevilMayCry5.exe+12F2545 (-0x1)
+  auto goliathSuckJmpAddr = patterns->find_addr(base, "00 F3 0F 11 82 40 0D 00 00"); //DevilMayCry5.exe+12F2545 (-0x1)
   if (!goliathSuckJmpAddr)
   {
       return "Unanable to find EnemySwapper.goliathSuckJmpAddr pattern.";
   }
 
-  auto goliathLeaveJmpAddr = patterns.find_addr(base, "F3 41 0F 11 86 30 0D 00 00"); //DevilMayCry5.exe+12F2455
+  auto goliathLeaveJmpAddr = patterns->find_addr(base, "F3 41 0F 11 86 30 0D 00 00"); //DevilMayCry5.exe+12F2455
   if (!goliathLeaveJmpAddr)
   {
       return "Unanable to find EnemySwapper.goliathLeaveJmpAddr pattern.";
   }
 
-  auto artemisCenterOfFloorAddr = patterns.find_addr(base, "B7 F3 0F 10 59 10"); //DevilMayCry5.exe+1E9CC1D (-0x1)
+  auto artemisCenterOfFloorAddr = patterns->find_addr(base, "B7 F3 0F 10 59 10"); //DevilMayCry5.exe+1E9CC1D (-0x1)
   if (!artemisCenterOfFloorAddr)
   {
       return "Unanable to find EnemySwapper.artemisCenterOfFloorAddr pattern.";
   }
 
-  auto urizen3TpAddr = patterns.find_addr(base, "48 83 78 18 00 75 93 F3 0F 10 87 E0"); //DevilMayCry5.exe+1189760
+  auto urizen3TpAddr = patterns->find_addr(base, "48 83 78 18 00 75 93 F3 0F 10 87 E0"); //DevilMayCry5.exe+1189760
   if (!urizen3TpAddr)
   {
       return "Unanable to find EnemySwapper.urizen3TpAddr pattern.";
   }
 
-  auto malphasAddr = patterns.find_addr(base, "F3 0F 10 87 90 00 00 00 F3 0F 11 4D B4"); //DevilMayCry5.exe+105B4C3
+  auto malphasAddr = patterns->find_addr(base, "F3 0F 10 87 90 00 00 00 F3 0F 11 4D B4"); //DevilMayCry5.exe+105B4C3
   if (!urizen3TpAddr)
   {
       return "Unanable to find EnemySwapper.malphasAddr pattern.";
   }
 
-  auto cerberusAddr = patterns.find_addr(base, "F3 44 0F 10 52 18 48 8B D3"); //DevilMayCry5.exe+111D60E
+  auto cerberusAddr = patterns->find_addr(base, "F3 44 0F 10 52 18 48 8B D3"); //DevilMayCry5.exe+111D60E
   if (!cerberusAddr)
   {
       return "Unanable to find EnemySwapper.cerberusAddr pattern.";
   }
 
-  auto cerberusThunderWaveAddr = patterns.find_addr(base, "F3 0F 5F 47 24"); //DevilMayCry5.exe+1121E1B
+  auto cerberusThunderWaveAddr = patterns->find_addr(base, "F3 0F 5F 47 24"); //DevilMayCry5.exe+1121E1B
   if (!cerberusThunderWaveAddr)
   {
       return "Unanable to find EnemySwapper.cerberusThunderWaveAddr pattern.";
   }
 
-  auto cerberusThunderBallAddr = patterns.find_addr(base, "44 38 B0 A9 0F 00 00"); //DevilMayCry5.exe+1F39983
+  auto cerberusThunderBallAddr = patterns->find_addr(base, "44 38 B0 A9 0F 00 00"); //DevilMayCry5.exe+1F39983
   if (!cerberusThunderBallAddr)
   {
       return "Unanable to find EnemySwapper.cerberusThunderBallAddr pattern.";
   }
 
-  auto nowFlowAddr = patterns.find_addr(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+89429E 
+  auto nowFlowAddr = patterns->find_addr(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+89429E 
   if (!nowFlowAddr)
   {
       return "Unanable to find EnemySwapper.nowFlowAddr pattern.";
   }
 
-  auto gameModeAddr = patterns.find_addr(base, "39 B8 90 00 00 00 48"); // DevilMayCry5.exe+132B592
+  auto gameModeAddr = patterns->find_addr(base, "39 B8 90 00 00 00 48"); // DevilMayCry5.exe+132B592
   if (!nowFlowAddr)
   {
       return "Unanable to find EnemySwapper.gameMode pattern.";

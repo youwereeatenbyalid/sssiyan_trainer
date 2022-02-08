@@ -27,7 +27,7 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Vergil's body will be not disappear while trick dodge.";
 
-	auto getEndDrawOffAddr = patterns.find_addr(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
+	auto getEndDrawOffAddr = patterns->find_addr(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
 	if (!getEndDrawOffAddr)
 	{
 		return "Unanable to find TrickDodgeNoDisappear.getEndDrawOffAddr pattern.";

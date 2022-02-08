@@ -62,7 +62,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   full_name_string     = "Select Enemy Difficulty";
   author_string        = "The Hitchhiker";
   description_string   = "Set the difficulty of enemies in combat.";
-  auto missionenemydifficulty_addr = patterns.find_addr(base, "89 B8 8C 00 00 00");
+  auto missionenemydifficulty_addr = patterns->find_addr(base, "89 B8 8C 00 00 00");
 
   if (!missionenemydifficulty_addr) {
     return "Unable to find missionenemydifficulty pattern.";
@@ -72,7 +72,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize missionenemydifficulty";
   }
-  auto bpenemydifficulty_addr = patterns.find_addr(base, "89 91 8C 00 00 00 48 8B");
+  auto bpenemydifficulty_addr = patterns->find_addr(base, "89 91 8C 00 00 00 48 8B");
 
   if (!bpenemydifficulty_addr) {
     return "Unable to find bpenemydifficulty pattern.";

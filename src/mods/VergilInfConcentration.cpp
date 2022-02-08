@@ -63,7 +63,7 @@ std::optional<std::string> VergilInfConcentration::on_initialize() {
   description_string   = "Lock Concentration meter to whatever level you want.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "F3 0F 10 93 50 1B 00 00");
+  auto addr = patterns->find_addr(base, "F3 0F 10 93 50 1B 00 00");
   if (!addr) {
     return "Unable to find VergilInfConcentration pattern.";
   }

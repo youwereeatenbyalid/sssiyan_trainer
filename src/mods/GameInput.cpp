@@ -287,16 +287,16 @@ std::optional<std::string> GameInput::on_initialize() {
   author_string        = "The HitchHiker";
   description_string   = "Hooks the virtual inputs.";
 
-  auto validcontrol_addr    = patterns.find_addr(base, "A1 01 00 00 48 8B 97 C0 00 00 00 48 8B CB 48 85 D2");
-  auto hold_addr            = patterns.find_addr(base, "44 85 82 98 00 00 00");
-  auto clearhold_addr       = patterns.find_addr(base, "45 89 66 3C 48 8B 46 50");
+  auto validcontrol_addr    = patterns->find_addr(base, "A1 01 00 00 48 8B 97 C0 00 00 00 48 8B CB 48 85 D2");
+  auto hold_addr            = patterns->find_addr(base, "44 85 82 98 00 00 00");
+  auto clearhold_addr       = patterns->find_addr(base, "45 89 66 3C 48 8B 46 50");
 
-  auto press_addr      = patterns.find_addr(base, "85 AB 90 00 00 00");
-  auto clearpress_addr = patterns.find_addr(base, "45 89 66 48 48 8B 46 50");
+  auto press_addr      = patterns->find_addr(base, "85 AB 90 00 00 00");
+  auto clearpress_addr = patterns->find_addr(base, "45 89 66 48 48 8B 46 50");
 
-  auto release_addr         = patterns.find_addr(base, "85 AB 94 00 00 00");
-  auto releasewhenheld_addr = patterns.find_addr(base, "85 73 3C 75 03");
-  auto clearrelease_addr    = patterns.find_addr(base, "45 89 66 44 48 8B 46 50");
+  auto release_addr         = patterns->find_addr(base, "85 AB 94 00 00 00");
+  auto releasewhenheld_addr = patterns->find_addr(base, "85 73 3C 75 03");
+  auto clearrelease_addr    = patterns->find_addr(base, "45 89 66 44 48 8B 46 50");
   if (!validcontrol_addr) 
     return "Unable to find ValidControl pattern.";
    if (!hold_addr)

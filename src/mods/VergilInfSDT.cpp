@@ -64,11 +64,11 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = patterns.find_addr(base, "F3 0F 10 8B 20 1B 00 00 8B");
+  auto addr1 = patterns->find_addr(base, "F3 0F 10 8B 20 1B 00 00 8B");
   if (!addr1) {
     return "Unable to find VergilInfSDT pattern.";
   }
-  auto addr2 = patterns.find_addr(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
+  auto addr2 = patterns->find_addr(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
   if (!addr2) {
     return "Unable to find VergilInfSDT pattern.";
   }

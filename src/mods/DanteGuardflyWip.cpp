@@ -49,7 +49,7 @@ std::optional<std::string> DanteGuardflyWip::on_initialize() {
   description_string   = "Removes the inertia clamp on Guard.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "0F 2F C2 0F 83 81 00 00 00");
+  auto addr = patterns->find_addr(base, "0F 2F C2 0F 83 81 00 00 00");
   if (!addr) {
     return "Unable to find DanteGuardflyWip pattern.";
   }

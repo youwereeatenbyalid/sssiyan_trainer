@@ -459,30 +459,30 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 
   fadeStaticBase = g_framework->get_module().as<uintptr_t>() + 0x7E836F8;
-  auto emDataLstAddr = patterns.find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
+  auto emDataLstAddr = patterns->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
   if (!emDataLstAddr) {
     return "Unanable to find emDataLstAddr pattern.";
   }
 
-  auto emPrefabLoad = patterns.find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
+  auto emPrefabLoad = patterns->find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
   if (!emPrefabLoad)
   {
       return "Unanable to find emPrefabLoad pattern.";
   }
 
-  auto bpFlowIdAddr = patterns.find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
+  auto bpFlowIdAddr = patterns->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
   if (!emPrefabLoad)
   {
       return "Unanable to find bpFlowIdAddr pattern.";
   }
 
-  auto missionRetAddr = patterns.find_addr(base, "35 0A 00 C6 87 C0 00 00 00 01");// DevilMayCry5.exe+249E18A(-0x3)
+  auto missionRetAddr = patterns->find_addr(base, "35 0A 00 C6 87 C0 00 00 00 01");// DevilMayCry5.exe+249E18A(-0x3)
   if (!emPrefabLoad)
   {
       return "Unanable to find missionRetAddr pattern.";
   }
 
-  auto missionRetAddr1 = patterns.find_addr(base, "C6 80 C0 00 00 00 01 48 8B 43 50 4C");// DevilMayCry5.exe+F178FB
+  auto missionRetAddr1 = patterns->find_addr(base, "C6 80 C0 00 00 00 01 48 8B 43 50 4C");// DevilMayCry5.exe+F178FB
   if (!emPrefabLoad)
   {
       return "Unanable to find missionRetAddr1 pattern.";

@@ -39,12 +39,12 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = patterns.find_addr(base, "E8 09 F0 DB 00");
+  auto init_addr = patterns->find_addr(base, "E8 09 F0 DB 00");
   if (!init_addr) {
     return "Unanable to find VergilDisableSDTAccumulate::init_addr pattern.";
   }
 
-  auto func_addr_temp = patterns.find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
+  auto func_addr_temp = patterns->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
   if (!func_addr_temp) {
     return "Unanable to find VergilDisableSDTAccumulate::func_addr pattern.";
   }

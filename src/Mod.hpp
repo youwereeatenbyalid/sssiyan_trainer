@@ -315,7 +315,7 @@ public:
         gilver,
 		secretmission
     };
-    static inline InitPatternsManager patterns{"patternsList.txt", "IsUsePatternsList"};
+    static inline std::unique_ptr<InitPatternsManager> patterns = nullptr;
     enum input_enum {sword = 0x1, gun = 0x2, jump = 0x4, tauntinput =0x8, lockon = 0x10, changetarget = 0x20, 
                     dpad = 0x40, deviltrigger = 0x80, dpadup = 0x100, dpaddown = 0x200, dpadleft = 0x400, dpadright = 0x800, 
                     style = 0x1000,righttrigger=0x4000,lefttrigger=0x2000, resetcamera = 0x8000,SDT = 0x10000};

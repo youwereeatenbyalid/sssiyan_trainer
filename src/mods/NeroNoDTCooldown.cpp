@@ -42,7 +42,7 @@ std::optional<std::string> NeroNoDTCooldown::on_initialize() {
   description_string   = "Removes the cooldown on exiting DT after entering.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
+  auto addr = patterns->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
   if (!addr) {
     return "Unable to find NeroNoDTCooldown pattern.";
   }

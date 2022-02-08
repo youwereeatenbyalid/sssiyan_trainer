@@ -312,43 +312,43 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	jceTimerStaticBase = *(uintptr_t*)jceTimerStaticBase;
 	rayCastAddr = dmc5Base + 0x7E53744;
 
-	auto canExeJceAddr = patterns.find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
+	auto canExeJceAddr = patterns->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
 	if (!canExeJceAddr)
 	{
 		return "Unable to find DMC3JCE.canExeJceAddr pattern.";
 	}
 
-	auto canExeJceAddr1 = patterns.find_addr(base, "0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 D8");//DevilMayCry5.exe+1C0A54C
+	auto canExeJceAddr1 = patterns->find_addr(base, "0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 D8");//DevilMayCry5.exe+1C0A54C
 	if (!canExeJceAddr1)
 	{
 		return "Unable to find DMC3JCE.canExeJceAddr1 pattern.";
 	}
 
-	auto subHumanJceAddr = patterns.find_addr(base, "F3 41 0F 11 88 20 1B 00 00");//DevilMayCry5.exe+25009B2
+	auto subHumanJceAddr = patterns->find_addr(base, "F3 41 0F 11 88 20 1B 00 00");//DevilMayCry5.exe+25009B2
 	if (!subHumanJceAddr)
 	{
 		return "Unable to find DMC3JCE.subHumanJceAddr pattern.";
 	}
 
-	auto jcePrefab2Addr = patterns.find_addr(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
+	auto jcePrefab2Addr = patterns->find_addr(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
 	if (!jcePrefab2Addr)
 	{
 		return "Unable to find DMC3JCE.jcePrefab2Addr pattern.";
 	}
 
-	auto jceTimerAddr = patterns.find_addr(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
+	auto jceTimerAddr = patterns->find_addr(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
 	if (!jceTimerAddr)
 	{
 		return "Unable to find DMC3JCE.jceTimerAddr pattern.";
 	}
 
-	auto crashPointAddr = patterns.find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
+	auto crashPointAddr = patterns->find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
 	if (!crashPointAddr)
 	{
 		return "Unable to find DMC3JCE.crashPointAddr pattern.";
 	}
 
-	auto finishPfbAddr = patterns.find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7
+	auto finishPfbAddr = patterns->find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7
 	if (!crashPointAddr)
 	{
 		return "Unable to find DMC3JCE.finishPfbAddr pattern.";

@@ -42,7 +42,7 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
 
-  auto addr = patterns.find_addr(base, "F3 0F 10 05 CF FF 45 06");
+  auto addr = patterns->find_addr(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {
     return "Unable to find DisableTitleTimer pattern.";
   }

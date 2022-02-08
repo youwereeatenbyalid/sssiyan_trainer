@@ -96,11 +96,11 @@ std::optional<std::string> NeroInfBreakers::on_initialize() {
                        "When using less than 8, this will bug and give you Overtures.";
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = patterns.find_addr(base, "FF 41 8B 44 12 04");
+  auto addr1 = patterns->find_addr(base, "FF 41 8B 44 12 04");
   if (!addr1) {
     return "Unable to find NeroInfBreakers1 pattern.";
   }
-  auto addr2 = patterns.find_addr(base, "8B 86 CC 17 00 00 85");
+  auto addr2 = patterns->find_addr(base, "8B 86 CC 17 00 00 85");
   if (!addr2) {
     return "Unable to find NeroInfBreakers2 pattern.";
   }

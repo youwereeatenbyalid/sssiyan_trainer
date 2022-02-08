@@ -103,7 +103,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Disable damage altogether or when below a certain Style Rank.";
 
-  auto addr = patterns.find_addr(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
+  auto addr = patterns->find_addr(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
   if (!addr) {
     return "Unable to find AllOrNothing pattern.";
   }
@@ -225,7 +225,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   author_string        = "The Hitchhiker";
   description_string   = "Disable damage altogether or when below a certain Style Rank.";
 
-  auto addr = patterns.find_addr(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
+  auto addr = patterns->find_addr(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");
   if (!addr) {
     return "Unable to find AllOrNothing pattern.";
   }

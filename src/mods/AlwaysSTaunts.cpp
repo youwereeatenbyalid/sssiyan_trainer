@@ -96,16 +96,16 @@ std::optional<std::string> AlwaysSTaunts::on_initialize() {
   description_string = "Restricts your taunts to those that play when at S rank or above.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = patterns.find_addr(base, "8B 88 B0 00 00 00 48 8B 15");
+  auto addr      = patterns->find_addr(base, "8B 88 B0 00 00 00 48 8B 15");
   if (!addr) {
     return "Unable to find AlwaysSTaunts pattern.";
   }
-  auto addr2 = patterns.find_addr(
+  auto addr2 = patterns->find_addr(
       base, "8B 80 B0 00 00 00 83 E8 05 83 F8 02 0F 96 C1 EB D0 48");
   if (!addr2) {
     return "Unable to find AlwaysSTaunts2 pattern.";
   }
-  auto addr3 = patterns.find_addr(
+  auto addr3 = patterns->find_addr(
       base, "8B 80 B0 00 00 00 83 E8 05 83 F8 02 0F 96 C1 EB D0 41");
   if (!addr3) {
     return "Unable to find AlwaysSTaunts3 pattern.";

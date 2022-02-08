@@ -41,7 +41,7 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   description_string   = "Remove the consecutive Just Judgement Cut limit.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "FF 87 E0 18 00 00");
+  auto addr = patterns->find_addr(base, "FF 87 E0 18 00 00");
   if (!addr) {
     return "Unable to find VergilInfJdCs pattern.";
   }

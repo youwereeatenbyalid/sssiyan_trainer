@@ -62,7 +62,7 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 	author_string = "VPZadov";
 	description_string = "Change some enemy waves settings.";
 
-	auto initAddr1 = patterns.find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
+	auto initAddr1 = patterns->find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
 	if (!initAddr1) {
 		return "Unanable to find EnemyWaveSettings pattern.";
 	}

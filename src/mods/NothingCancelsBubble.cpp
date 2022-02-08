@@ -39,7 +39,7 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
   author_string        = "The HitchHiker";
   description_string   = "Prevents ragtime bubble from being destroyed prematurely.";
 
-  auto addr = patterns.find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
+  auto addr = patterns->find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
   if (!addr) {
     return "Unable to find NothingCancelsBubble pattern.";
   }

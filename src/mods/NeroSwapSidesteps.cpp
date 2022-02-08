@@ -64,11 +64,11 @@ std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "C7 40 10 1F 08 00 00");
+  auto addr = patterns->find_addr(base, "C7 40 10 1F 08 00 00");
   if (!addr) {
     return "Unable to find NeroSwapSidesteps pattern.";
   }
-  auto addr2 = patterns.find_addr(base, "C7 40 10 20 08 00 00");
+  auto addr2 = patterns->find_addr(base, "C7 40 10 20 08 00 00");
   if (!addr2) {
     return "Unable to find NeroSwapSidesteps2 pattern.";
   }

@@ -132,7 +132,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
   description_string = "Adjust the speed of various moves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "F3 0F 11 41 4C 48 8B 5C");
+  auto addr = patterns->find_addr(base, "F3 0F 11 41 4C 48 8B 5C");
   if (!addr) {
     return "Unable to find EntitySpeeds pattern.";
   }

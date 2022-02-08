@@ -103,7 +103,7 @@ std::optional<std::string> TextEditor::on_initialize() {
   ischecked = &TextEditor::cheaton;
   //onpage    = commonpage;
 
-  auto addr = patterns.find_addr(base, "40 53 57 41 56 48 83 EC 20 45 33");
+  auto addr = patterns->find_addr(base, "40 53 57 41 56 48 83 EC 20 45 33");
   if (!addr) {
 	  return "Unable to find Text Editor Pattern.";
   }

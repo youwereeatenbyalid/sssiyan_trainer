@@ -48,7 +48,7 @@ std::optional<std::string> DisableEnemyAI::on_initialize() {
   description_string      = "Forces enemies to act like they do when disabling Void's 'Enemy Action'.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns.find_addr(base, "80 B8 9C 00 00 00 00 74 11");
+  auto addr = patterns->find_addr(base, "80 B8 9C 00 00 00 00 74 11");
   if (!addr) {
     return "Unable to find DisableEnemyAI pattern.";
   }
