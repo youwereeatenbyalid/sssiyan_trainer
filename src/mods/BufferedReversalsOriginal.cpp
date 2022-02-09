@@ -35,7 +35,7 @@ std::optional<std::string> OriginalReversals::on_initialize() {
   
   m_is_enabled                  = &OriginalReversals::cheaton;
   m_on_page                     = mechanics;
-  m_full_name_string           = "Original Reversals";
+  m_full_name_string           = "Demo Reversals";
   m_author_string              = "SSSiyan";
   m_description_string		 = "Allows you to use directional moves in any direction.\n\n"
 							   "During the recovery of a move, buffer a directional attack, then "

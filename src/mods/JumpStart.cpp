@@ -72,9 +72,9 @@ std::optional<std::string> JumpStart::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &JumpStart::cheaton ;
-  m_on_page             = enemystep;
+  m_on_page             = mechanics;
 
-  m_full_name_string   = "JumpStart (+)";
+  m_full_name_string   = "Selective Jump-Cancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with any jump action.";
 

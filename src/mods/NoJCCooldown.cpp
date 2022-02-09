@@ -37,7 +37,7 @@ std::optional<std::string> NoJCCooldown::on_initialize() {
   m_is_enabled          = &NoJCCooldown::cheaton;
   m_on_page             = enemystep;
 
-  m_full_name_string   = "No Jump Cancel Cooldown";
+  m_full_name_string   = "No Enemy Step Cooldown";
   m_author_string      = "SSSiyan";
   m_description_string = "Removes the cooldown that starts when you enemy step, "
                        "allowing you to perform jump cancels in quicker succession.";

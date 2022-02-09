@@ -123,9 +123,9 @@ std::optional<std::string> AllStartManual::on_initialize() {
   m_is_enabled          = &AllStartManual::cheaton;
   m_on_page             = enemystep;
 
-  m_full_name_string   = "AllStart 2 (+)";
+  m_full_name_string   = "Cancellable Enemy Step (+)";
   m_author_string      = "SSSiyan";
-  m_description_string = "Allows you to cancel out of a selection of moves with any other move.";
+  m_description_string = "Allows you to cancel out of a selection of moves (currently only enemy step) with any other move.";
 
   set_up_hotkey();
 

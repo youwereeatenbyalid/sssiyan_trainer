@@ -105,7 +105,7 @@ std::optional<std::string> FileFrameCuts::on_initialize() {
   m_is_enabled            = &FileFrameCuts::cheaton;
   m_on_page               = animation;
 
-  m_full_name_string     = "Frame Cuts (+)";
+  m_full_name_string     = "Character Frame Cuts (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Cuts frames from various moves.";
 

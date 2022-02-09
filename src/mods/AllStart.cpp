@@ -123,7 +123,7 @@ std::optional<std::string> AllStart::on_initialize() {
   m_is_enabled          = &AllStart::cheaton;
   m_on_page             = mechanics;
 
-  m_full_name_string   = "AllStart (+)";
+  m_full_name_string   = "Selective All-Cancels (+)";
   m_author_string      = "SSSiyan, dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with any other move.";
 
