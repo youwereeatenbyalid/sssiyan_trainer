@@ -9,6 +9,7 @@
 #include "VergilSDTFormTracker.hpp"
 #include "PlayerTracker.hpp"
 #include "EnemyWaveEditor.hpp"
+#include "DeepTurbo.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -108,7 +109,7 @@ public:
 
 		bool get_condition(bool isBadPtr)
 		{
-			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr)
+			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr && !DeepTurbo::isCutscene)
 			{
 				if (EnemySwapper::gameMode == 3)
 				{
@@ -189,7 +190,7 @@ public:
 
 		bool set_capacity(int newCap){ return jcSpawn.set_list_shell_capacity(newCap); }
 
-		void  start_jce()
+		volatile void start_jce()
 		{
 			if(executing.load())
 				return;
@@ -268,7 +269,6 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-
 							rcx = rcxFlag ? jcSpawn.get_rcx_ptr() : jcSpawn.get_rcx_ptr(1);//This may be completely bullshit, idk 
 							rcxFlag = !rcxFlag;
 							if(!rcx.has_value())

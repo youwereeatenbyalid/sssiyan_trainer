@@ -186,7 +186,7 @@ void DMC3JCE::start_jce_asm()
 volatile uintptr_t rdx_back_c = 0;//i guess it's have smth bad with std::vector allocator
 volatile uintptr_t rdx_back_s = 0;//i guess it's have smth bad with std::vector allocator
 
-static naked void jce_exetime_detour()
+static volatile naked void jce_exetime_detour()
 {
 	__asm {
 		cmp byte ptr [DMC3JCE::cheaton], 1
