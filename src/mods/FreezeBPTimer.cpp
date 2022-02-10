@@ -58,5 +58,4 @@ std::optional<std::string> FreezeBPTimer::on_initialize() {
   return Mod::on_initialize();
 }
 
-void FreezeBPTimer::on_draw_ui() {
-}
+// void FreezeBPTimer::on_draw_ui(){}

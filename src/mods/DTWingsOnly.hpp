@@ -13,8 +13,8 @@ public:
   static uintptr_t jmp_ret;
   static bool cheaton;
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   // void on_frame() override;

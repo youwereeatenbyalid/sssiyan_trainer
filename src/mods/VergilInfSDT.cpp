@@ -88,5 +88,4 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilInfSDT::on_draw_ui() {
-}
+// void VergilInfSDT::on_draw_ui(){}

@@ -68,5 +68,4 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   return Mod::on_initialize();
 }
 
-  void DisplayEnemyHPInOrbs::on_draw_ui() {
-  }
+// void DisplayEnemyHPInOrbs::on_draw_ui() {}

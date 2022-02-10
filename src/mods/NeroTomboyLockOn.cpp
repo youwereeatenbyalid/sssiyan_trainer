@@ -67,4 +67,4 @@ std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroTomboyLockOn::on_draw_ui() {}
+// void NeroTomboyLockOn::on_draw_ui() {}

@@ -100,9 +100,7 @@ void SecretMissionTimer::on_config_save(utility::Config& cfg)
 	cfg.set<float>("SecretMissionTimer.isM9NoStart", isM9NoStart);
 }
 
-void SecretMissionTimer::on_frame()
-{
-}
+// void SecretMissionTimer::on_frame(){}
 
 void SecretMissionTimer::on_draw_ui()
 {
@@ -111,9 +109,7 @@ void SecretMissionTimer::on_draw_ui()
 	ImGui::Checkbox("Disable sm9 no ground start timer", &isM9NoStart);
 }
 
-void SecretMissionTimer::on_draw_debug_ui()
-{
-}
+// void SecretMissionTimer::on_draw_debug_ui(){}
 
 void SecretMissionTimer::init_check_box_info()
 {

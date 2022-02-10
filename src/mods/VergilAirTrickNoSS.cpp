@@ -62,5 +62,4 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilAirTrickNoSS::on_draw_ui() {
-}
+// void VergilAirTrickNoSS::on_draw_ui() {}

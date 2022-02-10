@@ -42,26 +42,15 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	return Mod::on_initialize();
 }
 
-void TrickDodgeNoDisappear::on_config_load(const utility::Config& cfg)
-{
-}
+// void TrickDodgeNoDisappear::on_config_load(const utility::Config& cfg){}
 
-void TrickDodgeNoDisappear::on_config_save(utility::Config& cfg)
-{
-}
+// void TrickDodgeNoDisappear::on_config_save(utility::Config& cfg){}
 
-void TrickDodgeNoDisappear::on_frame()
-{
-}
+// void TrickDodgeNoDisappear::on_frame(){}
 
-void TrickDodgeNoDisappear::on_draw_ui()
-{
+// void TrickDodgeNoDisappear::on_draw_ui(){}
 
-}
-
-void TrickDodgeNoDisappear::on_draw_debug_ui()
-{
-}
+// void TrickDodgeNoDisappear::on_draw_debug_ui(){}
 
 void TrickDodgeNoDisappear::init_check_box_info()
 {

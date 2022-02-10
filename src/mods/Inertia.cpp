@@ -143,9 +143,9 @@ std::optional<std::string> Inertia::on_initialize() {
 }
 
 // during load
-void Inertia::on_config_load(const utility::Config &cfg) {}
+// void Inertia::on_config_load(const utility::Config &cfg) {}
 // during save
-void Inertia::on_config_save(utility::Config &cfg) {}
+// void Inertia::on_config_save(utility::Config &cfg) {}
 // do something every frame
 void Inertia::on_frame() { 
   if (airhiketimer > 1) {

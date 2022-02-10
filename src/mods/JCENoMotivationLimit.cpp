@@ -129,25 +129,15 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	return Mod::on_initialize();
 }
 
-void JCENoMotivationLimit::on_config_load(const utility::Config& cfg)
-{
-}
+// void JCENoMotivationLimit::on_config_load(const utility::Config& cfg){}
 
-void JCENoMotivationLimit::on_config_save(utility::Config& cfg)
-{
-}
+// void JCENoMotivationLimit::on_config_save(utility::Config& cfg){}
 
-void JCENoMotivationLimit::on_frame()
-{
-}
+// void JCENoMotivationLimit::on_frame(){}
 
-void JCENoMotivationLimit::on_draw_ui()
-{
-}
+// void JCENoMotivationLimit::on_draw_ui(){}
 
-void JCENoMotivationLimit::on_draw_debug_ui()
-{
-}
+// void JCENoMotivationLimit::on_draw_debug_ui(){}
 
 void JCENoMotivationLimit::init_check_box_info()
 {

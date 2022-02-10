@@ -94,9 +94,7 @@ void EnemyWaveSettings::on_config_save(utility::Config& cfg)
 
 }
 
-void EnemyWaveSettings::on_frame()
-{
-}
+// void EnemyWaveSettings::on_frame(){}
 
 void EnemyWaveSettings::on_draw_ui()
 {
@@ -112,9 +110,7 @@ void EnemyWaveSettings::on_draw_ui()
 	UI::SliderInt("##permitNumSlider", (int*)&permitNum, 0, 25);*/
 }
 
-void EnemyWaveSettings::on_draw_debug_ui()
-{
-}
+// void EnemyWaveSettings::on_draw_debug_ui(){}
 
 void EnemyWaveSettings::init_check_box_info()
 {

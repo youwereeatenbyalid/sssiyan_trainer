@@ -102,7 +102,7 @@ void VergilSDTAccumulateRework::on_draw_ui() {
     VergilSDTAccumulateRework::cheaton = false;
 }
 
-void VergilSDTAccumulateRework::on_draw_debug_ui() {}
+// void VergilSDTAccumulateRework::on_draw_debug_ui() {}
 
 void VergilSDTAccumulateRework::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());

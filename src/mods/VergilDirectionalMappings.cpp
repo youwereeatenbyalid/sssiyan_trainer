@@ -69,5 +69,4 @@ std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilDirectionalMappings::on_draw_ui() {
-}
+// void VergilDirectionalMappings::on_draw_ui() {}

@@ -63,12 +63,12 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
 }
 
 // during load
-void PetChargeNoInterrupt::on_config_load(const utility::Config &cfg) {}
+// void PetChargeNoInterrupt::on_config_load(const utility::Config &cfg) {}
 // during save
-void PetChargeNoInterrupt::on_config_save(utility::Config &cfg) {}
+// void PetChargeNoInterrupt::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void PetChargeNoInterrupt::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 // void PetChargeNoInterrupt::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void PetChargeNoInterrupt::on_draw_ui() {}
+// void PetChargeNoInterrupt::on_draw_ui() {}

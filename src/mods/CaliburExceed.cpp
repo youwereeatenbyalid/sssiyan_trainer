@@ -57,9 +57,9 @@ std::optional<std::string> CaliburExceed::on_initialize() {
 }
 
 // during load
-void CaliburExceed::on_config_load(const utility::Config &cfg) {}
+// void CaliburExceed::on_config_load(const utility::Config &cfg) {}
 // during save
-void CaliburExceed::on_config_save(utility::Config &cfg) {}
+// void CaliburExceed::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void CaliburExceed::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

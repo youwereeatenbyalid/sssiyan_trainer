@@ -56,4 +56,4 @@ std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilNoTrickRestriction::on_draw_ui() {}
+//void VergilNoTrickRestriction::on_draw_ui() {}

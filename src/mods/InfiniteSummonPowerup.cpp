@@ -57,9 +57,9 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
 }
 
 // during load
-void InfiniteSummonPowerup::on_config_load(const utility::Config &cfg) {}
+// void InfiniteSummonPowerup::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteSummonPowerup::on_config_save(utility::Config &cfg) {}
+// void InfiniteSummonPowerup::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void InfiniteSummonPowerup::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

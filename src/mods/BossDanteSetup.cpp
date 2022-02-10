@@ -207,9 +207,7 @@ void BossDanteSetup::on_config_save(utility::Config& cfg)
 	cfg.set<float>("BossDanteSetup.dtDuration", dtDuration);
 }
 
-void BossDanteSetup::on_frame()
-{
-}
+// void BossDanteSetup::on_frame(){}
 
 void BossDanteSetup::on_draw_ui()
 {
@@ -238,9 +236,7 @@ void BossDanteSetup::on_draw_ui()
 	ImGui::Checkbox("Disable boss moves delay;", &isNoMovesDelay);
 }
 
-void BossDanteSetup::on_draw_debug_ui()
-{
-}
+// void BossDanteSetup::on_draw_debug_ui(){}
 
 void BossDanteSetup::init_check_box_info()
 {

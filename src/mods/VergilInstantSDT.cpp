@@ -163,5 +163,4 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilInstantSDT::on_draw_ui() {
-}
+// void VergilInstantSDT::on_draw_ui(){}

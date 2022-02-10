@@ -66,9 +66,9 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
 }
 
 // during load
-void EmpoweredCane::on_config_load(const utility::Config &cfg) {}
+// void EmpoweredCane::on_config_load(const utility::Config &cfg) {}
 // during save
-void EmpoweredCane::on_config_save(utility::Config &cfg) {}
+// void EmpoweredCane::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void EmpoweredCane::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

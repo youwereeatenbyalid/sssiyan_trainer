@@ -26,8 +26,8 @@ public:
   static uintptr_t pressframes[20];
   static uintptr_t releaseframes[20];
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   // void on_frame() override;

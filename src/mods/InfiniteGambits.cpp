@@ -57,9 +57,9 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
 }
 
 // during load
-void InfiniteGambits::on_config_load(const utility::Config &cfg) {}
+// void InfiniteGambits::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteGambits::on_config_save(utility::Config &cfg) {}
+// void InfiniteGambits::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void InfiniteGambits::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

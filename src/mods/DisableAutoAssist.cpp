@@ -53,9 +53,9 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
 }
 
 // during load
-void DisableAutoAssist::on_config_load(const utility::Config &cfg) {}
+// void DisableAutoAssist::on_config_load(const utility::Config &cfg) {}
 // during save
-void DisableAutoAssist::on_config_save(utility::Config &cfg) {}
+// void DisableAutoAssist::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void DisableAutoAssist::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

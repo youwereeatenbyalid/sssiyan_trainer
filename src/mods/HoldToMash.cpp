@@ -60,9 +60,9 @@ std::optional<std::string> HoldToMash::on_initialize() {
 }
 
 // during load
-void HoldToMash::on_config_load(const utility::Config &cfg) {}
+// void HoldToMash::on_config_load(const utility::Config &cfg) {}
 // during save
-void HoldToMash::on_config_save(utility::Config &cfg) {}
+// void HoldToMash::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void HoldToMash::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

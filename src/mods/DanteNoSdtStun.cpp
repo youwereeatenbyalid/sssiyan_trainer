@@ -50,26 +50,15 @@ std::optional<std::string> DanteNoSdtStun::on_initialize()
 	return Mod::on_initialize();
 }
 
-void DanteNoSdtStun::on_config_load(const utility::Config& cfg)
-{
-}
+// void DanteNoSdtStun::on_config_load(const utility::Config& cfg){}
 
-void DanteNoSdtStun::on_config_save(utility::Config& cfg)
-{
-}
+// void DanteNoSdtStun::on_config_save(utility::Config& cfg){}
 
-void DanteNoSdtStun::on_frame()
-{
-}
+// void DanteNoSdtStun::on_frame(){}
 
-void DanteNoSdtStun::on_draw_ui()
-{
+// void DanteNoSdtStun::on_draw_ui(){}
 
-}
-
-void DanteNoSdtStun::on_draw_debug_ui()
-{
-}
+// void DanteNoSdtStun::on_draw_debug_ui(){}
 
 void DanteNoSdtStun::init_check_box_info()
 {

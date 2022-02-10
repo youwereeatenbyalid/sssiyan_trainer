@@ -375,9 +375,9 @@ std::optional<std::string> GameInput::on_initialize() {
 }
 
 // during load
-void GameInput::on_config_load(const utility::Config &cfg) {}
+// void GameInput::on_config_load(const utility::Config &cfg) {}
 // during save
-void GameInput::on_config_save(utility::Config &cfg) {}
+// void GameInput::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void GameInput::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

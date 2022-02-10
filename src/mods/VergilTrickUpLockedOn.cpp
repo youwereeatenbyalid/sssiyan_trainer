@@ -157,4 +157,4 @@ std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilTrickUpLockedOn::on_draw_ui() {}
+// void VergilTrickUpLockedOn::on_draw_ui() {}

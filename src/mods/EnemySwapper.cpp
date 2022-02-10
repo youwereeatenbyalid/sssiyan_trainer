@@ -1384,7 +1384,7 @@ void EnemySwapper::on_config_save(utility::Config& cfg) {
   }
 }
 
-void EnemySwapper::on_frame() {}
+// void EnemySwapper::on_frame() {}
 
 void EnemySwapper::restore_default_settings() {
   for (int i = 0; i < EnemySwapper::enemyListCount; i++)

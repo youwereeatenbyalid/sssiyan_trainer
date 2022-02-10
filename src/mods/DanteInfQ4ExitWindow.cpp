@@ -63,5 +63,4 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteInfQ4ExitWindow::on_draw_ui() {
-}
+// void DanteInfQ4ExitWindow::on_draw_ui() {}

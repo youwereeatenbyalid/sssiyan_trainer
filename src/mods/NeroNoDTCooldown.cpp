@@ -57,4 +57,4 @@ std::optional<std::string> NeroNoDTCooldown::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroNoDTCooldown::on_draw_ui() {}
+// void NeroNoDTCooldown::on_draw_ui() {}

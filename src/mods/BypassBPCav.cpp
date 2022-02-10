@@ -63,5 +63,4 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   return Mod::on_initialize();
 }
 
-void BypassBPCav::on_draw_ui() {
-}
+// void BypassBPCav::on_draw_ui() {}

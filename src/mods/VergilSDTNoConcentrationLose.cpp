@@ -50,25 +50,15 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 	return Mod::on_initialize();
 }
 
-void VergilSDTNoConcentrationLose::on_config_load(const utility::Config& cfg)
-{
-}
+// void VergilSDTNoConcentrationLose::on_config_load(const utility::Config& cfg){}
 
-void VergilSDTNoConcentrationLose::on_config_save(utility::Config& cfg)
-{
-}
+// void VergilSDTNoConcentrationLose::on_config_save(utility::Config& cfg){}
 
-void VergilSDTNoConcentrationLose::on_frame()
-{
-}
+// void VergilSDTNoConcentrationLose::on_frame(){}
 
-void VergilSDTNoConcentrationLose::on_draw_ui()
-{
+// void VergilSDTNoConcentrationLose::on_draw_ui(){}
 
-}
-
-void VergilSDTNoConcentrationLose::on_draw_debug_ui()
-{}
+// void VergilSDTNoConcentrationLose::on_draw_debug_ui(){}
 
 void VergilSDTNoConcentrationLose::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());

@@ -58,4 +58,4 @@ std::optional<std::string> NoJCCooldown::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NoJCCooldown::on_draw_ui() {}
+// void NoJCCooldown::on_draw_ui() {}

@@ -657,9 +657,9 @@ void FileEditor::on_config_save(utility::Config &cfg) {
     }
 }
 // do something every frame
-void FileEditor::on_frame() {}
+// void FileEditor::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void FileEditor::on_draw_debug_ui() {}
+// void FileEditor::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 
 void FileEditor::asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps)

@@ -239,9 +239,9 @@ std::optional<std::string> MoveReplacer::on_initialize() {
 }
 
 // during load
-void MoveReplacer::on_config_load(const utility::Config &cfg) {}
+// void MoveReplacer::on_config_load(const utility::Config &cfg) {}
 // during save
-void MoveReplacer::on_config_save(utility::Config &cfg) {}
+// void MoveReplacer::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void MoveReplacer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

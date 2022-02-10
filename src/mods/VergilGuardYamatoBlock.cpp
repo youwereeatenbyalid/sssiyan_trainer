@@ -39,26 +39,15 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 	return Mod::on_initialize();
 }
 
-void VergilGuardYamatoBlock::on_config_load(const utility::Config& cfg)
-{
-}
+// void VergilGuardYamatoBlock::on_config_load(const utility::Config& cfg){}
 
-void VergilGuardYamatoBlock::on_config_save(utility::Config& cfg)
-{
-}
+// void VergilGuardYamatoBlock::on_config_save(utility::Config& cfg){}
 
-void VergilGuardYamatoBlock::on_frame()
-{
-}
+// void VergilGuardYamatoBlock::on_frame(){}
 
-void VergilGuardYamatoBlock::on_draw_ui()
-{
+// void VergilGuardYamatoBlock::on_draw_ui(){}
 
-}
-
-void VergilGuardYamatoBlock::on_draw_debug_ui()
-{
-}
+// void VergilGuardYamatoBlock::on_draw_debug_ui(){}
 
 void VergilGuardYamatoBlock::init_check_box_info()
 {

@@ -54,5 +54,4 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NoScreenShake::on_draw_ui() {
-}
+// void NoScreenShake::on_draw_ui() {}

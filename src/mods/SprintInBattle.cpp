@@ -66,4 +66,4 @@ std::optional<std::string> SprintInBattle::on_initialize() {
   return Mod::on_initialize();
 }
 
-void SprintInBattle::on_draw_ui() {}
+// void SprintInBattle::on_draw_ui() {}

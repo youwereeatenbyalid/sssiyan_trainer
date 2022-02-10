@@ -121,9 +121,7 @@ void DanteAirTrickSettings::on_config_save(utility::Config& cfg)
 	cfg.set<float>("DanteAirTrickSettings.addZOffset", addZOffset);
 }
 
-void DanteAirTrickSettings::on_frame()
-{
-}
+// void DanteAirTrickSettings::on_frame(){}
 
 void DanteAirTrickSettings::on_draw_ui()
 {
@@ -136,9 +134,7 @@ void DanteAirTrickSettings::on_draw_ui()
 	}
 }
 
-void DanteAirTrickSettings::on_draw_debug_ui()
-{
-}
+// void DanteAirTrickSettings::on_draw_debug_ui(){}
 
 void DanteAirTrickSettings::init_check_box_info() {
 	m_check_box_name = m_prefix_check_box_name + std::string(get_name());

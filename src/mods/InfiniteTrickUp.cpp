@@ -46,25 +46,15 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
     return Mod::on_initialize();
 }
 
-void InfiniteTrickUp::on_config_load(const utility::Config& cfg)
-{
-}
+// void InfiniteTrickUp::on_config_load(const utility::Config& cfg){}
 
-void InfiniteTrickUp::on_config_save(utility::Config& cfg)
-{
-}
+// void InfiniteTrickUp::on_config_save(utility::Config& cfg){}
 
-void InfiniteTrickUp::on_frame()
-{
-}
+// void InfiniteTrickUp::on_frame(){}
 
-void InfiniteTrickUp::on_draw_ui()
-{
-}
+// void InfiniteTrickUp::on_draw_ui(){}
 
-void InfiniteTrickUp::on_draw_debug_ui()
-{
-}
+// void InfiniteTrickUp::on_draw_debug_ui(){}
 
 void InfiniteTrickUp::init_check_box_info() {
     m_check_box_name = m_prefix_check_box_name + std::string(get_name());

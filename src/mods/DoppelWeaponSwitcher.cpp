@@ -667,9 +667,9 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
 }
 
 // during load
-void DoppelWeaponSwitcher::on_config_load(const utility::Config &cfg) {}
+// void DoppelWeaponSwitcher::on_config_load(const utility::Config &cfg) {}
 // during save
-void DoppelWeaponSwitcher::on_config_save(utility::Config &cfg) {}
+// void DoppelWeaponSwitcher::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void DoppelWeaponSwitcher::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

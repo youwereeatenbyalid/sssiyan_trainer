@@ -66,18 +66,14 @@ void VergilWalkingGuard::on_config_save(utility::Config& cfg)
 	cfg.set<bool>("VergilWalkingGuard.skipInSdt", skipInSdt);
 }
 
-void VergilWalkingGuard::on_frame()
-{
-}
+// void VergilWalkingGuard::on_frame(){}
 
 void VergilWalkingGuard::on_draw_ui()
 {
 	ImGui::Checkbox("Use default behavior while in SDT", &skipInSdt);
 }
 
-void VergilWalkingGuard::on_draw_debug_ui()
-{
-}
+// void VergilWalkingGuard::on_draw_debug_ui(){}
 
 void VergilWalkingGuard::init_check_box_info()
 {

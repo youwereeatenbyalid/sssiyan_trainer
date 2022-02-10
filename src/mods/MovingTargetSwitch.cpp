@@ -63,5 +63,4 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   return Mod::on_initialize();
 }
 
-void MovingTargetSwitch::on_draw_ui() {
-}
+// void MovingTargetSwitch::on_draw_ui(){}

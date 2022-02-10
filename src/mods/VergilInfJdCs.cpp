@@ -56,5 +56,4 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilInfJdCs::on_draw_ui() {
-}
+// void VergilInfJdCs::on_draw_ui(){}

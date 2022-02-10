@@ -89,4 +89,4 @@ std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroSwapSidesteps::on_draw_ui() {}
+//void NeroSwapSidesteps::on_draw_ui() {}

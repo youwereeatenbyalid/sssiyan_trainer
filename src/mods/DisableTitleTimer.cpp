@@ -57,9 +57,9 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
 }
 
 // during load
-void DisableTitleTimer::on_config_load(const utility::Config &cfg) {}
+// void DisableTitleTimer::on_config_load(const utility::Config &cfg) {}
 // during save
-void DisableTitleTimer::on_config_save(utility::Config &cfg) {}
+// void DisableTitleTimer::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void DisableTitleTimer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

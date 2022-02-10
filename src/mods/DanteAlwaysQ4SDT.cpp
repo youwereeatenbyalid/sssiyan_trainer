@@ -65,5 +65,4 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteAlwaysQ4SDT::on_draw_ui() {
-}
+// void DanteAlwaysQ4SDT::on_draw_ui() {}

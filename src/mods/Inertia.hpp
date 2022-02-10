@@ -17,8 +17,8 @@ public:
   void static preserve_detour();
   void static redirect_detour();
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
   void on_frame() override;

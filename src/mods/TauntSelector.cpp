@@ -287,7 +287,7 @@ void TauntSelector::on_config_save(utility::Config &cfg) {
     
 }
 // do something every frame
-void TauntSelector::on_frame() {}
+// void TauntSelector::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void TauntSelector::on_draw_debug_ui() {
     ImGui::Text("nero Air Taunt: %X", TauntSelector::nerotaunts[0]);

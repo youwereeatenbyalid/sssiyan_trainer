@@ -86,25 +86,15 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
     return Mod::on_initialize();
 }
 
-void VergilSDTTrickEfx::on_config_load(const utility::Config& cfg)
-{
-}
+// void VergilSDTTrickEfx::on_config_load(const utility::Config& cfg){}
 
-void VergilSDTTrickEfx::on_config_save(utility::Config& cfg)
-{
-}
+// void VergilSDTTrickEfx::on_config_save(utility::Config& cfg){}
 
-void VergilSDTTrickEfx::on_frame()
-{
-}
+// void VergilSDTTrickEfx::on_frame(){}
 
-void VergilSDTTrickEfx::on_draw_ui()
-{
-}
+// void VergilSDTTrickEfx::on_draw_ui(){}
 
-void VergilSDTTrickEfx::on_draw_debug_ui()
-{
-}
+// void VergilSDTTrickEfx::on_draw_debug_ui(){}
 
 void VergilSDTTrickEfx::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());

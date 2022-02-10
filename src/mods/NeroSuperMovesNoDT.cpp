@@ -87,12 +87,12 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
 }
 
 // during load
-void NeroSuperMovesNoDT::on_config_load(const utility::Config &cfg) {}
+// void NeroSuperMovesNoDT::on_config_load(const utility::Config &cfg) {}
 // during save
-void NeroSuperMovesNoDT::on_config_save(utility::Config &cfg) {}
+// void NeroSuperMovesNoDT::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void NeroSuperMovesNoDT::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 // void NeroSuperMovesNoDT::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void NeroSuperMovesNoDT::on_draw_ui() {}
+// void NeroSuperMovesNoDT::on_draw_ui(){}

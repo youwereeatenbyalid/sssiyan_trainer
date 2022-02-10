@@ -56,4 +56,4 @@ void SinCoordinate::on_draw_debug_ui() {
   ImGui::Text("Sin Value: %.4f", SinCoordinate::directionsinvalue);
 }
 // will show up in main window, dump ImGui widgets you want here
-void SinCoordinate::on_draw_ui() {}
+// void SinCoordinate::on_draw_ui() {}

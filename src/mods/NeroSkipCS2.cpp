@@ -62,4 +62,4 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroSkipCS2::on_draw_ui() {}
+// void NeroSkipCS2::on_draw_ui() {}

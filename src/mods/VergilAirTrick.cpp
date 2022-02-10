@@ -440,9 +440,7 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
 }
 
-void VergilAirTrick::on_frame()
-{
-}
+// void VergilAirTrick::on_frame(){}
 
 void VergilAirTrick::on_draw_ui()
 {
@@ -485,9 +483,7 @@ void VergilAirTrick::on_draw_ui()
 	}
 }
 
-void VergilAirTrick::on_draw_debug_ui()
-{
-}
+// void VergilAirTrick::on_draw_debug_ui(){}
 
 void VergilAirTrick::init_check_box_info()
 {

@@ -60,9 +60,9 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
 }
 
 // during load
-void InfiniteSummonVitality::on_config_load(const utility::Config &cfg) {}
+// void InfiniteSummonVitality::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteSummonVitality::on_config_save(utility::Config &cfg) {}
+// void InfiniteSummonVitality::on_config_save(utility::Config &cfg) {}
 // do something every frame
 // void InfiniteSummonVitality::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

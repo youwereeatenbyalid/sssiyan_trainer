@@ -433,9 +433,7 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 	cfg.set<float>("DMC3JCE.minSdt", minSdt);
 }
 
-void DMC3JCE::on_frame()
-{
-}
+// void DMC3JCE::on_frame(){}
 
 void DMC3JCE::on_draw_ui()
 {
@@ -513,9 +511,7 @@ void DMC3JCE::on_draw_ui()
 	}
 }
 
-void DMC3JCE::on_draw_debug_ui()
-{
-}
+// void DMC3JCE::on_draw_debug_ui(){}
 
 void DMC3JCE::init_check_box_info()
 {

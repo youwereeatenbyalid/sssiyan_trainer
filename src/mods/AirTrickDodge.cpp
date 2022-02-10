@@ -40,26 +40,15 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 	return Mod::on_initialize();
 }
 
-void AirTrickDodge::on_config_load(const utility::Config& cfg)
-{
-}
+// void AirTrickDodge::on_config_load(const utility::Config& cfg){}
 
-void AirTrickDodge::on_config_save(utility::Config& cfg)
-{
-}
+// void AirTrickDodge::on_config_save(utility::Config& cfg){}
 
-void AirTrickDodge::on_frame()
-{
-}
+// void AirTrickDodge::on_frame(){}
 
-void AirTrickDodge::on_draw_ui()
-{
+// void AirTrickDodge::on_draw_ui(){}
 
-}
-
-void AirTrickDodge::on_draw_debug_ui()
-{
-}
+// void AirTrickDodge::on_draw_debug_ui(){}
 
 void AirTrickDodge::init_check_box_info()
 {

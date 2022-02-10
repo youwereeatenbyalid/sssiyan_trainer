@@ -70,9 +70,9 @@ std::optional<std::string> GilverNoDTCooldown::on_initialize() {
 }
 
 // during load
-void GilverNoDTCooldown::on_config_load(const utility::Config &cfg) {}
+// void GilverNoDTCooldown::on_config_load(const utility::Config &cfg) {}
 // during save
-void GilverNoDTCooldown::on_config_save(utility::Config &cfg) {}
+// void GilverNoDTCooldown::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void GilverNoDTCooldown::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

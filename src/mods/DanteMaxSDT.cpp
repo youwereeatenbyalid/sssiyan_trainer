@@ -61,6 +61,6 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteMaxSDT::on_draw_ui() {
+// void DanteMaxSDT::on_draw_ui() {
   //ImGui::Checkbox("Dante Max SDT", &dantemaxsdtcheck);
-}
+// }

@@ -60,5 +60,4 @@ std::optional<std::string> OriginalReversals::on_initialize() {
   return Mod::on_initialize();
 }
 
-void OriginalReversals::on_draw_ui() {
-}
+// void OriginalReversals::on_draw_ui() }

@@ -67,13 +67,12 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
 }
 
 // during load
-void WalkOnKeyboard::on_config_load(const utility::Config &cfg) {}
+// void WalkOnKeyboard::on_config_load(const utility::Config &cfg) {}
 // during save
-void WalkOnKeyboard::on_config_save(utility::Config &cfg) {}
+// void WalkOnKeyboard::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void WalkOnKeyboard::on_frame() {}
 //will show up in debug window, dump ImGui widgets you want here
 //void WalkOnKeyboard::on_draw_debug_ui() {}
 //will show up in main window, dump ImGui widgets you want here
-void WalkOnKeyboard::on_draw_ui() {
-}
+// void WalkOnKeyboard::on_draw_ui() {}
