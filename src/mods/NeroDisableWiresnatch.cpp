@@ -101,4 +101,4 @@ std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroDisableWiresnatch::on_draw_ui() {}
+// void NeroDisableWiresnatch::on_draw_ui() {}

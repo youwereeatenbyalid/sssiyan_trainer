@@ -277,9 +277,9 @@ void SpardaWorkshop::on_config_save(utility::Config &cfg) {
     cfg.set<int>("enemy index", enemyindex);
 }
 // do something every frame
-void SpardaWorkshop::on_frame() {}
+// void SpardaWorkshop::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void SpardaWorkshop::on_draw_debug_ui() {}
+// void SpardaWorkshop::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 
 

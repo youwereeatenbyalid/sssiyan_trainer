@@ -68,9 +68,9 @@ void ExceedValue::on_config_save(utility::Config &cfg) {
     cfg.set<int>("exceed_value", exceed_value);
 }
 // do something every frame
-void ExceedValue::on_frame() {}
+//void ExceedValue::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void ExceedValue::on_draw_debug_ui() {}
+//void ExceedValue::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void ExceedValue::on_draw_ui() {
     UI::SliderInt("Exceed Level",(int*)&ExceedValue::exceed_value, 0, 3);

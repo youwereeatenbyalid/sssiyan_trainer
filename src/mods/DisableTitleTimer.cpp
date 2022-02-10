@@ -61,8 +61,8 @@ void DisableTitleTimer::on_config_load(const utility::Config &cfg) {}
 // during save
 void DisableTitleTimer::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void DisableTitleTimer::on_frame() {}
+// void DisableTitleTimer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void DisableTitleTimer::on_draw_debug_ui() {}
+// void DisableTitleTimer::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void DisableTitleTimer::on_draw_ui() {}
+// void DisableTitleTimer::on_draw_ui() {}

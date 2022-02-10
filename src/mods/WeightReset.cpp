@@ -159,8 +159,6 @@ std::optional<std::string> WeightReset::on_initialize() {
   return Mod::on_initialize();
 }
 
-void WeightReset::on_config_load(const utility::Config& cfg) {
-}
+// void WeightReset::on_config_load(const utility::Config& cfg) {}
 
-void WeightReset::on_config_save(utility::Config& cfg) {
-}
+// void WeightReset::on_config_save(utility::Config& cfg) {}

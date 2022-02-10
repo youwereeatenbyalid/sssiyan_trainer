@@ -65,4 +65,4 @@ std::optional<std::string> DisableGauntletStages::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DisableGauntletStages::on_draw_ui() {}
+// void DisableGauntletStages::on_draw_ui() {}

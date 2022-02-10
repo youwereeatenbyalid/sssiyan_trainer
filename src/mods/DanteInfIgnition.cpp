@@ -91,4 +91,4 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteInfIgnition::on_draw_ui() {}
+// void DanteInfIgnition::on_draw_ui() {}

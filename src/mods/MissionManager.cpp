@@ -30,14 +30,14 @@ std::optional<std::string> MissionManager::on_initialize() {
   return Mod::on_initialize();
 }
 
-void MissionManager::on_config_load(const utility::Config& cfg) {}
+// void MissionManager::on_config_load(const utility::Config& cfg) {}
 
-void MissionManager::on_config_save(utility::Config& cfg) {}
+// void MissionManager::on_config_save(utility::Config& cfg) {}
 
-void MissionManager::on_frame() {}
+// void MissionManager::on_frame() {}
 
-void MissionManager::on_draw_ui() {}
+// void MissionManager::on_draw_ui() {}
 
-void MissionManager::on_draw_debug_ui() {}
+// void MissionManager::on_draw_debug_ui() {}
 
-void MissionManager::init_check_box_info() {}
+// void MissionManager::init_check_box_info() {}

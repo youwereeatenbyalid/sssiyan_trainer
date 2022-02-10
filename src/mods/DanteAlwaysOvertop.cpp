@@ -113,4 +113,4 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteAlwaysOvertop::on_draw_ui() {}
+// void DanteAlwaysOvertop::on_draw_ui() {}

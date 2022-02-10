@@ -66,4 +66,4 @@ std::optional<std::string> DisableEnemyAI::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DisableEnemyAI::on_draw_ui() {}
+// void DisableEnemyAI::on_draw_ui() {}

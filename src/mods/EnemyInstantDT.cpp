@@ -59,7 +59,7 @@ std::optional<std::string> EnemyInstantDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void EnemyInstantDT::on_draw_ui() {}
+// void EnemyInstantDT::on_draw_ui() {}
 
 /*
 {

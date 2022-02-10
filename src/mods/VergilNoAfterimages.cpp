@@ -118,4 +118,4 @@ void VergilNoAfterimages::on_draw_ui() {
   ImGui::Checkbox("Disable afterimages when Vergil body isn't drawing (like while tricks, doges or JCE);", &isNoDrawIfObjHidden);
 }
 
-void VergilNoAfterimages::on_draw_debug_ui() {}
+// void VergilNoAfterimages::on_draw_debug_ui() {}

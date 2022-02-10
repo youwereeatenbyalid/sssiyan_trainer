@@ -21,11 +21,8 @@ __asm {
 
   cheatcode:
     jmp qword ptr [InfiniteSummonPowerup::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -64,8 +61,8 @@ void InfiniteSummonPowerup::on_config_load(const utility::Config &cfg) {}
 // during save
 void InfiniteSummonPowerup::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void InfiniteSummonPowerup::on_frame() {}
+//void InfiniteSummonPowerup::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void InfiniteSummonPowerup::on_draw_debug_ui() {}
+//void InfiniteSummonPowerup::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void InfiniteSummonPowerup::on_draw_ui() {}
+// void InfiniteSummonPowerup::on_draw_ui() {}

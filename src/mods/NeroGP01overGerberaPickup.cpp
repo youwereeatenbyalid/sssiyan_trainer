@@ -69,4 +69,4 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
 // will show up in debug window, dump ImGui widgets you want here
 // void NeroGP01overGerberaPickup::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void NeroGP01overGerberaPickup::on_draw_ui() {}
+// void NeroGP01overGerberaPickup::on_draw_ui() {}

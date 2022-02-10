@@ -59,4 +59,4 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteTwoTricks::on_draw_ui() {}
+// void DanteTwoTricks::on_draw_ui() {}

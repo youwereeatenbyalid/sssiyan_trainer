@@ -112,9 +112,7 @@ void CheckpointPos::on_config_save(utility::Config& cfg) {
   cfg.set<float>("CheckpointPos.CustomPosZ", customPos.z);
 }
 
-void CheckpointPos::on_frame() {}
-
-
+// void CheckpointPos::on_frame() {}
 
 void CheckpointPos::on_draw_ui() {
   ImGui::TextWrapped("Load mission from checkpoint (or press \"Continue\" from main menu) to place character near boss fight. M7 - teleports to Proto Angelo arena fight.");
@@ -137,8 +135,7 @@ void CheckpointPos::on_draw_ui() {
     }
   }
 
-
-void CheckpointPos::on_draw_debug_ui() {}
+// void CheckpointPos::on_draw_debug_ui() {}
 
 void CheckpointPos::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());

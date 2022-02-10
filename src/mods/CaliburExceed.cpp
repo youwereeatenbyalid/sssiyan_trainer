@@ -61,8 +61,8 @@ void CaliburExceed::on_config_load(const utility::Config &cfg) {}
 // during save
 void CaliburExceed::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void CaliburExceed::on_frame() {}
+// void CaliburExceed::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void CaliburExceed::on_draw_debug_ui() {}
+// void CaliburExceed::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void CaliburExceed::on_draw_ui() {}
+// void CaliburExceed::on_draw_ui() {}

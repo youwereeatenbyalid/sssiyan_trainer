@@ -57,4 +57,4 @@ std::optional<std::string> InfDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void InfDT::on_draw_ui() {}
+// void InfDT::on_draw_ui() {}

@@ -23,8 +23,6 @@ __asm {
   cheatcode:
     //cmp dword ptr [rdx+0x000009B0],0x01
     jmp qword ptr [NeroSuperMovesNoDT::jmp_return]
-    
-
   }
 }
   static naked void newmem2_detour() {
@@ -42,8 +40,6 @@ __asm {
   cheatcode:
     //cmp dword ptr [rdx+0x000009B0],0x01
     jmp qword ptr [NeroSuperMovesNoDT::jmp_return2]
-    
-
   }
 }
 
@@ -95,8 +91,8 @@ void NeroSuperMovesNoDT::on_config_load(const utility::Config &cfg) {}
 // during save
 void NeroSuperMovesNoDT::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void NeroSuperMovesNoDT::on_frame() {}
+// void NeroSuperMovesNoDT::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void NeroSuperMovesNoDT::on_draw_debug_ui() {}
+// void NeroSuperMovesNoDT::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void NeroSuperMovesNoDT::on_draw_ui() {}

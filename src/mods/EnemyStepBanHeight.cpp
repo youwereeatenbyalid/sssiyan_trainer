@@ -58,4 +58,4 @@ std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   return Mod::on_initialize();
 }
 
-void EnemyStepBanHeight::on_draw_ui() {}
+// void EnemyStepBanHeight::on_draw_ui() {}

@@ -165,5 +165,4 @@ void Inertia::on_draw_debug_ui() {
     ImGui::Text("[Inertia] Air Hike Timer: %d", (int*)&Inertia::airhiketimer);
 }
 // will show up in main window, dump ImGui widgets you want here
-void Inertia::on_draw_ui() {}
-
+// void Inertia::on_draw_ui() {}

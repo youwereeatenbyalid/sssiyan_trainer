@@ -243,9 +243,9 @@ void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   }
 }
 // do something every frame
-void BreakerSwitcher::on_frame() {}
+// void BreakerSwitcher::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void BreakerSwitcher::on_draw_debug_ui() {}
+// void BreakerSwitcher::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void BreakerSwitcher::on_draw_ui() {
 //ImGui::InputInt("breaker up", (int*)&BreakerSwitcher::breakers[0]);
@@ -264,6 +264,4 @@ ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxs
 ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
 ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
 ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
-
-
 }

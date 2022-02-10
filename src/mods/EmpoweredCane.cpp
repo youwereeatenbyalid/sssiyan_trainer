@@ -20,13 +20,12 @@ __asm {
     //+0x5D
     comiss xmm2, xmm3
     ja ja_return
-    mov[rbx+0x20], edx
+    mov [rbx+0x20], edx
     jmp qword ptr [EmpoweredCane::jmp_return]
 
   cheatcode:
   ja_return:
 	jmp qword ptr [EmpoweredCane::ja_return]
-
   }
 }
 
@@ -71,8 +70,8 @@ void EmpoweredCane::on_config_load(const utility::Config &cfg) {}
 // during save
 void EmpoweredCane::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void EmpoweredCane::on_frame() {}
+//void EmpoweredCane::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void EmpoweredCane::on_draw_debug_ui() {}
+//void EmpoweredCane::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void EmpoweredCane::on_draw_ui() {}
+// void EmpoweredCane::on_draw_ui() {}

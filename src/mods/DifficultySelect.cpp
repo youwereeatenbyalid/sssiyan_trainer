@@ -102,9 +102,9 @@ void DifficultySelect::on_config_save(utility::Config &cfg)
     cfg.set<int>("mission difficulty", missiondifficulty);
 }
 // do something every frame
-void DifficultySelect::on_frame() {}
+// void DifficultySelect::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void DifficultySelect::on_draw_debug_ui() {}
+// void DifficultySelect::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void DifficultySelect::on_draw_ui() {
   auto difficultystring =
@@ -112,6 +112,4 @@ void DifficultySelect::on_draw_ui() {
       "and Hell\0";
   ImGui::Combo("Mission Difficulty", (int*)&DifficultySelect::missiondifficulty, difficultystring);
   ImGui::Combo("Bloody Palace Difficulty", (int*)&DifficultySelect::bpdifficulty, difficultystring);
-	
-	
 }

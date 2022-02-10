@@ -24,11 +24,8 @@ __asm {
     test [r8+0x3C], eax
     seta al
     jmp qword ptr [HoldToMash::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -67,8 +64,8 @@ void HoldToMash::on_config_load(const utility::Config &cfg) {}
 // during save
 void HoldToMash::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void HoldToMash::on_frame() {}
+//void HoldToMash::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void HoldToMash::on_draw_debug_ui() {}
+//void HoldToMash::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void HoldToMash::on_draw_ui() {}
+// void HoldToMash::on_draw_ui() {}

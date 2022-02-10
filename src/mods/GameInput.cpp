@@ -379,8 +379,8 @@ void GameInput::on_config_load(const utility::Config &cfg) {}
 // during save
 void GameInput::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void GameInput::on_frame() {}
+// void GameInput::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void GameInput::on_draw_debug_ui() {}
+// void GameInput::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void GameInput::on_draw_ui() {}
+// void GameInput::on_draw_ui() {}

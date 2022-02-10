@@ -40,13 +40,13 @@ std::optional<std::string> VergilSDTFormTracker::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilSDTFormTracker::on_config_load(const utility::Config& cfg) {}
+// void VergilSDTFormTracker::on_config_load(const utility::Config& cfg) {}
 
-void VergilSDTFormTracker::on_config_save(utility::Config& cfg) {}
+// void VergilSDTFormTracker::on_config_save(utility::Config& cfg) {}
 
-void VergilSDTFormTracker::on_frame() {}
+// void VergilSDTFormTracker::on_frame() {}
 
-void VergilSDTFormTracker::on_draw_ui() {}
+// void VergilSDTFormTracker::on_draw_ui() {}
 
 void VergilSDTFormTracker::on_draw_debug_ui() {
   ImGui::Text("[VergilSDTFormTracker] Vergil in form: %X", vergilform_state);

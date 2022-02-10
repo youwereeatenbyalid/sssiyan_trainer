@@ -123,8 +123,8 @@ void TextEditor::on_config_load(const utility::Config &cfg) {}
 // during save
 void TextEditor::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void TextEditor::on_frame() {}
+// void TextEditor::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void TextEditor::on_draw_debug_ui() {}
+// void TextEditor::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void TextEditor::on_draw_ui() {}

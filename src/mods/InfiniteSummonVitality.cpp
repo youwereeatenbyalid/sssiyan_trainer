@@ -24,11 +24,8 @@ __asm {
     fstp qword ptr [rax+0x10]
     movss xmm0,[rax+0x10]
     jmp qword ptr [InfiniteSummonVitality::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -67,8 +64,8 @@ void InfiniteSummonVitality::on_config_load(const utility::Config &cfg) {}
 // during save
 void InfiniteSummonVitality::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void InfiniteSummonVitality::on_frame() {}
+// void InfiniteSummonVitality::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void InfiniteSummonVitality::on_draw_debug_ui() {}
+// void InfiniteSummonVitality::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void InfiniteSummonVitality::on_draw_ui() {}
+// void InfiniteSummonVitality::on_draw_ui() {}

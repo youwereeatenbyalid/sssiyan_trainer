@@ -11,8 +11,8 @@ public:
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  bool static cheaton;
+  static uintptr_t jmp_ret;
+  static bool cheaton;
   // Override this things if you want to store values in the config file
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;

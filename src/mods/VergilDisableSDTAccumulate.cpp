@@ -60,10 +60,10 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilDisableSDTAccumulate::on_config_load(const utility::Config& cfg) {}
+// void VergilDisableSDTAccumulate::on_config_load(const utility::Config& cfg) {}
 
-void VergilDisableSDTAccumulate::on_config_save(utility::Config& cfg) {}
+// void VergilDisableSDTAccumulate::on_config_save(utility::Config& cfg) {}
 
-void VergilDisableSDTAccumulate::on_draw_ui() {}
+// void VergilDisableSDTAccumulate::on_draw_ui() {}
 
-void VergilDisableSDTAccumulate::on_draw_debug_ui() {}
+// void VergilDisableSDTAccumulate::on_draw_debug_ui() {}
