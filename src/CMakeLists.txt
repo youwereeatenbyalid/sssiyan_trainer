@@ -243,6 +243,9 @@ set(MODS_SRC
     mods/AirTrickDodge.cpp
     mods/DanteNoSdtStun.hpp
     mods/DanteNoSdtStun.cpp
+    mods/DanteRedlineCav.hpp 
+    mods/DanteRedlineCav.cpp 
+
 )
 
 set(HOOKS_SRC
