@@ -48,23 +48,11 @@ static naked void restart_pos_detour() {
 
         cheat:
         push rax
-		push rbx
 		push rcx
-        push rsi
-		push r8
-		push r9
-		push r10
-		push r11
         sub rsp, 32
         call [load_boss_checkpoint]
         add rsp, 32
-        pop r11
-		pop r10
-	    pop r9
-		pop r8
-        pop rsi
 		pop rcx
-		pop rbx
 		pop rax
         cmp byte ptr [CheckpointPos::isNoBoss], 1
         je originalcode
@@ -80,7 +68,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   auto base        = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled        = &cheaton;
   m_on_page           = gamemode;
-  m_full_name_string = "Load boss checkpoint (+)";
+  m_full_name_string = "Custom checkpoints (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Loading from a checkpoint force game to load \"boss checkpoint\" or custom position checkpoint.";
 
@@ -119,6 +107,7 @@ void CheckpointPos::on_draw_ui() {
   ImGui::TextWrapped("Load mission from checkpoint (or press \"Continue\" from main menu) to place character near boss fight. M7 - teleports to Proto Angelo arena fight.");
   ImGui::Separator();
   ImGui::Checkbox("Use cutom checkpoint position", &isCustomPos);
+  ImGui::ShowHelpMarker("If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
   if (isCustomPos) {
     ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, "%.3f");
