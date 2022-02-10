@@ -32,13 +32,15 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DisableAutoAssist::cheaton;
-  onpage    = qol;
-  full_name_string     = "Disable Auto Assist";
-  author_string        = "The Hitchhiker";
-  description_string   = "Prevents Auto Assist from being activated.";
+  m_is_enabled = &DisableAutoAssist::cheaton;
+  m_on_page    = qol;
+  m_full_name_string     = "Disable Auto Assist";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Prevents Auto Assist from being activated.";
 
-  auto addr = utility::scan(base, "BE 89 48 14 48 8B 5C 24 30");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "BE 89 48 14 48 8B 5C 24 30");
   if (!addr) {
     return "Unable to find DisableAutoAssist pattern.";
   }

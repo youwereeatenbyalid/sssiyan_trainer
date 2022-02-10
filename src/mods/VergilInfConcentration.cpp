@@ -55,15 +55,17 @@ void VergilInfConcentration::init_check_box_info() {
 std::optional<std::string> VergilInfConcentration::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilInfConcentration::cheaton;
-  onpage               = vergilcheat;
+  m_is_enabled            = &VergilInfConcentration::cheaton;
+  m_on_page               = vergilcheat;
 
-  full_name_string     = "Concentration Lock (+)";
-  author_string        = "SSSiyan";
-  description_string   = "Lock Concentration meter to whatever level you want.";
+  m_full_name_string     = "Concentration Lock (+)";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Lock Concentration meter to whatever level you want.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 93 50 1B 00 00");
+  auto addr = patterns->find_addr(base, "F3 0F 10 93 50 1B 00 00");
   if (!addr) {
     return "Unable to find VergilInfConcentration pattern.";
   }
@@ -86,5 +88,5 @@ void VergilInfConcentration::on_config_save(utility::Config& cfg) {
 
 void VergilInfConcentration::on_draw_ui() {
   ImGui::Text("Concentration level");
-  ImGui::SliderInt("##concentrationslider", &concentrationLevel, 0, 2);
+  UI::SliderInt("##concentrationslider", &concentrationLevel, 0, 2);
 }

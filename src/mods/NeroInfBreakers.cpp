@@ -87,20 +87,22 @@ void NeroInfBreakers::init_check_box_info() {
 std::optional<std::string> NeroInfBreakers::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NeroInfBreakers::cheaton;
-  onpage             = breaker;
+  m_is_enabled          = &NeroInfBreakers::cheaton;
+  m_on_page             = breaker;
 
-  full_name_string   = "Infinite Devil Breakers";
-  author_string      = "DeepDarkKapustka";
-  description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
+  m_full_name_string   = "Infinite Devil Breakers";
+  m_author_string      = "DeepDarkKapustka";
+  m_description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
                        "When using less than 8, this will bug and give you Overtures.";
 
+  set_up_hotkey();
+
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "FF 41 8B 44 12 04");
+  auto addr1 = patterns->find_addr(base, "FF 41 8B 44 12 04");
   if (!addr1) {
     return "Unable to find NeroInfBreakers1 pattern.";
   }
-  auto addr2 = utility::scan(base, "8B 86 CC 17 00 00 85");
+  auto addr2 = patterns->find_addr(base, "8B 86 CC 17 00 00 85");
   if (!addr2) {
     return "Unable to find NeroInfBreakers2 pattern.";
   }

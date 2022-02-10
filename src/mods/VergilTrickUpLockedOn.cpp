@@ -111,27 +111,29 @@ void VergilTrickUpLockedOn::init_check_box_info() {
 std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilTrickUpLockedOn::cheaton;
-  onpage               = vergiltrick;
+  m_is_enabled            = &VergilTrickUpLockedOn::cheaton;
+  m_on_page               = vergiltrick;
 
-  full_name_string     = "Trick Up On Forward + Trick";
-  author_string        = "SSSiyan";
-  description_string   = "Trick Up without letting go of Lock On.";
+  m_full_name_string     = "Trick Up On Forward + Trick";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Trick Up without letting go of Lock On.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "40 38 B2 D0 0E 00 00 75");
+  auto addr1 = patterns->find_addr(base, "40 38 B2 D0 0E 00 00 75");
   if (!addr1) {
     return "Unable to find VergilTrickUpLockedOn pattern1.";
   }
   VergilTrickUpLockedOn::jmp_jne1 = addr1.value() + 69;
 
-  auto addr2 = utility::scan(base, "80 BA D0 0E 00 00 00 0F 85 86");
+  auto addr2 = patterns->find_addr(base, "80 BA D0 0E 00 00 00 0F 85 86");
   if (!addr2) {
     return "Unable to find VergilTrickUpLockedOn pattern2.";
   }
   VergilTrickUpLockedOn::jmp_jne2 = addr2.value() + 147;
   
-  auto addr3 = utility::scan(base, "84 C0 0F 84 E7 02 00 006");
+  auto addr3 = patterns->find_addr(base, "84 C0 0F 84 E7 02 00 006");
   if (!addr3) {
     return "Unable to find VergilTrickUpLockedOn pattern3.";
   }

@@ -41,15 +41,17 @@ void DanteGuardflyWip::init_check_box_info() {
 std::optional<std::string> DanteGuardflyWip::on_initialize() {
   init_check_box_info();
 
-  ischecked = &DanteGuardflyWip::cheaton;
-  onpage               = mechanics;
+  m_is_enabled = &DanteGuardflyWip::cheaton;
+  m_on_page               = mechanics;
 
-  full_name_string     = "Guardfly WIP";
-  author_string        = "socks";
-  description_string   = "Removes the inertia clamp on Guard.";
+  m_full_name_string     = "Guardfly WIP";
+  m_author_string        = "socks";
+  m_description_string   = "Removes the inertia clamp on Guard.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "0F 2F C2 0F 83 81 00 00 00");
+  auto addr = patterns->find_addr(base, "0F 2F C2 0F 83 81 00 00 00");
   if (!addr) {
     return "Unable to find DanteGuardflyWip pattern.";
   }

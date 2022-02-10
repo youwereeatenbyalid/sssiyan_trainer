@@ -145,14 +145,16 @@ std::optional<std::string> TauntSelector::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &TauntSelector::cheaton;
-  onpage    = taunt;
+  m_is_enabled = &TauntSelector::cheaton;
+  m_on_page    = taunt;
 
-  full_name_string     = "Taunt Selector (+)";
-  author_string        = "The Hitchhiker";
-  description_string   = "Allows you to specify what taunts will be used by each character.";
+  m_full_name_string     = "Taunt Selector (+)";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Allows you to specify what taunts will be used by each character.";
 
-  auto addr = utility::scan(base, "80 7F 20 00 48 8B CB 44");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "80 7F 20 00 48 8B CB 44");
   if (!addr) {
     return "Unable to find TauntSelector pattern.";
   }

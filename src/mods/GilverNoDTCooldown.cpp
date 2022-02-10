@@ -44,12 +44,16 @@ std::optional<std::string> GilverNoDTCooldown::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &GilverNoDTCooldown::cheaton;
-  onpage    = gilver;
-  full_name_string     = "No DT Cooldown";
-  author_string        = "SSSiyan";
-  description_string   = "Remove the delay when summoning/unsummoning Nightmare.";
-  auto nodtcooldown_addr = utility::scan(base, "0F 87 A6 00 00 00 48 8B 15");
+  
+  m_is_enabled = &GilverNoDTCooldown::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "No DT Cooldown";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Remove the delay when summoning/unsummoning Nightmare.";
+
+  set_up_hotkey();
+  auto nodtcooldown_addr = patterns->find_addr(base, "0F 87 A6 00 00 00 48 8B 15");
+
   GilverNoDTCooldown::ja_return = nodtcooldown_addr.value()+0xAC;
 
 

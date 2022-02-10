@@ -1,0 +1,198 @@
+#pragma once
+#include <mods/GameFunctions/GameFunc.hpp>
+namespace GameFunctions
+{
+	class Transform_SetPosition : public GameFunc<void>
+	{
+	private:
+		typedef void (__cdecl *f_set_pos)(void *rcx, void *transform, Vec3 newPos);
+		f_set_pos set_pos;
+		void *transform = nullptr;
+
+		void invoke() override
+		{
+			throw std::bad_function_call();
+		}
+
+		void operator()() override{ invoke(); }
+
+		std::optional<uintptr_t> get_rcx_ptr() override
+		{
+			throw std::bad_function_call();
+		}
+
+		void set_rcx(uintptr_t rcx) override
+		{
+			throw std::bad_function_call();
+		}
+
+	public:
+		Transform_SetPosition()
+		{
+			fAddr += 0x258BC0;
+			set_pos = (f_set_pos)fAddr;
+		}
+
+		Transform_SetPosition(void *transformObj) : Transform_SetPosition() 
+		{ 
+			transform = transformObj;
+		}
+
+		void invoke(void *transformObj, Vec3 newPos)
+		{
+			transform = transformObj;
+			invoke(newPos);
+		}
+
+		void invoke(Vec3 newPos)
+		{
+			if(transform != nullptr && !IsBadReadPtr(transform, 8))
+				set_pos(NULL, transform, newPos);
+		}
+
+		void operator()(void* transformObj, Vec3 newPos) { invoke(transformObj, newPos); }
+
+		void operator()(Vec3 newPos) { invoke( newPos); }
+
+		void set_transform(void *obj) {transform = obj; }
+
+		void *get_transform() const { return transform; }
+
+	};
+
+	class PositionErrorCorrector : public GameFunc<void>
+	{
+	private:
+		typedef void(__cdecl* f_set_pos)(void* rcx, void* corrector, Vec3 newPos);
+		f_set_pos set_pos;
+		uintptr_t setPosAddr = 0x11D3FD0;
+		
+		typedef void(__cdecl* f_stop_internal)(void* rcx, void* corrector);
+		f_stop_internal def_stop_internal;
+		uintptr_t stopInternalAddr = 0x11D3CA0;
+
+		typedef void(__cdecl* f_restatrt)(void* rcx, void* corrector);
+		f_restatrt def_restart;
+		uintptr_t restartAddr = 0x11CF640;
+
+		void* corrector = nullptr;
+
+		void invoke() override
+		{
+			throw std::bad_function_call();
+		}
+
+		void operator()() override
+		{
+			invoke();
+		}
+
+		bool check_ptrs()
+		{
+			if (!IsBadReadPtr((void*)rcx, 8) && !IsBadReadPtr(corrector, 8))
+				return true;
+			return false;
+		}
+
+		void check_rcx()
+		{
+			if (rcx == 0)
+				rcx = get_rcx_ptr().value_or(0);
+		}
+
+		bool full_check()
+		{
+			check_rcx();
+			return check_ptrs();
+		}
+
+	public:
+		PositionErrorCorrector()
+		{
+			setPosAddr += fAddr;
+			set_pos = (f_set_pos)setPosAddr;
+			stopInternalAddr += fAddr;
+			def_stop_internal = (f_stop_internal)stopInternalAddr;
+			restartAddr += fAddr;
+			def_restart = (f_restatrt)(restartAddr);
+		}
+
+		PositionErrorCorrector(void* correctorObj) : PositionErrorCorrector()
+		{
+			corrector = correctorObj;
+		}
+
+		void set_corrector(void* obj)
+		{
+			corrector = obj;
+		}
+
+		void set_position(Vec3 newPos)
+		{
+			if(full_check())
+				set_pos((void*)rcx, corrector, newPos);
+		}
+
+		void set_position(void *correctorObj, Vec3 newPos)
+		{
+			corrector = correctorObj;
+			set_position(newPos);
+		}
+
+		void stop_internal()
+		{
+			if(full_check())
+				def_stop_internal((void*)rcx, corrector);
+		}
+
+		void stop_internal(void *correctorObj)
+		{
+			corrector = correctorObj;
+			stop_internal();
+		}
+
+		void restart()
+		{
+			if(full_check())
+				def_restart((void*)rcx, corrector);
+		}
+
+		void restart(void *correctorObj)
+		{
+			corrector = correctorObj;
+			restart();
+		}
+	};
+
+	class SetSafePosition : public GameFunc<void>
+	{
+	private:
+		typedef void(__cdecl* f_set_pos)(void* rcx, void* player, Vec3 pos);
+		f_set_pos set_safe_pos;
+
+		const ptrdiff_t setSafePosOffs = 0x162DE10;
+
+		void invoke() override { }
+
+		void operator()() override { }
+
+	public:
+
+		SetSafePosition()
+		{
+			fAddr += setSafePosOffs;
+			set_safe_pos = (f_set_pos)fAddr;
+		}
+
+		void invoke(void *player, Vec3 pos)
+		{
+			set_safe_pos(nullptr, player, pos);
+		}
+
+		void operator()(void* player, Vec3 pos)
+		{
+			set_safe_pos(nullptr, player, pos);
+		}
+	};
+}
+

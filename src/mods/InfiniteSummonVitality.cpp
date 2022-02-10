@@ -41,12 +41,14 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteSummonVitality::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Summon Vitality";
-  author_string        = "Jessie Kazama";
-  description_string   = "Pet health is locked at max.";
-  auto infsummonvitality_addr = utility::scan(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
+  m_is_enabled = &InfiniteSummonVitality::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Summon Vitality";
+  m_author_string        = "Jessie Kazama";
+  m_description_string   = "Pet health is locked at max.";
+
+  set_up_hotkey();
+  auto infsummonvitality_addr = patterns->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
 
   if (!infsummonvitality_addr) {
     return "Unable to find infsummonvitality pattern.";

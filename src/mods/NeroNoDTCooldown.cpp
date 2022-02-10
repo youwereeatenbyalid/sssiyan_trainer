@@ -34,15 +34,17 @@ void NeroNoDTCooldown::init_check_box_info() {
 std::optional<std::string> NeroNoDTCooldown::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NeroNoDTCooldown::cheaton;
-  onpage               = nero;
+  m_is_enabled            = &NeroNoDTCooldown::cheaton;
+  m_on_page               = nero;
 
-  full_name_string     = "No DT Cooldown";
-  author_string        = "SSSiyan";
-  description_string   = "Removes the cooldown on exiting DT after entering.";
+  m_full_name_string     = "No DT Cooldown";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Removes the cooldown on exiting DT after entering.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
+  auto addr = patterns->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
   if (!addr) {
     return "Unable to find NeroNoDTCooldown pattern.";
   }

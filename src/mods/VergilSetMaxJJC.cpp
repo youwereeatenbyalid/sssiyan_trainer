@@ -42,14 +42,16 @@ void VergilSetMaxJJC::on_config_save(utility::Config& cfg) {
 
 std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   init_check_box_info();
-  ischecked        = &VergilSetMaxJJC::cheaton;
-  onpage           = vergilcheat;
-  full_name_string = "Set maximum JJC in a row (+)";
-  author_string    = "VPZadov";
-  description_string = "Set the maximum number of Just Judgement Cuts Vergil can perform in a row.";
+  m_is_enabled        = &VergilSetMaxJJC::cheaton;
+  m_on_page           = vergilcheat;
+  m_full_name_string = "Set maximum JJC in a row (+)";
+  m_author_string    = "VPZadov";
+  m_description_string = "Set the maximum number of Just Judgement Cuts Vergil can perform in a row.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto init_addr = utility::scan(base, "8B 47 48 39 81 E0 18 00 00");
+  auto init_addr = patterns->find_addr(base, "8B 47 48 39 81 E0 18 00 00");
   if (!init_addr)
     return "Unable to find VergilSetMaxJJC pattern.";
 
@@ -66,7 +68,7 @@ void VergilSetMaxJJC::on_draw_ui() {
   }
   ImGui::TextWrapped("\"Infinite Just Judgement Cuts\" mod will be disabled if this mod active.");
   ImGui::TextWrapped("Set maximum jjc:");
-  ImGui::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
+  UI::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
 }
 
 void VergilSetMaxJJC::on_draw_debug_ui() {}

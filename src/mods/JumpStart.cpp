@@ -71,12 +71,14 @@ void JumpStart::init_check_box_info() {
 std::optional<std::string> JumpStart::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &JumpStart::cheaton ;
-  onpage             = enemystep;
+  m_is_enabled          = &JumpStart::cheaton ;
+  m_on_page             = mechanics;
 
-  full_name_string   = "JumpStart (+)";
-  author_string      = "SSSiyan, Dr.penguin";
-  description_string = "Allows you to cancel out of a selection of moves with any jump action.";
+  m_full_name_string   = "Selective Jump-Cancels (+)";
+  m_author_string      = "SSSiyan, Dr.penguin";
+  m_description_string = "Allows you to cancel out of a selection of moves with any jump action.";
+
+  set_up_hotkey();
 
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

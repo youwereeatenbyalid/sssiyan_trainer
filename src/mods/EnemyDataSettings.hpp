@@ -23,11 +23,11 @@ public:
 	inline std::optional<std::string> on_initialize() override {
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-		ischecked = &cheaton;
-		onpage = balance;
-		full_name_string = "Enemy data settings (+)";
-		author_string = "VPZadov";
-		description_string = "Change enemy num in waves, delay for spawn and spawn odds.";
+		m_is_enabled = &cheaton;
+		m_on_page = balance;
+		m_full_name_string = "Enemy data settings (+)";
+		m_author_string = "VPZadov";
+		m_description_string = "Change enemy num in waves, delay for spawn and spawn odds.";
 
 		for (int i = 0; i < EnemySwapper::enemySettings.size(); i++) {
 			EnemySwapper::enemySettings[i].emId.set_current_id(i);
@@ -80,7 +80,7 @@ public:
 		cfg.set<bool>("EnemyDataSettings_shareSettings", shareSettings);
 
 		for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
-			if(i == 32 || i == 33 || i == 35 || i == 39 || i == 40)
+			if(i == 32 || i == 33)
 				continue;
 			key = std::string(EnemySwapper::emNames[i]) + "_" + "waitTimeMin";
 			cfg.set<float>(key, EnemySwapper::enemySettings[i].waitTimeMin);
@@ -118,8 +118,8 @@ public:
           ImGui::TextWrapped("Wait time max: ");
           ImGui::InputFloat("##WaitTimeMaxShared", &waitTimeMax);
           ImGui::Spacing();
-		  ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
-          ImGui::SliderFloat("##enemyOddsShared", &odds, 0.1f, 100.0f, "%.01f");
+		  ImGui::TextWrapped("Spawn chance (%%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
+          ImGui::SliderFloat("##enemyOddsShared", &odds, 0.0f, 100.0f, "%.1f");
           validate_values(shareSettings);
           set_all_data_settings(waitTimeMin, waitTimeMax, enemyNum, odds);
 		}
@@ -134,7 +134,7 @@ public:
 			}
 			ImGui::Separator();
 			for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
-				if(i == 32 || i == 33 || i == 35 || i == 39 || i == 40)//Vergils and Dante
+				if(i == 32 || i == 33)//Urizens
 					continue;
 				uniqStr = std::string("Use default game settings ##" + std::to_string(i));
 				ImGui::TextWrapped(EnemySwapper::emNames[i]);

@@ -35,15 +35,17 @@ void FreezeBPTimer::init_check_box_info() {
 std::optional<std::string> FreezeBPTimer::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &FreezeBPTimer::cheaton;
-  onpage               = bloodypalace;
+  m_is_enabled            = &FreezeBPTimer::cheaton;
+  m_on_page               = bloodypalace;
 
-  full_name_string     = "Freeze Bloody Palace Timer";
-  author_string        = "SSSiyan";
-  description_string   = "Freezes the timer in Bloody Palace.";
+  m_full_name_string     = "Freeze Bloody Palace Timer";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Freezes the timer in Bloody Palace.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
+  auto addr      = patterns->find_addr(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
   if (!addr) {
     return "Unable to find FreezeBPTimer pattern.";
   }

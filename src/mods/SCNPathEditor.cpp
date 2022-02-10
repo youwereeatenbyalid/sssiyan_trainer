@@ -158,13 +158,15 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &SCNPathEditor::cheaton;
+  m_is_enabled = &SCNPathEditor::cheaton;
   //onpage    = gamemode;
-  full_name_string     = "SCNPathEditor Full Name";
-  author_string        = "Author";
-  description_string   = "This is the description of SCNPathEditor.";
+  m_full_name_string     = "SCNPathEditor Full Name";
+  m_author_string        = "Author";
+  m_description_string   = "This is the description of SCNPathEditor.";
 
-  auto addr = utility::scan(base, "75 F5 48 83 C1 68");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "75 F5 48 83 C1 68");
   if (!addr) {
     return "Unable to find SCNPathEditor pattern.";
   }

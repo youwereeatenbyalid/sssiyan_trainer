@@ -56,13 +56,15 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = balance;
-	full_name_string = "Enemy waves settings (+)";
-	author_string = "VPZadov";
-	description_string = "Change some enemy waves settings.";
+	m_is_enabled = &cheaton;
+	m_on_page = balance;
+	m_full_name_string = "Enemy waves settings (+)";
+	m_author_string = "VPZadov";
+	m_description_string = "Change some enemy waves settings.";
 
-	auto initAddr1 = utility::scan(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
+  set_up_hotkey();
+
+	auto initAddr1 = patterns->find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
 	if (!initAddr1) {
 		return "Unanable to find EnemyWaveSettings pattern.";
 	}
@@ -101,13 +103,13 @@ void EnemyWaveSettings::on_draw_ui()
 	//ImGui::Checkbox("Use custom generate type setting", &isCustomGenerateType);
 	ImGui::TextWrapped("Change the order of spawns in subwaves.");
 	ImGui::TextWrapped("Change \"generateType\" to: 0 - order, 1 - random, 2 - parallel. Parallel is glitchy and can cause enemies not to spawn.");
-	ImGui::SliderInt("##generateTypeSlider", (int*)&generateType, 0, 2);
+	UI::SliderInt("##generateTypeSlider", (int*)&generateType, 0, 2);
 	ImGui::Separator();
 
 	/*ImGui::TextWrapped("(?) Controls, how many enemies can attack at the same time in a wave (?).");
 	ImGui::Checkbox("Use custom attack permit settings. ", &isCustomPermitSetting);
 	ImGui::TextWrapped("(?)Enemies num, that can start attak at the same time:(?)");//no
-	ImGui::SliderInt("##permitNumSlider", (int*)&permitNum, 0, 25);*/
+	UI::SliderInt("##permitNumSlider", (int*)&permitNum, 0, 25);*/
 }
 
 void EnemyWaveSettings::on_draw_debug_ui()

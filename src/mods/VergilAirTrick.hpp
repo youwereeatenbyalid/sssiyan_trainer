@@ -1,13 +1,24 @@
 #pragma once
 #include "Mod.hpp"
+#include "mods/GameFunctions/PositionController.hpp"
+#include "PlayerTracker.hpp"
 class VergilAirTrick : public Mod
 {
 public:
+	enum TeleportType
+	{
+		Front,
+		Behind
+	};
+
+	static inline TeleportType trickType = Front;
+
 	static bool cheaton;
 	static bool isSpeedUp;
 	static bool isCustomOffset;
 	static bool isCustomWaitTime;
-	//static bool isTeleport;
+	static inline bool isTeleport = false;
+	static inline bool isDoppelOppositeTeleport = false;
 
 	/*static constexpr float defaultInitSpeed = 0.7f;
 	static constexpr float defaultFinishRange = 1.2f;
@@ -22,15 +33,11 @@ public:
 	static constexpr float modFinishOffsetX = 1.5f;
     static constexpr float modSpeedAcc         = 0.0f;
 
+	static inline float trickCorrection = 1.8f;
 	static float initSpeed;
 	static float waitTime;
 	static float finishOffsetZ;
-	/*static float emCoordX;
-	static float emCoordY;
-	static float emCoordZ;
-	static float playerCoordX;
-	static float playerCoordY;
-	static float playerCoordZ;*/
+	static inline float teleportZOffs = -1.3f;
 
 	static uintptr_t initSpeedRet;
     static uintptr_t speedAccRet;
@@ -40,12 +47,7 @@ public:
 	static uintptr_t waitTimeRet;
     static uintptr_t maxSpeedZRet;
 	static uintptr_t maxXZRet;
-    //static uintptr_t teleportRet;
-	//static uintptr_t playerAddr;
-    //static uintptr_t teleportRet2;
-	//static uintptr_t transformRet;
-
-	//static uintptr_t playerTransformAddr;
+	static uintptr_t routineStartRet;
 
 	VergilAirTrick() = default;
 
@@ -67,8 +69,12 @@ public:
 	// on_draw_debug_ui() is called when debug window shows up
 	void on_draw_debug_ui() override;
 
+	static void change_pos_asm(uintptr_t trickAction);
+
 private:
 	void init_check_box_info() override;
+	static void xypos_teleport(uintptr_t vergil, TeleportType type, float &x, float &y, GameFunctions::Vec3 pPos, float trickX, float trickY, float trickLen);
+	//static inline std::unique_ptr<GameFunctions::Transform_SetPosition> set_pos{nullptr};
 	std::unique_ptr<FunctionHook> m_airtrick_hook;
     std::unique_ptr<FunctionHook> m_initspeed_hook;
 	std::unique_ptr<FunctionHook> m_waittime_hook;
@@ -76,7 +82,7 @@ private:
     std::unique_ptr<FunctionHook> m_maxspeed_z_hook;
     std::unique_ptr<FunctionHook> m_max_xz_hook;
     std::unique_ptr<FunctionHook> m_speed_acc_hook;
-    std::unique_ptr<FunctionHook> m_teleport_hook;
-    std::unique_ptr<FunctionHook> m_teleport2_hook;
+	std::unique_ptr<FunctionHook> m_teleport_hook;
+	std::unique_ptr<FunctionHook> m_finish_range_hook;
 };
 

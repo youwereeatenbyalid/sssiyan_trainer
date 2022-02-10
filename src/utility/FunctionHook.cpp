@@ -8,7 +8,7 @@ using namespace std;
 
 bool g_isMinHookInitialized{ false };
 
-FunctionHook::FunctionHook(Address target, Address destination, UINT8 size)
+FunctionHook::FunctionHook(Address target, Address destination)
     : m_target{ 0 },
     m_destination{ 0 },
     m_original{ 0 }
@@ -21,14 +21,14 @@ FunctionHook::FunctionHook(Address target, Address destination, UINT8 size)
     }
 
     // Create the hook. Call create afterwards to prevent race conditions accessing FunctionHook before it leaves its constructor.
-    if (MH_CreateHook(target.as<LPVOID>(), destination.as<LPVOID>(), (LPVOID*)&m_original, size) == MH_OK) {
+    if (auto status = MH_CreateHook(target.as<LPVOID>(), destination.as<LPVOID>(), (LPVOID*)&m_original); status == MH_OK) {
         m_target = target;
         m_destination = destination;
 
         spdlog::info("Hook init successful {:p}->{:p}", target.ptr(), destination.ptr());
     }
     else {
-        spdlog::error("Failed to hook {:p}", target.ptr());
+        spdlog::error("Failed to hook {:p}: {}", target.ptr(), MH_StatusToString(status));
     }
 }
 
@@ -42,36 +42,17 @@ bool FunctionHook::create() {
         return false;
     }
 
-    if (MH_EnableHook((LPVOID)m_target) != MH_OK) {
+    if (auto status = MH_EnableHook((LPVOID)m_target); status != MH_OK) {
         m_original = 0;
         m_destination = 0;
         m_target = 0;
 
-        spdlog::error("Failed to hook {:x}", m_target);
+        spdlog::error("Failed to hook {:x}: {}", m_target, MH_StatusToString(status));
         return false;
     }
 
     spdlog::info("Hooked {:x}->{:x}", m_target, m_destination);
     return true;
-}
-
-bool FunctionHook::queue() {
-	if (m_target == 0 || m_destination == 0 || m_original == 0) {
-		spdlog::error("FunctionHook not initialized");
-		return false;
-	}
-
-	if (MH_QueueEnableHook((LPVOID)m_target) != MH_OK) {
-		m_original = 0;
-		m_destination = 0;
-		m_target = 0;
-
-		spdlog::error("Failed to queue {:x}", m_target);
-		return false;
-	}
-
-	spdlog::info("Queueing hook {:x}->{:x}", m_target, m_destination);
-	return true;
 }
 
 bool FunctionHook::remove() {
@@ -90,16 +71,6 @@ bool FunctionHook::remove() {
     m_target = 0;
     m_destination = 0;
     m_original = 0;
-
-    return true;
-}
-
-bool FunctionHook::enable_queued() {
-
-    if (MH_ApplyQueued() != MH_OK) {
-		spdlog::error("MinHook failed to ApplyQueued hooks");
-        return false;
-    }
 
     return true;
 }

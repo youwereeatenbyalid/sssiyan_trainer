@@ -1,4 +1,4 @@
-﻿
+
 #include "DamageTypeLean.hpp"
 #include "PlayerTracker.hpp"
 #include "NeroSwapWiresnatch.hpp"
@@ -46,7 +46,7 @@ std::optional<std::string> DamageTypeLean::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "8B A8 C8 00 00 00 E8");
+  auto addr = patterns->find_addr(base, "8B A8 C8 00 00 00 E8");
   if (!addr) {
     return "Unable to find DamageTypeLean pattern.";
   }

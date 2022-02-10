@@ -33,14 +33,16 @@ void ModSample::init_check_box_info() {
 std::optional<std::string> ModSample::on_initialize() {
   init_check_box_info();
 
-  // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  //ischecked = &ModSample::cheaton;
-  //onpage    = commonpage;
-  //full_name_string     = "ModSample Full Name";
-  //author_string        = "Author";
-  //description_string   = "This is the description of ModSample.";
+  //auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  //m_is_enabled = &ModSample::cheaton;
+  //m_on_page    = commonpage;
+  //m_full_name_string     = "ModSample Full Name";
+  //m_author_string        = "Author";
+  //m_description_string   = "This is the description of ModSample.";
 
-  //auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
+  //set_up_hotkey();
+
+  //auto addr = patterns->find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
   //if (!addr) {
   //  return "Unable to find ModSample pattern.";
   //}

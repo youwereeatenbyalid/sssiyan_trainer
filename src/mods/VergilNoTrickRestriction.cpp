@@ -33,15 +33,17 @@ void VergilNoTrickRestriction::init_check_box_info() {
 std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &VergilNoTrickRestriction::cheaton;
-  onpage             = vergiltrick;
+  m_is_enabled          = &VergilNoTrickRestriction::cheaton;
+  m_on_page             = vergiltrick;
 
-  full_name_string   = "No Trick Restriction";
-  author_string      = "SSSiyan";
-  description_string = "Allows you to trick during things like World of V startup.";
+  m_full_name_string   = "No Trick Restriction";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Allows you to trick during things like World of V startup.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = utility::scan(base, "80 B9 A8 00 00 00 00 0F");
+  auto addr      = patterns->find_addr(base, "80 B9 A8 00 00 00 00 0F");
   if (!addr) {
     return "Unable to find VergilNoTrickRestriction pattern.";
   }

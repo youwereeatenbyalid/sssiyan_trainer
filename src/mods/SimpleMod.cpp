@@ -12,9 +12,11 @@ void SimpleMod::init_check_box_info() {
 std::optional<std::string> SimpleMod::on_initialize() {
   init_check_box_info();
 
-  full_name_string   = "";
-  author_string      = "";
-  description_string = "";
+  m_full_name_string   = "";
+  m_author_string      = "";
+  m_description_string = "";
+
+  set_up_hotkey();
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
   return Mod::on_initialize();
 }

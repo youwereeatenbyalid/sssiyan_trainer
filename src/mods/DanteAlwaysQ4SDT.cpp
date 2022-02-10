@@ -40,20 +40,22 @@ void DanteAlwaysQ4SDT::init_check_box_info() {
 std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DanteAlwaysQ4SDT::cheaton;
-  onpage             = dantesdt;
+  m_is_enabled          = &DanteAlwaysQ4SDT::cheaton;
+  m_on_page             = dantesdt;
 
-  full_name_string   = "Always Quadruple S";
-  author_string      = "SSSiyan";
-  description_string = "Removes the style requirement for Quadruple S.";
+  m_full_name_string   = "Always Quadruple S";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Removes the style requirement for Quadruple S.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "83 B8 B0 00 00 00 07");
+  auto addr = patterns->find_addr(base, "83 B8 B0 00 00 00 07");
   if (!addr) {
     return "Unable to find DanteAlwaysQ4SDT pattern.";
   }
 
-  DanteAlwaysQ4SDT::jmp_jne = utility::scan(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
+  DanteAlwaysQ4SDT::jmp_jne = patterns->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

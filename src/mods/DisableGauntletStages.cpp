@@ -40,15 +40,17 @@ void DisableGauntletStages::init_check_box_info() {
 std::optional<std::string> DisableGauntletStages::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &DisableGauntletStages::cheaton;
-  onpage             = bloodypalace;
+  m_is_enabled          = &DisableGauntletStages::cheaton;
+  m_on_page             = bloodypalace;
 
-  full_name_string   = "Skip Nero's BP Gauntlet Stages";
-  author_string      = "Dante";
-  description_string = "Recommended for use with Breaker Switcher or Infinite Breakers.";
+  m_full_name_string   = "Skip Nero's BP Gauntlet Stages";
+  m_author_string      = "Dante";
+  m_description_string = "Recommended for use with Breaker Switcher or Infinite Breakers.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "39 98 64 0E 00 00"); // DevilMayCry5.exe+367DAB
+  auto addr = patterns->find_addr(base, "39 98 64 0E 00 00"); // DevilMayCry5.exe+367DAB
   if (!addr) {
     return "Unable to find DisableGauntletStages pattern.";
   }

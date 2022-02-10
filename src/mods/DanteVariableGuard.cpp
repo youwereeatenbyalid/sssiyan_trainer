@@ -40,15 +40,17 @@ void DanteVariableGuard::init_check_box_info() {
 std::optional<std::string> DanteVariableGuard::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DanteVariableGuard::cheaton;
-  onpage               = dantecheat;
+  m_is_enabled            = &DanteVariableGuard::cheaton;
+  m_on_page               = dantecheat;
 
-  full_name_string     = "Guard Meter Lock (+)";
-  author_string        = "SSSiyan";
-  description_string   = "Lock Guard meter to whatever level you want.";
+  m_full_name_string     = "Guard Meter Lock (+)";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Lock Guard meter to whatever level you want.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 5A 28 0F 57");
+  auto addr = patterns->find_addr(base, "F3 0F 10 5A 28 0F 57");
   if (!addr) {
     return "Unable to find DanteVariableGuard pattern.";
   }
@@ -71,5 +73,5 @@ void DanteVariableGuard::on_config_save(utility::Config& cfg) {
 
 void DanteVariableGuard::on_draw_ui() {
   ImGui::Text("Guard level");
-  ImGui::SliderFloat("##guardlevelslider", &inputGuardValue, 0.0f, 10.0f, "%.0f");
+  UI::SliderFloat("##guardlevelslider", &inputGuardValue, 0.0f, 10.0f, "%.0f");
 }

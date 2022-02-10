@@ -38,12 +38,14 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteSummonPowerup::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Summon Powerup Duration";
-  author_string        = "Jessie Kazama";
-  description_string   = "Summon powerup state lasts forever.";
-  auto infinitesummonpowerupduration_addr = utility::scan(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
+  m_is_enabled = &InfiniteSummonPowerup::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Summon Powerup Duration";
+  m_author_string        = "Jessie Kazama";
+  m_description_string   = "Summon powerup state lasts forever.";
+
+  set_up_hotkey();
+  auto infinitesummonpowerupduration_addr = patterns->find_addr(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
 
   if (!infinitesummonpowerupduration_addr) {
     return "Unable to find infinitesummonpowerupduration pattern.";

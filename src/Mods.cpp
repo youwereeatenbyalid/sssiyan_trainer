@@ -1,6 +1,7 @@
-
 #include <spdlog/spdlog.h>
 #include "Mods.hpp"
+#include "Config.hpp"
+#include "imgui_internal.h"
 // Example
          #include "mods/SimpleMod.hpp"
 // Darkness
@@ -64,6 +65,7 @@
         #include "mods/MovingTargetSwitch.hpp"
         #include "mods/HideHUD.hpp"
         #include "mods/CameraSettings.hpp"
+        #include "mods/LandCancels.hpp"
     // Gameplay
         #include "mods/BufferedReversals.hpp"
         #include "mods/BufferedReversalsOriginal.hpp"
@@ -136,10 +138,16 @@
        #include "mods/EnemySwapper.hpp"
        #include "mods/EnemyDataSettings.hpp"
        #include "mods/EnemyWaveSettings.hpp"
+       #include "mods/CheckpointPos.hpp"
+       #include "mods/MissionManager.hpp"
+       #include "mods/EnemyWaveEditor.hpp"
+       #include "mods/SecretMissionTimer.hpp"
+       #include "mods/BossDanteSetup.hpp"
     // Nero
     // Dante
        #include "mods/DanteAirTrickSettings.hpp"
        #include "mods/GroundTrickNoDistanceRestriction.hpp"
+       #include "mods/DanteNoSdtStun.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -150,14 +158,25 @@
        #include "mods/VergilSDTAccumulateRework.hpp"
        #include "mods/VergilSDTNoConcentrationLose.hpp"
        #include "mods/VergilAirTrick.hpp"
-       //#include "mods/VergilSDTTrickEfx.hpp" //Removed intil better times
+       //#include "mods/VergilSDTTrickEfx.hpp" //Removed until better times
        #include "mods//InfiniteTrickUp.hpp"
+       #include "mods/DMC3JCE.hpp"
+       #include "mods/JCENoMotivationLimit.hpp" // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
+       #include "mods/TrickDodgeNoDisappear.hpp"
+       #include "mods/VergilWalkingGuard.hpp"
+       #include "mods/VergilGuardYamatoBlock.hpp"
+       #include "mods/AirTrickDodge.hpp"
+
+
+static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+
 Mods::Mods() 
-    : redrawfocusedwindow{ false }, m_config{"DMC2_fw_config.txt"} {
+    : m_config{CONFIG_FILENAME}
+{
   // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
-// Darkness
-    // Background
+//// Darkness
+//    // Background
         m_mods.emplace_back(std::make_unique<FileEditor>());
     // Common
     // Gameplay
@@ -209,7 +228,7 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
 
-// Siyan
+//// Siyan
     // Background
         m_mods.emplace_back(std::make_unique<DamageTypeLean>());
     // Common
@@ -221,6 +240,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HideHUD>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
+        m_mods.emplace_back(std::make_unique<LandCancels>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<BufferedReversals>());
         m_mods.emplace_back(std::make_unique<OriginalReversals>());
@@ -276,7 +296,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoTrickRestriction>());
         m_mods.emplace_back(std::make_unique<VergilTrickUpLockedOn>());
 
-// Dr.penguin
+//// Dr.penguin
     // Background
     // Common
     // Gameplay
@@ -291,13 +311,19 @@ Mods::Mods()
         // Background
         // Common
         // Gameplay
+        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
+        m_mods.emplace_back(std::make_unique<CheckpointPos>());
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         // Nero
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
         m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
+        m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
@@ -310,6 +336,13 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilAirTrick>());
         //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
         m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
+        m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
+        m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
+        m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
+        m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
+        m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
+        m_mods.emplace_back(std::make_unique<AirTrickDodge>());
+
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
@@ -324,7 +357,9 @@ std::optional<std::string> Mods::on_initialize() const {
             return e;
         }
     }
-
+    if(Mod::patterns->is_changed())
+        Mod::patterns->save();
+    Mod::patterns->free();
     /*utility::Config m_config{ "re2_fw_config.txt" };
 
     for (auto& mod : m_mods) {
@@ -362,36 +397,36 @@ void Mods::on_frame() const {
 void Mods::save_mods() {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
-        std::string togglename = std::string{mod->get_name()};
+        std::string togglename = std::string(mod->get_name());
         togglename.append("_on");
-        if(mod->ischecked){
-            m_config.set<bool>(togglename, *mod->ischecked);
+
+        if(mod->m_is_enabled){
+            m_config.set<bool>(togglename, *mod->m_is_enabled);
         }else{
             m_config.set<bool>(togglename, false);
         }
+
         mod->on_config_save(m_config);
-        //and then probably call the rest of the stuff here;
     }
-    // dorime
-    //namespace fs = std::filesystem;
-    //std::filesystem::path mypath = fs::current_path() / "DMC2_fw_config.txt" ;
-    //auto m_conf_path             = mypath.string();
-    // ameno
-    m_config.save();
 }
 
 
-void Mods::load_mods() const {
-  for (auto& mod : m_mods) {
-    spdlog::info("{:s}::on_config_load()", mod->get_name().data());
-    std::string togglename = std::string{mod->get_name()};
-    togglename.append("_on");
-	if (mod->ischecked) {
-		*(mod->ischecked) = m_config.get<bool>(togglename).value_or(false);
-		mod->on_config_load(m_config);
-	}
-    // and then probably call the rest of the stuff here;
-  }
+void Mods::load_mods(const std::optional<utility::Config>& cfg) const {
+    if(cfg)
+    {
+        m_config = *cfg;
+    }
+
+    for (auto& mod : m_mods) {
+        spdlog::info("{:s}::on_config_load()", mod->get_name().data());
+        std::string togglename = std::string(mod->get_name());
+        togglename.append("_on");
+
+	    if (mod->m_is_enabled) {
+	    	*mod->m_is_enabled = m_config.get<bool>(togglename).value_or(false);
+	    	mod->on_config_load(m_config);
+	    }
+    }
 }
 
 void Mods::on_draw_debug_ui() const {
@@ -408,19 +443,39 @@ void Mods::on_draw_ui() const {
 
 void Mods::draw_entry(std::unique_ptr<Mod>& mod){
     //mod->get_hotkey_name()
-    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->ischecked);
+    auto window = ImGui::GetCurrentWindow();
+
+    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
-    if (ImGui::Selectable(mod->full_name_string.c_str(), focusedmod == mod->get_name())) {
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    if (ImGui::Selectable(mod->m_full_name_string.c_str(), focusedmod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
         focusedmod = mod->get_name();
+    }
+
+    ImRect areaOfModName(cursorPos, ImVec2(window->Pos.x + window->Size.x, cursorPos.y + ImGui::GetItemRectSize().y));
+
+    auto mousePos = ImGui::GetMousePos();
+
+    bool isHovered = mousePos.x > areaOfModName.Min.x && mousePos.y > areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
+
+    if (isHovered) {
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.0f * g_framework->get_scale());
+    	KeyBindButton(mod->m_raw_full_name, std::string(mod->get_name()), g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
+		ImGui::PopStyleVar(1);
     }
 }
 
 
-void Mods::on_pagelist_ui(int page){
+void Mods::on_pagelist_ui(int page, float indent) {
   for (auto& mod : m_mods) {
-    if (page == mod->onpage) {
-        draw_entry(mod);
+    if (page == mod->m_on_page) {
+      if (indent != 0.f) {
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
       }
+      draw_entry(mod);
+    }
       //mod->modkeytoggle.draw(mod->get_name());
   }
 }

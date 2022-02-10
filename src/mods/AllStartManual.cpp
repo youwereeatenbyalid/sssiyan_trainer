@@ -120,17 +120,19 @@ void AllStartManual::init_check_box_info() {
 std::optional<std::string> AllStartManual::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &AllStartManual::cheaton;
-  onpage             = enemystep;
+  m_is_enabled          = &AllStartManual::cheaton;
+  m_on_page             = enemystep;
 
-  full_name_string   = "AllStart 2 (+)";
-  author_string      = "SSSiyan";
-  description_string = "Allows you to cancel out of a selection of moves with any other move.";
+  m_full_name_string   = "Cancellable Enemy Step (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Allows you to cancel out of a selection of moves (currently only enemy step) with any other move.";
+
+  set_up_hotkey();
 
   // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   constexpr ptrdiff_t addr = 0x2C723DF;
   //auto addr = base + 0x2C723DF;
-  // auto addr      = utility::scan(base, "66 C7 47 5E 00 00");
+  // auto addr      = patterns->find_addr(base, "66 C7 47 5E 00 00");
   // if (!addr) {
   //   return "Unable to find AllStartManual pattern.";
   // }

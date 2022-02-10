@@ -1,16 +1,17 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-
+#include "PlayerTracker.hpp"
 
 class VergilNoAfterimages : public Mod {
 public:
   static uintptr_t afterimages_jne;
   static uintptr_t afterimages_jmp_ret;
 
-  static uint32_t vergilafterimage_state; //Disable afterimages: 0 - human, 1 - SDT, 2 - all;
+  static uint32_t vergilafterimage_state; //Disable afterimages: 0 - human, 1 - SDT, 2 - all, 3 - default;
 
   static bool cheaton;
+  static inline bool isNoDrawIfObjHidden = false;
 
   VergilNoAfterimages() = default;
   std::string_view get_name() const override { return "VergilNoAfterimages"; }

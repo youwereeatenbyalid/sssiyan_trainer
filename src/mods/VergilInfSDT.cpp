@@ -56,19 +56,21 @@ void VergilInfSDT::init_check_box_info() {
 std::optional<std::string> VergilInfSDT::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilInfSDT::cheaton;
-  onpage               = vergilsdt;
+  m_is_enabled            = &VergilInfSDT::cheaton;
+  m_on_page               = vergilsdt;
 
-  full_name_string     = "Infinite SDT";
-  author_string        = "SSSiyan";
-  description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
+  m_full_name_string     = "Infinite SDT";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "F3 0F 10 8B 20 1B 00 00 8B");
+  auto addr1 = patterns->find_addr(base, "F3 0F 10 8B 20 1B 00 00 8B");
   if (!addr1) {
     return "Unable to find VergilInfSDT pattern.";
   }
-  auto addr2 = utility::scan(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
+  auto addr2 = patterns->find_addr(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
   if (!addr2) {
     return "Unable to find VergilInfSDT pattern.";
   }

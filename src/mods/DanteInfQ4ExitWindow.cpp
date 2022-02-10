@@ -39,15 +39,17 @@ void DanteInfQ4ExitWindow::init_check_box_info() {
 std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DanteInfQ4ExitWindow::cheaton;
-  onpage               = dantesdt;
+  m_is_enabled            = &DanteInfQ4ExitWindow::cheaton;
+  m_on_page               = dantesdt;
 
-  full_name_string     = "Infinite Q4 SDT Exit Window";
-  author_string        = "SSSiyan";
-  description_string   = "Removes the time limit on the Quadruple S Exit window.";
+  m_full_name_string     = "Infinite Q4 SDT Exit Window";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Removes the time limit on the Quadruple S Exit window.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "47 50 48 83 78 18 00 75 2E F3 0F 5A");
+  auto addr = patterns->find_addr(base, "47 50 48 83 78 18 00 75 2E F3 0F 5A");
   if (!addr) {
     return "Unable to find DanteInfQ4ExitWindow pattern.";
   }

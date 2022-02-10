@@ -75,19 +75,21 @@ void NeroSwapWiresnatch::init_check_box_info() {
 std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NeroSwapWiresnatch::cheaton;
-  onpage             = wiresnatch;
+  m_is_enabled          = &NeroSwapWiresnatch::cheaton;
+  m_on_page             = wiresnatch;
 
-  full_name_string   = "Angel and Devil Snatch";
-  author_string      = "SSSiyan";
-  description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
+  m_full_name_string   = "Angel and Devil Snatch (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Replaces Wiresnatch with rawhide snatch to the enemy and adds knockback.";
 
+  set_up_hotkey();
+  
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = utility::scan(base, "C7 40 10 1A 00 00 00 E9");
+  auto addr1 = patterns->find_addr(base, "C7 40 10 1A 00 00 00 E9");
   if (!addr1) {
     return "Unable to find NeroSwapWiresnatch pattern.";
   }
-  auto addr2 = utility::scan(base, "C7 40 10 19 00 00 00 48 8B D0");
+  auto addr2 = patterns->find_addr(base, "C7 40 10 19 00 00 00 48 8B D0");
   if (!addr2) {
     return "Unable to find NeroSwapWiresnatch pattern.";
   }

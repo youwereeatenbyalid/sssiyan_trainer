@@ -18,7 +18,7 @@ std::optional<std::string> PositionHooks::on_initialize() {
     const auto mod_size = utility::get_module_size(game);
 
     if (!mod_size) {
-        return "Unable to get module size";
+        return "Unable to get module itemSize";
     }
 
     // The 48 8B 4D 40 bit might change.

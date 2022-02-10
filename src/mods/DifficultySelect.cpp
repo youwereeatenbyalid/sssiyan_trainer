@@ -57,12 +57,15 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DifficultySelect::cheaton;
-  onpage    = balance;
-  full_name_string     = "Select Enemy Difficulty";
-  author_string        = "The Hitchhiker";
-  description_string   = "Set the difficulty of enemies in combat.";
-  auto missionenemydifficulty_addr = utility::scan(base, "89 B8 8C 00 00 00");
+
+  m_is_enabled = &DifficultySelect::cheaton;
+  m_on_page    = balance;
+  m_full_name_string     = "Select Enemy Difficulty (+)";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Set the difficulty of enemies in combat.";
+
+  set_up_hotkey();
+  auto missionenemydifficulty_addr = patterns->find_addr(base, "89 B8 8C 00 00 00");
 
   if (!missionenemydifficulty_addr) {
     return "Unable to find missionenemydifficulty pattern.";
@@ -72,7 +75,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize missionenemydifficulty";
   }
-  auto bpenemydifficulty_addr = utility::scan(base, "89 91 8C 00 00 00 48 8B");
+  auto bpenemydifficulty_addr = patterns->find_addr(base, "89 91 8C 00 00 00 48 8B");
 
   if (!bpenemydifficulty_addr) {
     return "Unable to find bpenemydifficulty pattern.";

@@ -100,16 +100,18 @@ void TextEditor::init_check_box_info() {
 std::optional<std::string> TextEditor::on_initialize() {
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &TextEditor::cheaton;
+  m_is_enabled = &TextEditor::cheaton;
   //onpage    = commonpage;
 
-  auto addr = utility::scan(base, "40 53 57 41 56 48 83 EC 20 45 33");
+  auto addr = patterns->find_addr(base, "40 53 57 41 56 48 83 EC 20 45 33");
   if (!addr) {
 	  return "Unable to find Text Editor Pattern.";
   }
-  full_name_string     = "Text Editor";
-  author_string        = "The Hitchhiker";
-  description_string   = "Replaces Strings.";
+  m_full_name_string     = "Text Editor";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Replaces Strings.";
+
+  set_up_hotkey();
   m_sub_function_hook = std::make_unique<FunctionHook>(addr.value(), &function_hook);
   m_sub_function_hook->create();
 
