@@ -6,7 +6,7 @@ bool MovingTargetSwitch::cheaton{NULL};
 uintptr_t MovingTargetSwitch::jmp_jae{NULL};
 
 float comissvalue = 0.75f;
-
+float fixvalue = 2.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -17,6 +17,7 @@ static naked void detour() {
         jmp code
 
     cheatcode:
+		comiss xmm0, [fixvalue]
 		jmp qword ptr [MovingTargetSwitch::jmp_ret]
 
     code:
@@ -54,7 +55,7 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
 
   MovingTargetSwitch::jmp_jae = patterns->find_addr(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
-  if (!install_hook_absolute(addr.value()+6, m_function_hook, &detour, &jmp_ret, 13)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize MovingTargetSwitch";
