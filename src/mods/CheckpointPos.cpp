@@ -1,6 +1,7 @@
 #include "CheckpointPos.hpp"
 #include "MissionManager.hpp"
 #include "EnemySwapper.hpp"
+//clang-format off
 
 bool CheckpointPos::cheaton{NULL};
 bool CheckpointPos::isCustomPos{NULL};
@@ -135,6 +136,27 @@ void CheckpointPos::on_draw_ui() {
       customPos = playerPos;
     }
     }
+  ImGui::Separator();
+  ImGui::TextWrapped("Set player's position:");
+  ImGui::DragFloat3("##TeleportPos", (float*)&newPlPos);
+  ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+  if (ImGui::Button("Get current player's position"))
+  {
+      if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+          newPlPos = get_player_coords();
+  }
+  ImGui::Spacing();
+  if (ImGui::Button("Get boss pos"))
+      newPlPos = get_boss_pos();
+  ImGui::Spacing();
+  
+  if (ImGui::Button("Set position"))
+      {
+          if(PlayerTracker::playerentity == 0 || EnemySwapper::nowFlow != 22)
+              return;
+          GameFunctions::Transform_SetPosition::set_player_pos(PlayerTracker::playerentity, newPlPos);
+      }
+  ImGui::ShowHelpMarker("It's actually instant teleport to a selected pos, so it can throw character in out of bounds.");
   }
 
 
@@ -143,6 +165,15 @@ void CheckpointPos::on_draw_debug_ui() {}
 void CheckpointPos::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
+}
+
+Vector3f CheckpointPos::get_boss_pos()
+{
+    for (int i = 0; i < CheckpointPos::mPosData.size(); i++)
+    {
+        if (CheckpointPos::mPosData[i].mNumber == MissionManager::missionNumber)
+            return CheckpointPos::mPosData[i].pos;
+    }
 }
 
 uintptr_t CheckpointPos::get_player_coords_ptr(uintptr_t addr) {
@@ -182,3 +213,4 @@ Vector3f CheckpointPos::get_player_coords() {
    res.y  = *((float*)&resHex);
    return res;
 }
+//clang-format on

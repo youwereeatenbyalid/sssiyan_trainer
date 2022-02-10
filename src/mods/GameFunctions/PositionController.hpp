@@ -58,6 +58,35 @@ namespace GameFunctions
 
 		void *get_transform() const { return transform; }
 
+		//Change player pos and colliders pos. Only for player obj.
+		static void set_player_pos(uintptr_t player, Vec3 newPos)
+		{
+			if(player == 0)
+				return;
+			auto gameObj = *(uintptr_t*)(player + 0x10);
+			auto transformGameObj = *(uintptr_t*)(gameObj + 0x18);
+			auto cachedCharController = *(uintptr_t*)(player + 0x2F0);
+			auto cachedSubCharController = *(uintptr_t*)(player + 0x2F8);
+			if(cachedCharController == 0 || cachedSubCharController == 0)
+				return;
+			Transform_SetPosition setPos((void*)transformGameObj);
+			setPos(newPos);
+
+			*(bool*)(cachedCharController + 0x30) = false;
+			*(bool*)(cachedSubCharController + 0x30) = false;
+
+			*(Vec3*)(cachedCharController + 0x140) = newPos;
+			*(Vec3*)(cachedCharController + 0x150) = newPos;
+			*(Vec3*)(cachedCharController + 0x160) = newPos;
+
+			*(Vec3*)(cachedSubCharController + 0x140) = newPos;
+			*(Vec3*)(cachedSubCharController + 0x150) = newPos;
+			*(Vec3*)(cachedSubCharController + 0x160) = newPos;
+
+			*(bool*)(cachedCharController + 0x30) = true;
+			*(bool*)(cachedSubCharController + 0x30) = true;
+		}
+
 	};
 
 	class PositionErrorCorrector : public GameFunc<void>

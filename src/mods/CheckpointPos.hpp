@@ -1,6 +1,9 @@
 #pragma once
 #include "Mod.hpp"
 #include <map>
+#include "mods/GameFunctions/PositionController.hpp"
+#include "PlayerTracker.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class CheckpointPos : public Mod
 {
 public:
@@ -65,7 +68,9 @@ public:
   void on_draw_debug_ui() override;
 
 private:
+  glm::vec3 newPlPos;
   void init_check_box_info() override;
+  Vector3f get_boss_pos();
   static uintptr_t get_player_coords_ptr(uintptr_t addr);
   static bool is_null_ptr(uintptr_t ptr);
   std::unique_ptr<FunctionHook> m_checkpointpos_hook;
