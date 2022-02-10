@@ -4,9 +4,10 @@ uintptr_t DanteInfIgnition::jmp_ret{NULL};
 uintptr_t DanteInfIgnition::jmp_ret2{NULL};
 bool DanteInfIgnition::cheaton{NULL};
 
-    // clang-format off
+// clang-format off
 // only in clang/icl mode on x64, sorry
 
+/*
 static naked void detour() {
 	__asm {
     validation:
@@ -47,6 +48,26 @@ static naked void detour2() {
         jmp qword ptr [DanteInfIgnition::jmp_ret2]
 	}
 }
+*/
+
+static naked void detour() {
+    __asm {
+    validation:
+        cmp [PlayerTracker::playerid], 1
+        jne code
+        cmp byte ptr [DanteInfIgnition::cheaton], 1
+        je cheatcode
+        jmp code
+
+     cheatcode :
+        mov byte ptr [rdi+0x360], 1
+        mov dword ptr [rdi+0x368], 0x44160000 // 600.0f
+
+    code :
+        mov eax, [rdi+0x00000360]
+        jmp qword ptr [DanteInfIgnition::jmp_ret]
+    }
+}
 
 // clang-format on
 
@@ -63,21 +84,26 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
 
   m_full_name_string     = "Infinite Ignition";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Sets ignition to full when you switch modes.";
+  m_description_string   = "Forces Balrog's Ignition.";
 
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "F2 0F 5C C8 66 0F 5A D1 F3 0F 11 97 68 03 00 00 48 8B 43 50 48 39 68 18 0F 85 17");
+  
+  /*auto addr = patterns->find_addr(base, "F2 0F 5C C8 66 0F 5A D1 F3 0F 11 97 68 03 00 00 48 8B 43 50 48 39 68 18 0F 85 17");
   if (!addr) {
     return "Unable to find DanteInfIgnition pattern.";
   }
   auto addr2 = patterns->find_addr(base, "65 8B 83 74 03 00 00 0F 57 C0 0F 57 D2 F2 48 0F 2A C0 8B 83 78 03 00 00");
   if (!addr2) {
     return "Unable to find DanteInfIgnition2 pattern.";
+  }*/
+  auto addr = patterns->find_addr(base, "8B 87 60 03 00 00 83");
+  if (!addr) {
+    return "Unable to find DanteInfIgnition pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
+  /*if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteInfIgnition";
@@ -86,6 +112,11 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteInfIgnition2";
+  }*/
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+    //  return a error string in case something goes wrong
+    spdlog::error("[{}] failed to initialize", get_name());
+    return "Failed to initialize DanteInfIgnition";
   }
 
   return Mod::on_initialize();
