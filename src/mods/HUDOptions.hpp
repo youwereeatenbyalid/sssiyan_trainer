@@ -1,16 +1,19 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
-class HideHUD : public Mod {
+class HUDOptions : public Mod {
 public:
-  HideHUD() = default;
+  HUDOptions() = default;
   // mod name string for config
-  std::string_view get_name() const override { return "HideHUD"; }
+  std::string_view get_name() const override { return "HUDOptions"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
   static uintptr_t jmp_ret;
+  static uintptr_t jmp_ret2;
+  static uintptr_t jmp_ret3;
+
   static bool cheaton;
 
   // Override this things if you want to store values in the config file
@@ -31,4 +34,6 @@ private:
   void init_check_box_info() override;
 
   std::unique_ptr<FunctionHook> m_function_hook;
+  std::unique_ptr<FunctionHook> m_function_hook2;
+  std::unique_ptr<FunctionHook> m_function_hook3;
 };

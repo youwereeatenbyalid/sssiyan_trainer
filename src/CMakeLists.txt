@@ -63,8 +63,8 @@ set(MODS_SRC
     mods/NoJCCooldown.cpp 
     mods/DisableEnemyAI.hpp 
     mods/DisableEnemyAI.cpp 
-    mods/HideHUD.hpp 
-    mods/HideHUD.cpp 
+    mods/HUDOptions.hpp 
+    mods/HUDOptions.cpp 
     mods/CameraSettings.hpp 
     mods/CameraSettings.cpp 
     mods/AlwaysSTaunts.hpp 
@@ -186,8 +186,6 @@ set(MODS_SRC
     mods/VergilSDTAccumulateRework.hpp
 	mods/DifficultySelect.hpp
 	mods/DifficultySelect.cpp
-	mods/DontHideWeaponWheel.hpp
-	mods/DontHideWeaponWheel.cpp
     mods/EnemySwapper.hpp
     mods/EnemySwapper.cpp
     mods/EnemyDataSettings.hpp

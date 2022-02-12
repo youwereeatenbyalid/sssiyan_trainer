@@ -30,7 +30,6 @@
         #include "mods/DisableTitleTimer.hpp"
         #include "mods/HoldToMash.hpp"
         #include "mods/SpardaWorkshop.hpp"
-        #include "mods/DontHideWeaponWheel.hpp"
         //#include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
@@ -62,7 +61,7 @@
         #include "mods/NoScreenShake.hpp"
         #include "mods/DisplayEnemyHPInOrbs.hpp"
         #include "mods/MovingTargetSwitch.hpp"
-        #include "mods/HideHUD.hpp"
+        #include "mods/HUDOptions.hpp"
         #include "mods/CameraSettings.hpp"
         #include "mods/LandCancels.hpp"
     // Gameplay
@@ -206,7 +205,6 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
         m_mods.emplace_back(std::make_unique<HoldToMash>());
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
-        m_mods.emplace_back(std::make_unique<DontHideWeaponWheel>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
@@ -239,7 +237,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NoScreenShake>());
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
-        m_mods.emplace_back(std::make_unique<HideHUD>());
+        m_mods.emplace_back(std::make_unique<HUDOptions>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
     // Gameplay
