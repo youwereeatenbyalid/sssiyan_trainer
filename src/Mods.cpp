@@ -112,6 +112,7 @@
         #include "mods/DanteGuardflyWip.hpp"
         #include "mods/DanteVariableGuard.hpp"
         #include "mods/DanteRedlineCav.hpp"
+        #include "mods/DanteSDTRework.hpp"
     // V
     // Vergil
         #include "mods/VergilAirTrickNoSS.hpp"
@@ -287,6 +288,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
         m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
         m_mods.emplace_back(std::make_unique<DanteRedlineCav>());
+        m_mods.emplace_back(std::make_unique<DanteSDTRework>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());

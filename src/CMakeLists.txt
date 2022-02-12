@@ -245,6 +245,8 @@ set(MODS_SRC
     mods/DanteNoSdtStun.cpp
     mods/DanteRedlineCav.hpp 
     mods/DanteRedlineCav.cpp 
+    mods/DanteSDTRework.hpp 
+    mods/DanteSDTRework.cpp 
 
 )
 

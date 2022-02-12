@@ -1,4 +1,3 @@
-
 #include "VergilInfSDT.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t VergilInfSDT::jmp_ret1{NULL};

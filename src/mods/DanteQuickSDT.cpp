@@ -1,4 +1,3 @@
-
 #include "DanteQuickSDT.hpp"
 #include "PlayerTracker.hpp"
 
@@ -34,7 +33,7 @@ static naked void detour() {
 		jmp qword ptr [DanteQuickSDT::jmp_ret]
 
     code:
-        movss xmm0,[rdi+00000128h]
+        movss xmm0, [rdi+00000128h]
         jmp qword ptr [DanteQuickSDT::jmp_ret]
 	}
 }
@@ -62,8 +61,8 @@ std::optional<std::string> DanteQuickSDT::on_initialize() {
   if (!addr) {
     return "Unable to find DanteQuickSDT pattern.";
   }
-
-  if (!install_hook_absolute(addr.value()+9, m_function_hook, &detour, &jmp_ret, 8)) {
+  
+  if (!install_hook_absolute(addr.value() + 9, m_function_hook, &detour, &jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteQuickSDT";

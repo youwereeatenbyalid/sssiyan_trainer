@@ -1,5 +1,6 @@
 #include "DanteMaxSDT.hpp"
 #include "PlayerTracker.hpp"
+#include "DanteSDTRework.hpp"
 uintptr_t DanteMaxSDT::jmp_ret{NULL};
 bool DanteMaxSDT::cheaton{NULL};
 
@@ -11,9 +12,9 @@ static naked void detour() {
     validation:
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-
+        cmp byte ptr [DanteSDTRework::cheaton], 1
+        je code
         cmp byte ptr [DanteMaxSDT::cheaton], 1
-
         je cheatcode
         jmp code
 

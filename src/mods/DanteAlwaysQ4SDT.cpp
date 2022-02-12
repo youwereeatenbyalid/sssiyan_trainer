@@ -1,6 +1,6 @@
-
 #include "DanteAlwaysQ4SDT.hpp"
 #include "PlayerTracker.hpp"
+#include "DanteSDTRework.hpp"
 uintptr_t DanteAlwaysQ4SDT::jmp_ret{NULL};
 uintptr_t DanteAlwaysQ4SDT::jmp_jne{NULL};
 bool DanteAlwaysQ4SDT::cheaton{NULL};
@@ -14,6 +14,8 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
 		cmp byte ptr [DanteAlwaysQ4SDT::cheaton], 1
+        je cheatcode
+        cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
         jmp code
 

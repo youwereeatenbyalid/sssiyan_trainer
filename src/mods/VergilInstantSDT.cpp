@@ -1,6 +1,6 @@
-
 #include "VergilInstantSDT.hpp"
 #include "PlayerTracker.hpp"
+
 uintptr_t VergilInstantSDT::jmp_ret1{NULL};
 uintptr_t VergilInstantSDT::jmp_ja1{NULL};
 
@@ -20,7 +20,7 @@ bool VergilInstantSDT::cheaton{NULL};
 
 static naked void detour1() {
 	__asm {
-        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4
         jne code
         cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode
@@ -42,6 +42,8 @@ static naked void detour1() {
 
 static naked void detour2() {
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4
+        jne code
         cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode
         jmp code
@@ -57,6 +59,8 @@ static naked void detour2() {
 
 static naked void detour3() { // Disables Doppel on DT input when SDT bar isn't full
 	__asm {
+        cmp byte ptr [PlayerTracker::playerid], 4
+        jne code
         cmp byte ptr [VergilInstantSDT::cheaton], 1
         je cheatcode
         jmp code
@@ -74,21 +78,22 @@ static naked void detour3() { // Disables Doppel on DT input when SDT bar isn't 
 	}
 }
 
-static naked void detour4() { // Makes SDT bar start to fill instantly when it needs to be loaded with DT
+static naked void detour4() {
 	__asm {
-        cmp byte ptr [VergilInstantSDT::cheaton], 1
-        je cheatcode
+        cmp byte ptr[PlayerTracker::playerid], 4 // Vergil // Makes SDT bar start to fill instantly when it needs to be loaded with DT
+        je cheatcheck
+        jmp code
+
+    cheatcheck:
+        cmp byte ptr [VergilInstantSDT::cheaton], 4
+        je jmp_out
         jmp code
 
     code:
         comisd xmm2, xmm1
         jae jmp_out
+    jmp_ret:
         jmp qword ptr [VergilInstantSDT::jmp_ret4]
-
-    cheatcode:
-        comisd xmm2, xmm1
-        jmp jmp_out
-		jmp qword ptr [VergilInstantSDT::jmp_ret4]
 
     jmp_out:
         jmp qword ptr [VergilInstantSDT::jmp_out4]
