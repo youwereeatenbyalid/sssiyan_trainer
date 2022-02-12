@@ -87,12 +87,13 @@ namespace GameFunctions
 		/// <param name="get_addr">Set true if u want to get addres, not ptr value itself.</param>
 		/// <returns></returns>
 		template <typename T, size_t offsCount>
-		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false)
+		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false, bool isDerefedBase = false)
 		{
 			int count = offsets.size() - 1;
 			if (!is_bad_ptr(base))
 			{
-				base = *(uintptr_t*)base;
+				if(!isDerefedBase)
+					base = *(uintptr_t*)base;
 				for (int i = 0; i < count; i++)
 				{
 					if (!is_bad_ptr(base))

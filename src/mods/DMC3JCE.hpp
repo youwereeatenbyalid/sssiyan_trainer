@@ -33,10 +33,11 @@ public:
 		const float rndEmMaxDist = 34.5f;
 
 		const std::array<uintptr_t, 4> isPauseOffst { 0x100, 0x288, 0xC8, 0x5C4 };
-		const std::array<uintptr_t, 7> jcPrefabOffsets {0x80, 0x88, 0x70, 0xC8, 0x300, 0x38, 0x10};//{0x140, 0x90, 0x10, 0xC8, 0x300, 0x38, 0x10};//{ 0x70, 0x170, 0x10, 0x88, 0x300, 0x38, 0x10 }; //{0x80, 0x90, 0x10, 0x108, 0x300, 0x38, 0x10};
+		//const std::array<uintptr_t, 7> jcPrefabOffsets {0x80, 0x88, 0x70, 0xC8, 0x300, 0x38, 0x10};//{0x140, 0x90, 0x10, 0xC8, 0x300, 0x38, 0x10};//{ 0x70, 0x170, 0x10, 0x88, 0x300, 0x38, 0x10 }; //{0x80, 0x90, 0x10, 0x108, 0x300, 0x38, 0x10};
+		const std::array<uintptr_t, 2> jcPfbYamatoParam {0x38, 0x10}; //Via PlTraker::yamatocommonparam
 
 		uintptr_t isPauseBase;
-		uintptr_t jcPrefabBase;
+		//uintptr_t jcPrefabBase;
 
 		std::mutex mt;
 
@@ -109,7 +110,7 @@ public:
 
 		bool get_condition(bool isBadPtr)
 		{
-			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr && !DeepTurbo::isCutscene)
+			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
 			{
 				if (EnemySwapper::gameMode == 3)
 				{
@@ -179,11 +180,11 @@ public:
 			moveTrackStepOffs.z = 0.98;
 
 			executing = false;
-			jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
+			//jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
 			isPauseBase = 0x07E55910;
 			JCEController::executionTimeAsm = rndExeTimeModDefault;
 			auto base = g_framework->get_module().as<uintptr_t>();
-			jcPrefabBase += base;
+			//jcPrefabBase += base;
 			isPauseBase += base;
 			isPtrBaseInit = true;
 		}
@@ -201,7 +202,7 @@ public:
 			int lvl = 1;
 			bool isBadPtr = false;
 			std::optional<bool> isPause;
-			auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(jcPrefabBase, jcPrefabOffsets, isBadPtr);
+			auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, false , true); 
 			switch (jceType)
 			{
 				case JCEController::Random:
@@ -396,7 +397,7 @@ public:
 
 		void init_ptrs_base(uintptr_t dmc5base)
 		{
-			jcPrefabBase += dmc5base;
+			//jcPrefabBase += dmc5base;
 			isPauseBase += dmc5base;
 			isPtrBaseInit = true;
 		}
