@@ -13,6 +13,7 @@ namespace GameFunctions
 		PlayerCheckNormalJump(uintptr_t player) : pl(player)
 		{
 			fAddr += 0x4C11A0;
+			func = (f_pl_check_normal_jump)fAddr;
 		}
 
 		bool invoke() override
