@@ -49,7 +49,6 @@
        #include "mods/InfiniteSummonVitality.hpp"
        #include "mods/PetChargeNoInterrupt.hpp"
        #include "mods/InfiniteGambits.hpp"
-       #include "mods/GilverNoDTCooldown.hpp"
        #include "mods/EmpoweredCane.hpp"
     // Vergil
         #include "mods/DoppelWeaponSwitcher.hpp"
@@ -97,9 +96,10 @@
         #include "mods/NeroSwapSidesteps.hpp"
         #include "mods/NeroInfPunchline.hpp"
         #include "mods/NeroSkipCS2.hpp"
-        #include "mods/NeroNoDTCooldown.hpp"
+        #include "mods/NoDTCooldown.hpp"
         #include "mods/DTWingsOnly.hpp"
         #include "mods/modNeroAlwaysInitialDT.hpp"
+        #include "mods/NeroInfCalibur.hpp"
     // Dante
         #include "mods/BypassBPCav.hpp"
         #include "mods/DanteMaxSDT.hpp"
@@ -225,7 +225,6 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
         m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
         m_mods.emplace_back(std::make_unique <InfiniteGambits>());
-        m_mods.emplace_back(std::make_unique <GilverNoDTCooldown>());
         m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
@@ -272,8 +271,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
         m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
         m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
-        m_mods.emplace_back(std::make_unique<NeroNoDTCooldown>());
+        m_mods.emplace_back(std::make_unique<NoDTCooldown>());
         m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
+        m_mods.emplace_back(std::make_unique<NeroInfCalibur>());
     // Dante
         m_mods.emplace_back(std::make_unique<BypassBPCav>());
         m_mods.emplace_back(std::make_unique<DanteMaxSDT>());

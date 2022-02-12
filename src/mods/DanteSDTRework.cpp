@@ -46,6 +46,7 @@ static naked void detour2() { // DisableChargingSDTWithDT
         jae jaecode
     cheatcode:
         jmp qword ptr [DanteSDTRework::jmp_ret2]
+
     jaecode:
         jmp qword ptr [DanteSDTRework::jmp_jae2]
     }

@@ -109,8 +109,8 @@ set(MODS_SRC
     mods/NeroInfPunchline.cpp 
     mods/NeroSkipCS2.hpp 
     mods/NeroSkipCS2.cpp 
-    mods/NeroNoDTCooldown.hpp 
-    mods/NeroNoDTCooldown.cpp 
+    mods/NoDTCooldown.hpp 
+    mods/NoDTCooldown.cpp 
     mods/PlayerDamageMult.hpp 
     mods/PlayerDamageMult.cpp 
     mods/TauntSelector.hpp 
@@ -165,8 +165,6 @@ set(MODS_SRC
     mods/WeightReset.cpp 
     mods/InfiniteSummonPowerup.hpp 
     mods/InfiniteSummonPowerup.cpp
-    mods/GilverNoDTCooldown.hpp 
-    mods/GilverNoDTCooldown.cpp
     mods/EmpoweredCane.hpp 
     mods/EmpoweredCane.cpp 
     mods/InfiniteSummonVitality.hpp 
@@ -247,6 +245,8 @@ set(MODS_SRC
     mods/DanteRedlineCav.cpp 
     mods/DanteSDTRework.hpp 
     mods/DanteSDTRework.cpp 
+    mods/NeroInfCalibur.hpp 
+    mods/NeroInfCalibur.cpp 
 
 )
 
