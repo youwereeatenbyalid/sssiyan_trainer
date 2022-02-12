@@ -412,22 +412,21 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
 {
     cfg.set<bool>                   ("HotkeyNotifications", m_is_notif_enabled);
     cfg.set<bool>                   ("SaveAfterEachUIClose", m_save_after_close_ui);
+    cfg.set<bool>                   ("RememberFocusedPanels", m_remember_focused_panels);
     cfg.set<uint8_t>                ("FocusedModsPanel", m_focused_mod_panel);
     cfg.set<uint8_t>                ("FocusedSettingsPanel", m_focused_settings_panel);
-    cfg.set<bool>                   ("RememberFocusedPanels", m_remember_focused_panels);
 }
 
 void ModFramework::load_trainer_settings(utility::Config& cfg)
 {
     m_is_notif_enabled              = cfg.get<bool>("HotkeyNotifications").value_or(false);
     m_save_after_close_ui           = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
+    m_remember_focused_panels 		= cfg.get<bool>("RememberFocusedPanels").value_or(false);
 
     if (m_remember_focused_panels) {
         m_focused_mod_panel         = static_cast<PanelID_>(cfg.get<uint8_t>("FocusedModsPanel").value_or(PanelID_Gameplay));
         m_focused_settings_panel    = static_cast<SettingsPanelID_>(cfg.get<uint8_t>("FocusedSettingsPanel").value_or(SettingsPanelID_FocusedMod));
     }
-
-    m_remember_focused_panels = cfg.get<bool>("RememberFocusedPanels").value_or(false);
 }
 
 void ModFramework::queue_notification(const ImGuiToast& notif) {
