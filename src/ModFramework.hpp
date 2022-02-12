@@ -110,8 +110,6 @@ private:
     bool m_is_internal_message{ false };
     bool m_close_menu_guard{ false };
 
-    SceneManager* m_scene_manager{ nullptr };
-    
     uint8_t m_default_menu_key{ DIK_DELETE };
     uint8_t m_default_close_menu_key{ DIK_ESCAPE };
     
@@ -173,6 +171,7 @@ private:
     // Trainer settings
     bool m_is_notif_enabled{ false };
     bool m_save_after_close_ui{ false };
+    bool m_remember_focused_panels{ false };
     PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
     SettingsPanelID_ m_focused_settings_panel{ SettingsPanelID_FocusedMod };
 
