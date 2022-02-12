@@ -1,7 +1,5 @@
 #include "KeyBinder.hpp"
 
-KeyBinder g_keyBinds;
-
 std::shared_ptr<KeyBinder> KeyBinder::m_instance{};
 
 std::map<std::string, std::shared_ptr<KeyBinder::Binding>> KeyBinder::m_bindings{};
@@ -1337,11 +1335,11 @@ void KeyBinder::OnKeyboardUpdate(const DIKeyList& kbState)
 			if (hasModifier)
 			{
 				modifierCheck = binding->IsModifierSet(kbState);
-			}
+			}/*
 			else
 			{
 				modifierCheck = !IsAnyModifierSet(kbState);
-			}
+			}*/
 
 			switch (GetKeyboardKeyState(*binding, kbState, m_lastKBState))
 			{
@@ -2372,7 +2370,7 @@ bool KeyBinder::Binding::DoKeysMatch(const REGPK_Flag& controllerState) const
 {
 	bool res = false;
 
-	if(m_controllerKeys != REGPK_None && m_controllerKeys == controllerState)
+	if(m_controllerKeys != REGPK_None && (m_controllerKeys & controllerState) == m_controllerKeys)
 	{
 		res = true;
 	}
