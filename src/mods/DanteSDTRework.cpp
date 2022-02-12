@@ -24,7 +24,6 @@ static naked void detour1() { // DrainDTInsteadOfSDT
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-
     code:
         cmp eax, 01
         jne jnecode
@@ -42,7 +41,6 @@ static naked void detour2() { // DisableChargingSDTWithDT
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-
     code:
         comisd xmm2, xmm1
         jae jaecode
@@ -59,7 +57,6 @@ static naked void detour3() { // EnterSDTWithMoreThan3kMeter
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-
     code:
         movss xmm1, [rdi+0x00001A14]
         movss xmm0, [maxSDTEnterFloat]
@@ -78,7 +75,6 @@ static naked void detour4() { // CurrentSDTFillGraphic
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-
     code:
         movss xmm1, [rdx+0x00001A14]
         jmp qword ptr [DanteSDTRework::jmp_ret4]
@@ -96,7 +92,6 @@ static naked void detour5() { // ShowSDTEnterGraphicAtMoreThan3kMeter
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-
     code:
         movss xmm1, [rdx+0x00001A14]
         movss xmm0, [maxSDTEnterFloat]
@@ -115,16 +110,14 @@ static naked void detour6() { // QuickSDT
         jne code
         cmp byte ptr [DanteSDTRework::cheaton], 1
         je cheatcode
-        jmp code
+    code:
+        movss xmm0, [rdi+00000128h]
+        jmp qword ptr [DanteSDTRework::jmp_ret6]
 
     cheatcode:
         movss xmm0, [rdi+00000128h]
         mulss xmm0, [newSDTSpeed]
 		jmp qword ptr [DanteSDTRework::jmp_ret6]
-
-    code:
-        movss xmm0, [rdi+00000128h]
-        jmp qword ptr [DanteSDTRework::jmp_ret6]
     }
 }
 
