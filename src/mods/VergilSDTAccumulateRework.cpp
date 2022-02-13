@@ -70,9 +70,9 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   init_check_box_info();
   m_is_enabled = &VergilSDTAccumulateRework::cheaton;
   m_on_page = vergilsdt;
-  m_full_name_string = "SDT accumulate system rework(+)";
+  m_full_name_string = "SDT accumulate rework(+)";
   m_author_string = "VPZadov";
-  m_description_string = "Vergil will gain SDT points when he gains DT points.";
+  m_description_string = "Vergil's SDT meter fills alongside his DT meter.";
 
   set_up_hotkey();
 
@@ -92,10 +92,10 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
 }
 
 void VergilSDTAccumulateRework::on_draw_ui() {
-  ImGui::Checkbox("Add const custom amount of sdt", &isConstInc);
+  ImGui::Checkbox("Set custom amount of SDT gained on DT increase", &isConstInc);
   if (isConstInc)
   {
-      ImGui::TextWrapped("Set num of SDT points, that Vergil will get with DT points:");
+      ImGui::TextWrapped("Amount of SDT points gained on DT increase:");
       UI::SliderFloat("##SDT Points Slider", &sdtPointsToAdd, 50.0, 180.0, "%.2f");
   }
   if (VergilInfSDT::cheaton|| InfDT::cheaton)

@@ -39,7 +39,7 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 	m_on_page = vergiltrick;
 	m_full_name_string = "Walking guard (+)";
 	m_author_string = "VPZadov";
-	m_description_string = "Vergil can perform block while he moving.";
+	m_description_string = "Vergil can block while walking.";
 
 	auto isPadInputAddr = patterns->find_addr(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)
 	if (!isPadInputAddr)
@@ -58,19 +58,19 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 
 void VergilWalkingGuard::on_config_load(const utility::Config& cfg)
 {
-	skipInSdt = cfg.get<bool>("VergilWalkingGuard.skipInSdt").value_or(true);
+	//skipInSdt = cfg.get<bool>("VergilWalkingGuard.skipInSdt").value_or(true);
 }
 
 void VergilWalkingGuard::on_config_save(utility::Config& cfg)
 {
-	cfg.set<bool>("VergilWalkingGuard.skipInSdt", skipInSdt);
+	//cfg.set<bool>("VergilWalkingGuard.skipInSdt", skipInSdt);
 }
 
 // void VergilWalkingGuard::on_frame(){}
 
 void VergilWalkingGuard::on_draw_ui()
 {
-	ImGui::Checkbox("Use default behavior while in SDT", &skipInSdt);
+	//ImGui::Checkbox("Use default behavior while in SDT", &skipInSdt);
 }
 
 // void VergilWalkingGuard::on_draw_debug_ui(){}

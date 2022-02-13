@@ -6,7 +6,7 @@ public:
 	static bool cheaton;
 	static bool isAddZOffset;
 	static bool isNoDistanceRestriction;
-
+	static bool groundIsNoDistanceRestriction;
 	static float addZOffset;
 	static inline constexpr float TRICK_DISTANCE = 100000.0f;
 

@@ -29,13 +29,13 @@ static naked void afterimages_detour() {
         cmp byte ptr [VergilNoAfterimages::isNoDrawIfObjHidden], 1
         je checkhide
         checkstate:
-        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 0
-        je humanonly
         cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 1
-        je sdtonly
+        je humanonly
         cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 2
-        je all
+        je sdtonly
         cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 3
+        je all
+        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 0
         je originalcode
 
         humanonly:
@@ -82,7 +82,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
   m_on_page           = vergilefxsettings;
   m_full_name_string = "Disable Vergil's afterimages (+)";
   m_author_string    = "VPZadov";
-  m_description_string = "Disable the afterimages that Vergil leaves after almost every move.";
+  m_description_string = "Disable the afterimages Vergil leaves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
@@ -112,10 +112,10 @@ void VergilNoAfterimages::on_config_save(utility::Config& cfg) {
 
 void VergilNoAfterimages::on_draw_ui() {
   ImGui::Text("Set value to disable afterimages: 0 - only in human form, \n1 - only in SDT, 2 - in all forms; 3 - default.");
-  ImGui::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 3, "%d", ImGuiSliderFlags_AlwaysClamp);
+
+  ImGui::Combo("Disable Type", (int*)&vergilafterimage_state, "Default afterimages\0Only in Human Form\0Only in SDT\0All Forms\0");
   ImGui::Separator();
-  ImGui::TextWrapped("If you want to disable just looping afterimages while tricks or JCE, set slider above to \"3\" and tick next option.");
-  ImGui::Checkbox("Disable afterimages when Vergil body isn't drawing (like while tricks, doges or JCE);", &isNoDrawIfObjHidden);
+  ImGui::Checkbox("Disable afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself", &isNoDrawIfObjHidden);
 }
 
 // void VergilNoAfterimages::on_draw_debug_ui() {}

@@ -1,12 +1,12 @@
 #include "GroundTrickNoDistanceRestriction.hpp"
-
+#include "DanteAirTrickSettings.hpp"
 bool GroundTrickNoDistanceRestriction::cheaton{false};
 uintptr_t GroundTrickNoDistanceRestriction::distanceRet0{NULL};
 uintptr_t GroundTrickNoDistanceRestriction::distanceRet1{NULL};
 
 static naked void distance0_detour() {
 	__asm {
-		cmp byte ptr [GroundTrickNoDistanceRestriction::cheaton], 1
+		cmp byte ptr [DanteAirTrickSettings::groundIsNoDistanceRestriction], 1
 		je cheat
 
 		originalcode:
@@ -21,7 +21,7 @@ static naked void distance0_detour() {
 
 static naked void distance1_detour() {
 	__asm {
-		cmp byte ptr [GroundTrickNoDistanceRestriction::cheaton], 0x1
+		cmp byte ptr [DanteAirTrickSettings::groundIsNoDistanceRestriction], 0x1
 		je cheat
 
 		originalcode:
@@ -39,7 +39,7 @@ std::optional<std::string> GroundTrickNoDistanceRestriction::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = dantecheat;
+	//m_on_page = dantecheat;
 	m_full_name_string = "Ground Trick no distance restriction";
 	m_author_string = "VPZadov";
 	m_description_string = "Increase max distance of Ground Trick.";

@@ -34,6 +34,8 @@
     // Gameplay
         #include "mods/AllOrNothing.hpp"
         #include "mods/DifficultySelect.hpp"
+		#include "mods/OneHitKill.hpp"
+		#include "mods/NoOneTakesDamage.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
         #include "mods/DisableBreakaway.hpp"
@@ -87,8 +89,6 @@
         #include "mods/AerialPushback.hpp"
         #include "mods/AerialPushbackVertical.hpp"
         #include "mods/DisableGauntletStages.hpp"
-		#include "mods/OneHitKill.hpp"
-		#include "mods/NoOneTakesDamage.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -212,6 +212,8 @@ Mods::Mods()
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
+		m_mods.emplace_back(std::make_unique<OneHitKill>());
+		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());
@@ -264,8 +266,6 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
         m_mods.emplace_back(std::make_unique<WeightReset>());
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
-		m_mods.emplace_back(std::make_unique<OneHitKill>());
-		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());

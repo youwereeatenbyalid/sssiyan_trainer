@@ -320,7 +320,7 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	m_on_page = vergiltrick;
 	m_full_name_string = "Air Trick settings (+)";
 	m_author_string = "VPZadov";
-	m_description_string = "Change air trick's speed, finish offset and delay before perform.";
+	m_description_string = "Adjust the properties of Vergil's Trick Actions.";
 
   set_up_hotkey();
 
@@ -444,42 +444,41 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 
 void VergilAirTrick::on_draw_ui()
 {
-	ImGui::Checkbox("Change delay before Air Trick.", &isCustomWaitTime);
+	ImGui::Checkbox("Change Air Trick startup.", &isCustomWaitTime);
 	if (isCustomWaitTime) {
-          ImGui::TextWrapped("Set delay before start trick movement. 6 - game default.");
+          ImGui::TextWrapped("Delay before trick movement starts. 6 - default game value.");
           UI::SliderFloat("##WaitTimeSlider", &waitTime, 0.0f, 20.0f, "%.1f");
 	}
 	ImGui::Separator();
 
-	ImGui::TextWrapped("Make Air Trick a bit faster. Remove speed limitation and acceleration.");
-	ImGui::Checkbox("Faster Air Trick", &isSpeedUp);
+	ImGui::TextWrapped("Removes Velocity & Acceleration limits on teleportation movement.");
+	ImGui::Checkbox("Unclamp Air Trick Speed", &isSpeedUp);
 	if (isSpeedUp) {
-		ImGui::TextWrapped("High speed value can occur movement glitches during trick. 0.7 - default game value.");
-          UI::SliderFloat("Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
+		ImGui::TextWrapped("High values can cause glitches. 0.7 - default game value.");
+          UI::SliderFloat("Air Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
 	}
 	ImGui::Separator();
 
-	ImGui::TextWrapped("A bit dangerous option: instead moving with high speed, this will insta change (delay before trick still working) player pos with it's colliders. Can move you out of bounds.");
-	ImGui::Checkbox("Use teleport", &isTeleport);
+	ImGui::TextWrapped("Teleport directly to coordinates instead of moving through the air invisibly. Can send you out of bounds (you have been warned).");
+	ImGui::Checkbox("Instant Transmission", &isTeleport);
 	if (isTeleport)
 	{
 		ImGui::Spacing();
-		ImGui::TextWrapped("Try to teleport:");
-		ImGui::RadioButton("In front of enemy", (int*)&trickType, 0);
+		ImGui::TextWrapped("Teleport position:");
+		ImGui::RadioButton("In front of the enemy", (int*)&trickType, 0);
 		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("Behind enemy", (int*)&trickType, 1);
-		ImGui::Checkbox("Doppelganger opposite teleport", &isDoppelOppositeTeleport);
-		ImGui::TextWrapped("Correction finish range:");
+		ImGui::RadioButton("Behind the enemy", (int*)&trickType, 1);
+		ImGui::Checkbox("Teleport doppelganger to opposite side", &isDoppelOppositeTeleport);
+		ImGui::TextWrapped("Distance from enemy:");
 		ImGui::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", ImGuiSliderFlags_None);
-		ImGui::TextWrapped("Correction finish Z offset. This option does't change colliders Z pos, so you won't fall under the floor.");
+		ImGui::TextWrapped("Height above/below enemy.");
 		ImGui::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", ImGuiSliderFlags_None);
 	}
 	ImGui::Separator();
 
-	ImGui::TextWrapped("Set Z axis offset for finish Air Trick");
-	ImGui::Checkbox("Use custom finish Z offset", &isCustomOffset);
+	ImGui::Checkbox("Custom height offset when finishing Air Trick", &isCustomOffset);
 	if (isCustomOffset) {
-		UI::SliderFloat("Z offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
+		UI::SliderFloat("Height offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
 	}
 }
 

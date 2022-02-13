@@ -3,7 +3,7 @@
 bool DanteAirTrickSettings::cheaton{false};
 bool DanteAirTrickSettings::isAddZOffset{false};
 bool DanteAirTrickSettings::isNoDistanceRestriction{false};
-
+bool DanteAirTrickSettings::groundIsNoDistanceRestriction{false};
 float DanteAirTrickSettings::addZOffset = 0.0f;
 
 uintptr_t DanteAirTrickSettings::distanceRet0{NULL};
@@ -68,9 +68,9 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = dantecheat;
-	m_full_name_string = "Air Trick settings (+)";
+	m_full_name_string = "Trick settings (+)";
 	m_author_string = "VPZadov";
-	m_description_string = "Allow to change Z axis appear offset and remove distance restriction.";
+	m_description_string = "Adjust the properties of Dante's Trick Actions.";
 
   set_up_hotkey();
 
@@ -125,11 +125,12 @@ void DanteAirTrickSettings::on_config_save(utility::Config& cfg)
 
 void DanteAirTrickSettings::on_draw_ui()
 {
-	ImGui::Checkbox("Remove distance restriction", &isNoDistanceRestriction);
+	ImGui::Checkbox("Air Trick infinite range", &isNoDistanceRestriction);
+	ImGui::Checkbox("Ground Trick infinite range", &groundIsNoDistanceRestriction);
 	ImGui::Separator();
-	ImGui::Checkbox("Set custom additional Z offset", &isAddZOffset);
+	ImGui::Checkbox("Adjust Air Trick Height", &isAddZOffset);
 	if (isAddZOffset) {
-		ImGui::TextWrapped("Additional offset:");
+		ImGui::TextWrapped("Additional height above enemy when reappearing:");
 		UI::SliderFloat("##OffssetSlider", &addZOffset, 0.0f, 10.0f, "%.01f");
 	}
 }
