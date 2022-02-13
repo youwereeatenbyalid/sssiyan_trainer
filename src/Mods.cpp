@@ -152,6 +152,7 @@
        #include "mods/GroundTrickNoDistanceRestriction.hpp"
        #include "mods/DanteNoSdtStun.hpp"
        #include "mods/JudgementCustomCost.hpp"
+       #include "mods/DanteDtNoActivationCost.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -332,6 +333,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
         m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
         m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
+        m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
