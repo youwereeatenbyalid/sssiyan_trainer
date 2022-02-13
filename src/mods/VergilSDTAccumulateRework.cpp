@@ -98,8 +98,6 @@ void VergilSDTAccumulateRework::on_draw_ui() {
       ImGui::TextWrapped("Set num of SDT points, that Vergil will get with DT points:");
       UI::SliderFloat("##SDT Points Slider", &sdtPointsToAdd, 50.0, 180.0, "%.2f");
   }
-  if (VergilInfSDT::cheaton|| InfDT::cheaton)
-    VergilSDTAccumulateRework::cheaton = false;
 }
 
 // void VergilSDTAccumulateRework::on_draw_debug_ui() {}
