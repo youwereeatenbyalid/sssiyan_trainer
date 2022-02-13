@@ -149,6 +149,7 @@
        #include "mods/DanteAirTrickSettings.hpp"
        #include "mods/GroundTrickNoDistanceRestriction.hpp"
        #include "mods/DanteNoSdtStun.hpp"
+       #include "mods/JudgementCustomCost.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -326,6 +327,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
         m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
         m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
+        m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
