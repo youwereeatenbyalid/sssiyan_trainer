@@ -245,7 +245,7 @@ set(MODS_SRC
     mods/DanteSDTRework.cpp 
     mods/NeroInfCalibur.hpp 
     mods/NeroInfCalibur.cpp 
-
+    mods/JudgementCustomCost.hpp
 )
 
 set(HOOKS_SRC

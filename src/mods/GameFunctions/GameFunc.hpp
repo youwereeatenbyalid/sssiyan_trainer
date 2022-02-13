@@ -84,7 +84,7 @@ namespace GameFunctions
 		/// <typeparam name="T"></typeparam>
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
 		/// <param name="offsets">Other offsets.</param>
-		/// <param name="get_addr">Set true if u want to get addres, not ptr value itself.</param>
+		/// <param name="get_addr">Set true if u don't want to get ptr value.</param>
 		/// <returns></returns>
 		template <typename T, size_t offsCount>
 		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false, bool isDerefedBase = false)
@@ -100,7 +100,6 @@ namespace GameFunctions
 						base = *(uintptr_t*)(base + offsets[i]);
 					else
 					{
-						//isBadPtr = true;
 						return std::nullopt;
 					}
 				}
@@ -109,15 +108,41 @@ namespace GameFunctions
 					if (!get_addr)
 					{
 						T res = *(T*)(base + offsets[count]);
-						//isBadPtr = false;
 						return std::optional<T>(res);
 					}
 					else
 						return std::optional<T>(base);
 				}
 			}
-			//isBadPtr = true;
 			return std::nullopt;
+		}
+
+		/// <summary>
+		/// Convert .Net List<T> to std::vector<T>.
+		/// </summary>
+		/// <typeparam name="T">Use * for ref types</typeparam>
+		/// <param name="listPtr"></param>
+		/// <param name="listCapacity">Out param, return .net List<T>.Capacity.</param>
+		/// <returns>Returns std::nullopt if IsBadReadPtr() happens.</returns>
+		template <typename T>
+		std::optional<std::vector<T>> get_dotnet_list(uintptr_t listPtr, size_t &listCapacity)
+		{
+			if(listPtr == 0)
+				return std::nullopt;
+			if(is_bad_ptr(listPtr + 0x18) || is_bad_ptr(listPtr + 0x10))
+				return std::nullopt;
+			size_t count = *(size_t*)(listPtr + 0x18);
+			std::vector<T> res;
+			uintptr_t items = *(uintptr_t*)(listPtr + 0x10);
+			if(listCapacity = (*(size_t*)(items + 0x1C)); listCapacity == 0)
+				return res;
+			size_t itemSize = sizeof(T);
+			size_t itemsSize = itemSize * count;
+			for (size_t i = 0x20; i < itemsSize; i += itemSize)
+			{
+				res.emplace_back(*(T*)(items + i));
+			}
+			return std::make_optional<std::vector<T>>(res);
 		}
 	};
 
