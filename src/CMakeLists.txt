@@ -250,6 +250,7 @@ set(MODS_SRC
     mods/OneHitKill.cpp
     mods/NoOneTakesDamage.hpp 
     mods/NoOneTakesDamage.cpp 
+    mods/DanteDtNoActivationCost.hpp
 )
 
 set(HOOKS_SRC

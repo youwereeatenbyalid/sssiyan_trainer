@@ -63,10 +63,6 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
 }
 
 void VergilSetMaxJJC::on_draw_ui() {
-  if (cheaton) {
-    VergilInfJdCs::cheaton = false;
-  }
-  ImGui::TextWrapped("\"Infinite Just Judgement Cuts\" mod will be disabled if this mod active.");
   ImGui::TextWrapped("Set maximum jjc:");
   UI::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
 }
