@@ -246,6 +246,10 @@ set(MODS_SRC
     mods/NeroInfCalibur.hpp 
     mods/NeroInfCalibur.cpp 
     mods/JudgementCustomCost.hpp
+    mods/OneHitKill.hpp 
+    mods/OneHitKill.cpp
+    mods/NoOneTakesDamage.hpp 
+    mods/NoOneTakesDamage.cpp 
 )
 
 set(HOOKS_SRC
