@@ -48,7 +48,7 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &WalkOnKeyboard::cheaton;
   m_on_page               = mechanics;
-  m_full_name_string     = "Walk On Keyboard";
+  m_full_name_string     = "Walk Using Keyboard Controls";
   m_author_string        = "SSSiyan";
   m_description_string   = "Your character will walk rather than run.";
 

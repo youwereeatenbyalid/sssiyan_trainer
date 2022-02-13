@@ -1,4 +1,5 @@
 #include "CameraSettings.hpp"
+#include <ImGuiExtensions/ImGuiExtensions.cpp>
 
 uintptr_t CameraSettings::jmp_retFoV{NULL};
 uintptr_t CameraSettings::jmp_retHorizontalSensClockwise{NULL};
@@ -344,11 +345,16 @@ void CameraSettings::on_config_save(utility::Config& cfg) {
 }
 
 void CameraSettings::on_draw_ui() {
-  ImGui::Checkbox("Siyan's Camera Fix 1.0", &siyanscamerafixenable);
+  ImGui::Checkbox("Siyan's Camera Fix (Old)", &siyanscamerafixenable);
+  ImGui::ShowHelpMarker("Old version of the camera settings. Its functionality has been split into the cheats below");
   ImGui::Checkbox("Disable Close Autocorrects", &closeautocorrectenable);
+  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
   ImGui::Checkbox("Disable Distant Autocorrects", &distantautocorrectenable);
+  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
   ImGui::Checkbox("Disable Height Based Autocorrects", &heightautocorrectenable);
+  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
   ImGui::Checkbox("Disable Movement Based Autocorrects", &movementautocorrectenable);
+  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
   ImGui::Checkbox("Allow Keyboard Camera Movement While Locked On", &keyboardhorizontalenable);
   ImGui::Spacing();
   ImGui::Text("Field of View (65 default)");

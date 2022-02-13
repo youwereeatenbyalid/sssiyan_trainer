@@ -32,7 +32,7 @@ std::optional<std::string> DTWingsOnly::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &DTWingsOnly::cheaton;
-  m_on_page               = commoncheat;
+  m_on_page               = nero;
   m_full_name_string     = "Nero Wings only DT";
   m_author_string        = "The Hitchhiker";
   m_description_string   = "Nero DT only wings.";

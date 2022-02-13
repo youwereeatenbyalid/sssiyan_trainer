@@ -25,17 +25,17 @@ static naked void detour() { // "DevilMayCry5.exe"+2C723DF
         jmp popcode
 
     nerocompare:
-        cmp byte ptr [enemystepcancels], 1
+        cmp byte ptr [AllStartManual::cheaton], 1
         je nero_enemy_step_compare
         jmp popcode
 
     dantecompare:
-        cmp byte ptr [enemystepcancels], 1
+        cmp byte ptr [AllStartManual::cheaton], 1
         je dante_enemy_step_compare
         jmp popcode
 
     vergilcompare:
-        cmp byte ptr [enemystepcancels], 1
+        cmp byte ptr [AllStartManual::cheaton], 1
         je vergil_enemy_step_compare
         jmp popcode
 
@@ -123,9 +123,9 @@ std::optional<std::string> AllStartManual::on_initialize() {
   m_is_enabled          = &AllStartManual::cheaton;
   m_on_page             = enemystep;
 
-  m_full_name_string   = "Cancellable Enemy Step (+)";
+  m_full_name_string   = "Instant Enemy Step Cancels";
   m_author_string      = "SSSiyan";
-  m_description_string = "Allows you to cancel out of a selection of moves (currently only enemy step) with any other move.";
+  m_description_string = "The vanilla game prevents you from cancelling enemy step for a small startup window. This mod removes that restriction.";
 
   set_up_hotkey();
 
@@ -152,5 +152,5 @@ void AllStartManual::on_config_save(utility::Config& cfg) {
 }
 
 void AllStartManual::on_draw_ui() {
-  ImGui::Checkbox("Enemy Step Cancels", &enemystepcancels);
+  //ImGui::Checkbox("Enemy Step Cancels", &enemystepcancels);
 }

@@ -2,6 +2,8 @@
 #include "mods/PlayerTracker.hpp"
 #include "mods/HeavyDay.hpp"
 #include "mods/StyleRank.hpp"
+#include "mods/OneHitKill.hpp"
+#include "mods/NoOneTakesDamage.hpp"
 uintptr_t AllOrNothing::jmp_ret{NULL};
 bool AllOrNothing::cheaton{NULL};
 uint32_t AllOrNothing::stylebar{NULL};
@@ -21,7 +23,7 @@ static naked void detour() {
         je originalcode
 
 	validation:
-        cmp byte ptr [noonetakesdamage], 1
+        cmp byte ptr [NoOneTakesDamage::cheaton], 1
         je nodamagecheck
 
     cheatcode:
@@ -44,7 +46,7 @@ static naked void detour() {
         jmp originalcode
     allornothing:
     //Raw IK?
-    cmp byte ptr [onehitkill], 1
+    cmp byte ptr [OneHitKill::cheaton], 1
     je alldamage
     //if we're not in combat, jump to the original code
 	cmp byte ptr [AllOrNothing::cheaton], 0
@@ -60,7 +62,7 @@ static naked void detour() {
     jmp originalcode
 
     nodamagecheck: // only check for cheaton if sent to nodamage via damage cheats. Skip this if PVP.
-        cmp byte ptr [AllOrNothing::cheaton], 1
+        cmp byte ptr [NoOneTakesDamage::cheaton], 1
         je nodamage
         jmp originalcode
 
@@ -74,7 +76,7 @@ static naked void detour() {
         jmp originalcode
     alldamage:
         //this makes the damage done = the enemies current health.
-        cmp byte ptr [AllOrNothing::cheaton], 0 // Alldamage isn't used in PVP, so can safely limit this to AllOrNothing cheat
+        cmp byte ptr [OneHitKill::cheaton], 0 // Alldamage isn't used in PVP, so can safely limit this to AllOrNothing cheat
         je originalcode
         movss xmm6, [rdi+0x10]
         jmp originalcode
@@ -118,19 +120,19 @@ std::optional<std::string> AllOrNothing::on_initialize() {
 }
 
 void AllOrNothing::on_config_load(const utility::Config& cfg) {
-  noonetakesdamage = cfg.get<bool>("no_one_takes_damage").value_or(false);
-  onehitkill       = cfg.get<bool>("one_hit_kill").value_or(false);
+  //noonetakesdamage = cfg.get<bool>("no_one_takes_damage").value_or(false);
+  //onehitkill       = cfg.get<bool>("one_hit_kill").value_or(false);
   AllOrNothing::stylebar = cfg.get<int>("style_damage_requirement").value_or(5);
 }
 void AllOrNothing::on_config_save(utility::Config& cfg) {
-  cfg.set<bool>("no_one_takes_damage", noonetakesdamage);
-  cfg.set<bool>("one_hit_kill", onehitkill);
+  //cfg.set<bool>("no_one_takes_damage", noonetakesdamage);
+  //cfg.set<bool>("one_hit_kill", onehitkill);
   cfg.set<int>("style_damage_requirement", AllOrNothing::stylebar);
 }
 
 void AllOrNothing::on_draw_ui() {
-  ImGui::Checkbox("No one takes damage", &noonetakesdamage);
-  ImGui::Checkbox("One hit kill", &onehitkill);
+  //ImGui::Checkbox("No one takes damage", &noonetakesdamage);
+  //ImGui::Checkbox("One hit kill", &onehitkill);
   ImGui::Text("Style Rank to beat (1:D, 7:SSS)");
   UI::SliderInt("##StlyeRankRequirement", (int*)&AllOrNothing::stylebar, 1, 7);
   

@@ -127,7 +127,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
 
   m_is_enabled          = &EntitySpeeds::cheaton;
   m_on_page             = animation;
-  m_full_name_string   = "Character Speed Edits (+)";
+  m_full_name_string   = "Faster Moves (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Adjust the speed of various moves.";
 
