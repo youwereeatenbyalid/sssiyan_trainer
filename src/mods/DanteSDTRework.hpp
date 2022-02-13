@@ -19,7 +19,8 @@ public:
 	static uintptr_t jmp_ret4;
 	static uintptr_t jmp_ret5;
 	static uintptr_t jmp_ret6;
-
+	static uintptr_t jmp_ret7;
+	static uintptr_t jmp_jne7;
 	static bool cheaton;
 
 	// Override this things if you want to store values in the config file
@@ -45,4 +46,5 @@ private:
 	std::unique_ptr<FunctionHook> m_function_hook4;
 	std::unique_ptr<FunctionHook> m_function_hook5;
 	std::unique_ptr<FunctionHook> m_function_hook6;
+	std::unique_ptr<FunctionHook> m_function_hook7;
 };

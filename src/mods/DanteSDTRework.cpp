@@ -9,14 +9,20 @@ uintptr_t DanteSDTRework::jmp_ret3{ NULL };
 uintptr_t DanteSDTRework::jmp_ret4{ NULL };
 uintptr_t DanteSDTRework::jmp_ret5{ NULL };
 uintptr_t DanteSDTRework::jmp_ret6{ NULL };
+uintptr_t DanteSDTRework::jmp_ret7{ NULL };
+uintptr_t DanteSDTRework::jmp_jne7{ NULL };
 
 bool DanteSDTRework::cheaton{ NULL };
 float minSDTEnterFloat{ 3000.0f };
 float maxSDTEnterFloat{ 10000.0f };
-float newSDTSpeed{ 5.0f };
+float newSDTSpeed{ 5.0f }; // quicksdt
+float dTTick{ 5.0f };      //  dt drain rate
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
+
+float xmm1backup{ NULL };
+float xmm2backup{ NULL };
 
 static naked void detour1() { // DrainDTInsteadOfSDT
     __asm {
@@ -27,7 +33,21 @@ static naked void detour1() { // DrainDTInsteadOfSDT
     code:
         cmp eax, 01
         jne jnecode
+    retcode:
+        jmp qword ptr[DanteSDTRework::jmp_ret1]
+
     cheatcode:
+        cmp byte ptr [rdx+0x9B0], 2 // Drain DT faster if in SDT
+        jne code
+        movss [xmm1backup], xmm1
+        movss [xmm2backup], xmm2
+        movss xmm1, [rdx+0x1110] // dt
+        movss xmm2, [dTTick]
+        mulss xmm2, [rdx+0x128]  // delta
+        subss xmm1, xmm2
+        movss [rdx+0x1110], xmm1
+        movss xmm1, [xmm1backup]
+        movss xmm2, [xmm2backup]
         jmp qword ptr [DanteSDTRework::jmp_ret1]
 
     jnecode:
@@ -122,6 +142,23 @@ static naked void detour6() { // QuickSDT
     }
 }
 
+static naked void detour7() { // QuickSDT
+    __asm {
+        cmp [PlayerTracker::playerid], 1
+        jne code
+        cmp byte ptr [DanteSDTRework::cheaton], 1
+        je cheatcode
+    code:
+        test ecx, ecx
+        jne jnecode
+    cheatcode:
+		jmp qword ptr [DanteSDTRework::jmp_ret7]
+
+    jnecode:
+        jmp qword ptr [DanteSDTRework::jmp_jne7]
+    }
+}
+
 // clang-format on
 
 void DanteSDTRework::init_check_box_info() {
@@ -136,7 +173,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     m_on_page = dantesdt;
 
     m_full_name_string = "Shared DT";
-    m_author_string = "SSSiyan";
+    m_author_string = "SSSiyan, VPZadov";
     m_description_string = "DT and SDT are a shared resource. Tap to DT, Hold to SDT. At least 3 bars of DT are required to enter SDT.";
 
     set_up_hotkey();
@@ -205,6 +242,17 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework6";
     }
     
+    auto addr7 = patterns->find_addr(base, "85 C9 0F 85 8A 00 00 00 48 8B 03");
+    if (!addr7) {
+        return "Unable to find DanteSDTRework pattern7.";
+    }
+    if (!install_hook_absolute(addr7.value(), m_function_hook7, &detour7, &jmp_ret7, 8)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize DanteSDTRework7";
+    }
+    DanteSDTRework::jmp_jne7 = addr2.value() + 92; // DevilMayCry5.exe+16A212B copyright update
+
     return Mod::on_initialize();
 }
 
