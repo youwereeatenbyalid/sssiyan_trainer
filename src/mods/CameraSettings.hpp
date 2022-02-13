@@ -1,5 +1,6 @@
 #pragma once
 #include "Mod.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 #include "sdk/ReClass.hpp"
 class CameraSettings : public Mod {
 public:

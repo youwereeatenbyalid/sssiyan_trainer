@@ -1,5 +1,4 @@
 #include "CameraSettings.hpp"
-#include <ImGuiExtensions/ImGuiExtensions.cpp>
 
 uintptr_t CameraSettings::jmp_retFoV{NULL};
 uintptr_t CameraSettings::jmp_retHorizontalSensClockwise{NULL};
