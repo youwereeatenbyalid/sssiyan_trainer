@@ -251,7 +251,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework7";
     }
-    DanteSDTRework::jmp_jne7 = addr2.value() + 92; // DevilMayCry5.exe+16A212B copyright update
+    DanteSDTRework::jmp_jne7 = addr7.value() + 146; // DevilMayCry5.exe+16A212B copyright update
 
     return Mod::on_initialize();
 }
