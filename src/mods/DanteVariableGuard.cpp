@@ -43,7 +43,7 @@ std::optional<std::string> DanteVariableGuard::on_initialize() {
   m_is_enabled            = &DanteVariableGuard::cheaton;
   m_on_page               = dantecheat;
 
-  m_full_name_string     = "Guard Meter Lock (+)";
+  m_full_name_string     = "Set Royal Guard Level (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Lock Guard meter to whatever level you want.";
 

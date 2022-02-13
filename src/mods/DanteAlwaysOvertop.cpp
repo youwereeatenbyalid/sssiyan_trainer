@@ -75,7 +75,7 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   m_is_enabled          = &DanteAlwaysOvertop::cheaton;
   m_on_page             = dantecheat;
 
-  m_full_name_string   = "Always Overtop";
+  m_full_name_string   = "Cavaliere Always Overtop";
   m_author_string      = "SSSiyan";
   m_description_string = "Forces Cavaliere to always use its highest gear.";
 

@@ -42,7 +42,7 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   m_is_enabled            = &DanteInfQ4ExitWindow::cheaton;
   m_on_page               = dantesdt;
 
-  m_full_name_string     = "Infinite Q4 SDT Exit Window";
+  m_full_name_string     = "Infinite Sin Devil Trigger Exit Window";
   m_author_string        = "SSSiyan";
   m_description_string   = "Removes the time limit on the Quadruple S Exit window.";
 

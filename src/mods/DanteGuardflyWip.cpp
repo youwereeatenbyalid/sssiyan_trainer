@@ -42,7 +42,7 @@ std::optional<std::string> DanteGuardflyWip::on_initialize() {
   init_check_box_info();
 
   m_is_enabled = &DanteGuardflyWip::cheaton;
-  m_on_page               = mechanics;
+  m_on_page               = dantecheat;
 
   m_full_name_string     = "Guardfly WIP";
   m_author_string        = "socks";

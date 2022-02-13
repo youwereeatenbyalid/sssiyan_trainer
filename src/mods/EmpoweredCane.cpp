@@ -44,7 +44,7 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
 
   m_is_enabled = &EmpoweredCane::cheaton;
   m_on_page    = gilver;
-  m_full_name_string     = "Empowered Cane";
+  m_full_name_string     = "Infinite Empowered Cane";
   m_author_string        = "SSSiyan";
   m_description_string   = "Extends the duration of V's BP Taunt to infinity.";
 

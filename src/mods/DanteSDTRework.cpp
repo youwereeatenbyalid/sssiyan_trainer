@@ -11,12 +11,13 @@ uintptr_t DanteSDTRework::jmp_ret5{ NULL };
 uintptr_t DanteSDTRework::jmp_ret6{ NULL };
 uintptr_t DanteSDTRework::jmp_ret7{ NULL };
 uintptr_t DanteSDTRework::jmp_jne7{ NULL };
+uintptr_t DanteSDTRework::jmp_ret8{ NULL };
 
 bool DanteSDTRework::cheaton{ NULL };
 float minSDTEnterFloat{ 3000.0f };
 float maxSDTEnterFloat{ 10000.0f };
 float newSDTSpeed{ 5.0f }; // quicksdt
-float dTTick{ 5.0f };      //  dt drain rate
+float dTTick{ 5.0f };      // dt drain rate
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -142,7 +143,7 @@ static naked void detour6() { // QuickSDT
     }
 }
 
-static naked void detour7() { // QuickSDT
+static naked void detour7() { // DrainDTDuringJudgement
     __asm {
         cmp [PlayerTracker::playerid], 1
         jne code
@@ -156,6 +157,21 @@ static naked void detour7() { // QuickSDT
 
     jnecode:
         jmp qword ptr [DanteSDTRework::jmp_jne7]
+    }
+}
+
+static naked void detour8() { // 3k SDT bar max
+    __asm {
+        cmp [PlayerTracker::playerid], 1
+        jne code
+        cmp byte ptr [DanteSDTRework::cheaton], 1
+        je cheatcode
+    code:
+        movss xmm2, [maxSDTEnterFloat]
+        jmp qword ptr[DanteSDTRework::jmp_ret8]
+    cheatcode:
+        movss xmm2, [minSDTEnterFloat]
+		jmp qword ptr [DanteSDTRework::jmp_ret8]
     }
 }
 
@@ -252,6 +268,16 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework7";
     }
     DanteSDTRework::jmp_jne7 = addr7.value() + 146; // DevilMayCry5.exe+16A212B copyright update
+
+    auto addr8 = patterns->find_addr(base, "F3 0F 10 15 39 0F 10 06");
+    if (!addr8) {
+        return "Unable to find DanteSDTRework pattern7.";
+    }
+    if (!install_hook_absolute(addr8.value(), m_function_hook8, &detour8, &jmp_ret8, 8)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize DanteSDTRework7";
+    }
 
     return Mod::on_initialize();
 }
