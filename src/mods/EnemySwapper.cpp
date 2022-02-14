@@ -1300,7 +1300,7 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   spawnPosXOffset  = cfg.get<float>("EnemySwapper.spawnPosXOffset").value_or(0.0f);
   spawnPosYOffset  = cfg.get<float>("EnemySwapper.spawnPosYOffset").value_or(0.0f);
   isBossDanteAiEnabled = cfg.get<bool>("EnemySwapper.isBossDanteAiEnabled").value_or(false);
-  isDanteM20 = cfg.get<bool>("EnemySwapper.isDanteM20").value_or(false);
+  isDanteM20 = cfg.get<bool>("EnemySwapper.isDanteM20").value_or(true);
   canKillGriffon = cfg.get<bool>("EnemySwapper.canKillGriffon").value_or(false);
   canKillShadow = cfg.get<bool>("EnemySwapper.canKillShadow").value_or(false);
   isNightmareFix  = cfg.get<bool>("EnemySwapper.isNightmareFix").value_or(false);
@@ -1396,10 +1396,10 @@ void EnemySwapper::restore_default_settings() {
 }
 
 void set_Dante_ai() {
-    ImGui::TextWrapped("Use this option if you want to swap some enemies to boss Dante. Don't work on BP stages >=20. Can't be changed during gameplay.");
-    ImGui::Checkbox("Enable boss Dante AI fix/Enable boss Vergil mission AI", &EnemySwapper::isBossDanteAiEnabled);
+    ImGui::TextWrapped("Use this option if you want to swap enemies with boss Dante. Doesn't work on BP stages greater than 19. Can't be changed during gameplay.");
+    ImGui::Checkbox("Fix boss Dante AI/Enable boss Vergil mission AI", &EnemySwapper::isBossDanteAiEnabled);
     if (EnemySwapper::isBossDanteAiEnabled) {
-        ImGui::TextWrapped("Select this to use boss Dante/Vergil M20 AI type. By default mod using M19 AI type.\n"
+        ImGui::TextWrapped("Select this to specify Dante/Vergil AI type.\n"
             "Killing boss Vergil with m19 AI on missions/BP will cause a soft lock.");
         //ImGui::Checkbox("Use boss Dante/Vergil M20 AI", &EnemySwapper::isDanteM20);
         if(ImGui::RadioButton("Use M19 AI", !EnemySwapper::isDanteM20))
@@ -1441,21 +1441,21 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Spacing();
       set_Dante_ai();
       ImGui::Separator();
-      ImGui::TextWrapped("Familiars options can be changed during gameplay.");
-      ImGui::Checkbox("Enable kill shadow", &canKillShadow);
-      ImGui::Checkbox("Enable kill griffon", &canKillGriffon);
-      ImGui::Checkbox("Nightmare meteor fix", &isNightmareFix);
+      ImGui::TextWrapped("Fix enemy familiars.");
+      ImGui::Checkbox("Allow Shadow to be killed", &canKillShadow);
+      ImGui::Checkbox("Allow Griffon to be killed", &canKillGriffon);
+      ImGui::Checkbox("Fix Nightmare meteor position", &isNightmareFix);
       if (isNightmareFix) {
-          ImGui::TextWrapped("Offset to current player position for meteor starting. Affect meteor speed.");
+          ImGui::TextWrapped("Offset from player position to start the meteor at.");
           ImGui::InputFloat("X offset", &nightmareStartPosOffs.x, 0.0f, 0.0f, "%.2f");
           ImGui::InputFloat("Y offset", &nightmareStartPosOffs.y, 0.0f, 0.0f, "%.2f");
           ImGui::InputFloat("Z offset", &nightmareStartPosOffs.z, 0.0f, 0.0f, "%.2f");
       }
       ImGui::Separator();
       ImGui::Spacing();
-      ImGui::Checkbox("Cavaliere teleports fix", &isCavFixEnabled);
-      ImGui::ShowHelpMarker("By defauld cav uses a precoded coords for bossfight arena to teleport. Because of that on other areas it almost always teleport behind the map and dies. This will swap capcom's coords to player coords. "
-          "Can stuck in teleport state :(. Can be changed during gameplay.");
+      ImGui::Checkbox("Fix Cavaliere Teleports", &isCavFixEnabled);
+      ImGui::ShowHelpMarker("Replace pre-coded teleport positions with offset from player position. "
+          "Can result in cavaliere becoming stuck in a teleporting state.");
       if (isCavFixEnabled)
       {
           ImGui::TextWrapped("X offset");
@@ -1467,74 +1467,73 @@ void EnemySwapper::on_draw_ui() {
       }
       if (isVergilFixEnabled)
           ImGui::Separator();
-      ImGui::Checkbox("Dive bomb fix", &isVergilFixEnabled);
-      ImGui::ShowHelpMarker("Change default center of floor coords to current player position to prevent dive bomp infinite flying to nowhere. Should be enabled before dive bomb's preparing teleport to take an effect.");
+      ImGui::Checkbox("Fix Vergil Dive Bomb", &isVergilFixEnabled);
+      ImGui::ShowHelpMarker("Replace pre-coded divebomb position with player coordinates.");
       if (isVergilFixEnabled)
       {
-          ImGui::TextWrapped("Height of arena side (default = 1.5)");
+          ImGui::TextWrapped("Height of arena sides (default = 1.5)");
           ImGui::InputFloat("##divebombHeightOfArenaSide", &divebombHeightOfArenaSide, 0, 0, "%.1f");
-          ImGui::TextWrapped("Height of outside (default = 8)");
+          ImGui::TextWrapped("Height outside arena (default = 8)");
           ImGui::InputFloat("##divebombHeightOfOutside", &divebombHeightOfOutside, 0, 0, "%.1f");
-          ImGui::TextWrapped("Distance of ground check (default = 5)");
+          ImGui::TextWrapped("Distance from ground (default = 5)");
           ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, "%.1f");
           ImGui::Checkbox("Fast divebomb attack", &isFastDiveBombAttack);
-          ImGui::ShowHelpMarker("Force Vergil to start ram you after he fly ~pi/3 of his way. It's make a harder to dodje him 'cause he will literally using \"lock on\" on you an all time of fly. Can help in a case if he start infinitely circle flying. "
-              "Can be enabled during gameplay.");
+          ImGui::ShowHelpMarker("Force Vergil to attack you earlier in the dive bomb. Vergil will also lock-on to you while flying making him harder to dodge. Can help in case he starts infinitely flying in a circle.");
           ImGui::Separator();
           ImGui::Spacing();
       }
-      ImGui::Checkbox("Goliath jumps fix", &isGoliathFixEnabled);
-      ImGui::ShowHelpMarker("Goliath will jump right to player, not to precoded capcom's coords. Can be changed during gameplay.");
+      ImGui::Checkbox("Fix Goliath jump", &isGoliathFixEnabled);
+      ImGui::ShowHelpMarker("Replace pre-coded leap position with player coordinates.");
 
-      ImGui::Checkbox("Artemis fly pos fix", &isArtemisFixEnabled);
+      ImGui::Checkbox("Fix Artemis flying position.", &isArtemisFixEnabled);
       if (isArtemisFixEnabled)
       {
           ImGui::Separator();
           ImGui::Spacing();
-          ImGui::Checkbox("Use player position for XY center of arena coords", &isArtemisPlayersXY);
-          ImGui::ShowHelpMarker("Artemis will always use current player XY coords as center of arena wich will force her to fly away from player when he gets close.");
+          ImGui::Checkbox("Use current player position as arena center ##artemis", &isArtemisPlayersXY);
+          ImGui::ShowHelpMarker("Artemis will always use the current player coordinates as the center of the arena wich will force her to fly away from the player when they get too close.");
           if (!isArtemisPlayersXY)
           {
               ImGui::Spacing();
-              btn_set_plpos_to(artemisCenterOfFloor, "Set center of floor to current player position ##Art");
+              btn_set_plpos_to(artemisCenterOfFloor, "Set arena center to current player position ##Art");
               ImGui::Spacing();
-              ImGui::InputFloat("X coord of center of arena ##Art", &artemisCenterOfFloor.x, 0.1f, 0, "%.2f");
-              ImGui::InputFloat("Y coord of center of arena ##Art", &artemisCenterOfFloor.y, 0.1f, 0, "%.2f");
+              ImGui::InputFloat("X coordinate ##Art", &artemisCenterOfFloor.x, 0.1f, 0, "%.2f");
+              ImGui::InputFloat("Y coordinate ##Art", &artemisCenterOfFloor.y, 0.1f, 0, "%.2f");
           }
-          ImGui::InputFloat("Z coord of center of arena ##Art", &artemisCenterOfFloor.z, 0.1f, 0, "%.2f");
+          ImGui::InputFloat("Height of arena center ##Art", &artemisCenterOfFloor.z, 0.1f, 0, "%.2f");
           ImGui::Separator();
           ImGui::Spacing();
       }
-      ImGui::Checkbox("Urizen 3 teleports fix", &isUrizen3FixEnabled);
-      ImGui::ShowHelpMarker("Prevent Urizen 3 stuck in teleport phase by disabling changing coords when he use teleport for change his position while changing battle state.");
-      ImGui::Checkbox("Malphas portals fix", &isMalphasFixEnabled);
-      ImGui::ShowHelpMarker("Chicken will not insta die.");
+      ImGui::Checkbox("Fix Urizen 3 teleports", &isUrizen3FixEnabled);
+      ImGui::ShowHelpMarker("Prevent Urizen 3 becoming stuck in his teleport phase when changing battle state.");
+      ImGui::Checkbox("Fix Malphas portals", &isMalphasFixEnabled);
+      ImGui::ShowHelpMarker("Prevent Malphas from going out of bounds and dying.");
       if (isMalphasFixEnabled)
       {
           ImGui::Spacing();
           ImGui::Separator();
-          ImGui::Checkbox("Use current player pos as center of arena", &malphasFixPlPos);
-          ImGui::ShowHelpMarker("Teleports also have an offsets to current player pos, so if this enabled and player stands on the edge of the arena, chicken still can fall and die. I recommend to set custom center coords for different areas manually.");
+          ImGui::Checkbox("Use current player position as arena center##malphas", &malphasFixPlPos);
+          ImGui::ShowHelpMarker("Teleports are offset from the arena center, so if this is enabled and the player stands on the edge of the arena, Malphas can still teleport out of bounds. It's recommended to set custom coordinates for different areas manually.");
           if (!malphasFixPlPos)
           {
-              btn_set_plpos_to(malphasCenterOfFloor, "Set center of floor to current player position ##Malph");
-              ImGui::InputFloat("X coord of center of arena ##Malph", &malphasCenterOfFloor.x, 0.1f, 0, "%.2f");
-              ImGui::InputFloat("Y coord of center of arena ##Malph", &malphasCenterOfFloor.y, 0.1f, 0, "%.2f");
-              ImGui::InputFloat("Z coord of center of arena ##Malph", &malphasCenterOfFloor.z, 0.1f, 0, "%.2f");
+              btn_set_plpos_to(malphasCenterOfFloor, "Set arena center to current player position ##Malph");
+              ImGui::InputFloat("X coord of arena center ##Malph", &malphasCenterOfFloor.x, 0.1f, 0, "%.2f");
+              ImGui::InputFloat("Y coord of arena center ##Malph", &malphasCenterOfFloor.y, 0.1f, 0, "%.2f");
+              ImGui::InputFloat("Z coord of arena center ##Malph", &malphasCenterOfFloor.z, 0.1f, 0, "%.2f");
           }
           ImGui::Separator();
           ImGui::Spacing();
       }
-      ImGui::Checkbox("Cerberus fix", &isCerberusFixEnabled);
-      ImGui::ShowHelpMarker("Fixes for jumps in fire state and shells in thunder state. No fix for ice wall :(");
+      ImGui::Checkbox("Fix Cerberus Moves", &isCerberusFixEnabled);
+      ImGui::ShowHelpMarker("Fixes jumping in cerberus's fire state and projectiles in his thunder state. There is currently no fix for the ice wall.");
       if (isCerberusFixEnabled)
       {
           ImGui::Spacing();
           ImGui::Separator();
-          ImGui::Checkbox("Use current player pos as center of arena ##cerberus", &cerberusFixPlPos);
+          ImGui::Checkbox("Use current player position as arena center##cerberus", &cerberusFixPlPos);
           if (!cerberusFixPlPos)
           {
-              btn_set_plpos_to(cerberusCenterOfFloor, "Set center of floor to current player position ##Cerberus");
+              btn_set_plpos_to(cerberusCenterOfFloor, "Set arena center to current player position##Cerberus");
               ImGui::InputFloat("X coord of center of arena ##Cerberus", &cerberusCenterOfFloor.x, 0.1f, 0, "%.2f");
               ImGui::InputFloat("Y coord of center of arena ##Cerberus", &cerberusCenterOfFloor.y, 0.1f, 0, "%.2f");
               ImGui::InputFloat("Z coord of center of arena ##Cerberus", &cerberusCenterOfFloor.z, 0.1f, 0, "%.2f");
@@ -1550,7 +1549,7 @@ void EnemySwapper::on_draw_ui() {
 
       }
       ImGui::Checkbox("Change XYZ spawn coordinates", &isCustomSpawnPos);
-      ImGui::ShowHelpMarker("Fixes some enemies spawning under the floor.Note that this will affect all spawnsand can change spawn animations.\n"
+      ImGui::ShowHelpMarker("Fixes some enemies spawning under the floor. Note that this will affect all spawns and can change spawn animations.\n"
           "This option can be changed during the mission.");
       if (isCustomSpawnPos) {
           ImGui::TextWrapped("Height offset");

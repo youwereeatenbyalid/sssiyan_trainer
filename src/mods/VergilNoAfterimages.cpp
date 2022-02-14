@@ -115,7 +115,8 @@ void VergilNoAfterimages::on_draw_ui() {
 
   ImGui::Combo("Disable Type", (int*)&vergilafterimage_state, "Default afterimages\0Only in Human Form\0Only in SDT\0All Forms\0");
   ImGui::Separator();
-  ImGui::Checkbox("Disable afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself", &isNoDrawIfObjHidden);
+  ImGui::TextWrapped("Disable afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself");
+  ImGui::Checkbox("Disable trick/dodge afterimages", &isNoDrawIfObjHidden);
 }
 
 // void VergilNoAfterimages::on_draw_debug_ui() {}

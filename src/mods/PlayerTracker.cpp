@@ -54,8 +54,11 @@
 	float PlayerTracker::sinvalue{0};
 	float PlayerTracker::cosvalue{0};
 	bool PlayerTracker::redirect{0};
+	bool PlayerTracker::ingameplay{ false };
 	float threshholdsubstitute = 0.35;
-  
+
+	uintptr_t PlayerTracker::playermanager{NULL};
+	const std::array<uintptr_t, 1> updatetime_array{ 0x68 };
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -390,6 +393,9 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
+  PlayerTracker::playermanager = staticbase + 0x7E571A0;
+
   //player tracker
   auto player_addr = patterns->find_addr(base, "4C 8B C9 41 83 F8 FF 74");
   if (!player_addr) {
@@ -465,7 +471,11 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 // during save
 // void PlayerTracker::on_config_save(utility::Config &cfg) {}
 // do something every frame
-// void PlayerTracker::on_frame() {}
+void PlayerTracker::on_frame() {
+	auto updatetime = GameFunctions::PtrController::get_ptr<float>(PlayerTracker::playermanager, updatetime_array, false, false);
+	PlayerTracker::ingameplay = (updatetime.has_value() && updatetime.value() > 2.0);
+}
+
 // will show up in debug window, dump ImGui widgets you want here
 void PlayerTracker::on_draw_debug_ui() {
 	ImGui::Text("[PlayerTracker] Player ID: %X", PlayerTracker::playerid);

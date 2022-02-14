@@ -211,29 +211,30 @@ void BossDanteSetup::on_config_save(utility::Config& cfg)
 
 void BossDanteSetup::on_draw_ui()
 {
-	ImGui::Checkbox("Enable DT HP regen", &isDtRegenEnabled);
-	ImGui::Checkbox("Custom SDT transform setup", &isSdtTransformSetup);
+	ImGui::Checkbox("Enable HP regeneration in DT", &isDtRegenEnabled);
+	ImGui::Checkbox("Specify SDT Transformation Type", &isSdtTransformSetup);
 	if (isSdtTransformSetup)
 	{
 		ImGui::Spacing();
-		ImGui::TextWrapped("Change transform mode to: 0 - always normal transform, 1 - always fast transform (default), 2 - first normal other fast (idk is this one even working?)");
-		ImGui::SliderInt("##TransformMode", (int*)&sdtTransformMode, 0, 2);
+		ImGui::Combo("Transformation Type", (int*)&sdtTransformMode, "Always Normal Transform\0Always SSSS Transform (Default)\0");
+		//ImGui::TextWrapped("Change transform mode to: 0 - always normal transform, 1 - always fast transform (default), 2 - first normal other fast (idk is this one even working?)");
+		//ImGui::SliderInt("##TransformMode", (int*)&sdtTransformMode, 0, 2);
 	}
-	ImGui::Checkbox("Modify dt & sdt timers", &isDtsTimerSkip);
+	ImGui::Checkbox("Modify DT & SDT cooldown", &isDtsTimerSkip);
 	if(isDtsTimerSkip)
 	{
-		ImGui::TextWrapped("Reactivation DT/SDT timer (depends of current mission):");
+		ImGui::TextWrapped("Cooldown timer (depends on current mission):");
 		ImGui::SliderFloat("##customTimerDelay", &dtTimer, 0.1f, 30.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
 		//dtTimerStartPoint = 30.0f - dtTimer + 0.08f;
 	}
-	ImGui::Checkbox("Custom dt duration", &isCustomDtDuration);
+	ImGui::Checkbox("Modify DT duration", &isCustomDtDuration);
 	if (isCustomDtDuration)
 	{
-		ImGui::TextWrapped("Set dt duration on m19 (game's default - 15):");
+		ImGui::TextWrapped("Set DT duration on Mission 19 (game's default - 15):");
 		ImGui::InputFloat("##dtDurationSlider", &dtDuration, 1.0f, 2.0f, "%.1f");
 	}
-	ImGui::Checkbox("No stun after end of SDT;", &isNoFinishSdtStun);
-	ImGui::Checkbox("Disable boss moves delay;", &isNoMovesDelay);
+	ImGui::Checkbox("No recovery after SDT exit", &isNoFinishSdtStun);
+	ImGui::Checkbox("Disable increased startup times on certain moves (Revolver, Stinger, etc.)", &isNoMovesDelay);
 }
 
 // void BossDanteSetup::on_draw_debug_ui(){}

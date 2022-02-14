@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include "mods/GameFunctions/GameFunc.hpp"
 class PlayerTracker : public Mod {
 public:
   PlayerTracker() = default;
@@ -65,9 +66,10 @@ public:
   static uintptr_t doppeltransform;
   static uintptr_t doppelweaponmodel;
 
-  
+  static uintptr_t playermanager;
+
   static uint32_t incombat;
-  
+  static bool ingameplay;
   static float sinvalue;
   static float cosvalue;
   static bool redirect;
@@ -75,8 +77,8 @@ public:
   // void on_config_load(const utility::Config& cfg) override;
   // void on_config_save(utility::Config& cfg) override;
 
-  // on_frame() is called every frame regardless whether the gui shows up.
-  // void on_frame() override;
+  //on_frame() is called every frame regardless whether the gui shows up.
+  void on_frame() override;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
   // void on_draw_ui() override;

@@ -58,7 +58,7 @@ static naked void detour() {
     mov r8, [AllOrNothing::stylebar]
     cmp byte ptr [StyleRank::rank],r8b
     //if below, do no damage to the enemy.
-    jb nodamagecheck
+    jb nodamage
     jmp originalcode
 
     nodamagecheck: // only check for cheaton if sent to nodamage via damage cheats. Skip this if PVP.
@@ -101,7 +101,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   m_on_page    = gamemode;
   m_is_enabled = &AllOrNothing::cheaton;
 
-  m_full_name_string     = "Must Style / Damage Toggles (+)";
+  m_full_name_string     = "Must Style (+)";
   m_author_string        = "The Hitchhiker";
   m_description_string   = "Disable damage altogether or when below a certain Style Rank.";
 
