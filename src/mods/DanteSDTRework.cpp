@@ -188,7 +188,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     m_is_enabled = &DanteSDTRework::cheaton;
     m_on_page = dantesdt;
 
-    m_full_name_string = "Shared DT";
+    m_full_name_string = "SDT Rework";
     m_author_string = "SSSiyan, VPZadov";
     m_description_string = "DT and SDT are a shared resource. Tap to DT, Hold to SDT. At least 3 bars of DT are required to enter SDT.";
 
@@ -205,7 +205,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework1";
     }
-    DanteSDTRework::jmp_jne1 = addr1.value() + 23; // DevilMayCry5.exe+196A4F4
+    DanteSDTRework::jmp_jne1 = addr1.value() + 23; // DevilMayCry5.exe+196A4F4 copyright update
     
     auto addr2 = patterns->find_addr(base, "66 0F 2F D1 73 25 F3 0F 10 8F 14");
     if (!addr2) {
@@ -216,7 +216,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework2";
     }
-    DanteSDTRework::jmp_jae2 = addr2.value() + 43; // DevilMayCry5.exe+19703D7
+    DanteSDTRework::jmp_jae2 = addr2.value() + 43; // DevilMayCry5.exe+19703D7 copyright update
     
     auto addr3 = patterns->find_addr(base, "D9 F3 0F 10 8F 14 1A 00 00");
     if (!addr3) {
