@@ -23,9 +23,9 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = vergilefxsettings;
-	m_full_name_string = "Trick dodge no disappear";
+	m_full_name_string = "Stay visible on trick dodge";
 	m_author_string = "VPZadov";
-	m_description_string = "Vergil's body will be not disappear while trick dodge.";
+	m_description_string = "Vergil stays visible while trick dodging.";
 
 	auto getEndDrawOffAddr = patterns->find_addr(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
 	if (!getEndDrawOffAddr)

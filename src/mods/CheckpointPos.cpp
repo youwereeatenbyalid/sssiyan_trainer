@@ -70,7 +70,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   m_on_page           = gamemode;
   m_full_name_string = "Custom checkpoints (+)";
   m_author_string    = "VPZadov";
-  m_description_string = "Loading from a checkpoint force game to load \"boss checkpoint\" or custom position checkpoint.";
+  m_description_string = "Create a custom checkpoint to reset at. Uses boss checkpoints by default.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
@@ -104,9 +104,9 @@ void CheckpointPos::on_config_save(utility::Config& cfg) {
 // void CheckpointPos::on_frame() {}
 
 void CheckpointPos::on_draw_ui() {
-  ImGui::TextWrapped("Load mission from checkpoint (or press \"Continue\" from main menu) to place character near boss fight. M7 - teleports to Proto Angelo arena fight.");
+  ImGui::TextWrapped("Select \"Checkpoint\" in mission menu (or press \"Continue\" from main menu) to load at the coordinates below.");
   ImGui::Separator();
-  ImGui::Checkbox("Use cutom checkpoint position", &isCustomPos);
+  ImGui::Checkbox("Use custom checkpoint position", &isCustomPos);
   ImGui::ShowHelpMarker("If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
   if (isCustomPos) {
     ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, "%.3f");

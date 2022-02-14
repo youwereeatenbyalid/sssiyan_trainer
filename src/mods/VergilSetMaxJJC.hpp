@@ -6,6 +6,8 @@ public:
   static uint32_t max_jjc;
   static uintptr_t jmp_ret;
   static bool cheaton;
+  static bool sdtincrease;
+  static bool infinitejjdc;
 
   VergilSetMaxJJC() = default;
   // mod name string for config

@@ -1,10 +1,9 @@
 #include "VergilSetMaxJJC.hpp"
-#include "VergilInfJdCs.hpp"
-
 uint32_t VergilSetMaxJJC::max_jjc{3};
 uintptr_t VergilSetMaxJJC::jmp_ret{NULL};
 bool VergilSetMaxJJC::cheaton{NULL};
-
+bool VergilSetMaxJJC::sdtincrease{ false };
+bool VergilSetMaxJJC::infinitejjdc{ false };
 //clang-format off
 static naked void max_jjc_detour() {
 	__asm {
@@ -18,6 +17,9 @@ static naked void max_jjc_detour() {
 
 		cheat:
 		mov eax, dword ptr [VergilSetMaxJJC::max_jjc]
+		cmp [VergilSetMaxJJC::sdtincrease], 1
+		jne ret_jmp
+		inc eax
 		jmp ret_jmp
 
 		ret_jmp://note: don't name labels as "exit" :D
@@ -34,19 +36,23 @@ void VergilSetMaxJJC::init_check_box_info() {
 
 void VergilSetMaxJJC::on_config_load(const utility::Config& cfg) {
   max_jjc = cfg.get<uint32_t>("vergil_max_jjc").value_or(3);
+  sdtincrease == cfg.get<bool>("vergil_sdt_jjdcincrease").value_or(false);
+  infinitejjdc == cfg.get<bool>("vergil_infinite_jjdc").value_or(false);
 }
 
 void VergilSetMaxJJC::on_config_save(utility::Config& cfg) {
   cfg.set<uint32_t>("vergil_max_jjc", max_jjc);
+  cfg.set<bool>("vergil_sdt_jjdcincrease", sdtincrease);
+  cfg.set<bool>("vergil_infinite_jjdc", infinitejjdc);
 }
 
 std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   init_check_box_info();
   m_is_enabled        = &VergilSetMaxJJC::cheaton;
   m_on_page           = vergilcheat;
-  m_full_name_string = "Set maximum JJC in a row (+)";
+  m_full_name_string = "Set Just Judgment Cut Limit(+)";
   m_author_string    = "VPZadov";
-  m_description_string = "Set the maximum number of Just Judgement Cuts Vergil can perform in a row.";
+  m_description_string = "Set the maximum number of Just Judgment Cuts Vergil can perform in a row.";
 
   set_up_hotkey();
 
@@ -63,8 +69,10 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
 }
 
 void VergilSetMaxJJC::on_draw_ui() {
-  ImGui::TextWrapped("Set maximum jjc:");
+  ImGui::TextWrapped("JJdC limit:");
   UI::SliderInt("##Set max jjc slider", (int*)&max_jjc, 1, 20);
+  ImGui::Checkbox("+1 to limit in SDT", (bool*)&sdtincrease);
+  ImGui::Checkbox("Infinite JJdC's", (bool*)&infinitejjdc);
 }
 
 void VergilSetMaxJJC::on_draw_debug_ui() {}

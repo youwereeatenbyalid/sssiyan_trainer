@@ -19,9 +19,9 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = vergilefxsettings;
-	m_full_name_string = "Always Yamato shot guard";
+	m_full_name_string = "DMC3 Guard";
 	m_author_string = "VPZadov";
-	m_description_string = "Always use Yamato shot guard animation while block.";
+	m_description_string = "Change block to gunshot block from dmc3.";
 
 	auto setActionAddr = patterns->find_addr(base, "F3 0F 11 44 24 20 E8 F4 F3"); //DevilMayCry5.exe+5762A1
 	if (!setActionAddr)

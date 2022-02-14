@@ -1,6 +1,10 @@
 #pragma once
 #include "Mod.hpp"
 #include "mods/EnemySwapper.hpp"
+
+#define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)
+#define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
+#define SELECTABLE_STYLE_ACT_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.91f) 
 class EnemyDataSettings : public Mod
 {
 public:
@@ -11,6 +15,7 @@ public:
 	static inline float waitTimeMax = 0.0f;
 	static inline int enemyNum = 4;
 	static inline float odds = 100.0f;
+	int index = 0;
 	//static inline bool isBp = false;
 
 	static inline void set_enemy_num(int num) { enemyNum = num; }
@@ -25,9 +30,9 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = balance;
-		m_full_name_string = "Enemy data settings (+)";
+		m_full_name_string = "Increased Enemy Spawns (+)";
 		m_author_string = "VPZadov";
-		m_description_string = "Change enemy num in waves, delay for spawn and spawn odds.";
+		m_description_string = "Increase the number of enemies that spawn and adjust the time between spawns.";
 
 		for (int i = 0; i < EnemySwapper::enemySettings.size(); i++) {
 			EnemySwapper::enemySettings[i].emId.set_current_id(i);
@@ -105,21 +110,23 @@ public:
 			ImGui::TextWrapped("The game has a hard limit on the number of enemies that can be present at the same time, which can be removed by enabling LDK.\n"
 			"This mod can cause problems when editing the data for bosses& when setting the enemy multiplier to 0 on certain encounters throughout the campaign & bloody palace.");
 		}
-		ImGui::Separator();
         ImGui::Checkbox("Share settings for all enemies", &shareSettings);
 		if (shareSettings) {
-		  ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting the value to 2 doubles the enemy #, setting it to 3 triples, etc. Setting it to 0 removes all enemies at that spawn point.");
+		  ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting it to 0 removes all enemies at that spawn point.");
 		  ImGui::InputInt("##enemyNumShared", &enemyNum, 1);
 		  ImGui::Spacing();
-		  ImGui::TextWrapped("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
-          ImGui::TextWrapped("Wait time min: ");
+		  ImGui::TextWrapped("Minimum spawn time & Maximum spawn time: Adjust in-engine settings controlling the delay between enemy spawns.");
+		  ImGui::Columns(2, NULL, false);
+          ImGui::TextWrapped("Wait time min");
+		  ImGui::Spacing();
           ImGui::InputFloat("##WaitTimeMinShared", &waitTimeMin);
-          ImGui::Spacing();
-          ImGui::TextWrapped("Wait time max: ");
+		  ImGui::NextColumn();
+		  ImGui::TextWrapped("Wait time max");
+		  ImGui::Spacing();
           ImGui::InputFloat("##WaitTimeMaxShared", &waitTimeMax);
-          ImGui::Spacing();
-		  ImGui::TextWrapped("Spawn chance (%%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
-          ImGui::SliderFloat("##enemyOddsShared", &odds, 0.0f, 100.0f, "%.1f");
+		  ImGui::Columns(1);
+		  //ImGui::TextWrapped("Spawn chance (%%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
+          //ImGui::SliderFloat("##enemyOddsShared", &odds, 0.0f, 100.0f, "%.1f");
           validate_values(shareSettings);
           set_all_data_settings(waitTimeMin, waitTimeMax, enemyNum, odds);
 		}
@@ -127,37 +134,77 @@ public:
 			/*ImGui::Text("Check if you want use custom settings for each enemies in BP (same shit like with swapper)");
 			ImGui::Checkbox("Tick this if you go to BP", &isBp);
 			ImGui::Separator();*/
-			if (ImGui::Button("Restore default mod settings")) {
+			//ImGui::Text("index %d", index);
+			ImGui::Columns(4, NULL, false);
+			for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
+				if (i == 32 || i == 33)//Urizens
+					continue;
+
+				bool state = !EnemySwapper::enemySettings[i].useDefault;
+				ImVec4 backgroundcolor = state ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered): SELECTABLE_STYLE_ACT;
+				if (i == index)
+					backgroundcolor = SELECTABLE_STYLE_HVR;
+				ImGui::PushStyleColor(ImGuiCol_Header, backgroundcolor);
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECTABLE_STYLE_ACT_HVR);
+				
+				
+					if (state) {
+						uniqStr = std::string(EnemySwapper::emNames[i] + std::string(" x") + std::to_string(EnemySwapper::enemySettings[i].enemyNum));
+					}
+					else {
+						uniqStr = EnemySwapper::emNames[i];
+					}
+
+				if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick)) {
+					if (ImGui::IsMouseDoubleClicked(0)) {
+						EnemySwapper::enemySettings[i].useDefault = !EnemySwapper::enemySettings[i].useDefault;
+					}
+					else {
+						index = i;
+					}
+				}
+				ImGui::PopStyleColor(2);
+				ImGui::NextColumn();
+			}
+			if (ImGui::Button("Restore default settings")) {
 				for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
 					set_enemy_data_settings(i, 0.0f, 0.0f, 1, true);
 				}
 			}
+			ImGui::Columns(1);
+			ImGui::Spacing();
 			ImGui::Separator();
+			uniqStr = std::string("Use default game settings ##" + std::to_string(index));
+			ImGui::TextWrapped(EnemySwapper::emNames[index]);
+			ImGui::Checkbox(uniqStr.c_str(),&EnemySwapper::enemySettings[index].useDefault);
+			if (!EnemySwapper::enemySettings[index].useDefault) {
+				ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting it to 0 prevents enemies from spawning.");
+				uniqStr = std::string("##EnemyNum" + std::to_string(index));
+				ImGui::InputInt(uniqStr.c_str(), &EnemySwapper::enemySettings[index].enemyNum);
+				ImGui::TextWrapped("Minimum spawn & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
+				ImGui::Columns(2, NULL, false);
+				ImGui::TextWrapped("Wait time min: ");
+
+				uniqStr = std::string("##WaitTimeMin" + std::to_string(index));
+				ImGui::InputFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].waitTimeMin, 0.1F);
+				ImGui::NextColumn();
+				ImGui::TextWrapped("Wait time max: ");
+				uniqStr = std::string("##WaitTimeMax" + std::to_string(index));
+				ImGui::InputFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].waitTimeMax, 0.1f);
+				ImGui::Columns(1);
+				//ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
+				//uniqStr = std::string("##Odds" + std::to_string(index));
+				//ImGui::SliderFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].odds, 0.1f, 100.0f, "%.01f");
+				validate_values(shareSettings, &EnemySwapper::enemySettings[index]);
+			}
+			/*
 			for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
 				if(i == 32 || i == 33)//Urizens
 					continue;
-				uniqStr = std::string("Use default game settings ##" + std::to_string(i));
-				ImGui::TextWrapped(EnemySwapper::emNames[i]);
-				ImGui::Checkbox(uniqStr.c_str(), &EnemySwapper::enemySettings[i].useDefault);
-				if (!EnemySwapper::enemySettings[i].useDefault) {
 
-					ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting the value to 2 doubles the enemy #, setting it to 3 triples, etc. Setting it to 0 removes all enemies at that spawn point.");
-					uniqStr = std::string("##EnemyNum" + std::to_string(i));
-					ImGui::InputInt(uniqStr.c_str(), &EnemySwapper::enemySettings[i].enemyNum);
-					ImGui::TextWrapped("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");					
-                    ImGui::TextWrapped("Wait time min: ");
-				    uniqStr = std::string("##WaitTimeMin" + std::to_string(i));
-				    ImGui::InputFloat(uniqStr.c_str() , &EnemySwapper::enemySettings[i].waitTimeMin, 0.1F);
-                    ImGui::TextWrapped("Wait time max: ");
-				    uniqStr = std::string("##WaitTimeMax" + std::to_string(i));
-				    ImGui::InputFloat(uniqStr.c_str() , &EnemySwapper::enemySettings[i].waitTimeMax, 0.1f);
-					ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
-					uniqStr = std::string("##Odds" + std::to_string(i));
-				    ImGui::SliderFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[i].odds, 0.1f, 100.0f, "%.01f");
-					validate_values(shareSettings, &EnemySwapper::enemySettings[i]);
-				}
-                ImGui::Separator();
+               // ImGui::Separator();
 			}
+			*/
 		}
 	}
 	// on_draw_debug_ui() is called when debug window shows up

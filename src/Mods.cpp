@@ -140,10 +140,10 @@
     // Gameplay
        #include "mods/EnemySwapper.hpp"
        #include "mods/EnemyDataSettings.hpp"
-       #include "mods/EnemyWaveSettings.hpp"
+       //#include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
        #include "mods/MissionManager.hpp"
-       #include "mods/EnemyWaveEditor.hpp"
+       //#include "mods/EnemyWaveEditor.hpp"
        #include "mods/SecretMissionTimer.hpp"
        #include "mods/BossDanteSetup.hpp"
     // Nero
@@ -159,7 +159,7 @@
        #include "mods//VergilNoAfterimages.hpp"
        #include "mods/VergilDisableSDTAccumulate.hpp"
        #include "mods/VergilSetMaxJJC.hpp"
-       #include "mods/VergilAdditionalJJC.hpp"
+       //#include "mods/VergilAdditionalJJC.hpp"
        #include "mods/VergilSDTAccumulateRework.hpp"
        #include "mods/VergilSDTNoConcentrationLose.hpp"
        #include "mods/VergilAirTrick.hpp"
@@ -322,9 +322,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
-        m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
+        //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
-        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        //m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         // Nero
@@ -340,7 +340,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
         m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
-        m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
+        //m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
         m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
         m_mods.emplace_back(std::make_unique<VergilAirTrick>());

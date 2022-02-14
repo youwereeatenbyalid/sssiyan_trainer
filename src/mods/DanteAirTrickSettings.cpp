@@ -111,6 +111,7 @@ void DanteAirTrickSettings::on_config_load(const utility::Config& cfg)
 {
 	isAddZOffset = cfg.get<bool>("DanteAirTrickSettings.isAddZOffset").value_or(false);
 	isNoDistanceRestriction = cfg.get<bool>("DanteAirTrickSettings.isNoDistanceRestriction").value_or(true);
+	groundIsNoDistanceRestriction = cfg.get<bool>("DanteAirTrickSettings.groundIsNoDistanceRestriction").value_or(true);
 	addZOffset = cfg.get<float>("DanteAirTrickSettings.addZOffset").value_or(0.0f);
 }
 
@@ -118,6 +119,7 @@ void DanteAirTrickSettings::on_config_save(utility::Config& cfg)
 {
 	cfg.set<bool>("DanteAirTrickSettings.isAddZOffset", isAddZOffset);
 	cfg.set<bool>("DanteAirTrickSettings.isNoDistanceRestriction", isNoDistanceRestriction);
+	cfg.set<bool>("DanteAirTrickSettings.groundIsNoDistanceRestriction", groundIsNoDistanceRestriction);
 	cfg.set<float>("DanteAirTrickSettings.addZOffset", addZOffset);
 }
 
