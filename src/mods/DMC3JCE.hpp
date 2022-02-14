@@ -216,8 +216,8 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_rcx_ptr();
-						if(!rcx.has_value())
+						auto rcx = jcSpawn.get_thread_context();
+						if(rcx == 0)
 						{
 							bad_ptr_stop();
 							return;
@@ -239,7 +239,7 @@ public:
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
 						int jcNum = 0;
 						int tryIter = 0;
-						jcSpawn.set_params(rcx.value(), jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
+						jcSpawn.set_params(rcx, jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						//std::this_thread::yield();//?
 						/*if (isSetCustomCapacity)
 						{
@@ -270,11 +270,10 @@ public:
 								continue;
 							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
 								break;
-							rcx = rcxFlag ? jcSpawn.get_rcx_ptr() : jcSpawn.get_rcx_ptr(1);//This may be completely bullshit, idk 
 							rcxFlag = !rcxFlag;
-							if(!rcx.has_value())
+							if(rcx == 0)
 								continue;
-							jcSpawn.set_rcx(rcx.value());
+							jcSpawn.set_rcx(rcx);
 							__try
 							{
 								jcShell = (volatile void*)jcSpawn(curPos, defaultRot);
@@ -334,15 +333,15 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_rcx_ptr();
-						if (!rcx.has_value())
+						auto rcx = jcSpawn.get_thread_context();
+						if (rcx == 0)
 						{
 							isBadPtr = true;
 							bad_ptr_stop();
 							return;
 						}
 						func::Quaternion defaultRot;
-						jcSpawn.set_params(rcx.value(), jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
+						jcSpawn.set_params(rcx, jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						uintptr_t jcShell;
 						while (get_condition(isBadPtr))

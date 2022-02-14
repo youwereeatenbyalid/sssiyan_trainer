@@ -16,7 +16,7 @@ namespace GameFunctions
 
 		void operator()() override{ invoke(); }
 
-		std::optional<uintptr_t> get_rcx_ptr() override
+		uintptr_t get_thread_context() override
 		{
 			throw std::bad_function_call();
 		}
@@ -126,7 +126,7 @@ namespace GameFunctions
 		void check_rcx()
 		{
 			if (rcx == 0)
-				rcx = get_rcx_ptr().value_or(0);
+				rcx = get_thread_context();
 		}
 
 		bool full_check()

@@ -159,11 +159,6 @@ namespace GameFunctions
 		uintptr_t rcx = 0;
 
 	public:
-		static const inline uintptr_t rcxBase = 0x07EC2F60;//0x07E53660;
-		static const inline uintptr_t rcxBase2 = 0x07E53660;
-		static inline const std::array<uintptr_t, 5> fancyRcx { 0x70, 0x50, 0x408, 0x80, 0x0 }; //{0x498, 0x60, 0xC0, 0x0};//Think this is some clr thread stuff actually //D380
-		static inline const std::array<uintptr_t, 4> fancyRcx2 { 0x4D8, 0x50, 0x118, 0x0 }; //{0x498, 0x60, 0xC0, 0x0};//Think this is some clr thread stuff actually //C8C0
-
 
 		//typedef func here
 
@@ -177,34 +172,13 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		//virtual std::optional<uintptr_t> get_rcx_ptr() { return std::nullopt; }
+		//virtual std::optional<uintptr_t> get_thread_context() { return std::nullopt; }
 
 		virtual uintptr_t get_cur_rcx() const { return rcx; }
 
-		virtual std::optional<uintptr_t> get_rcx_ptr(int indx)
+		virtual uintptr_t get_thread_context()
 		{
-			switch (indx)
-			{
-				case 0:
-					return get_rcx_ptr();
-				case 1:
-				{
-					auto base = g_framework->get_module().as<uintptr_t>() + rcxBase2;
-					return GameFunctions::PtrController::get_ptr<uintptr_t>(base, fancyRcx2, true);
-					break;
-				}
-				default:
-				{
-					return get_rcx_ptr();
-				}
-			}
-		}
-
-		virtual std::optional<uintptr_t> get_rcx_ptr()
-		{
-			auto base = g_framework->get_module().as<uintptr_t>() + rcxBase;
-			auto ptrAddr = GameFunctions::PtrController::get_ptr<uintptr_t>(base, fancyRcx, true);
-			return ptrAddr;
+			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context());
 		}
 
 		virtual void set_rcx(uintptr_t param) { rcx = param; }

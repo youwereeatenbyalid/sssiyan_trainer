@@ -164,11 +164,7 @@ namespace GameFunctions
 					return 0;
 				if (rcx == 0)
 				{
-					auto rcxOpt = get_rcx_ptr();
-					if(!rcxOpt.has_value())
-						return 0;
-					else 
-						rcx = rcxOpt.value();
+					return 0;
 				}
 				res = create_shell((void*)rcx, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
 			}
@@ -208,7 +204,7 @@ namespace GameFunctions
 
 		bool set_list_shell_capacity(int newCapacity)
 		{
-			return ShellListSetCapacity::invoke(newCapacity, get_rcx_ptr());
+			return ShellListSetCapacity::invoke(newCapacity, get_thread_context());
 		}
 
 		int get_list_shell_capacity() const

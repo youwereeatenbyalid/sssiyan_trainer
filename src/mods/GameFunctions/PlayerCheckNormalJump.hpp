@@ -18,9 +18,7 @@ namespace GameFunctions
 
 		bool invoke() override
 		{
-			auto rcx = get_rcx_ptr();
-			if(!rcx.has_value())
-				throw std::runtime_error("Can't get rcx.");
+			auto rcx = get_thread_context();
 			return func(rcx.value(), pl);
 		}
 

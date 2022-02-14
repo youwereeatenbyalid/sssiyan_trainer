@@ -324,7 +324,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
-        //m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         // Nero
