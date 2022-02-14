@@ -55,9 +55,9 @@ std::optional<std::string> OneHitKill::on_initialize() {
 }
 
 // during load
-//void OneHitKill::on_config_load(const utility::Config &cfg) {}
+// void OneHitKill::on_config_load(const utility::Config &cfg) {}
 // during save
-//void OneHitKill::on_config_save(utility::Config &cfg) {}
+// void OneHitKill::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void OneHitKill::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here

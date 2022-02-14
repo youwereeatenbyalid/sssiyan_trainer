@@ -55,9 +55,9 @@ std::optional<std::string> NoOneTakesDamage::on_initialize() {
 }
 
 // during load
-//void NoOneTakesDamage::on_config_load(const utility::Config &cfg) {}
+// void NoOneTakesDamage::on_config_load(const utility::Config &cfg) {}
 // during save
-//void NoOneTakesDamage::on_config_save(utility::Config &cfg) {}
+// void NoOneTakesDamage::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void NoOneTakesDamage::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
