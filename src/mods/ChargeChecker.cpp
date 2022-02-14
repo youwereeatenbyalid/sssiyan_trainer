@@ -145,11 +145,13 @@ void ChargeChecker::on_config_save(utility::Config& cfg) {
 
 void ChargeChecker::on_draw_ui() {
   ImGui::Text("Sword Charge Speed Multiplier");
+
   UI::SliderFloat("##swordmultslider", &neroSwordMult, 0.5f, 3.0f, "%.1f");
   ImGui::Text("Gun Charge Speed Multiplier");
   UI::SliderFloat("##gunmultslider", &neroGunMult, 0.5f, 3.0f, "%.1f");
   ImGui::Text("Breaker Charge Speed Multiplier");
   UI::SliderFloat("##breakermultslider", &neroBreakerMult, 0.5f, 3.0f, "%.1f");
+
   ImGui::Spacing();
   ImGui::Separator();
   ImGui::Spacing();

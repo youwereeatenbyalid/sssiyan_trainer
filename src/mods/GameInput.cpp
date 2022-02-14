@@ -140,6 +140,14 @@ static naked void press_detour() {
         or r9, GameInput::pressframes[1*8]
         or r9, GameInput::pressframes[2*8]
         or r9, GameInput::pressframes[3*8]
+        or r9, GameInput::pressframes[4 * 8]
+        or r9, GameInput::pressframes[5 * 8]
+        or r9, GameInput::pressframes[6 * 8]
+        //or r9, GameInput::pressframes[7 * 8]
+        //or r9, GameInput::pressframes[8 * 8]
+        mov r10, GameInput::holdframes[0*8]
+        or r10, GameInput::holdframes[1*8]
+        or r10, GameInput::holdframes[2 * 8]
         push r8
         lea r8, BreakerSwitcher::breakerpress_detour
         call r8

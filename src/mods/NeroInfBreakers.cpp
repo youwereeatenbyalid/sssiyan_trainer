@@ -1,6 +1,7 @@
 
 #include "NeroInfBreakers.hpp"
 #include "PlayerTracker.hpp"
+#include "BreakerSwitcher.hpp"
 uintptr_t NeroInfBreakers::jmp_ret1{NULL};
 uintptr_t NeroInfBreakers::jmp_ret2{NULL};
 
@@ -22,7 +23,7 @@ static naked void detour1() {
 	__asm {
         cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
         jne code
-        cmp byte ptr [NeroInfBreakers::cheaton], 1
+        cmp byte ptr [BreakerSwitcher::infinite_breakers], 1
         je cheatcode
         jmp code
 
@@ -87,8 +88,9 @@ void NeroInfBreakers::init_check_box_info() {
 std::optional<std::string> NeroInfBreakers::on_initialize() {
   init_check_box_info();
 
+
   m_is_enabled          = &NeroInfBreakers::cheaton;
-  m_on_page             = breaker;
+  //m_on_page             = breaker;
 
   m_full_name_string   = "Infinite Devil Breakers";
   m_author_string      = "DeepDarkKapustka";

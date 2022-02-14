@@ -254,7 +254,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<AllStartManual>());
         m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
-        m_mods.emplace_back(std::make_unique<DamageMultiplier>());    // TESTING
+        m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
         m_mods.emplace_back(std::make_unique<EntitySpeeds>());
@@ -263,8 +263,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
-        m_mods.emplace_back(std::make_unique<ChargeChecker>());       // Only Nero right now but will be Gameplay
-        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());      // Needs Lock On compare from player+0xED0
+        m_mods.emplace_back(std::make_unique<ChargeChecker>());
+        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());
         m_mods.emplace_back(std::make_unique<WeightReset>());
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
     // Nero
@@ -319,11 +319,13 @@ Mods::Mods()
         // Background
         // Common
         // Gameplay
+        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
+
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());

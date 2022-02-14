@@ -41,6 +41,7 @@ static naked void sdt_transform_detour()
 	}
 }
 
+
 static naked void dt_sdt_timer_detour()
 {
 	__asm {
@@ -108,6 +109,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+
 	m_is_enabled = &cheaton;
 	m_on_page = balance;
 	m_full_name_string = "Boss Dante settings (+)";
@@ -115,16 +117,19 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	m_description_string = "Vergil's nightmare begins here.";
 
 	auto dtAddr = patterns->find_addr(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
+
 	if (!dtAddr)
 	{
 		return "Unanable to find BossDanteSetup.dtAddr pattern.";
 	}
+
 
 	auto sdtTransformAddr = patterns->find_addr(base, "8B 49 10 85 C9 74 35"); // DevilMayCry5.exe+19C637C
 	if (!sdtTransformAddr)
 	{
 		return "Unanable to find BossDanteSetup.sdtTransformAddr pattern.";
 	}
+
 
 	auto dtTimerAddr = patterns->find_addr(base, "F3 0F 11 4A 18 48 8B"); // DevilMayCry5.exe+318477
 	if (!dtTimerAddr)
@@ -177,7 +182,6 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.charUpdateDelay";
 	}
-
 	return Mod::on_initialize();
 }
 
