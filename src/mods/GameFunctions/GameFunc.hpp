@@ -159,11 +159,6 @@ namespace GameFunctions
 		uintptr_t rcx = 0;
 
 	public:
-		static const inline uintptr_t rcxBase = 0x07EC2F60;//0x07E53660;
-		static const inline uintptr_t rcxBase2 = 0x07E53660;
-		static inline const std::array<uintptr_t, 5> fancyRcx { 0x70, 0x50, 0x408, 0x80, 0x0 }; //{0x498, 0x60, 0xC0, 0x0};//Think this is some clr thread stuff actually //D380
-		static inline const std::array<uintptr_t, 4> fancyRcx2 { 0x4D8, 0x50, 0x118, 0x0 }; //{0x498, 0x60, 0xC0, 0x0};//Think this is some clr thread stuff actually //C8C0
-
 
 		//typedef func here
 
