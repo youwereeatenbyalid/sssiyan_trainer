@@ -783,7 +783,9 @@ static naked void kill_griffon_detour() {
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
         option_check:
-        cmp byte ptr [EnemySwapper::canKillGriffon], 00
+        /*cmp byte ptr [Mission::canKillGriffon], 00
+        je originalcode*/
+        cmp dword ptr [MissionManager::missionNumber], 0x12
         je originalcode
         jmp qword ptr [EnemySwapper::killGriffonRet]
 
@@ -800,7 +802,9 @@ static naked void kill_shadow_detour() {
         cmp byte ptr [EnemySwapper::cheaton], 00
         je originalcode
         option_check:
-        cmp byte ptr [EnemySwapper::canKillShadow], 00
+        /*cmp byte ptr [EnemySwapper::canKillShadow], 00
+        je originalcode*/
+        cmp dword ptr [MissionManager::missionNumber], 0x12
         je originalcode
         jmp qword ptr [EnemySwapper::killShadowRet]
 
@@ -1301,8 +1305,8 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   spawnPosYOffset  = cfg.get<float>("EnemySwapper.spawnPosYOffset").value_or(0.0f);
   isBossDanteAiEnabled = cfg.get<bool>("EnemySwapper.isBossDanteAiEnabled").value_or(false);
   isDanteM20 = cfg.get<bool>("EnemySwapper.isDanteM20").value_or(false);
-  canKillGriffon = cfg.get<bool>("EnemySwapper.canKillGriffon").value_or(false);
-  canKillShadow = cfg.get<bool>("EnemySwapper.canKillShadow").value_or(false);
+  /*canKillGriffon = cfg.get<bool>("EnemySwapper.canKillGriffon").value_or(false);
+  canKillShadow = cfg.get<bool>("EnemySwapper.canKillShadow").value_or(false);*/
   isNightmareFix  = cfg.get<bool>("EnemySwapper.isNightmareFix").value_or(false);
   isCavFixEnabled = cfg.get<bool>("EnemySwapper.isCavFixEnabled").value_or(false);
   isVergilFixEnabled = cfg.get<bool>("EnemySwapper.isVergilFixEnabled").value_or(false);
@@ -1442,8 +1446,8 @@ void EnemySwapper::on_draw_ui() {
       set_Dante_ai();
       ImGui::Separator();
       ImGui::TextWrapped("Familiars options can be changed during gameplay.");
-      ImGui::Checkbox("Enable kill shadow", &canKillShadow);
-      ImGui::Checkbox("Enable kill griffon", &canKillGriffon);
+      /*ImGui::Checkbox("Enable kill shadow", &canKillShadow);
+      ImGui::Checkbox("Enable kill griffon", &canKillGriffon);*/
       ImGui::Checkbox("Nightmare meteor fix", &isNightmareFix);
       if (isNightmareFix) {
           ImGui::TextWrapped("Offset to current player position for meteor starting. Affect meteor speed.");

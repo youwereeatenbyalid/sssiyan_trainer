@@ -177,34 +177,13 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		//virtual std::optional<uintptr_t> get_rcx_ptr() { return std::nullopt; }
+		//virtual std::optional<uintptr_t> get_thread_context() { return std::nullopt; }
 
 		virtual uintptr_t get_cur_rcx() const { return rcx; }
 
-		virtual std::optional<uintptr_t> get_rcx_ptr(int indx)
+		virtual uintptr_t get_thread_context()
 		{
-			switch (indx)
-			{
-				case 0:
-					return get_rcx_ptr();
-				case 1:
-				{
-					auto base = g_framework->get_module().as<uintptr_t>() + rcxBase2;
-					return GameFunctions::PtrController::get_ptr<uintptr_t>(base, fancyRcx2, true);
-					break;
-				}
-				default:
-				{
-					return get_rcx_ptr();
-				}
-			}
-		}
-
-		virtual std::optional<uintptr_t> get_rcx_ptr()
-		{
-			auto base = g_framework->get_module().as<uintptr_t>() + rcxBase;
-			auto ptrAddr = GameFunctions::PtrController::get_ptr<uintptr_t>(base, fancyRcx, true);
-			return ptrAddr;
+			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context());
 		}
 
 		virtual void set_rcx(uintptr_t param) { rcx = param; }

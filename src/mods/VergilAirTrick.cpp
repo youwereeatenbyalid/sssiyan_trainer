@@ -173,7 +173,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	//void *posCorPtr = (void*)(*(uintptr_t*)(vergil + 0x8E8));
 	//////*(uintptr_t*)((uintptr_t)posCorPtr+0x18) = 0;
 	//GameFunctions::PositionErrorCorrector posCor{posCorPtr};
-	//posCor.set_rcx(posCor.get_rcx_ptr().value());
+	//posCor.set_rcx(posCor.get_thread_context().value());
 	//posCor.set_position(targetPos);
 	//-------------------------------------------------------------------------------------------------------------//
 

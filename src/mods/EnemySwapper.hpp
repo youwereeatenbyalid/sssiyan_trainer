@@ -6,6 +6,7 @@
 #include "EnemyWaveEditor.hpp"
 #include "CheckpointPos.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
+#include "MissionManager.hpp"
 //#include "EnemyDataSettings.hpp"
 
 class EnemySwapper : public Mod {
