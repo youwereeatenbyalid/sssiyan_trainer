@@ -30,21 +30,23 @@ void VergilDisableSDTAccumulate::init_check_box_info() {
 
 std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   init_check_box_info();
-  ischecked          = &VergilDisableSDTAccumulate::cheaton;
-  onpage             = vergilsdt;
-  full_name_string   = "Disable SDT accumulate";
-  author_string      = "VPZadov";
-  description_string = "Disable the \"accumulate\" skill. Works best with the "
+  m_is_enabled          = &VergilDisableSDTAccumulate::cheaton;
+  m_on_page             = vergilsdt;
+  m_full_name_string   = "Disable SDT accumulate";
+  m_author_string      = "VPZadov";
+  m_description_string = "Disable the \"accumulate\" skill. Works best with the "
                        "accumulate system rework.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = utility::scan(base, "E8 09 F0 DB 00");
+  auto init_addr = patterns->find_addr(base, "E8 09 F0 DB 00");
   if (!init_addr) {
     return "Unanable to find VergilDisableSDTAccumulate::init_addr pattern.";
   }
 
-  auto func_addr_temp = utility::scan(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
+  auto func_addr_temp = patterns->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
   if (!func_addr_temp) {
     return "Unanable to find VergilDisableSDTAccumulate::func_addr pattern.";
   }
@@ -58,10 +60,10 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilDisableSDTAccumulate::on_config_load(const utility::Config& cfg) {}
+// void VergilDisableSDTAccumulate::on_config_load(const utility::Config& cfg) {}
 
-void VergilDisableSDTAccumulate::on_config_save(utility::Config& cfg) {}
+// void VergilDisableSDTAccumulate::on_config_save(utility::Config& cfg) {}
 
-void VergilDisableSDTAccumulate::on_draw_ui() {}
+// void VergilDisableSDTAccumulate::on_draw_ui() {}
 
-void VergilDisableSDTAccumulate::on_draw_debug_ui() {}
+// void VergilDisableSDTAccumulate::on_draw_debug_ui() {}

@@ -10,48 +10,48 @@ public:
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static jmp_ret;
-  bool static cheaton;
+  static uintptr_t jmp_ret;
+  static bool cheaton;
   static void* function_hook(int* a1, wchar_t* a2);
   void* string_replace(int* a1, wchar_t* a2);
-  wchar_t static ldkcomp[];
-  wchar_t static ldkdescriptioncomp[];
+  static wchar_t ldkcomp[];
+  static wchar_t ldkdescriptioncomp[];
 
-  wchar_t static voidcomp[];
-  wchar_t static voidpausecomp[];
-  wchar_t static voidconfirmcomp[];
-  wchar_t static voiddescriptioncomp[];
-  
+  static wchar_t voidcomp[];
+  static wchar_t voidpausecomp[];
+  static wchar_t voidconfirmcomp[];
+  static wchar_t voiddescriptioncomp[];
 
-  wchar_t static ldkstring[];
-  wchar_t static sosstring[];
 
-  wchar_t static ldkdescriptionstring[];
-  wchar_t static sosdescriptionstring[];
+  static wchar_t ldkstring[];
+  static wchar_t sosstring[];
 
-  wchar_t static swstring[];
-  wchar_t static voidstring[];
+  static wchar_t ldkdescriptionstring[];
+  static wchar_t sosdescriptionstring[];
 
-  wchar_t static swpausestring[];
-  wchar_t static voidpausestring[];
-  
-  wchar_t static swconfirmstring[];
-  wchar_t static voidconfirmstring[];
+  static wchar_t swstring[];
+  static wchar_t voidstring[];
 
-  wchar_t static swdescriptionstring[];
-  wchar_t static voiddescriptionstring[];
+  static wchar_t swpausestring[];
+  static wchar_t voidpausestring[];
+
+  static wchar_t swconfirmstring[];
+  static wchar_t voidconfirmstring[];
+
+  static wchar_t swdescriptionstring[];
+  static wchar_t voiddescriptionstring[];
 
 
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
   // on_frame() is called every frame regardless whether the gui shows up.
-  void on_frame() override;
+  // void on_frame() override;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
-  void on_draw_ui() override;
+  // void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
-  void on_draw_debug_ui() override;
+  // void on_draw_debug_ui() override;
 private:
 
   // function hook instance for our detour, convinient wrapper 

@@ -34,16 +34,18 @@ void NoJCCooldown::init_check_box_info() {
 std::optional<std::string> NoJCCooldown::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NoJCCooldown::cheaton;
-  onpage             = enemystep;
+  m_is_enabled          = &NoJCCooldown::cheaton;
+  m_on_page             = enemystep;
 
-  full_name_string   = "No Jump Cancel Cooldown";
-  author_string      = "SSSiyan";
-  description_string = "Removes the cooldown that starts when you enemy step, "
+  m_full_name_string   = "No Enemy Step Cooldown";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Removes the cooldown that starts when you enemy step, "
                        "allowing you to perform jump cancels in quicker succession.";
 
+  set_up_hotkey();
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 11 87 34 13 00 00 48 8B 43 50 48 83 78 18 00 0F 85 F8");
+  auto addr = patterns->find_addr(base, "F3 0F 11 87 34 13 00 00 48 8B 43 50 48 83 78 18 00 0F 85 F8");
   if (!addr) {
     return "Unable to find NoJCCooldown pattern.";
   }
@@ -56,4 +58,4 @@ std::optional<std::string> NoJCCooldown::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NoJCCooldown::on_draw_ui() {}
+// void NoJCCooldown::on_draw_ui() {}

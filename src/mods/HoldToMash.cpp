@@ -24,11 +24,8 @@ __asm {
     test [r8+0x3C], eax
     seta al
     jmp qword ptr [HoldToMash::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -41,13 +38,15 @@ std::optional<std::string> HoldToMash::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &HoldToMash::cheaton;
-  onpage    = qol;
-  full_name_string     = "Hold To Mash";
-  author_string        = "The Hitchhiker";
-  description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
-  auto holdtomash_addr = utility::scan(base, "41 85 40 48 0F 97 C0");
+  m_is_enabled = &HoldToMash::cheaton;
+  m_on_page    = qol;
+  m_full_name_string     = "Hold To Mash";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
 
+  set_up_hotkey();
+  auto holdtomash_addr = patterns->find_addr(base, "41 85 40 48 0F 97 C0");
+  
   if (!holdtomash_addr) {
     return "Unable to find holdtomash pattern.";
   }
@@ -61,12 +60,12 @@ std::optional<std::string> HoldToMash::on_initialize() {
 }
 
 // during load
-void HoldToMash::on_config_load(const utility::Config &cfg) {}
+// void HoldToMash::on_config_load(const utility::Config &cfg) {}
 // during save
-void HoldToMash::on_config_save(utility::Config &cfg) {}
+// void HoldToMash::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void HoldToMash::on_frame() {}
+//void HoldToMash::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void HoldToMash::on_draw_debug_ui() {}
+//void HoldToMash::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void HoldToMash::on_draw_ui() {}
+// void HoldToMash::on_draw_ui() {}

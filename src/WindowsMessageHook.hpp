@@ -4,11 +4,13 @@
 
 #include <Windows.h>
 
+#define RE_TOGGLE_CURSOR WM_APP + 1
+
 // This type of hook replaces a windows message procedure so that it can intercept
 // messages sent to the window.
 class WindowsMessageHook {
 public:
-    std::function<bool(HWND, UINT, WPARAM, LPARAM)> on_message;
+    std::function<bool(HWND&, UINT&, WPARAM&, LPARAM&)> on_message;
 
     WindowsMessageHook() = delete;
     WindowsMessageHook(const WindowsMessageHook& other) = delete;
@@ -26,6 +28,10 @@ public:
 
     auto get_original() const {
         return m_original_proc;
+    }
+
+    inline void window_toggle_cursor(bool toggle) {
+      ::PostMessage(m_wnd, RE_TOGGLE_CURSOR, toggle, 0);
     }
 
     WindowsMessageHook& operator=(const WindowsMessageHook& other) = delete;

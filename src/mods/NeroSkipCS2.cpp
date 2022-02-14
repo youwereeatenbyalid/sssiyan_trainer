@@ -39,15 +39,17 @@ void NeroSkipCS2::init_check_box_info() {
 std::optional<std::string> NeroSkipCS2::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NeroSkipCS2::cheaton;
-  onpage               = nero;
+  m_is_enabled            = &NeroSkipCS2::cheaton;
+  m_on_page               = nero;
 
-  full_name_string     = "Skip Charge Shot 2";
-  author_string        = "SSSiyan";
-  description_string   = "Bypasses Charge Shot 2 when charging Blue Rose.";
+  m_full_name_string     = "Skip Charge Shot 2";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Bypasses Charge Shot 2 when charging Blue Rose.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "FF 47 58 48 8B 43 50 48 39");
+  auto addr = patterns->find_addr(base, "FF 47 58 48 8B 43 50 48 39");
   if (!addr) {
     return "Unable to find NeroSkipCS2 pattern.";
   }
@@ -60,4 +62,4 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroSkipCS2::on_draw_ui() {}
+// void NeroSkipCS2::on_draw_ui() {}

@@ -94,19 +94,21 @@ void ChargeChecker::init_check_box_info() {
 std::optional<std::string> ChargeChecker::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &ChargeChecker::cheaton;
-  onpage             = nero;
+  m_is_enabled          = &ChargeChecker::cheaton;
+  m_on_page             = nero;
 
-  full_name_string   = "Faster Charges";
-  author_string      = "SSSiyan";
-  description_string = "Speed up or slow down charges bound to hold inputs.";
+  m_full_name_string   = "Faster Charges (+)";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Speed up or slow down charges bound to hold inputs.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 4F 5C 0F 57 C0 0F 5A C9 F3"); // "DevilMayCry5.exe"+20BE39E
+  auto addr = patterns->find_addr(base, "F3 0F 10 4F 5C 0F 57 C0 0F 5A C9 F3"); // "DevilMayCry5.exe"+20BE39E
   if (!addr) {
     return "Unable to find ChargeChecker pattern.";
   }
-  auto addr2 = utility::scan(base, "95 F3 0F 10 40 10"); // "DevilMayCry5.exe"+20B648B
+  auto addr2 = patterns->find_addr(base, "95 F3 0F 10 40 10"); // "DevilMayCry5.exe"+20B648B
   if (!addr2) {
     return "Unable to find ChargeChecker pattern2.";
   }
@@ -131,25 +133,29 @@ void ChargeChecker::on_config_load(const utility::Config& cfg) {
   neroGunMult = cfg.get<float>("nero_gun_charge").value_or(1.0f);
   neroBreakerMult = cfg.get<float>("nero_breaker_charge").value_or(1.0f);
   breakerChargeMax = cfg.get<float>("nero_breaker_charge_max").value_or(120.0f);
+  standardizeBreakerCharges = cfg.get<bool>("standardize_breaker_charges").value_or(false);
 }
 void ChargeChecker::on_config_save(utility::Config& cfg) {
   cfg.set<float>("nero_sword_charge", neroSwordMult);
   cfg.set<float>("nero_gun_charge", neroGunMult);
   cfg.set<float>("nero_breaker_charge", neroBreakerMult);
   cfg.set<float>("nero_breaker_charge_max", breakerChargeMax);
+  cfg.set<bool>("standardize_breaker_charges", standardizeBreakerCharges);
 }
 
 void ChargeChecker::on_draw_ui() {
   ImGui::Text("Sword Charge Speed Multiplier");
-  ImGui::InputFloat("##swordmultslider", &neroSwordMult, 0.1f);
+
+  UI::SliderFloat("##swordmultslider", &neroSwordMult, 0.5f, 3.0f, "%.1f");
   ImGui::Text("Gun Charge Speed Multiplier");
-  ImGui::InputFloat("##gunmultslider", &neroGunMult, 0.1f);
+  UI::SliderFloat("##gunmultslider", &neroGunMult, 0.5f, 3.0f, "%.1f");
   ImGui::Text("Breaker Charge Speed Multiplier");
-  ImGui::InputFloat("##breakermultslider", &neroBreakerMult, 0.1f);
+  UI::SliderFloat("##breakermultslider", &neroBreakerMult, 0.5f, 3.0f, "%.1f");
+
   ImGui::Spacing();
   ImGui::Separator();
   ImGui::Spacing();
   ImGui::Checkbox("Standardize Breaker Charge Times", &standardizeBreakerCharges);
   ImGui::Text("Breaker Charge Time (Gerbera default is 120)");
-  ImGui::InputFloat("##maxbreakerchargeslider", &breakerChargeMax, 0.1f);
+  UI::SliderFloat("##maxbreakerchargeslider", &breakerChargeMax, 0.0f, 200.0f, "%.0f");
 }

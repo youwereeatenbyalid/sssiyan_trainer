@@ -21,11 +21,8 @@ __asm {
 
   cheatcode:
     jmp qword ptr [InfiniteGambits::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -38,12 +35,14 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteGambits::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Gambits";
-  author_string        = "SSSiyan";
-  description_string   = "Infinite number of aerial gambits.";
-  auto infinitegambit_addr = utility::scan(base, "FF 87 28 18 00 00 48");
+  m_is_enabled = &InfiniteGambits::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Gambits";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Infinite number of aerial gambits.";
+
+  set_up_hotkey();
+  auto infinitegambit_addr = patterns->find_addr(base, "FF 87 28 18 00 00 48");
 
   if (!infinitegambit_addr) {
     return "Unable to find infinitegambit pattern.";
@@ -58,12 +57,12 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
 }
 
 // during load
-void InfiniteGambits::on_config_load(const utility::Config &cfg) {}
+// void InfiniteGambits::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteGambits::on_config_save(utility::Config &cfg) {}
+// void InfiniteGambits::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void InfiniteGambits::on_frame() {}
+//void InfiniteGambits::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void InfiniteGambits::on_draw_debug_ui() {}
+//void InfiniteGambits::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void InfiniteGambits::on_draw_ui() {}
+// void InfiniteGambits::on_draw_ui() {}

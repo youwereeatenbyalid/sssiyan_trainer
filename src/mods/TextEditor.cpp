@@ -100,16 +100,18 @@ void TextEditor::init_check_box_info() {
 std::optional<std::string> TextEditor::on_initialize() {
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &TextEditor::cheaton;
+  m_is_enabled = &TextEditor::cheaton;
   //onpage    = commonpage;
 
-  auto addr = utility::scan(base, "40 53 57 41 56 48 83 EC 20 45 33");
+  auto addr = patterns->find_addr(base, "40 53 57 41 56 48 83 EC 20 45 33");
   if (!addr) {
 	  return "Unable to find Text Editor Pattern.";
   }
-  full_name_string     = "Text Editor";
-  author_string        = "The Hitchhiker";
-  description_string   = "Replaces Strings.";
+  m_full_name_string     = "Text Editor";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Replaces Strings.";
+
+  set_up_hotkey();
   m_sub_function_hook = std::make_unique<FunctionHook>(addr.value(), &function_hook);
   m_sub_function_hook->create();
 
@@ -117,12 +119,12 @@ std::optional<std::string> TextEditor::on_initialize() {
 }
 
 // during load
-void TextEditor::on_config_load(const utility::Config &cfg) {}
+// void TextEditor::on_config_load(const utility::Config &cfg) {}
 // during save
-void TextEditor::on_config_save(utility::Config &cfg) {}
+// void TextEditor::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void TextEditor::on_frame() {}
+// void TextEditor::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void TextEditor::on_draw_debug_ui() {}
+// void TextEditor::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void TextEditor::on_draw_ui() {}
+// void TextEditor::on_draw_ui() {}

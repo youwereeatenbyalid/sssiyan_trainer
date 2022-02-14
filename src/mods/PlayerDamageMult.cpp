@@ -66,22 +66,24 @@ void PlayerDamageMult::init_check_box_info() {
 std::optional<std::string> PlayerDamageMult::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &PlayerDamageMult::cheaton;
-  onpage             = balance;
-  full_name_string   = "Damage Multiplier (+)";
-  author_string      = "Dante";
-  description_string = "Adjust the damage output of players and enemies.";
+  m_is_enabled          = &PlayerDamageMult::cheaton;
+  m_on_page             = balance;
+  m_full_name_string   = "Damage Multiplier (+)";
+  m_author_string      = "Dante";
+  m_description_string = "Adjust the damage output of players and enemies.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 5C 81 20");
+  auto addr = patterns->find_addr(base, "F3 0F 10 5C 81 20");
   if (!addr) {
     return "Unable to find PlayerDamageMult pattern.";
   }
-  auto addr2 = utility::scan(base, "F3 0F 10 5C 91 20 48");
+  auto addr2 = patterns->find_addr(base, "F3 0F 10 5C 91 20 48");
   if (!addr2) {
     return "Unable to find PlayerDamageMult2 pattern.";
   }
-  // auto addr3 = utility::scan(base, "00 E3 01 FC BC 02 00 00 70"); // Game Difficulty Base
+  // auto addr3 = patterns->find_addr(base, "00 E3 01 FC BC 02 00 00 70"); // Game Difficulty Base
   // if (!addr3) {
   //   return "Unable to find PlayerDamageMult3 pattern.";
   // }

@@ -212,16 +212,18 @@ std::optional<std::string> MoveReplacer::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &MoveReplacer::cheaton;
-  onpage    = -1;
-  full_name_string     = "MoveReplacer";
-  author_string        = "The Hitchhiker";
-  description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
+  m_is_enabled = &MoveReplacer::cheaton;
+  m_on_page    = -1;
+  m_full_name_string     = "MoveReplacer";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
 
-  auto addr = utility::scan(base, "41 8B 1E 49 8B CD");
-  auto filtercalladdr = utility::scan(base, "FE FE FF FF 48 83 C3 04 48 FF C7");
-  auto startmovecalladdr = utility::scan(base, "49 8B 46 20 41 8B CC");
-  auto endmovecalladdr   = utility::scan(base, "66 44 21 73 1A");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "41 8B 1E 49 8B CD");
+  auto filtercalladdr = patterns->find_addr(base, "FE FE FF FF 48 83 C3 04 48 FF C7");
+  auto startmovecalladdr = patterns->find_addr(base, "49 8B 46 20 41 8B CC");
+  auto endmovecalladdr   = patterns->find_addr(base, "66 44 21 73 1A");
   MoveReplacer::filtercall = filtercalladdr.value();
   MoveReplacer::startmovecall = startmovecalladdr.value();
   MoveReplacer::endmovecall   = endmovecalladdr.value();
@@ -237,12 +239,12 @@ std::optional<std::string> MoveReplacer::on_initialize() {
 }
 
 // during load
-void MoveReplacer::on_config_load(const utility::Config &cfg) {}
+// void MoveReplacer::on_config_load(const utility::Config &cfg) {}
 // during save
-void MoveReplacer::on_config_save(utility::Config &cfg) {}
+// void MoveReplacer::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void MoveReplacer::on_frame() {}
+// void MoveReplacer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void MoveReplacer::on_draw_debug_ui() {}
+// void MoveReplacer::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void MoveReplacer::on_draw_ui() {}
+// void MoveReplacer::on_draw_ui() {}

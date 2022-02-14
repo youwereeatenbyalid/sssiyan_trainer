@@ -6,7 +6,7 @@ bool MovingTargetSwitch::cheaton{NULL};
 uintptr_t MovingTargetSwitch::jmp_jae{NULL};
 
 float comissvalue = 0.75f;
-
+float fixvalue = 2.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -17,6 +17,7 @@ static naked void detour() {
         jmp code
 
     cheatcode:
+		comiss xmm0, [fixvalue]
 		jmp qword ptr [MovingTargetSwitch::jmp_ret]
 
     code:
@@ -39,22 +40,22 @@ void MovingTargetSwitch::init_check_box_info() {
 std::optional<std::string> MovingTargetSwitch::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &MovingTargetSwitch::cheaton;
-  onpage               = mechanics;
+  m_is_enabled            = &MovingTargetSwitch::cheaton;
+  m_on_page               = mechanics;
 
-  full_name_string     = "Moving Target Switch";
-  author_string        = "SSSiyan";
-  description_string   = "Allows you to switch targets while moving the left stick";
+  m_full_name_string     = "Moving Target Switch";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Allows you to switch targets while moving the left stick";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "0F 2F 05 81 DF F6 02");
+  auto addr = patterns->find_addr(base, "0F 2F 05 B1 DF F6 02");
   if (!addr) {
     return "Unable to find MovingTargetSwitch pattern.";
   }
 
-  MovingTargetSwitch::jmp_jae = utility::scan(base, "3E 00 00 48 85 C9 75 12").value()+3;
+  MovingTargetSwitch::jmp_jae = patterns->find_addr(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
+  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize MovingTargetSwitch";
@@ -62,5 +63,4 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   return Mod::on_initialize();
 }
 
-void MovingTargetSwitch::on_draw_ui() {
-}
+// void MovingTargetSwitch::on_draw_ui(){}

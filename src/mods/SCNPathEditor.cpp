@@ -158,13 +158,15 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &SCNPathEditor::cheaton;
+  m_is_enabled = &SCNPathEditor::cheaton;
   //onpage    = gamemode;
-  full_name_string     = "SCNPathEditor Full Name";
-  author_string        = "Author";
-  description_string   = "This is the description of SCNPathEditor.";
+  m_full_name_string     = "SCNPathEditor Full Name";
+  m_author_string        = "Author";
+  m_description_string   = "This is the description of SCNPathEditor.";
 
-  auto addr = utility::scan(base, "75 F5 48 83 C1 68");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "75 F5 48 83 C1 68");
   if (!addr) {
     return "Unable to find SCNPathEditor pattern.";
   }
@@ -178,13 +180,13 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
 }
 
 // during load
-void SCNPathEditor::on_config_load(const utility::Config &cfg) {}
+// void SCNPathEditor::on_config_load(const utility::Config &cfg) {}
 // during save
-void SCNPathEditor::on_config_save(utility::Config &cfg) {}
+// void SCNPathEditor::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void SCNPathEditor::on_frame() {}
+// void SCNPathEditor::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void SCNPathEditor::on_draw_debug_ui() {}
+// void SCNPathEditor::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void SCNPathEditor::on_draw_ui() {}
+// void SCNPathEditor::on_draw_ui() {}
 

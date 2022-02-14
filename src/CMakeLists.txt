@@ -63,8 +63,8 @@ set(MODS_SRC
     mods/NoJCCooldown.cpp 
     mods/DisableEnemyAI.hpp 
     mods/DisableEnemyAI.cpp 
-    mods/HideHUD.hpp 
-    mods/HideHUD.cpp 
+    mods/HUDOptions.hpp 
+    mods/HUDOptions.cpp 
     mods/CameraSettings.hpp 
     mods/CameraSettings.cpp 
     mods/AlwaysSTaunts.hpp 
@@ -109,8 +109,8 @@ set(MODS_SRC
     mods/NeroInfPunchline.cpp 
     mods/NeroSkipCS2.hpp 
     mods/NeroSkipCS2.cpp 
-    mods/NeroNoDTCooldown.hpp 
-    mods/NeroNoDTCooldown.cpp 
+    mods/NoDTCooldown.hpp 
+    mods/NoDTCooldown.cpp 
     mods/PlayerDamageMult.hpp 
     mods/PlayerDamageMult.cpp 
     mods/TauntSelector.hpp 
@@ -165,8 +165,6 @@ set(MODS_SRC
     mods/WeightReset.cpp 
     mods/InfiniteSummonPowerup.hpp 
     mods/InfiniteSummonPowerup.cpp
-    mods/GilverNoDTCooldown.hpp 
-    mods/GilverNoDTCooldown.cpp
     mods/EmpoweredCane.hpp 
     mods/EmpoweredCane.cpp 
     mods/InfiniteSummonVitality.hpp 
@@ -188,8 +186,6 @@ set(MODS_SRC
     mods/VergilSDTAccumulateRework.hpp
 	mods/DifficultySelect.hpp
 	mods/DifficultySelect.cpp
-	mods/DontHideWeaponWheel.hpp
-	mods/DontHideWeaponWheel.cpp
     mods/EnemySwapper.hpp
     mods/EnemySwapper.cpp
     mods/EnemyDataSettings.hpp
@@ -221,19 +217,62 @@ set(MODS_SRC
     mods/CheckpointPos.cpp
     mods/MissionManager.cpp
     mods/MissionManager.hpp
+    mods/EnemyWaveEditor.hpp
+    mods/EnemyWaveEditor.cpp
+    mods/SecretMissionTimer.hpp
+    mods/SecretMissionTimer.cpp
+    mods/DMC3JCE.hpp
+    mods/DMC3JCE.cpp
+    mods/JCENoMotivationLimit.hpp
+    mods/JCENoMotivationLimit.cpp
     mods/BossDanteSetup.hpp
     mods/BossDanteSetup.cpp
+    mods/LandCancels.hpp 
+    mods/LandCancels.cpp 
+    mods/TrickDodgeNoDisappear.hpp
+    mods/TrickDodgeNoDisappear.cpp
+    mods/VergilWalkingGuard.hpp
+    mods/VergilWalkingGuard.cpp
+    mods/VergilGuardYamatoBlock.hpp
+    mods/VergilGuardYamatoBlock.cpp
+    mods/AirTrickDodge.hpp
+    mods/AirTrickDodge.cpp
+    mods/DanteNoSdtStun.hpp
+    mods/DanteNoSdtStun.cpp
+    mods/DanteRedlineCav.hpp 
+    mods/DanteRedlineCav.cpp 
+    mods/DanteSDTRework.hpp 
+    mods/DanteSDTRework.cpp 
+    mods/NeroInfCalibur.hpp 
+    mods/NeroInfCalibur.cpp 
+    mods/JudgementCustomCost.hpp
+    mods/OneHitKill.hpp 
+    mods/OneHitKill.cpp
+    mods/NoOneTakesDamage.hpp 
+    mods/NoOneTakesDamage.cpp 
+    mods/DanteDtNoActivationCost.hpp
 )
 
 set(HOOKS_SRC
+	ControllerHook.hpp
+	ControllerHook.cpp
     DInputHook.hpp
     DInputHook.cpp
     D3D11Hook.hpp
     D3D11Hook.cpp
+    D3D12Hook.hpp
+    D3D12Hook.cpp
     WindowsMessageHook.hpp
     WindowsMessageHook.cpp
     PositionHooks.hpp
     PositionHooks.cpp
+	XInputHook.hpp
+	XInputHook.cpp
+)
+
+set(IMGUI_EXTENSIONS_SRC
+    ImGuiExtensions/ImGuiExtensions.h
+    ImGuiExtensions/ImGuiExtensions.cpp
 )
 
 set(SDK_SRC
@@ -241,6 +280,8 @@ set(SDK_SRC
     sdk/ReClass_Internal.hpp
     sdk/Enums_Internal.hpp
     sdk/Offsets.hpp
+    sdk/REContext.cpp
+    sdk/REContext.hpp
 )
 
 set(UTILITY_SRC
@@ -271,62 +312,68 @@ set(FRAMEWORK_SRC
     ModFramework.hpp
     ModFramework.cpp
     Config.hpp
+	stb_image.h
+	stb_image_resize.h
+	KeyBinder.hpp
+	KeyBinder.cpp
+	logo.hpp
+	icons.hpp
+    InitPatternsManager.hpp
 )
 
-option(HOOK_D3D "Hook direct3D" OFF)
+set(LISTEDITOR_SRC
+    ListEditor/AllocatedData.hpp
+    ListEditor/MimicMngObj.hpp
+)
 
-if(HOOK_D3D)
+set(GAME_FUNC_SRC
+    Mods/GameFunctions/GameFunc.hpp
+    Mods/GameFunctions/PrefabInstantiate.hpp
+    Mods/GameFunctions/CreateShell.hpp
+    Mods/GameFunctions/PositionController.hpp
+    Mods/GameFunctions/PlayerCheckNormalJump.hpp
+)
+
 set(IMGUI_SRC
+	fw-imgui/font_robotomedium.hpp
+    fw-imgui/fa_solid_900.h
+    fw-imgui/font_awesome_5.h
     fw-imgui/imgui_impl_win32.h
     fw-imgui/imgui_impl_win32.cpp
     fw-imgui/imgui_impl_dx11.h
     fw-imgui/imgui_impl_dx11.cpp
+    fw-imgui/imgui_impl_dx12.h
+    fw-imgui/imgui_impl_dx12.cpp
+    fw-imgui/imgui_notify.h
+    fw-imgui/ui.cpp
+    fw-imgui/ui.hpp
 )
-else()
-set(IM_WINDOW_DX11
-    ImWindowDX11/ImwPlatformWindowDX11.cpp  
-    ImWindowDX11/ImwPlatformWindowDX11.h
-    ImWindowDX11/ImwWindowManagerDX11.cpp   
-    ImWindowDX11/ImwWindowManagerDX11.h  
-    ImWindowDX11/Win32MessageHelper.cpp
-    ImWindowDX11/Win32MessageHelper.h
-)
-
-set(IM_WINDOW_EASY_WINDOW
-    ImWindowEasyWindow/ImwPlatformWindowEasyWindow.cpp  
-    ImWindowEasyWindow/ImwPlatformWindowEasyWindow.h    
-    ImWindowEasyWindow/ImwWindowManagerEasyWindow.cpp
-    ImWindowEasyWindow/ImwWindowManagerEasyWindow.h
-)
-endif()
 
 source_group("Hooks" FILES ${HOOKS_SRC})
+source_group("ImGuiExtensions" FILES ${IMGUI_EXTENSIONS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
+source_group("ListEditor" FILES ${LISTEDITOR_SRC})
+source_group("Mods/GameFunctions" FILES ${GAME_FUNC_SRC})
 source_group("SDK" FILES ${SDK_SRC})
 source_group("Utility" FILES ${UTILITY_SRC})
 source_group("Framework" FILES ${FRAMEWORK_SRC})
-
-if(HOOK_D3D)
-    source_group("imgui", FILES ${IMGUI_SRC})
-else()
-    source_group("ImWindowDX11" FILES ${IM_WINDOW_DX11})
-    source_group("ImWindowEasyWindow" FILES ${IM_WINDOW_EASY_WINDOW})
-endif()
+source_group("FW-ImGui" FILES ${IMGUI_SRC})
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
             Main.cpp
             LicenseStrings.hpp
             ${SDK_SRC}
+            ${IMGUI_EXTENSIONS_SRC}
             ${MODS_SRC}
+            ${GAME_FUNC_SRC}
+            ${LISTEDITOR_SRC}
             ${HOOKS_SRC}
             ${IMGUI_SRC}
             ${UTILITY_SRC}
-            ${IM_WINDOW_DX11}
-            ${IM_WINDOW_EASY_WINDOW}
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 glm_static jsonstthm imwindow easywindow shlwapi)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
@@ -342,8 +389,9 @@ OUTPUT_NAME sssiyan)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
                    POST_BUILD
-                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)fluffymod\\" /E /Y /R VERBATIM)
+                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
+                   target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)
-    target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
+    #target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 endif()

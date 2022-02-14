@@ -39,13 +39,15 @@ std::optional<std::string> ExceedValue::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &ExceedValue::cheaton;
-  onpage    = nero;
-  full_name_string     = "Set Exceed Level";
-  author_string        = "The Hitchhiker";
-  description_string   = "Set/Lock Nero's Exceed.";
+  m_is_enabled = &ExceedValue::cheaton;
+  m_on_page = nero;
+  m_full_name_string     = "Set Exceed Level (+)";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Set/Lock Nero's Exceed.";
 
-  auto addr = utility::scan(base, "48 8B 88 48 19 00 00 33 F6 48 85");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "48 8B 88 48 19 00 00 33 F6 48 85");
   if (!addr) {
     return "Unable to find ExceedValue pattern.";
   }
@@ -66,10 +68,10 @@ void ExceedValue::on_config_save(utility::Config &cfg) {
     cfg.set<int>("exceed_value", exceed_value);
 }
 // do something every frame
-void ExceedValue::on_frame() {}
+//void ExceedValue::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void ExceedValue::on_draw_debug_ui() {}
+//void ExceedValue::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void ExceedValue::on_draw_ui() {
-    ImGui::SliderInt("Exceed Level",(int*)&ExceedValue::exceed_value, 0, 3);
+    UI::SliderInt("Exceed Level",(int*)&ExceedValue::exceed_value, 0, 3);
 }

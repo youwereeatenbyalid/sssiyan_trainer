@@ -25,7 +25,6 @@ __asm {
   cheatcode:
   je_return:
 	jmp qword ptr [PetChargeNoInterrupt::je_return]
-
   }
 }
 
@@ -41,12 +40,15 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &PetChargeNoInterrupt::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Pet charge carries through interrupt ";
-  author_string        = "The Hitchhiker";
-  description_string   = "Griffon's charges will continue through a backstep or air hike. Shadow's hedgehog will continue to charge through forced movement";
-  auto INJECT_addr = utility::scan(base, "74 10 48 8B D7 48 8B CB E8 C3");
+  m_is_enabled = &PetChargeNoInterrupt::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Pet charge carries through interrupt ";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Griffon's charges will continue through a backstep or air hike. Shadow's hedgehog will continue to charge through forced movement";
+
+  set_up_hotkey();
+  
+  auto INJECT_addr = patterns->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
   PetChargeNoInterrupt::je_return = INJECT_addr.value()+0x12;
   if (!INJECT_addr) {
     return "Unable to find INJECT pattern.";
@@ -61,12 +63,12 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
 }
 
 // during load
-void PetChargeNoInterrupt::on_config_load(const utility::Config &cfg) {}
+// void PetChargeNoInterrupt::on_config_load(const utility::Config &cfg) {}
 // during save
-void PetChargeNoInterrupt::on_config_save(utility::Config &cfg) {}
+// void PetChargeNoInterrupt::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void PetChargeNoInterrupt::on_frame() {}
+// void PetChargeNoInterrupt::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void PetChargeNoInterrupt::on_draw_debug_ui() {}
+// void PetChargeNoInterrupt::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void PetChargeNoInterrupt::on_draw_ui() {}
+// void PetChargeNoInterrupt::on_draw_ui() {}

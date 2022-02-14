@@ -19,16 +19,6 @@ add_library(minhook STATIC
             minhook/src/hde/table32.h
             minhook/src/hde/table64.h)
 
-project(imgui)
-
-add_library(imgui STATIC
-            imgui/imconfig.h
-            imgui/imgui_demo.cpp
-            #imgui/imgui_widgets.cpp
-            imgui/imgui_draw.cpp
-            imgui/imgui.cpp
-            imgui/imgui.h)
-
 project(jsonstthm)
 
 add_library(jsonstthm STATIC
@@ -36,29 +26,23 @@ add_library(jsonstthm STATIC
             JsonStthm/JsonStthm.h
             JsonStthm/JsonStthmConfig.h)
 
-project(imwindow)
+#pragma comment(lib, "jsonstthm.lib")
 
-add_library(imwindow STATIC
-            ImWindow/ImwContainer.cpp
-            ImWindow/ImwContainer.h
-            ImWindow/ImwMenu.cpp
-            ImWindow/ImwMenu.h
-            ImWindow/ImwPlatformWindow.cpp
-            ImWindow/ImwPlatformWindow.h
-            ImWindow/ImwStatusBar.cpp
-            ImWindow/ImwStatusBar.h
-            ImWindow/ImwToolBar.cpp
-            ImWindow/ImwToolBar.h
-            ImWindow/ImwWindow.cpp
-            ImWindow/ImwWindow.h
-            ImWindow/ImwWindowManager.cpp
-            ImWindow/ImwWindowManager.h
-            ImWindow/ImwConfig.h)
+project(imgui)
 
-project(easywindow)
-
-add_library(easywindow STATIC
-            EasyWindow/EasyWindowWin32.cpp
-            EasyWindow/EasyWindow.cpp
-            EasyWindow/EasyWindow.h
-)
+add_library(imgui STATIC
+            imgui/imconfig.h
+            imgui/imgui.cpp
+            imgui/imgui.h
+            imgui/imgui_demo.cpp
+            imgui/imgui_draw.cpp
+            imgui/imgui_internal.h
+            imgui/imgui_tables.cpp
+            imgui/imgui_widgets.cpp
+            imgui/imstb_rectpack.h
+            imgui/imstb_textedit.h
+            imgui/imstb_truetype.h
+            imgui/misc/cpp/imgui_stdlib.cpp
+            imgui/misc/cpp/imgui_stdlib.h
+            imgui/misc/fonts/binary_to_compressed_c.cpp
+            imgui/misc/single_file/imgui_single_file.h)

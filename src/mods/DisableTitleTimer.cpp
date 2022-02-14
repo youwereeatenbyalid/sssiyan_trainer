@@ -36,13 +36,15 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DisableTitleTimer::cheaton;
-  onpage    = qol;
-  full_name_string     = "Disable Titlescreen Timer";
-  author_string        = "The Hitchhiker";
-  description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
+  m_is_enabled = &DisableTitleTimer::cheaton;
+  m_on_page    = qol;
+  m_full_name_string     = "Disable Titlescreen Timer";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
 
-  auto addr = utility::scan(base, "F3 0F 10 05 CF FF 45 06");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {
     return "Unable to find DisableTitleTimer pattern.";
   }
@@ -55,12 +57,12 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
 }
 
 // during load
-void DisableTitleTimer::on_config_load(const utility::Config &cfg) {}
+// void DisableTitleTimer::on_config_load(const utility::Config &cfg) {}
 // during save
-void DisableTitleTimer::on_config_save(utility::Config &cfg) {}
+// void DisableTitleTimer::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void DisableTitleTimer::on_frame() {}
+// void DisableTitleTimer::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void DisableTitleTimer::on_draw_debug_ui() {}
+// void DisableTitleTimer::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void DisableTitleTimer::on_draw_ui() {}
+// void DisableTitleTimer::on_draw_ui() {}

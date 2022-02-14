@@ -123,18 +123,20 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &SpardaWorkshop::cheaton;
-  onpage    = gamemode;
-  full_name_string     = "Sparda's Workshop (+)";
-  author_string        = "Lidemi";
-  description_string   = "A comprehensive environmental training tool that enhances the Void.\n"
+  m_is_enabled = &SpardaWorkshop::cheaton;
+  m_on_page    = gamemode;
+  m_full_name_string     = "Sparda's Workshop (+)";
+  m_author_string        = "Lidemi";
+  m_description_string   = "A comprehensive environmental training tool that enhances the Void.\n"
                          "Use the advanced options to set player, barrel & enemy spawn positions.";
 
-  auto sceneplacer_addr = utility::scan(base, "8B 42 08 89 41 38 80");
+  set_up_hotkey();
+  
+  auto sceneplacer_addr = patterns->find_addr(base, "8B 42 08 89 41 38 80");
   if (!sceneplacer_addr) {
     return "Unable to find sceneplacer pattern.";
   }
-  auto enemyplacer_addr = utility::scan(base, "01 00 00 F3 0F 10 86 80 00 00 00 F3");
+  auto enemyplacer_addr = patterns->find_addr(base, "01 00 00 F3 0F 10 86 80 00 00 00 F3");
   if (!enemyplacer_addr) {
       return "Unable to find enemyplacer pattern.";
   }
@@ -275,9 +277,9 @@ void SpardaWorkshop::on_config_save(utility::Config &cfg) {
     cfg.set<int>("enemy index", enemyindex);
 }
 // do something every frame
-void SpardaWorkshop::on_frame() {}
+// void SpardaWorkshop::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void SpardaWorkshop::on_draw_debug_ui() {}
+// void SpardaWorkshop::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 
 

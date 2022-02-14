@@ -23,13 +23,15 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergilcheat;
-	full_name_string = "Infinite Trick Up";
-	author_string = "VPZadov";
-	description_string = "Allow to use Trick Up infinite times.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergilcheat;
+	m_full_name_string = "Infinite Trick Up";
+	m_author_string = "VPZadov";
+	m_description_string = "Allow vergil to infinitely trick up.";
 
-	auto trickUpAddr = utility::scan(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
+  set_up_hotkey();
+
+	auto trickUpAddr = patterns->find_addr(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
 	if (!trickUpAddr) {
 		return "Unanable to find InfiniteTrickUp.trickUpAddr pattern.";
 	}
@@ -44,25 +46,15 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
     return Mod::on_initialize();
 }
 
-void InfiniteTrickUp::on_config_load(const utility::Config& cfg)
-{
-}
+// void InfiniteTrickUp::on_config_load(const utility::Config& cfg){}
 
-void InfiniteTrickUp::on_config_save(utility::Config& cfg)
-{
-}
+// void InfiniteTrickUp::on_config_save(utility::Config& cfg){}
 
-void InfiniteTrickUp::on_frame()
-{
-}
+// void InfiniteTrickUp::on_frame(){}
 
-void InfiniteTrickUp::on_draw_ui()
-{
-}
+// void InfiniteTrickUp::on_draw_ui(){}
 
-void InfiniteTrickUp::on_draw_debug_ui()
-{
-}
+// void InfiniteTrickUp::on_draw_debug_ui(){}
 
 void InfiniteTrickUp::init_check_box_info() {
     m_check_box_name = m_prefix_check_box_name + std::string(get_name());

@@ -21,23 +21,46 @@ static naked void afterimages_detour() {
         mov rcx,rbx
         jmp qword ptr [VergilNoAfterimages::afterimages_jmp_ret]
 
+        checkhideret:
+        pop rax
+        jmp checkstate
+
         cheat:
-        cmp [VergilNoAfterimages::vergilafterimage_state], 0
+        cmp byte ptr [VergilNoAfterimages::isNoDrawIfObjHidden], 1
+        je checkhide
+        checkstate:
+        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 1
         je humanonly
-        cmp [VergilNoAfterimages::vergilafterimage_state], 1
+        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 2
         je sdtonly
-        cmp [VergilNoAfterimages::vergilafterimage_state], 2
+        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 3
         je all
+        cmp dword ptr [VergilNoAfterimages::vergilafterimage_state], 0
+        je originalcode
 
         humanonly:
-        cmp [VergilSDTFormTracker::vergilform_state], 2
+        cmp dword ptr [VergilSDTFormTracker::vergilform_state], 2
         jne ret_jne
         jmp originalcode
 
         sdtonly:
-        cmp [VergilSDTFormTracker::vergilform_state], 2
+        cmp dword ptr [VergilSDTFormTracker::vergilform_state], 2
         je ret_jne
         jmp originalcode
+
+        checkhide:
+        cmp qword ptr [PlayerTracker::vergilentity], 0
+        je checkstate
+        push rax
+        mov rax, [PlayerTracker::vergilentity]
+        mov rax, [rax+0x10]//GameObj
+        test rax, rax
+        je checkhideret
+        mov al, [rax + 0x15]//DrawSelf
+        cmp al, 0
+        pop rax
+        je ret_jne
+        jmp checkstate
 
         all:
         jmp ret_jne
@@ -55,15 +78,15 @@ void VergilNoAfterimages::init_check_box_info() {
 
 std::optional<std::string> VergilNoAfterimages::on_initialize() {
   init_check_box_info();
-  ischecked        = &VergilNoAfterimages::cheaton;
-  onpage           = vergilefxsettings;
-  full_name_string = "Disable Vergil's afterimages (+)";
-  author_string    = "VPZadov";
-  description_string = "Disable the afterimages Vergil leaves after almost every move.";
+  m_is_enabled        = &VergilNoAfterimages::cheaton;
+  m_on_page           = vergilefxsettings;
+  m_full_name_string = "Disable Vergil's afterimages (+)";
+  m_author_string    = "VPZadov";
+  m_description_string = "Disable the afterimages Vergil leaves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = utility::scan(base, "4C 39 78 18 0F 85 03 03 00 00 48");
+  auto init_addr = patterns->find_addr(base, "4C 39 78 18 0F 85 03 03 00 00 48");//DevilMayCry5.exe+58B450 
   if (!init_addr) {
     return "Unanable to find VergilNoAfterimages pattern.";
   }
@@ -79,15 +102,21 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
 
 void VergilNoAfterimages::on_config_load(const utility::Config& cfg) {
   vergilafterimage_state = cfg.get<uint32_t>("Vergil_Afterimage_State").value_or<uint32_t>(0);
+  isNoDrawIfObjHidden = cfg.get<bool>("VergilNoAfterimages.isNoDrawIfObjHidden").value_or(true);
 }
 
 void VergilNoAfterimages::on_config_save(utility::Config& cfg) {
   cfg.set<uint32_t>("Vergil_Afterimage_State", vergilafterimage_state);
+  cfg.set<bool>("VergilNoAfterimages.isNoDrawIfObjHidden", isNoDrawIfObjHidden);
 }
 
 void VergilNoAfterimages::on_draw_ui() {
-  ImGui::Text("Set value to disable afterimages: 0 - only in human form, \n1 - only in SDT, 2 - in all forms.");
-  ImGui::SliderInt("##Afterimages state slider", (int*)&vergilafterimage_state, 0, 2);
+  ImGui::Text("Set value to disable afterimages: 0 - only in human form, \n1 - only in SDT, 2 - in all forms; 3 - default.");
+
+  ImGui::Combo("Disable Type", (int*)&vergilafterimage_state, "Default afterimages\0Only in Human Form\0Only in SDT\0All Forms\0");
+  ImGui::Separator();
+  ImGui::TextWrapped("Disable afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself");
+  ImGui::Checkbox("Disable trick/dodge afterimages", &isNoDrawIfObjHidden);
 }
 
-void VergilNoAfterimages::on_draw_debug_ui() {}
+// void VergilNoAfterimages::on_draw_debug_ui() {}

@@ -10,47 +10,47 @@ public:
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
-  uintptr_t static updateweapon_jmp_ret;
-  uintptr_t static resetweapon_jmp_ret;
-  uintptr_t static fixparameter_jmp_ret;
-  uintptr_t static fixjdc_jmp_ret;
+  static uintptr_t updateweapon_jmp_ret;
+  static uintptr_t resetweapon_jmp_ret;
+  static uintptr_t fixparameter_jmp_ret;
+  static uintptr_t fixjdc_jmp_ret;
 
-  uintptr_t static jjdcaltcheck_jmp_ret;
-  uintptr_t static doppeljjdc_jmp_ret;
-  uintptr_t static doppeljjdc_jmp_jne;
-  uintptr_t static doppelonlyjjdc_jmp_ret;
-  uintptr_t static doppelonlyjjdc_jmp_call;
-  uintptr_t static doppelonlyjjdcteleport_jmp_ret;
-  uintptr_t static doppelonlyjjdcteleport_jmp_call;
+  static uintptr_t jjdcaltcheck_jmp_ret;
+  static uintptr_t doppeljjdc_jmp_ret;
+  static uintptr_t doppeljjdc_jmp_jne;
+  static uintptr_t doppelonlyjjdc_jmp_ret;
+  static uintptr_t doppelonlyjjdc_jmp_call;
+  static uintptr_t doppelonlyjjdcteleport_jmp_ret;
+  static uintptr_t doppelonlyjjdcteleport_jmp_call;
 
-  uintptr_t static doppelidle1_jmp_ret;
-  uintptr_t static doppelidle2_jmp_ret;
-  uintptr_t static doppelidle3_jmp_ret;
+  static uintptr_t doppelidle1_jmp_ret;
+  static uintptr_t doppelidle2_jmp_ret;
+  static uintptr_t doppelidle3_jmp_ret;
 
-  uintptr_t static doppelbeowulfcharge_jmp_ret;
-  uintptr_t static soundchargestart_jmp_ret;
-  uintptr_t static soundchargeend_jmp_ret;
-  uintptr_t static soundchargelevel1_jmp_ret;
-  uintptr_t static soundchargelevel2_jmp_ret;
+  static uintptr_t doppelbeowulfcharge_jmp_ret;
+  static uintptr_t soundchargestart_jmp_ret;
+  static uintptr_t soundchargeend_jmp_ret;
+  static uintptr_t soundchargelevel1_jmp_ret;
+  static uintptr_t soundchargelevel2_jmp_ret;
 
-  uintptr_t static yamatotype;
-  uintptr_t static beowulftype;
-  uintptr_t static forceedgetype;
-  uintptr_t static weaponresetparameter;
-  uint32_t static doppelweaponid;
-  uintptr_t static doppelweaponparameter;
+  static uintptr_t yamatotype;
+  static uintptr_t beowulftype;
+  static uintptr_t forceedgetype;
+  static uintptr_t weaponresetparameter;
+  static uint32_t doppelweaponid;
+  static uintptr_t doppelweaponparameter;
   static bool cheaton;
   // Override this things if you want to store values in the config file
-  void on_config_load(const utility::Config& cfg) override;
-  void on_config_save(utility::Config& cfg) override;
+  // void on_config_load(const utility::Config& cfg) override;
+  // void on_config_save(utility::Config& cfg) override;
 
   // on_frame() is called every frame regardless whether the gui shows up.
-  void on_frame() override;
+  // void on_frame() override;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
-  void on_draw_ui() override;
+  // void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
-  void on_draw_debug_ui() override;
+  void on_draw_debug_ui() override; // used
 private:
 
   // function hook instance for our detour, convinient wrapper 

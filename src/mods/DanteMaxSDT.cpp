@@ -1,5 +1,6 @@
 #include "DanteMaxSDT.hpp"
 #include "PlayerTracker.hpp"
+#include "DanteSDTRework.hpp"
 uintptr_t DanteMaxSDT::jmp_ret{NULL};
 bool DanteMaxSDT::cheaton{NULL};
 
@@ -11,9 +12,9 @@ static naked void detour() {
     validation:
         cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
         jne code
-
+        cmp byte ptr [DanteSDTRework::cheaton], 1
+        je code
         cmp byte ptr [DanteMaxSDT::cheaton], 1
-
         je cheatcode
         jmp code
 
@@ -38,15 +39,17 @@ void DanteMaxSDT::init_check_box_info() {
 std::optional<std::string> DanteMaxSDT::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &DanteMaxSDT::cheaton;
-  onpage               = dantesdt;
+  m_is_enabled            = &DanteMaxSDT::cheaton;
+  m_on_page               = dantesdt;
 
-  full_name_string     = "Infinite SDT";
-  author_string        = "SSSiyan";
-  description_string   = "Sets the SDT Bar to maximum.";
+  m_full_name_string     = "Infinite SDT";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Sets the SDT Bar to maximum.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "F3 0F 10 8F 14 1A 00 00 BA");
+  auto addr = patterns->find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
   if (!addr) {
     return "Unable to find DanteMaxSDT pattern.";
   }
@@ -59,6 +62,6 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteMaxSDT::on_draw_ui() {
+// void DanteMaxSDT::on_draw_ui() {
   //ImGui::Checkbox("Dante Max SDT", &dantemaxsdtcheck);
-}
+// }

@@ -522,65 +522,67 @@ static naked void hitvfx_nohitlines_detour() {
 std::optional<std::string> LDK::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &LDK::cheaton;
-  onpage               = gamemode;
+  m_is_enabled            = &LDK::cheaton;
+  m_on_page               = gamemode;
 
-  full_name_string     = "Legendary Dark Knights (+)";
-  author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
-  description_string   = "Enables the Legendary Dark Knights Gamemode.";
+  m_full_name_string     = "Legendary Dark Knights (+)";
+  m_author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
+  m_description_string   = "Enables the Legendary Dark Knights Gamemode.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   LDK::containernum_addr = staticbase + 0x07E836F8;
 
 
-  auto enemynumber_addr = utility::scan(base, "8B 40 70 89 87 50 07 00 00");
+  auto enemynumber_addr = patterns->find_addr(base, "8B 40 70 89 87 50 07 00 00");
   if (!enemynumber_addr) {
     return "Unable to find Enemy Number pattern.";
   }
-  auto capbypass_addr1 = utility::scan(base, "3B 41 30 7D 12");
+  auto capbypass_addr1 = patterns->find_addr(base, "3B 41 30 7D 12");
   if (!capbypass_addr1) {
     return "Unable to find Cap bypass 1 pattern.";
   }
-  auto capbypass_addr2 = utility::scan(base, "44 3B F0 7E 52");
+  auto capbypass_addr2 = patterns->find_addr(base, "44 3B F0 7E 52");
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
   }
-  auto nopfunction_addr1 = utility::scan(base, "E8 D7 0C 07 FF");
+  auto nopfunction_addr1 = patterns->find_addr(base, "E8 D7 0C 07 FF");
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }
-  auto nopfunction_1_call = utility::scan(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
+  auto nopfunction_1_call = patterns->find_addr(base, "48 8B C4 55 56 57 41 54 41 56 41 57 48 8D A8");
   if (!nopfunction_1_call) {
 	  return "Unable to find nop function call pattern.";
   }
-  auto vergildivebomb_addr = utility::scan(base, "C7 40 10 15 00 00 00 48");
+  auto vergildivebomb_addr = patterns->find_addr(base, "C7 40 10 15 00 00 00 48");
   if (!vergildivebomb_addr) {
 	  return "Unable to find vergildivebomb pattern.";
   }
-  auto cavforcevalid_addr = utility::scan(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
+  auto cavforcevalid_addr = patterns->find_addr(base, "74 04 32 C0 EB 02 B0 01 0F B6 D0");
   if (!cavforcevalid_addr) {
 	  return "Unable to find cavforcevalid pattern.";
   }
-  auto cavforcelightning_addr = utility::scan(base, "41 89 8D 30 0E 00 00");
+  auto cavforcelightning_addr = patterns->find_addr(base, "41 89 8D 30 0E 00 00");
   if (!cavforcelightning_addr) {
 	  return "Unable to find cavforcelightning pattern.";
   }
-  auto cavcoordinatechange_addr = utility::scan(base, "49 8B 4D 10 F3 0F 11 45 90");
+  auto cavcoordinatechange_addr = patterns->find_addr(base, "49 8B 4D 10 F3 0F 11 45 90");
   if (!cavcoordinatechange_addr) {
 	  return "Unable to find cavcoordinatechange pattern.";
   }
-  auto hitvfxskip_addr = utility::scan(base, "75 F3 48 85 ED");
+  auto hitvfxskip_addr = patterns->find_addr(base, "75 F3 48 85 ED");
   if (!hitvfxskip_addr) {
     return "Unable to find hitvfxskip_addr pattern.";
   }
 
-  auto waittime_addr = utility::scan(base, "49 63 40 24 48 89 5C 24 50"); //DevilMayCry5.exe+11C5E9C 
+  auto waittime_addr = patterns->find_addr(base, "49 63 40 24 48 89 5C 24 50"); //DevilMayCry5.exe+11C5E9C 
   if (!waittime_addr) {
     return "Unable to find waittime_addr pattern.";
   }
 
-  auto dontdrawhitlines_addr = utility::scan(base, "76 80 78 51 00 74 04"); //DevilMayCry5.exe+916E9D
+  auto dontdrawhitlines_addr = patterns->find_addr(base, "76 80 78 51 00 74 04"); //DevilMayCry5.exe+916E9D
   if (!dontdrawhitlines_addr) {
     return "Unable to find LDK.dontdrawhitlines_addr pattern.";
   }
@@ -749,7 +751,7 @@ void LDK::on_draw_debug_ui() {
 void LDK::on_draw_ui() {
   ImGui::Text("Enemy Hard Limit");
   ImGui::TextWrapped("This controls the maximum number of enemies that can be active simultaneously in encounters.");
-  ImGui::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
+  UI::SliderInt("##Enemy Hard Limit Slider", (int*)&LDK::hardlimit, 1, 50);
   ImGui::Separator();
 
   if (ImGui::CollapsingHeader("Performance Optimization"))
@@ -761,14 +763,14 @@ void LDK::on_draw_ui() {
   ImGui::Spacing();
   if(LDK::hitvfx_fix_on){
 	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will only draw white hit effects.");
-	  ImGui::SliderInt("##ContainerNum limit to draw only hit effects", (int*)&LDK::container_limit_damage_only, 0, 180);
+	  UI::SliderInt("##ContainerNum limit to draw only hit effects", (int*)&LDK::container_limit_damage_only, 0, 180);
 	  ImGui::Checkbox("Disable limit", (bool*)&swap_hitvfx_settings);
 	  LDK::set_container_limit_blood_only(LDK::container_limit_damage_only);
 
 	  ImGui::Spacing();
   
 	  ImGui::TextWrapped("When the number of effects queued exceeds this value, the game will not draw any hit effects.");
-	  ImGui::SliderInt("##ContainerNum limit to draw nothing", (int*)&LDK::container_limit_all,  0, 310);
+	  UI::SliderInt("##ContainerNum limit to draw nothing", (int*)&LDK::container_limit_all,  0, 310);
 	  LDK::set_container_limit_all(LDK::container_limit_all);
 
 	  ImGui::Spacing();
@@ -803,7 +805,7 @@ void LDK::on_draw_ui() {
   //ImGui::TextWrapped("Enable pause for spawning enemies before each enemy spawns, include preloaded enemies (like cainas on start of mission 1). Enemies will spawn by groops of a few "
       //"pieces after \"Wait time\" property. That should decrease a load to PC while playing LDK + coop.");
   //ImGui::TextWrapped("Delay before spawn");
-  //ImGui::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
+  //UI::SliderFloat("##DelaySlider", &waitTime, 0.5f, 5.0f, "%.1f");
   if (waitTimeEnabled)
     pausespawn_enabled = false;
 

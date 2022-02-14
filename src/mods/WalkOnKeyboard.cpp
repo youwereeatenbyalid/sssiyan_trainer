@@ -46,13 +46,15 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &WalkOnKeyboard::cheaton;
-  onpage               = mechanics;
-  full_name_string     = "Walk On Keyboard";
-  author_string        = "SSSiyan";
-  description_string   = "Your character will walk rather than run.";
+  m_is_enabled = &WalkOnKeyboard::cheaton;
+  m_on_page               = mechanics;
+  m_full_name_string     = "Walk Using Keyboard Controls";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Your character will walk rather than run.";
 
-  auto addr = utility::scan(base, "F3 41 0F 11 46 30 48 8B 46");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "F3 41 0F 11 46 30 48 8B 46");
   if (!addr) {
     return "Unable to find WalkOnKeyboard pattern.";
   }
@@ -65,13 +67,12 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
 }
 
 // during load
-void WalkOnKeyboard::on_config_load(const utility::Config &cfg) {}
+// void WalkOnKeyboard::on_config_load(const utility::Config &cfg) {}
 // during save
-void WalkOnKeyboard::on_config_save(utility::Config &cfg) {}
+// void WalkOnKeyboard::on_config_save(utility::Config &cfg) {}
 // do something every frame
 //void WalkOnKeyboard::on_frame() {}
 //will show up in debug window, dump ImGui widgets you want here
 //void WalkOnKeyboard::on_draw_debug_ui() {}
 //will show up in main window, dump ImGui widgets you want here
-void WalkOnKeyboard::on_draw_ui() {
-}
+// void WalkOnKeyboard::on_draw_ui() {}

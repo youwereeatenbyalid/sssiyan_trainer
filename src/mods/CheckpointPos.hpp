@@ -1,6 +1,9 @@
 #pragma once
 #include "Mod.hpp"
 #include <map>
+#include "mods/GameFunctions/PositionController.hpp"
+#include "PlayerTracker.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class CheckpointPos : public Mod
 {
 public:
@@ -22,6 +25,9 @@ public:
     Vector3f pos;
     CheckpointPosData(int mNum, Vector3f coords) : mNumber(mNum), pos(coords){}
   };
+
+  static Vector3f get_player_coords();
+
 
   static inline std::array<CheckpointPosData, 15> mPosData {//x, y, z
       CheckpointPosData(0, Vector3f(0.1704f, -80.5705f, -5.2691f)),
@@ -53,19 +59,18 @@ public:
   void on_config_load(const utility::Config& cfg) override;
   void on_config_save(utility::Config& cfg) override;
 
-  // on_frame() is called every frame regardless whether the gui shows up.
-  void on_frame() override;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
   void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
-  void on_draw_debug_ui() override;
+  // void on_draw_debug_ui() override;
 
 private:
+  glm::vec3 newPlPos;
   void init_check_box_info() override;
-  uintptr_t get_player_coords_ptr(uintptr_t addr);
-  void get_player_coords();
-  bool is_null_ptr(uintptr_t ptr);
+  Vector3f get_boss_pos();
+  static uintptr_t get_player_coords_ptr(uintptr_t addr);
+  static bool is_null_ptr(uintptr_t ptr);
   std::unique_ptr<FunctionHook> m_checkpointpos_hook;
   std::unique_ptr<FunctionHook> m_startpos_hook;
 };

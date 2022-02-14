@@ -27,7 +27,7 @@ void VergilSDTFormTracker::init_check_box_info() {
 std::optional<std::string> VergilSDTFormTracker::on_initialize() {
   init_check_box_info();
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto init_addr = utility::scan(base, "44 89 82 B0 09 00 00 48");
+  auto init_addr = patterns->find_addr(base, "44 89 82 B0 09 00 00 48");
   if (!init_addr) {
     return "Unanable to find VergilSDTFormTracker pattern.";
   }
@@ -40,13 +40,13 @@ std::optional<std::string> VergilSDTFormTracker::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilSDTFormTracker::on_config_load(const utility::Config& cfg) {}
+// void VergilSDTFormTracker::on_config_load(const utility::Config& cfg) {}
 
-void VergilSDTFormTracker::on_config_save(utility::Config& cfg) {}
+// void VergilSDTFormTracker::on_config_save(utility::Config& cfg) {}
 
-void VergilSDTFormTracker::on_frame() {}
+// void VergilSDTFormTracker::on_frame() {}
 
-void VergilSDTFormTracker::on_draw_ui() {}
+// void VergilSDTFormTracker::on_draw_ui() {}
 
 void VergilSDTFormTracker::on_draw_debug_ui() {
   ImGui::Text("[VergilSDTFormTracker] Vergil in form: %X", vergilform_state);

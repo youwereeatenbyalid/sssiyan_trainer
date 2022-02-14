@@ -24,11 +24,8 @@ __asm {
     fstp qword ptr [rax+0x10]
     movss xmm0,[rax+0x10]
     jmp qword ptr [InfiniteSummonVitality::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -41,12 +38,14 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteSummonVitality::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Summon Vitality";
-  author_string        = "Jessie Kazama";
-  description_string   = "Pet health is locked at max.";
-  auto infsummonvitality_addr = utility::scan(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
+  m_is_enabled = &InfiniteSummonVitality::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Summon Vitality";
+  m_author_string        = "Jessie Kazama";
+  m_description_string   = "Pet health is locked at max.";
+
+  set_up_hotkey();
+  auto infsummonvitality_addr = patterns->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
 
   if (!infsummonvitality_addr) {
     return "Unable to find infsummonvitality pattern.";
@@ -61,12 +60,12 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
 }
 
 // during load
-void InfiniteSummonVitality::on_config_load(const utility::Config &cfg) {}
+// void InfiniteSummonVitality::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteSummonVitality::on_config_save(utility::Config &cfg) {}
+// void InfiniteSummonVitality::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void InfiniteSummonVitality::on_frame() {}
+// void InfiniteSummonVitality::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void InfiniteSummonVitality::on_draw_debug_ui() {}
+// void InfiniteSummonVitality::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void InfiniteSummonVitality::on_draw_ui() {}
+// void InfiniteSummonVitality::on_draw_ui() {}

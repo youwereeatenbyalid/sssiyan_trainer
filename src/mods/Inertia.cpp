@@ -121,14 +121,16 @@ std::optional<std::string> Inertia::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &Inertia::cheaton;
-  onpage    = mechanics;
+  m_is_enabled = &Inertia::cheaton;
+  m_on_page    = mechanics;
 
-  full_name_string     = "Inertia Redirection";
-  author_string        = "The Hitchhiker";
-  description_string   = "Redirect inertia through air hikes & enemy steps.";
+  m_full_name_string     = "Inertia Redirection";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Redirect inertia through air hikes & enemy steps.";
 
-  auto addr = utility::scan(base, "48 8B 41 08 44 8B 40 78");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "48 8B 41 08 44 8B 40 78");
   if (!addr) {
     return "Unable to find Inertia pattern.";
   }
@@ -141,9 +143,9 @@ std::optional<std::string> Inertia::on_initialize() {
 }
 
 // during load
-void Inertia::on_config_load(const utility::Config &cfg) {}
+// void Inertia::on_config_load(const utility::Config &cfg) {}
 // during save
-void Inertia::on_config_save(utility::Config &cfg) {}
+// void Inertia::on_config_save(utility::Config &cfg) {}
 // do something every frame
 void Inertia::on_frame() { 
   if (airhiketimer > 1) {
@@ -163,5 +165,4 @@ void Inertia::on_draw_debug_ui() {
     ImGui::Text("[Inertia] Air Hike Timer: %d", (int*)&Inertia::airhiketimer);
 }
 // will show up in main window, dump ImGui widgets you want here
-void Inertia::on_draw_ui() {}
-
+// void Inertia::on_draw_ui() {}

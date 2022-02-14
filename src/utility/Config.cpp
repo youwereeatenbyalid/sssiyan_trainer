@@ -38,7 +38,7 @@ namespace utility {
 
             set(key, value);
         }
-        f.close();
+
         return true;
     }
 
@@ -62,8 +62,15 @@ namespace utility {
             f << keyValue.first << "=" << keyValue.second << endl;
         }
 
-        f.close();
         return true;
+    }
+
+    void Config::append(const Config& other)
+    {
+        for(const auto& entry : other.get_key_values())
+        {
+            m_key_values[entry.first] = entry.second;
+        }
     }
 
     // Added by Darkness
@@ -90,4 +97,5 @@ namespace utility {
             m_key_values[key] = value;
         }
     }
+
 }

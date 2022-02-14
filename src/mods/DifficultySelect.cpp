@@ -57,12 +57,15 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &DifficultySelect::cheaton;
-  onpage    = balance;
-  full_name_string     = "Select Enemy Difficulty";
-  author_string        = "The Hitchhiker";
-  description_string   = "Set the difficulty of enemies in combat.";
-  auto missionenemydifficulty_addr = utility::scan(base, "89 B8 8C 00 00 00");
+
+  m_is_enabled = &DifficultySelect::cheaton;
+  m_on_page    = balance;
+  m_full_name_string     = "Select Enemy Difficulty (+)";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Set the difficulty of enemies in combat.";
+
+  set_up_hotkey();
+  auto missionenemydifficulty_addr = patterns->find_addr(base, "89 B8 8C 00 00 00");
 
   if (!missionenemydifficulty_addr) {
     return "Unable to find missionenemydifficulty pattern.";
@@ -72,7 +75,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize missionenemydifficulty";
   }
-  auto bpenemydifficulty_addr = utility::scan(base, "89 91 8C 00 00 00 48 8B");
+  auto bpenemydifficulty_addr = patterns->find_addr(base, "89 91 8C 00 00 00 48 8B");
 
   if (!bpenemydifficulty_addr) {
     return "Unable to find bpenemydifficulty pattern.";
@@ -99,9 +102,9 @@ void DifficultySelect::on_config_save(utility::Config &cfg)
     cfg.set<int>("mission difficulty", missiondifficulty);
 }
 // do something every frame
-void DifficultySelect::on_frame() {}
+// void DifficultySelect::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void DifficultySelect::on_draw_debug_ui() {}
+// void DifficultySelect::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void DifficultySelect::on_draw_ui() {
   auto difficultystring =
@@ -109,6 +112,4 @@ void DifficultySelect::on_draw_ui() {
       "and Hell\0";
   ImGui::Combo("Mission Difficulty", (int*)&DifficultySelect::missiondifficulty, difficultystring);
   ImGui::Combo("Bloody Palace Difficulty", (int*)&DifficultySelect::bpdifficulty, difficultystring);
-	
-	
 }

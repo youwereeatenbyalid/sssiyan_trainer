@@ -248,14 +248,16 @@ void BpStageJump::init_check_box_info() {
 std::optional<std::string> BpStageJump::on_initialize() {
   init_check_box_info();
 
-  ischecked               = &BpStageJump::cheaton;
-  onpage                  = bloodypalace;
-  full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
-  author_string           = "SSSiyan, The Hitchhiker";
-  description_string      = "Allows you to skip to a BP stage of your choosing.";
+  m_is_enabled               = &BpStageJump::cheaton;
+  m_on_page                  = bloodypalace;
+  m_full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
+  m_author_string           = "SSSiyan, The Hitchhiker";
+  m_description_string      = "Allows you to skip to a BP stage of your choosing.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "38 4B 79 75 03");
+  auto addr = patterns->find_addr(base, "38 4B 79 75 03");
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }
@@ -352,7 +354,7 @@ void BpStageJump::on_draw_ui() {
 		ImGui::Separator();
 		ImGui::Spacing();
         ImGui::TextWrapped("Stage Jump");
-        ImGui::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
+        UI::SliderInt("##BP Stage Slider", &bpstage, 1, 101);
 		ImGui::Spacing();
 		ImGui::TextWrapped("Tick to keep retrying whichever stage you are on without continuing");
 		ImGui::Checkbox("Retry Stage", &retrystage);

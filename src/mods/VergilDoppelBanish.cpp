@@ -150,43 +150,45 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
   init_check_box_info();
 
   auto base          = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked          = &VergilDoppelBanish::cheaton;
-  onpage             = vergildoppel;
-  full_name_string   = "Disable Doppel Banish (+)";
-  author_string      = "Dr.penguin";
-  description_string = "Stops doppelganger from despawning while doing certain actions.";
+  m_is_enabled          = &VergilDoppelBanish::cheaton;
+  m_on_page             = vergildoppel;
+  m_full_name_string   = "Disable Doppel Banish (+)";
+  m_author_string      = "Dr.penguin";
+  m_description_string = "Stops doppelganger from despawning while doing certain actions.";
 
-  auto addr = utility::scan(base, "80 BF A8 18 00 00 00 74 1D"); // No Dismiss on leaving SDT // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "80 BF A8 18 00 00 00 74 1D"); // No Dismiss on leaving SDT // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
   if (!addr) {
     return "Unable to find VergilDoppelBanish pattern.";
   }
 
-  auto addrYamatoBanish = utility::scan(base, "E8 76 9F 92 FE"); // No Banish on Yamato Super // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
+  auto addrYamatoBanish = patterns->find_addr(base, "E8 76 9F 92 FE"); // No Banish on Yamato Super // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
   if (!addrYamatoBanish) {
     return "Unable to find YamatoBanish pattern.";
   }
 
-  auto addrBeowulfBanish = utility::scan(base, "E8 C4 91 35 FF"); // No Banish on Beowulf Super // NEEDS AOB
+  auto addrBeowulfBanish = patterns->find_addr(base, "E8 C4 91 35 FF"); // No Banish on Beowulf Super // NEEDS AOB
   if (!addrBeowulfBanish) {
     return "Unable to find BeowulfBanish pattern.";
   }
 
-  auto addrForceEdgeBanish = utility::scan(base, "E8 1A E8 8A FF"); // No Banish on Force Edge Super // NEEDS AOB
+  auto addrForceEdgeBanish = patterns->find_addr(base, "E8 1A E8 8A FF"); // No Banish on Force Edge Super // NEEDS AOB
   if (!addrForceEdgeBanish) {
     return "Unable to find ForceEdgeBanish pattern.";
   }
 
-  auto addrSDTYamatoBanish = utility::scan(base, "E8 1A 9F 92 FE"); // No Banish on SDT Yamato Super // NEEDS AOB
+  auto addrSDTYamatoBanish = patterns->find_addr(base, "E8 1A 9F 92 FE"); // No Banish on SDT Yamato Super // NEEDS AOB
   if (!addrSDTYamatoBanish) {
     return "Unable to find SDTYamatoBanish pattern.";
   }
 
-  auto addrSDTBeowulfBanish = utility::scan(base, "E8 68 91 35 FF"); // No Banish on SDT Beowulf Super // NEEDS AOB
+  auto addrSDTBeowulfBanish = patterns->find_addr(base, "E8 68 91 35 FF"); // No Banish on SDT Beowulf Super // NEEDS AOB
   if (!addrSDTBeowulfBanish) {
     return "Unable to find SDTBeowulfBanish pattern.";
   }
 
-  VergilDoppelBanish::super_banish_call = utility::scan(base, "40 53 57 41 57 48 83 EC 40 48 8B 41 50 45").value(); // The call every banish uses
+  VergilDoppelBanish::super_banish_call = patterns->find_addr(base, "40 53 57 41 57 48 83 EC 40 48 8B 41 50 45").value(); // The call every banish uses
   if (!VergilDoppelBanish::super_banish_call) {
     return "Unable to find VergilDoppelBanishCall pattern.";
   }

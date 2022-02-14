@@ -52,18 +52,20 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 {
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	ischecked = &cheaton;
-	onpage = vergilefxsettings;
-	full_name_string = "SDT Tricks EFX";
-	author_string = "VPZadov";
-	description_string = "Always use SDT Tricks EFX and SDT yamato sheath flash EFX.";
+	m_is_enabled = &cheaton;
+	m_on_page = vergilefxsettings;
+	m_full_name_string = "SDT Tricks EFX";
+	m_author_string = "VPZadov";
+	m_description_string = "Always use SDT Tricks EFX and SDT yamato sheath flash EFX.";
 
-	auto sdtEfxAddr = utility::scan(base, "83 F8 02 74 06 41 83 CE"); //DevilMayCry5.exe+58991C      //utility::scan(base, "8B 86 B0 09 00 00 4C"); //DevilMayCry5.exe+1DDCB5D
+  set_up_hotkey();
+
+	auto sdtEfxAddr = patterns->find_addr(base, "83 F8 02 74 06 41 83 CE"); //DevilMayCry5.exe+58991C      //patterns->find_addr(base, "8B 86 B0 09 00 00 4C"); //DevilMayCry5.exe+1DDCB5D
     if (!sdtEfxAddr) {
           return "Unanable to find VergilSDTTrickEfx.sdtEfxAddr pattern.";
     }
 
-	auto yamatoBehaviorAddr = utility::scan(base, "48 83 78 18 00 75 18 8B 47 74"); //DevilMayCry5.exe+15822AD
+	auto yamatoBehaviorAddr = patterns->find_addr(base, "48 83 78 18 00 75 18 8B 47 74"); //DevilMayCry5.exe+15822AD
     if (!yamatoBehaviorAddr) {
           return "Unanable to find VergilSDTTrickEfx.yamatoBehaviorAddr pattern.";
     }
@@ -84,25 +86,15 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
     return Mod::on_initialize();
 }
 
-void VergilSDTTrickEfx::on_config_load(const utility::Config& cfg)
-{
-}
+// void VergilSDTTrickEfx::on_config_load(const utility::Config& cfg){}
 
-void VergilSDTTrickEfx::on_config_save(utility::Config& cfg)
-{
-}
+// void VergilSDTTrickEfx::on_config_save(utility::Config& cfg){}
 
-void VergilSDTTrickEfx::on_frame()
-{
-}
+// void VergilSDTTrickEfx::on_frame(){}
 
-void VergilSDTTrickEfx::on_draw_ui()
-{
-}
+// void VergilSDTTrickEfx::on_draw_ui(){}
 
-void VergilSDTTrickEfx::on_draw_debug_ui()
-{
-}
+// void VergilSDTTrickEfx::on_draw_debug_ui(){}
 
 void VergilSDTTrickEfx::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());

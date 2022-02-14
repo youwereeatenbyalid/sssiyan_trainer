@@ -36,13 +36,15 @@ std::optional<std::string> CaliburExceed::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &CaliburExceed::cheaton;
-  onpage    = nero;
-  full_name_string     = "Calibur Always Level 3";
-  author_string        = "The Hitchhiker";
-  description_string   = "Forces calibur to always perform the EX 3 variant.";
+  m_is_enabled = &CaliburExceed::cheaton;
+  m_on_page    = nero;
+  m_full_name_string     = "Calibur Always Level 3";
+  m_author_string        = "The Hitchhiker";
+  m_description_string   = "Forces calibur to always perform the EX 3 variant.";
 
-  auto addr = utility::scan(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
   if (!addr) {
     return "Unable to find CaliburExceed pattern.";
   }
@@ -55,12 +57,12 @@ std::optional<std::string> CaliburExceed::on_initialize() {
 }
 
 // during load
-void CaliburExceed::on_config_load(const utility::Config &cfg) {}
+// void CaliburExceed::on_config_load(const utility::Config &cfg) {}
 // during save
-void CaliburExceed::on_config_save(utility::Config &cfg) {}
+// void CaliburExceed::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void CaliburExceed::on_frame() {}
+// void CaliburExceed::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void CaliburExceed::on_draw_debug_ui() {}
+// void CaliburExceed::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void CaliburExceed::on_draw_ui() {}
+// void CaliburExceed::on_draw_ui() {}

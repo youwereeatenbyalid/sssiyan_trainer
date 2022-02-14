@@ -56,19 +56,21 @@ void NeroSwapSidesteps::init_check_box_info() {
 std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &NeroSwapSidesteps::cheaton;
-  onpage               = nero;
+  m_is_enabled            = &NeroSwapSidesteps::cheaton;
+  m_on_page               = nero;
 
-  full_name_string     = "Swap Sidesteps with Table Hopper";
-  author_string        = "SSSiyan";
-  description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
+  m_full_name_string     = "Swap Sidesteps with Table Hopper";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "C7 40 10 1F 08 00 00");
+  auto addr = patterns->find_addr(base, "C7 40 10 1F 08 00 00");
   if (!addr) {
     return "Unable to find NeroSwapSidesteps pattern.";
   }
-  auto addr2 = utility::scan(base, "C7 40 10 20 08 00 00");
+  auto addr2 = patterns->find_addr(base, "C7 40 10 20 08 00 00");
   if (!addr2) {
     return "Unable to find NeroSwapSidesteps2 pattern.";
   }
@@ -87,4 +89,4 @@ std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroSwapSidesteps::on_draw_ui() {}
+//void NeroSwapSidesteps::on_draw_ui() {}

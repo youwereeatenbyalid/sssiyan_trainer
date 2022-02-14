@@ -21,11 +21,8 @@ __asm {
 
   cheatcode:
     jmp qword ptr [InfiniteSummonPowerup::jmp_return]
-    
-
   }
 }
-
 
 // clang-format on
 
@@ -38,12 +35,14 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &InfiniteSummonPowerup::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Infinite Summon Powerup Duration";
-  author_string        = "Jessie Kazama";
-  description_string   = "Summon powerup state lasts forever.";
-  auto infinitesummonpowerupduration_addr = utility::scan(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
+  m_is_enabled = &InfiniteSummonPowerup::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Summon Powerup Duration";
+  m_author_string        = "Jessie Kazama";
+  m_description_string   = "Summon powerup state lasts forever.";
+
+  set_up_hotkey();
+  auto infinitesummonpowerupduration_addr = patterns->find_addr(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
 
   if (!infinitesummonpowerupduration_addr) {
     return "Unable to find infinitesummonpowerupduration pattern.";
@@ -58,12 +57,12 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
 }
 
 // during load
-void InfiniteSummonPowerup::on_config_load(const utility::Config &cfg) {}
+// void InfiniteSummonPowerup::on_config_load(const utility::Config &cfg) {}
 // during save
-void InfiniteSummonPowerup::on_config_save(utility::Config &cfg) {}
+// void InfiniteSummonPowerup::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void InfiniteSummonPowerup::on_frame() {}
+//void InfiniteSummonPowerup::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void InfiniteSummonPowerup::on_draw_debug_ui() {}
+//void InfiniteSummonPowerup::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void InfiniteSummonPowerup::on_draw_ui() {}
+// void InfiniteSummonPowerup::on_draw_ui() {}

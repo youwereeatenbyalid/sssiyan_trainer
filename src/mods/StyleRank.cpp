@@ -53,6 +53,4 @@ void StyleRank::on_draw_debug_ui() {
   ImGui::Text("Style Rank: %X", StyleRank::rank);
 }
   // will show up in main window, dump ImGui widgets you want here
-void StyleRank::on_draw_ui() {
-
-}
+// void StyleRank::on_draw_ui() {}

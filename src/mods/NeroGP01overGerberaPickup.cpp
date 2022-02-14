@@ -40,13 +40,15 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
   init_check_box_info();
 
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-   ischecked = &NeroGP01overGerberaPickup::cheaton;
-   onpage    = bloodypalace;
-   full_name_string     = "GP01 over Gerbera Pickup";
-   author_string        = "Dr. Penguin, Siyan";
-   description_string   = "Replace all Gerbera picked up in BP with GP01.";
+   m_is_enabled = &NeroGP01overGerberaPickup::cheaton;
+   m_on_page    = bloodypalace;
+   m_full_name_string     = "GP01 over Gerbera Pickup";
+   m_author_string        = "Dr. Penguin, Siyan";
+   m_description_string   = "Replace all Gerbera picked up in BP with GP01.";
 
-   auto addr = utility::scan(base, "44 89 59 20 41 B9 01 00 00 00");
+  set_up_hotkey();
+
+   auto addr = patterns->find_addr(base, "44 89 59 20 41 B9 01 00 00 00");
    if (!addr) {
     return "Unable to find NeroGP01overGerberaPickup pattern.";
   }
@@ -67,4 +69,4 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
 // will show up in debug window, dump ImGui widgets you want here
 // void NeroGP01overGerberaPickup::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void NeroGP01overGerberaPickup::on_draw_ui() {}
+// void NeroGP01overGerberaPickup::on_draw_ui() {}

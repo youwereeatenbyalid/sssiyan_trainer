@@ -41,15 +41,17 @@ void NeroTomboyLockOn::init_check_box_info() {
 std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   init_check_box_info();
 
-  ischecked          = &NeroTomboyLockOn::cheaton;
-  onpage             = nero;
+  m_is_enabled          = &NeroTomboyLockOn::cheaton;
+  m_on_page             = nero;
 
-  full_name_string   = "Lock On With Tomboy";
-  author_string      = "SSSiyan";
-  description_string        = "Allows you to lock on while using Tomboy.";
+  m_full_name_string   = "Lock On With Tomboy";
+  m_author_string      = "SSSiyan";
+  m_description_string        = "Allows you to lock on while using Tomboy.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "20 85 C9 75 15 48 8B D3");
+  auto addr = patterns->find_addr(base, "20 85 C9 75 15 48 8B D3");
   if (!addr) {
     return "Unable to find NeroTomboyLockOn pattern.";
   }
@@ -65,4 +67,4 @@ std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   return Mod::on_initialize();
 }
 
-void NeroTomboyLockOn::on_draw_ui() {}
+// void NeroTomboyLockOn::on_draw_ui() {}

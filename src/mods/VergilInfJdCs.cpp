@@ -1,5 +1,6 @@
 #include "VergilInfJdCs.hpp"
 #include "PlayerTracker.hpp"
+#include "VergilSetMaxJJC.hpp"
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
 bool VergilInfJdCs::cheaton{NULL};
 
@@ -10,7 +11,7 @@ static naked void detour() {
 	__asm {
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
         jne code
-        cmp byte ptr [VergilInfJdCs::cheaton], 1
+        cmp byte ptr [VergilSetMaxJJC::infinitejjdc], 1
         je cheatcode
         jmp code
 
@@ -33,15 +34,17 @@ void VergilInfJdCs::init_check_box_info() {
 std::optional<std::string> VergilInfJdCs::on_initialize() {
   init_check_box_info();
 
-  ischecked            = &VergilInfJdCs::cheaton;
-  onpage               = vergilcheat;
+  m_is_enabled            = &VergilInfJdCs::cheaton;
+  //m_on_page               = vergilcheat;
 
-  full_name_string     = "Infinite Just Judgement Cuts";
-  author_string        = "SSSiyan";
-  description_string   = "Remove the consecutive Just Judgement Cut limit.";
+  m_full_name_string     = "Infinite Just Judgement Cuts";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Remove the consecutive Just Judgement Cut limit.";
+
+  set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "FF 87 E0 18 00 00");
+  auto addr = patterns->find_addr(base, "FF 87 E0 18 00 00");
   if (!addr) {
     return "Unable to find VergilInfJdCs pattern.";
   }
@@ -54,5 +57,4 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   return Mod::on_initialize();
 }
 
-void VergilInfJdCs::on_draw_ui() {
-}
+// void VergilInfJdCs::on_draw_ui(){}

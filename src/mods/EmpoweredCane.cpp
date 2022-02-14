@@ -20,13 +20,12 @@ __asm {
     //+0x5D
     comiss xmm2, xmm3
     ja ja_return
-    mov[rbx+0x20], edx
+    mov [rbx+0x20], edx
     jmp qword ptr [EmpoweredCane::jmp_return]
 
   cheatcode:
   ja_return:
 	jmp qword ptr [EmpoweredCane::ja_return]
-
   }
 }
 
@@ -42,12 +41,17 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &EmpoweredCane::cheaton;
-  onpage    = gilver;
-  full_name_string     = "Empowered Cane";
-  author_string        = "SSSiyan";
-  description_string   = "Extends the duration of V's BP Taunt to infinity.";
-  auto bettercane_addr = utility::scan(base, "77 5B 89 53 20");
+
+  m_is_enabled = &EmpoweredCane::cheaton;
+  m_on_page    = gilver;
+  m_full_name_string     = "Infinite Empowered Cane";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Extends the duration of V's BP Taunt to infinity.";
+
+  set_up_hotkey();
+  
+  auto bettercane_addr = patterns->find_addr(base, "77 5B 89 53 20");
+
   EmpoweredCane::ja_return = bettercane_addr.value()+0x5D;
   if (!bettercane_addr) {
     return "Unable to find bettercane pattern.";
@@ -62,12 +66,12 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
 }
 
 // during load
-void EmpoweredCane::on_config_load(const utility::Config &cfg) {}
+// void EmpoweredCane::on_config_load(const utility::Config &cfg) {}
 // during save
-void EmpoweredCane::on_config_save(utility::Config &cfg) {}
+// void EmpoweredCane::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void EmpoweredCane::on_frame() {}
+//void EmpoweredCane::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void EmpoweredCane::on_draw_debug_ui() {}
+//void EmpoweredCane::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void EmpoweredCane::on_draw_ui() {}
+// void EmpoweredCane::on_draw_ui() {}

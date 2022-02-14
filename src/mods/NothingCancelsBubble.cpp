@@ -33,13 +33,15 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &NothingCancelsBubble::cheaton;
-  onpage    = nero;
-  full_name_string     = "Nothing cancels ragtime bubble";
-  author_string        = "The HitchHiker";
-  description_string   = "Prevents ragtime bubble from being destroyed prematurely.";
+  m_is_enabled = &NothingCancelsBubble::cheaton;
+  m_on_page    = nero;
+  m_full_name_string     = "Don't pop ragtime bubble.";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Prevents ragtime bubble from being \"popped\" prematurely when breaking ragtime gauntlet.";
 
-  auto addr = utility::scan(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
+  set_up_hotkey();
+
+  auto addr = patterns->find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
   if (!addr) {
     return "Unable to find NothingCancelsBubble pattern.";
   }
@@ -52,12 +54,12 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
 }
 
 // during load
-void NothingCancelsBubble::on_config_load(const utility::Config &cfg) {}
+// void NothingCancelsBubble::on_config_load(const utility::Config &cfg) {}
 // during save
-void NothingCancelsBubble::on_config_save(utility::Config &cfg) {}
+// void NothingCancelsBubble::on_config_save(utility::Config &cfg) {}
 // do something every frame
-void NothingCancelsBubble::on_frame() {}
+// void NothingCancelsBubble::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void NothingCancelsBubble::on_draw_debug_ui() {}
+// void NothingCancelsBubble::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
-void NothingCancelsBubble::on_draw_ui() {}
+// void NothingCancelsBubble::on_draw_ui() {}

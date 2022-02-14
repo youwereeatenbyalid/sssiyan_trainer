@@ -16,11 +16,11 @@ public:
 
   inline std::optional<std::string> on_initialize() override {
     init_check_box_info();
-    ischecked        = &cheaton;
-    onpage           = vergilcheat;
-    full_name_string = "Additional JJC in SDT";
-    author_string    = "VPZadov";
-    description_string = "Allow Vergil to perform an extra JJC while in SDT.";
+    m_is_enabled        = &cheaton;
+    m_on_page           = vergilcheat;
+    m_full_name_string = "Additional JJC in SDT";
+    m_author_string    = "VPZadov";
+    m_description_string = "Allow Vergil to perform an extra JJC while in SDT.";
     if (cheaton)
       VergilSetMaxJJC::cheaton = true;
     return Mod::on_initialize();

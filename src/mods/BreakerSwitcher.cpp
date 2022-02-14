@@ -622,14 +622,16 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  ischecked = &BreakerSwitcher::cheaton;
-  onpage    = breaker;
+  m_is_enabled = &BreakerSwitcher::cheaton;
+  m_on_page    = breaker;
 
-  full_name_string     = "Breaker Switcher (+)";
-  author_string        = "The Hitchhiker (original version by Nino)";
-  description_string   = "Make sure your d-pad is bound to breakaway, then "
+  m_full_name_string     = "Breaker Switcher (+)";
+  m_author_string        = "The Hitchhiker (original version by Nino)";
+  m_description_string   = "Make sure your d-pad is bound to breakaway, then "
                          "press a button on the d-pad to switch breakers.";
 
+
+  set_up_hotkey();
   auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
   auto NeroUIOverride_addr = utility::scan(base, "0F 85 DC 02 00 00 48 8B 87 08");
@@ -641,9 +643,8 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   BreakerSwitcher::call_nero_creategauntlet = call_nero_creategauntlet_addr.value()+0x3;
   BreakerSwitcher::jne_uireturn = NeroUIOverride_addr.value() + 0x2E2;
   BreakerSwitcher::jne_bringer_ret = bringerinputcontroller_addr.value()+0x50;
-
   if (!breakersize_addr) {
-    return "Unable to find breaker size pattern.";
+    return "Unable to find breaker itemSize pattern.";
   }
   if (!nextbreaker_addr) {
     return "Unable to find next breaker pattern.";
@@ -711,9 +712,9 @@ void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   cfg.set<bool>("use_secondary", BreakerSwitcher::use_secondary);
 }
 // do something every frame
-void BreakerSwitcher::on_frame() {}
+// void BreakerSwitcher::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
-void BreakerSwitcher::on_draw_debug_ui() {}
+// void BreakerSwitcher::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void BreakerSwitcher::on_draw_ui() {
 //ImGui::InputInt("breaker up", (int*)&BreakerSwitcher::breakers[0]);
@@ -747,6 +748,4 @@ ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxs
 ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
 ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
 ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
-
-
 }
