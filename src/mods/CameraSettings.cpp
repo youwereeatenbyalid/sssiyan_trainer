@@ -19,6 +19,8 @@ uintptr_t CameraSettings::jmp_retMovementAutoCorrect;
 
 uintptr_t CameraSettings::jmp_retHeightAutoCorrect;
 
+uintptr_t CameraSettings::jmp_retNoVignette;
+
 bool CameraSettings::cheaton{NULL};
 
 float fov = 65.0;
@@ -27,11 +29,8 @@ float horizontalmult = 100.0;
 float horizontalsens = 3.25;
 
 bool keyboardhorizontalenable;
-bool siyanscamerafixenable;
-bool closeautocorrectenable;
-bool distantautocorrectenable;
-bool movementautocorrectenable;
-bool heightautocorrectenable;
+bool nocameraautocorrectsenable;
+bool novignetteenable;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -39,9 +38,7 @@ bool heightautocorrectenable;
 static naked void detourFoV() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
+        jne code
     cheatcode:
         movss xmm2, [fov]
         jmp qword ptr [CameraSettings::jmp_retFoV]
@@ -55,9 +52,7 @@ static naked void detourFoV() {
 static naked void detourHorizontalSensClockwise() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
+        jne code
     cheatcode:
         movss xmm6, [horizontalsens]
         divss xmm6, [horizontalmult]
@@ -72,11 +67,8 @@ static naked void detourHorizontalSensClockwise() {
 
 static naked void detourHorizontalSensAntiClockwise() {
 	__asm {
-
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
+        jne code
     cheatcode:
         movss xmm6, [horizontalsens]
         divss xmm6, [horizontalmult]
@@ -92,14 +84,9 @@ static naked void detourHorizontalSensAntiClockwise() {
 static naked void detourKeyboardHorizontalEnable() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [keyboardhorizontalenable], 1
         jne code
-		jmp qword ptr [CameraSettings::jmp_jeKeyboardHorizontalEnable]
-
+        cmp byte ptr [keyboardhorizontalenable], 1
+        je jejmp
     code:
         test edx,edx
         je jejmp
@@ -114,17 +101,13 @@ static naked void detourKeyboardHorizontalEnable() {
 static naked void detourSiyansCamFix1() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [siyanscamerafixenable], 1
         jne code
-		jmp qword ptr [CameraSettings::jmp_retSiyansCamFix1]
-
+        cmp byte ptr [nocameraautocorrectsenable], 1
+        je cheatcode
     code:
         cmp qword ptr [rax+18h], 00
         jne jnejmp
+    cheatcode:
         jmp qword ptr [CameraSettings::jmp_retSiyansCamFix1]
 
     jnejmp:
@@ -135,14 +118,9 @@ static naked void detourSiyansCamFix1() {
 static naked void detourCloseAutoCorrect() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [closeautocorrectenable], 1
         jne code
-		jmp jnejmp
-
+        cmp byte ptr [nocameraautocorrectsenable], 1
+        je jnejmp
     code:
         cmp byte ptr [rbx+00000494h], 00
         jne jnejmp
@@ -156,16 +134,12 @@ static naked void detourCloseAutoCorrect() {
 static naked void detourDistantAutoCorrect() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [distantautocorrectenable], 1
         jne code
-		jmp qword ptr [CameraSettings::jmp_retDistantAutoCorrect]
-
+        cmp byte ptr [nocameraautocorrectsenable], 1
+        je cheatcode
     code:
         mov [rdi+00000280h], eax
+    cheatcode:
         jmp qword ptr [CameraSettings::jmp_retDistantAutoCorrect]
 	}
 }
@@ -173,16 +147,12 @@ static naked void detourDistantAutoCorrect() {
 static naked void detourHeightAutoCorrect() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [heightautocorrectenable], 1
         jne code
-		jmp qword ptr [CameraSettings::jmp_retHeightAutoCorrect]
-
+        cmp byte ptr [nocameraautocorrectsenable], 1
+        je cheatcode
     code:
         movss [rdi+00000280h], xmm0
+    cheatcode:
         jmp qword ptr [CameraSettings::jmp_retHeightAutoCorrect]
 	}
 }
@@ -190,18 +160,31 @@ static naked void detourHeightAutoCorrect() {
 static naked void detourMovementAutoCorrect() {
 	__asm {
 		cmp byte ptr [CameraSettings::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        cmp byte ptr [movementautocorrectenable], 1
         jne code
-		jmp qword ptr [CameraSettings::jmp_retMovementAutoCorrect]
-
+        cmp byte ptr [nocameraautocorrectsenable], 1
+        je cheatcode
     code:
         movss [rdi+00000280h], xmm0
+    cheatcode:
         jmp qword ptr [CameraSettings::jmp_retMovementAutoCorrect]
 	}
+}
+
+static naked void detourNoVignette() {
+    __asm {
+        cmp byte ptr[CameraSettings::cheaton], 1
+        jne code
+        cmp byte ptr [novignetteenable], 1
+        je cheatcode
+    code:
+        mov [rax+0x00000180], edx
+        jmp qword ptr[CameraSettings::jmp_retNoVignette]
+
+    cheatcode:
+        mov edx, 2
+        mov [rax+0x00000180], edx
+        jmp qword ptr[CameraSettings::jmp_retNoVignette]
+    }
 }
 
 // clang-format on
@@ -217,7 +200,7 @@ std::optional<std::string> CameraSettings::on_initialize() {
   m_is_enabled          = &CameraSettings::cheaton;
   m_on_page             = camera;
 
-  m_full_name_string   = "Camera Settings (+)";
+  m_full_name_string   = "Camera Options (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Change various camera settings.";
 
@@ -273,6 +256,11 @@ std::optional<std::string> CameraSettings::on_initialize() {
     return "Unable to find CameraMovementBasedAutocorrects pattern.";
   }
 
+  auto addr10 = patterns->find_addr(base, "89 90 80 01 00 00 C3");
+  if (!addr10) {
+      return "Unable to find CameraNoVignette pattern.";
+  }
+
   if (!install_hook_absolute(addr1.value(), m_function_hookFoV, &detourFoV, &jmp_retFoV, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -318,47 +306,37 @@ std::optional<std::string> CameraSettings::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings9";
   }
+  if (!install_hook_absolute(addr10.value(), m_function_hookNoVignette, &detourNoVignette, &jmp_retNoVignette, 6)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize CameraSettingsNoVignette";
+  }
 
   return Mod::on_initialize();
 }
 void CameraSettings::on_config_load(const utility::Config& cfg) {
-  siyanscamerafixenable = cfg.get<bool>("camera_settings_siyans_cam_fix_1").value_or(false);
-  closeautocorrectenable = cfg.get<bool>("camera_settings_close_auto_correct").value_or(false);
-  distantautocorrectenable = cfg.get<bool>("camera_settings_distant_auto_correct").value_or(false);
-  heightautocorrectenable = cfg.get<bool>("camera_settings_height_auto_correct").value_or(false);
-  movementautocorrectenable = cfg.get<bool>("camera_settings_movement_auto_correct").value_or(false);
+  nocameraautocorrectsenable = cfg.get<bool>("camera_settings_siyans_cam_fix_1").value_or(false);
   keyboardhorizontalenable = cfg.get<bool>("camera_settings_keyboard_horizontal").value_or(false);
   fov = cfg.get<float>("camera_settings_fov").value_or(65.0f);
   horizontalsens = cfg.get<float>("camera_settings_horizontal_sens").value_or(3.25f);
+  novignetteenable = cfg.get<bool>("camera_settings_no_vignette").value_or(false);
 }
 
 void CameraSettings::on_config_save(utility::Config& cfg) {
-  cfg.set<bool>("camera_settings_siyans_cam_fix_1", siyanscamerafixenable);
-  cfg.set<bool>("camera_settings_close_auto_correct", closeautocorrectenable);
-  cfg.set<bool>("camera_settings_distant_auto_correct", distantautocorrectenable);
-  cfg.set<bool>("camera_settings_height_auto_correct", heightautocorrectenable);
-  cfg.set<bool>("camera_settings_movement_auto_correct", movementautocorrectenable);
+  cfg.set<bool>("camera_settings_siyans_cam_fix_1", nocameraautocorrectsenable);
   cfg.set<bool>("camera_settings_keyboard_horizontal", keyboardhorizontalenable);
   cfg.set<float>("camera_settings_fov", fov);
   cfg.set<float>("camera_settings_horizontal_sens", horizontalsens);
+  cfg.set<bool>("camera_settings_no_vignette", novignetteenable);
 }
 
 void CameraSettings::on_draw_ui() {
-  ImGui::Checkbox("Siyan's Camera Fix (Old)", &siyanscamerafixenable);
-  ImGui::ShowHelpMarker("Old version of the camera settings. Its functionality has been split into the cheats below");
-  ImGui::Checkbox("Disable Close Autocorrects", &closeautocorrectenable);
-  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
-  ImGui::Checkbox("Disable Distant Autocorrects", &distantautocorrectenable);
-  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
-  ImGui::Checkbox("Disable Height Based Autocorrects", &heightautocorrectenable);
-  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
-  ImGui::Checkbox("Disable Movement Based Autocorrects", &movementautocorrectenable);
-  ImGui::ShowHelpMarker("Autocorrects are when the game automatically spins the camera to keep the enemy in view. They are replaced here with the camera panning out instead.");
-  ImGui::Checkbox("Allow Keyboard Camera Movement While Locked On", &keyboardhorizontalenable);
-  ImGui::Spacing();
+  ImGui::Checkbox("Prefer panning to rotating", &nocameraautocorrectsenable);
+  ImGui::ShowHelpMarker("The game automatically spins the camera to keep the enemy in view. This will attempt to avoid that by panning instead.");
+  ImGui::Checkbox("Disable Vignette", &novignetteenable);
+  ImGui::Checkbox("Allow Camera Movement While Locked On Using Keyboard", &keyboardhorizontalenable);
   ImGui::Text("Field of View (65 default)");
   UI::SliderFloat("##fovslider", &fov, 0.0f, 120.0f, "%.0f");
-  ImGui::Spacing();
   ImGui::Text("Horizontal Sensitivity (3.25 default)");
   UI::SliderFloat("##horizontalsensslider", &horizontalsens, 3.25f, 10.0f, "%.2f");
 }

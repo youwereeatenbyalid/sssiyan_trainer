@@ -271,12 +271,12 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
 
     auto addr8 = patterns->find_addr(base, "F3 0F 10 15 39 0F 10 06");
     if (!addr8) {
-        return "Unable to find DanteSDTRework pattern7.";
+        return "Unable to find DanteSDTRework pattern8.";
     }
     if (!install_hook_absolute(addr8.value(), m_function_hook8, &detour8, &jmp_ret8, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
-        return "Failed to initialize DanteSDTRework7";
+        return "Failed to initialize DanteSDTRework8";
     }
 
     return Mod::on_initialize();
