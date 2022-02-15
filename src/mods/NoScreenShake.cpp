@@ -35,7 +35,7 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   m_on_page               = camera;
 
   m_full_name_string     = "No Screen Shake";
-  m_author_string        = "DeepDarkKapustka";
+  m_author_string        = "deepdarkkapustka";
   m_description_string   = "Disables screen shake completely.";
 
   set_up_hotkey();

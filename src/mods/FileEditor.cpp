@@ -287,7 +287,7 @@ std::optional<std::string> FileEditor::on_initialize() {
 
   m_full_name_string     = "Asset Swapper (+)";
   m_author_string        = "Darkness (TheDarkness704)";
-  m_description_string   = "Lets you load custom assets into the game and manage them, effects will take action after each loading screen.";
+  m_description_string   = "Lets you load custom assets into the game and manage them. Effects will take action after each loading screen.";
 
   set_up_hotkey();
 

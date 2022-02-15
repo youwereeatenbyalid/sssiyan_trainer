@@ -37,7 +37,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = dantesdt;
-		m_full_name_string = "Judgement custom cost (+)";
+		m_full_name_string = "Judgement Custom Cost (+)";
 		m_author_string = "VPZadov";
 		m_description_string = "Set cost for SDT's \"Judgement\" move.";
 

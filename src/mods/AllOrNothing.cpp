@@ -102,7 +102,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   m_is_enabled = &AllOrNothing::cheaton;
 
   m_full_name_string     = "Must Style (+)";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Disable damage altogether or when below a certain Style Rank.";
 
   set_up_hotkey();
@@ -226,7 +226,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   ischecked = &AllOrNothing::cheaton;
 
   full_name_string     = "Must Style / Damage Toggles (+)";
-  author_string        = "The Hitchhiker";
+  author_string        = "The HitchHiker";
   description_string   = "Disable damage altogether or when below a certain Style Rank.";
 
   auto addr = patterns->find_addr(base, "F3 0F 10 4F 10 0F 57 C0 0F 5A");

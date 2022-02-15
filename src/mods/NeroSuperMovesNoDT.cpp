@@ -58,7 +58,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
   m_is_enabled = &NeroSuperMovesNoDT::cheaton;
   m_on_page    = nero;
   m_full_name_string     = "Super Moves outside of DT";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Use Max Bet & Showdown outside of Devil Trigger.";
 
   set_up_hotkey();

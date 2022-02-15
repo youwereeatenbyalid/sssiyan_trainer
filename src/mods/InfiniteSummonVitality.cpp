@@ -42,7 +42,7 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   m_on_page    = gilver;
   m_full_name_string     = "Infinite Summon Vitality";
   m_author_string        = "Jessie Kazama";
-  m_description_string   = "Pet health is locked at max.";
+  m_description_string   = "Pet health is locked to max.";
 
   set_up_hotkey();
   auto infsummonvitality_addr = patterns->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");

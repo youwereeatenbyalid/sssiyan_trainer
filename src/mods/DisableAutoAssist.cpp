@@ -35,7 +35,7 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
   m_is_enabled = &DisableAutoAssist::cheaton;
   m_on_page    = qol;
   m_full_name_string     = "Disable Auto Assist";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Prevents Auto Assist from being activated.";
 
   set_up_hotkey();

@@ -149,7 +149,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
   m_on_page    = taunt;
 
   m_full_name_string     = "Taunt Selector (+)";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Allows you to specify what taunts will be used by each character.";
 
   set_up_hotkey();

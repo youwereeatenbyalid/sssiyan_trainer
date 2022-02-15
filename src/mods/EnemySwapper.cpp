@@ -1757,7 +1757,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
   m_on_page         = balance;
   m_full_name_string   = "Enemy Swapper(+)";
   m_author_string      = "VPZadov";
-  m_description_string = "Swap enemy spawns. Effects normal spawns & hell judecca summons.";
+  m_description_string = "Swap enemy spawns. Affects normal spawns & hell judecca summons.";
 
   plPosBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 

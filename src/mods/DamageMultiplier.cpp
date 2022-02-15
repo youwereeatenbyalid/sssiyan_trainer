@@ -81,7 +81,7 @@ std::optional<std::string> DamageMultiplier::on_initialize() {
   // ischecked             = &DamageMultiplier::cheaton;
   // onpage                = gamemode;
 
-  m_full_name_string      = "Damage Multiplier (+)";
+  m_full_name_string      = "This address is only used for backing up enemy HP";
   m_author_string         = "SSSiyan";
   m_description_string    = "Allows you to adjust the damage output of players and enemies.";
 

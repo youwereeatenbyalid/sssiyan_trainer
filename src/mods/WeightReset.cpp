@@ -141,7 +141,7 @@ std::optional<std::string> WeightReset::on_initialize() {
 
   m_full_name_string     = "Reset Weight";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Air Hikes and Divekick will reset your weight";
+  m_description_string   = "Air Hike and Friction will reset your weight.";
 
   set_up_hotkey();
 

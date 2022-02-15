@@ -41,7 +41,7 @@ std::optional<std::string> DisableEnemyAI::on_initialize() {
   init_check_box_info();
 
   m_is_enabled               = &DisableEnemyAI::cheaton;
-  m_on_page                  = commoncheat;
+  m_on_page                  = balance;
 
   m_full_name_string        = "Disable Enemy AI";
   m_author_string           = "SSSiyan";

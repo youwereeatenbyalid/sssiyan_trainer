@@ -41,7 +41,7 @@ std::optional<std::string> HoldToMash::on_initialize() {
   m_is_enabled = &HoldToMash::cheaton;
   m_on_page    = qol;
   m_full_name_string     = "Hold To Mash";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
 
   set_up_hotkey();

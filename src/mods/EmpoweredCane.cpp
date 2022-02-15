@@ -46,7 +46,7 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   m_on_page    = gilver;
   m_full_name_string     = "Infinite Empowered Cane";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Extends the duration of V's BP Taunt to infinity.";
+  m_description_string   = "V's BP Taunt buffed cane will last forever.";
 
   set_up_hotkey();
   

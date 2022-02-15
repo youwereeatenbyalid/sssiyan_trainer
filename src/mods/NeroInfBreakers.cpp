@@ -93,7 +93,7 @@ std::optional<std::string> NeroInfBreakers::on_initialize() {
   //m_on_page             = breaker;
 
   m_full_name_string   = "Infinite Devil Breakers";
-  m_author_string      = "DeepDarkKapustka";
+  m_author_string      = "deepdarkkapustka";
   m_description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"
                        "When using less than 8, this will bug and give you Overtures.";
 

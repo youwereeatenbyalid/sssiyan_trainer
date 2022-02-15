@@ -78,7 +78,7 @@ std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   m_is_enabled          = &NeroSwapWiresnatch::cheaton;
   m_on_page             = wiresnatch;
 
-  m_full_name_string   = "Angel and Devil Snatch (+)";
+  m_full_name_string   = "Angel And Devil Snatch (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Replaces Wiresnatch with a move that pulls nero towards the enemy and adds knockback.";
 
@@ -115,5 +115,5 @@ void NeroSwapWiresnatch::on_config_save(utility::Config& cfg) {
 }
 
 void NeroSwapWiresnatch::on_draw_ui() {
-  ImGui::Checkbox("Angel Snatch on Devil Bringer instead of Wiresnatch", &swapInputs);
+  ImGui::Checkbox("Swap inputs", &swapInputs);
 }

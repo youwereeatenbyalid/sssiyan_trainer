@@ -49,8 +49,8 @@ std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   m_is_enabled            = &VergilDirectionalMappings::cheaton;
   m_on_page               = vergiltrick;
   
-  m_full_name_string     = "Down Trick on Back + Trick";
-  m_author_string        = "The Hitchhiker";
+  m_full_name_string     = "Down Trick On Back + Trick";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Down Trick input moved to Back + B / O.";
 
   set_up_hotkey();

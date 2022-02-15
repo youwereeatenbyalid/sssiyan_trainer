@@ -108,7 +108,7 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   m_on_page             = mechanics;
 
   m_full_name_string   = "Turbo (+)";
-  m_author_string      = "DeepDarkKapustka";
+  m_author_string      = "deepdarkkapustka";
   m_description_string = "Change the game speed by adjusting the slider.\n\n"
                        "1.2 is the value used in DMC3 and DMC4.";
 

@@ -33,9 +33,9 @@
         //#include "mods/SCNPathEditor.hpp"
     // Gameplay
         #include "mods/AllOrNothing.hpp"
-        #include "mods/DifficultySelect.hpp"
 		#include "mods/OneHitKill.hpp"
 		#include "mods/NoOneTakesDamage.hpp"
+        #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
         #include "mods/DisableBreakaway.hpp"
@@ -212,9 +212,9 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
-        m_mods.emplace_back(std::make_unique<DifficultySelect>());
 		m_mods.emplace_back(std::make_unique<OneHitKill>());
 		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
+        m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());

@@ -20,7 +20,7 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = vergiltrick;
-	m_full_name_string = "Air trick dodge";
+	m_full_name_string = "Air Trick Dodge";
 	m_author_string = "VPZadov & The HitchHiker";
 	m_description_string = "Allow trick dodge while airborne.";
 	set_up_hotkey();

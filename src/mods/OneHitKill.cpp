@@ -34,11 +34,11 @@ std::optional<std::string> OneHitKill::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_on_page = gamemode;
+  m_on_page = balance;
   m_is_enabled = &OneHitKill::cheaton;
   m_full_name_string     = "One Hit Kill";
-  m_author_string        = "The Hitchhiker";
-  m_description_string   = "This is the description of OneHitKill.";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Enemies will die in one hit.";
 
   set_up_hotkey();
 

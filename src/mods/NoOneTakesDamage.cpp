@@ -35,10 +35,10 @@ std::optional<std::string> NoOneTakesDamage::on_initialize() {
 
   //auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &NoOneTakesDamage::cheaton;
-  m_on_page    = gamemode;
-  m_full_name_string     = "No one takes Damage";
+  m_on_page    = balance;
+  m_full_name_string     = "No One Takes Damage";
   m_author_string        = "The HitchHiker";
-  m_description_string   = "This is the description of NoOneTakesDamage.";
+  m_description_string   = "Players and enemies take no damage.";
 
   set_up_hotkey();
 

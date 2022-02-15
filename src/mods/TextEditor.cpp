@@ -108,7 +108,7 @@ std::optional<std::string> TextEditor::on_initialize() {
 	  return "Unable to find Text Editor Pattern.";
   }
   m_full_name_string     = "Text Editor";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Replaces Strings.";
 
   set_up_hotkey();

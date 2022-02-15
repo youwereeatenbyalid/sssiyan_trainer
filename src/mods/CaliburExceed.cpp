@@ -39,7 +39,7 @@ std::optional<std::string> CaliburExceed::on_initialize() {
   m_is_enabled = &CaliburExceed::cheaton;
   m_on_page    = nero;
   m_full_name_string     = "Calibur Always Level 3";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Forces calibur to always perform the EX 3 variant.";
 
   set_up_hotkey();

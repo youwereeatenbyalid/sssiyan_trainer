@@ -39,7 +39,7 @@ std::optional<std::string> DanteRedlineCav::on_initialize() {
     m_on_page = dantecheat;
 
     m_full_name_string = "Redline On Cavaliere";
-    m_author_string = "The Hitchhiker";
+    m_author_string = "The HitchHiker";
     m_description_string = "Allows you to use the Cavaliere R exclusive move on regular Cavaliere.";
 
     set_up_hotkey();

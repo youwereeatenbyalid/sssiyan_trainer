@@ -39,7 +39,7 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
   m_is_enabled = &DisableTitleTimer::cheaton;
   m_on_page    = qol;
   m_full_name_string     = "Disable Titlescreen Timer";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
 
   set_up_hotkey();

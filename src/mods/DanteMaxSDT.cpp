@@ -44,7 +44,7 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
 
   m_full_name_string     = "Infinite SDT";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Sets the SDT Bar to maximum.";
+  m_description_string   = "Freezes the SDT Bar at maximum.";
 
   set_up_hotkey();
 

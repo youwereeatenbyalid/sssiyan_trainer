@@ -1175,7 +1175,6 @@ void ModFramework::draw_panel(PanelID_ panelID)
     PanelID_ current_focused_panel;
     
     float modListIndent = 10.0f * m_scale;
-    float sprtSpcYOfst = 0.0f * m_scale;
 
     switch (panelID) {
         case PanelID_Gameplay:
@@ -1184,28 +1183,24 @@ void ModFramework::draw_panel(PanelID_ panelID)
                     current_focused_panel = PanelID_Gameplay;
 
                 if (m_error.empty() && m_game_data_initialized) {
-                    ImGui::Text("Common Mechanics");
-	                m_mods->on_pagelist_ui(Mod::mechanics, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
-
-                    ImGui::Separator();
-                    ImGui::Text("Enemy Step");
-                    m_mods->on_pagelist_ui(Mod::enemystep, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
-
-                    ImGui::Separator();
                     ImGui::Text("Shared Cheats");
                     m_mods->on_pagelist_ui(Mod::commoncheat, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
-                    ImGui::Text("Taunts");
-                    m_mods->on_pagelist_ui(Mod::taunt, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
+                    ImGui::Text("Common Mechanics");
+                    m_mods->on_pagelist_ui(Mod::mechanics, modListIndent);
 
                     ImGui::Separator();
                     ImGui::Text("Animation");
                     m_mods->on_pagelist_ui(Mod::animation, modListIndent);
+
+                    ImGui::Separator();
+                    ImGui::Text("Enemy Step");
+                    m_mods->on_pagelist_ui(Mod::enemystep, modListIndent);
+
+                    ImGui::Separator();
+                    ImGui::Text("Taunts");
+                    m_mods->on_pagelist_ui(Mod::taunt, modListIndent);
                 }
                 else if (!m_game_data_initialized) {
                     ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1222,18 +1217,16 @@ void ModFramework::draw_panel(PanelID_ panelID)
                     current_focused_panel = PanelID_Scenario;
 
                 if (m_error.empty() && m_game_data_initialized) {
+                    ImGui::Text("Game Balance");
+                    m_mods->on_pagelist_ui(Mod::balance, modListIndent);
+                    
+                    ImGui::Separator();
                     ImGui::Text("Game Modes");
-	            	m_mods->on_pagelist_ui(Mod::gamemode, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
+                    m_mods->on_pagelist_ui(Mod::gamemode, modListIndent);
 
                     ImGui::Separator();
                     ImGui::Text("Bloody Palace");
                     m_mods->on_pagelist_ui(Mod::bloodypalace, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
-
-                    ImGui::Separator();
-                    ImGui::Text("Game Balance");
-                    m_mods->on_pagelist_ui(Mod::balance, modListIndent);
                 }
                 else if (!m_game_data_initialized) {
                     ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1252,7 +1245,6 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 if (m_error.empty() && m_game_data_initialized) {
                     ImGui::Text("Camera");
 	            	m_mods->on_pagelist_ui(Mod::camera, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Quality-of-life");
@@ -1275,12 +1267,10 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 if (m_error.empty() && m_game_data_initialized) {
                     ImGui::Text("Breaker");
 	            	m_mods->on_pagelist_ui(Mod::breaker, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Wiresnatch");
                     m_mods->on_pagelist_ui(Mod::wiresnatch, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Cheats");
@@ -1303,7 +1293,6 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 if (m_error.empty() && m_game_data_initialized) {
                     ImGui::Text("SDT");
 	            	m_mods->on_pagelist_ui(Mod::dantesdt, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Cheats");
@@ -1344,22 +1333,18 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 if (m_error.empty() && m_game_data_initialized) {
                     ImGui::Text("SDT");
 	            	m_mods->on_pagelist_ui(Mod::vergilsdt, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Dark Slayer");
                     m_mods->on_pagelist_ui(Mod::vergiltrick, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("Cheats");
                     m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("DoppelGanger");
                     m_mods->on_pagelist_ui(Mod::vergildoppel, modListIndent);
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + sprtSpcYOfst);
 
                     ImGui::Separator();
                     ImGui::Text("EFX Settings");

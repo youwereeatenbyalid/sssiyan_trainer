@@ -38,7 +38,7 @@ std::optional<std::string> NoSlowmoOrHitstop::on_initialize() {
   m_on_page             = animation;
   m_full_name_string   = "No Slowmo Or Hitstop";
   m_author_string      = "SSSiyan";
-  m_description_string = "Disables player slowdowns and hitstop.";
+  m_description_string = "Disables slowdown and hitstop.";
 
   set_up_hotkey();
 

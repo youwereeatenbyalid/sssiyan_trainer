@@ -42,9 +42,9 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &PetChargeNoInterrupt::cheaton;
   m_on_page    = gilver;
-  m_full_name_string     = "Pet charge carries through interrupt ";
-  m_author_string        = "The Hitchhiker";
-  m_description_string   = "Griffon's charges will continue through a backstep or air hike. Shadow's hedgehog will continue to charge through forced movement";
+  m_full_name_string     = "Pet Charges Carry Through Interrupts";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Griffon's charges will continue through a backstep or air hike. Shadow's hedgehog will continue to charge through forced movement.";
 
   set_up_hotkey();
   

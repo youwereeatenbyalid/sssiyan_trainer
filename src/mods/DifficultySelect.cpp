@@ -61,7 +61,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   m_is_enabled = &DifficultySelect::cheaton;
   m_on_page    = balance;
   m_full_name_string     = "Select Enemy Difficulty (+)";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Set the difficulty of enemies in combat.";
 
   set_up_hotkey();

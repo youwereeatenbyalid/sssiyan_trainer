@@ -526,7 +526,7 @@ std::optional<std::string> LDK::on_initialize() {
   m_on_page               = gamemode;
 
   m_full_name_string     = "Legendary Dark Knights (+)";
-  m_author_string        = "The HitchHiker, Dr. Penguin, DeepDarkKapusta, VPZadov";
+  m_author_string        = "The HitchHiker, Dr. Penguin, deepdarkkapustka, VPZadov";
   m_description_string   = "Enables the Legendary Dark Knights Gamemode.";
 
   set_up_hotkey();

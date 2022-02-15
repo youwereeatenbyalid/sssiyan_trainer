@@ -51,7 +51,7 @@ std::optional<std::string> DisableBreakaway::on_initialize() {
   m_on_page    = breaker;
 
   m_full_name_string     = "Disable Breakaway (+)";
-  m_author_string        = "Lidemi & The Hitchhiker";
+  m_author_string        = "Lidemi & The HitchHiker";
   m_description_string   = "Disables the Breakaway animation."
                          "Hold the assigned input while pressing breakaway to force a breakaway.";
 

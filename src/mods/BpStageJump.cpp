@@ -251,7 +251,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   m_is_enabled               = &BpStageJump::cheaton;
   m_on_page                  = bloodypalace;
   m_full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
-  m_author_string           = "SSSiyan, The Hitchhiker";
+  m_author_string           = "SSSiyan, The HitchHiker";
   m_description_string      = "Allows you to skip to a BP stage of your choosing.";
 
   set_up_hotkey();

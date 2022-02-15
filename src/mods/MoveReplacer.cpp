@@ -215,7 +215,7 @@ std::optional<std::string> MoveReplacer::on_initialize() {
   m_is_enabled = &MoveReplacer::cheaton;
   m_on_page    = -1;
   m_full_name_string     = "MoveReplacer";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Framework for animation replacement + inertia. Should be hidden in release.";
 
   set_up_hotkey();

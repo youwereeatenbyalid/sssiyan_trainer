@@ -36,11 +36,11 @@ std::optional<std::string> EnemyInstantDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled               = &EnemyInstantDT::cheaton;
-  m_on_page                  = gamemode;
+  m_on_page                  = balance;
 
   m_full_name_string        = "Instant Enemy DT";
   m_author_string           = "SSSiyan";
-  m_description_string      = "Forces enemies to enter DT immediately when on DMD";
+  m_description_string      = "Forces enemies to enter DT immediately when on DMD.";
 
   set_up_hotkey();
 

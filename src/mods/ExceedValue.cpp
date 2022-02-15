@@ -42,7 +42,7 @@ std::optional<std::string> ExceedValue::on_initialize() {
   m_is_enabled = &ExceedValue::cheaton;
   m_on_page = nero;
   m_full_name_string     = "Set Exceed Level (+)";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Set/Lock Nero's Exceed.";
 
   set_up_hotkey();

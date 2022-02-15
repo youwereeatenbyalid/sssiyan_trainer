@@ -68,9 +68,9 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   auto base        = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled        = &cheaton;
   m_on_page           = gamemode;
-  m_full_name_string = "Custom checkpoints (+)";
+  m_full_name_string = "Custom Checkpoints (+)";
   m_author_string    = "VPZadov";
-  m_description_string = "Create a custom checkpoint to reset at. Uses boss checkpoints by default.";
+  m_description_string = "Create a custom checkpoint to reset to. Uses boss checkpoints by default.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 

@@ -39,7 +39,7 @@ std::optional<std::string> InfDT::on_initialize() {
 
   m_full_name_string   = "Infinite DT";
   m_author_string      = "SSSiyan";
-  m_description_string = "Sets your DT bar to maximum.";
+  m_description_string = "Freezes the DT Bar at maximum.";
 
   set_up_hotkey();
 

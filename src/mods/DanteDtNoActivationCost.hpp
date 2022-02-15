@@ -39,7 +39,7 @@ public:
 		m_on_page = dantecheat;
 		m_full_name_string = "Remove DT activation cost";
 		m_author_string = "VPZadov";
-		m_description_string = "As title said.";
+		m_description_string = "Remove the activation cost of entering DT.";
 
 		set_up_hotkey();
 

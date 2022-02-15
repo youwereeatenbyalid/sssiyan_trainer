@@ -125,7 +125,7 @@ std::optional<std::string> Inertia::on_initialize() {
   m_on_page    = mechanics;
 
   m_full_name_string     = "Inertia Redirection";
-  m_author_string        = "The Hitchhiker";
+  m_author_string        = "The HitchHiker";
   m_description_string   = "Redirect inertia through air hikes & enemy steps.";
 
   set_up_hotkey();

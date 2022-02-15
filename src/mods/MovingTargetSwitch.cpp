@@ -45,7 +45,7 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
 
   m_full_name_string     = "Moving Target Switch";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Allows you to switch targets while moving the left stick";
+  m_description_string   = "Allows you to switch targets while moving the left stick.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = patterns->find_addr(base, "0F 2F 05 B1 DF F6 02");

@@ -303,7 +303,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = vergiltrick;
-	m_full_name_string = "Enhanced human JCE mechanic (DMC3 JCE) (+)";
+	m_full_name_string = "Enhanced Human JCE Mechanic (DMC3 JCE) (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Change duration, amount of SDT expended to perform JCE and overall virgin DMC5 human JCE to chad DMC3 boss Vergil JCE. Can be executed without full STD bar. This mod can crash the game :(";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();

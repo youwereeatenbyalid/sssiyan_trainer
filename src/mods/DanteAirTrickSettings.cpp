@@ -68,7 +68,7 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = dantecheat;
-	m_full_name_string = "Trick settings (+)";
+	m_full_name_string = "Trick Settings (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Adjust the properties of Dante's Trick Actions.";
 

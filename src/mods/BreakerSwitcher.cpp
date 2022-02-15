@@ -678,7 +678,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   m_on_page    = breaker;
 
   m_full_name_string     = "Breaker Switcher (+)";
-  m_author_string        = "The Hitchhiker (original version by Nino)";
+  m_author_string        = "The HitchHiker (original version by Nino)";
   m_description_string   = "Make sure your d-pad is bound to breakaway, then "
                          "press a button on the d-pad to switch breakers.";
 
