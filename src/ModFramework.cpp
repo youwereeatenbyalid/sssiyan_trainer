@@ -34,16 +34,22 @@ ModFramework::ModFramework()
 {
     using std::filesystem::path;
 
+    auto patternsCacheFileName = "Collab Trainer/Configs/AOBList.ini";
+
     // Making sure the log and configs directories are created
     ::CreateDirectory(path(LOG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(KEYBIND_CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
+    ::CreateDirectory(path(patternsCacheFileName).parent_path().string().c_str(), nullptr);
 
     m_logger = spdlog::basic_logger_mt("Collab Trainer", LOG_FILENAME, true);
 
     spdlog::set_default_logger(m_logger);
     spdlog::flush_on(spdlog::level::info);
     spdlog::info(LOG_ENTRY);
+
+    // Initialize the pattern manager
+    Mod::patterns = std::make_unique<InitPatternsManager>(patternsCacheFileName, "IsUsingPatternsList");
 
     // Loading stuff we saved in the config file
     utility::Config cfg(CONFIG_FILENAME);
@@ -61,7 +67,20 @@ ModFramework::ModFramework()
 
     if (!hook_d3d12()) {
         spdlog::error("Failed to hook D3D12 for initial test.");
+        return;
     }
+
+    // Setting up the maps for panel ID
+    m_mods_panels_map["Gameplay"] = PanelID_Gameplay;
+    m_mods_panels_map["Scenario"] = PanelID_Scenario;
+    m_mods_panels_map["System"] = PanelID_System;
+    m_mods_panels_map["Nero"] = PanelID_Nero;
+    m_mods_panels_map["Dante"] = PanelID_Dante;
+    m_mods_panels_map["V"] = PanelID_Gilver;
+    m_mods_panels_map["Vergil"] = PanelID_Vergil;
+
+    m_settings_panels_map["Mod Settings"] = SettingsPanelID_FocusedMod;
+    m_settings_panels_map["Trainer Settings"] = SettingsPanelID_Trainer;
 }
 
 ModFramework::~ModFramework() {
@@ -86,7 +105,7 @@ bool ModFramework::hook_d3d11()
 {
 	m_d3d11_hook = std::make_unique<D3D11Hook>();
 	m_d3d11_hook->on_present([this](D3D11Hook& hook) { on_frame_d3d11(); });
-	m_d3d11_hook->on_resize_buffers([this](D3D11Hook& hook) { on_reset(); });
+	m_d3d11_hook->on_resize_buffers([this](D3D11Hook&, const UINT& width, const UINT& height) { on_reset(width, height); });
 
     // Making sure D3D12 is not hooked
 	if (!m_is_d3d12) {
@@ -121,7 +140,7 @@ bool ModFramework::hook_d3d12()
 
 	m_d3d12_hook = std::make_unique<D3D12Hook>();
 	m_d3d12_hook->on_present([this](D3D12Hook& hook) { on_frame_d3d12(); });
-	m_d3d12_hook->on_resize_buffers([this](D3D12Hook& hook) { on_reset(); });
+	m_d3d12_hook->on_resize_buffers([this](D3D12Hook&, const UINT& width, const UINT& height) { on_reset(width, height); });
 	//m_d3d12_hook->on_resize_target([this](D3D12Hook& hook) { on_reset(); });
 	//m_d3d12_hook->on_create_swap_chain([this](D3D12Hook& hook) { m_pd3d_command_queue_d3d12 = m_d3d12_hook->get_command_queue(); });
 
@@ -156,86 +175,15 @@ void ModFramework::set_style(const float& scale) noexcept {
     style.ChildRounding     = 0.0f * scale;
     style.PopupRounding     = 0.0f * scale;
     style.FrameRounding     = 0.0f * scale;
-    style.ScrollbarSize     = 8.0f * scale;
+    style.ScrollbarSize     = 10.0f * scale;
     style.ScrollbarRounding = 2.0f * scale;
     style.GrabRounding      = 0.0f * scale;
     style.TabRounding       = 5.0f * scale;
     style.WindowBorderSize  = 2.0f * scale;
     style.WindowPadding     = ImVec2(8.0f, 5.0f) * scale;
-    style.ItemSpacing.y     = 8.0f * scale;
+    style.ItemSpacing.y     = 8.0f;
 
     auto& colors = ImGui::GetStyle().Colors;
-
-    // Constants to be able to change color schemes later easier
-    /*
-    // Black and white scheme:
-    const ImVec4 color_normal(0.2f, 0.205f, 0.21f, 1.0f);
-    const ImVec4 color_hovered(0.3f, 0.305f, 0.31f, 1.0f);
-    const ImVec4 color_active(0.55f, 0.5505f, 0.551f, 1.0f);
-    const ImVec4 color_title_bg(0.25f, 0.2505f, 0.251f, 1.0f);
-    const ImVec4 color_focused_active(0.265f, 0.2655f, 0.266f, 1.0f);
-    const ImVec4 color_unfocused(0.18f, 0.1805f, 0.181f, 1.0f);
-    const ImVec4 color_collapsed(0.55f, 0.5505f, 0.551f, 1.0f);
-    */
-	/*
-
-    const ImVec4 color_normal = color_htof(0x7DE8E8FF);
-    const ImVec4 color_hovered = color_htof(0x5616BCFF);
-    const ImVec4 color_active =  color_htof(0x7827CCFF);
-    const ImVec4 color_title_bg(0.25f, 0.2505f, 0.251f, 1.0f);
-    const ImVec4 color_focused_active(0.265f, 0.2655f, 0.266f, 1.0f);
-    const ImVec4 color_unfocused(0.18f, 0.1805f, 0.181f, 1.0f);
-    const ImVec4 color_collapsed(0.55f, 0.5505f, 0.551f, 1.0f);
-
-    // Window BG
-    colors[ImGuiCol_WindowBg] = color_htof(0x0B0019ff);
-
-    // Navigatation highlight
-    colors[ImGuiCol_NavHighlight] = color_hovered;
-
-    // Headers
-    colors[ImGuiCol_Header] = color_normal;
-    colors[ImGuiCol_HeaderHovered] = color_hovered;
-    colors[ImGuiCol_HeaderActive] = color_active;
-
-    // Buttons
-    colors[ImGuiCol_Button] = color_normal;
-    colors[ImGuiCol_ButtonHovered] = color_hovered;
-    colors[ImGuiCol_ButtonActive] = color_active;
-
-    // Checkmark
-    colors[ImGuiCol_CheckMark] = color_active;
-
-    // Slider
-    colors[ImGuiCol_SliderGrab] = color_normal;
-    colors[ImGuiCol_SliderGrabActive] = color_active;
-
-    // Frame BG
-    colors[ImGuiCol_FrameBg] = color_normal;
-    colors[ImGuiCol_FrameBgHovered] = color_hovered;
-    colors[ImGuiCol_FrameBgActive] = color_active;
-
-    // Tabs
-    colors[ImGuiCol_Tab] = color_normal;
-    colors[ImGuiCol_TabHovered] = color_hovered;
-    colors[ImGuiCol_TabActive] = color_active;
-    colors[ImGuiCol_TabUnfocused] = color_unfocused;
-    colors[ImGuiCol_TabUnfocusedActive] = color_unfocused;
-
-    // Resize Grip
-    colors[ImGuiCol_ResizeGrip] = color_normal;
-    colors[ImGuiCol_ResizeGripHovered] = color_hovered;
-    colors[ImGuiCol_ResizeGripActive] = color_active;
-
-    // Title
-    colors[ImGuiCol_TitleBg] = color_title_bg;
-    colors[ImGuiCol_TitleBgActive] = color_active;
-    colors[ImGuiCol_TitleBgCollapsed] = color_collapsed;
-
-    // Borders
-    colors[ImGuiCol_Border] = color_normal;
-    colors[ImGuiCol_BorderShadow] = color_normal;
-*/
 
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
@@ -262,7 +210,7 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_ButtonHovered] = ImVec4(0.29f, 0.55f, 0.80f, 0.50f);
     colors[ImGuiCol_ButtonActive] = ImVec4(0.29f, 0.55f, 0.80f, 1.00f);
     colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-    colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.05f, 0.11f, 0.20f, 1.00f);
     colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
     colors[ImGuiCol_Separator] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
     colors[ImGuiCol_SeparatorHovered] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
@@ -270,11 +218,11 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
     colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-    colors[ImGuiCol_Tab] = ImVec4(0.02f, 0.02f, 0.02f, 0.86f);
-    colors[ImGuiCol_TabHovered] = ImVec4(0.09f, 0.60f, 0.64f, 0.80f);
-    colors[ImGuiCol_TabActive] = ImVec4(0.14f, 0.38f, 0.47f, 1.00f);
-    colors[ImGuiCol_TabUnfocused] = ImVec4(0.07f, 0.10f, 0.15f, 0.97f);
-    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.14f, 0.26f, 0.42f, 1.00f);
+    colors[ImGuiCol_Tab] = ImVec4(0.0f, 0.20f, 0.30f, 1.0f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.00f, 0.35f, 0.58f, 1.00f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.00f, 0.30f, 0.50f, 1.00f);
+    colors[ImGuiCol_TabUnfocused] = ImVec4(0.0f, 0.15f, 0.25f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.00f, 0.25f, 0.40f, 1.00f);
     colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.35f, 0.43f, 1.00f, 1.00f);
     colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 0.70f, 0.90f, 1.00f);
@@ -412,21 +360,12 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
 {
     cfg.set<bool>                   ("HotkeyNotifications", m_is_notif_enabled);
     cfg.set<bool>                   ("SaveAfterEachUIClose", m_save_after_close_ui);
-    cfg.set<bool>                   ("RememberFocusedPanels", m_remember_focused_panels);
-    cfg.set<uint8_t>                ("FocusedModsPanel", m_focused_mod_panel);
-    cfg.set<uint8_t>                ("FocusedSettingsPanel", m_focused_settings_panel);
 }
 
 void ModFramework::load_trainer_settings(utility::Config& cfg)
 {
     m_is_notif_enabled              = cfg.get<bool>("HotkeyNotifications").value_or(false);
     m_save_after_close_ui           = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
-    m_remember_focused_panels 		= cfg.get<bool>("RememberFocusedPanels").value_or(false);
-
-    if (m_remember_focused_panels) {
-        m_focused_mod_panel         = static_cast<PanelID_>(cfg.get<uint8_t>("FocusedModsPanel").value_or(PanelID_Gameplay));
-        m_focused_settings_panel    = static_cast<SettingsPanelID_>(cfg.get<uint8_t>("FocusedSettingsPanel").value_or(SettingsPanelID_FocusedMod));
-    }
 }
 
 void ModFramework::queue_notification(const ImGuiToast& notif) {
@@ -517,8 +456,8 @@ void ModFramework::on_frame_d3d12() {
     draw_notifs();
 
     ImGui::EndFrame();
-    //ImGui::UpdatePlatformWindows();
-    ImGui::Render();
+
+	ImGui::Render();
     
 	//Rendering
 	UINT back_buffer_idx = m_d3d12_hook->get_swap_chain()->GetCurrentBackBufferIndex();
@@ -558,17 +497,26 @@ void ModFramework::on_frame_d3d12() {
     }
 }
 
-void ModFramework::on_reset() {
+void ModFramework::on_reset(const UINT& width, const UINT& height) {
     spdlog::info("Reset!");
 
     // Crashes if we don't release it at this point.
-    if (m_is_d3d11) cleanup_render_target_d3d11();
+    if (m_is_d3d11) {
+        if (m_initialized && (m_swap_desc.BufferDesc.Width != width || m_swap_desc.BufferDesc.Height != height))
+        {
+            ImGui_ImplDX11_Shutdown();
+            ImGui_ImplWin32_Shutdown();
+            ImGui::DestroyContext();
+        }
+        cleanup_render_target_d3d11();
+    }
 
     if (m_is_d3d12) {
-        // For some reason if we don't destroy the context and recreate it later, the text fields will not work.
-		if (m_initialized)
+		if (m_initialized && (m_swap_desc.BufferDesc.Width != width || m_swap_desc.BufferDesc.Height != height))
 		{
-			ImGui::DestroyContext();
+            ImGui_ImplDX12_Shutdown();
+            ImGui_ImplWin32_Shutdown();
+		    ImGui::DestroyContext();
 		}
 		cleanup_render_target_d3d12();
     }
@@ -936,6 +884,17 @@ void ModFramework::initialize_key_bindings()
 		}, m_default_close_menu_key);
 }
 
+void ModFramework::focus_tab(const std::string_view& window_name)
+{
+    ImGuiWindow* window = ImGui::FindWindowByName(window_name.data());
+
+    if (window == nullptr || window->DockNode == nullptr || window->DockNode->TabBar == nullptr) {
+    	return;
+    }
+
+    window->DockNode->TabBar->NextSelectedTabId = window->ID;
+}
+
 void ModFramework::draw_ui() {
     std::lock_guard _{ m_input_mutex };
 
@@ -1028,6 +987,10 @@ void ModFramework::draw_ui() {
 
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
 
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.25f, 0.38f, 1.00f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.00f, 0.35f, 0.58f, 1.00f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.00f, 0.30f, 0.50f, 1.00f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 1.0f, 1.0f, 1.0f));
     if (ImGui::Button("Save Settings")) 
     {
 		save_config();
@@ -1036,6 +999,7 @@ void ModFramework::draw_ui() {
     if (ImGui::Button("Load Settings")) { 
         load_config();
     }
+    ImGui::PopStyleColor(4);
 
     ImGui::PopStyleVar();
     
@@ -1043,114 +1007,66 @@ void ModFramework::draw_ui() {
     ImGui::Separator();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.26f, 0.59f, 0.98f, 0.00f));
-	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
 
+    static ImGuiID left{}, right{};
+    //ImGuiID leftTop{}, leftBottom{};
     ImGuiID dockSpaceId = ImGui::GetID("SSSiyan's Collaborative Trainer");
     if (!ImGui::DockBuilderGetNode(dockSpaceId))
     {
         ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
         ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetContentRegionAvail());
 
-        ImGuiID left{}, right{};
-
         ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.4f, &left, &right);
-        
-        ImGui::DockBuilderDockWindow("Mods", left);
+        //ImGui::DockBuilderSplitNode(left, ImGuiDir_Up, 0.0f, &leftTop, &leftBottom);
 
-        ImGui::DockBuilderDockWindow("Settings", right);
+        // Mods
+        ImGui::DockBuilderDockWindow("Gameplay", left);
+        ImGui::DockBuilderDockWindow("Scenario", left);
+        ImGui::DockBuilderDockWindow("System", left);
+        ImGui::DockBuilderDockWindow("Nero", left);
+        ImGui::DockBuilderDockWindow("Dante", left);
+        ImGui::DockBuilderDockWindow("V", left);
+        ImGui::DockBuilderDockWindow("Vergil", left);
 
-        ImGui::DockBuilderFinish(dockSpaceId);
+        // Settings
+        ImGui::DockBuilderDockWindow("Mod Settings", right);
+        ImGui::DockBuilderDockWindow("Trainer Settings", right);
+
+    	ImGui::DockBuilderFinish(dockSpaceId);
     }
 
-    ImGui::DockSpace(dockSpaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_AutoHideTabBar);
+    ImGui::DockSpace(dockSpaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
+
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
+    ImGui::PushStyleColor(ImGuiCol_Header, 0);
+
+    draw_panels();
+    draw_settings();
+
+    ImGui::PopStyleColor(2);
+
+    if(!m_is_focus_set)
+    {
+        focus_tab("Mod Settings");
+        focus_tab("Gameplay");
     
-    ImGuiWindowFlags panel_flags =   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus |
-                                    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground;
-
-    {
-        ImGuiWindowClass windowClass;
-        windowClass.DockNodeFlagsOverrideClear = 000;
-        windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-        ImGui::SetNextWindowClass(&windowClass);
-
-		ImGui::Begin("Mods", nullptr, panel_flags);
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.0f, 0.0f));
-
-        ImVec2 tabBtnSize(0.0f, 25.0f * m_scale);
-        float tabBtnRounding = 5.0f;
-
-		if (UI::TabBtn("Gameplay", m_focused_mod_panel == PanelID_Gameplay ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Gameplay;
-        ImGui::SameLine();
-
-		if (UI::TabBtn("Scenario", m_focused_mod_panel == PanelID_Scenario ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Scenario;
-        ImGui::SameLine();
-
-		if (UI::TabBtn("System", m_focused_mod_panel == PanelID_System ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_System;
-        ImGui::SameLine();
-
-		if (UI::TabBtn("Nero", m_focused_mod_panel == PanelID_Nero ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Nero;
-		ImGui::SameLine();
-
-		if (UI::TabBtn("Dante", m_focused_mod_panel == PanelID_Dante ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Dante;
-		ImGui::SameLine();
-
-		if (UI::TabBtn("V", m_focused_mod_panel == PanelID_Gilver ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Gilver;
-		ImGui::SameLine();
-
-		if (UI::TabBtn("Vergil", m_focused_mod_panel == PanelID_Vergil ? true : false, tabBtnSize, tabBtnRounding))
-			m_focused_mod_panel = PanelID_Vergil;
-
-    	ImGui::PopStyleVar();
-
-		ImGui::PushStyleColor(ImGuiCol_Separator, OUTLINE_NORM);
-		ImGui::Separator();
-		ImGui::PopStyleColor();
-
-		draw_panel(m_focused_mod_panel);
-		ImGui::End();
+        m_is_focus_set = true;
     }
 
-    {
-        ImGuiWindowClass windowClass;
-        windowClass.DockNodeFlagsOverrideClear = 000;
-        windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-        ImGui::SetNextWindowClass(&windowClass);
+    // Store focused panels' ID
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.0f, 0.0f));
-
-        ImGui::Begin("Settings", nullptr, panel_flags);
-
-        ImVec2 tabBtnSize(0.0f, 25.0f * m_scale);
-        float tabBtnRounding = 5.0f;
-
-        if (UI::TabBtn("Selected Mod", m_focused_settings_panel == SettingsPanelID_FocusedMod ? true : false, tabBtnSize, tabBtnRounding))
-            m_focused_settings_panel = SettingsPanelID_FocusedMod;
-        ImGui::SameLine();
-
-        if (UI::TabBtn("Trainer", m_focused_settings_panel == SettingsPanelID_Trainer ? true : false, tabBtnSize, tabBtnRounding))
-            m_focused_settings_panel = SettingsPanelID_Trainer;
-
-    	ImGui::PopStyleVar();
-
-        ImGui::PushStyleColor(ImGuiCol_Separator, OUTLINE_NORM);
-        ImGui::Separator();
-        ImGui::PopStyleColor();
-
-        draw_settings(m_focused_settings_panel);
-        ImGui::End();
+    if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(left)->TabBar->SelectedTabId); window != nullptr) {
+        if (const auto panelID = m_mods_panels_map.find(window->Name); panelID != m_mods_panels_map.end()) {
+            m_focused_mod_panel = panelID->second;
+        }
     }
 
-    ImGui::PopStyleColor(4);
+    if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(right)->TabBar->SelectedTabId); window != nullptr) {
+        if (const auto panelID = m_settings_panels_map.find(window->Name); panelID != m_settings_panels_map.end()) {
+            m_focused_settings_panel = panelID->second;
+        }
+    }
+
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -1170,12 +1086,11 @@ void ModFramework::draw_ui() {
     m_do_once_after_ui = true;
 }
 
-void ModFramework::draw_panel(PanelID_ panelID)
+void ModFramework::draw_panels()
 {
-    PanelID_ current_focused_panel;
-    
     float modListIndent = 10.0f * m_scale;
 
+<<<<<<< HEAD
     switch (panelID) {
         case PanelID_Gameplay:
             {
@@ -1306,25 +1221,30 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 }
             }
             break;
+=======
+    static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
+    static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
 
-        case PanelID_Gilver:
-        {
-                if(ImGui::IsWindowFocused())
-                    current_focused_panel = PanelID_Gilver;
+    static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing;
 
-                if (m_error.empty() && m_game_data_initialized) {
-                    ImGui::Text("V cheats");
-	            	m_mods->on_pagelist_ui(Mod::gilver, modListIndent);
-                }
-                else if (!m_game_data_initialized) {
-                    ImGui::TextWrapped("Trainer is currently initializing...");
-                }
-                else if(!m_error.empty()) {
-                    ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
-                }
-            }
-            break;
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Gameplay ? activeTabText : inactiveTabText);
+    ImGui::Begin("Gameplay", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("Shared Cheats");
+            m_mods->on_pagelist_ui(Mod::commoncheat, modListIndent);
 
+            ImGui::Separator();
+            ImGui::Text("Common Mechanics");
+            m_mods->on_pagelist_ui(Mod::mechanics, modListIndent);
+>>>>>>> main
+
+            ImGui::Separator();
+            ImGui::Text("Animation");
+            m_mods->on_pagelist_ui(Mod::animation, modListIndent);
+
+<<<<<<< HEAD
         case PanelID_Vergil:
             {
                 if(ImGui::IsWindowFocused())
@@ -1358,56 +1278,209 @@ void ModFramework::draw_panel(PanelID_ panelID)
                 }
             }
             break;
-    }
-
-    m_last_focused_panel = current_focused_panel;
-}
-
-void ModFramework::draw_settings(SettingsPanelID_ panelID)
-{
-    SettingsPanelID_ current_focused_settings_panel;
-
-    switch(panelID)
-    {
-    case SettingsPanelID_FocusedMod:
-	    {
-            if (ImGui::IsWindowFocused())
-                current_focused_settings_panel = SettingsPanelID_FocusedMod;
-            auto& current_mod = m_mods->get_mod(m_mods->get_focused_mod());
-
-            ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-            ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-            ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+=======
+            ImGui::Separator();
+            ImGui::Text("Enemy Step");
+            m_mods->on_pagelist_ui(Mod::enemystep, modListIndent);
 
             ImGui::Separator();
-
-            current_mod->on_draw_ui();
-	    }
-        break;
-
-    case SettingsPanelID_Trainer:
-	    {
-            if (ImGui::IsWindowFocused())
-                current_focused_settings_panel = SettingsPanelID_Trainer;
-
-            ImGui::Text("Menu Key:"); ImGui::SameLine();
-            ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-            UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-            ImGui::Text("Close Menu Key:"); ImGui::SameLine();
-            ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-    		UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-
-            ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
-            ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
-            ImGui::Checkbox("Load The Saved Focused Mods & Settings Panels On Profile Load", &m_remember_focused_panels);
-	    }
-        break;
+            ImGui::Text("Taunts");
+            m_mods->on_pagelist_ui(Mod::taunt, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+>>>>>>> main
     }
+    ImGui::End();
 
-    m_last_settings_focused_panel = current_focused_settings_panel;
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Scenario ? activeTabText : inactiveTabText);
+    ImGui::Begin("Scenario", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("Game Balance");
+            m_mods->on_pagelist_ui(Mod::balance, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Game Modes");
+            m_mods->on_pagelist_ui(Mod::gamemode, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Bloody Palace");
+            m_mods->on_pagelist_ui(Mod::bloodypalace, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_System ? activeTabText : inactiveTabText);
+    ImGui::Begin("System", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("Camera");
+            m_mods->on_pagelist_ui(Mod::camera, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Quality-of-life");
+            m_mods->on_pagelist_ui(Mod::qol, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Nero ? activeTabText : inactiveTabText);
+    ImGui::Begin("Nero", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("Breaker");
+            m_mods->on_pagelist_ui(Mod::breaker, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Wiresnatch");
+            m_mods->on_pagelist_ui(Mod::wiresnatch, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Cheats");
+            m_mods->on_pagelist_ui(Mod::nero, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Dante ? activeTabText : inactiveTabText);
+    ImGui::Begin("Dante", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("SDT");
+            m_mods->on_pagelist_ui(Mod::dantesdt, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Cheats");
+            m_mods->on_pagelist_ui(Mod::dantecheat, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Gilver ? activeTabText : inactiveTabText);
+    ImGui::Begin("V", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("V cheats");
+     		m_mods->on_pagelist_ui(Mod::gilver, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+    
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Vergil ? activeTabText : inactiveTabText);
+    ImGui::Begin("Vergil", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("SDT");
+            m_mods->on_pagelist_ui(Mod::vergilsdt, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Dark Slayer");
+            m_mods->on_pagelist_ui(Mod::vergiltrick, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("Cheats");
+            m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("DoppelGanger");
+            m_mods->on_pagelist_ui(Mod::vergildoppel, modListIndent);
+
+            ImGui::Separator();
+            ImGui::Text("VFX Settings");
+            m_mods->on_pagelist_ui(Mod::vergilvfxsettings, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if(!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::End();
+}
+
+void ModFramework::draw_settings()
+{
+    static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
+    static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
+
+    static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing;
+
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_settings_panel == SettingsPanelID_FocusedMod ? activeTabText : inactiveTabText);
+    ImGui::Begin("Mod Settings", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        auto& current_mod = m_mods->get_mod(m_mods->get_focused_mod());
+
+        ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+        ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+        ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+
+        ImGui::Separator();
+
+        current_mod->on_draw_ui();
+	}
+    ImGui::End();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_settings_panel == SettingsPanelID_Trainer ? activeTabText : inactiveTabText);
+    ImGui::Begin("Trainer Settings", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        ImGui::Text("Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+        UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+        ImGui::Text("Close Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+    	UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+
+        ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
+        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+	}
+    ImGui::End();
 }
 
 void ModFramework::draw_notifs() {

@@ -12,7 +12,7 @@
 class D3D11Hook {
 public:
     typedef std::function<void(D3D11Hook&)> OnPresentFn;
-    typedef std::function<void(D3D11Hook&)> OnResizeBuffersFn;
+    typedef std::function<void(D3D11Hook&, const UINT& width, const UINT& height)> OnResizeBuffersFn;
 
     D3D11Hook() = default;
     virtual ~D3D11Hook();

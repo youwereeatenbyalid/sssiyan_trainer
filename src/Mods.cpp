@@ -457,19 +457,19 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
 
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
-    auto cursorPos = ImGui::GetCursorScreenPos();
+
     if (ImGui::Selectable(mod->m_full_name_string.c_str(), focusedmod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
         focusedmod = mod->get_name();
     }
 
-    ImRect areaOfModName(cursorPos, ImVec2(window->Pos.x + window->Size.x, cursorPos.y + ImGui::GetItemRectSize().y));
+    ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
 
-    auto mousePos = ImGui::GetMousePos();
+    const auto mousePos = ImGui::GetMousePos();
 
-    bool isHovered = mousePos.x > areaOfModName.Min.x && mousePos.y > areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
+    const bool isHovered = mousePos.x >= areaOfModName.Min.x && mousePos.y >= areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
 
     if (isHovered) {
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 0.0f));
         ImGui::SameLine();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.0f * g_framework->get_scale());
     	KeyBindButton(mod->m_raw_full_name, std::string(mod->get_name()), g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
