@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class BreakerSwitcher : public Mod {
 public:
   BreakerSwitcher() = default;
@@ -27,7 +28,9 @@ public:
   uintptr_t static switcher_mode;
   uint32_t static breakaway_type;
   uintptr_t static breakaway_button;
+  static bool force_primary_input;
 
+  static bool fasterbreaker;
   static bool cheaton;
   static bool use_secondary;
   static bool infinite_breakers;

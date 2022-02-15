@@ -43,6 +43,8 @@ static naked void hold_detour() {
         push r15
         cmp rdx, [GameInput::validcontrols]
         jne code
+        cmp byte ptr [PlayerTracker::ingameplay], 1
+        jne code
         mov r15, 0
         test [rdx+0x00000098],r8d
         jna charactercompare
@@ -79,7 +81,8 @@ static naked void clearhold_detour() {
 	validation:
         cmp r14, [GameInput::validcontrols]
         jne clearholdoriginalcode
-
+        cmp byte ptr [PlayerTracker::ingameplay], 1
+        jne clearholdoriginalcode
         push r8
         push rcx
         push rax
@@ -115,6 +118,8 @@ static naked void press_detour() {
         push r14
         push r15
         cmp rdx, [GameInput::validcontrols]
+        jne code
+        cmp byte ptr [PlayerTracker::ingameplay], 1
         jne code
         mov r15, 0
         test [rbx+0x00000090],ebp
@@ -172,6 +177,8 @@ static naked void clearpress_detour() {
         cmp r14, [GameInput::validcontrols]
         jne clearpressoriginalcode
 
+        cmp byte ptr [PlayerTracker::ingameplay], 1
+        jne clearpressoriginalcode
         push r8
         push rcx
         push rax
@@ -210,9 +217,11 @@ static naked void release_detour() {
         push r15
         cmp rdx, [GameInput::validcontrols]
         jne code
+        cmp byte ptr [PlayerTracker::ingameplay], 1
+        jne code
         mov r15, 0
         test [rbx+0x00000094], ebp
-        jna charactercompare
+        jna releasefinish
         or GameInput::releaseframes[0], rsi
         mov r15, 1
         jmp charactercompare
@@ -230,6 +239,26 @@ static naked void release_detour() {
         jmp qword ptr [GameInput::release_jmp_ret]       
 
     charactercompare:
+        cmp byte ptr [PlayerTracker::playerid], 0 //check for nero
+        jne code
+        cmp rsi, 0x1000 //check for breaker
+        je nerobreakervalid 
+        jmp code
+
+    nerobreakervalid:
+        mov r12, [PlayerTracker::playerentity] //get nero
+        test r12, r12
+        je code
+        mov r12, [r12+0x17E0] //get nero track
+        test r12, r12
+        je code
+        cmp byte ptr [r12+0x57], 1 //can we start command?
+        jne code
+        mov byte ptr [BreakerSwitcher::force_primary_input], 1 //force breaker
+        jmp code
+
+
+    releasefinish:
         pop r15
         pop r14
         pop r13
@@ -252,7 +281,8 @@ static naked void clearrelease_detour() {
     validation:
         cmp r14, [GameInput::validcontrols]
         jne clearpressoriginalcode
-
+        cmp byte ptr [PlayerTracker::ingameplay], 1
+        jne clearpressoriginalcode
         push r8
         push rcx
         push rax

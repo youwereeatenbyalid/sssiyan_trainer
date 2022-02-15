@@ -21,8 +21,8 @@ uint32_t BreakerSwitcher::breakaway_type{0};
 uintptr_t BreakerSwitcher::breakaway_button{0x1000};
 bool BreakerSwitcher::infinite_breakers{false};
 bool BreakerSwitcher::use_secondary{false};
-
-
+bool BreakerSwitcher::force_primary_input{ false };
+bool BreakerSwitcher::fasterbreaker{ false };
 bool BreakerSwitcher::cheaton{NULL};
 
 uint32_t BreakerSwitcher::breakers[8]{};
@@ -257,6 +257,17 @@ static naked void breakercontrol_detour() {
         cmp r9, 0x3
         je PrimaryBreakerComparison
 
+        
+
+        cmp byte ptr [BreakerSwitcher::force_primary_input], 1 //check if primary input override
+        mov byte ptr [BreakerSwitcher::force_primary_input], 0
+        jne CheckBufferedInput
+
+        cmp byte ptr [BreakerSwitcher::fasterbreaker], 1 //skip breaker recovery
+        je PrimaryBreakerComparison
+        cmp [BreakerSwitcher::nextbreaker], r8d //compare first slot to BreakerSwitcher::next_breaker
+        je CheckBufferedInput
+        jmp PrimaryBreakerComparison
 
     CheckBufferedInput:
     //check for buffered breaker input
@@ -699,6 +710,7 @@ void BreakerSwitcher::on_config_load(const utility::Config& cfg) {
   breakaway_index = cfg.get<int>("breakaway_button").value_or(0);
   BreakerSwitcher::infinite_breakers = cfg.get<bool>("infinite_breakers").value_or(false);
   BreakerSwitcher::use_secondary = cfg.get<bool>("use_secondary").value_or(false);
+  BreakerSwitcher::fasterbreaker = cfg.get<bool>("faster_breaker").value_or(false);
 }
 // during save
 void BreakerSwitcher::on_config_save(utility::Config &cfg) {
@@ -710,6 +722,7 @@ void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   cfg.set<int>("breakaway_button", breakaway_index);
   cfg.set<bool>("infinite_breakers",BreakerSwitcher::infinite_breakers);
   cfg.set<bool>("use_secondary", BreakerSwitcher::use_secondary);
+  cfg.set<bool>("faster_breaker", BreakerSwitcher::fasterbreaker);
 }
 // do something every frame
 // void BreakerSwitcher::on_frame() {}
@@ -734,7 +747,10 @@ if (BreakerSwitcher::breakaway_type == 1){
     }
 }
 ImGui::Checkbox("Use Secondary Breaker", (bool*)&BreakerSwitcher::use_secondary);
+ImGui::ShowHelpMarker("If Nero's magazine has at least two breakers, the second breaker will be used in place of the devil bringer.");
 ImGui::Checkbox("Infinite Breakers", (bool*)&BreakerSwitcher::infinite_breakers);
+ImGui::Checkbox("Faster Breakers", (bool*)&BreakerSwitcher::fasterbreaker);
+ImGui::ShowHelpMarker("Removes Recovery on the breaker, allowing it to cancel into itself.");
 
   auto breakerboxstring =
       "Overture\0Ragtime\0Helter Skelter\0Gerbera\0Punchline\0Buster "
