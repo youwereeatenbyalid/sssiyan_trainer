@@ -31,6 +31,8 @@ public:
   static bool force_primary_input;
 
   static bool fasterbreaker;
+  static bool instantkeyboardbreakers;
+  static bool force_keyboard_input;
   static bool cheaton;
   static bool use_secondary;
   static bool infinite_breakers;

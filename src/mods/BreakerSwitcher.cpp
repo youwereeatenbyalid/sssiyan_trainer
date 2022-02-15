@@ -22,8 +22,14 @@ uintptr_t BreakerSwitcher::breakaway_button{0x1000};
 bool BreakerSwitcher::infinite_breakers{false};
 bool BreakerSwitcher::use_secondary{false};
 bool BreakerSwitcher::force_primary_input{ false };
+bool BreakerSwitcher::force_keyboard_input{ false };
 bool BreakerSwitcher::fasterbreaker{ false };
+
+bool BreakerSwitcher::instantkeyboardbreakers{ false };
+
 bool BreakerSwitcher::cheaton{NULL};
+
+
 
 uint32_t BreakerSwitcher::breakers[8]{};
 uint32_t BreakerSwitcher::nextbreaker{3};
@@ -258,6 +264,9 @@ static naked void breakercontrol_detour() {
         je PrimaryBreakerComparison
 
         
+        cmp byte ptr [BreakerSwitcher::force_keyboard_input], 1 //check if primary input override
+        mov byte ptr [BreakerSwitcher::force_keyboard_input], 0
+        je PrimaryBreakerComparison
 
         cmp byte ptr [BreakerSwitcher::force_primary_input], 1 //check if primary input override
         mov byte ptr [BreakerSwitcher::force_primary_input], 0
@@ -622,6 +631,38 @@ naked void BreakerSwitcher::breakerpress_detour() {
 	}
 }
 
+static naked void keyboardbreakerupdate(int index){
+    __asm {
+        start:
+        push rax
+        push rbx
+
+        main:
+        mov rax, [PlayerTracker::neroentity]
+        test rax, rax
+        je wrapup
+        
+        mov rax, [rax+0x1790]
+        test rax, rax
+        je wrapup
+
+        mov ebx, [BreakerSwitcher::primary_breaker]
+        mov [rax+rcx], ebx //rcx has the first argument
+        mov [BreakerSwitcher::do_ui_update], 1
+
+        mov rax, [PlayerTracker::neroentity]
+        mov rax, [rax+0x17E0] //get nero track
+        cmp byte ptr [rax+0x57], 1 //can we start command?
+        jne wrapup
+        cmp byte ptr [BreakerSwitcher::instantkeyboardbreakers], 1 //do instant inputs?
+        jne wrapup
+        mov byte ptr [BreakerSwitcher::force_keyboard_input], 1
+        wrapup:
+        pop rbx
+        pop rax
+        ret
+    }
+}
 // clang-format on
 
 void BreakerSwitcher::init_check_box_info() {
@@ -643,6 +684,82 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
 
 
   set_up_hotkey();
+
+
+  
+  g_keyBinds.Get()->AddBind(std::string(get_name())+"SLOT1",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[0];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT2",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[1];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT3",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[2];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT4",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[3];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT5",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[4];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT6",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[5];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT7",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[6];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+  g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT8",
+      [this]() {
+          if (PlayerTracker::ingameplay && PlayerTracker::playerid == 0) {
+              BreakerSwitcher::primary_breaker = BreakerSwitcher::breakers[7];
+              keyboardbreakerupdate(0x20);
+          }
+
+      }, OnState_Press);
+
+
   auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
   auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
   auto NeroUIOverride_addr = utility::scan(base, "0F 85 DC 02 00 00 48 8B 87 08");
@@ -711,6 +828,7 @@ void BreakerSwitcher::on_config_load(const utility::Config& cfg) {
   BreakerSwitcher::infinite_breakers = cfg.get<bool>("infinite_breakers").value_or(false);
   BreakerSwitcher::use_secondary = cfg.get<bool>("use_secondary").value_or(false);
   BreakerSwitcher::fasterbreaker = cfg.get<bool>("faster_breaker").value_or(false);
+  BreakerSwitcher::instantkeyboardbreakers = cfg.get<bool>("instant_keyboard_breakers").value_or(false);
 }
 // during save
 void BreakerSwitcher::on_config_save(utility::Config &cfg) {
@@ -723,6 +841,7 @@ void BreakerSwitcher::on_config_save(utility::Config &cfg) {
   cfg.set<bool>("infinite_breakers",BreakerSwitcher::infinite_breakers);
   cfg.set<bool>("use_secondary", BreakerSwitcher::use_secondary);
   cfg.set<bool>("faster_breaker", BreakerSwitcher::fasterbreaker);
+  cfg.set<bool>("instant_keyboard_breakers", BreakerSwitcher::instantkeyboardbreakers);
 }
 // do something every frame
 // void BreakerSwitcher::on_frame() {}
@@ -752,16 +871,37 @@ ImGui::Checkbox("Infinite Breakers", (bool*)&BreakerSwitcher::infinite_breakers)
 ImGui::Checkbox("Faster Breakers", (bool*)&BreakerSwitcher::fasterbreaker);
 ImGui::ShowHelpMarker("Removes Recovery on the breaker, allowing it to cancel into itself.");
 
+ImGui::Checkbox("Instant Keyboard Breakers", (bool*)&BreakerSwitcher::instantkeyboardbreakers);
+ImGui::ShowHelpMarker("Activating the breaker swap hotkeys will also perform the breaker move.");
+
   auto breakerboxstring =
       "Overture\0Ragtime\0Helter Skelter\0Gerbera\0Punchline\0Buster "
       "Arm\0Rawhide\0Tomboy\0Mega Buster\0Gerbera GP01\0Pasta Breaker\0Sweet "
       "Surrender\0Monkey Business\0";
 ImGui::Combo("breaker up", (int*)&BreakerSwitcher::breakers[0], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT1", std::string(get_name()) + "SLOT1", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker down", (int*)&BreakerSwitcher::breakers[1], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT2", std::string(get_name()) + "SLOT2", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker left", (int*)&BreakerSwitcher::breakers[2], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT3", std::string(get_name()) + "SLOT3", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker right", (int*)&BreakerSwitcher::breakers[3], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT4", std::string(get_name()) + "SLOT4", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT5", std::string(get_name()) + "SLOT5", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT6", std::string(get_name()) + "SLOT6", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT8", std::string(get_name()) + "SLOT8", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
+ImGui::SameLine();
+UI::KeyBindButton(std::string(get_name()) + "SLOT7", std::string(get_name()) + "SLOT7", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
+
+
 }

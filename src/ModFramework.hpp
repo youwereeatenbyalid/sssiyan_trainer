@@ -68,7 +68,6 @@ public:
     void disable_notifications() { m_is_notif_enabled = false; }
 
     void queue_notification(const ImGuiToast& notif);
-    
     void on_frame_d3d11();
     void on_frame_d3d12();
     void on_reset();
