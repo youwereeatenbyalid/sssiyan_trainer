@@ -415,11 +415,11 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 	trackDelay = jceController->trackDelayTime;
 	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
 	jcTypeUi = jceController->get_jce_type();
-	isCrashFixEnabled = cfg.get<bool>("DMC3JCE.isCrashFixEnabled").value_or(true);
 	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
 	jceController->rndEmTrackInterval = cfg.get<int>("DMC3JCE.rndEmTrackInterval").value_or(22);
 	humanJCECost = cfg.get<float>("DMC3JCE.humanJCECost").value_or(3000.0f);
 	minSdt = cfg.get<float>("DMC3JCE.minSdt").value_or(3000.0f);
+	isCrashFixEnabled = true;
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
@@ -427,7 +427,6 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 	cfg.set<int>("DMC3JCE.rndDelayTime", jceController->rndDelayTime);
 	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->trackDelayTime);
 	cfg.set<int>("DMC3JCE.jceType", jceController->get_jce_type());
-	cfg.set<bool>("DMC3JCE.isCrashFixEnabled", isCrashFixEnabled);
 	cfg.set<int>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
 	cfg.set<float>("DMC3JCE.humanJCECost", humanJCECost);
 	cfg.set<float>("DMC3JCE.minSdt", minSdt);
@@ -492,8 +491,6 @@ void DMC3JCE::on_draw_ui()
 			break;
 	}
 	ImGui::Separator();
-	ImGui::TextWrapped("Enable this if game crashes with low delay between jc spawn. Can screw up some enemy projectiles while performing dmc3 jce.");
-	ImGui::Checkbox("Enable crash fix", &isCrashFixEnabled);
 	//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);
 	
 	ImGui::TextWrapped("If smth goes wrong(TM) and 3 JCE execution doesn't stop after Vergil appears, press this:");

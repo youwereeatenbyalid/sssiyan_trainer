@@ -319,7 +319,6 @@ Mods::Mods()
         // Background
         // Common
         // Gameplay
-        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
