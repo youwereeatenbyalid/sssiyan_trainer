@@ -176,7 +176,6 @@ void HUDOptions::on_draw_ui() {
   ImGui::Checkbox("Hide Orbs", &hideorbs);
   ImGui::Checkbox("Hide Style", &hidestyle);
   ImGui::Checkbox("Hide all optional HUD", &hideeverything);
-  ImGui::Spacing();
   ImGui::Separator();
   ImGui::Checkbox("Never Hide Dante's Weapon Wheels", &danteWeaponUnhide);
   ImGui::Checkbox("Never Hide Vergil's Weapon Wheel", &vergilWeaponUnhide);

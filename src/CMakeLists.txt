@@ -17,8 +17,6 @@ set(MODS_SRC
     mods/LDK.cpp 
     mods/DeepTurbo.hpp 
     mods/DeepTurbo.cpp 
-    mods/BufferedReversals.hpp 
-    mods/BufferedReversals.cpp 
     mods/BypassBPCav.hpp 
     mods/BypassBPCav.cpp 
     mods/DanteMaxSDT.hpp 
@@ -137,8 +135,8 @@ set(MODS_SRC
     mods/TextEditor.cpp
     mods/WalkOnKeyboard.hpp 
     mods/WalkOnKeyboard.cpp 
-    mods/BufferedReversalsOriginal.hpp 
-    mods/BufferedReversalsOriginal.cpp 
+    mods/Reversals.hpp 
+    mods/Reversals.cpp 
     mods/EnemyInstantDT.hpp 
     mods/EnemyInstantDT.cpp 
     mods/ChargeChecker.hpp 

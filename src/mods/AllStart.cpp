@@ -1,10 +1,13 @@
 #include "AllStart.hpp"
 #include "PlayerTracker.hpp"
+#include "GameInput.hpp"
+
 uintptr_t AllStart::jmp_ret{NULL};
 bool AllStart::cheaton{NULL};
 uintptr_t AllStart::jmp_initial{NULL};
 int cancelId = 0;
 bool stingerjumpcancels;
+bool guardCancelsEverything;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -38,7 +41,6 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         pop r11
         pop r10
         */
-
         cmp [PlayerTracker::playerid], 0
         je nerocancels
         cmp [PlayerTracker::playerid], 1
@@ -61,6 +63,8 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         // je dantejccheck
         cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Dante Stinger Jump
         je stingercheck
+        cmp byte ptr [guardCancelsEverything], 1 // should come last
+        je guardallcheck
         jmp code
 
     vancels:
@@ -95,6 +99,21 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         // je code
         // jmp cancellable
 
+    guardallcheck:
+        push r11
+        push r12
+        mov r11, [PlayerTracker::playerentity]
+        add r11, 0x1888
+        cmp byte ptr [r11], 3 // royal guard
+        jne codepops
+        mov r11b, [GameInput::holdframes+1] // amazing variable name
+        mov r12b, 0x10
+        test r11, r12
+        pop r12
+        pop r11
+        jnz cancellable
+        jmp code
+
     stingercheck:
         cmp byte ptr [stingerjumpcancels], 1
         je cancellable
@@ -104,6 +123,9 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         mov word ptr [rdi+5Eh], 0100h
 		jmp qword ptr [AllStart::jmp_ret]
 
+    codepops:
+        pop r12
+        pop r11
     code:
         mov word ptr [rdi+5Eh], 0000h
         jmp qword ptr [AllStart::jmp_ret]
@@ -121,11 +143,11 @@ std::optional<std::string> AllStart::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &AllStart::cheaton;
-  m_on_page             = mechanics;
+  m_on_page             = animation;
 
   m_full_name_string   = "Selective All-Cancels (+)";
   m_author_string      = "SSSiyan, dr.penguin";
-  m_description_string = "Allows you to cancel out of a selection of moves with any other move.";
+  m_description_string = "Allows you to cancel out of a selection of moves with any action.";
 
   set_up_hotkey();
 
@@ -146,11 +168,17 @@ std::optional<std::string> AllStart::on_initialize() {
 
 void AllStart::on_config_load(const utility::Config& cfg) {
   stingerjumpcancels = cfg.get<bool>("stinger_jump_cancels").value_or(true);
+  guardCancelsEverything = cfg.get<bool>("guard_cancels_everything").value_or(false);
 }
 void AllStart::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("stinger_jump_cancels", stingerjumpcancels);
+  cfg.set<bool>("guard_cancels_everything", guardCancelsEverything);
 }
 
 void AllStart::on_draw_ui() {
-  ImGui::Checkbox("Stinger Jump Cancels", &stingerjumpcancels);
+  ImGui::Text("All Characters");
+  ImGui::Checkbox("Stinger Jump", &stingerjumpcancels);
+  ImGui::Separator();
+  ImGui::Text("Dante");
+  ImGui::Checkbox("Guard Cancels Everything", &guardCancelsEverything);
 }

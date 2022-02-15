@@ -72,7 +72,7 @@ std::optional<std::string> JumpStart::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &JumpStart::cheaton ;
-  m_on_page             = mechanics;
+  m_on_page             = animation;
 
   m_full_name_string   = "Selective Jump-Cancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
@@ -106,8 +106,8 @@ void JumpStart::on_config_save(utility::Config& cfg) {
 
 void JumpStart::on_draw_ui() {
   ImGui::Text("Nero");
-  ImGui::Checkbox(" DT Cancel", &nerodtcancel);
+  ImGui::Checkbox("DT Activation", &nerodtcancel);
   ImGui::Separator();
   ImGui::Text("Vergil");
-  ImGui::Checkbox("Ground JdC Cancel", &vergilgroundjdccancel);
+  ImGui::Checkbox("Grounded Judgement Cut", &vergilgroundjdccancel);
 }
