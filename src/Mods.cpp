@@ -89,6 +89,7 @@
         #include "mods/AerialPushback.hpp"
         #include "mods/AerialPushbackVertical.hpp"
         #include "mods/DisableGauntletStages.hpp"
+        #include "mods/NoSlowmoOrHitstop.hpp"
     // Nero
         #include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -267,6 +268,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());
         m_mods.emplace_back(std::make_unique<WeightReset>());
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
+        m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
     // Nero
         m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
@@ -324,10 +326,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
-
+        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
-        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         // Nero
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());

@@ -251,6 +251,9 @@ set(MODS_SRC
     mods/NoOneTakesDamage.hpp 
     mods/NoOneTakesDamage.cpp 
     mods/DanteDtNoActivationCost.hpp
+    mods/NoSlowmoOrHitstop.hpp 
+    mods/NoSlowmoOrHitstop.cpp 
+
 )
 
 set(HOOKS_SRC
