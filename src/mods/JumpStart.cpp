@@ -1,6 +1,7 @@
 #include "JumpStart.hpp"
 #include "AllStart.hpp"
 #include "PlayerTracker.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 
 uintptr_t JumpStart::jmp_ret{NULL};
 bool JumpStart::cheaton{NULL};
@@ -8,6 +9,8 @@ bool JumpStart::cheaton{NULL};
 bool nerodtcancel;
 
 bool vergilgroundjdccancel;
+
+bool caviframecancels;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -22,7 +25,7 @@ static naked void detour() {
         cmp [PlayerTracker::playerid], 0
         je nerocancels
         cmp [PlayerTracker::playerid], 1
-        je code
+        je dantecancels
         cmp [PlayerTracker::playerid], 2
         je code
         cmp [PlayerTracker::playerid], 4
@@ -38,6 +41,20 @@ static naked void detour() {
 
     nerodtcheck:
         cmp byte ptr [nerodtcancel], 1
+        je cancellable
+        jmp code
+
+    dantecancels:
+        cmp dword ptr [PlayerTracker::playermoveid], 0x177000E6 // Cav back+swordmaster
+        je caviframecheck
+        cmp dword ptr [PlayerTracker::playermoveid], 0x01F400E6 // Cav backforward melee
+        je caviframecheck
+        cmp dword ptr [PlayerTracker::playermoveid], 0x03E800E6 // Cav back melee
+        je caviframecheck
+        jmp code
+
+    caviframecheck:
+        cmp byte ptr [caviframecancels], 1
         je cancellable
         jmp code
 
@@ -74,9 +91,9 @@ std::optional<std::string> JumpStart::on_initialize() {
   m_is_enabled          = &JumpStart::cheaton ;
   m_on_page             = animation;
 
-  m_full_name_string   = "Selective Jump-Cancels (+)";
+  m_full_name_string   = "Selective Cancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
-  m_description_string = "Allows you to cancel out of a selection of moves with any jump action.";
+  m_description_string = "Allows you to cancel out of a selection of moves with jump, dodge or guard.";
 
   set_up_hotkey();
 
@@ -97,16 +114,22 @@ std::optional<std::string> JumpStart::on_initialize() {
 
 void JumpStart::on_config_load(const utility::Config& cfg) {
   nerodtcancel = cfg.get<bool>("nero_dt_cancel").value_or(true);
+  caviframecancels = cfg.get<bool>("cav_iframe_cancels").value_or(false);
   vergilgroundjdccancel = cfg.get<bool>("vergil_ground_jdc_cancel").value_or(true);
 }
 void JumpStart::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("nero_dt_cancel", nerodtcancel);
+  cfg.set<bool>("cav_iframe_cancels", caviframecancels);
   cfg.set<bool>("vergil_ground_jdc_cancel", vergilgroundjdccancel);
 }
 
 void JumpStart::on_draw_ui() {
   ImGui::Text("Nero");
   ImGui::Checkbox("DT Activation", &nerodtcancel);
+  ImGui::Separator();
+  ImGui::Text("Dante");
+  ImGui::Checkbox("Cavaliere Invuln Animations", &caviframecancels);
+  ImGui::ShowHelpMarker("A few of Cavaliere's moves give the player invulnerability frames. This option will make those animations cancellable.");
   ImGui::Separator();
   ImGui::Text("Vergil");
   ImGui::Checkbox("Grounded Judgement Cut", &vergilgroundjdccancel);

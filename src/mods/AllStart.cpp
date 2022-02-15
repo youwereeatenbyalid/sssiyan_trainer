@@ -52,30 +52,22 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         jmp code
 
     nerocancels:
-        // cmp dword ptr [cancelId], 53C0000h // Nero Enemy Step
-        // je jccheck
-        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Nero Stinger Jump
+        cmp dword ptr [PlayerTracker::playermoveid], 0x5280000 // Nero Stinger Jump
         je stingercheck
         jmp code
 
     dantecancels:
-        // cmp dword ptr [cancelId], 53C0000h // Dante Enemy Step
-        // je dantejccheck
-        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Dante Stinger Jump
+        cmp dword ptr [PlayerTracker::playermoveid], 0x5280000 // Dante Stinger Jump
         je stingercheck
         cmp byte ptr [guardCancelsEverything], 1 // should come last
         je guardallcheck
         jmp code
 
     vancels:
-        // cmp dword ptr [cancelId], 53C0000h // V Enemy Step (probably)
-        // je jccheck
         jmp code
 
     vergilancels:
-        // cmp dword ptr [cancelId], 53C0000h // Vergil Enemy Step (probably)
-        // je jccheck
-        cmp dword ptr [PlayerTracker::playermoveid], 5280000h // Dante Stinger Jump
+        cmp dword ptr [PlayerTracker::playermoveid], 0x5280000 // Dante Stinger Jump
         je stingercheck
         jmp code
 
@@ -145,8 +137,8 @@ std::optional<std::string> AllStart::on_initialize() {
   m_is_enabled          = &AllStart::cheaton;
   m_on_page             = animation;
 
-  m_full_name_string   = "Selective All-Cancels (+)";
-  m_author_string      = "SSSiyan, dr.penguin";
+  m_full_name_string   = "Selective Omnicancels (+)";
+  m_author_string      = "SSSiyan, Dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with any action.";
 
   set_up_hotkey();
