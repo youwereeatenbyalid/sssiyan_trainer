@@ -373,7 +373,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi jsonstthm)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 

@@ -71,7 +71,7 @@ public:
     
     void on_frame_d3d11();
     void on_frame_d3d12();
-    void on_reset();
+    void on_reset(const UINT& width, const UINT& height);
     void consume_input();
     bool on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM& l_param);
     void on_direct_input_keys(const std::array<uint8_t, 256>& keys);
@@ -88,9 +88,12 @@ private:
     enum SettingsPanelID_ : uint8_t;
 
     void draw_ui();
-    void draw_panel(PanelID_ panelID);
-    void draw_settings(SettingsPanelID_ panelID);
+    void draw_panels();
+    void draw_settings();
     void draw_notifs();
+    void focus_tab(const std::string_view& window_name);
+    std::string_view get_panel_name(const PanelID_& id);
+    std::string_view get_settings_panel_name(const SettingsPanelID_& id);
 
     bool hook_d3d11();
     bool hook_d3d12();
@@ -109,6 +112,9 @@ private:
     bool m_main_game_cursor_state_buffer{ true };
     bool m_is_internal_message{ false };
     bool m_close_menu_guard{ false };
+
+    std::unordered_map<std::string, PanelID_> m_mods_panels_map;
+    std::unordered_map<std::string, SettingsPanelID_> m_settings_panels_map;
 
     uint8_t m_default_menu_key{ DIK_DELETE };
     uint8_t m_default_close_menu_key{ DIK_ESCAPE };
@@ -134,8 +140,10 @@ private:
         SettingsPanelID_Trainer
     };
 
-    PanelID_ m_last_focused_panel{ m_focused_mod_panel };
-    SettingsPanelID_ m_last_settings_focused_panel{ m_focused_mod_panel };
+    PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
+    SettingsPanelID_ m_focused_settings_panel{ SettingsPanelID_FocusedMod };
+
+    bool m_is_focus_set{ false };
 
     //uint8_t m_frame_counter{0};
     //bool m_is_second_frame{false};
@@ -171,9 +179,6 @@ private:
     // Trainer settings
     bool m_is_notif_enabled{ false };
     bool m_save_after_close_ui{ false };
-    bool m_remember_focused_panels{ false };
-    PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
-    SettingsPanelID_ m_focused_settings_panel{ SettingsPanelID_FocusedMod };
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
