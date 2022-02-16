@@ -2,6 +2,7 @@
 #include "DanteTwoTricks.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t DanteTwoTricks::jmp_ret{NULL};
+uintptr_t DanteTwoTricks::jmp_jne{ NULL };
 bool DanteTwoTricks::cheaton{NULL};
 
 
@@ -19,12 +20,14 @@ static naked void detour() {
     cheatcode:
         cmp byte ptr [PlayerTracker::isgrounded], 1
         je retcode
-
     code:
-        inc byte ptr [rax+0x44]
+        test rax, rax
+        jne jnecode
     retcode:
-        mov rsi, [rsp+0x30]
         jmp qword ptr [DanteTwoTricks::jmp_ret]
+
+    jnecode:
+        jmp qword ptr [DanteTwoTricks::jmp_jne]
 	}
 }
 
@@ -48,16 +51,17 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "FF 40 44 48 8B 74 24 30");
+  auto addr = patterns->find_addr(base, "60 17 00 00 48 85 C0 75 1E");
   if (!addr) {
     return "Unable to find DanteTwoTricks pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
+  if (!install_hook_absolute(addr.value()+4, m_function_hook, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteTwoTricks";
   }
+  DanteTwoTricks::jmp_jne = addr.value() + 0x4 + 0x23;
   return Mod::on_initialize();
 }
 
