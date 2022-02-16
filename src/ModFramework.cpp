@@ -79,8 +79,6 @@ ModFramework::ModFramework()
     m_mods_panels_map["V"] = PanelID_Gilver;
     m_mods_panels_map["Vergil"] = PanelID_Vergil;
     m_mods_panels_map["Trainer"] = PanelID_Trainer;
-
-    m_settings_panels_map["Mod Settings"] = SettingsPanelID_FocusedMod;
 }
 
 ModFramework::~ModFramework() {
@@ -1033,7 +1031,7 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderDockWindow("Trainer", left);
 
         // Settings
-        ImGui::DockBuilderDockWindow("Mod Settings", right);
+        ImGui::DockBuilderDockWindow("Options", right);
 
         ImGui::DockBuilderFinish(dockSpaceId);
     }
@@ -1045,13 +1043,12 @@ void ModFramework::draw_ui() {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
 
     draw_panels();
-    draw_settings();
+    draw_options();
 
     ImGui::PopStyleColor(3);
 
     if (!m_is_focus_set)
     {
-        focus_tab("Mod Settings");
         focus_tab("Gameplay");
 
         m_is_focus_set = true;
@@ -1062,12 +1059,6 @@ void ModFramework::draw_ui() {
     if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(left)->TabBar->SelectedTabId); window != nullptr) {
         if (const auto panelID = m_mods_panels_map.find(window->Name); panelID != m_mods_panels_map.end()) {
             m_focused_mod_panel = panelID->second;
-        }
-    }
-
-    if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(right)->TabBar->SelectedTabId); window != nullptr) {
-        if (const auto panelID = m_settings_panels_map.find(window->Name); panelID != m_settings_panels_map.end()) {
-            m_focused_settings_panel = panelID->second;
         }
     }
 
@@ -1278,42 +1269,112 @@ void ModFramework::draw_panels()
     ImGui::Begin("Trainer", nullptr, panel_flags);
     ImGui::PopStyleColor();
     {
-        ImGui::Text("Menu Key:"); ImGui::SameLine();
-        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-        UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-        ImGui::Text("Close Menu Key:"); ImGui::SameLine();
-        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-        UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+        if (ImGui::Button("Options"))
+        {
+            m_active_option_menu = OptionID_Settings;
+            m_mods->set_focused_mod("None");
+        }
 
-        ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
-        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+        if (ImGui::Button("Credits"))
+        {
+            m_active_option_menu = OptionID_Credits;
+            m_mods->set_focused_mod("None");
+        }
+
+        if (ImGui::Button("License"))
+        {
+            m_active_option_menu = OptionID_License;
+            m_mods->set_focused_mod("None");
+        }
     }
     ImGui::End();
 }
 
-void ModFramework::draw_settings()
+void ModFramework::draw_options()
 {
     static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
     static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
 
-    static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing;
+    static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing
+	| ImGuiWindowFlags_NoTitleBar;
 
-    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_settings_panel == SettingsPanelID_FocusedMod ? activeTabText : inactiveTabText);
-    ImGui::Begin("Mod Settings", nullptr, panel_flags);
-    ImGui::PopStyleColor();
+    ImGuiWindowClass windowClass;
+    windowClass.DockNodeFlagsOverrideClear = 000;
+    windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+
+    ImGui::SetNextWindowClass(&windowClass);
+
+    ImGui::Begin("Options", nullptr, panel_flags);
     {
-        auto& current_mod = m_mods->get_mod(m_mods->get_focused_mod());
+        const auto current_mod = m_mods->get_mod(m_mods->get_focused_mod());
 
-        ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-        ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-        ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+        if (current_mod != nullptr) {
+            ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+            ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+            ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
 
-        ImGui::Separator();
+            ImGui::Separator();
 
-        current_mod->on_draw_ui();
+            current_mod->on_draw_ui();
+        } else
+        {
+	        switch(m_active_option_menu)
+	        {
+	        case OptionID_None:
+                if (m_error.empty() && m_game_data_initialized) {
+                    ImGui::TextWrapped("Select something!");
+                }
+                else if (!m_game_data_initialized) {
+                    ImGui::TextWrapped("Trainer is currently initializing...");
+                }
+	        	break;
+
+	        case OptionID_Settings:
+		        {
+                    ImGui::Text("Menu Key:"); ImGui::SameLine();
+                    ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+                    UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+                    ImGui::Text("Close Menu Key:"); ImGui::SameLine();
+                    ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+                    UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+
+                    ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
+                    ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+		        }
+                break;
+
+	        case OptionID_Credits:
+                ImGui::TextWrapped("The almighty Darkness\n"
+                    "TheHitchhiker\n"
+                    "Siyan\n"
+                    "VPZadov\n"
+                    "Deepdarkkapustka\n"
+                    "Lidemi\n"
+                    "Dr. Penguin\n"
+					"Special thanks to Praydog and Cursey for their awesome work on REFramework!");
+                break;
+
+            case OptionID_License: 
+            {
+                ImGui::TextWrapped(license::glm);
+                ImGui::Separator();
+                ImGui::TextWrapped(license::imgui);
+                ImGui::Separator();
+                ImGui::TextWrapped(license::minhook);
+                ImGui::Separator();
+                ImGui::TextWrapped(license::spdlog);
+                ImGui::Separator();
+                ImGui::TextWrapped(license::ref);
+                ImGui::Separator();
+                ImGui::TextWrapped(license::jsonstthm);
+                ImGui::Separator();
+            }
+                break;
+	        }
+        }
     }
     ImGui::End();
 }
@@ -1330,7 +1391,7 @@ void ModFramework::draw_notifs() {
 
 void ModFramework::create_render_target_d3d11() {
     ComPtr<ID3D11Texture2D> back_buffer;
-    if (m_d3d11_hook->get_swap_chain()->GetBuffer(0, __uuidof(ID3D11Texture2D), &back_buffer) == S_OK) {
+    if (m_d3d11_hook->get_swap_chain()->GetBuffer(0, IID_PPV_ARGS(&back_buffer)) == S_OK) {
         m_d3d11_hook->get_device()->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_main_render_target_view_d3d11);
     }
 }

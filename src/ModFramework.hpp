@@ -84,15 +84,13 @@ public:
     
 private:
     enum PanelID_ : uint8_t;
-    enum SettingsPanelID_ : uint8_t;
+    enum OptionID_ : uint8_t;
 
     void draw_ui();
     void draw_panels();
-    void draw_settings();
+    void draw_options();
     void draw_notifs();
     void focus_tab(const std::string_view& window_name);
-    std::string_view get_panel_name(const PanelID_& id);
-    std::string_view get_settings_panel_name(const SettingsPanelID_& id);
 
     bool hook_d3d11();
     bool hook_d3d12();
@@ -113,7 +111,6 @@ private:
     bool m_close_menu_guard{ false };
 
     std::unordered_map<std::string, PanelID_> m_mods_panels_map;
-    std::unordered_map<std::string, SettingsPanelID_> m_settings_panels_map;
 
     uint8_t m_default_menu_key{ DIK_DELETE };
     uint8_t m_default_close_menu_key{ DIK_ESCAPE };
@@ -122,8 +119,7 @@ private:
     UI::KCWBuffers m_kcw_buffers;
     UI::KeyMode_t& m_last_key_mode = m_kcw_buffers.keyMode;
 
-    // Really shitty stuff
-    enum PanelID_ : uint8_t {
+	enum PanelID_ : uint8_t {
         PanelID_Gameplay = 0,
         PanelID_Scenario,
         PanelID_System,
@@ -134,13 +130,15 @@ private:
         PanelID_Trainer
     };
 
-    enum SettingsPanelID_ : uint8_t
-    {
-        SettingsPanelID_FocusedMod = 0,
+    enum OptionID_ : uint8_t {
+        OptionID_None = 0,
+        OptionID_Settings,
+        OptionID_Credits,
+        OptionID_License
     };
 
     PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
-    SettingsPanelID_ m_focused_settings_panel{ SettingsPanelID_FocusedMod };
+    OptionID_ m_active_option_menu{ OptionID_None };
 
     bool m_is_focus_set{ false };
 

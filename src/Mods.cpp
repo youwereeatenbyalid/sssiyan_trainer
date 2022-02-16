@@ -370,32 +370,37 @@ std::optional<std::string> Mods::on_initialize() const {
     if(Mod::patterns->is_changed())
         Mod::patterns->save();
     Mod::patterns->free();
-    /*utility::Config m_config{ "re2_fw_config.txt" };
 
-    for (auto& mod : m_mods) {
-        spdlog::info("{:s}::on_config_load()", mod->get_name().data());
-        mod->on_config_load(m_config);
-    }
-    */
     load_mods();
-    //this is still very not great
-    focusedmod = "nomod";
+
+	m_focused_mod = "";
     return std::nullopt;
 }
 
 
-const std::unique_ptr<Mod>& Mods::get_mod(std::string modname) const {
-    //recursive call in case we can't find the mod being looked for
+Mod* Mods::get_mod(std::string modName) const {
+  if(modName == "None")
+  {
+      return nullptr;
+  }
+
+
   for (auto& mod : m_mods) {
-    if (modname == mod->get_name()) {
-      return mod;
+    if (modName == mod->get_name()) {
+      return mod.get();
     }
   }
-  return get_mod("SimpleMod");
+
+  return nullptr;
 }
 
 std::string Mods::get_focused_mod() const {
-  return focusedmod;
+  return m_focused_mod;
+}
+
+void Mods::set_focused_mod(const std::string& modName) const
+{
+  m_focused_mod = modName;
 }
 
 void Mods::on_frame() const {
@@ -458,8 +463,8 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
 
-    if (ImGui::Selectable(mod->m_full_name_string.c_str(), focusedmod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
-        focusedmod = mod->get_name();
+    if (ImGui::Selectable(mod->m_full_name_string.c_str(), m_focused_mod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
+        m_focused_mod = mod->get_name();
     }
 
     ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
