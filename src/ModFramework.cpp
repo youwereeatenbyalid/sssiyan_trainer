@@ -956,7 +956,7 @@ void ModFramework::draw_ui() {
         m_windows_message_hook->window_toggle_cursor(true);
     }
 
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBringToFrontOnFocus;
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
     ImGuiViewport *mainViewport = ImGui::GetMainViewport();
     ImGuiWindowClass mainWindowClass;
     mainWindowClass.DockNodeFlagsOverrideClear = 000;
