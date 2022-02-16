@@ -17,11 +17,13 @@ static naked void detour() {
         jmp code
 
     cheatcode:
-		jmp qword ptr [DanteTwoTricks::jmp_ret]
+        cmp byte ptr [PlayerTracker::isgrounded], 1
+        je retcode
 
     code:
-        cmp byte ptr [rsi+00000098h], 00
-        setne al
+        inc byte ptr [rax+0x44]
+    retcode:
+        mov rsi, [rsp+0x30]
         jmp qword ptr [DanteTwoTricks::jmp_ret]
 	}
 }
@@ -36,18 +38,17 @@ void DanteTwoTricks::init_check_box_info() {
 std::optional<std::string> DanteTwoTricks::on_initialize() {
   init_check_box_info();
 
-	
   m_is_enabled          = &DanteTwoTricks::cheaton;
   m_on_page             = dantecheat;
 
-  m_full_name_string    = "Always Get 2 Tricks";
-  m_author_string       = "SSSiyan";
-  m_description_string  = "Allows non DT Dante to trick twice.";
+  m_full_name_string   = "DMC4 Trick Count";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Using Trick while grounded won't use up an aerial trick.";
 
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = utility::scan(base, "80 BE 98 00 00 00 00 0F 95 C0 48 85 C9 75 9D 8B 4F 44");
+  auto addr = patterns->find_addr(base, "FF 40 44 48 8B 74 24 30");
   if (!addr) {
     return "Unable to find DanteTwoTricks pattern.";
   }
@@ -60,4 +61,4 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   return Mod::on_initialize();
 }
 
-void DanteTwoTricks::on_draw_ui() {}
+// void DanteTwoTricks::on_draw_ui() {}

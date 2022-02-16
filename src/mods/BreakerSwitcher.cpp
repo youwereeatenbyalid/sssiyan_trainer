@@ -760,12 +760,12 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
       }, OnState_Press);
 
 
-  auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
-  auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
-  auto NeroUIOverride_addr = utility::scan(base, "0F 85 DC 02 00 00 48 8B 87 08");
-  auto breakerinputcontrol_addr = utility::scan(base, "41 8D 41 FF 48 8B FA");
-  auto call_nero_creategauntlet_addr = utility::scan(base, "C3 CC CC 40 53 56 41 55");
-  auto bringerinputcontroller_addr = utility::scan(base, "75 4E 80 BA C2 18 00 00 00");
+  auto breakersize_addr = patterns->find_addr(base, "8B 8E CC 17 00 00 48 85");
+  auto nextbreaker_addr = patterns->find_addr(base, "4C 63 60 20 48 85 D2");
+  auto NeroUIOverride_addr = patterns->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
+  auto breakerinputcontrol_addr = patterns->find_addr(base, "41 8D 41 FF 48 8B FA");
+  auto call_nero_creategauntlet_addr = patterns->find_addr(base, "C3 CC CC 40 53 56 41 55");
+  auto bringerinputcontroller_addr = patterns->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
 
 
   BreakerSwitcher::call_nero_creategauntlet = call_nero_creategauntlet_addr.value()+0x3;
