@@ -130,13 +130,13 @@ private:
         PanelID_Nero,
         PanelID_Dante,
         PanelID_Gilver,
-        PanelID_Vergil
+        PanelID_Vergil,
+        PanelID_Trainer
     };
 
     enum SettingsPanelID_ : uint8_t
     {
         SettingsPanelID_FocusedMod = 0,
-        SettingsPanelID_Trainer
     };
 
     PanelID_ m_focused_mod_panel{ PanelID_Gameplay };

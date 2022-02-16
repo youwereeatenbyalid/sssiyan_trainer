@@ -78,9 +78,9 @@ ModFramework::ModFramework()
     m_mods_panels_map["Dante"] = PanelID_Dante;
     m_mods_panels_map["V"] = PanelID_Gilver;
     m_mods_panels_map["Vergil"] = PanelID_Vergil;
+    m_mods_panels_map["Trainer"] = PanelID_Trainer;
 
     m_settings_panels_map["Mod Settings"] = SettingsPanelID_FocusedMod;
-    m_settings_panels_map["Trainer Settings"] = SettingsPanelID_Trainer;
 }
 
 ModFramework::~ModFramework() {
@@ -1030,10 +1030,10 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderDockWindow("Dante", left);
         ImGui::DockBuilderDockWindow("V", left);
         ImGui::DockBuilderDockWindow("Vergil", left);
+        ImGui::DockBuilderDockWindow("Trainer", left);
 
         // Settings
         ImGui::DockBuilderDockWindow("Mod Settings", right);
-        ImGui::DockBuilderDockWindow("Trainer Settings", right);
 
         ImGui::DockBuilderFinish(dockSpaceId);
     }
@@ -1273,6 +1273,22 @@ void ModFramework::draw_panels()
         }
     }
     ImGui::End();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Trainer ? activeTabText : inactiveTabText);
+    ImGui::Begin("Trainer", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        ImGui::Text("Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+        UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+        ImGui::Text("Close Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+        UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+
+        ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
+        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+    }
+    ImGui::End();
 }
 
 void ModFramework::draw_settings()
@@ -1298,22 +1314,6 @@ void ModFramework::draw_settings()
         ImGui::Separator();
 
         current_mod->on_draw_ui();
-    }
-    ImGui::End();
-
-    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_settings_panel == SettingsPanelID_Trainer ? activeTabText : inactiveTabText);
-    ImGui::Begin("Trainer Settings", nullptr, panel_flags);
-    ImGui::PopStyleColor();
-    {
-        ImGui::Text("Menu Key:"); ImGui::SameLine();
-        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-        UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-        ImGui::Text("Close Menu Key:"); ImGui::SameLine();
-        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-        UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-
-        ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
-        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
     }
     ImGui::End();
 }
