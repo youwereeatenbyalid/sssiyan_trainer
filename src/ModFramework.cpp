@@ -1042,11 +1042,12 @@ void ModFramework::draw_ui() {
 
     ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
     ImGui::PushStyleColor(ImGuiCol_Header, 0);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
 
     draw_panels();
     draw_settings();
 
-    ImGui::PopStyleColor(2);
+    ImGui::PopStyleColor(3);
 
     if (!m_is_focus_set)
     {
