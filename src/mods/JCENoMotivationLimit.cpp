@@ -68,7 +68,7 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = vergilcheat;
-	m_full_name_string = "No concentration restriction on JCE";
+	m_full_name_string = "No Concentration Restriction On JCE";
 	m_author_string = "akasha51";
 	m_description_string = "Allow JCE at any concentration level.";
 

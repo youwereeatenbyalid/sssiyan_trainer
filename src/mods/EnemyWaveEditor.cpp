@@ -454,7 +454,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   m_is_enabled        = &cheaton;
   m_on_page           = balance;
-  m_full_name_string = "Enemy wave editor (+)";
+  m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 

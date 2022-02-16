@@ -37,7 +37,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = dantecheat;
-		m_full_name_string = "Remove DT activation cost";
+		m_full_name_string = "Remove DT Activation Cost";
 		m_author_string = "VPZadov";
 		m_description_string = "Remove the activation cost of entering DT.";
 

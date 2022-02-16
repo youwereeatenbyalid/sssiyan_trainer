@@ -1229,7 +1229,7 @@ void ModFramework::draw_panels()
     ImGui::PopStyleColor();
     {
         if (m_error.empty() && m_game_data_initialized) {
-            ImGui::Text("V cheats");
+            ImGui::Text("Cheats");
             m_mods->on_pagelist_ui(Mod::gilver, modListIndent);
         }
         else if (!m_game_data_initialized) {
@@ -1258,7 +1258,7 @@ void ModFramework::draw_panels()
             m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
 
             ImGui::Separator();
-            ImGui::Text("DoppelGanger");
+            ImGui::Text("Doppelganger");
             m_mods->on_pagelist_ui(Mod::vergildoppel, modListIndent);
 
             ImGui::Separator();

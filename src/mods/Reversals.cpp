@@ -111,7 +111,7 @@ void Reversals::on_draw_ui() {
 	ImGui::Text("When using only this checkbox, reversals will work identically to how they did in the demo.");
 	ImGui::Checkbox("Demo Reversals", &demoReversals);
 	ImGui::Separator();
-	ImGui::Text("The following checkboxes are for our old modded reversals, kept for legacy's sake.\nBoth have their advantages and can even be stacked.");
+	ImGui::Text("The following checkboxes are for our old modded reversals.\nThese and demo reversals have their own advantages and disadvantages.");
 	if (ImGui::Checkbox("Modded Reversals", &bufferedReversals) == true) {
 		bufferlessReversals = false;
 	}

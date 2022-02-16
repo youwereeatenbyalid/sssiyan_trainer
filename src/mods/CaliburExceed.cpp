@@ -38,7 +38,7 @@ std::optional<std::string> CaliburExceed::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &CaliburExceed::cheaton;
   m_on_page    = nero;
-  m_full_name_string     = "Calibur Always Level 3";
+  m_full_name_string     = "Force Level 3 Calibur";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Forces calibur to always perform the EX 3 variant.";
 
