@@ -18,7 +18,7 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilefxsettings;
+	m_on_page = vergilvfxsettings;
 	m_full_name_string = "DMC3 Guard";
 	m_author_string = "VPZadov";
 	m_description_string = "Change block to the gunshot block from DMC3.";
