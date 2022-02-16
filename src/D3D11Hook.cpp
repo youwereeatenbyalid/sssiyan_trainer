@@ -109,7 +109,7 @@ HRESULT WINAPI D3D11Hook::resize_buffers(IDXGISwapChain* swap_chain, UINT buffer
     if (m_execute_resize_buffer_detour) {
         D3D11HOOK_INTERNAL({
             if (d3d11->m_on_resize_buffers) {
-                d3d11->m_on_resize_buffers(*d3d11);
+                d3d11->m_on_resize_buffers(*d3d11, width, height);
             }
         });
     }

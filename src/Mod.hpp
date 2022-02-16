@@ -302,7 +302,7 @@ public:
         vergiltrick,
         vergildoppel,
         vergilcheat,
-        vergilefxsettings,
+        vergilvfxsettings,
         gamemode,
         bloodypalace,
         balance,

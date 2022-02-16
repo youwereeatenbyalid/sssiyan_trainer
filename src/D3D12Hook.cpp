@@ -295,7 +295,7 @@ HRESULT WINAPI D3D12Hook::resize_buffers(IDXGISwapChain3* swap_chain, UINT buffe
             d3d12->m_display_height = height;
 
             if (d3d12->m_on_resize_buffers) {
-                d3d12->m_on_resize_buffers(*d3d12);
+                d3d12->m_on_resize_buffers(*d3d12, width, height);
             }
     	});
     }
