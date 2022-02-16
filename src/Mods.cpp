@@ -197,6 +197,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
+		m_mods.emplace_back(std::make_unique<HoldToMash>()); //has to come before game input??
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
@@ -207,7 +208,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
-        m_mods.emplace_back(std::make_unique<HoldToMash>());
+
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay

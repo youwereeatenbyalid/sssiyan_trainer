@@ -10,8 +10,8 @@ bool HoldToMash::cheaton{NULL};
   static naked void newmem_detour() {
 __asm {
   validation:
-    cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
-    jne code
+    //cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
+    //jne code
     cmp byte ptr [HoldToMash::cheaton], 1
     je cheatcode
     jmp code

@@ -17,6 +17,7 @@ static naked void detour() {
             cmp qword ptr [rax+0x18], 00
             jmp qword ptr [DTWingsOnly::jmp_ret]        
         cheatcode:
+            cmp byte ptr [DTWingsOnly::cheaton], 0 //force sete AL to fail
             jmp qword ptr [DTWingsOnly::jmp_ret]
 	}
 }
