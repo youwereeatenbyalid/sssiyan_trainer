@@ -38,7 +38,7 @@
         #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
-        #include "mods/DisableBreakaway.hpp"
+        //#include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
@@ -218,7 +218,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
-        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
         m_mods.emplace_back(std::make_unique<ExceedValue>());

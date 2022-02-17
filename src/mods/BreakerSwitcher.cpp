@@ -678,7 +678,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   m_on_page    = breaker;
 
   m_full_name_string     = "Breaker Switcher (+)";
-  m_author_string        = "The HitchHiker (original version by Nino)";
+  m_author_string        = "The HitchHiker (original version by Nino)\n Disable Breakaway made with assistance from Lidemi";
   m_description_string   = "Make sure your d-pad is bound to breakaway, then "
                          "press a button on the d-pad to switch breakers.";
 
@@ -855,7 +855,7 @@ void BreakerSwitcher::on_draw_ui() {
 //ImGui::InputInt("breaker right", (int*)&BreakerSwitcher::breakers[3]);
 ImGui::Combo("Breaker Type", (int*)&BreakerSwitcher::switcher_mode,"Off\0Switcher\0Cycler\0");
 
-ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold Breaker\0On\0");
+ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold button to override\0On\0");
 if (BreakerSwitcher::breakaway_type == 1){
     if (ImGui::Combo("Override button", &breakaway_index,
         "Sword\0Gun\0Jump\0Taunt\0"

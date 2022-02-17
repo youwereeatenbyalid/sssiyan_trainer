@@ -8,7 +8,9 @@ uintptr_t NeroDisableWiresnatch::jmp_ret2{NULL};
 uintptr_t NeroDisableWiresnatch::jmp_jne2{NULL};
 
 bool NeroDisableWiresnatch::cheaton{NULL};
-
+bool NeroDisableWiresnatch::movementoverride{NULL};
+bool NeroDisableWiresnatch::flipoverride{NULL};
+//PlayerTracker::redirect
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -21,7 +23,21 @@ static naked void detour1() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [NeroDisableWiresnatch::movementoverride], 0
+        je retinfo
+        cmp byte ptr [rdx+00000ED0h], 0 //lock-on check
+        je retinfo
+        cmp byte ptr [PlayerTracker::redirect], 1 //if movement threshhold allow snatch
+        je flipcode
+        cmp byte ptr[NeroDisableWiresnatch::flipoverride], 1 //if flip override jump to jne anyway
+        je jnecode
+    retinfo:
 		jmp qword ptr [NeroDisableWiresnatch::jmp_ret1]
+
+    flipcode:
+        cmp byte ptr [NeroDisableWiresnatch::flipoverride], 0 //if not flip override jump to jne
+        je jnecode
+        jmp qword ptr[NeroDisableWiresnatch::jmp_ret1]
 
     code:
         cmp byte ptr [rdx+00000ED0h], 00
@@ -42,8 +58,22 @@ static naked void detour2() {
         je cheatcode
         jmp code
 
-    cheatcode:
-		jmp qword ptr [NeroDisableWiresnatch::jmp_ret2]
+    cheatcode :
+        cmp byte ptr [NeroDisableWiresnatch::movementoverride], 0
+        je retinfo
+        cmp byte ptr [rdx+00000ED0h], 0 //lock-on check
+        je retinfo
+        cmp byte ptr [PlayerTracker::redirect], 1 //if movement threshhold allow snatch
+        je flipcode
+        cmp byte ptr [NeroDisableWiresnatch::flipoverride], 1 //if flip override jump to jne anyway
+        je jnecode
+    retinfo:
+        jmp qword ptr [NeroDisableWiresnatch::jmp_ret1]
+
+    flipcode:
+        cmp byte ptr [NeroDisableWiresnatch::flipoverride], 0 //if not flip override jump to jne
+        je jnecode
+        jmp qword ptr [NeroDisableWiresnatch::jmp_ret1]
 
     code:
         cmp byte ptr [rdx+00000ED0h], 00
@@ -101,4 +131,18 @@ std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   return Mod::on_initialize();
 }
 
-// void NeroDisableWiresnatch::on_draw_ui() {}
+
+void NeroDisableWiresnatch::on_config_load(const utility::Config& cfg) {
+    NeroDisableWiresnatch::movementoverride = cfg.get<bool>("disable_breakaway_movement_override").value_or(false);
+    NeroDisableWiresnatch::flipoverride = cfg.get<bool>("disable_breakaway_flip_override").value_or(false);
+}
+void NeroDisableWiresnatch::on_config_save(utility::Config& cfg) {
+    cfg.set<bool>("disable_breakaway_movement_override", NeroDisableWiresnatch::movementoverride);
+    cfg.set<bool>("disable_breakaway_flip_override", NeroDisableWiresnatch::flipoverride);
+}
+void NeroDisableWiresnatch::on_draw_ui() {
+    if (ImGui::Checkbox("Allow snatch when stick is not neutral", (bool*)&NeroDisableWiresnatch::movementoverride));
+    if(movementoverride){
+        ImGui::Checkbox("Invert behavior (Allow snatch when stick is neutral)", (bool*)&NeroDisableWiresnatch::flipoverride);
+    }
+}
