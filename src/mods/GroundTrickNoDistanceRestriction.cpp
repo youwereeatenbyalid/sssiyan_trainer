@@ -6,6 +6,8 @@ uintptr_t GroundTrickNoDistanceRestriction::distanceRet1{NULL};
 
 static naked void distance0_detour() {
 	__asm {
+		cmp byte ptr [DanteAirTrickSettings::cheaton], 0
+		je originalcode
 		cmp byte ptr [DanteAirTrickSettings::groundIsNoDistanceRestriction], 1
 		je cheat
 
@@ -21,6 +23,8 @@ static naked void distance0_detour() {
 
 static naked void distance1_detour() {
 	__asm {
+		cmp byte ptr[DanteAirTrickSettings::cheaton], 0
+		je originalcode
 		cmp byte ptr [DanteAirTrickSettings::groundIsNoDistanceRestriction], 0x1
 		je cheat
 
