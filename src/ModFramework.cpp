@@ -212,7 +212,7 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
     colors[ImGuiCol_Separator] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
     colors[ImGuiCol_SeparatorHovered] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
-    colors[ImGuiCol_SeparatorActive] = ImVec4(0.67f, 0.17f, 0.18f, 0.82f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.50f, 0.93f, 0.93f, 0.80f);
     colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
     colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
@@ -647,8 +647,8 @@ bool ModFramework::initialize() {
         set_style(m_scale);
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.IniFilename = NULL;
-        io.LogFilename = NULL;
+        io.IniFilename = nullptr;
+        io.LogFilename = nullptr;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -767,8 +767,8 @@ bool ModFramework::initialize() {
         set_style(m_scale);
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.IniFilename = NULL;
-        io.LogFilename = NULL;
+        io.IniFilename = nullptr;
+        io.LogFilename = nullptr;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -894,6 +894,14 @@ void ModFramework::focus_tab(const std::string_view& window_name)
     window->DockNode->TabBar->NextSelectedTabId = window->ID;
 }
 
+bool ModFramework::is_window_focused(const std::string_view& window_name)
+{
+    const auto window = ImGui::FindWindowByName(window_name.data());
+    const auto focusedWindow = ImGui::GetCurrentContext()->NavWindow;
+
+	return window != nullptr && focusedWindow != nullptr && window == focusedWindow;
+}
+
 void ModFramework::draw_ui() {
     std::lock_guard _{ m_input_mutex };
 
@@ -957,8 +965,8 @@ void ModFramework::draw_ui() {
         m_windows_message_hook->window_toggle_cursor(true);
     }
 
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
-    ImGuiViewport* mainViewport = ImGui::GetMainViewport();
+    static constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus;
+    const ImGuiViewport* mainViewport = ImGui::GetMainViewport();
     ImGuiWindowClass mainWindowClass;
     mainWindowClass.DockNodeFlagsOverrideClear = 000;
     mainWindowClass.DockNodeFlagsOverrideSet = 000;
@@ -971,33 +979,60 @@ void ModFramework::draw_ui() {
 
     ImGui::PushStyleColor(ImGuiCol_ResizeGrip, 0);
 
-    ImGui::Begin("##SSSiyan's Collaborative Trainer", m_kcw_buffers.drawWindow ? nullptr : &m_draw_ui, windowFlags);
+    const auto is_trainer_focused = !is_window_focused("Settings"); // Yeah...
 
-    ImGui::SetCursorPosX(ImGui::GetContentRegionAvailWidth() / 2 - (float)logo.GetWidth() * m_scale / 2);
+    const auto border_col = ImGui::GetStyle().Colors[ImGuiCol_Border];
+    const ImVec4 border_unfocused{ border_col.x, border_col.y, border_col.z, border_col.w * 0.7f };
+    const auto border_shadow_col = ImGui::GetStyle().Colors[ImGuiCol_BorderShadow];
+    const ImVec4 border_shadow_unfocused{ border_shadow_col.x, border_shadow_col.y, border_shadow_col.z, border_shadow_col.w * 0.7f };
+
+	ImGui::PushStyleColor(ImGuiCol_Border, is_trainer_focused ? border_col : border_unfocused);
+    ImGui::PushStyleColor(ImGuiCol_BorderShadow, is_trainer_focused ? border_shadow_col : border_shadow_unfocused);
+    ImGui::Begin("##SSSiyan's Collaborative Trainer", m_kcw_buffers.drawWindow ? nullptr : &m_draw_ui, windowFlags);
+    ImGui::PopStyleColor(2);
+
+    const auto settings_toggle_pos = ImGui::GetCursorPos();
+    const auto trainer_width = ImGui::GetContentRegionAvailWidth();
+
+    ImGui::SetCursorPosX(trainer_width / 2 - (float)logo.GetWidth() * m_scale / 2);
 
     if (m_is_d3d11)
         ImGui::Image(m_logo_dx11, m_logo_dx11.GetSize(m_scale));
     else
         ImGui::Image(m_logo_dx12, m_logo_dx12.GetSize(m_scale));
 
-    //UI::KeyBindButton("Menu Key", m_kc_draw_window);
+    const auto config_buttons_pos = ImGui::GetCursorPos();
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
-    //ImGui::Text("Menu Key: Delete");
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetWindowSize().x / 2 - ImGui::CalcTextSize("Save Settings Load Settings").x / 2);
+    ImGui::SetCursorPos(settings_toggle_pos);
+
+    if (ImGui::Button("Settings"))
+    {
+        m_show_settings = !m_show_settings;
+    }
+
+    ImGui::SetCursorPos({ config_buttons_pos.x, config_buttons_pos.y + 15.0f });
 
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+
+    const auto save_label = "Save Settings";
+    const auto load_label = "Load Settings";
+    const auto save_label_size = ImGui::CalcTextSize(save_label);
+    const auto load_label_size = ImGui::CalcTextSize(load_label);
+    const auto save_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, save_label_size.x + style.FramePadding.x * 2.0f, save_label_size.y + style.FramePadding.y * 2.0f);
+    const auto load_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, load_label_size.x + style.FramePadding.x * 2.0f, load_label_size.y + style.FramePadding.y * 2.0f);
+
+    ImGui::SetCursorPosX(trainer_width / 2 - (save_button_size.x + load_button_size.x) / 2);
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.25f, 0.38f, 1.00f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.00f, 0.35f, 0.58f, 1.00f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.00f, 0.30f, 0.50f, 1.00f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 1.0f, 1.0f, 1.0f));
-    if (ImGui::Button("Save Settings"))
+    if (ImGui::Button(save_label))
     {
         save_config();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load Settings")) {
+    if (ImGui::Button(load_label)) {
         load_config();
     }
     ImGui::PopStyleColor(4);
@@ -1010,7 +1045,6 @@ void ModFramework::draw_ui() {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
 
     static ImGuiID left{}, right{};
-    //ImGuiID leftTop{}, leftBottom{};
     ImGuiID dockSpaceId = ImGui::GetID("SSSiyan's Collaborative Trainer");
     if (!ImGui::DockBuilderGetNode(dockSpaceId))
     {
@@ -1028,7 +1062,6 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderDockWindow("Dante", left);
         ImGui::DockBuilderDockWindow("V", left);
         ImGui::DockBuilderDockWindow("Vergil", left);
-        ImGui::DockBuilderDockWindow("Trainer", left);
 
         // Settings
         ImGui::DockBuilderDockWindow("Options", right);
@@ -1045,7 +1078,11 @@ void ModFramework::draw_ui() {
     draw_panels();
     draw_options();
 
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor();
+
+    draw_trainer_settings();
+
+    ImGui::PopStyleColor(2);
 
     if (!m_is_focus_set)
     {
@@ -1264,42 +1301,10 @@ void ModFramework::draw_panels()
         }
     }
     ImGui::End();
-
-    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Trainer ? activeTabText : inactiveTabText);
-    ImGui::Begin("Trainer", nullptr, panel_flags);
-    ImGui::PopStyleColor();
-    static int selected = -1;
-    {
-
-        if (ImGui::Selectable("Options", selected == 1))
-        {
-            m_active_option_menu = OptionID_Settings;
-            m_mods->set_focused_mod("None");
-            selected = 1;
-        }
-
-        if (ImGui::Selectable("Credits", selected == 2))
-        {
-            m_active_option_menu = OptionID_Credits;
-            m_mods->set_focused_mod("None");
-            selected = 2;
-        }
-
-        if (ImGui::Selectable("License", selected == 3))
-        {
-            m_active_option_menu = OptionID_License;
-            m_mods->set_focused_mod("None");
-            selected = 3;
-        }
-    }
-    ImGui::End();
 }
 
 void ModFramework::draw_options()
 {
-    static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
-    static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
-
     static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing
 	| ImGuiWindowFlags_NoTitleBar;
 
@@ -1326,43 +1331,68 @@ void ModFramework::draw_options()
             current_mod->on_draw_ui();
         } else
         {
-	        switch(m_active_option_menu)
-	        {
-	        case OptionID_None:
-                if (m_error.empty() && m_game_data_initialized) {
-                    ImGui::TextWrapped("Select something!");
-                }
-                else if (!m_game_data_initialized) {
-                    ImGui::TextWrapped("Trainer is currently initializing...");
-                }
-	        	break;
+            if (m_error.empty() && m_game_data_initialized) {
+                ImGui::TextWrapped("Select something!");
+            }
+            else if (!m_game_data_initialized) {
+                ImGui::TextWrapped("Trainer is currently initializing...");
+            }
+        }
+    }
+    ImGui::End();
+}
 
-	        case OptionID_Settings:
-		        {
-                    ImGui::Text("Menu Key:"); ImGui::SameLine();
-                    ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-                    UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
-                    ImGui::Text("Close Menu Key:"); ImGui::SameLine();
-                    ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
-                    UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+void ModFramework::draw_trainer_settings()
+{
+    if(!m_show_settings)
+    {
+        return;
+    }
 
-                    ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
-                    ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
-		        }
-                break;
+    ImGui::SetNextWindowPos(ImVec2(m_window_pos.x + 25.0f, m_window_pos.y + 15.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
+    ImGui::SetNextWindowSize(ImVec2(500.0f, 600.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
 
-	        case OptionID_Credits:
-                ImGui::TextWrapped("The Darkness\n\n"
+    static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
+    static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
+
+    const bool is_settings_active = is_window_focused("Settings");
+
+    const auto border_col = ImGui::GetStyle().Colors[ImGuiCol_Border];
+    const ImVec4 border_unfocused{ border_col.x, border_col.y, border_col.z, border_col.w * 0.7f };
+    const auto border_shadow_col = ImGui::GetStyle().Colors[ImGuiCol_BorderShadow];
+    const ImVec4 border_shadow_unfocused{ border_shadow_col.x, border_shadow_col.y, border_shadow_col.z, border_shadow_col.w * 0.7f };
+
+    ImGui::PushStyleColor(ImGuiCol_Border, is_settings_active ? border_col : border_unfocused);
+    ImGui::PushStyleColor(ImGuiCol_BorderShadow, is_settings_active ? border_shadow_col : border_shadow_unfocused);
+    ImGui::PushStyleColor(ImGuiCol_Text, is_settings_active ? activeTabText : inactiveTabText);
+    ImGui::Begin("Settings", &m_show_settings, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse);
+    ImGui::PopStyleColor(3);
+    {
+        ImGui::Text("Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+        UI::KeyBindButton("Menu Key", "Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+        ImGui::Text("Close Menu Key:"); ImGui::SameLine();
+        ImGui::SetCursorScreenPos(UI::Vec2<float>(ImGui::GetCursorScreenPos()) - UI::Vec2(10.0f, 2.0f) * m_scale);
+        UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
+
+        ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
+        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+
+        ImGui::Spacing();
+        if (ImGui::TreeNodeEx("About")) {
+            if (ImGui::TreeNodeEx("Credits"))
+            {
+                ImGui::TextWrapped("Darkness\n\n"
                     "The Hitchhiker\n\n"
                     "Siyan\n\n"
                     "VPZadov\n\n"
                     "Deepdarkkapustka\n\n"
                     "Lidemi\n\n"
                     "Dr. Penguin\n\n"
-					"Special thanks to Praydog and Cursey for their awesome work on REFramework!");
-                break;
+                    "Special thanks to Praydog and Cursey for their awesome work on REFramework which inspired this project!");
+            }
 
-            case OptionID_License: 
+            if (ImGui::TreeNodeEx("License"))
             {
                 ImGui::TextWrapped(license::glm);
                 ImGui::Separator();
@@ -1375,10 +1405,7 @@ void ModFramework::draw_options()
                 ImGui::TextWrapped(license::ref);
                 ImGui::Separator();
                 ImGui::TextWrapped(license::jsonstthm);
-                ImGui::Separator();
             }
-                break;
-	        }
         }
     }
     ImGui::End();

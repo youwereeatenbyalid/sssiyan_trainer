@@ -89,8 +89,10 @@ private:
     void draw_ui();
     void draw_panels();
     void draw_options();
+    void draw_trainer_settings();
     void draw_notifs();
     void focus_tab(const std::string_view& window_name);
+    bool is_window_focused(const std::string_view& window_name);
 
     bool hook_d3d11();
     bool hook_d3d12();
@@ -104,6 +106,7 @@ private:
 
     // UI
     bool m_draw_ui{ false };
+    bool m_show_settings{ false };
     bool m_do_once_after_ui{ false };
     bool m_is_ui_focused{ false };
     bool m_main_game_cursor_state_buffer{ true };
@@ -130,15 +133,7 @@ private:
         PanelID_Trainer
     };
 
-    enum OptionID_ : uint8_t {
-        OptionID_None = 0,
-        OptionID_Settings,
-        OptionID_Credits,
-        OptionID_License
-    };
-
     PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
-    OptionID_ m_active_option_menu{ OptionID_None };
 
     bool m_is_focus_set{ false };
 
