@@ -101,7 +101,7 @@ private:
     
     bool initialize();
     
-    void prepare_tex();
+    void prepare_textures();
     void initialize_key_bindings();
 
     // UI
@@ -219,11 +219,13 @@ private:
         UI::Texture2DDX11 kbIconDX11;
         UI::Texture2DDX11 kbIconActiveDX11;
         UI::Texture2DDX11 keyIconsDX11;
+        UI::Texture2DDX11 gearIconDX11;
         
         // D3D12
         UI::Texture2DDX12 kbIconDX12;
         UI::Texture2DDX12 kbIconActiveDX12;
         UI::Texture2DDX12 keyIconsDX12;
+        UI::Texture2DDX12 gearIconDX12;
     } m_icons;
 };
 

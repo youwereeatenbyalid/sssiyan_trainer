@@ -56,7 +56,7 @@ ModFramework::ModFramework()
     load_trainer_settings(cfg);
 
     // Preparing custom textures before loading them
-    prepare_tex();
+    prepare_textures();
 
     // Initializing the key bindings
     initialize_key_bindings();
@@ -132,8 +132,14 @@ bool ModFramework::hook_d3d12()
 {
     // Making sure we have D3D12 support (win 7 and 8 don't)
     if (LoadLibraryA("d3d12.dll") == nullptr) {
-        spdlog::warn("D3D12 not surpported!");
-        return false;
+        spdlog::warn("D3D12 not surpported! Trying to hook D3D11");
+
+        if (!hook_d3d11()) {
+            spdlog::error("Failed to hook D3D11.");
+            return false;
+        }
+
+        return true;
     }
 
     m_d3d12_hook = std::make_unique<D3D12Hook>();
@@ -501,7 +507,7 @@ void ModFramework::on_reset(const UINT& width, const UINT& height) {
 
     // Crashes if we don't release it at this point.
     if (m_is_d3d11) {
-        if (m_initialized && (m_swap_desc.BufferDesc.Width != width || m_swap_desc.BufferDesc.Height != height))
+        if (m_initialized)
         {
             ImGui_ImplDX11_Shutdown();
             ImGui_ImplWin32_Shutdown();
@@ -511,7 +517,7 @@ void ModFramework::on_reset(const UINT& width, const UINT& height) {
     }
 
     if (m_is_d3d12) {
-        if (m_initialized && (m_swap_desc.BufferDesc.Width != width || m_swap_desc.BufferDesc.Height != height))
+        if (m_initialized)
         {
             ImGui_ImplDX12_Shutdown();
             ImGui_ImplWin32_Shutdown();
@@ -673,8 +679,10 @@ bool ModFramework::initialize() {
         m_icons.kbIconDX11 = UI::Texture2DDX11(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get());
         m_icons.kbIconActiveDX11 = UI::Texture2DDX11(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get());
         m_icons.keyIconsDX11 = UI::Texture2DDX11(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get());
+        m_icons.gearIconDX11 = UI::Texture2DDX11(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get());
 
-        if (!m_logo_dx11 || !m_icons.kbIconDX11 || !m_icons.kbIconActiveDX11) {
+        if (!m_logo_dx11 || !m_icons.kbIconDX11 || !m_icons.kbIconActiveDX11
+            || !m_icons.keyIconsDX11 || !m_icons.gearIconDX11) {
             spdlog::error("Failed to load textures!");
             return false;
         }
@@ -702,8 +710,10 @@ bool ModFramework::initialize() {
             m_is_d3d12 = false;
 
             // We hook D3D11
-            if (!hook_d3d11()) {
-                spdlog::error("Failed to hook D3D11 after unhooking D3D12.");
+            if (LoadLibraryA("d3d12.dll") != nullptr) {
+                if (!hook_d3d11()) {
+                    spdlog::error("Failed to hook D3D11 after unhooking D3D12.");
+                }
             }
             return false;
         }
@@ -744,7 +754,7 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        if (!create_srv_descriptor_heap_d3d12(5)) {
+        if (!create_srv_descriptor_heap_d3d12(6)) {
             spdlog::error("Failed to create SRV Descriptor.");
             return false;
         }
@@ -767,8 +777,8 @@ bool ModFramework::initialize() {
         set_style(m_scale);
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.IniFilename = nullptr;
-        io.LogFilename = nullptr;
+        io.IniFilename = NULL;
+        io.LogFilename = NULL;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -799,8 +809,10 @@ bool ModFramework::initialize() {
         m_icons.kbIconDX12 = UI::Texture2DDX12(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 2);
         m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 3);
         m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 4);
+        m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 5);
 
-        if (!m_logo_dx12 || !m_icons.kbIconDX12 || !m_icons.kbIconActiveDX12) {
+        if (!m_logo_dx12 || !m_icons.kbIconDX12 || !m_icons.kbIconActiveDX12
+            || !m_icons.keyIconsDX12 || !m_icons.gearIconDX12) {
             spdlog::error("Failed to load textures!");
             return false;
         }
@@ -849,12 +861,13 @@ bool ModFramework::initialize() {
     return true;
 }
 
-void ModFramework::prepare_tex()
+void ModFramework::prepare_textures()
 {
     logo.Resize(800, 76);
     kbIcon.ResizeByRatioH(21);
     kbIconActive.ResizeByRatioH(21);
     keyIcons.ResizeByRatioW(512);
+    gearIcon.ResizeByRatioW(25);
 }
 
 void ModFramework::initialize_key_bindings()
@@ -991,8 +1004,7 @@ void ModFramework::draw_ui() {
     ImGui::Begin("##SSSiyan's Collaborative Trainer", m_kcw_buffers.drawWindow ? nullptr : &m_draw_ui, windowFlags);
     ImGui::PopStyleColor(2);
 
-    const auto settings_toggle_pos = ImGui::GetCursorPos();
-    const auto trainer_width = ImGui::GetContentRegionAvailWidth();
+	const auto trainer_width = ImGui::GetContentRegionAvailWidth();
 
     ImGui::SetCursorPosX(trainer_width / 2 - (float)logo.GetWidth() * m_scale / 2);
 
@@ -1002,20 +1014,35 @@ void ModFramework::draw_ui() {
         ImGui::Image(m_logo_dx12, m_logo_dx12.GetSize(m_scale));
 
     const auto config_buttons_pos = ImGui::GetCursorPos();
+    const auto window_pos = ImGui::GetWindowPos();
 
-    ImGui::SetCursorPos(settings_toggle_pos);
+    ImGui::SetCursorScreenPos({ window_pos.x + style.WindowPadding.x + 5.0f,  window_pos.y + style.WindowPadding.y + 12.0f });
 
-    if (ImGui::Button("Settings"))
+    ImGui::PushStyleColor(ImGuiCol_Button, 0);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0);
+	if (m_is_d3d11) {
+        if (ImGui::ImageButton(m_icons.gearIconDX11, m_icons.gearIconDX11.GetSize(m_scale), 
+            { 0.0f, 0.0f }, { 1.0f, 1.0f }, -1, { 0.0f, 0.0f, 0.0f, 0.0f}, UI::BUTTONCOLOR))
+        {
+            m_show_settings = !m_show_settings;
+        }
+    } else
     {
-        m_show_settings = !m_show_settings;
+        if (ImGui::ImageButton(m_icons.gearIconDX12, m_icons.gearIconDX12.GetSize(m_scale), 
+            { 0.0f, 0.0f }, { 1.0f, 1.0f }, -1, { 0.0f, 0.0f, 0.0f, 0.0f }, UI::BUTTONCOLOR))
+        {
+            m_show_settings = !m_show_settings;
+        }
     }
+    ImGui::PopStyleColor(3);
 
     ImGui::SetCursorPos({ config_buttons_pos.x, config_buttons_pos.y + 15.0f });
 
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
 
-    const auto save_label = "Save Settings";
-    const auto load_label = "Load Settings";
+    const auto save_label = "Save Config";
+    const auto load_label = "Load Config";
     const auto save_label_size = ImGui::CalcTextSize(save_label);
     const auto load_label_size = ImGui::CalcTextSize(load_label);
     const auto save_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, save_label_size.x + style.FramePadding.x * 2.0f, save_label_size.y + style.FramePadding.y * 2.0f);
@@ -1069,11 +1096,10 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderFinish(dockSpaceId);
     }
 
-    ImGui::DockSpace(dockSpaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
-
     ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
-    ImGui::PushStyleColor(ImGuiCol_Header, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
+
+    ImGui::DockSpace(dockSpaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
 
     draw_panels();
     draw_options();
@@ -1082,7 +1108,7 @@ void ModFramework::draw_ui() {
 
     draw_trainer_settings();
 
-    ImGui::PopStyleColor(2);
+    ImGui::PopStyleColor();
 
     if (!m_is_focus_set)
     {
@@ -1390,6 +1416,7 @@ void ModFramework::draw_trainer_settings()
                     "Lidemi\n\n"
                     "Dr. Penguin\n\n"
                     "Special thanks to Praydog and Cursey for their awesome work on REFramework which inspired this project!");
+                ImGui::TreePop();
             }
 
             if (ImGui::TreeNodeEx("License"))
@@ -1405,7 +1432,9 @@ void ModFramework::draw_trainer_settings()
                 ImGui::TextWrapped(license::ref);
                 ImGui::Separator();
                 ImGui::TextWrapped(license::jsonstthm);
+                ImGui::TreePop();
             }
+            ImGui::TreePop();
         }
     }
     ImGui::End();

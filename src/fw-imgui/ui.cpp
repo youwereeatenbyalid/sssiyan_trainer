@@ -1624,6 +1624,8 @@ void UI::KeyCaptureWindow(KCWBuffers& kcwBuffers, bool closeBtn /*= false*/)
 						ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(bind.c_str()).x + padding.x * 2) / 2, ImGui::GetCursorScreenPos().y });
 						ImGui::Text(bind.c_str());
 					}
+
+					ImGui::TreePop();
 				}
 
 				ImGui::PopStyleColor(2);
