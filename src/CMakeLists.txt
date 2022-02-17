@@ -253,7 +253,7 @@ set(MODS_SRC
     mods/NoSlowmoOrHitstop.cpp 
     mods/InfHP.hpp 
     mods/InfHP.cpp 
-
+    mods/VergilNoRoyalForkDelay.hpp
 )
 
 set(HOOKS_SRC

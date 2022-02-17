@@ -102,7 +102,7 @@ static naked void jceprefab_detour()
 		jmp qword ptr[DMC3JCE::jcePfbRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		push rax
@@ -129,7 +129,7 @@ static naked void jceprefab1_detour()
 		jmp qword ptr [DMC3JCE::jcePfb1Ret]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		push rax
@@ -154,7 +154,7 @@ static naked void jceprefab2_detour()
 		jmp qword ptr [DMC3JCE::jcePfb2Ret]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		push rax
@@ -197,7 +197,7 @@ static volatile naked void jce_exetime_detour()
 		jmp qword ptr [DMC3JCE::jceTimerRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		push rax
@@ -258,7 +258,7 @@ static naked void crashpoint_detour()//this mb not good idk
 		jmp qword ptr [DMC3JCE::crashPointRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		cmp byte ptr [DMC3JCE::isCrashFixEnabled], 0
 		je originalcode
@@ -282,7 +282,7 @@ static naked void finish_pfb_detour()
 		jmp qword ptr [DMC3JCE::jceFinishPfbRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUseDefaultJce], 1
+		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
 		je originalcode
 		//cmp dword ptr [VergilSDTFormTracker::vergilform_state], 0
 		push rax
@@ -409,37 +409,44 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 void DMC3JCE::on_config_load(const utility::Config& cfg)
 {
-	jceController->rndDelayTime = cfg.get<int>("DMC3JCE.rndDelayTime").value_or(jceController->defaultRndDelay);
-	rndDelay = jceController->rndDelayTime;
-	jceController->trackDelayTime = cfg.get<int>("DMC3JCE.trackDelayTime").value_or(jceController->defaultTrackDelay);
-	trackDelay = jceController->trackDelayTime;
+	jceController->set_rndspawn_delay( cfg.get<int>("DMC3JCE.rndDelayTime").value_or(jceController->defaultRndDelay));
+	rndDelay = jceController->get_rndspawn_delay();
+	jceController->set_trackspawn_delay(cfg.get<int>("DMC3JCE.trackDelayTime").value_or(jceController->defaultTrackDelay));
+	trackDelay = jceController->get_trackspawn_delay();
 	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
 	jcTypeUi = jceController->get_jce_type();
-	isUseDefaultJce = cfg.get<bool>("DMC3JCE.isUseDefaultJce").value_or(false);
+	isUsingDefaultJce = cfg.get<bool>("DMC3JCE.isUsingDefaultJce").value_or(false);
 	jceController->rndEmTrackInterval = cfg.get<int>("DMC3JCE.rndEmTrackInterval").value_or(22);
 	humanJCECost = cfg.get<float>("DMC3JCE.humanJCECost").value_or(3000.0f);
 	minSdt = cfg.get<float>("DMC3JCE.minSdt").value_or(3000.0f);
 	isCrashFixEnabled = true;
+	rndExeDuration = cfg.get<float>("DMC3JCE.rndExeDuration").value_or(jceController->rndExeTimeModDefault);
+	trackExeDuration = cfg.get<float>("DMC3JCE.trackExeDuration").value_or(jceController->trackExeTimeModDefault);
+
+	if(jceController->get_jce_type() == JCEController::Random)
+		jceController->executionTimeAsm = rndExeDuration;
+	else
+		jceController->executionTimeAsm = trackExeDuration;
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
 {
-	cfg.set<int>("DMC3JCE.rndDelayTime", jceController->rndDelayTime);
-	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->trackDelayTime);
+	cfg.set<int>("DMC3JCE.rndDelayTime", jceController->get_rndspawn_delay());
+	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->get_trackspawn_delay());
 	cfg.set<int>("DMC3JCE.jceType", jceController->get_jce_type());
 	cfg.set<int>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
 	cfg.set<float>("DMC3JCE.humanJCECost", humanJCECost);
 	cfg.set<float>("DMC3JCE.minSdt", minSdt);
+	cfg.set<float>("DMC3JCE.rndExeDuration", rndExeDuration);
+	cfg.set<float>("DMC3JCE.trackExeDuration", trackExeDuration);
 }
-
-// void DMC3JCE::on_frame(){}
 
 void DMC3JCE::on_draw_ui()
 {
 	ImGui::TextWrapped("If after Vergil's disappear, jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
 	ImGui::Separator();
 	ImGui::Spacing();
-	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUseDefaultJce);
+	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUsingDefaultJce);
 	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
 	ImGui::Separator();
 	ImGui::TextWrapped("SDT cost for performing JCE in human form:");
@@ -477,6 +484,9 @@ void DMC3JCE::on_draw_ui()
 				jceController->set_rndspawn_delay(rndDelay);
 			ImGui::TextWrapped("Interval between spawn on lock on position:");
 			ImGui::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
+			ImGui::TextWrapped("Execution duration:");
+			ImGui::SliderFloat("##rndExeTime", &rndExeDuration, 4.0f, 8.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+			jceController->executionTimeAsm = rndExeDuration;
 			break;
 		}
 		case JCEController::Type::Track:
@@ -485,6 +495,9 @@ void DMC3JCE::on_draw_ui()
 			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##1"))
 				jceController->set_trackspawn_delay(trackDelay);
+			ImGui::TextWrapped("Execution duration:");
+			ImGui::SliderFloat("##trackExeTime", &trackExeDuration, 5.0f, 8.5f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+			jceController->executionTimeAsm = trackExeDuration;
 			break;
 		}
 		default:
@@ -507,8 +520,6 @@ void DMC3JCE::on_draw_ui()
 		jceController->start_jce();
 	}
 }
-
-// void DMC3JCE::on_draw_debug_ui(){}
 
 void DMC3JCE::init_check_box_info()
 {

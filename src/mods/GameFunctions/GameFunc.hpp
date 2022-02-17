@@ -74,7 +74,7 @@ namespace GameFunctions
 	private:
 		static bool is_bad_ptr(uintptr_t ptr)
 		{
-			return (bool)IsBadReadPtr((void*)ptr, 0x8);// not thread safe?
+			return (bool)IsBadReadPtr((void*)ptr, 0x8);
 		}
 
 	public:
@@ -85,6 +85,7 @@ namespace GameFunctions
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
 		/// <param name="offsets">Other offsets.</param>
 		/// <param name="get_addr">Set true if u don't want to get ptr value.</param>
+		/// <param name="isDerefedBase">Is dereference base passed.</param>
 		/// <returns></returns>
 		template <typename T, size_t offsCount>
 		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false, bool isDerefedBase = false)
@@ -111,10 +112,48 @@ namespace GameFunctions
 						return std::optional<T>(res);
 					}
 					else
-						return std::optional<T>(base);
+						return std::optional<T>(base + offsets[count]);
 				}
 			}
 			return std::nullopt;
+		}
+
+		/// <summary>
+		/// Try to volatile pointer to data via offsets.
+		/// </summary>
+		/// <typeparam name="T">Pointer type</typeparam>
+		/// <param name="offsets">Other offsets</param>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <returns>Returns volatile ptr if it's valid, otherwise std::nullopt.</returns>
+		template <typename T, size_t offsCount>
+		static std::optional<volatile T*> get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false)
+		{
+			auto res = PtrController::get_ptr<uintptr_t>(base, offsets, true, isDerefedBase);
+			if(!res.has_value())
+				return std::nullopt;
+			return std::make_optional<volatile T*>((volatile T*)res.value());
+		}
+
+		/// <summary>
+		/// Try to write to pointer
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="offsets">Other offsets.</param>
+		/// <param name="val">New *ptr value</param>
+		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <returns>Return true if success, false if ptr isn't valid</returns>
+		template <typename T, size_t offsCount>
+		static bool try_to_write(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, T val, bool isDerefedBase = false)
+		{
+			auto ptr = PtrController::get_ptr<T>(offsets, base, isDerefedBase);
+			if (ptr.has_value())
+			{
+				*(ptr.value()) = val;
+				return true;
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -155,8 +194,7 @@ namespace GameFunctions
 	{
 	protected:
 		uintptr_t fAddr;
-		//ptr to some managed stuff idk. Sometimes it can be be null, but some times not. In second case u need check what argument function use in-game and make ptr scan for it.
-		uintptr_t rcx = 0;
+		uintptr_t threadContext = 0;
 
 	public:
 
@@ -172,16 +210,10 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		//virtual std::optional<uintptr_t> get_thread_context() { return std::nullopt; }
-
-		virtual uintptr_t get_cur_rcx() const { return rcx; }
-
 		virtual uintptr_t get_thread_context()
 		{
 			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context());
 		}
-
-		virtual void set_rcx(uintptr_t param) { rcx = param; }
 
 		virtual T __cdecl invoke() = 0;
 		virtual T __cdecl operator()()

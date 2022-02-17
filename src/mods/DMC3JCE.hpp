@@ -29,8 +29,13 @@ public:
 
 		func::CreateShell jcSpawn;
 
+		int rndDelayTime = defaultRndDelay;//ms
+		int trackDelayTime = defaultTrackDelay;//ms
+
 		const float zTrackOffs = 0.94f;
 		const float rndEmMaxDist = 34.5f;
+		const float rndAttackRate = 2.5f;
+		const float trackAttackRate = 1.2f;
 
 		const std::array<uintptr_t, 4> isPauseOffst { 0x100, 0x288, 0xC8, 0x5C4 };
 		//const std::array<uintptr_t, 7> jcPrefabOffsets {0x80, 0x88, 0x70, 0xC8, 0x300, 0x38, 0x10};//{0x140, 0x90, 0x10, 0xC8, 0x300, 0x38, 0x10};//{ 0x70, 0x170, 0x10, 0x88, 0x300, 0x38, 0x10 }; //{0x80, 0x90, 0x10, 0x108, 0x300, 0x38, 0x10};
@@ -39,11 +44,7 @@ public:
 		uintptr_t isPauseBase;
 		//uintptr_t jcPrefabBase;
 
-		std::mutex mt;
-
-		std::atomic_bool executing;
-
-		std::condition_variable cv;
+		std::atomic_bool isExecuting;
 
 		bool isPtrBaseInit;
 		const bool isRndJust = true;
@@ -52,7 +53,7 @@ public:
 		func::Vec3 get_lockon_pos(bool& isNullPtr)
 		{
 			uintptr_t lockOnObj = *(uintptr_t*)(PlayerTracker::vergilentity + 0x428);
-			if (lockOnObj == 0)
+			if (IsBadReadPtr((void*)lockOnObj, 0x8))
 			{
 				isNullPtr = true;
 				return func::Vec3(0, 0, 0);
@@ -110,7 +111,7 @@ public:
 
 		bool get_condition(bool isBadPtr)
 		{
-			if (EnemySwapper::nowFlow == 0x16 && executing.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
+			if (EnemySwapper::nowFlow == 0x16 && isExecuting.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
 			{
 				if (EnemySwapper::gameMode == 3)
 				{
@@ -127,12 +128,12 @@ public:
 			if (run)
 			{
 				isJceRunning = true;
-				executing.store(true, std::memory_order_relaxed);
+				isExecuting.store(true);
 				//*(int*)rayCastAddr = curRayCastSize;
 			}
 			else
 			{
-				executing.store(false, std::memory_order_relaxed);
+				isExecuting.store(false);
 				isJceRunning = false;
 				//*(int*)rayCastAddr = prevRayCastSize;
 			}
@@ -150,21 +151,19 @@ public:
 			Random,
 			Track
 		};
+
 	private:
 		Type jceType;
+
 	public:
 		const int defaultRndDelay = 120;
 		const int defaultTrackDelay = 187;
-
-		int rndDelayTime = defaultRndDelay;//ms
-		int trackDelayTime = defaultTrackDelay;//ms
 
 		static inline float executionTimeAsm;
 		int rndEmTrackInterval = 22;
 
 		const float rndExeTimeModDefault = 6.8f;
-		const float trackExeTimeModDefault = 5.65f;
-		const float rndAttackRate = 2.5f;
+		const float trackExeTimeModDefault = 5.95f;
 
 		JCEController()
 		{
@@ -179,7 +178,7 @@ public:
 			moveTrackStepOffs.y = 1.18F;
 			moveTrackStepOffs.z = 0.98;
 
-			executing = false;
+			isExecuting = false;
 			//jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
 			isPauseBase = 0x07E55910;
 			JCEController::executionTimeAsm = rndExeTimeModDefault;
@@ -193,7 +192,7 @@ public:
 
 		volatile void start_jce()
 		{
-			if(executing.load())
+			if(isExecuting.load())
 				return;
 			if(!isPtrBaseInit)
 				return;
@@ -209,15 +208,13 @@ public:
 				{
 					std::thread([this, id, lvl, isBadPtr, isPause, jcPrefab]() mutable
 					{
-						bool rcxFlag = true;
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
 						if (!jcPrefab.has_value() || jcPrefab.value() == 0)
 						{
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_thread_context();
-						if(rcx == 0)
+						if(jcSpawn.get_thread_context() == 0)
 						{
 							bad_ptr_stop();
 							return;
@@ -239,8 +236,7 @@ public:
 						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
 						int jcNum = 0;
 						int tryIter = 0;
-						jcSpawn.set_params(rcx, jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
-						//std::this_thread::yield();//?
+						jcSpawn.set_params(jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						/*if (isSetCustomCapacity)
 						{
 							if (jcSpawn.get_list_shell_capacity() < newCapacity)
@@ -268,12 +264,8 @@ public:
 							}
 							if (isPause.value())
 								continue;
-							if (EnemySwapper::nowFlow != 0x16 || executing.load() == false)//check this again
+							if (EnemySwapper::nowFlow != 0x16 || isExecuting.load() == false)//check this again
 								break;
-							rcxFlag = !rcxFlag;
-							if(rcx == 0)
-								continue;
-							jcSpawn.set_rcx(rcx);
 							__try
 							{
 								jcShell = (volatile void*)jcSpawn(curPos, defaultRot);
@@ -333,15 +325,14 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						auto rcx = jcSpawn.get_thread_context();
-						if (rcx == 0)
+						if (jcSpawn.get_thread_context() == 0)
 						{
 							isBadPtr = true;
 							bad_ptr_stop();
 							return;
 						}
 						func::Quaternion defaultRot;
-						jcSpawn.set_params(rcx, jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
+						jcSpawn.set_params(jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						uintptr_t jcShell;
 						while (get_condition(isBadPtr))
@@ -369,6 +360,7 @@ public:
 							if (jcShell == 0)
 								break;
 							*(bool*)(jcShell + 0x440) = isTrackJust; //isJust
+							*(float*)(jcShell + 0x444) = trackAttackRate; //attackRate
 							jcShell = 0;
 							std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
 							track_pos_update(curPos);
@@ -391,7 +383,7 @@ public:
 
 		bool is_executing() const
 		{
-			return executing.load();
+			return isExecuting.load();
 		}
 
 		void init_ptrs_base(uintptr_t dmc5base)
@@ -407,25 +399,34 @@ public:
 
 		void set_trackspawn_delay(int delay) {trackDelayTime = delay; }
 
-		void set_jce_type(Type type) 
+		int get_rndspawn_delay() const noexcept {return rndDelayTime; }
+
+		int get_trackspawn_delay() const noexcept {return trackDelayTime; }
+
+		void set_jce_type(Type type, bool isDefaultTime = true, float time = 0) 
 		{
 			jceType = type;
-			switch (type)
+			if (isDefaultTime)
 			{
-				case DMC3JCE::JCEController::Random:
+				switch (type)
 				{
-					JCEController::executionTimeAsm = rndExeTimeModDefault;
-					break;
+					case DMC3JCE::JCEController::Random:
+					{
+						JCEController::executionTimeAsm = rndExeTimeModDefault;
+						break;
+					}
+
+					case DMC3JCE::JCEController::Track:
+					{
+						JCEController::executionTimeAsm = trackExeTimeModDefault;
+						break;
+					}
+					default:
+						break;
 				}
-					
-				case DMC3JCE::JCEController::Track:
-				{
-					JCEController::executionTimeAsm = trackExeTimeModDefault;
-					break;
-				}
-				default:
-					break;
 			}
+			else
+				JCEController::executionTimeAsm = time;
 		}
 
 		Type get_jce_type() const {return jceType; }
@@ -436,7 +437,7 @@ public:
 	static inline bool cheaton = true;
 	static inline bool isJceRunning = false;
 	static inline bool isCrashFixEnabled = true;
-	static inline bool isUseDefaultJce = false;
+	static inline bool isUsingDefaultJce = false;
 	static inline bool isSetCustomCapacity = false;
 
 	static inline uintptr_t canExeJceRet = 0;
@@ -504,6 +505,8 @@ public:
 
 private:
 	//std::unique_ptr<JCEController> jceController;
+	float rndExeDuration = 0;
+	float trackExeDuration = 0;
 	void init_check_box_info() override;
 	std::unique_ptr<FunctionHook> m_can_exe_jce_hook;
 	std::unique_ptr<FunctionHook> m_can_exe_jce1_hook;

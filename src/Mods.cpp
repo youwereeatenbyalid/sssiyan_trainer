@@ -172,6 +172,7 @@
        #include "mods/VergilWalkingGuard.hpp"
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
+       #include "mods/VergilNoRoyalForkDelay.hpp"
 
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -349,12 +350,13 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilAirTrick>());
         //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
         m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
-        m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
+        m_mods.emplace_back(std::make_unique<DMC3JCE>());
         m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
         m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
         m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
         m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
         m_mods.emplace_back(std::make_unique<AirTrickDodge>());
+        m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

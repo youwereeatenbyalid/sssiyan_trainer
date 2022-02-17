@@ -19,7 +19,7 @@ namespace GameFunctions
 		bool invoke() override
 		{
 			auto rcx = get_thread_context();
-			return func(rcx.value(), pl);
+			return func(rcx, pl);
 		}
 
 		bool operator()() override
