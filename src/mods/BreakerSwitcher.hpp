@@ -13,21 +13,21 @@ public:
   std::optional<std::string> on_initialize() override;
   static uintptr_t breakersize_jmp_ret;
   static uintptr_t nextbreaker_jmp_ret;
-  uintptr_t static breakercontrol_jmp_ret;
-  uintptr_t static jmp_bringer_ret;
-  uintptr_t static jne_bringer_ret;
-  uintptr_t static jmp_uireturn;
-  uintptr_t static jne_uireturn;
+  static uintptr_t breakercontrol_jmp_ret;
+  static uintptr_t jmp_bringer_ret;
+  static uintptr_t jne_bringer_ret;
+  static uintptr_t jmp_uireturn;
+  static uintptr_t jne_uireturn;
   static uintptr_t call_nero_creategauntlet;
 
-  uintptr_t static breaker_busy;
-  uintptr_t static buffered_breaker_input;
-  uintptr_t static primary_breaker;
-  uintptr_t static do_ui_update;
-  uintptr_t static secondary_breaker;
-  uintptr_t static switcher_mode;
-  uint32_t static breakaway_type;
-  uintptr_t static breakaway_button;
+  static uintptr_t breaker_busy;
+  static uintptr_t buffered_breaker_input;
+  static uintptr_t primary_breaker;
+  static uintptr_t do_ui_update;
+  static uintptr_t secondary_breaker;
+  static uintptr_t switcher_mode;
+  static uint32_t breakaway_type;
+  static uintptr_t breakaway_button;
   static bool force_primary_input;
 
   static bool fasterbreaker;
