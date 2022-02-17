@@ -1268,23 +1268,28 @@ void ModFramework::draw_panels()
     ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Trainer ? activeTabText : inactiveTabText);
     ImGui::Begin("Trainer", nullptr, panel_flags);
     ImGui::PopStyleColor();
+    static int selected = -1;
     {
-        if (ImGui::Button("Options"))
+
+        if (ImGui::Selectable("Options", selected == 1))
         {
             m_active_option_menu = OptionID_Settings;
             m_mods->set_focused_mod("None");
+            selected = 1;
         }
 
-        if (ImGui::Button("Credits"))
+        if (ImGui::Selectable("Credits", selected == 2))
         {
             m_active_option_menu = OptionID_Credits;
             m_mods->set_focused_mod("None");
+            selected = 2;
         }
 
-        if (ImGui::Button("License"))
+        if (ImGui::Selectable("License", selected == 3))
         {
             m_active_option_menu = OptionID_License;
             m_mods->set_focused_mod("None");
+            selected = 3;
         }
     }
     ImGui::End();
@@ -1347,13 +1352,13 @@ void ModFramework::draw_options()
                 break;
 
 	        case OptionID_Credits:
-                ImGui::TextWrapped("The almighty Darkness\n"
-                    "TheHitchhiker\n"
-                    "Siyan\n"
-                    "VPZadov\n"
-                    "Deepdarkkapustka\n"
-                    "Lidemi\n"
-                    "Dr. Penguin\n"
+                ImGui::TextWrapped("The Darkness\n\n"
+                    "The Hitchhiker\n\n"
+                    "Siyan\n\n"
+                    "VPZadov\n\n"
+                    "Deepdarkkapustka\n\n"
+                    "Lidemi\n\n"
+                    "Dr. Penguin\n\n"
 					"Special thanks to Praydog and Cursey for their awesome work on REFramework!");
                 break;
 
