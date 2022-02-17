@@ -66,6 +66,7 @@
         #include "mods/HUDOptions.hpp"
         #include "mods/CameraSettings.hpp"
         #include "mods/LandCancels.hpp"
+        #include "mods/InfHP.hpp"
     // Gameplay
         #include "mods/Reversals.hpp"
         #include "mods/NoJCCooldown.hpp"
@@ -247,6 +248,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<HUDOptions>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
+        m_mods.emplace_back(std::make_unique<InfHP>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<Reversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());

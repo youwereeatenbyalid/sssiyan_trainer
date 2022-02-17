@@ -251,6 +251,8 @@ set(MODS_SRC
     mods/DanteDtNoActivationCost.hpp
     mods/NoSlowmoOrHitstop.hpp 
     mods/NoSlowmoOrHitstop.cpp 
+    mods/InfHP.hpp 
+    mods/InfHP.cpp 
 
 )
 
