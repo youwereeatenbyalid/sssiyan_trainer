@@ -61,7 +61,7 @@ ModFramework::ModFramework()
     // Initializing the key bindings
     initialize_key_bindings();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     spdlog::set_level(spdlog::level::debug);
 #endif
 
@@ -214,7 +214,7 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_ButtonHovered] = ImVec4(0.29f, 0.55f, 0.80f, 0.50f);
     colors[ImGuiCol_ButtonActive] = ImVec4(0.29f, 0.55f, 0.80f, 1.00f);
     colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-    colors[ImGuiCol_HeaderHovered] = ImVec4(0.05f, 0.11f, 0.20f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.51f);
     colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
     colors[ImGuiCol_Separator] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
     colors[ImGuiCol_SeparatorHovered] = ImVec4(0.67f, 0.17f, 0.18f, 1.00f);
@@ -365,12 +365,16 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
 {
     cfg.set<bool>("HotkeyNotifications", m_is_notif_enabled);
     cfg.set<bool>("SaveAfterEachUIClose", m_save_after_close_ui);
+    cfg.set<bool>("LoadOnStartup", m_load_on_startup);
 }
 
 void ModFramework::load_trainer_settings(utility::Config& cfg)
 {
-    m_is_notif_enabled = cfg.get<bool>("HotkeyNotifications").value_or(false);
-    m_save_after_close_ui = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
+    m_load_on_startup = cfg.get<bool>("LoadOnStartup").value_or(true);
+    if (m_load_on_startup) {
+        m_is_notif_enabled = cfg.get<bool>("HotkeyNotifications").value_or(false);
+        m_save_after_close_ui = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
+    }
 }
 
 void ModFramework::queue_notification(const ImGuiToast& notif) {
@@ -558,9 +562,11 @@ void ModFramework::load_config()
 
     utility::Config cfg(CONFIG_FILENAME);
 
-    m_mods->load_mods(cfg);
-
     load_trainer_settings(cfg);
+
+    spdlog::info("Loaded traienr settings");
+
+	m_mods->load_mods(cfg);
 
     if (!KeyBinder::LoadAllBinds(true))
     {
@@ -839,7 +845,7 @@ bool ModFramework::initialize() {
         std::thread init_thread([this]() {
             m_mods = std::make_unique<Mods>();
 
-            auto e = m_mods->on_initialize();
+            auto e = m_mods->on_initialize(m_load_on_startup);
 
             if (e) {
                 if (e->empty()) {
@@ -1016,24 +1022,31 @@ void ModFramework::draw_ui() {
     const auto config_buttons_pos = ImGui::GetCursorPos();
     const auto window_pos = ImGui::GetWindowPos();
 
-    ImGui::SetCursorScreenPos({ window_pos.x + style.WindowPadding.x + 5.0f,  window_pos.y + style.WindowPadding.y + 12.0f });
+    UI::Vec2 settings_button_pos{ window_pos.x + style.WindowPadding.x + 5.0f,  window_pos.y + style.WindowPadding.y + 12.0f };
+
+    ImGui::SetCursorScreenPos(settings_button_pos);
 
     ImGui::PushStyleColor(ImGuiCol_Button, 0);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0);
 	if (m_is_d3d11) {
-        if (ImGui::ImageButton(m_icons.gearIconDX11, m_icons.gearIconDX11.GetSize(m_scale), 
-            { 0.0f, 0.0f }, { 1.0f, 1.0f }, -1, { 0.0f, 0.0f, 0.0f, 0.0f}, UI::BUTTONCOLOR))
+        if (ImGui::InvisibleButton("Settings", m_icons.gearIconDX11.GetSize(m_scale) + style.FramePadding * 2))
         {
             m_show_settings = !m_show_settings;
         }
+
+        ImGui::SetCursorScreenPos(settings_button_pos + style.FramePadding);
+        ImGui::Image(m_icons.gearIconDX11, m_icons.gearIconDX11.GetSize(m_scale), { 0, 0 }, { 1, 1 }, ImGui::IsItemHovered() ? UI::BUTTONCOLORHOVERED : UI::BUTTONCOLOR);
+
     } else
     {
-        if (ImGui::ImageButton(m_icons.gearIconDX12, m_icons.gearIconDX12.GetSize(m_scale), 
-            { 0.0f, 0.0f }, { 1.0f, 1.0f }, -1, { 0.0f, 0.0f, 0.0f, 0.0f }, UI::BUTTONCOLOR))
+        if (ImGui::InvisibleButton("Settings", m_icons.gearIconDX12.GetSize(m_scale) + style.FramePadding * 2))
         {
             m_show_settings = !m_show_settings;
         }
+
+        ImGui::SetCursorScreenPos(settings_button_pos + style.FramePadding);
+        ImGui::Image(m_icons.gearIconDX12, m_icons.gearIconDX12.GetSize(m_scale), { 0, 0 }, { 1, 1 }, ImGui::IsItemHovered() ? UI::BUTTONCOLORHOVERED : UI::BUTTONCOLOR);
     }
     ImGui::PopStyleColor(3);
 
@@ -1079,7 +1092,6 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetContentRegionAvail());
 
         ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.4f, &left, &right);
-        //ImGui::DockBuilderSplitNode(left, ImGuiDir_Up, 0.0f, &leftTop, &leftBottom);
 
         // Mods
         ImGui::DockBuilderDockWindow("Gameplay", left);
@@ -1096,6 +1108,7 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderFinish(dockSpaceId);
     }
 
+    ImGui::PushStyleColor(ImGuiCol_Header, 0);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
 
@@ -1129,7 +1142,7 @@ void ModFramework::draw_ui() {
 
     ImGui::End();
 
-    ImGui::PopStyleColor();
+    ImGui::PopStyleColor(2);
 
     // If we are binding a key
     if (m_kcw_buffers.drawWindow) {
@@ -1152,6 +1165,8 @@ void ModFramework::draw_panels()
     static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
 
     static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing;
+
+    ImGui::PushStyleColor(ImGuiCol_Header, { 0.26f, 0.59f, 0.98f, 0.31f });
 
     ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Gameplay ? activeTabText : inactiveTabText);
     ImGui::Begin("Gameplay", nullptr, panel_flags);
@@ -1327,6 +1342,8 @@ void ModFramework::draw_panels()
         }
     }
     ImGui::End();
+
+    ImGui::PopStyleColor();
 }
 
 void ModFramework::draw_options()
@@ -1376,7 +1393,7 @@ void ModFramework::draw_trainer_settings()
     }
 
     ImGui::SetNextWindowPos(ImVec2(m_window_pos.x + 25.0f, m_window_pos.y + 15.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
-    ImGui::SetNextWindowSize(ImVec2(500.0f, 600.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
+    ImGui::SetNextWindowSize(ImVec2(500.0f, 650.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
 
     static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
     static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
@@ -1402,7 +1419,8 @@ void ModFramework::draw_trainer_settings()
         UI::KeyBindButton("Close Menu Key", "Close Menu Key", m_kcw_buffers, 1.0f, true, UI::BUTTONCOLOR);
 
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
-        ImGui::Checkbox("Save Settings Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+        ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
+        ImGui::Checkbox("Load Config Automatically When The Game Launches (On By Default)", &m_load_on_startup);
 
         ImGui::Spacing();
         if (ImGui::TreeNodeEx("About")) {

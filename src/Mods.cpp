@@ -363,7 +363,7 @@ Mods::Mods()
 #endif
 }
 
-std::optional<std::string> Mods::on_initialize() const {
+std::optional<std::string> Mods::on_initialize(const bool& load_configs) const {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_initialize()", mod->get_name().data());
 
@@ -376,7 +376,10 @@ std::optional<std::string> Mods::on_initialize() const {
         Mod::patterns->save();
     Mod::patterns->free();
 
-    load_mods();
+    if (load_configs)
+    {
+        load_mods();
+    }
 
 	m_focused_mod = "";
     return std::nullopt;

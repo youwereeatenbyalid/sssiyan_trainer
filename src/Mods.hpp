@@ -8,7 +8,7 @@ public:
     Mods();
     virtual ~Mods() {}
 
-    std::optional<std::string> on_initialize() const;
+    std::optional<std::string> on_initialize(const bool& load_configs) const;
 
     void on_frame() const;
     void on_draw_ui() const;
