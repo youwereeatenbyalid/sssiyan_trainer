@@ -154,7 +154,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	xypos_teleport(vergil, curType, xTmp, yTmp, pPos, trickVec.x, trickVec.y, trickVecLen);
 	targetPos.x = xTmp;
 	targetPos.y = yTmp;
-	float oldTargetZ = targetPos.z;
+	float oldTargetZ = targetPos.z + colliderZUp;
 	targetPos.z += teleportZOffs;
 
 	auto cachedCharController = *(uintptr_t*)(vergil + 0x2F0);
