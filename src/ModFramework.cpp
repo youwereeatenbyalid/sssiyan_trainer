@@ -1375,7 +1375,8 @@ void ModFramework::draw_options()
         } else
         {
             if (m_error.empty() && m_game_data_initialized) {
-                ImGui::TextWrapped("Select something!");
+                ImGui::TextWrapped("Welcome to SSSiyan's collaborative cheat trainer!\n"
+                    "Click any cheat marked with (+) to view additional options.");
             }
             else if (!m_game_data_initialized) {
                 ImGui::TextWrapped("Trainer is currently initializing...");
