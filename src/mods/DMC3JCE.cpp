@@ -303,9 +303,9 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = vergiltrick;
-	m_full_name_string = "Enhanced Human JCE Mechanic (DMC3 JCE) (+)";
+	m_full_name_string = "DMC3 Judgement Cut End) (+)";
 	m_author_string = "VPZadov";
-	m_description_string = "Change duration, amount of SDT expended to perform JCE and overall virgin DMC5 human JCE to chad DMC3 boss Vergil JCE. Can be executed without full STD bar. This mod can crash the game :(";
+	m_description_string = "Replaces Vergil's Judgment Cut End in human form with his Judgement Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.\nWARNING: This mod can crash the game.";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
 
 	jceTimerStaticBase = dmc5Base + 0x45F0390;//0x45F0360;
@@ -443,17 +443,17 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 
 void DMC3JCE::on_draw_ui()
 {
-	ImGui::TextWrapped("If after Vergil's disappear, jc doesnt start spawn and cheat has been disabled - pointer to jc wasn't loaded correctly. Restart the mission.");
+	ImGui::TextWrapped("If after Vergil disappears, JdC's do not start spawning and cheat has been disabled, the pointer to the JdC shell wasn't loaded correctly. Restart the mission.");
 	ImGui::Separator();
 	ImGui::Spacing();
-	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUsingDefaultJce);
+	ImGui::Checkbox("Use default JCE in human form (no DMC3 JCE).", &isUsingDefaultJce); //what is the point of this??
 	ImGui::Separator();
-	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
+	ImGui::TextWrapped("Random mode uses Just Judgement Cut projectile and increased damage. Tracking mode uses default Judgement Cut projectile and damage. The modes also use different execution times.");
 	ImGui::Separator();
-	ImGui::TextWrapped("SDT cost for performing JCE in human form:");
+	ImGui::TextWrapped("SDT cost to perform JCE in human form:");
 	ImGui::SliderFloat("##subSdtSlider", &humanJCECost, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::Spacing();
-	ImGui::TextWrapped("Minimum sdt to perform JCE in human form:");
+	ImGui::TextWrapped("Minimum SDT to perform JCE in human form:");
 	ImGui::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
 
 	//--------------This should be removed----------------//
@@ -472,18 +472,18 @@ void DMC3JCE::on_draw_ui()
 	if( ImGui::RadioButton("Random", (int*)&jcTypeUi, 0) )
 		jceController->set_jce_type(jcTypeUi);
 	ImGui::SameLine(); ImGui::Spacing();
-	if(ImGui::RadioButton("Track", (int*)&jcTypeUi, 1))
+	if(ImGui::RadioButton("Tracking", (int*)&jcTypeUi, 1))
 		jceController->set_jce_type(jcTypeUi);
 
 	switch (jceController->get_jce_type())
 	{
 		case JCEController::Type::Random:
 		{
-			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game:");
+			ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
 			ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##0"))
 				jceController->set_rndspawn_delay(rndDelay);
-			ImGui::TextWrapped("Interval between spawn on lock on position:");
+			ImGui::TextWrapped("Interval between spawning a Judgement Cut on the lock-on target:");
 			ImGui::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::TextWrapped("Execution duration:");
 			ImGui::SliderFloat("##rndExeTime", &rndExeDuration, 4.0f, 8.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
@@ -492,7 +492,7 @@ void DMC3JCE::on_draw_ui()
 		}
 		case JCEController::Type::Track:
 		{
-			ImGui::TextWrapped("Delay between each jc spawn (ms). Low value can crash the game and make this OP as fuck vs single target:");
+			ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
 			ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Apply delay settings ##1"))
 				jceController->set_trackspawn_delay(trackDelay);
@@ -507,19 +507,19 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Separator();
 	//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);
 	
-	ImGui::TextWrapped("If smth goes wrong(TM) and 3 JCE execution doesn't stop after Vergil appears, press this:");
-	if (ImGui::Button("Stop 3 jce"))
+	ImGui::TextWrapped("If something goes wrong(TM) and JCE execution doesn't stop after Vergil appears, press this:");
+	if (ImGui::Button("Stop JCE"))
 	{
 		isJceRunning = false;
 		jceController->stop_jce();
 		
 	}
-	ImGui::Separator();
-	ImGui::TextWrapped("Start spawning jce. Keep this here only for fun.");
-	if (ImGui::Button("Start 3 jce"))
-	{
-		jceController->start_jce();
-	}
+	//ImGui::Separator();
+	//ImGui::TextWrapped("Start spawning jce. Keep this here only for fun.");
+	//if (ImGui::Button("Start 3 jce"))
+	//{
+		//jceController->start_jce();
+	//}
 }
 
 void DMC3JCE::init_check_box_info()
