@@ -266,37 +266,37 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyStepBanHeight>());
         m_mods.emplace_back(std::make_unique<DisableEnemyAI>());
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
-    //    m_mods.emplace_back(std::make_unique<ChargeChecker>());
-    //    m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());
-    //    m_mods.emplace_back(std::make_unique<WeightReset>());
-    //    m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
-    //    m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
-    //// Nero
-    //    m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
-    //    m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
-    //    m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
-    //    m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
-    //    m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
-    //    m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
-    //    m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
-    //    m_mods.emplace_back(std::make_unique<NoDTCooldown>());
-    //    m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
-    //    m_mods.emplace_back(std::make_unique<NeroInfCalibur>());
-    //// Dante
-    //    m_mods.emplace_back(std::make_unique<BypassBPCav>());
-    //    m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
-    //    m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
-    //    m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
-    //    m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
-    //    m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
-    //    m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
-    //    m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
-    //    m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
-    //    m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
-    //    m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
-    //    m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
-    //    m_mods.emplace_back(std::make_unique<DanteRedlineCav>());
-    //    m_mods.emplace_back(std::make_unique<DanteSDTRework>());
+        m_mods.emplace_back(std::make_unique<ChargeChecker>());
+        m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());
+        m_mods.emplace_back(std::make_unique<WeightReset>());
+        m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
+        m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
+    // Nero
+        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
+        m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
+        m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
+        m_mods.emplace_back(std::make_unique<NeroSwapSidesteps>());
+        m_mods.emplace_back(std::make_unique<NeroInfPunchline>());
+        m_mods.emplace_back(std::make_unique<NeroSkipCS2>());
+        m_mods.emplace_back(std::make_unique<NoDTCooldown>());
+        m_mods.emplace_back(std::make_unique<NeroAlwaysInitialDT>());
+        m_mods.emplace_back(std::make_unique<NeroInfCalibur>());
+    // Dante
+        m_mods.emplace_back(std::make_unique<BypassBPCav>());
+        m_mods.emplace_back(std::make_unique<DanteMaxSDT>());
+        m_mods.emplace_back(std::make_unique<DanteQuickSDT>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysQ4SDT>());
+        m_mods.emplace_back(std::make_unique<DanteInfQ4ExitWindow>());
+        m_mods.emplace_back(std::make_unique<DanteTwoTricks>());
+        m_mods.emplace_back(std::make_unique<DanteAlwaysOvertop>());
+        m_mods.emplace_back(std::make_unique<DanteInfIgnition>());
+        m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
+        m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
+        m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
+        m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
+        m_mods.emplace_back(std::make_unique<DanteRedlineCav>());
+        m_mods.emplace_back(std::make_unique<DanteSDTRework>());
     // V
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilAirTrickNoSS>());

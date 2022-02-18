@@ -134,7 +134,7 @@ namespace GameFunctions
 		template <typename T, size_t offsCount>
 		volatile T* get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false)
 		{
-			auto res = PtrController::get_ptr<uintptr_t>(base, offsets, true, isDerefedBase);
+			auto res = PtrController::get_ptr<uintptr_t>(base, offsets, isDerefedBase);
 			if(!res.has_value())
 				return nullptr;
 			return (volatile T*)res.value();
