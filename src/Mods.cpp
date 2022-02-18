@@ -38,9 +38,10 @@
         #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
-        //#include "mods/DisableBreakaway.hpp"
+        #include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
+		#include "mods/LongerRagtimeBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
         #include "mods/DTWingsOnly.hpp"
@@ -220,9 +221,10 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
-        //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
+		m_mods.emplace_back(std::make_unique<LongerRagtimeBubble>());
         m_mods.emplace_back(std::make_unique<ExceedValue>());
         m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
         m_mods.emplace_back(std::make_unique<DTWingsOnly>());
