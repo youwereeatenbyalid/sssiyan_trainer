@@ -472,7 +472,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 // void PlayerTracker::on_config_save(utility::Config &cfg) {}
 // do something every frame
 void PlayerTracker::on_frame() {
-	auto updatetime = GameFunctions::PtrController::get_ptr<float>(PlayerTracker::playermanager, updatetime_array, false, false);
+	auto updatetime = GameFunctions::PtrController::get_ptr_val<float>(PlayerTracker::playermanager, updatetime_array, false);
 	PlayerTracker::ingameplay = (updatetime.has_value() && updatetime.value() > 2.0);
 }
 

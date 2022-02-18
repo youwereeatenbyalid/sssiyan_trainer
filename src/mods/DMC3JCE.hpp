@@ -201,7 +201,7 @@ public:
 			int lvl = 1;
 			bool isBadPtr = false;
 			std::optional<bool> isPause;
-			auto jcPrefab = func::PtrController::get_ptr<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, false , true); 
+			auto jcPrefab = func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true); 
 			switch (jceType)
 			{
 				case JCEController::Random:
@@ -253,10 +253,9 @@ public:
 								}
 							}
 						}*/
-
 						while (get_condition(isBadPtr))
 						{
-							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst);
+							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
 							if (!isPause.has_value())
 							{
 								isBadPtr = true;
@@ -337,7 +336,7 @@ public:
 						uintptr_t jcShell;
 						while (get_condition(isBadPtr))
 						{
-							isPause = func::PtrController::get_ptr<bool>(isPauseBase, isPauseOffst);
+							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
 							if (!isPause.has_value())
 							{
 								isBadPtr = true;

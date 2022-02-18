@@ -447,6 +447,7 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Separator();
 	ImGui::Spacing();
 	ImGui::Checkbox("Use default jce in human form (no dmc3 jce).", &isUsingDefaultJce);
+	ImGui::Separator();
 	ImGui::TextWrapped("Random mode uses perfect jc shell and increased damage. Track mode uses default jc shell and damage. Modes also uses different execution time.");
 	ImGui::Separator();
 	ImGui::TextWrapped("SDT cost for performing JCE in human form:");
