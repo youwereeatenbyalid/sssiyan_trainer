@@ -1,6 +1,6 @@
 #include "BreakerSwitcher.hpp"
 #include "mods/PlayerTracker.hpp"
-uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpad,Mod::deviltrigger,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::lefttrigger,Mod::resetcamera,Mod::SDT };
+uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::resetcamera,Mod::SDT };
 int breakaway_index = {0};
 uintptr_t BreakerSwitcher::breakersize_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::nextbreaker_jmp_ret{NULL};
@@ -859,9 +859,9 @@ ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hol
 if (BreakerSwitcher::breakaway_type == 1){
     if (ImGui::Combo("Override button", &breakaway_index,
         "Sword\0Gun\0Jump\0Taunt\0"
-        "Lock-on\0Change Target\0Breakaway\0Devil Trigger\0"
+        "Lock-on\0Change Target\0"
         "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"
-        "Breaker Action\0Exceed\0Buster\0Reset Camera\0")) {
+        "Breaker Action\0Exceed\0Reset Camera\0")) {
         BreakerSwitcher::breakaway_button = bsinputs[breakaway_index];
     }
 }
