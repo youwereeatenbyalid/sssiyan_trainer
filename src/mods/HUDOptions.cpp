@@ -4,11 +4,13 @@
 uintptr_t HUDOptions::jmp_ret{NULL};
 uintptr_t HUDOptions::jmp_ret2{ NULL };
 uintptr_t HUDOptions::jmp_ret3{ NULL };
+uintptr_t HUDOptions::jmp_ret4{ NULL };
 bool HUDOptions::cheaton{NULL};
 bool hideeverything;
 bool hidehp;
 bool hideorbs;
 bool hidestyle;
+bool hidetimer;
 
 bool danteWeaponUnhide;
 bool vergilWeaponUnhide;
@@ -101,6 +103,25 @@ static naked void newmem_detour_vergil() { // special snowflake
     }
 }
 
+static naked void newmem_detour_timer() {
+    __asm {
+        cmp byte ptr [HUDOptions::cheaton], 1
+        jne code
+        cmp byte ptr [hideeverything], 1
+        je cheatcode
+        cmp byte ptr [hidetimer], 1
+        jne code
+    cheatcode:
+        mov [rsp+0x58], rsi
+        jmp qword ptr[HUDOptions::jmp_ret4]
+    code:
+        cmp byte ptr [rdx+0x00000108], 00
+        mov [rsp+0x58], rsi
+        setne sil
+        jmp qword ptr[HUDOptions::jmp_ret4]
+    }
+}
+
 // clang-format on
 
 void HUDOptions::init_check_box_info() {
@@ -123,12 +144,12 @@ std::optional<std::string> HUDOptions::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = patterns->find_addr(base, "89 83 C4 00 00 00 F3");
   if (!addr) {
-    return "Unable to find HUDOptions pattern.";
+    return "Unable to find HUDOptions pattern1.";
   }
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize HUDOptions";
+    return "Failed to initialize HUDOptions1";
   }
 
   // WEAPON WHEELS
@@ -151,21 +172,34 @@ std::optional<std::string> HUDOptions::on_initialize() {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize donthideweaponandgun_vergil";
   }
+
+  auto addr4 = patterns->find_addr(base, "80 BA 08 01 00 00 00 48 89");
+  if (!addr4) {
+      return "Unable to find donthideweaponandgun hidetimer.";
+  }
+  if (!install_hook_absolute(addr4.value(), m_function_hook4, &newmem_detour_timer, &jmp_ret4, 16)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize hidetimer";
+  }
+
   return Mod::on_initialize();
 }
 
 void HUDOptions::on_config_load(const utility::Config& cfg) {
-  hidehp         = cfg.get<bool>("hide_hp_hud").value_or(false);
-  hideorbs       = cfg.get<bool>("hide_orbs_hud").value_or(false);
-  hidestyle      = cfg.get<bool>("hide_style_hud").value_or(false);
-  hideeverything = cfg.get<bool>("hide_all_hud").value_or(false);
-  danteWeaponUnhide = cfg.get<bool>("never_hide_dante_weapon_hud").value_or(false);
+  hidehp             = cfg.get<bool>("hide_hp_hud").value_or(false);
+  hideorbs           = cfg.get<bool>("hide_orbs_hud").value_or(false);
+  hidestyle          = cfg.get<bool>("hide_style_hud").value_or(false);
+  hidetimer          = cfg.get<bool>("hide_timer").value_or(false);
+  hideeverything     = cfg.get<bool>("hide_all_hud").value_or(false);
+  danteWeaponUnhide  = cfg.get<bool>("never_hide_dante_weapon_hud").value_or(false);
   vergilWeaponUnhide = cfg.get<bool>("never_hide_vergil_weapon_hud").value_or(false);
 }
 void HUDOptions::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("hide_hp_hud", hidehp);
   cfg.set<bool>("hide_orbs_hud", hideorbs);
   cfg.set<bool>("hide_style_hud", hidestyle);
+  cfg.set<bool>("hide_timer", hidetimer);
   cfg.set<bool>("hide_all_hud", hideeverything);
   cfg.set<bool>("never_hide_dante_weapon_hud", danteWeaponUnhide);
   cfg.set<bool>("never_hide_vergil_weapon_hud", vergilWeaponUnhide);
@@ -175,6 +209,7 @@ void HUDOptions::on_draw_ui() {
   ImGui::Checkbox("Hide HP", &hidehp);
   ImGui::Checkbox("Hide Orbs", &hideorbs);
   ImGui::Checkbox("Hide Style", &hidestyle);
+  ImGui::Checkbox("Hide BP Timer", &hidetimer);
   ImGui::Checkbox("Hide all optional HUD", &hideeverything);
   ImGui::Separator();
   ImGui::Checkbox("Never Hide Dante's Weapon Wheels", &danteWeaponUnhide);

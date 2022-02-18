@@ -13,6 +13,7 @@ public:
   static uintptr_t jmp_ret;
   static uintptr_t jmp_ret2;
   static uintptr_t jmp_ret3;
+  static uintptr_t jmp_ret4;
 
   static bool cheaton;
 
@@ -36,4 +37,5 @@ private:
   std::unique_ptr<FunctionHook> m_function_hook;
   std::unique_ptr<FunctionHook> m_function_hook2;
   std::unique_ptr<FunctionHook> m_function_hook3;
+  std::unique_ptr<FunctionHook> m_function_hook4;
 };
