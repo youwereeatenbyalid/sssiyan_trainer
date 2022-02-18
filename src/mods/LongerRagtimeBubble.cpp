@@ -10,7 +10,7 @@ float LongerRagtimeBubble::decrementamount{0.50};
   static naked void newmem_detour() {
 __asm {
   validation:
-    cmp [PlayerTracker::playerid], 1 //change this to the char number obviously
+    cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
     jne code
     cmp byte ptr [LongerRagtimeBubble::cheaton], 1
     je cheatcode
@@ -44,9 +44,9 @@ std::optional<std::string> LongerRagtimeBubble::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &LongerRagtimeBubble::cheaton;
   m_on_page = nero;
-  m_full_name_string     = "LongerRagtimeBubble Full Name";
-  m_author_string        = "Author";
-  m_description_string   = "This is the description of LongerRagtimeBubble.";
+  m_full_name_string     = "Longer Ragtime Bubbles";
+  m_author_string        = "The HitchHiker";
+  m_description_string   = "Nero's Ragtime Bubbles will last longer.";
 
   set_up_hotkey();
 
@@ -77,5 +77,5 @@ void LongerRagtimeBubble::on_config_save(utility::Config &cfg) {
 //void LongerRagtimeBubble::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void LongerRagtimeBubble::on_draw_ui() {
-    ImGui::SliderFloat("Additional Time: 0 is vanilla, 1 is infinite", &decrementamount, 0, 1, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::SliderFloat("Additional Time: 0 is vanilla, 1 is infinite", &decrementamount, 0, 1, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 }
