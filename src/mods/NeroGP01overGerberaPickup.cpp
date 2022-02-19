@@ -42,7 +42,7 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
    m_is_enabled = &NeroGP01overGerberaPickup::cheaton;
    m_on_page    = bloodypalace;
-   m_full_name_string     = "GP01 over Gerbera Pickup";
+   m_full_name_string     = "GP01 Over Gerbera Pickup";
    m_author_string        = "Dr. Penguin, Siyan";
    m_description_string   = "Replace all Gerbera picked up in BP with GP01.";
 

@@ -22,8 +22,8 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilefxsettings;
-	m_full_name_string = "Stay visible on trick dodge";
+	m_on_page = vergilvfxsettings;
+	m_full_name_string = "Remove Invisibility On Trick Dodge";
 	m_author_string = "VPZadov";
 	m_description_string = "Vergil stays visible while trick dodging.";
 

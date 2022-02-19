@@ -74,7 +74,7 @@ namespace GameFunctions
 	private:
 		static bool is_bad_ptr(uintptr_t ptr)
 		{
-			return (bool)IsBadReadPtr((void*)ptr, 0x8);// not thread safe?
+			return (bool)IsBadReadPtr((void*)ptr, 0x8);
 		}
 
 	public:
@@ -85,9 +85,10 @@ namespace GameFunctions
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
 		/// <param name="offsets">Other offsets.</param>
 		/// <param name="get_addr">Set true if u don't want to get ptr value.</param>
+		/// <param name="isDerefedBase">Is dereference base passed.</param>
 		/// <returns></returns>
-		template <typename T, size_t offsCount>
-		static std::optional<T> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool get_addr = false, bool isDerefedBase = false)
+		template <size_t offsCount>
+		static std::optional<uintptr_t> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool isDerefedBase = false)
 		{
 			int count = offsets.size() - 1;
 			if (!is_bad_ptr(base))
@@ -105,16 +106,59 @@ namespace GameFunctions
 				}
 				if (!is_bad_ptr((base + offsets[count])))
 				{
-					if (!get_addr)
-					{
-						T res = *(T*)(base + offsets[count]);
-						return std::optional<T>(res);
-					}
-					else
-						return std::optional<T>(base);
+					return std::optional<uintptr_t>(base + offsets[count]);
 				}
 			}
 			return std::nullopt;
+		}
+
+		template<typename T, size_t offsCount>
+		static std::optional<T> get_ptr_val(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, bool isDerefedBase = false)
+		{
+			auto addr = PtrController::get_ptr(base, offsets, isDerefedBase);
+			if(!addr)
+				return std::nullopt;
+			if(is_bad_ptr(addr.value()))
+				return std::nullopt;
+			return std::make_optional<T>(*(T*)(addr.value()));
+		}
+
+		/// <summary>
+		/// Try to get volatile pointer to data via offsets.
+		/// </summary>
+		/// <typeparam name="T">Pointer type</typeparam>
+		/// <param name="offsets">Other offsets</param>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <returns>Returns pointer if it's valid, otherwise nullptr.</returns>
+		template <typename T, size_t offsCount>
+		volatile T* get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false)
+		{
+			auto res = PtrController::get_ptr<uintptr_t>(base, offsets, isDerefedBase);
+			if(!res.has_value())
+				return nullptr;
+			return (volatile T*)res.value();
+		}
+
+		/// <summary>
+		/// Try to write to pointer
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="offsets">Other offsets.</param>
+		/// <param name="val">New *ptr value</param>
+		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <returns>Return true if success, false if ptr isn't valid</returns>
+		template <typename T, size_t offsCount>
+		static bool try_to_write(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, T val, bool isDerefedBase = false)
+		{
+			auto ptr = PtrController::get_ptr<T>(offsets, base, isDerefedBase);
+			if (ptr.has_value())
+			{
+				*(ptr.value()) = val;
+				return true;
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -155,8 +199,7 @@ namespace GameFunctions
 	{
 	protected:
 		uintptr_t fAddr;
-		//ptr to some managed stuff idk. Sometimes it can be be null, but some times not. In second case u need check what argument function use in-game and make ptr scan for it.
-		uintptr_t rcx = 0;
+		uintptr_t threadContext = 0;
 
 	public:
 
@@ -172,16 +215,10 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		//virtual std::optional<uintptr_t> get_thread_context() { return std::nullopt; }
-
-		virtual uintptr_t get_cur_rcx() const { return rcx; }
-
 		virtual uintptr_t get_thread_context()
 		{
 			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context());
 		}
-
-		virtual void set_rcx(uintptr_t param) { rcx = param; }
 
 		virtual T __cdecl invoke() = 0;
 		virtual T __cdecl operator()()

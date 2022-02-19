@@ -202,6 +202,7 @@ namespace UI {
 	namespace WRL = Microsoft::WRL;
 
 	const ImVec4 BUTTONCOLOR = { 0.501f, 0.929f, 0.929f, 1.0f };
+	const ImVec4 BUTTONCOLORHOVERED = { 0.694f, 0.952f, 0.952f, 1.0f };
 
 	unsigned int stb_decompress_length(const unsigned char *input);
 	unsigned int stb_decompress(unsigned char *output, const unsigned char *i, unsigned int length);

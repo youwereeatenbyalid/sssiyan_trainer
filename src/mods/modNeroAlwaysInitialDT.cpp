@@ -41,7 +41,7 @@ std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   m_is_enabled = &NeroAlwaysInitialDT::cheaton;
   m_on_page    = nero;
 
-  m_full_name_string   = "Nero Always uses Initial DT Animation";
+  m_full_name_string   = "Forced Initial DT Animation";
   m_author_string      = "SSSiyan";
   m_description_string = "Note: the voice line will only play the first time you use this each run of M20.";
 

@@ -18,12 +18,7 @@ namespace GameFunctions
 
 		uintptr_t get_thread_context() override
 		{
-			throw std::bad_function_call();
-		}
-
-		void set_rcx(uintptr_t rcx) override
-		{
-			throw std::bad_function_call();
+			GameFunc::get_thread_context();
 		}
 
 	public:
@@ -118,20 +113,20 @@ namespace GameFunctions
 
 		bool check_ptrs()
 		{
-			if (!IsBadReadPtr((void*)rcx, 8) && !IsBadReadPtr(corrector, 8))
+			if (!IsBadReadPtr((void*)threadContext, 8) && !IsBadReadPtr(corrector, 8))
 				return true;
 			return false;
 		}
 
-		void check_rcx()
+		void check_thread_context()
 		{
-			if (rcx == 0)
-				rcx = get_thread_context();
+			if (threadContext == 0)
+				threadContext = get_thread_context();
 		}
 
 		bool full_check()
 		{
-			check_rcx();
+			check_thread_context();
 			return check_ptrs();
 		}
 
@@ -144,6 +139,7 @@ namespace GameFunctions
 			def_stop_internal = (f_stop_internal)stopInternalAddr;
 			restartAddr += fAddr;
 			def_restart = (f_restatrt)(restartAddr);
+			threadContext = get_thread_context();
 		}
 
 		PositionErrorCorrector(void* correctorObj) : PositionErrorCorrector()
@@ -158,8 +154,9 @@ namespace GameFunctions
 
 		void set_position(Vec3 newPos)
 		{
+			threadContext = get_thread_context();
 			if(full_check())
-				set_pos((void*)rcx, corrector, newPos);
+				set_pos((void*)threadContext, corrector, newPos);
 		}
 
 		void set_position(void *correctorObj, Vec3 newPos)
@@ -170,8 +167,9 @@ namespace GameFunctions
 
 		void stop_internal()
 		{
+			threadContext = get_thread_context();
 			if(full_check())
-				def_stop_internal((void*)rcx, corrector);
+				def_stop_internal((void*)threadContext, corrector);
 		}
 
 		void stop_internal(void *correctorObj)
@@ -182,8 +180,9 @@ namespace GameFunctions
 
 		void restart()
 		{
+			threadContext = get_thread_context();
 			if(full_check())
-				def_restart((void*)rcx, corrector);
+				def_restart((void*)threadContext, corrector);
 		}
 
 		void restart(void *correctorObj)

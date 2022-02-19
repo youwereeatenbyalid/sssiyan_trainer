@@ -35,9 +35,9 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &NothingCancelsBubble::cheaton;
   m_on_page    = nero;
-  m_full_name_string     = "Don't pop ragtime bubble.";
+  m_full_name_string     = "Don't Pop Ragtime Bubble";
   m_author_string        = "SSSiyan";
-  m_description_string   = "Prevents ragtime bubble from being popped prematurely when breaking the ragtime breaker.";
+  m_description_string   = "Prevents ragtime bubble from being destroyed prematurely when breaking the ragtime breaker.";
 
   set_up_hotkey();
 

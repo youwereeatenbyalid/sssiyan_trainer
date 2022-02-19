@@ -18,14 +18,14 @@ private:
 		std::stringstream stream(address);
 		stream >> std::hex >> ret;
 		return ret;
-	};
+	}
 
 	std::string to_hex_str(uintptr_t num)
 	{
 		std::stringstream stream;
 		stream << std::hex << num;
 		return stream.str();
-	};
+	}
 
 	void load()
 	{
@@ -33,7 +33,7 @@ private:
 			return;
 		patternsCfg->load();
 		isInitViaPatternsList = patternsCfg->get<bool>(listInitKey).value_or(true);
-	};
+	}
 
 	void add(uintptr_t offs, const std::string& pattern)
 	{
@@ -41,7 +41,7 @@ private:
 			return;
 		patternsCfg->set(pattern, to_hex_str(offs));
 		IsChangesWasMade = true;
-	};
+	}
 
 public:
 	InitPatternsManager(const char* fileName, const char* initKey) : patternsCfg(new utility::Config(fileName)), listInitKey(initKey)
@@ -49,7 +49,7 @@ public:
 		if(patternsCfg->get_key_values().empty())
 			isEmptyFile = true;
 		isInitViaPatternsList = patternsCfg->get<bool>(initKey).value_or(true);
-	};
+	}
 
 	~InitPatternsManager() { free(); };
 
@@ -71,18 +71,18 @@ public:
 				add(res.value() - uintptrBase, pattern);
 		}
 		return res;
-	};
+	}
 
 	void save()
 	{
 		if (patternsCfg == nullptr)
 			return;
 		patternsCfg->save();
-	};
+	}
 
-	bool is_init_by_patt_lst() const noexcept { return isInitViaPatternsList; };
+	bool is_init_by_patt_lst() const noexcept { return isInitViaPatternsList; }
 
-	bool is_init() const noexcept { return patternsCfg != nullptr; };
+	bool is_init() const noexcept { return patternsCfg != nullptr; }
 
 	bool is_changed() const noexcept { return IsChangesWasMade; }
 
@@ -91,5 +91,5 @@ public:
 		if(patternsCfg != nullptr)
 			delete patternsCfg;
 		patternsCfg = nullptr;
-	};
+	}
 };

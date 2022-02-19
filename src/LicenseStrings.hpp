@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 namespace license {
-    static constexpr auto glm = 
+    static constexpr auto glm =
 R"(================================================================================
 OpenGL Mathematics (GLM)
 --------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ namespace license {
     static constexpr auto imgui =
 R"(The MIT License (MIT)
 
-Copyright (c) 2014-2019 Omar Cornut
+Copyright (c) 2014-2022 Omar Cornut
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -86,7 +86,7 @@ SOFTWARE.
 
 namespace license {
     static constexpr auto minhook =
-        R"(MinHook - The Minimalistic API Hooking Library for x64/x86
+R"(MinHook - The Minimalistic API Hooking Library for x64/x86
 Copyright (C) 2009-2017 Tsuda Kageyu.
 All rights reserved.
 
@@ -172,7 +172,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace license {
     static constexpr auto spdlog =
-        R"(The MIT License (MIT)
+R"(The MIT License (MIT)
 
 Copyright (c) 2016 Gabi Melman.                                       
 
@@ -193,5 +193,63 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+)";
+}
+
+namespace license
+{
+    static constexpr auto ref =
+R"(MIT License
+
+Copyright (c) 2019 praydog
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+    © 2022 GitHub, Inc.
+
+    Terms
+)";
+}
+
+namespace license
+{
+    static constexpr auto jsonstthm =
+R"(MIT License
+
+Copyright (c) 2016 Thibault Hennequin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 )";
 }

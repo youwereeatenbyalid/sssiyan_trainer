@@ -2,6 +2,7 @@
 #include "GameInput.hpp"
 #include "mods/PlayerTracker.hpp"
 #include "mods/BreakerSwitcher.hpp"
+#include "mods/HoldToMash.hpp"
 uintptr_t GameInput::validcontrol_jmp_ret{NULL};
 uintptr_t GameInput::hold_jmp_ret{NULL};
 uintptr_t GameInput::clearhold_jmp_ret{NULL};
@@ -65,6 +66,23 @@ static naked void hold_detour() {
         jmp qword ptr [GameInput::hold_jmp_ret]
 
     charactercompare:
+        cmp [PlayerTracker::playerid], 1 //go to dante compare
+        je dantecompare
+        jmp code
+
+    dantecompare:
+        cmp byte ptr [HoldToMash::cheaton], 1 //check if hold to mash
+        jne code
+        cmp r15, 1 //check if button held
+        jne code
+        cmp rsi, 2//check if gun button
+        jne code
+        mov r8, [PlayerTracker::danteentity]
+        cmp dword ptr [r8+0x1A54], 8 //check if active action is ebony/ivory
+        jne code
+        or [rbx+0x48], rsi //add gun value to press?
+        jmp code
+    wrapup:
         pop r15
         pop r14
         pop r13

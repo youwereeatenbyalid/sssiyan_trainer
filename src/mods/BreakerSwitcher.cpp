@@ -1,6 +1,6 @@
 #include "BreakerSwitcher.hpp"
 #include "mods/PlayerTracker.hpp"
-uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpad,Mod::deviltrigger,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::lefttrigger,Mod::resetcamera,Mod::SDT };
+uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::resetcamera,Mod::SDT };
 int breakaway_index = {0};
 uintptr_t BreakerSwitcher::breakersize_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::nextbreaker_jmp_ret{NULL};
@@ -678,7 +678,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   m_on_page    = breaker;
 
   m_full_name_string     = "Breaker Switcher (+)";
-  m_author_string        = "The HitchHiker (original version by Nino)";
+  m_author_string        = "The HitchHiker (original version by Nino)\n Disable Breakaway made with assistance from Lidemi";
   m_description_string   = "Make sure your d-pad is bound to breakaway, then "
                          "press a button on the d-pad to switch breakers.";
 
@@ -760,12 +760,12 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
       }, OnState_Press);
 
 
-  auto breakersize_addr = utility::scan(base, "8B 8E CC 17 00 00 48 85");
-  auto nextbreaker_addr = utility::scan(base, "4C 63 60 20 48 85 D2");
-  auto NeroUIOverride_addr = utility::scan(base, "0F 85 DC 02 00 00 48 8B 87 08");
-  auto breakerinputcontrol_addr = utility::scan(base, "41 8D 41 FF 48 8B FA");
-  auto call_nero_creategauntlet_addr = utility::scan(base, "C3 CC CC 40 53 56 41 55");
-  auto bringerinputcontroller_addr = utility::scan(base, "75 4E 80 BA C2 18 00 00 00");
+  auto breakersize_addr = patterns->find_addr(base, "8B 8E CC 17 00 00 48 85");
+  auto nextbreaker_addr = patterns->find_addr(base, "4C 63 60 20 48 85 D2");
+  auto NeroUIOverride_addr = patterns->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
+  auto breakerinputcontrol_addr = patterns->find_addr(base, "41 8D 41 FF 48 8B FA");
+  auto call_nero_creategauntlet_addr = patterns->find_addr(base, "C3 CC CC 40 53 56 41 55");
+  auto bringerinputcontroller_addr = patterns->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
 
 
   BreakerSwitcher::call_nero_creategauntlet = call_nero_creategauntlet_addr.value()+0x3;
@@ -855,13 +855,13 @@ void BreakerSwitcher::on_draw_ui() {
 //ImGui::InputInt("breaker right", (int*)&BreakerSwitcher::breakers[3]);
 ImGui::Combo("Breaker Type", (int*)&BreakerSwitcher::switcher_mode,"Off\0Switcher\0Cycler\0");
 
-ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold Breaker\0On\0");
+ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold button to override\0On\0");
 if (BreakerSwitcher::breakaway_type == 1){
     if (ImGui::Combo("Override button", &breakaway_index,
         "Sword\0Gun\0Jump\0Taunt\0"
-        "Lock-on\0Change Target\0Breakaway\0Devil Trigger\0"
+        "Lock-on\0Change Target\0"
         "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"
-        "Breaker Action\0Exceed\0Buster\0Reset Camera\0")) {
+        "Breaker Action\0Exceed\0Reset Camera\0")) {
         BreakerSwitcher::breakaway_button = bsinputs[breakaway_index];
     }
 }

@@ -251,7 +251,11 @@ set(MODS_SRC
     mods/DanteDtNoActivationCost.hpp
     mods/NoSlowmoOrHitstop.hpp 
     mods/NoSlowmoOrHitstop.cpp 
-
+    mods/InfHP.hpp 
+    mods/InfHP.cpp 
+    mods/VergilNoRoyalForkDelay.hpp
+    mods/LongerRagtimeBubble.hpp 
+    mods/LongerRagtimeBubble.cpp 
 )
 
 set(HOOKS_SRC
@@ -333,6 +337,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/CreateShell.hpp
     Mods/GameFunctions/PositionController.hpp
     Mods/GameFunctions/PlayerCheckNormalJump.hpp
+    Mods/GameFunctions/RequestPlCameraShake.hpp
 )
 
 set(IMGUI_SRC
@@ -374,7 +379,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi jsonstthm)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 

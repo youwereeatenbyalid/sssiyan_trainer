@@ -4,8 +4,6 @@
 #include <windows.h>
 
 #include "ModFramework.hpp"
-#include "Mod.hpp"
-#include "InitPatternsManager.hpp"
 
 HMODULE g_dinput = 0;
 std::mutex g_load_mutex{};
@@ -58,7 +56,6 @@ void startup_thread() {
 #endif
 
     if (load_dinput8()) {
-		  Mod::patterns = std::make_unique<InitPatternsManager>("patternsList.txt", "IsUsePatternsList");
         g_framework = std::make_unique<ModFramework>();
     }
 }

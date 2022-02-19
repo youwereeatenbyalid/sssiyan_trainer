@@ -1624,6 +1624,8 @@ void UI::KeyCaptureWindow(KCWBuffers& kcwBuffers, bool closeBtn /*= false*/)
 						ImGui::SetCursorScreenPos({ windowCenter.x - (ImGui::CalcTextSize(bind.c_str()).x + padding.x * 2) / 2, ImGui::GetCursorScreenPos().y });
 						ImGui::Text(bind.c_str());
 					}
+
+					ImGui::TreePop();
 				}
 
 				ImGui::PopStyleColor(2);
@@ -1784,6 +1786,14 @@ void UI::KeyCaptureWindow(KCWBuffers& kcwBuffers, bool closeBtn /*= false*/)
 		ImGui::PopStyleVar(2);
 
 		kcwBuffers.windowSizeAddBuffer.y += ImGui::GetItemRectSize().y + 10.0f;
+	}
+
+	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem | ImGuiHoveredFlags_AllowWhenBlockedByPopup)
+		&& (io.MouseClicked[0] || io.MouseClicked[1] || io.MouseClicked[2] || io.MouseClicked[3] || io.MouseClicked[4]))
+	{
+		g_framework->clear_kc_bind_name();
+		kcwBuffers.needConfirmBuffer = false;
+		kcwBuffers.drawWindow = false;
 	}
 
 	ImGui::End();

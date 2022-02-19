@@ -53,7 +53,7 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilefxsettings;
+	m_on_page = vergilvfxsettings;
 	m_full_name_string = "SDT Tricks EFX";
 	m_author_string = "VPZadov";
 	m_description_string = "Always use SDT Tricks EFX and SDT yamato sheath flash EFX.";

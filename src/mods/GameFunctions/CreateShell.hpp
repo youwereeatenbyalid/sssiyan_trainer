@@ -31,26 +31,23 @@ namespace GameFunctions
 
 			public:
 				
-				static bool invoke(int capacity, std::optional<uintptr_t> rcx)
+				static bool invoke(int capacity, uintptr_t threadContext)
 				{
 					bool res = false;
 					set_capacity = (f_set_Capacity)(g_framework->get_module().as<uintptr_t>() + fAddr);
-					if (rcx.has_value())
+					if (threadContext != 0)
 					{
-						if (rcx.value() != 0)
+						uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+						if (shellMng != 0)
 						{
-							uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-							if (shellMng != 0)
+							uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
+							uintptr_t mngObj = *(uintptr_t*)(lst+0x10);
+							if (mngObj != 0)
 							{
-								uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
-								uintptr_t mngObj = *(uintptr_t*)(lst+0x10);
-								if (mngObj != 0)
-								{
-									int curCapacity = *(int*)(mngObj + 0x1C);
-									std::unique_lock<std::mutex> lock(mt);
-									if(capacity != curCapacity)
-										return res = set_capacity((void*)rcx.value(), (void*)lst, capacity);
-								}
+								int curCapacity = *(int*)(mngObj + 0x1C);
+								std::unique_lock<std::mutex> lock(mt);
+								if(capacity != curCapacity)
+									return res = set_capacity((void*)threadContext, (void*)lst, capacity);
 							}
 						}
 					}
@@ -122,6 +119,7 @@ namespace GameFunctions
 			fAddr +=  0x1B0A400;
 			create_shell = (f_CreateShell)fAddr;
 			delay = nullptr;
+			threadContext = get_thread_context();
 		}
 
 		CreateShell(uintptr_t prefab) : CreateShell()
@@ -129,9 +127,8 @@ namespace GameFunctions
 			pfb = prefab;
 		}
 
-		void set_params(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		void set_params(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
-			rcx = rcxParam;
 			pfb = prefab;
 			pos = spawnPos;
 			rot = spawnRot;
@@ -162,28 +159,29 @@ namespace GameFunctions
 				uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
 				if(shellMng == 0 || IsBadReadPtr((void*)shellMng, 8))
 					return 0;
-				if (rcx == 0)
+				threadContext = get_thread_context();
+				if (threadContext == 0)
 				{
 					return 0;
 				}
-				res = create_shell((void*)rcx, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
+				res = create_shell((void*)threadContext, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
 			}
 			return res;
 		}
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		uintptr_t invoke(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
-			set_params(rcxParam, prefab, spawnPos, spawnRot, owner, level, id);
+			set_params(prefab, spawnPos, spawnRot, owner, level, id);
 			return invoke();
 		}
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t operator ()(uintptr_t rcxParam, uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		uintptr_t operator ()(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
-			return invoke(rcxParam, prefab, spawnPos, spawnRot, owner, level, id);
+			return invoke(prefab, spawnPos, spawnRot, owner, level, id);
 		}
 
 		/// <summary></summary>

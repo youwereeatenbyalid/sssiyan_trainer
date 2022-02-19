@@ -181,30 +181,6 @@ void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
             read_em_data_asm(lstAddr);
             break;
         }
-        //case EnemyWaveEditor::Mode::RunTimeEdit:
-        //{
-        //    mtx.lock();
-        //    isRtReady = false;
-        //    std::unique_lock<std::mutex> lock(mt);
-        //    if(EnemySwapper::gameMode == 3)//BP
-        //        break;
-        //    if(!mimObjManager.is_all_allocated())
-        //        break;
-        //    read_em_data_asm(lstAddr);
-        //    while(!isRtReady)
-        //        cv.wait(lock);//(lock, [] {return isRtReady;});
-        //    auto mimList = mimObjManager.get_mimic_list_ptr(selectedMimicListItem);
-        //    if (!isDefaultGameData && !mimList->isUsedByRtEdit)
-        //    {
-        //        mimList->isUsedByRtEdit = true;
-        //        selectedMimicListItem = 0;
-        //        set_em_data_asm(mimList, lstAddr);
-        //    }
-        //    lock.unlock();
-        //    mtx.unlock();
-        //    break;
-        //}
-
         default:
             break;
     }
@@ -454,7 +430,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   m_is_enabled        = &cheaton;
   m_on_page           = balance;
-  m_full_name_string = "Enemy wave editor (+)";
+  m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 
@@ -520,8 +496,6 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   mode = Mode::Mod;
   curCustomEmData.set_default();
-  gameDataList.reserve(60);
-  selectedEmDataItem = -1;
   return Mod::on_initialize();
 }
 
@@ -632,15 +606,29 @@ void EnemyWaveEditor::on_draw_ui() {
     ImGui::Separator();
     if (!isBpAllocation)
     {
-        for (int i = 0; i < mimObjManager.count(); i++)
+        ImGui::RadioButton("List all", (int*)&viewUserDataState, 0); ImGui::SameLine();
+        ImGui::Spacing(); ImGui::SameLine();
+        ImGui::RadioButton("By selecting specific list", (int*)&viewUserDataState, 1);
+        if (viewUserDataState == All)
         {
-            draw_mimiclist_items(i);
-            ImGui::Separator();
-            ImGui::Separator();
+            for (int i = 0; i < mimObjManager.count(); i++)
+            {
+                print_mimiclist_items(i);
+                ImGui::Separator();
+                ImGui::Separator();
+            }
         }
+        else
+        {
+            if(mimObjManager.count() == 0)
+                return;
+            draw_emlist_combo();
+            print_mimiclist_items(selectedMimicListItem);
+        }
+        
     }
     else if (mimObjManager.count() != 0)
-        draw_mimiclist_items(0);
+        print_mimiclist_items(0);
     
     break;
   }
@@ -652,61 +640,6 @@ void EnemyWaveEditor::on_draw_ui() {
     print_emlist_data();
     break;
   }
-  /*case EnemyWaveEditor::RunTimeEdit:
-  {
-      ImGui::ShowHelpMarker("Swap original enemy lists with custom in run-time when game loading a mission. You need to allocate custom data first. Each list can be used for 1 swap. Doesn't work in BP. This option will freeze "
-      "game thread during mission load, make sure that trainer window was opened before that.\nThe loading game's data and list of custom enemy lists will to choose will appears when mission will be loading.");
-      ImGui::Separator();
-      if (mimObjManager.is_all_allocated() && !isRtReady)
-      {
-          if (ImGui::Button("Next"))
-          {
-              std::lock_guard<std::mutex> lck(mt);
-
-              cv.notify_all();
-              isRtReady = true;
-          }
-          ImGui::ShowHelpMarker("Swap current game list with selected and load next enemy list.");
-          ImGui::Spacing();
-          if (ImGui::Button("Skip all next"))
-          {
-              std::lock_guard<std::mutex> lck(mt);
-              cv.notify_all();
-              isRtReady = true;
-              mode = Mode::ReadGameData;
-          }
-          ImGui::ShowHelpMarker("Swap current game list with selected and load all next lists as default. Some times game thread still freezed after pressing button. Select run-time edit mode and press \"Skip all next\" again.");
-          ImGui::Separator();
-          ImGui::TextWrapped("Current game enemy data");
-          ImGui::Spacing();
-          auto item = gameDataList.back();
-          ImGui::TextWrapped("Enemy list address: %X", item.listAddr);
-          ImGui::TextWrapped("Count: %d", item.count);
-          ImGui::Spacing();
-          for (const auto& data : item.emDataInfo)
-          {
-              ImGui::TextWrapped("Enemy: %s", EnemySwapper::emNames[get_em_name_indx(data.emId)]);
-              ImGui::TextWrapped("Enemy num: %d", data.num);
-              ImGui::Spacing();
-          }
-          ImGui::Separator();
-          ImGui::Checkbox("Use default game list", &isDefaultGameData);
-          if (!isDefaultGameData)
-          {
-              ImGui::TextWrapped("Select list to swap with: ");
-              draw_emlist_combo();
-              ImGui::ShowHelpMarker("You can use every custom list for swap only once.");
-          }
-         
-          if (!isDefaultGameData)
-          {
-              ImGui::TextWrapped("Selected list's data: ");
-              draw_mimiclist_items(selectedMimicListItem);
-          }
-          ImGui::Separator();
-      }
-      break;
-  }*/
 
   case EnemyWaveEditor::Serialization:
   {
@@ -749,7 +682,7 @@ void EnemyWaveEditor::on_draw_ui() {
   }
 }
 
-void EnemyWaveEditor::draw_mimiclist_items(int i)
+void EnemyWaveEditor::print_mimiclist_items(int i)
 {
     ImGui::TextWrapped("List load id: %d", mimObjManager.get_mimic_list_ptr(i)->loadId);
     ImGui::Spacing();
@@ -789,8 +722,12 @@ void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Wait time min:");
   ImGui::ShowHelpMarker("Minimum spawn time & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
   ImGui::InputFloat("##WaitTimeMin", &data.waitTimeMin, 0.1f, 0.5f, "%.1f");
+  if(data.waitTimeMin < 0)
+      data.waitTimeMin = 0;
   ImGui::TextWrapped("Wait time max:");
   ImGui::InputFloat("##WaitTimeMax", &data.waitTimeMax, 0.1f, 0.5f, "%.1f");
+  if (data.waitTimeMax < 0)
+      data.waitTimeMax = 0;
   ImGui::Checkbox("Don't set orbs", &data.isDontSetOrb);
   ImGui::Spacing();
   ImGui::Checkbox("Is near player(?)", &data.isNearPlayer);
@@ -830,7 +767,7 @@ void EnemyWaveEditor::print_emlist_data()
     for (const auto& item : gameDataList)
     {
         ImGui::TextWrapped("Load id: %d", item.loadId);
-        ImGui::TextWrapped("Enemy list address: %X", item.listAddr);
+        //ImGui::TextWrapped("Enemy list address: %X", item.listAddr);
         ImGui::TextWrapped("Count: %d", item.count);
         ImGui::Spacing();
         for (const auto &data : item.emDataInfo)
@@ -964,6 +901,73 @@ void EnemyWaveEditor::bpmode_data_setup()
         mimObjManager.copy_to(0, i, false);
 }
 
+void WaveEditorMod::EnemyWaveEditor::print_em_colums(int indx)
+{
+    bool isSelected = false;
+    if(ImGui::BeginListBox("##EnemiesDataListBox"))
+    {
+        for (int row = 0; row < mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count(); row++)
+        {
+            isSelected = (selectedEmDataItem == row);
+            ImVec4 backgroundcolor = isSelected ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : SELECTABLE_STYLE_ACT;
+            if (row == selectedEmDataItem)
+                backgroundcolor = SELECTABLE_STYLE_HVR;
+            ImGui::PushStyleColor(ImGuiCol_Header, backgroundcolor);
+            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECTABLE_STYLE_ACT_HVR);
+            auto uniqStr = EnemySwapper::emNames[mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data()->selectedItem] + std::string(" x") + 
+                std::to_string(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data()->num);  //+ std::string("##") + std::to_string(row);
+            auto addInfo = add_line_em_info(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data());
+            if (!addInfo.empty())
+                uniqStr += ", ";
+            uniqStr += addInfo + "##" + std::to_string(row);
+            if(ImGui::Selectable(uniqStr.c_str(), isSelected))
+                selectedEmDataItem = row;
+            ImGui::PopStyleColor(2);
+        }
+        ImGui::EndListBox();
+    }
+
+}
+
+std::string WaveEditorMod::EnemyWaveEditor::add_line_em_info(SetEmData* data)
+{
+    std::string res = "";
+    if(data == nullptr)
+        return res;
+    if(data->isBoss)
+        res += "boss, ";
+    if(data->isNoDie)
+        res += "no die, ";
+    if (data->isNearPlayer)
+        res += "near player, ";
+    if(data->isDontSetOrb)
+        res += "dont set orbs, ";
+    std::stringstream stream;
+    if (data->odds <= 99.02F)
+    {
+        stream << std::fixed << std::setprecision(1) << data->odds;
+        res += "odds " + stream.str() + ", ";
+    }
+    stream.str("");
+    if (data->waitTimeMin >= 0.01F)
+    {
+        stream << std::fixed <<std::setprecision(1) << data->waitTimeMin;
+        res += "min wait " + stream.str() + ", ";
+    }
+    stream.str("");
+    if (data->waitTimeMax >= 0.01F)
+    {
+        stream << std::fixed << std::setprecision(1) << data->waitTimeMax;
+        res += "max wait " + stream.str() + ", ";
+    }
+    if (!res.empty())
+    {
+        res.pop_back();
+        res.pop_back();
+    }
+    return res;
+}
+
 void EnemyWaveEditor::draw_mimic_list_ui()
 {
     if (!mimObjManager.is_all_allocated())
@@ -1015,27 +1019,33 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 if (ImGui::Button("Remove selected enemy list"))
                 {
                     mimObjManager.remove_at(selectedMimicListItem);
-                    selectedMimicListItem = 0;
+                    if (selectedMimicListItem != 0)
+                        selectedMimicListItem--;
+                    else
+                        selectedMimicListItem = 0;
                     return;
                 }
                 ImGui::Spacing();
                 if (ImGui::Button("Clear all"))
                 {
                     selectedMimicListItem = 0;
-                    selectedEmDataItem = -1;
                     mimObjManager.remove_all();
                     return;
                 }
                 ImGui::Separator();
                 ImGui::TextWrapped("Enemy data editor");
                 ImGui::Spacing();
-                ImGui::InputInt("Item index", &selectedEmDataItem);
-                if(selectedEmDataItem < -1)
-                    selectedEmDataItem = mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count() - 1;
-                if (selectedEmDataItem >= mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count())
-                    selectedEmDataItem = -1;
-                ImGui::ShowHelpMarker("To edit existing enemy list item input it index. To add new enemy data to list input \"-1\"");
-                if (selectedEmDataItem == -1)
+
+                ImGui::RadioButton("Add new enemy data", &emChangeState, 0); ImGui::SameLine();
+                ImGui::Spacing(); ImGui::SameLine();
+                ImGui::RadioButton("Edit existed enemy data", &emChangeState, 1);
+                if (mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count() == 0)
+                {
+                    emChangeState = 0;
+                    selectedEmDataItem = 0;
+                }
+                ImGui::Separator();
+                if(emChangeState == 0  )
                 {
                     print_emdata_input(curCustomEmData);
                     ImGui::Spacing();
@@ -1046,6 +1056,9 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 }
                 else
                 {
+                    print_em_colums(selectedMimicListItem);
+                    if (selectedEmDataItem < 0)//if first item was removed
+                        selectedEmDataItem = 0;
                     print_emdata_input(*(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(selectedEmDataItem)->get_data()));
                     ImGui::Spacing();
                     if (ImGui::Button("Remove selected enemy data item from list"))
@@ -1056,6 +1069,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 ImGui::Separator();
                 ImGui::TextWrapped("Current enemy list count = %d;", mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count());
                 ImGui::Separator();
+                
                 if(ImGui::CollapsingHeader("Copy data"))
                     draw_copy_list_data();
                 ImGui::Separator();

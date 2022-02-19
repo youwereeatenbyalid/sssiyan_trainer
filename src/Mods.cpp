@@ -41,6 +41,7 @@
         #include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
+		#include "mods/LongerRagtimeBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
         #include "mods/DTWingsOnly.hpp"
@@ -66,6 +67,7 @@
         #include "mods/HUDOptions.hpp"
         #include "mods/CameraSettings.hpp"
         #include "mods/LandCancels.hpp"
+        #include "mods/InfHP.hpp"
     // Gameplay
         #include "mods/Reversals.hpp"
         #include "mods/NoJCCooldown.hpp"
@@ -171,6 +173,7 @@
        #include "mods/VergilWalkingGuard.hpp"
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
+       #include "mods/VergilNoRoyalForkDelay.hpp"
 
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -197,6 +200,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SinCoordinate>());
         //m_mods.emplace_back(std::make_unique<CosCoordinate>());
         //m_mods.emplace_back(std::make_unique<MoveID>());
+		m_mods.emplace_back(std::make_unique<HoldToMash>()); //has to come before game input??
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
     // Common
@@ -207,7 +211,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
-        m_mods.emplace_back(std::make_unique<HoldToMash>());
+
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
@@ -220,6 +224,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
+		m_mods.emplace_back(std::make_unique<LongerRagtimeBubble>());
         m_mods.emplace_back(std::make_unique<ExceedValue>());
         m_mods.emplace_back(std::make_unique<NeroSuperMovesNoDT>());
         m_mods.emplace_back(std::make_unique<DTWingsOnly>());
@@ -246,6 +251,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<HUDOptions>());
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
+        m_mods.emplace_back(std::make_unique<InfHP>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<Reversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
@@ -346,19 +352,20 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilAirTrick>());
         //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
         m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
-        m_mods.emplace_back(std::make_unique<DMC3JCE>());//Better disable it in debug mode
+        m_mods.emplace_back(std::make_unique<DMC3JCE>());
         m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
         m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
         m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
         m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
         m_mods.emplace_back(std::make_unique<AirTrickDodge>());
+        m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
 }
 
-std::optional<std::string> Mods::on_initialize() const {
+std::optional<std::string> Mods::on_initialize(const bool& load_configs) const {
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_initialize()", mod->get_name().data());
 
@@ -370,32 +377,40 @@ std::optional<std::string> Mods::on_initialize() const {
     if(Mod::patterns->is_changed())
         Mod::patterns->save();
     Mod::patterns->free();
-    /*utility::Config m_config{ "re2_fw_config.txt" };
 
-    for (auto& mod : m_mods) {
-        spdlog::info("{:s}::on_config_load()", mod->get_name().data());
-        mod->on_config_load(m_config);
+    if (load_configs)
+    {
+        load_mods();
     }
-    */
-    load_mods();
-    //this is still very not great
-    focusedmod = "nomod";
+
+	m_focused_mod = "";
     return std::nullopt;
 }
 
 
-const std::unique_ptr<Mod>& Mods::get_mod(std::string modname) const {
-    //recursive call in case we can't find the mod being looked for
+Mod* Mods::get_mod(std::string modName) const {
+  if(modName == "None")
+  {
+      return nullptr;
+  }
+
+
   for (auto& mod : m_mods) {
-    if (modname == mod->get_name()) {
-      return mod;
+    if (modName == mod->get_name()) {
+      return mod.get();
     }
   }
-  return get_mod("SimpleMod");
+
+  return nullptr;
 }
 
 std::string Mods::get_focused_mod() const {
-  return focusedmod;
+  return m_focused_mod;
+}
+
+void Mods::set_focused_mod(const std::string& modName) const
+{
+  m_focused_mod = modName;
 }
 
 void Mods::on_frame() const {
@@ -457,19 +472,19 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
 
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
-    auto cursorPos = ImGui::GetCursorScreenPos();
-    if (ImGui::Selectable(mod->m_full_name_string.c_str(), focusedmod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
-        focusedmod = mod->get_name();
+
+    if (ImGui::Selectable(mod->m_full_name_string.c_str(), m_focused_mod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {
+        m_focused_mod = mod->get_name();
     }
 
-    ImRect areaOfModName(cursorPos, ImVec2(window->Pos.x + window->Size.x, cursorPos.y + ImGui::GetItemRectSize().y));
+    ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
 
-    auto mousePos = ImGui::GetMousePos();
+    const auto mousePos = ImGui::GetMousePos();
 
-    bool isHovered = mousePos.x > areaOfModName.Min.x && mousePos.y > areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
+    const bool isHovered = mousePos.x >= areaOfModName.Min.x && mousePos.y >= areaOfModName.Min.y && mousePos.x < areaOfModName.Max.x && mousePos.y < areaOfModName.Max.y;
 
     if (isHovered) {
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 0.0f));
         ImGui::SameLine();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.0f * g_framework->get_scale());
     	KeyBindButton(mod->m_raw_full_name, std::string(mod->get_name()), g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);

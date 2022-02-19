@@ -79,8 +79,8 @@ void VergilNoAfterimages::init_check_box_info() {
 std::optional<std::string> VergilNoAfterimages::on_initialize() {
   init_check_box_info();
   m_is_enabled        = &VergilNoAfterimages::cheaton;
-  m_on_page           = vergilefxsettings;
-  m_full_name_string = "Disable Vergil's afterimages (+)";
+  m_on_page           = vergilvfxsettings;
+  m_full_name_string = "Disable Afterimages (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Disable the afterimages Vergil leaves.";
 

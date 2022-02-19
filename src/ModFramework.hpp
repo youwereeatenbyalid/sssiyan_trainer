@@ -70,7 +70,7 @@ public:
     void queue_notification(const ImGuiToast& notif);
     void on_frame_d3d11();
     void on_frame_d3d12();
-    void on_reset();
+    void on_reset(const UINT& width, const UINT& height);
     void consume_input();
     bool on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM& l_param);
     void on_direct_input_keys(const std::array<uint8_t, 256>& keys);
@@ -84,12 +84,15 @@ public:
     
 private:
     enum PanelID_ : uint8_t;
-    enum SettingsPanelID_ : uint8_t;
+    enum OptionID_ : uint8_t;
 
     void draw_ui();
-    void draw_panel(PanelID_ panelID);
-    void draw_settings(SettingsPanelID_ panelID);
+    void draw_panels();
+    void draw_options();
+    void draw_trainer_settings();
     void draw_notifs();
+    void focus_tab(const std::string_view& window_name);
+    bool is_window_focused(const std::string_view& window_name);
 
     bool hook_d3d11();
     bool hook_d3d12();
@@ -98,16 +101,19 @@ private:
     
     bool initialize();
     
-    void prepare_tex();
+    void prepare_textures();
     void initialize_key_bindings();
 
     // UI
     bool m_draw_ui{ false };
+    bool m_show_settings{ false };
     bool m_do_once_after_ui{ false };
     bool m_is_ui_focused{ false };
     bool m_main_game_cursor_state_buffer{ true };
     bool m_is_internal_message{ false };
     bool m_close_menu_guard{ false };
+
+    std::unordered_map<std::string, PanelID_> m_mods_panels_map;
 
     uint8_t m_default_menu_key{ DIK_DELETE };
     uint8_t m_default_close_menu_key{ DIK_ESCAPE };
@@ -116,25 +122,20 @@ private:
     UI::KCWBuffers m_kcw_buffers;
     UI::KeyMode_t& m_last_key_mode = m_kcw_buffers.keyMode;
 
-    // Really shitty stuff
-    enum PanelID_ : uint8_t {
+	enum PanelID_ : uint8_t {
         PanelID_Gameplay = 0,
         PanelID_Scenario,
         PanelID_System,
         PanelID_Nero,
         PanelID_Dante,
         PanelID_Gilver,
-        PanelID_Vergil
+        PanelID_Vergil,
+        PanelID_Trainer
     };
 
-    enum SettingsPanelID_ : uint8_t
-    {
-        SettingsPanelID_FocusedMod = 0,
-        SettingsPanelID_Trainer
-    };
+    PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
 
-    PanelID_ m_last_focused_panel{ m_focused_mod_panel };
-    SettingsPanelID_ m_last_settings_focused_panel{ m_focused_mod_panel };
+    bool m_is_focus_set{ false };
 
     //uint8_t m_frame_counter{0};
     //bool m_is_second_frame{false};
@@ -170,9 +171,7 @@ private:
     // Trainer settings
     bool m_is_notif_enabled{ false };
     bool m_save_after_close_ui{ false };
-    bool m_remember_focused_panels{ false };
-    PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
-    SettingsPanelID_ m_focused_settings_panel{ SettingsPanelID_FocusedMod };
+    bool m_load_on_startup{ true };
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
@@ -221,11 +220,13 @@ private:
         UI::Texture2DDX11 kbIconDX11;
         UI::Texture2DDX11 kbIconActiveDX11;
         UI::Texture2DDX11 keyIconsDX11;
+        UI::Texture2DDX11 gearIconDX11;
         
         // D3D12
         UI::Texture2DDX12 kbIconDX12;
         UI::Texture2DDX12 kbIconActiveDX12;
         UI::Texture2DDX12 keyIconsDX12;
+        UI::Texture2DDX12 gearIconDX12;
     } m_icons;
 };
 
