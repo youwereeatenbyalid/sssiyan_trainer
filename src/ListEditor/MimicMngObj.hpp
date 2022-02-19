@@ -63,7 +63,11 @@ namespace GameListEditor
 			restore_original_list_data();
 			dealloc_mimic_arr();
 			pDataList->clear();
-			delete pDataList;
+			if (pDataList)
+			{
+				delete pDataList;
+				pDataList = nullptr;
+			}
 		}
 
 		inline uintptr_t get_list_addr() const { return listAddr; }
@@ -76,7 +80,12 @@ namespace GameListEditor
 		inline bool is_allocated() const {return isAllocated; }
 		inline bool is_list_data_swapped() const {return isDataSwapped;}
 		inline int get_allocated_count() const {return count; }
-		inline int get_count() const {return pDataList->size(); }
+		inline int get_count() const
+		{
+			if (pDataList == nullptr)
+				return 0;
+			return pDataList->size();
+		}
 		inline int get_cutom_count() const {return addCustomCount; }
 		inline size_t get_mimic_obj_size() const {return objSize; }
 

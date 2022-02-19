@@ -303,7 +303,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = vergiltrick;
-	m_full_name_string = "DMC3 Judgement Cut End) (+)";
+	m_full_name_string = "DMC3 Judgement Cut End (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Replaces Vergil's Judgment Cut End in human form with his Judgement Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.\nWARNING: This mod can crash the game.";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();

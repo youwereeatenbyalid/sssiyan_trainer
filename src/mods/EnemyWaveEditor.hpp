@@ -4,16 +4,19 @@
 
 #include "Mod.hpp"
 #include "EnemySwapper.hpp"
-#include <string>
 #include "ListEditor/AllocatedData.hpp"
 #include "ListEditor/MimicMngObj.hpp"
 #include <mutex>
 #include <condition_variable>
-#include <atomic>
 #include "JsonStthm.h"
 #include <filesystem>
 #include <map>
+#include <sstream>
 #include "ImGuiExtensions/ImGuiExtensions.h"
+
+#define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)
+#define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
+#define SELECTABLE_STYLE_ACT_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.91f) 
 
 namespace json = JsonStthm;
 
@@ -442,7 +445,6 @@ namespace WaveEditorMod
 			Mod,
 			ViewUserData,
 			ReadGameData,
-			//RunTimeEdit,
 			Serialization
 		};
 		static Mode mode;
@@ -458,6 +460,7 @@ namespace WaveEditorMod
 		static int addListInRangeMin;
 		static int addListInRangeMax;
 		static inline uint32_t bpFlowId = 0;
+		static inline int emChangeState = 0; //0 - add new; 1 - Edit emList
 
 		static bool cheaton;
 		static bool isAllAllocCorrectly;
@@ -478,7 +481,7 @@ namespace WaveEditorMod
 
 		
 		static MimicMngObjManager mimObjManager;
-		static SetEmData curEmData;
+		//static SetEmData curEmData;
 		static std::vector<GameEmList> gameDataList;
 
 		EnemyWaveEditor() = default;
@@ -520,7 +523,6 @@ namespace WaveEditorMod
 			"Add/change enemy data",
 			"View all custom data",
 			"Read game enemy data",
-			//"Run-time edit",
 			"Import profile"
 		};
 
@@ -530,16 +532,22 @@ namespace WaveEditorMod
 			Last,
 		};
 
+		enum ViewUserDataState
+		{
+			All,
+			ByLoadId
+		};
+
 		static SetupEmMode setupEmMode;
 		static inline bool isDefaultGameData = true;
 		static inline std::string jsonEmDataPath = "";//std::filesystem::current_path().string() + "\\" + "emListsProfile.json";
 		SetEmData curCustomEmData;
-		int selectedEmDataItem;
+		int selectedEmDataItem = 0;
 		void init_check_box_info() override;
 		void print_emdata_input(SetEmData& data);
 		void draw_mimic_list_ui();
 		void draw_emlist_combo();
-		void draw_mimiclist_items(int i);
+		void print_mimiclist_items(int i);
 		void print_emlist_data();
 		void emlist_btn();
 		static void clear_emlist();
@@ -552,12 +560,15 @@ namespace WaveEditorMod
 		static void read_em_data_asm(uintptr_t lstAddr);
 		static void set_em_data_asm(std::shared_ptr<HandleMimicObj>& curHandleObj, uintptr_t lstAddr);
 		void bpmode_data_setup();
+		void print_em_colums(int indx);
+		std::string add_line_em_info(SetEmData *data);
 		static GameEmList get_game_emdata_asm(uintptr_t lstAddr, bool incReaderCounter);
 		int fromLst = 0;
 		int toLst = 0;
 		int selectedProfile = 0;
 		int prevGameDataCount = 0;
 		int gameDataIndx = 0;
+		ViewUserDataState viewUserDataState = ViewUserDataState::ByLoadId;
 		std::unique_ptr<FunctionHook> m_emwave_hook;
 		std::unique_ptr<FunctionHook> m_loadall_hook;
 		std::unique_ptr<FunctionHook> m_bploadflow_hook;
