@@ -36,8 +36,8 @@ void VergilSetMaxJJC::init_check_box_info() {
 
 void VergilSetMaxJJC::on_config_load(const utility::Config& cfg) {
   max_jjc = cfg.get<uint32_t>("vergil_max_jjc").value_or(3);
-  sdtincrease == cfg.get<bool>("vergil_sdt_jjdcincrease").value_or(false);
-  infinitejjdc == cfg.get<bool>("vergil_infinite_jjdc").value_or(false);
+  sdtincrease = cfg.get<bool>("vergil_sdt_jjdcincrease").value_or(false);
+  infinitejjdc = cfg.get<bool>("vergil_infinite_jjdc").value_or(false);
 }
 
 void VergilSetMaxJJC::on_config_save(utility::Config& cfg) {
