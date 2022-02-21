@@ -38,7 +38,7 @@
         #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
-        #include "mods/DisableBreakaway.hpp"
+        //#include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
 		#include "mods/LongerRagtimeBubble.hpp"
@@ -92,7 +92,7 @@
         #include "mods/DisableGauntletStages.hpp"
         #include "mods/NoSlowmoOrHitstop.hpp"
     // Nero
-        #include "mods/NeroInfBreakers.hpp"
+        //#include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
         #include "mods/NeroTomboyLockOn.hpp"
@@ -221,7 +221,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
-        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
 		m_mods.emplace_back(std::make_unique<LongerRagtimeBubble>());
@@ -274,7 +274,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
         m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
     // Nero
-        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
+        //m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
