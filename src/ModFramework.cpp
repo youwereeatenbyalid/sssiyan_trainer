@@ -1421,7 +1421,7 @@ void ModFramework::draw_trainer_settings()
 
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
-        ImGui::Checkbox("Load Config Automatically When The Game Launches (On By Default)", &m_load_on_startup);
+        ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
 
         ImGui::Spacing();
         if (ImGui::TreeNodeEx("About")) {
