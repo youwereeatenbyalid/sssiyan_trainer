@@ -93,17 +93,15 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
 
     guardallcheck:
         push r11
-        push r12
         mov r11, [PlayerTracker::playerentity]
         add r11, 0x1888
         cmp byte ptr [r11], 3 // royal guard
         jne codepops
-        mov r11b, [GameInput::holdframes+1] // amazing variable name
-        mov r12b, 0x10
-        test r11, r12
-        pop r12
+        mov r11, [GameInput::holdframes] // amazing variable name
+        shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
+        test r11, 0x1
         pop r11
-        jnz cancellable
+        jne cancellable //jump if 1 present
         jmp code
 
     stingercheck:
@@ -116,7 +114,6 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
 		jmp qword ptr [AllStart::jmp_ret]
 
     codepops:
-        pop r12
         pop r11
     code:
         mov word ptr [rdi+5Eh], 0000h
