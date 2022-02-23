@@ -466,9 +466,14 @@ void Mods::on_draw_ui() const {
     }
 }
 
-void Mods::draw_entry(std::unique_ptr<Mod>& mod){
-    //mod->get_hotkey_name()
-    auto window = ImGui::GetCurrentWindow();
+void Mods::draw_entry(Mod* mod){
+
+    if(mod == nullptr)
+    {
+        return;
+    }
+
+    const auto window = ImGui::GetCurrentWindow();
 
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
@@ -477,7 +482,12 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
         m_focused_mod = mod->get_name();
     }
 
-    ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
+    //if (!ImGui::IsWindowFocused())
+    //{
+    //    return;
+    //}
+
+    const ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
 
     const auto mousePos = ImGui::GetMousePos();
 
@@ -499,7 +509,7 @@ void Mods::on_pagelist_ui(int page, float indent) {
       if (indent != 0.f) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
       }
-      draw_entry(mod);
+      draw_entry(mod.get());
     }
       //mod->modkeytoggle.draw(mod->get_name());
   }

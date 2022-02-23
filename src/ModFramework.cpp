@@ -1427,7 +1427,16 @@ void ModFramework::draw_trainer_settings()
         if (ImGui::TreeNodeEx("About")) {
             if (ImGui::TreeNodeEx("Credits"))
             {
-                ImGui::TextWrapped("Darkness\n\n"
+                { // NOBODY TOUCHES THIS OR I SWEAR...
+                    static float r, g, b;
+                    ImGui::ColorConvertHSVtoRGB(static_cast<float>(std::abs(std::sin(static_cast<double>(GetTickCount64() % (20LL * 360LL)) / (20.0 * 360.0)))), 1.0f, 1.0f, r, g, b);
+                    ImGui::PushStyleColor(ImGuiCol_Text, { r, g, b, 1.0f });
+                    ImGui::TextWrapped("Darkness\n");
+                    ImGui::Dummy({ 0.0f, 1.0f * m_scale });
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TextWrapped(//"Darkness\n\n"
                     "The Hitchhiker\n\n"
                     "Siyan\n\n"
                     "VPZadov\n\n"
