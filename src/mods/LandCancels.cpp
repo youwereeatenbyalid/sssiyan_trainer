@@ -41,7 +41,7 @@ static naked void detour() {
         jne popret
         cmp dword ptr [rbp+r9+0xB0], 700 // Motion ID
         jne popret
-        cmp dword ptr [rbp+r9+0xC8], 0x41400000 // PrevFrame // 12.0f
+        cmp dword ptr [rbp+r9+0xC8], 0x41500000 // PrevFrame // 12.0f was too early, trying 13.0f
         ja forceland
         jmp popcode
 

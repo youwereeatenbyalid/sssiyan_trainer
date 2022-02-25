@@ -92,6 +92,27 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         // jmp cancellable
 
     guardallcheck:
+        /* // these don't work because moveid updates too slow, using holdframes+4*? feels bad
+        cmp dword ptr[PlayerTracker::playermoveid], 0x1B6201FE // release ground
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x1B6C01FE // royal release ground
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x1D5601FE // release air
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x1D6001FE // royal release air
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x138801FE // guard start ground
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x139201FE // guard loop ground
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x139C01FE // guard end ground
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x157C01FE // guard start air
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x158101FE // guard loop air
+        je code
+        cmp dword ptr [PlayerTracker::playermoveid], 0x158601FE // guard end air
+        je code*/
         push r11
         mov r11, [PlayerTracker::playerentity]
         add r11, 0x1888
@@ -101,7 +122,7 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
         test r11, 0x1
         pop r11
-        jne cancellable //jump if 1 present
+        jne cancellable
         jmp code
 
     stingercheck:
