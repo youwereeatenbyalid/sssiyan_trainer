@@ -135,9 +135,9 @@ static naked void jceprefab1_detour()
 		push rax
 		mov rax, [PlayerTracker::vergilentity]
 		mov eax, dword ptr [rax+0x09B0]
-		cmp eax, 0
+		cmp eax, 2
 		pop rax
-		jne originalcode
+		je originalcode
 		jmp qword ptr [DMC3JCE::jcePfbJeJmp]
 	}
 }
@@ -160,9 +160,9 @@ static naked void jceprefab2_detour()
 		push rax
 		mov rax, [PlayerTracker::vergilentity]
 		mov eax, dword ptr [rax+0x09B0]
-		cmp eax, 0
+		cmp eax, 2
 		pop rax
-		jne originalcode
+		je originalcode
 
 		jne_ret:
 		jmp qword ptr [DMC3JCE::jcePfbJneJmp]
@@ -203,9 +203,9 @@ static volatile naked void jce_exetime_detour()
 		push rax
 		mov rax, [PlayerTracker::vergilentity]
 		mov eax, dword ptr [rax+0x09B0]
-		cmp eax, 0
+		cmp eax, 2
 		pop rax
-		jne originalcode
+		je originalcode
 		movss xmm0, [DMC3JCE::JCEController::executionTimeAsm]
 		comiss xmm0, xmm1
 		movss [rdi+0x6C], xmm1
@@ -288,9 +288,9 @@ static naked void finish_pfb_detour()
 		push rax
 		mov rax, [PlayerTracker::vergilentity]
 		mov eax, dword ptr [rax+0x09B0]
-		cmp eax, 0
+		cmp eax, 2
 		pop rax
-		jne originalcode
+		je originalcode
 		mov rsi, 0
 		jmp originalcode
 	}
