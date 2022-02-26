@@ -1,9 +1,13 @@
 #include "LandCancels.hpp"
 #include "PlayerTracker.hpp"
+//#include "ImGuiExtensions/ImGuiExtensions.h"
 
 uintptr_t LandCancels::jmp_ret{NULL};
 bool LandCancels::cheaton{NULL};
-bool timedChargeShotCancels{NULL};
+bool landCancelTestWeightToggle{ FALSE };
+float desiredWeight{ 30.0f };
+bool landCancelTestToggle{ FALSE };
+uint32_t landCancelTestMove{ 8008 };
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -12,9 +16,27 @@ static naked void detour() {
     __asm {
         cmp byte ptr [LandCancels::cheaton], 1
         jne code
+        //cmp byte ptr [landCancelTestWeightToggle], 1
+        //push r11
+        //push r12
+        //jne cheatcode
+        //mov r11, [PlayerTracker::playerentity]
+        //mov r11, [r11+0x2C4]
+        //mov r12, [desiredWeight]
+        //mov [r11], r12d
+        //pop r12
+        //pop r11
         jmp cheatcode
 
     cheatcode:
+        cmp byte ptr [landCancelTestToggle], 1
+        jne cheatcodecont
+        push r11
+        mov r11d, [landCancelTestMove]
+        cmp r11d, [PlayerTracker::playermoveid]
+        pop r11
+        je forceland
+    cheatcodecont:
         cmp [PlayerTracker::playerid], 0
         je neromoves
         cmp [PlayerTracker::playerid], 1
@@ -162,4 +184,33 @@ std::optional<std::string> LandCancels::on_initialize() {
     return "Failed to initialize LandCancels";
   }
   return Mod::on_initialize();
+}
+
+void LandCancels::on_frame() {
+    if (PlayerTracker::ingameplay) {
+        if (landCancelTestWeightToggle) {
+            (*(float*)(PlayerTracker::playerentity + 0x2C4)) = desiredWeight;
+        }
+    }
+}
+
+void LandCancels::on_draw_ui() {
+    if (ImGui::CollapsingHeader("Debug")) {
+        ImGui::TextWrapped("This will freeze your weight to your choice to make it easier to test land cancels.");
+        ImGui::Checkbox("Land Cancel Weight Assist", &landCancelTestWeightToggle);
+        if (landCancelTestWeightToggle) {
+            ImGui::InputFloat("Desired Weight", &desiredWeight);
+        }
+        ImGui::Separator();
+        ImGui::TextWrapped("This allows you test to see what a move would be like with land cancelling applied.");
+        ImGui::Checkbox("Land Cancel Test", &landCancelTestToggle);
+        if (landCancelTestToggle) {
+            ImGui::TextWrapped("Pause the game while doing the move you want to see land cancellable, then press this button.");
+            ImGui::TextWrapped("If the results are good, send me a message and I'll look at adding it to the list!");
+            if (ImGui::Button("Enable Land Cancel For Current Move")) {
+                landCancelTestMove = PlayerTracker::playermoveid;
+            }
+            ImGui::Text("Current MoveID: %i", PlayerTracker::playermoveid);
+        }
+    }
 }
