@@ -15,15 +15,21 @@ static naked void detour() {
         jmp cheatcode
 
     cheatcode:
-        cmp byte ptr [PlayerTracker::isgrounded], 1
+        // cmp byte ptr [PlayerTracker::isgrounded], 1
+        // cmp byte ptr [PlayerTracker::groundedmem], 1 // seems to do the same as isgrounded
+        push r12
+        mov r12, [PlayerTracker::playerentity] // why is this not always in a register i hate it
+        mov r12, [r12+0x4D8] // SequenceTrackMoveController
+        cmp byte ptr [r12+0xC1], 1 // grounded
+        pop r12
         je code
         cmp [PlayerTracker::playerid], 0
         je nerocheat
-        jmp retcode
+        jmp code
 
     nerocheat:
         cmp byte ptr [timedChargeShotCancels], 1 // move this down when we have more toggles
-        jne retcode
+        jne forcelandnopops
         push r11
         push r12
         push r9
@@ -41,7 +47,7 @@ static naked void detour() {
         jne popret
         cmp dword ptr [rbp+r9+0xB0], 700 // Motion ID
         jne popret
-        cmp dword ptr [rbp+r9+0xC8], 0x41500000 // PrevFrame // 12.0f was too early, trying 13.0f
+        cmp dword ptr [rbp+r9+0xC8], 0x41600000 // PrevFrame // 14.0f
         ja forceland
         jmp popcode
 
@@ -49,6 +55,7 @@ static naked void detour() {
         pop r9
         pop r12
         pop r11
+    forcelandnopops:
         mov dword ptr [rdx+34h], 2 // can land
         jmp qword ptr [LandCancels::jmp_ret]
 
