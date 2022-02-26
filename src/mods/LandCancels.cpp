@@ -30,11 +30,11 @@ static naked void detour() {
         je forceland                                     
         cmp [PlayerTracker::playermoveid], 0x04060028 // Air Rave 3
         je forceland
-        cmp [PlayerTracker::playermoveid], 0x02A8003C // Low Charge Shot Shoot
+        cmp [PlayerTracker::playermoveid], 0x02C6003C // Charge Shot Looking Up
         je chargeshottimer
-        cmp [PlayerTracker::playermoveid], 0x044C003C // Charge Shot Shoot
+        cmp [PlayerTracker::playermoveid], 0x02A8003C // Charge Shot Level
         je chargeshottimer
-        cmp [PlayerTracker::playermoveid], 0x0410003C // High Shot
+        cmp [PlayerTracker::playermoveid], 0x02D0003C // Charge Shot Looking Down
         je chargeshottimer
         cmp byte ptr [rdx+0x8], 2
         je retcode
@@ -46,7 +46,7 @@ static naked void detour() {
         push r9
         // some kind of action and grounded check? only shows 1-4 when rbp = treelayer
         cmp rsi,rdi
-        jne groundedcheck
+        jne posttimer
         // hitch stuff: get layer offset
         mov r9, [rbp+0x1F80]
         and r9, 1
@@ -57,15 +57,12 @@ static naked void detour() {
         // jne groundedcheck
         cmp dword ptr [rbp+r9+0xC8], 0x41600000 // PrevFrame // 14.0f
         ja popforceland
-    groundedcheck:
-        cmp byte ptr [rdx+0x8], 2
-        je popret
-        jmp popcode
+        jmp posttimer
 
     dantemoves:
-        // cmp [PlayerTracker::playermoveid], 0x04B00002 // Ecstasy
+        // cmp [PlayerTracker::playermoveid], 0x04B00002 // Ecstasy, works without this
         // je forceland
-        // swords
+    // swords
         cmp [PlayerTracker::playermoveid], 0x157C00C9 // Air Rave 1 Reb
         je forceland
         cmp [PlayerTracker::playermoveid], 0x158600C9 // Air Rave 2 Reb
@@ -90,18 +87,25 @@ static naked void detour() {
         je forceland
         cmp [PlayerTracker::playermoveid], 0x159A00F1 // Air Rave 4 Reb
         je forceland
-        // guns
-        cmp [PlayerTracker::playermoveid], 0x03F2012C //Air Shot
+    // guns
+        cmp [PlayerTracker::playermoveid], 0x03F2012C // Air Shot
         je forceland
-        cmp [PlayerTracker::playermoveid], 0x157C012C //Rainstorm
+        cmp [PlayerTracker::playermoveid], 0x157C012C // Rainstorm
         je forceland
-        cmp [PlayerTracker::playermoveid], 0x1590012C //Rainstorm End
+        cmp [PlayerTracker::playermoveid], 0x1586012C // Rainstorm Loop
         je forceland
-        cmp [PlayerTracker::playermoveid], 0x159A012C //Low Rainstorm End
+        cmp [PlayerTracker::playermoveid], 0x159A012C // Rainstorm End
+        je forceland
+        cmp [PlayerTracker::playermoveid], 0x159A012C // Low Rainstorm End
         je forceland
         cmp byte ptr [rdx+0x8], 2
         je retcode
         jmp code
+
+    posttimer:
+        cmp byte ptr [rdx+0x8], 2
+        je popret
+        jmp popcode
 
     popcode:
         pop r9
@@ -143,7 +147,8 @@ std::optional<std::string> LandCancels::on_initialize() {
 
   m_full_name_string = "Land Cancels";
   m_author_string    = "SSSiyan";
-  m_description_string = "Touching the floor will cancel your current aerial attack.\n\nOnly certain attacks are set to be land cancellable and this list will expand with time. Feel free to @ me with ideas!";
+  m_description_string = "Touching the floor will cancel your current aerial attack.\n\n"
+      "Only certain attacks are set to be land cancellable and this list will expand with time. Feel free to @ me with ideas!";
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto addr = patterns->find_addr(base, "C7 42 34 00 00 00 00 C3 CC CC 48");
@@ -158,72 +163,3 @@ std::optional<std::string> LandCancels::on_initialize() {
   }
   return Mod::on_initialize();
 }
-
-/*
-static naked void detour() {
-    __asm {
-        cmp byte ptr [LandCancels::cheaton], 1
-        jne code
-        jmp cheatcode
-
-    cheatcode:
-        cmp [PlayerTracker::playerid], 0
-        je nerocheat
-        cmp byte ptr[PlayerTracker::isgrounded], 1
-        je code
-        jmp retcode
-
-    nerocheat:
-        cmp byte ptr [timedChargeShotCancels], 1 // move this down when we have more toggles
-        je chargeshottimer
-        cmp byte ptr [PlayerTracker::isgrounded], 1
-        je code
-        jmp retcode
-
-    chargeshottimer:
-        push r11
-        push r12
-        push r9
-        // some kind of action and grounded check? only shows 1-4 when rbp = treelayer
-        cmp rsi,rdi
-        jne groundedcheck
-        // hitch stuff: get layer offset
-        mov r9, [rbp+0x1F80]
-        and r9, 1
-        imul r9, r9, 0xFB0
-
-        cmp dword ptr [rbp+r9+0xA8], 60 // Motion Bank
-        jne groundedcheck
-        cmp dword ptr [rbp+r9+0xB0], 700 // Motion ID
-        jne groundedcheck
-        cmp dword ptr [rbp+r9+0xC8], 0x41600000 // PrevFrame // 14.0f
-        ja forceland
-    groundedcheck:
-        cmp byte ptr [PlayerTracker::isgrounded], 1
-        je popcode
-        jmp popret
-
-    popcode:
-        pop r9
-        pop r12
-        pop r11
-    code:
-        mov dword ptr [rdx+34h], 0 // can't land
-    retcode:
-        jmp qword ptr [LandCancels::jmp_ret]
-
-    popret:
-        pop r9
-        pop r12
-        pop r11
-        jmp qword ptr [LandCancels::jmp_ret]
-
-    forceland:
-        pop r9
-        pop r12
-        pop r11
-        mov dword ptr [rdx+34h], 2 // can land
-        jmp qword ptr [LandCancels::jmp_ret]
-    }
-}
-*/
