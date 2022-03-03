@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <windows.h>
 #include <cstdint>
 
@@ -58,6 +59,8 @@ private:
     uintptr_t m_original{ 0 };
 
     // Thread synchronization
+
+    std::recursive_mutex m_hook_mutex;
 
     inline static bool s_allow_hook = true;
     inline static void (*s_hook_init_end_call_back)(HANDLE current_thread) = nullptr;

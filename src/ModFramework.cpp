@@ -29,16 +29,18 @@ static ImVec2 operator*(const ImVec2& lhs, const float rhs) { return {lhs.x * rh
 
 std::unique_ptr<ModFramework> g_framework{};
 
-static bool g_is_safe_to_close = true;
+static size_t g_currently_hooking = 0;
+static HANDLE g_hooking_thread;
 
 static void hook_init_begin_callback(HANDLE hooking_thread)
 {
-    g_is_safe_to_close = false;
+    g_hooking_thread = hooking_thread;
+    g_currently_hooking++;
 }
 
 static void hook_init_end_callback(HANDLE hooking_thread)
 {
-    g_is_safe_to_close = true;
+    g_currently_hooking--;
 }
 
 ModFramework::ModFramework()
@@ -289,11 +291,12 @@ bool ModFramework::on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM&
     switch (message) {
     case WM_CLOSE:
     {
+        // Don't allow any more hooks to get initialized
         FunctionHook::allow_hook(false);
 
-		while(!g_is_safe_to_close)
+		while(g_currently_hooking != 0)
 		{
-            Sleep(1);
+            Sleep(5);
 		}
     }
     break;

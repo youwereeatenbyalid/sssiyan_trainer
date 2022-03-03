@@ -12,6 +12,8 @@ FunctionHook::FunctionHook(Address target, Address destination)
     m_destination{ 0 },
     m_original{ 0 }
 {
+    std::scoped_lock _{ m_hook_mutex };
+
     if(!s_allow_hook)
     {
         return;
