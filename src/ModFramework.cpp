@@ -289,8 +289,7 @@ bool ModFramework::on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM&
     bool is_mouse_moving = false;
 
     switch (message) {
-    case WM_CLOSE:
-    {
+    case WM_CLOSE: {
         // Don't allow any more hooks to get initialized
         FunctionHook::allow_hook(false);
 
