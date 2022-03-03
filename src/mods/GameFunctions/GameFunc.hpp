@@ -1,6 +1,8 @@
 #pragma once
 #include "Mod.hpp"
+#include "utility/Memory.hpp"
 #include <optional>
+
 //clang-format off
 namespace GameFunctions
 {
@@ -74,7 +76,7 @@ namespace GameFunctions
 	private:
 		static bool is_bad_ptr(uintptr_t ptr)
 		{
-			return (bool)IsBadReadPtr((void*)ptr, 0x8);
+			return !utility::isGoodReadPtr(ptr, sizeof(ptr));
 		}
 
 	public:

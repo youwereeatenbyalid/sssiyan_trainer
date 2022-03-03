@@ -79,7 +79,7 @@ public:
     void save_trainer_settings(utility::Config& cfg) const;
     void load_trainer_settings(utility::Config& cfg);
 
-    void save_config();
+    void save_config() const;
     void load_config();
     
 private:
@@ -87,10 +87,10 @@ private:
     enum OptionID_ : uint8_t;
 
     void draw_ui();
-    void draw_panels();
-    void draw_options();
+    void draw_panels() const;
+    void draw_options() const;
     void draw_trainer_settings();
-    void draw_notifs();
+    void draw_notifs() const;
     void focus_tab(const std::string_view& window_name);
     bool is_window_focused(const std::string_view& window_name);
 

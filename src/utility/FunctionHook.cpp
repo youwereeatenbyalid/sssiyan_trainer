@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 bool g_isMinHookInitialized{ false };
 
 FunctionHook::FunctionHook(Address target, Address destination)
@@ -13,6 +12,17 @@ FunctionHook::FunctionHook(Address target, Address destination)
     m_destination{ 0 },
     m_original{ 0 }
 {
+    if(!s_allow_hook)
+    {
+        return;
+    }
+
+    // Call back before the initialiazation begins
+    if (s_hook_init_begin_call_back != nullptr)
+    {
+        s_hook_init_begin_call_back(::GetCurrentThread());
+    }
+
     spdlog::info("Attempting to hook {:p}->{:p}", target.ptr(), destination.ptr());
 
     // Initialize MinHook if it hasn't been already.
@@ -21,7 +31,7 @@ FunctionHook::FunctionHook(Address target, Address destination)
     }
 
     // Create the hook. Call create afterwards to prevent race conditions accessing FunctionHook before it leaves its constructor.
-    if (auto status = MH_CreateHook(target.as<LPVOID>(), destination.as<LPVOID>(), (LPVOID*)&m_original); status == MH_OK) {
+    if (const auto status = MH_CreateHook(target.as<LPVOID>(), destination.as<LPVOID>(), reinterpret_cast<LPVOID*>(&m_original)); status == MH_OK) {
         m_target = target;
         m_destination = destination;
 
@@ -29,6 +39,12 @@ FunctionHook::FunctionHook(Address target, Address destination)
     }
     else {
         spdlog::error("Failed to hook {:p}: {}", target.ptr(), MH_StatusToString(status));
+    }
+
+    // Call back after the initialiazation is finished
+    if(s_hook_init_end_call_back != nullptr)
+    {
+        s_hook_init_end_call_back(::GetCurrentThread());
     }
 }
 
@@ -42,7 +58,7 @@ bool FunctionHook::create() {
         return false;
     }
 
-    if (auto status = MH_EnableHook((LPVOID)m_target); status != MH_OK) {
+    if (auto status = MH_EnableHook(reinterpret_cast<LPVOID>(m_target)); status != MH_OK) {
         m_original = 0;
         m_destination = 0;
         m_target = 0;
@@ -62,8 +78,8 @@ bool FunctionHook::remove() {
     }
 
     // Disable then remove the hook.
-    if (MH_DisableHook((LPVOID)m_target) != MH_OK ||
-        MH_RemoveHook((LPVOID)m_target) != MH_OK) {
+    if (MH_DisableHook(reinterpret_cast<LPVOID>(m_target)) != MH_OK ||
+        MH_RemoveHook(reinterpret_cast<LPVOID>(m_target)) != MH_OK) {
         return false;
     }
 
