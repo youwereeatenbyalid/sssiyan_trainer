@@ -293,12 +293,11 @@ bool ModFramework::on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM&
         // Don't allow any more hooks to get initialized
         FunctionHook::allow_hook(false);
 
-		while(g_currently_hooking != 0)
-		{
+	while(g_currently_hooking != 0)
+	{
             Sleep(5);
-		}
-    }
-    break;
+	}
+    } break;
 
     case WM_INPUT: {
         // RIM_INPUT means the window has focus
