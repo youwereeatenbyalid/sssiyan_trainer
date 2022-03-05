@@ -1496,12 +1496,12 @@ void ModFramework::draw_trainer_settings()
 void ModFramework::draw_notifs() const
 {
     // Notifications
-    ImGui::GetStyle().Alpha = 1.0f;
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f);
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 100.f / 255.f));
-    ImGui::RenderNotifications();
-    ImGui::PopStyleVar();
-    ImGui::PopStyleColor();
+    //ImGui::GetStyle().Alpha = 1.0f;
+    //ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f);
+    //ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 100.f / 255.f));
+    //ImGui::RenderNotifications();
+    //ImGui::PopStyleVar();
+    //ImGui::PopStyleColor();
 }
 
 void ModFramework::create_render_target_d3d11() {

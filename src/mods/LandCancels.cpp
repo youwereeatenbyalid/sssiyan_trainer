@@ -356,6 +356,8 @@ static naked void detour() {
         jmp posttimer
 
     posttimer:
+        jmp popcode
+
         cmp byte ptr [rdx+0x8], 2
         je popret
         jmp popcode
