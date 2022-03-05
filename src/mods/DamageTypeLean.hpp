@@ -12,6 +12,7 @@ public:
   std::optional<std::string> on_initialize() override;
   static uintptr_t jmp_ret;
   static uint32_t playermoveid;
+  // static bool cheaton;
 
   // Override this things if you want to store values in the config file
   // void on_config_load(const utility::Config& cfg) override;

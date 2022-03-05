@@ -256,6 +256,8 @@ set(MODS_SRC
     mods/VergilNoRoyalForkDelay.hpp
     mods/LongerRagtimeBubble.hpp 
     mods/LongerRagtimeBubble.cpp 
+    mods/DamageType.hpp 
+    mods/DamageType.cpp 
 )
 
 set(HOOKS_SRC

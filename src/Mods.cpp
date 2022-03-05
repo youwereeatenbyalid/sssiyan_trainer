@@ -91,6 +91,7 @@
         #include "mods/AerialPushbackVertical.hpp"
         #include "mods/DisableGauntletStages.hpp"
         #include "mods/NoSlowmoOrHitstop.hpp"
+        #include "mods/DamageType.hpp"
     // Nero
         //#include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
@@ -273,6 +274,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<WeightReset>());
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
         m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
+        m_mods.emplace_back(std::make_unique<DamageType>());
     // Nero
         //m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
