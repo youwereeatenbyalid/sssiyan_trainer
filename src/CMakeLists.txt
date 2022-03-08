@@ -340,6 +340,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PositionController.hpp
     Mods/GameFunctions/PlayerCheckNormalJump.hpp
     Mods/GameFunctions/RequestPlCameraShake.hpp
+    Mods/GameFunctions/PlayerSetDT.hpp
 )
 
 set(IMGUI_SRC
