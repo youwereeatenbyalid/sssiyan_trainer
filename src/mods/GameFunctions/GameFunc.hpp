@@ -154,10 +154,10 @@ namespace GameFunctions
 		template <typename T, size_t offsCount>
 		static bool try_to_write(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, T val, bool isDerefedBase = false)
 		{
-			auto ptr = PtrController::get_ptr<T>(offsets, base, isDerefedBase);
+			auto ptr = PtrController::get_ptr(base, offsets, isDerefedBase);
 			if (ptr.has_value())
 			{
-				*(ptr.value()) = val;
+				*(T*)(ptr.value()) = val;
 				return true;
 			}
 			return false;

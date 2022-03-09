@@ -228,7 +228,7 @@ void BossDanteSetup::on_draw_ui()
 	if(isDtsTimerSkip)
 	{
 		ImGui::TextWrapped("Cooldown timer (depends on current mission):");
-		ImGui::SliderFloat("##customTimerDelay", &dtTimer, 0.1f, 30.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+		UI::SliderFloat("##customTimerDelay", &dtTimer, 0.1f, 30.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 		//dtTimerStartPoint = 30.0f - dtTimer + 0.08f;
 	}
 	ImGui::Checkbox("Modify DT duration", &isCustomDtDuration);

@@ -202,7 +202,7 @@ void DeepTurbo::on_draw_ui() {
   if (isSpeedUpMenu)
   {
       ImGui::TextWrapped("Menu speed:");
-      ImGui::SliderFloat("##menuSpeed", &menuSpeed, 1.0f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+      UI::SliderFloat("##menuSpeed", &menuSpeed, 1.0f, 10.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
   }
 }
 
