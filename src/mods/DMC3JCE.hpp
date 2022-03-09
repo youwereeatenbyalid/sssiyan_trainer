@@ -11,6 +11,7 @@
 #include "EnemyWaveEditor.hpp"
 #include "DeepTurbo.hpp"
 #include "mods/GameFunctions/PlayerSetDT.hpp"
+#include "VergilInstantSDT.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -144,7 +145,7 @@ public:
 		void bad_ptr_stop()
 		{
 			stop_jce();
-			cheaton = false;
+			//cheaton = false;
 		}
 
 	public:
@@ -267,7 +268,7 @@ public:
 							}
 							if (isPause.value())
 								continue;
-							if (EnemySwapper::nowFlow != 0x16 || isExecuting.load() == false)//check this again
+							if(!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
 								break;
 							__try
 							{
@@ -348,7 +349,7 @@ public:
 							}
 							if (isPause.value())
 								continue;
-							if (EnemySwapper::nowFlow != 0x16)//check this again
+							if (!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
 								break;
 							__try
 							{

@@ -186,8 +186,13 @@ void DMC3JCE::set_sdt_asm(GameFunctions::PlVergilSetDT::DevilTrigger dtState)
 	std::array<uintptr_t, 1> offs {0x1B20};
 	float curSdt = func::PtrController::get_ptr_val<float>(PlayerTracker::vergilentity, offs, true).value();
 	func::PtrController::try_to_write(PlayerTracker::vergilentity, offs, 10000.0f, true);
+	//*(int*)(PlayerTracker::vergilentity + 0x1938) = 2;//SDTGaugeChargeStatus
+	//*(float*)(PlayerTracker::vergilentity + 0x1C34) = 20.0f;//dtPressTimer
+	bool isInstantSdtOn = VergilInstantSDT::cheaton;
+	VergilInstantSDT::cheaton = true;
 	setDt(dtState, false);
 	func::PtrController::try_to_write<float>(PlayerTracker::vergilentity, offs, curSdt, true);
+	VergilInstantSDT::cheaton = isInstantSdtOn;
 	if (dtState == GameFunctions::PlVergilSetDT::DevilTrigger::SDT)
 	{
 		JCEController::isSdtRequestedAsm = true;
