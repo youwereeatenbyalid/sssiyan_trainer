@@ -2,6 +2,7 @@
 #include "mods/PlayerTracker.hpp"
 uintptr_t BypassBPCav::jmp_cavrfix1_return{NULL};
 uintptr_t BypassBPCav::jmp_cavrfix2_return{NULL};
+uintptr_t BypassBPCav::jmp_cavrfix3_return{ NULL };
 bool BypassBPCav::cheaton{NULL};
 //variables
 // clang-format off
@@ -44,6 +45,25 @@ __asm {
   }
 }
 
+  static naked void newmem_detour3() {
+__asm {
+  validation:
+    cmp byte ptr [BypassBPCav::cheaton], 1
+    je cheatcode
+    jmp code
+  code:
+    mov rax, [rbx + 0x50]
+    mov rcx, [rax + 0x18]
+    jmp qword ptr [BypassBPCav::jmp_cavrfix3_return]
+
+  cheatcode:
+    mov edx, 0x0
+    mov rax, [rbx + 0x50]
+    mov rcx, [rax + 0x18]
+    jmp qword ptr [BypassBPCav::jmp_cavrfix3_return]
+    }
+  }
+
 
 // clang-format on
 void BypassBPCav::init_check_box_info() {
@@ -85,7 +105,17 @@ std::optional<std::string> BypassBPCav::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix2";
   }
-  
+  auto cavrfix3_addr = utility::scan(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+
+  if (!cavrfix3_addr) {
+      return "Unable to find cavrfix3 pattern.";
+  }
+
+  if (!install_hook_absolute(cavrfix3_addr.value() + 0x06, m_cavrfix3_hook, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize cavrfix3";
+  }
   
 
   return Mod::on_initialize();
