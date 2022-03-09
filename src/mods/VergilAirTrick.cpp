@@ -470,9 +470,9 @@ void VergilAirTrick::on_draw_ui()
 		ImGui::RadioButton("Behind the enemy", (int*)&trickType, 1);
 		ImGui::Checkbox("Teleport doppelganger to opposite side", &isDoppelOppositeTeleport);
 		ImGui::TextWrapped("Distance from enemy:");
-		ImGui::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", ImGuiSliderFlags_None);
+		UI::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
 		ImGui::TextWrapped("Height above/below enemy.");
-		ImGui::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", ImGuiSliderFlags_None);
+		UI::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
 	}
 	ImGui::Separator();
 

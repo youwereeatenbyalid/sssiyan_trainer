@@ -637,10 +637,10 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Separator();
 	ImGui::TextWrapped("SDT cost to perform JCE in human form:");
 	ImGui::ShowHelpMarker("Doesn't work if \"Auto SDT\" enabled.");
-	ImGui::SliderFloat("##subSdtSlider", &humanJCECost, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	UI::SliderFloat("##subSdtSlider", &humanJCECost, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 	ImGui::Spacing();
 	ImGui::TextWrapped("Minimum SDT to perform JCE in human form:");
-	ImGui::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	UI::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
 	//--------------This should be removed----------------//
 	/*ImGui::Separator();
@@ -673,24 +673,24 @@ void DMC3JCE::on_draw_ui()
 			case JCEController::Type::Random:
 			{
 				ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
-				ImGui::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
+				UI::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 				if (ImGui::Button("Apply delay settings ##0"))
 					jceController->set_rndspawn_delay(rndDelay);
 				ImGui::TextWrapped("Interval between spawning a Judgement Cut on the lock-on target:");
-				ImGui::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
+				UI::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 				ImGui::TextWrapped("Execution duration:");
-				ImGui::SliderFloat("##rndExeTime", &rndExeDuration, 2.8f, 8.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+				UI::SliderFloat("##rndExeTime", &rndExeDuration, 2.8f, 8.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 				jceController->executionTimeAsm = rndExeDuration;
 				break;
 			}
 			case JCEController::Type::Track:
 			{
 				ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
-				ImGui::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", ImGuiSliderFlags_AlwaysClamp);
+				UI::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 				if (ImGui::Button("Apply delay settings ##1"))
 					jceController->set_trackspawn_delay(trackDelay);
 				ImGui::TextWrapped("Execution duration:");
-				ImGui::SliderFloat("##trackExeTime", &trackExeDuration, 3.0f, 8.5f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+				UI::SliderFloat("##trackExeTime", &trackExeDuration, 3.0f, 8.5f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 				jceController->executionTimeAsm = trackExeDuration;
 				break;
 			}

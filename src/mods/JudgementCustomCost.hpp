@@ -74,7 +74,7 @@ public:
 	void on_draw_ui() override
 	{
 		ImGui::TextWrapped("Judgement cost:");
-		ImGui::SliderFloat("##CustomCost", &customCost, 0, 10000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+		UI::SliderFloat("##CustomCost", &customCost, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 	};
 
 private:
