@@ -1556,12 +1556,12 @@ void EnemySwapper::on_draw_ui() {
       ImGui::ShowHelpMarker("Fixes some enemies spawning under the floor. Note that this will affect all spawns and can change spawn animations.");
       if (isCustomSpawnPos) {
           ImGui::TextWrapped("Height offset");
-          ImGui::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 12.0f, "%.1f");
+          UI::SliderFloat("##spawnPosZOffsetSlider", &spawnPosZOffset, 0.0f, 12.0f, "%.1f");
           ImGui::TextWrapped("Changing XY coordinates can fix enemies spawning behind invisible walls (i.e. swapping Urizen 1, Nidhogg or Qliphot roots with other enemies).");
           ImGui::TextWrapped("X offset");
-          ImGui::SliderFloat("##spawnPosXOffsetSlider", &spawnPosXOffset, -12.0f, 12.0f, "%.1f");
+          UI::SliderFloat("##spawnPosXOffsetSlider", &spawnPosXOffset, -12.0f, 12.0f, "%.1f");
           ImGui::TextWrapped("Y offset");
-          ImGui::SliderFloat("##spawnPosYOffsetSlider", &spawnPosYOffset, -12.0f, 12.0f, "%.1f");
+          UI::SliderFloat("##spawnPosYOffsetSlider", &spawnPosYOffset, -12.0f, 12.0f, "%.1f");
       }
       ImGui::Separator();
       ImGui::Spacing();
@@ -1676,10 +1676,10 @@ void EnemySwapper::on_draw_ui() {
       ImGui::TextWrapped("Controls the pool of enemies that can be selected from when randomizing");
       ImGui::Columns(2, NULL, false);
       ImGui::TextWrapped("Min enemy index:");
-      ImGui::SliderInt("##minIndxSlider", &curMinIndx, 0, 39);
+      UI::SliderInt("##minIndxSlider", &curMinIndx, 0, 39, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
       ImGui::NextColumn();
       ImGui::TextWrapped("Max enemy index:");
-      ImGui::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40);
+      UI::SliderInt("##maxIndxSlider", &curMaxIndx, 1, 40, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
       ImGui::Columns(1);
       if (curMinIndx >= curMaxIndx)
         curMinIndx = curMaxIndx - 1;

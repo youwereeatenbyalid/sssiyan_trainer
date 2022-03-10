@@ -12,6 +12,7 @@ public:
   std::optional<std::string> on_initialize() override;
   uintptr_t static jmp_cavrfix1_return;
   uintptr_t static jmp_cavrfix2_return;
+  uintptr_t static jmp_cavrfix3_return;
 
   bool static cheaton;
 
@@ -35,5 +36,5 @@ private:
   //function hooks
   std::unique_ptr<FunctionHook> m_cavrfix1_hook;
   std::unique_ptr<FunctionHook> m_cavrfix2_hook;
-
+  std::unique_ptr<FunctionHook> m_cavrfix3_hook;
 };

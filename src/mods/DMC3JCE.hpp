@@ -10,6 +10,8 @@
 #include "PlayerTracker.hpp"
 #include "EnemyWaveEditor.hpp"
 #include "DeepTurbo.hpp"
+#include "mods/GameFunctions/PlayerSetDT.hpp"
+#include "VergilInstantSDT.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -109,7 +111,7 @@ public:
 			pos.z = pPos.z + zDist(rndGen);
 		}
 
-		bool get_condition(bool isBadPtr)
+		bool can_execute(bool isBadPtr)
 		{
 			if (EnemySwapper::nowFlow == 0x16 && isExecuting.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
 			{
@@ -135,6 +137,7 @@ public:
 			{
 				isExecuting.store(false);
 				isJceRunning = false;
+				isSdtRequestedAsm = false;
 				//*(int*)rayCastAddr = prevRayCastSize;
 			}
 		}
@@ -142,7 +145,7 @@ public:
 		void bad_ptr_stop()
 		{
 			stop_jce();
-			cheaton = false;
+			//cheaton = false;
 		}
 
 	public:
@@ -164,6 +167,8 @@ public:
 
 		const float rndExeTimeModDefault = 6.8f;
 		const float trackExeTimeModDefault = 5.95f;
+
+		static inline bool isSdtRequestedAsm = false;
 
 		JCEController()
 		{
@@ -253,7 +258,7 @@ public:
 								}
 							}
 						}*/
-						while (get_condition(isBadPtr))
+						while (can_execute(isBadPtr))
 						{
 							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
 							if (!isPause.has_value())
@@ -263,7 +268,7 @@ public:
 							}
 							if (isPause.value())
 								continue;
-							if (EnemySwapper::nowFlow != 0x16 || isExecuting.load() == false)//check this again
+							if(!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
 								break;
 							__try
 							{
@@ -334,7 +339,7 @@ public:
 						jcSpawn.set_params(jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						uintptr_t jcShell;
-						while (get_condition(isBadPtr))
+						while (can_execute(isBadPtr))
 						{
 							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
 							if (!isPause.has_value())
@@ -344,7 +349,7 @@ public:
 							}
 							if (isPause.value())
 								continue;
-							if (EnemySwapper::nowFlow != 0x16)//check this again
+							if (!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
 								break;
 							__try
 							{
@@ -438,6 +443,8 @@ public:
 	static inline bool isCrashFixEnabled = true;
 	static inline bool isUsingDefaultJce = false;
 	static inline bool isSetCustomCapacity = false;
+	static inline bool isAutoSdt = true;
+	static inline bool isDisableSdtRequest = false;
 
 	static inline uintptr_t canExeJceRet = 0;
 	static inline uintptr_t canExeJceRet1 = 0;
@@ -447,7 +454,6 @@ public:
 	static inline uintptr_t jcePfbJeJmp = 0;
 	static inline uintptr_t jcePfbJneJmp = 0;
 	static inline uintptr_t jcePfb2Ret = 0;
-
 	static inline uintptr_t jceTimerRet = 0;
 	static inline uintptr_t jceTimerStaticBase = 0;
 	static inline uintptr_t stopJceTimerRet = 0;
@@ -456,6 +462,8 @@ public:
 	static inline uintptr_t crashPointJeJmp = 0;
 	static inline uintptr_t jceFinishPfbRet = 0;
 	static inline uintptr_t rayCastAddr = 0;
+	static inline uintptr_t endTeleportRet = 0;
+	static inline uintptr_t vergilActionRet = 0;
 
 	static inline float humanJCECost = 3000.0f;
 	static inline float minSdt = 3000.0f;
@@ -470,6 +478,9 @@ public:
 
 	static void __cdecl start_jce_asm();
 	static void __cdecl stop_jce_asm();
+	static void set_sdt_asm(GameFunctions::PlVergilSetDT::DevilTrigger dtState);
+	static void setup_sdt_asm(int vergilActionId);
+	static bool use_default_behaviour_asm();
 
 	//PlVergil +1978 - curWeapon;
 
@@ -514,6 +525,8 @@ private:
 	std::unique_ptr<FunctionHook> m_jce_crashpoint_hook;
 	std::unique_ptr<FunctionHook> m_jce_finishpfb_hook;
 	std::unique_ptr<FunctionHook> m_jce_prefab2_hook;
+	std::unique_ptr<FunctionHook> m_end_teleport_hook;
+	std::unique_ptr<FunctionHook> m_set_active_action_hook;
 };
 //clang-format on
 

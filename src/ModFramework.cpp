@@ -29,18 +29,18 @@ static ImVec2 operator*(const ImVec2& lhs, const float rhs) { return {lhs.x * rh
 
 std::unique_ptr<ModFramework> g_framework{};
 
-static size_t g_currently_hooking = 0;
+static std::atomic_uint64_t g_currently_hooking = 0;
 static HANDLE g_hooking_thread;
 
 static void hook_init_begin_callback(HANDLE hooking_thread)
 {
     g_hooking_thread = hooking_thread;
-    g_currently_hooking++;
+    ++g_currently_hooking;
 }
 
 static void hook_init_end_callback(HANDLE hooking_thread)
 {
-    g_currently_hooking--;
+    --g_currently_hooking;
 }
 
 ModFramework::ModFramework()

@@ -82,7 +82,7 @@ void VergilGuardYamatoBlock::on_config_save(utility::Config& cfg)
 	 ImGui::ShowHelpMarker("By default block's hit efx power depends on concentration level: 0 - no efx, 1 - small flash, 2 - big flash and idk, some blur wave shit(?). "
 	 "This option allow set \"efx level\" independently of current concentration level. Can be used even if main mod is disabled.");
 	 if(isSelectEfx)
-		ImGui::SliderInt("##concLvl", &concEfx, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
+		UI::SliderInt("##concLvl", &concEfx, 0, 2, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
  }
 
 void VergilGuardYamatoBlock::init_check_box_info()

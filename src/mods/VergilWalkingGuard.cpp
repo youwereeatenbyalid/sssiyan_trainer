@@ -58,19 +58,19 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 
 void VergilWalkingGuard::on_config_load(const utility::Config& cfg)
 {
-	//skipInSdt = cfg.get<bool>("VergilWalkingGuard.skipInSdt").value_or(true);
+	skipInSdt = cfg.get<bool>("VergilWalkingGuard.skipInSdt").value_or(true);
 }
 
 void VergilWalkingGuard::on_config_save(utility::Config& cfg)
 {
-	//cfg.set<bool>("VergilWalkingGuard.skipInSdt", skipInSdt);
+	cfg.set<bool>("VergilWalkingGuard.skipInSdt", skipInSdt);
 }
 
 // void VergilWalkingGuard::on_frame(){}
 
 void VergilWalkingGuard::on_draw_ui()
 {
-	//ImGui::Checkbox("Use default behavior while in SDT", &skipInSdt);
+	ImGui::Checkbox("Disable mod while in SDT", &skipInSdt);
 }
 
 // void VergilWalkingGuard::on_draw_debug_ui(){}
