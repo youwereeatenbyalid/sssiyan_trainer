@@ -175,6 +175,7 @@
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
        #include "mods/VergilNoRoyalForkDelay.hpp"
+       #include "mods/InstantDoppel.hpp"
 
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -361,6 +362,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
         m_mods.emplace_back(std::make_unique<AirTrickDodge>());
         m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
+        m_mods.emplace_back(std::make_unique<InstantDoppel>());
 
 #ifdef DEVELOPER
     m_mods.emplace_back(std::make_unique<DeveloperTools>());

@@ -1,3 +1,4 @@
+#pragma once
 #include "GameFunc.hpp"
 
 namespace GameFunctions
@@ -33,14 +34,14 @@ namespace GameFunctions
 			setDT = (f_set_devil_trigger)fAddr;
 		}
 
-		bool invoke(DevilTrigger dt, bool isNotProduction)
+		bool invoke(DevilTrigger dt, bool isNotProduction) noexcept
 		{
 			if(!utility::isGoodReadPtr(pl, 8))
 				return false;
 			return setDT(get_thread_context(), pl, dt, isNotProduction);
 		}
 
-		bool operator()(DevilTrigger dt, bool isNotProduction) { return invoke(dt, isNotProduction); }
+		bool operator()(DevilTrigger dt, bool isNotProduction) noexcept { return invoke(dt, isNotProduction); }
 	};
 
 	class PlVergilSetDT : public PlayerSetDT
