@@ -508,7 +508,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	}
 
 	auto finishPfbAddr = patterns->find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7
-	if (!crashPointAddr)
+	if (!finishPfbAddr)
 	{
 		return "Unable to find DMC3JCE.finishPfbAddr pattern.";
 	}

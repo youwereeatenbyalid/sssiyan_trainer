@@ -257,7 +257,8 @@ set(MODS_SRC
     mods/LongerRagtimeBubble.hpp 
     mods/LongerRagtimeBubble.cpp 
     mods/DamageType.hpp 
-    mods/DamageType.cpp 
+    mods/DamageType.cpp
+    mods/InstantDoppel.hpp
 )
 
 set(HOOKS_SRC
@@ -341,6 +342,8 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PlayerCheckNormalJump.hpp
     Mods/GameFunctions/RequestPlCameraShake.hpp
     Mods/GameFunctions/PlayerSetDT.hpp
+    Mods/GameFunctions/PlVergilDoppel.hpp
+    Mods/GameFunctions/GameModelSetAction.hpp
 )
 
 set(IMGUI_SRC
