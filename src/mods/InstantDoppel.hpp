@@ -97,9 +97,9 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = vergildoppel;
-		m_full_name_string = "Instant doppelganger summon";
+		m_full_name_string = "Summon doppelganger instantly";
 		m_author_string = "VPZadov";
-		m_description_string = "Remove i-frame animation when summoning doppel.";
+		m_description_string = "Remove Vergil's i-frame DT activation motion and summon doppelganger instantly (doppel himself still have appears motion)";
 
 		set_up_hotkey();
 
@@ -137,8 +137,8 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override 
 	{
-		ImGui::TextWrapped("Select this if you want use this mod only when you activate dt with special delay state:");
-		ImGui::Checkbox("Depend on doppel delay", &isControlledBySpeedState);
+		ImGui::TextWrapped("Select this if you want use instant summon only with specific doppel's delay setup:");
+		ImGui::Checkbox("Instant summon when summon via", &isControlledBySpeedState);
 		bool isSelected = false;
 		if(ImGui::BeginCombo("##doppelDelay", delayNames[delay - 1]))
 		{
@@ -162,7 +162,7 @@ private:
 	}
 	std::unique_ptr<FunctionHook> m_doppel_hook;
 
-	const std::array<char*, 3> delayNames {"Fast", "Default", "Slow"};
+	const std::array<char*, 3> delayNames {"Fast mode", "Default mode", "Slow mode"};
 
 };
 //clang-format on
