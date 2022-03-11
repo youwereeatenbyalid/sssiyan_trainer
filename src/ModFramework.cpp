@@ -161,7 +161,7 @@ bool ModFramework::hook_d3d12()
     m_d3d12_hook->on_present([this](D3D12Hook& hook) { on_frame_d3d12(); });
     m_d3d12_hook->on_resize_buffers([this](D3D12Hook&, const UINT& width, const UINT& height) { on_reset(width, height); });
     //m_d3d12_hook->on_resize_target([this](D3D12Hook& hook) { on_reset(); });
-    //m_d3d12_hook->on_create_swap_chain([this](D3D12Hook& hook) { m_pd3d_command_queue_d3d12 = m_d3d12_hook->get_command_queue(); });
+    //m_d3d12_hook->on_create_swap_chain([this](D3D12Hook& hook) { m_d3d12.m_pd3d_command_queue = m_d3d12_hook->get_command_queue(); });
 
     // Making sure D3D11 is not hooked
     if (!m_is_d3d11) {
@@ -257,7 +257,7 @@ void ModFramework::set_style(const float& scale) noexcept {
     style.ScaleAllSizes(scale);
 
     // Font
-    auto& io = ImGui::GetIO();
+    const auto& io = ImGui::GetIO();
     ImFontConfig font_cfg;
     font_cfg.FontDataOwnedByAtlas = false;
 
@@ -442,7 +442,7 @@ void ModFramework::on_frame_d3d11() {
     ComPtr<ID3D11DeviceContext> context;
     m_d3d11_hook->get_device()->GetImmediateContext(&context);
 
-    context->OMSetRenderTargets(1, m_main_render_target_view_d3d11.GetAddressOf(), nullptr);
+    context->OMSetRenderTargets(1, m_d3d11.main_render_target_view.GetAddressOf(), nullptr);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -494,40 +494,40 @@ void ModFramework::on_frame_d3d12() {
     ImGui::Render();
 
     //Rendering
-    UINT back_buffer_idx = m_d3d12_hook->get_swap_chain()->GetCurrentBackBufferIndex();
-    auto& frame_context = m_frame_context_d3d12[back_buffer_idx];
+    const UINT back_buffer_idx = m_d3d12_hook->get_swap_chain()->GetCurrentBackBufferIndex();
+    const auto& frame_context = m_d3d12.frame_context[back_buffer_idx];
     frame_context.CommandAllocator->Reset();
 
     D3D12_RESOURCE_BARRIER barrier{};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = m_frame_context_d3d12[back_buffer_idx].MainRenderTargetResource.Get();
+    barrier.Transition.pResource = m_d3d12.frame_context[back_buffer_idx].MainRenderTargetResource.Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-    m_pd3d_command_list_d3d12->Reset(frame_context.CommandAllocator.Get(), nullptr);
-    m_pd3d_command_list_d3d12->ResourceBarrier(1, &barrier);
+    m_d3d12.pd3d_command_list->Reset(frame_context.CommandAllocator.Get(), nullptr);
+    m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
 
     // Render Dear ImGui graphics
-    m_pd3d_command_list_d3d12->OMSetRenderTargets(1, &m_frame_context_d3d12[back_buffer_idx].MainRenderTargetDescriptorHandle, FALSE, nullptr);
-    m_pd3d_command_list_d3d12->SetDescriptorHeaps(1, m_pd3d_srv_desc_heap_d3d12.GetAddressOf());
+    m_d3d12.pd3d_command_list->OMSetRenderTargets(1, &m_d3d12.frame_context[back_buffer_idx].MainRenderTargetDescriptorHandle, FALSE, nullptr);
+    m_d3d12.pd3d_command_list->SetDescriptorHeaps(1, m_d3d12.pd3d_srv_desc_heap.GetAddressOf());
 
-    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pd3d_command_list_d3d12.Get());
+    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_d3d12.pd3d_command_list.Get());
 
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 
-    m_pd3d_command_list_d3d12->ResourceBarrier(1, &barrier);
-    m_pd3d_command_list_d3d12->Close();
+    m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+    m_d3d12.pd3d_command_list->Close();
 
-    command_queue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(m_pd3d_command_list_d3d12.GetAddressOf()));
+    command_queue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(m_d3d12.pd3d_command_list.GetAddressOf()));
 
     ImGui::UpdatePlatformWindows();
 
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
-        ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_pd3d_command_list_d3d12.Get());
+        ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_d3d12.pd3d_command_list.Get());
     }
 }
 
@@ -539,9 +539,9 @@ void ModFramework::on_reset(const UINT& width, const UINT& height) {
         if (m_initialized)
         {
             ImGui_ImplDX11_Shutdown();
-            ImGui_ImplWin32_Shutdown();
-            ImGui::DestroyContext();
+            m_d3d11 = {};
         }
+
         cleanup_render_target_d3d11();
     }
 
@@ -549,9 +549,9 @@ void ModFramework::on_reset(const UINT& width, const UINT& height) {
         if (m_initialized)
         {
             ImGui_ImplDX12_Shutdown();
-            ImGui_ImplWin32_Shutdown();
-            ImGui::DestroyContext();
+            m_d3d12 = {};
         }
+
         cleanup_render_target_d3d12();
     }
 
@@ -753,8 +753,8 @@ bool ModFramework::initialize() {
         swap_chain->GetDesc(&m_swap_desc);
 
         m_wnd = m_swap_desc.OutputWindow;
-        m_buffer_count_d3d12 = m_swap_desc.BufferCount;
-        m_frame_context_d3d12.resize(m_buffer_count_d3d12);
+        m_d3d12.buffer_count = m_swap_desc.BufferCount;
+        m_d3d12.frame_context.resize(m_d3d12.buffer_count);
 
         m_scale = 1.0f;
 
@@ -821,10 +821,10 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        if (!ImGui_ImplDX12_Init(device.Get(), m_buffer_count_d3d12,
-            DXGI_FORMAT_R8G8B8A8_UNORM, m_pd3d_srv_desc_heap_d3d12.Get(),
-            m_pd3d_srv_desc_heap_d3d12->GetCPUDescriptorHandleForHeapStart(),
-            m_pd3d_srv_desc_heap_d3d12->GetGPUDescriptorHandleForHeapStart()))
+        if (!ImGui_ImplDX12_Init(device.Get(), m_d3d12.buffer_count,
+            DXGI_FORMAT_R8G8B8A8_UNORM, m_d3d12.pd3d_srv_desc_heap.Get(),
+            m_d3d12.pd3d_srv_desc_heap->GetCPUDescriptorHandleForHeapStart(),
+            m_d3d12.pd3d_srv_desc_heap->GetGPUDescriptorHandleForHeapStart()))
         {
             spdlog::error("Failed to initialize ImGui ImplDX12.");
             return false;
@@ -837,11 +837,11 @@ bool ModFramework::initialize() {
         }
 
         // Loading the custom textures for DX12
-        m_logo_dx12 = UI::Texture2DDX12(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 1);
-        m_icons.kbIconDX12 = UI::Texture2DDX12(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 2);
-        m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 3);
-        m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 4);
-        m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get(), m_pd3d_srv_desc_heap_d3d12.Get(), 5);
+        m_logo_dx12 = UI::Texture2DDX12(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 1);
+        m_icons.kbIconDX12 = UI::Texture2DDX12(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 2);
+        m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 3);
+        m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 4);
+        m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 5);
 
         if (!m_logo_dx12 || !m_icons.kbIconDX12 || !m_icons.kbIconActiveDX12
             || !m_icons.keyIconsDX12 || !m_icons.gearIconDX12) {
@@ -1507,12 +1507,12 @@ void ModFramework::draw_notifs() const
 void ModFramework::create_render_target_d3d11() {
     ComPtr<ID3D11Texture2D> back_buffer;
     if (m_d3d11_hook->get_swap_chain()->GetBuffer(0, IID_PPV_ARGS(&back_buffer)) == S_OK) {
-        m_d3d11_hook->get_device()->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_main_render_target_view_d3d11);
+        m_d3d11_hook->get_device()->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_d3d11.main_render_target_view);
     }
 }
 
 void ModFramework::cleanup_render_target_d3d11() {
-    m_main_render_target_view_d3d11.Reset();
+    m_d3d11.main_render_target_view.Reset();
 }
 
 bool ModFramework::create_rtv_descriptor_heap_d3d12() {
@@ -1520,19 +1520,19 @@ bool ModFramework::create_rtv_descriptor_heap_d3d12() {
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-    desc.NumDescriptors = m_buffer_count_d3d12;
+    desc.NumDescriptors = m_d3d12.buffer_count;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     desc.NodeMask = 1;
 
-    if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3d_rtv_desc_heap_d3d12)) != S_OK) {
+    if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_d3d12.pd3d_rtv_desc_heap)) != S_OK) {
         return false;
     }
 
 	const SIZE_T rtv_descriptor_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = m_pd3d_rtv_desc_heap_d3d12->GetCPUDescriptorHandleForHeapStart();
-    for (UINT i = 0; i < m_buffer_count_d3d12; i++)
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = m_d3d12.pd3d_rtv_desc_heap->GetCPUDescriptorHandleForHeapStart();
+    for (UINT i = 0; i < m_d3d12.buffer_count; i++)
     {
-        m_frame_context_d3d12[i].MainRenderTargetDescriptorHandle = rtv_handle;
+        m_d3d12.frame_context[i].MainRenderTargetDescriptorHandle = rtv_handle;
         rtv_handle.ptr += rtv_descriptor_size;
     }
 
@@ -1545,7 +1545,7 @@ bool ModFramework::create_srv_descriptor_heap_d3d12(UINT descriptorCount) {
     desc.NumDescriptors = descriptorCount;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-    if (m_d3d12_hook->get_device()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3d_srv_desc_heap_d3d12)) != S_OK)
+    if (m_d3d12_hook->get_device()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_d3d12.pd3d_srv_desc_heap)) != S_OK)
     {
 	    return false;
     }
@@ -1554,9 +1554,9 @@ bool ModFramework::create_srv_descriptor_heap_d3d12(UINT descriptorCount) {
 }
 
 bool ModFramework::create_command_allocator_d3d12() {
-    for (UINT i = 0; i < m_buffer_count_d3d12; i++)
+    for (UINT i = 0; i < m_d3d12.buffer_count; i++)
     {
-	    if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frame_context_d3d12[i].CommandAllocator)) != S_OK)
+	    if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_d3d12.frame_context[i].CommandAllocator)) != S_OK)
 	    {
 		    return false;
 	    }
@@ -1566,7 +1566,7 @@ bool ModFramework::create_command_allocator_d3d12() {
 }
 
 bool ModFramework::create_command_list_d3d12() {
-    if (m_d3d12_hook->get_device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_frame_context_d3d12[0].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_pd3d_command_list_d3d12)) != S_OK || m_pd3d_command_list_d3d12->Close() != S_OK)
+    if (m_d3d12_hook->get_device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_d3d12.frame_context[0].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_d3d12.pd3d_command_list)) != S_OK || m_d3d12.pd3d_command_list->Close() != S_OK)
     {
 	    return false;
     }
@@ -1576,9 +1576,9 @@ bool ModFramework::create_command_list_d3d12() {
 
 void ModFramework::cleanup_render_target_d3d12()
 {
-    for (UINT i = 0; i < m_buffer_count_d3d12; i++) {
-        if (m_frame_context_d3d12[i].MainRenderTargetResource) {
-            m_frame_context_d3d12[i].MainRenderTargetResource.Reset();
+    for (UINT i = 0; i < m_d3d12.buffer_count; i++) {
+        if (m_d3d12.frame_context[i].MainRenderTargetResource) {
+            m_d3d12.frame_context[i].MainRenderTargetResource.Reset();
         }
     }
 }
@@ -1587,9 +1587,9 @@ void ModFramework::create_render_target_d3d12()
 {
     //cleanup_render_target_d3d12();
 
-    for (UINT i = 0; i < m_buffer_count_d3d12; i++) {
-        if (m_d3d12_hook->get_swap_chain()->GetBuffer(i, IID_PPV_ARGS(&m_frame_context_d3d12[i].MainRenderTargetResource)) == S_OK) {
-            m_d3d12_hook->get_device()->CreateRenderTargetView(m_frame_context_d3d12[i].MainRenderTargetResource.Get(), nullptr, m_frame_context_d3d12[i].MainRenderTargetDescriptorHandle);
+    for (UINT i = 0; i < m_d3d12.buffer_count; i++) {
+        if (m_d3d12_hook->get_swap_chain()->GetBuffer(i, IID_PPV_ARGS(&m_d3d12.frame_context[i].MainRenderTargetResource)) == S_OK) {
+            m_d3d12_hook->get_device()->CreateRenderTargetView(m_d3d12.frame_context[i].MainRenderTargetResource.Get(), nullptr, m_d3d12.frame_context[i].MainRenderTargetDescriptorHandle);
         }
     }
 }
