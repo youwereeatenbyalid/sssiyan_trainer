@@ -1,17 +1,22 @@
 #pragma once
 #include "Mod.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class VergilGuardYamatoBlock : public Mod
 {
 public:
 	static inline bool cheaton = false;
+	static inline bool isSelectEfx = false;
 
 	static inline uintptr_t ret = 0;
+	static inline uintptr_t efxRet = 0;
+
+	static inline int concEfx = 2;
 
 	VergilGuardYamatoBlock() = default;
 
 	std::string_view get_name() const override
 	{
-		return "GuardBlockYamatoAnim";
+		return "VergilGuardYamatoBlock";
 	}
 	std::string get_checkbox_name() override
 	{
@@ -23,21 +28,14 @@ public:
 	};
 
 	std::optional<std::string> on_initialize() override;
-
+	void on_draw_ui() override;
 	// Override this things if you want to store values in the config file
-	// void on_config_load(const utility::Config & cfg) override;
-	// void on_config_save(utility::Config & cfg) override;
-
-	// on_frame() is called every frame regardless whether the gui shows up.
-	// void on_frame() override;
-	// on_draw_ui() is called only when the gui shows up
-	// you are in the imgui window here.
-	// void on_draw_ui() override;
-	// on_draw_debug_ui() is called when debug window shows up
-	// void on_draw_debug_ui() override;
+	void on_config_load(const utility::Config & cfg) override;
+	void on_config_save(utility::Config & cfg) override;
 
 private:
 	void init_check_box_info() override;
 	std::unique_ptr<FunctionHook> m_action_hook;
+	std::unique_ptr<FunctionHook> m_efx_hook;
 };
 

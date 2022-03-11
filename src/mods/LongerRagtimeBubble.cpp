@@ -77,5 +77,5 @@ void LongerRagtimeBubble::on_config_save(utility::Config &cfg) {
 //void LongerRagtimeBubble::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void LongerRagtimeBubble::on_draw_ui() {
-    ImGui::SliderFloat("Additional Time: 0 is vanilla, 1 is infinite", &decrementamount, 0, 1, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+    UI::SliderFloat("Additional Time: 0 is vanilla, 1 is infinite", &decrementamount, 0, 1, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 }

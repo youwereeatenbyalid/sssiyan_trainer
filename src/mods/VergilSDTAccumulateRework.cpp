@@ -22,6 +22,8 @@ static naked void dtchange_detour() {
         cheat:
         cmp byte ptr [DMC3JCE::isJceRunning], 1
         je originalcode
+        cmp dword ptr [rbp+0xE64], 4//playerId
+        jne originalcode
         movss xmm5, [VergilSDTAccumulateRework::maxSdt]
         comiss xmm5, dword ptr [rbp + 0x00001B20]
         jbe originalcode

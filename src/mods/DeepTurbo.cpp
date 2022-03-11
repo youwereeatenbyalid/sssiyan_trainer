@@ -53,10 +53,20 @@ static naked void detour2() {
         cmp dword ptr [EnemySwapper::nowFlow], 0x16//Gameplay
         jne menuturbo
         mov rbx, [DeepTurbo::pauseBase]
+        test rbx, rbx
+        je setturbospeed
         mov rbx, [rbx]
+        test rbx, rbx
+        je setturbospeed
         mov rbx, [rbx + 0x100]
+        test rbx, rbx
+        je setturbospeed
         mov rbx, [rbx + 0x288]
+        test rbx, rbx
+        je setturbospeed
         mov rbx, [rbx + 0xC8]
+        test rbx, rbx
+        je setturbospeed
         mov rbx, [rbx + 0x5C4]
         cmp bx, 1
         jne setturbospeed
@@ -192,7 +202,7 @@ void DeepTurbo::on_draw_ui() {
   if (isSpeedUpMenu)
   {
       ImGui::TextWrapped("Menu speed:");
-      ImGui::SliderFloat("##menuSpeed", &menuSpeed, 1.0f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+      UI::SliderFloat("##menuSpeed", &menuSpeed, 1.0f, 10.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
   }
 }
 

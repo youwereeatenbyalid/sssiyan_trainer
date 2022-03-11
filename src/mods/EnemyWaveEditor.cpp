@@ -712,7 +712,7 @@ void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::InputInt("##EmNumInput", &data.num);
   ImGui::Spacing();
   ImGui::TextWrapped("Odds to appear (%%):");
-  ImGui::SliderFloat("##OddsSlider", &data.odds, 0.0f, 100.f, "%.1f");
+  UI::SliderFloat("##OddsSlider", &data.odds, 0.0f, 100.f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
   ImGui::Spacing();
   ImGui::Checkbox("Use boss hp bar and boss camera", &data.isBoss);
   ImGui::Spacing();

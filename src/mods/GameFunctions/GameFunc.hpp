@@ -1,6 +1,8 @@
 #pragma once
 #include "Mod.hpp"
+#include "utility/Memory.hpp"
 #include <optional>
+
 //clang-format off
 namespace GameFunctions
 {
@@ -74,7 +76,7 @@ namespace GameFunctions
 	private:
 		static bool is_bad_ptr(uintptr_t ptr)
 		{
-			return (bool)IsBadReadPtr((void*)ptr, 0x8);
+			return !utility::isGoodReadPtr(ptr, sizeof(ptr));
 		}
 
 	public:
@@ -152,10 +154,10 @@ namespace GameFunctions
 		template <typename T, size_t offsCount>
 		static bool try_to_write(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, T val, bool isDerefedBase = false)
 		{
-			auto ptr = PtrController::get_ptr<T>(offsets, base, isDerefedBase);
+			auto ptr = PtrController::get_ptr(base, offsets, isDerefedBase);
 			if (ptr.has_value())
 			{
-				*(ptr.value()) = val;
+				*(T*)(ptr.value()) = val;
 				return true;
 			}
 			return false;

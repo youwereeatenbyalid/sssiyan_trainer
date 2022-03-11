@@ -4,48 +4,65 @@
 uintptr_t ChargeChecker::jmp_ret{NULL};
 uintptr_t ChargeChecker::jmp_ret2{NULL};
 bool ChargeChecker::cheaton{NULL};
+
+// nero
 float neroSwordMult{NULL};
 float neroGunMult{NULL};
 float neroBreakerMult{NULL};
-// float neroAllInMult{NULL};
+float neroMaxBetMult{NULL};
 
-bool standardizeBreakerCharges{NULL};
-float breakerChargeMax{NULL};
+bool standardizeBreakerCharges{ NULL };
+float breakerChargeMax{ NULL };
+
+
+// dante
+float danteOverdriveMult{ NULL };
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
+        cmp byte ptr[ChargeChecker::cheaton], 1
         jne code
-		cmp byte ptr [ChargeChecker::cheaton], 1
-        je cheatcode
+        cmp [PlayerTracker::playerid], 0
+        je nerocode
+        cmp [PlayerTracker::playerid], 1
+        je dantecode
         jmp code
 
-    cheatcode:
+    nerocode:
         cmp dword ptr [rdi+48h], 1
-        je swordcharge
+        je swordchargenero
         cmp dword ptr [rdi+48h], 2
-        je guncharge
+        je gunchargenero
         cmp dword ptr [rdi+48h], 4096
-        je breakercharge
-        //cmp [rdi+48h], 4097 // all in input
-        //je allincharge
+        je breakerchargenero
+        cmp dword ptr [rdi+48h], 4097 // all in input
+        je maxbetcharge
 		jmp code
 
-    swordcharge:
+    swordchargenero:
         mulss xmm6, [neroSwordMult]
         jmp code
-    guncharge:
+    gunchargenero:
         mulss xmm6, [neroGunMult]
         jmp code
-    breakercharge:
+    breakerchargenero:
         mulss xmm6, [neroBreakerMult]
         jmp code
-    // allincharge:
-        // mulss xmm6, [neroAllInMult]
-        // jmp code
+    maxbetcharge:
+        mulss xmm6, [neroMaxBetMult]
+        jmp code
+
+    dantecode:
+        cmp dword ptr [rdi+48h], 1
+        je overdrivechargedante
+        jmp code
+
+    overdrivechargedante:
+        mulss xmm6, [danteOverdriveMult]
+        jmp code
 
     code:
         movss xmm1, [rdi+5Ch]
@@ -53,23 +70,17 @@ static naked void detour() {
 	}
 }
 
-static naked void detour2() {
+static naked void detour2() { // standardize breaker charges
 	__asm {
-        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
+        cmp byte ptr[ChargeChecker::cheaton], 1
         jne code
-		cmp byte ptr [ChargeChecker::cheaton], 1
-        je cheatcode
+        cmp [PlayerTracker::playerid], 0 //change this to the char number obviously
+        je nerocode
         jmp code
 
-    cheatcode:
+    nerocode:
         cmp byte ptr [standardizeBreakerCharges], 1
         jne code
-        //cmp dword ptr [rdi+48h], 1
-        //je swordcharge
-        //cmp dword ptr [rdi+48h], 2
-        //je guncharge
-        //cmp [rdi+48h], 4097 // all in input
-        //je allincharge
         cmp dword ptr [rdi+48h], 4096
         je breakercharge
 		jmp code
@@ -95,7 +106,7 @@ std::optional<std::string> ChargeChecker::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &ChargeChecker::cheaton;
-  m_on_page             = nero;
+  m_on_page             = mechanics;
 
   m_full_name_string   = "Faster Charges (+)";
   m_author_string      = "SSSiyan";
@@ -129,33 +140,56 @@ std::optional<std::string> ChargeChecker::on_initialize() {
 }
 
 void ChargeChecker::on_config_load(const utility::Config& cfg) {
+  // nero
   neroSwordMult = cfg.get<float>("nero_sword_charge").value_or(1.0f);
   neroGunMult = cfg.get<float>("nero_gun_charge").value_or(1.0f);
+  neroMaxBetMult = cfg.get<float>("nero_max_bet_charge").value_or(1.0f);
   neroBreakerMult = cfg.get<float>("nero_breaker_charge").value_or(1.0f);
   breakerChargeMax = cfg.get<float>("nero_breaker_charge_max").value_or(120.0f);
   standardizeBreakerCharges = cfg.get<bool>("standardize_breaker_charges").value_or(false);
+  // dante
+  danteOverdriveMult = cfg.get<float>("dante_overdrive_charge").value_or(1.0f);
 }
+
 void ChargeChecker::on_config_save(utility::Config& cfg) {
+  // nero
   cfg.set<float>("nero_sword_charge", neroSwordMult);
   cfg.set<float>("nero_gun_charge", neroGunMult);
+  cfg.set<float>("nero_max_bet_charge", neroMaxBetMult);
   cfg.set<float>("nero_breaker_charge", neroBreakerMult);
   cfg.set<float>("nero_breaker_charge_max", breakerChargeMax);
   cfg.set<bool>("standardize_breaker_charges", standardizeBreakerCharges);
+  // dante
+  cfg.set<float>("dante_overdrive_charge", danteOverdriveMult);
 }
 
 void ChargeChecker::on_draw_ui() {
+
+  ImGui::Text("Nero");
   ImGui::Text("Sword Charge Speed Multiplier");
-
-  UI::SliderFloat("##swordmultslider", &neroSwordMult, 0.5f, 3.0f, "%.1f");
+  UI::SliderFloat("##swordmultslidernero", &neroSwordMult, 0.5f, 5.0f, "%.1f");
+  ImGui::Text("Max Bet Charge Speed Multiplier");
+  UI::SliderFloat("##maxbetmultslider", &neroMaxBetMult, 0.5f, 5.0f, "%.1f");
   ImGui::Text("Gun Charge Speed Multiplier");
-  UI::SliderFloat("##gunmultslider", &neroGunMult, 0.5f, 3.0f, "%.1f");
+  UI::SliderFloat("##gunmultslider", &neroGunMult, 0.5f, 5.0f, "%.1f");
   ImGui::Text("Breaker Charge Speed Multiplier");
-  UI::SliderFloat("##breakermultslider", &neroBreakerMult, 0.5f, 3.0f, "%.1f");
-
-  ImGui::Spacing();
-  ImGui::Separator();
+  UI::SliderFloat("##breakermultslider", &neroBreakerMult, 0.5f, 5.0f, "%.1f");
   ImGui::Spacing();
   ImGui::Checkbox("Standardize Breaker Charge Times", &standardizeBreakerCharges);
   ImGui::Text("Breaker Charge Time (Gerbera default is 120)");
   UI::SliderFloat("##maxbreakerchargeslider", &breakerChargeMax, 0.0f, 200.0f, "%.0f");
+
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+  ImGui::Text("Dante");
+  ImGui::Text("Overdrive Charge Speed Multiplier");
+  UI::SliderFloat("##overdrivemultesliderdante", &danteOverdriveMult, 0.5f, 5.0f, "%.1f");
+
+  // ImGui::Spacing();
+  // ImGui::Separator();
+  // ImGui::Spacing();
+  // ImGui::Text("Vergil");
+  // ImGui::Text("Overdrive Charge Speed Multiplier"); // doesn't work because vergil is once again a special snowflake
+  // UI::SliderFloat("##overdrivemulteslidervergil", &vergilOverdriveMult, 0.5f, 5.0f, "%.1f");
 }

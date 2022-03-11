@@ -256,6 +256,8 @@ set(MODS_SRC
     mods/VergilNoRoyalForkDelay.hpp
     mods/LongerRagtimeBubble.hpp 
     mods/LongerRagtimeBubble.cpp 
+    mods/DamageType.hpp 
+    mods/DamageType.cpp 
 )
 
 set(HOOKS_SRC
@@ -338,6 +340,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PositionController.hpp
     Mods/GameFunctions/PlayerCheckNormalJump.hpp
     Mods/GameFunctions/RequestPlCameraShake.hpp
+    Mods/GameFunctions/PlayerSetDT.hpp
 )
 
 set(IMGUI_SRC

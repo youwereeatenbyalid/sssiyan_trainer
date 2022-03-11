@@ -829,6 +829,7 @@ void BreakerSwitcher::on_config_load(const utility::Config& cfg) {
   BreakerSwitcher::use_secondary = cfg.get<bool>("use_secondary").value_or(false);
   BreakerSwitcher::fasterbreaker = cfg.get<bool>("faster_breaker").value_or(false);
   BreakerSwitcher::instantkeyboardbreakers = cfg.get<bool>("instant_keyboard_breakers").value_or(false);
+  BreakerSwitcher::breakaway_button = bsinputs[breakaway_index];
 }
 // during save
 void BreakerSwitcher::on_config_save(utility::Config &cfg) {

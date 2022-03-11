@@ -38,7 +38,7 @@
         #include "mods/DifficultySelect.hpp"
     // Nero
         #include "mods/BreakerSwitcher.hpp"
-        #include "mods/DisableBreakaway.hpp"
+        //#include "mods/DisableBreakaway.hpp"
         #include "mods/CaliburExceed.hpp"
         #include "mods/NothingCancelsBubble.hpp"
 		#include "mods/LongerRagtimeBubble.hpp"
@@ -91,8 +91,9 @@
         #include "mods/AerialPushbackVertical.hpp"
         #include "mods/DisableGauntletStages.hpp"
         #include "mods/NoSlowmoOrHitstop.hpp"
+        #include "mods/DamageType.hpp"
     // Nero
-        #include "mods/NeroInfBreakers.hpp"
+        //#include "mods/NeroInfBreakers.hpp"
         #include "mods/NeroDisableWiresnatch.hpp"
         #include "mods/NeroSwapWiresnatch.hpp"
         #include "mods/NeroTomboyLockOn.hpp"
@@ -221,7 +222,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
         m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
-        m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
 		m_mods.emplace_back(std::make_unique<LongerRagtimeBubble>());
@@ -273,8 +274,9 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<WeightReset>());
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
         m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
+        m_mods.emplace_back(std::make_unique<DamageType>());
     // Nero
-        m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
+        //m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
@@ -466,9 +468,14 @@ void Mods::on_draw_ui() const {
     }
 }
 
-void Mods::draw_entry(std::unique_ptr<Mod>& mod){
-    //mod->get_hotkey_name()
-    auto window = ImGui::GetCurrentWindow();
+void Mods::draw_entry(Mod* mod){
+
+    if(mod == nullptr)
+    {
+        return;
+    }
+
+    const auto window = ImGui::GetCurrentWindow();
 
     ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
     ImGui::SameLine();
@@ -477,7 +484,12 @@ void Mods::draw_entry(std::unique_ptr<Mod>& mod){
         m_focused_mod = mod->get_name();
     }
 
-    ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
+    //if (!ImGui::IsWindowFocused())
+    //{
+    //    return;
+    //}
+
+    const ImRect areaOfModName(ImGui::GetItemRectMin(), ImVec2(window->Pos.x + window->Size.x, ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y));
 
     const auto mousePos = ImGui::GetMousePos();
 
@@ -499,7 +511,7 @@ void Mods::on_pagelist_ui(int page, float indent) {
       if (indent != 0.f) {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
       }
-      draw_entry(mod);
+      draw_entry(mod.get());
     }
       //mod->modkeytoggle.draw(mod->get_name());
   }

@@ -17,12 +17,15 @@ static naked void max_jjc_detour() {
 
 		cheat:
 		mov eax, dword ptr [VergilSetMaxJJC::max_jjc]
-		cmp [VergilSetMaxJJC::sdtincrease], 1
+		cmp byte ptr [VergilSetMaxJJC::sdtincrease], 1
+		jne ret_jmp
+
+		sdtinc:
+		cmp dword ptr [rcx+0x09B0], 2
 		jne ret_jmp
 		inc eax
-		jmp ret_jmp
 
-		ret_jmp://note: don't name labels as "exit" :D
+		ret_jmp:
 		cmp [rcx+0x000018E0],eax
 		jmp [VergilSetMaxJJC::jmp_ret]
   }
@@ -36,8 +39,8 @@ void VergilSetMaxJJC::init_check_box_info() {
 
 void VergilSetMaxJJC::on_config_load(const utility::Config& cfg) {
   max_jjc = cfg.get<uint32_t>("vergil_max_jjc").value_or(3);
-  sdtincrease == cfg.get<bool>("vergil_sdt_jjdcincrease").value_or(false);
-  infinitejjdc == cfg.get<bool>("vergil_infinite_jjdc").value_or(false);
+  sdtincrease = cfg.get<bool>("vergil_sdt_jjdcincrease").value_or(false);
+  infinitejjdc = cfg.get<bool>("vergil_infinite_jjdc").value_or(false);
 }
 
 void VergilSetMaxJJC::on_config_save(utility::Config& cfg) {
@@ -51,7 +54,7 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   m_is_enabled        = &VergilSetMaxJJC::cheaton;
   m_on_page           = vergilcheat;
   m_full_name_string = "Just Judgement Cut Limit (+)";
-  m_author_string    = "VPZadov";
+  m_author_string    = "SSSiyan, VPZadov";
   m_description_string = "Set the maximum number of Just Judgment Cuts Vergil can perform in a row.";
 
   set_up_hotkey();

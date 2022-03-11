@@ -25,22 +25,37 @@
 
 // clang-format off
 
-static ImVec2 operator*(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x * rhs, lhs.y * rhs); }
+static ImVec2 operator*(const ImVec2& lhs, const float rhs) { return {lhs.x * rhs, lhs.y * rhs}; }
 
 std::unique_ptr<ModFramework> g_framework{};
 
+static std::atomic_uint64_t g_currently_hooking = 0;
+static HANDLE g_hooking_thread;
+
+static void hook_init_begin_callback(HANDLE hooking_thread)
+{
+    g_hooking_thread = hooking_thread;
+    ++g_currently_hooking;
+}
+
+static void hook_init_end_callback(HANDLE hooking_thread)
+{
+    --g_currently_hooking;
+}
+
 ModFramework::ModFramework()
-    : m_game_module{ GetModuleHandle(0) }
+    : m_game_module{ GetModuleHandle(nullptr) }
 {
     using std::filesystem::path;
 
-    auto patternsCacheFileName = "Collab Trainer/Configs/AOBList.ini";
+    FunctionHook::get_hook_begin_callback() = &hook_init_begin_callback;
+    FunctionHook::get_hook_end_callback() = &hook_init_end_callback;
 
     // Making sure the log and configs directories are created
     ::CreateDirectory(path(LOG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(KEYBIND_CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
-    ::CreateDirectory(path(patternsCacheFileName).parent_path().string().c_str(), nullptr);
+    ::CreateDirectory(path(AOB_LIST_FILENAME).parent_path().string().c_str(), nullptr);
 
     m_logger = spdlog::basic_logger_mt("Collab Trainer", LOG_FILENAME, true);
 
@@ -49,7 +64,7 @@ ModFramework::ModFramework()
     spdlog::info(LOG_ENTRY);
 
     // Initialize the pattern manager
-    Mod::patterns = std::make_unique<InitPatternsManager>(patternsCacheFileName, "IsUsingPatternsList");
+    Mod::patterns = std::make_unique<InitPatternsManager>(AOB_LIST_FILENAME, "IsUsingPatternsList");
 
     // Loading stuff we saved in the config file
     utility::Config cfg(CONFIG_FILENAME);
@@ -96,7 +111,7 @@ ModFramework::~ModFramework() {
         save_config();
     }
 
-    g_keyBinds.ResetInstance();
+    KeyBinder::ResetInstance();
 }
 
 bool ModFramework::hook_d3d11()
@@ -274,6 +289,16 @@ bool ModFramework::on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM&
     bool is_mouse_moving = false;
 
     switch (message) {
+    case WM_CLOSE: {
+        // Don't allow any more hooks to get initialized
+        FunctionHook::allow_hook(false);
+
+	    while(g_currently_hooking != 0)
+	    {
+            Sleep(5);
+		}
+    } break;
+
     case WM_INPUT: {
         // RIM_INPUT means the window has focus
         if (GET_RAWINPUT_CODE_WPARAM(w_param) == RIM_INPUT) {
@@ -533,7 +558,8 @@ void ModFramework::on_reset(const UINT& width, const UINT& height) {
     m_initialized = false;
 }
 
-void ModFramework::save_config() {
+void ModFramework::save_config() const
+{
     spdlog::info("Saving config to file");
 
     utility::Config cfg(CONFIG_FILENAME);
@@ -589,8 +615,8 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        ComPtr<ID3D11Device> device = m_d3d11_hook->get_device();
-        ComPtr<IDXGISwapChain> swap_chain = m_d3d11_hook->get_swap_chain();
+        const ComPtr<ID3D11Device> device = m_d3d11_hook->get_device();
+        const ComPtr<IDXGISwapChain> swap_chain = m_d3d11_hook->get_swap_chain();
 
         // Wait.
         if (!device || !swap_chain) {
@@ -650,7 +676,7 @@ bool ModFramework::initialize() {
 
         create_render_target_d3d11();
 
-        spdlog::info("Window Handle: {0:x}", (uintptr_t)m_wnd);
+        spdlog::info("Window Handle: {0:x}", reinterpret_cast<uintptr_t>(m_wnd));
         spdlog::info("Initializing ImGui");
 
         IMGUI_CHECKVERSION();
@@ -700,8 +726,8 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        ComPtr<ID3D12Device> device = m_d3d12_hook->get_device();
-        ComPtr<IDXGISwapChain3> swap_chain = m_d3d12_hook->get_swap_chain();
+        const ComPtr<ID3D12Device> device = m_d3d12_hook->get_device();
+        const ComPtr<IDXGISwapChain3> swap_chain = m_d3d12_hook->get_swap_chain();
 
         if (!device || !swap_chain) {
             spdlog::info("Device or SwapChain null. DirectX 11 may be in use. Unhooking D3D12...");
@@ -783,8 +809,8 @@ bool ModFramework::initialize() {
         set_style(m_scale);
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.IniFilename = NULL;
-        io.LogFilename = NULL;
+        io.IniFilename = nullptr;
+        io.LogFilename = nullptr;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -966,8 +992,8 @@ void ModFramework::draw_ui() {
     if (m_swap_desc.BufferDesc.Width > 0 && m_swap_desc.BufferDesc.Height > 0) {
         //size = ImVec2((float)swap_desc.BufferDesc.Width, (float)swap_desc.BufferDesc.Height);
         io.DisplayFramebufferScale = ImVec2(
-            (float)m_swap_desc.BufferDesc.Width / io.DisplaySize.x,
-            (float)m_swap_desc.BufferDesc.Height / io.DisplaySize.y);
+            static_cast<float>(m_swap_desc.BufferDesc.Width) / io.DisplaySize.x,
+            static_cast<float>(m_swap_desc.BufferDesc.Height) / io.DisplaySize.y);
     }
 
     if (io.WantCaptureKeyboard || m_is_ui_focused) {
@@ -1012,7 +1038,7 @@ void ModFramework::draw_ui() {
 
 	const auto trainer_width = ImGui::GetContentRegionAvailWidth();
 
-    ImGui::SetCursorPosX(trainer_width / 2 - (float)logo.GetWidth() * m_scale / 2);
+    ImGui::SetCursorPosX(trainer_width / 2 - static_cast<float>(logo.GetWidth()) * m_scale / 2);
 
     if (m_is_d3d11)
         ImGui::Image(m_logo_dx11, m_logo_dx11.GetSize(m_scale));
@@ -1085,7 +1111,7 @@ void ModFramework::draw_ui() {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
 
     static ImGuiID left{}, right{};
-    ImGuiID dockSpaceId = ImGui::GetID("SSSiyan's Collaborative Trainer");
+    const ImGuiID dockSpaceId = ImGui::GetID("SSSiyan's Collaborative Trainer");
     if (!ImGui::DockBuilderGetNode(dockSpaceId))
     {
         ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
@@ -1131,7 +1157,6 @@ void ModFramework::draw_ui() {
     }
 
     // Store focused panels' ID
-
     if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(left)->TabBar->SelectedTabId); window != nullptr) {
         if (const auto panelID = m_mods_panels_map.find(window->Name); panelID != m_mods_panels_map.end()) {
             m_focused_mod_panel = panelID->second;
@@ -1157,9 +1182,9 @@ void ModFramework::draw_ui() {
     m_do_once_after_ui = true;
 }
 
-void ModFramework::draw_panels()
+void ModFramework::draw_panels() const
 {
-    float modListIndent = 10.0f * m_scale;
+	const float modListIndent = 10.0f * m_scale;
 
     static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
     static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
@@ -1346,7 +1371,7 @@ void ModFramework::draw_panels()
     ImGui::PopStyleColor();
 }
 
-void ModFramework::draw_options()
+void ModFramework::draw_options() const
 {
     static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing
 	| ImGuiWindowFlags_NoTitleBar;
@@ -1421,13 +1446,22 @@ void ModFramework::draw_trainer_settings()
 
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
-        ImGui::Checkbox("Load Config Automatically When The Game Launches (On By Default)", &m_load_on_startup);
+        ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
 
         ImGui::Spacing();
         if (ImGui::TreeNodeEx("About")) {
             if (ImGui::TreeNodeEx("Credits"))
             {
-                ImGui::TextWrapped("Darkness\n\n"
+                { // NOBODY TOUCHES THIS OR I SWEAR...
+                    static float r, g, b;
+                    ImGui::ColorConvertHSVtoRGB(static_cast<float>(std::abs(std::sin(static_cast<double>(GetTickCount64() % (20LL * 360LL)) / (20.0 * 360.0)))), 1.0f, 1.0f, r, g, b);
+                    ImGui::PushStyleColor(ImGuiCol_Text, { r, g, b, 1.0f });
+                    ImGui::TextWrapped("Darkness\n");
+                    ImGui::Dummy({ 0.0f, 1.0f * m_scale });
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TextWrapped(//"Darkness\n\n"
                     "The Hitchhiker\n\n"
                     "Siyan\n\n"
                     "VPZadov\n\n"
@@ -1459,7 +1493,8 @@ void ModFramework::draw_trainer_settings()
     ImGui::End();
 }
 
-void ModFramework::draw_notifs() {
+void ModFramework::draw_notifs() const
+{
     // Notifications
     ImGui::GetStyle().Alpha = 1.0f;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f);
@@ -1481,17 +1516,19 @@ void ModFramework::cleanup_render_target_d3d11() {
 }
 
 bool ModFramework::create_rtv_descriptor_heap_d3d12() {
-    auto device = m_d3d12_hook->get_device();
+	const auto device = m_d3d12_hook->get_device();
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     desc.NumDescriptors = m_buffer_count_d3d12;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     desc.NodeMask = 1;
-    if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3d_rtv_desc_heap_d3d12)) != S_OK)
-        return false;
 
-    SIZE_T rtv_descriptor_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3d_rtv_desc_heap_d3d12)) != S_OK) {
+        return false;
+    }
+
+	const SIZE_T rtv_descriptor_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = m_pd3d_rtv_desc_heap_d3d12->GetCPUDescriptorHandleForHeapStart();
     for (UINT i = 0; i < m_buffer_count_d3d12; i++)
     {
@@ -1507,22 +1544,33 @@ bool ModFramework::create_srv_descriptor_heap_d3d12(UINT descriptorCount) {
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     desc.NumDescriptors = descriptorCount;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
     if (m_d3d12_hook->get_device()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3d_srv_desc_heap_d3d12)) != S_OK)
-        return false;
+    {
+	    return false;
+    }
 
     return true;
 }
 
 bool ModFramework::create_command_allocator_d3d12() {
     for (UINT i = 0; i < m_buffer_count_d3d12; i++)
-        if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frame_context_d3d12[i].CommandAllocator)) != S_OK)
-            return false;
+    {
+	    if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frame_context_d3d12[i].CommandAllocator)) != S_OK)
+	    {
+		    return false;
+	    }
+    }
+
     return true;
 }
 
 bool ModFramework::create_command_list_d3d12() {
     if (m_d3d12_hook->get_device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_frame_context_d3d12[0].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_pd3d_command_list_d3d12)) != S_OK || m_pd3d_command_list_d3d12->Close() != S_OK)
-        return false;
+    {
+	    return false;
+    }
+
     return true;
 }
 
