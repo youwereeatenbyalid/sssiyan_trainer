@@ -476,9 +476,11 @@ namespace WaveEditorMod
 		static uintptr_t prefabLoadJmp;
 		static uintptr_t bpRetJmp;
 		static uintptr_t fadeStaticBase;
-		static uintptr_t missionExitProcRet;
-		static uintptr_t missionExitProcRet1;
-
+		static inline uintptr_t retryMissionRet = 0;
+		static inline uintptr_t exitMissionRet = 0;
+		static inline uintptr_t checkpointMissionRet = 0;
+		static inline uintptr_t secretMissionRet = 0;
+		static inline uintptr_t exitBpMissionRet = 0;
 		
 		static MimicMngObjManager mimObjManager;
 		//static SetEmData curEmData;
@@ -574,7 +576,12 @@ namespace WaveEditorMod
 		std::unique_ptr<FunctionHook> m_bploadflow_hook;
 		std::unique_ptr<FunctionHook> m_exitproc_hook;
 		std::unique_ptr<FunctionHook> m_exitproc1_hook;
-
+		std::unique_ptr<FunctionHook> m_request_retire_mission_hook;
+		std::unique_ptr<FunctionHook> m_retry_mission_hook;
+		std::unique_ptr<FunctionHook> m_exit_mission_hook;
+		std::unique_ptr<FunctionHook> m_checkpoint_mission_hook;
+		std::unique_ptr<FunctionHook> m_secret_mission_hook;
+		std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
 
 		class ProfileManager
 		{
