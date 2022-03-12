@@ -69,8 +69,8 @@ static naked void detour() {
         je ragtimebubbletimer
         cmp [PlayerTracker::playermoveid], 0x006E01F4 // Mega Buster break age
         je megabusterbreakagetimer
-        cmp byte ptr [rdx+0x8], 2
-        je retcode
+        // cmp byte ptr [rdx+0x8], 2
+        // je retcode
         jmp code
 
     chargeshottimer:
@@ -159,8 +159,8 @@ static naked void detour() {
         jmp posttimer
 
     dantemoves:
-        // cmp [PlayerTracker::playermoveid], 0x04B00002 // Ecstasy, works without this
-        // je forceland
+        cmp [PlayerTracker::playermoveid], 0x04B00002 // Ecstasy
+        je ecstasytimer
     // swords
         cmp [PlayerTracker::playermoveid], 0x157C00C9 // Air Rave 1 Reb
         je forceland
@@ -215,9 +215,26 @@ static naked void detour() {
         je forceland
         cmp [PlayerTracker::playermoveid], 0x064000DF // neutral air hold swordmaster
         je lightningairneutraltimer
-        cmp byte ptr [rdx+0x8], 2
-        je retcode
+        // cmp byte ptr [rdx+0x8], 2
+        // je retcode
         jmp code
+
+    ecstasytimer:
+        //get tree layer
+        push r8
+        mov r8, [PlayerTracker::playerentity]
+        mov r8, [r8+0xD98]
+        mov r8, [r8+0x10]
+        mov r8, [r8+0x130]
+        mov r8, [r8]
+        push r9
+        // hitch stuff: get layer offset
+        mov r9, [r8+0x1F80]
+        and r9, 1
+        imul r9, r9, 0xFB0
+        cmp dword ptr [r8+r9+0xC8], 0x41400000 // PrevFrame // 12.0f
+        ja popforceland
+        jmp posttimer
 
     fireworkstimer:
         //get tree layer
