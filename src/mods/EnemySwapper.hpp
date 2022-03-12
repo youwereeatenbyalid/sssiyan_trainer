@@ -7,6 +7,7 @@
 #include "CheckpointPos.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
 #include "MissionManager.hpp"
+#include "PlayerTracker.hpp"
 //#include "EnemyDataSettings.hpp"
 
 class EnemySwapper : public Mod {
@@ -105,6 +106,8 @@ static uintptr_t cerberusFixRet;
 static uintptr_t cerberusThunderWaveRet;
 static uintptr_t cerberusThunderBallRet;
 static uintptr_t cerberusThunderBallJmp;
+static inline uintptr_t shadowWarpFuncRet = 0;
+static inline uintptr_t nightmireExtFarPosRet = 0;
 
 static bool isSwapAll;
 static bool cheaton;
@@ -205,6 +208,8 @@ static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
 
   static void set_swapper_settings(std::array<int, enemyListCount> &settingsList);
 
+  static void clear_swap_data_asm();
+
   static inline std::array<const char*, enemyListCount> emNames{
 	  "Hell Caina", //0
 	  "Hell Antenora",//1
@@ -250,7 +255,7 @@ static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
       //"Dante M20"//41 No:)
   };
 
-  static std::vector<uintptr_t> setDataAddrs;
+  static std::vector<uintptr_t> swapDataAddrs;
   //static std::mutex mtx;
 
 
@@ -300,4 +305,6 @@ private:
   std::unique_ptr<FunctionHook> m_cerberus_pos_hook;
   std::unique_ptr<FunctionHook> m_cerberus_thunderwave_hook;
   std::unique_ptr<FunctionHook> m_cerberus_thunderball_hook;
+  std::unique_ptr<FunctionHook> m_shadow_warp_func_hook;
+  std::unique_ptr<FunctionHook> m_nightmirepos_ext_far_hook;
 };

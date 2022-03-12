@@ -13,6 +13,7 @@
 #include <map>
 #include <sstream>
 #include "ImGuiExtensions/ImGuiExtensions.h"
+#include "EnemySwapper.hpp"
 
 #define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)
 #define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
@@ -481,6 +482,7 @@ namespace WaveEditorMod
 		static inline uintptr_t checkpointMissionRet = 0;
 		static inline uintptr_t secretMissionRet = 0;
 		static inline uintptr_t exitBpMissionRet = 0;
+		static inline uintptr_t requestResultRet = 0;
 		
 		static MimicMngObjManager mimObjManager;
 		//static SetEmData curEmData;
@@ -582,6 +584,7 @@ namespace WaveEditorMod
 		std::unique_ptr<FunctionHook> m_checkpoint_mission_hook;
 		std::unique_ptr<FunctionHook> m_secret_mission_hook;
 		std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
+		std::unique_ptr<FunctionHook> m_request_result_hook;
 
 		class ProfileManager
 		{

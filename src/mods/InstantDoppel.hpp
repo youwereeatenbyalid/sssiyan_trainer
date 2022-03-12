@@ -97,7 +97,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = vergildoppel;
-		m_full_name_string = "Summon doppelganger instantly";
+		m_full_name_string = "Summon doppelganger instantly (+)";
 		m_author_string = "VPZadov";
 		m_description_string = "Remove Vergil's i-frame DT activation motion and summon doppelganger instantly (doppel himself still have appears motion)";
 
