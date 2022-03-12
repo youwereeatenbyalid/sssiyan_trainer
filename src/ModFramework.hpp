@@ -192,26 +192,31 @@ private: //DXGI members
 	DXGI_SWAP_CHAIN_DESC m_swap_desc{};
 
 private: // D3D11 members
-    ComPtr<ID3D11RenderTargetView> m_main_render_target_view_d3d11{};
-    UI::Texture2DDX11 m_logo_dx11;
+    struct {
+        ComPtr<ID3D11RenderTargetView> main_render_target_view{};
+    } m_d3d11;
 
 private: // D3D12 members
     struct FrameContext_D3D12 {
-      D3D12_CPU_DESCRIPTOR_HANDLE MainRenderTargetDescriptorHandle{};
-      ComPtr<ID3D12Resource> MainRenderTargetResource{};
-      ComPtr<ID3D12CommandAllocator> CommandAllocator{};
-      UINT64 FenceValue{ 0 };
+        D3D12_CPU_DESCRIPTOR_HANDLE MainRenderTargetDescriptorHandle{};
+        ComPtr<ID3D12Resource> MainRenderTargetResource{};
+        ComPtr<ID3D12CommandAllocator> CommandAllocator{};
+        UINT64 FenceValue{ 0 };
     };
-    
-    UINT m_buffer_count_d3d12{ 0 };
-    std::vector<FrameContext_D3D12> m_frame_context_d3d12{};
-    ComPtr<ID3D12DescriptorHeap> m_pd3d_rtv_desc_heap_d3d12{};
-    ComPtr<ID3D12DescriptorHeap> m_pd3d_srv_desc_heap_d3d12{};
-    ComPtr<ID3D12CommandQueue> m_pd3d_command_queue_d3d12{};
-    ComPtr<ID3D12GraphicsCommandList> m_pd3d_command_list_d3d12{};
-    //ID3D12Fence* m_pd3d_fence_d3d12{ NULL };
+
+    struct {
+        UINT buffer_count{ 0 };
+        std::vector<FrameContext_D3D12> frame_context{};
+        ComPtr<ID3D12DescriptorHeap> pd3d_rtv_desc_heap{};
+        ComPtr<ID3D12DescriptorHeap> pd3d_srv_desc_heap{};
+        ComPtr<ID3D12CommandQueue> pd3d_command_queue{};
+        ComPtr<ID3D12GraphicsCommandList> pd3d_command_list{};
+        //ID3D12Fence* m_pd3d_fence{ NULL };
+    } m_d3d12;
     
 private:
+    // Logos
+    UI::Texture2DDX11 m_logo_dx11;
     UI::Texture2DDX12 m_logo_dx12;
     
     // Icons
