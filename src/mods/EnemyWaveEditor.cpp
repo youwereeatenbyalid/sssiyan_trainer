@@ -28,8 +28,6 @@ uintptr_t EnemyWaveEditor::curListAddr{NULL};
 uintptr_t EnemyWaveEditor::prefabLoadJmp{NULL};
 uintptr_t EnemyWaveEditor::bpRetJmp{NULL};
 uintptr_t EnemyWaveEditor::fadeStaticBase{NULL};
-uintptr_t EnemyWaveEditor::missionExitProcRet{NULL};
-uintptr_t EnemyWaveEditor::missionExitProcRet1{NULL};
 
 std::vector<GameEmList> EnemyWaveEditor::gameDataList;
 
@@ -370,57 +368,133 @@ static naked void bp_forceload_detour()
     }
 }
 
-static naked void mission_exit_detour()
+static naked void retry_mission_detour()
 {
     __asm {
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
-        cheat:
         push rax
         push rcx
         push rdx
-		push r8
-		push r9
+        push r8
+        push r9
         sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
         add rsp, 32
-	    pop r9
-		pop r8
+        pop r9
+        pop r8
         pop rdx
-		pop rcx
-		pop rax
+        pop rcx
+        pop rax
 
-        originalcode:
-        mov byte ptr [rdi + 0x000000C0], 01
-        jmp qword ptr [EnemyWaveEditor::missionExitProcRet]
+        originalcode :
+        mov [rsp + 0x18], rbx
+        jmp qword ptr [EnemyWaveEditor::retryMissionRet]
     }
 }
 
-static naked void mission_exit_detour1()
+static naked void exit_mission_detour()
 {
     __asm {
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
-        cheat:
         push rax
         push rcx
         push rdx
-		push r8
-		push r9
+        push r8
+        push r9
         sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
         add rsp, 32
-	    pop r9
-		pop r8
+        pop r9
+        pop r8
         pop rdx
-		pop rcx
-		pop rax
+        pop rcx
+        pop rax
 
-        originalcode:
-        mov byte ptr [rax + 0x000000C0], 01
-        jmp qword ptr [EnemyWaveEditor::missionExitProcRet1]
+        originalcode :
+        mov [rsp + 0x10], rbx
+        jmp qword ptr [EnemyWaveEditor::exitMissionRet]
+    }
+}
+
+static naked void checkpoint_mission_detour()
+{
+    __asm {
+        cmp byte ptr [EnemyWaveEditor::cheaton], 0
+        je originalcode
+
+        push rax
+        push rcx
+        push rdx
+        push r8
+        push r9
+        sub rsp, 32
+        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        add rsp, 32
+        pop r9
+        pop r8
+        pop rdx
+        pop rcx
+        pop rax
+
+        originalcode :
+        mov [rsp + 0x10], rbx
+        jmp qword ptr [EnemyWaveEditor::checkpointMissionRet]
+    }
+}
+
+static naked void smiss_exit_detour()
+{
+    __asm {
+        cmp byte ptr [EnemyWaveEditor::cheaton], 0
+        je originalcode
+
+        push rax
+        push rcx
+        push rdx
+        push r8
+        push r9
+        sub rsp, 32
+        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        add rsp, 32
+        pop r9
+        pop r8
+        pop rdx
+        pop rcx
+        pop rax
+
+        originalcode :
+        mov [rsp + 0x10], rbx
+        jmp qword ptr [EnemyWaveEditor::secretMissionRet]
+    }
+}
+
+static naked void exit_bp_mission_detour()
+{
+    __asm {
+        cmp byte ptr [EnemyWaveEditor::cheaton], 0
+        je originalcode
+
+        push rax
+        push rcx
+        push rdx
+        push r8
+        push r9
+        sub rsp, 32
+        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        add rsp, 32
+        pop r9
+        pop r8
+        pop rdx
+        pop rcx
+        pop rax
+
+        originalcode :
+        mov [rsp+0x10],rbx
+        jmp qword ptr [EnemyWaveEditor::exitBpMissionRet]
     }
 }
 
@@ -447,22 +521,36 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   }
 
   auto bpFlowIdAddr = patterns->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
-  if (!emPrefabLoad)
+  if (!bpFlowIdAddr)
   {
       return "Unanable to find bpFlowIdAddr pattern.";
   }
 
-  auto missionRetAddr = patterns->find_addr(base, "35 0A 00 C6 87 C0 00 00 00 01");// DevilMayCry5.exe+249E18A(-0x3)
-  if (!emPrefabLoad)
+  auto retryMissionAddr = patterns->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
+  if (!retryMissionAddr)
   {
-      return "Unanable to find missionRetAddr pattern.";
+      return "Unanable to find retryMissionAddr pattern.";
   }
 
-  auto missionRetAddr1 = patterns->find_addr(base, "C6 80 C0 00 00 00 01 48 8B 43 50 4C");// DevilMayCry5.exe+F178FB
-  if (!emPrefabLoad)
+  auto exitMissionAddr = patterns->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
+  if (!retryMissionAddr)
   {
-      return "Unanable to find missionRetAddr1 pattern.";
+      return "Unanable to find exitMissionAddr pattern.";
   }
+
+  auto checkpointMissionAddr = patterns->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 41 0F B6 F8");// DevilMayCry5.exe+249DFA0
+  if (!checkpointMissionAddr)
+  {
+      return "Unanable to find checkpointMissionAddr pattern.";
+  }
+
+  auto exitBpMissionAddr = patterns->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
+  if (!exitBpMissionAddr)
+  {
+      return "Unanable to find exitBpMissionAddr pattern.";
+  }
+
+  auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
 
   retJl = emDataLstAddr.value() + 0x270;
 
@@ -482,16 +570,34 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       return "Failed to initialize EnemyWaveEditor.bpFlowId";
   }
 
-  if (!install_hook_absolute(missionRetAddr.value() + 0x3, m_exitproc_hook, &mission_exit_detour, &missionExitProcRet, 0x7))
+  if (!install_hook_absolute(retryMissionAddr.value() + 0x6, m_retry_mission_hook, &retry_mission_detour, &retryMissionRet, 0x5))
   {
       spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.missionRet";
+      return "Failed to initialize EnemyWaveEditor.retryMission";
   }
 
-  if (!install_hook_absolute(missionRetAddr1.value(), m_exitproc1_hook, &mission_exit_detour1, &missionExitProcRet1, 0x7))
+  if (!install_hook_absolute(exitMissionAddr.value() + 0x9, m_exit_mission_hook, &exit_mission_detour, &exitMissionRet, 0x5))
   {
       spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.missionRet1";
+      return "Failed to initialize EnemyWaveEditor.exitMission";
+  }
+
+  if (!install_hook_absolute(checkpointMissionAddr.value(), m_checkpoint_mission_hook, &checkpoint_mission_detour, &checkpointMissionRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.checkpointMission";
+  }
+
+  if (!install_hook_absolute(exitSecretMissionAddr, m_secret_mission_hook, &smiss_exit_detour, &secretMissionRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.exitSecretMission";
+  }
+
+  if (!install_hook_absolute(exitBpMissionAddr.value()+0x2, m_exit_bp_mission_hook, &exit_bp_mission_detour, &exitBpMissionRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.exitSecretMission";
   }
 
   mode = Mode::Mod;
@@ -546,15 +652,12 @@ void EnemyWaveEditor::on_draw_ui() {
         print_spacing("After you finish setup enemy data, press \"Allocate all custom enemy data\" button;");
         //print_spacing("(Optional) If you want to swap game's data manually during the loading process, use \"Run-time edit\" mode;");
         print_spacing("(Re)Load mission;");
-        print_spacing("If you want to quit/reload mission/secret mission from pause menu or from game over menu, press \"Restore all game list's data\" button before it. Restarting mission from checkpoint "
-        "(from pause or game over menu) or retrying it from game over menu doesn't requires restoring data from the trainer;");
-        print_spacing("Dealloc memory when you want to change wawes data or disable mod. Don't dealloc memory before restoring original lists data.");
+        print_spacing("Dealloc memory when you want to change wawes data or disable mod.");
         ImGui::Separator();
         ImGui::BulletText("For BP (correctly works only on \"warm up\" mode)");
         print_spacing("Enable \"Bp alloc mode\", create 1 enemy list and setup set up it;");
         print_spacing("After you finish setup enemy data, press \"Allocate all custom enemy data\" button;");
         print_spacing("Select stage what you want. Some stages can't be loaded without \"bp load fix\";");
-        print_spacing("If you want to leave a stage from pause menu, restore original data before doing it.");
         ImGui::Separator();
         ImGui::BulletText("Current issues");
         //print_spacing("Some missions, like m13, have a \"puppet waves\" (last nobody encounter for ex). You need to kill all enemies before going to battle arena, or enemies will not load.");
@@ -1091,20 +1194,16 @@ void EnemyWaveEditor::draw_mimic_list_ui()
     }
     else
     {
-        ImGui::TextWrapped("Memory for all custom data was allocated successfully, edit mode disabled. You can (re)load a mission. Dont forget to restore game list data "
-        "before you restart/leave the mission, another way memory leak or crash happens.");
+        ImGui::TextWrapped("Memory for all custom data was allocated successfully, edit mode disabled. You can (re)load a mission.");
         ImGui::Spacing();
         if (ImGui::Button("Dealloc all memory"))
         {
+            mimObjManager.restore_all_data();
             mimObjManager.dealloc_all();
             emSetterCounter = 0;
         }
-        if (ImGui::Button("Restore all game list's data"))
-        {
-            mimObjManager.restore_all_data();
-            emSetterCounter = 0;
-        }
-        ImGui::ShowHelpMarker("Press this every time before you quit from the mission/restart mission; going to secret mission from story mission/exit from secret mission; exit from bp stage from pause menu.");
+        ImGui::ShowHelpMarker("After pressing this all original data also will be restored if this didnt happen already. You will get softlock/crash if continue mission after restoring data "
+        "without restarting.");
     }
 }
 
