@@ -316,8 +316,6 @@ static naked void bp_forceload_detour()
     __asm {
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
-        cmp dword ptr [rcx + 0x60], 0x2E//46
-        je restore_refs
         cmp byte ptr [EnemyWaveEditor::isBPFixRequested], 0
         je originalcode
 
@@ -349,38 +347,26 @@ static naked void bp_forceload_detour()
         mov byte ptr [EnemyWaveEditor::isRequestEndBpStage], 0
         mov dword ptr [rcx+0x60], 0x1E //30
         jmp originalcode
-
-        restore_refs:
-        push rax
-        push rcx
-        push rdx
-		push r8
-		push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        add rsp, 32
-	    pop r9
-		pop r8
-        pop rdx
-		pop rcx
-		pop rax
-        jmp originalcode
     }
 }
 
 static naked void retry_mission_detour()
 {
     __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 1
+        je fcall
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
+        fcall:
         push rax
         push rcx
         push rdx
         push r8
         push r9
         sub rsp, 32
-        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
         add rsp, 32
         pop r9
         pop r8
@@ -397,16 +383,20 @@ static naked void retry_mission_detour()
 static naked void exit_mission_detour()
 {
     __asm {
+        cmp byte ptr[EnemySwapper::cheaton], 1
+        je fcall
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
+        fcall:
         push rax
         push rcx
         push rdx
         push r8
         push r9
         sub rsp, 32
-        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
         add rsp, 32
         pop r9
         pop r8
@@ -423,16 +413,20 @@ static naked void exit_mission_detour()
 static naked void checkpoint_mission_detour()
 {
     __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 1
+        je fcall
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
+        fcall:
         push rax
         push rcx
         push rdx
         push r8
         push r9
         sub rsp, 32
-        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
         add rsp, 32
         pop r9
         pop r8
@@ -449,16 +443,20 @@ static naked void checkpoint_mission_detour()
 static naked void smiss_exit_detour()
 {
     __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 1
+        je fcall
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
+        fcall:
         push rax
         push rcx
         push rdx
         push r8
         push r9
         sub rsp, 32
-        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
         add rsp, 32
         pop r9
         pop r8
@@ -475,16 +473,20 @@ static naked void smiss_exit_detour()
 static naked void exit_bp_mission_detour()
 {
     __asm {
+        cmp byte ptr[EnemySwapper::cheaton], 1
+        je fcall
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
 
+        fcall:
         push rax
         push rcx
         push rdx
         push r8
         push r9
         sub rsp, 32
-        call qword ptr[EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
         add rsp, 32
         pop r9
         pop r8
@@ -495,6 +497,36 @@ static naked void exit_bp_mission_detour()
         originalcode :
         mov [rsp+0x10],rbx
         jmp qword ptr [EnemyWaveEditor::exitBpMissionRet]
+    }
+}
+
+static naked void request_result_detour()
+{
+    __asm {
+        cmp byte ptr [EnemySwapper::cheaton], 1
+        je fcall
+        cmp byte ptr [EnemyWaveEditor::cheaton], 0
+        je originalcode
+
+        fcall:
+        push rax
+        push rcx
+        push rdx
+        push r8
+        push r9
+        sub rsp, 32
+        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
+        call qword ptr [EnemySwapper::clear_swap_data_asm]
+        add rsp, 32
+        pop r9
+        pop r8
+        pop rdx
+        pop rcx
+        pop rax
+
+        originalcode :
+        mov [rsp + 0x18], rbx
+        jmp qword ptr [EnemyWaveEditor::requestResultRet]
     }
 }
 
@@ -552,6 +584,12 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
 
+  auto requestResultAddr = patterns->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
+  if (!exitBpMissionAddr)
+  {
+      return "Unanable to find requestResultAddr pattern.";
+  }
+
   retJl = emDataLstAddr.value() + 0x270;
 
   if (!install_hook_absolute(emDataLstAddr.value(), m_emwave_hook, &emlist_detour, &retJmp, 0xA)) {
@@ -597,7 +635,13 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   if (!install_hook_absolute(exitBpMissionAddr.value()+0x2, m_exit_bp_mission_hook, &exit_bp_mission_detour, &exitBpMissionRet, 0x5))
   {
       spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.exitSecretMission";
+      return "Failed to initialize EnemyWaveEditor.exitBpMission";
+  }
+
+  if (!install_hook_absolute(requestResultAddr.value() + 0x4, m_request_result_hook, &request_result_detour, &requestResultRet, 0x5))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.requestResult";
   }
 
   mode = Mode::Mod;
@@ -622,17 +666,17 @@ void EnemyWaveEditor::on_config_save(utility::Config& cfg)
 
 void EnemyWaveEditor::on_frame() 
 {
-    if (cheaton)
-    {
-        if (EnemySwapper::nowFlow == 0x17) //23
-        {
-            mimObjManager.restore_all_data();
-            mimObjManager.dealloc_all();
-            mimObjManager.remove_all_binds();
-            emSetterCounter = 0;
-            cheaton = false;
-        }
-    }
+    //if (cheaton)
+    //{
+    //    if (EnemySwapper::nowFlow == 0x17) //23
+    //    {
+    //        mimObjManager.restore_all_data();
+    //        mimObjManager.dealloc_all();
+    //        mimObjManager.remove_all_binds();
+    //        emSetterCounter = 0;
+    //        cheaton = false;
+    //    }
+    //}
 }
 
 void EnemyWaveEditor::on_draw_ui() {
