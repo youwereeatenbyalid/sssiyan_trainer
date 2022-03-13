@@ -280,12 +280,14 @@ public:
 								bad_ptr_stop();
 								break;
 							}
-							if (jcShell == 0)
-								continue;
-							if(!IsBadReadPtr((void*)((uintptr_t)jcShell+0x440), 8))
+							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
+							{
 								*(bool*)((uintptr_t)jcShell + 0x440) = isRndJust; //isJust
-							if(!IsBadReadPtr((void*)((uintptr_t)jcShell + 0x444), 8))
 								*(float*)((uintptr_t)jcShell + 0x444) = rndAttackRate; //attackRate
+							}
+							else
+								continue;
+							jcShell = 0;
 							jcNum++;
 							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
 							prevPos = curPos;
@@ -361,10 +363,13 @@ public:
 								bad_ptr_stop();
 								break;
 							}
-							if (jcShell == 0)
-								break;
-							*(bool*)(jcShell + 0x440) = isTrackJust; //isJust
-							*(float*)(jcShell + 0x444) = trackAttackRate; //attackRate
+							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
+							{
+								*(bool*)((uintptr_t)jcShell + 0x440) = isTrackJust; //isJust
+								*(float*)((uintptr_t)jcShell + 0x444) = trackAttackRate; //attackRate
+							}
+							else
+								continue;
 							jcShell = 0;
 							std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
 							track_pos_update(curPos);
