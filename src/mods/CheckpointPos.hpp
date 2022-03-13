@@ -29,7 +29,7 @@ public:
   static Vector3f get_player_coords();
 
 
-  static inline std::array<CheckpointPosData, 15> mPosData {//x, y, z
+  static inline std::array<CheckpointPosData, 16> mPosData {//x, y, z
       CheckpointPosData(0, Vector3f(0.1704f, -80.5705f, -5.2691f)),
       CheckpointPosData(1, Vector3f(1.63f, -64.902f, - 0.091f)),
       CheckpointPosData(2, Vector3f(-49.079f, -350.258f, 1.764f)),
@@ -38,6 +38,7 @@ public:
       CheckpointPosData(5, Vector3f(282.346f, -65.189f, - 42.138f)),
       CheckpointPosData(7, Vector3f(9.225, -609.819f, 32.107f)),
       CheckpointPosData(8, Vector3f(0.183f, -81.354f, 1774.665f)),
+      CheckpointPosData(9, Vector3f(-3.793f, -135.243f, 1.697f)),
       CheckpointPosData(10, Vector3f(-43.536f, -121.236f, -31.105f)),
       CheckpointPosData(11, Vector3f(281.389f, -3.210f, 4.441f)),
       CheckpointPosData(12, Vector3f(-1233.897f, -59.512f, 65.877f)),

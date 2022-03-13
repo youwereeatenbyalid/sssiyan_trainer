@@ -91,7 +91,7 @@ void CheckpointPos::on_config_load(const utility::Config& cfg) {
   isCustomPos = cfg.get<bool>("CheckpointPos.isCustomPos").value_or(false);
   customPos.x = cfg.get<float>("CheckpointPos.CustomPosX").value_or(0.0f);
   customPos.y = cfg.get<float>("CheckpointPos.CustomPosY").value_or(0.0f);
-  customPos.y = cfg.get<float>("CheckpointPos.CustomPosZ").value_or(0.0f);
+  customPos.z = cfg.get<float>("CheckpointPos.CustomPosZ").value_or(0.0f);
 }
 
 void CheckpointPos::on_config_save(utility::Config& cfg) {
