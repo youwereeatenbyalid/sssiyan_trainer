@@ -190,6 +190,18 @@ namespace GameFunctions
 			}
 			return std::make_optional<std::vector<T>>(res);
 		}
+
+		static const char* get_str(uintptr_t dotNetString)
+		{
+			if (PtrController::is_bad_ptr(dotNetString))
+				return nullptr;
+			auto length = *(int32_t*)(dotNetString + 0x10);
+			char res[length];
+			for (int i = 0, j = 0; i < length; i++, j+=2)
+				res[i] = *(byte*)(dotNetString + 0x14 + j);
+			*(res + length) = 0;
+			return res;
+		}
 	};
 
 	/// <summary>

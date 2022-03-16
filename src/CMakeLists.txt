@@ -259,6 +259,8 @@ set(MODS_SRC
     mods/DamageType.hpp 
     mods/DamageType.cpp
     mods/InstantDoppel.hpp
+    mods/AirMoves.hpp
+    mods/AirMoves.cpp
 )
 
 set(HOOKS_SRC

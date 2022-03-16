@@ -176,6 +176,7 @@
        #include "mods/AirTrickDodge.hpp"
        #include "mods/VergilNoRoyalForkDelay.hpp"
        #include "mods/InstantDoppel.hpp"
+       #include "mods/AirMoves.hpp"
 
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -331,6 +332,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<AirMoves>());
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());
