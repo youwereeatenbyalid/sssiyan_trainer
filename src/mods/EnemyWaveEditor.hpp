@@ -483,6 +483,8 @@ namespace WaveEditorMod
 		static inline uintptr_t secretMissionRet = 0;
 		static inline uintptr_t exitBpMissionRet = 0;
 		static inline uintptr_t requestResultRet = 0;
+		static inline uintptr_t bossDanteCrashRet = 0;
+		static inline uintptr_t bossDanteCrashSkip = 0;
 		
 		static MimicMngObjManager mimObjManager;
 		//static SetEmData curEmData;
@@ -585,6 +587,7 @@ namespace WaveEditorMod
 		std::unique_ptr<FunctionHook> m_secret_mission_hook;
 		std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
 		std::unique_ptr<FunctionHook> m_request_result_hook;
+		std::unique_ptr<FunctionHook> m_bossdante_crash_hook;
 
 		class ProfileManager
 		{
