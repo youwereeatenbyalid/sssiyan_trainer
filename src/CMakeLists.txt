@@ -344,6 +344,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PlayerSetDT.hpp
     Mods/GameFunctions/PlVergilDoppel.hpp
     Mods/GameFunctions/GameModelSetAction.hpp
+    Mods/GameFunctions/GameModelRequestSetEffect.hpp
 )
 
 set(IMGUI_SRC

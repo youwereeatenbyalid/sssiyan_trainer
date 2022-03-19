@@ -16,7 +16,7 @@ namespace GameFunctions
 
 		void operator()() override{ invoke(); }
 
-		uintptr_t get_thread_context() override
+		uintptr_t get_thread_context(uint32_t unk) override
 		{
 			GameFunc::get_thread_context();
 		}
@@ -53,15 +53,15 @@ namespace GameFunctions
 
 		void *get_transform() const { return transform; }
 
-		//Change player pos and colliders pos. Only for player obj.
-		static void set_player_pos(uintptr_t player, Vec3 newPos)
+		//Change character pos and colliders pos. Only for character obj.
+		static void set_player_pos(uintptr_t character, Vec3 newPos)
 		{
-			if(player == 0)
+			if(character == 0)
 				return;
-			auto gameObj = *(uintptr_t*)(player + 0x10);
+			auto gameObj = *(uintptr_t*)(character + 0x10);
 			auto transformGameObj = *(uintptr_t*)(gameObj + 0x18);
-			auto cachedCharController = *(uintptr_t*)(player + 0x2F0);
-			auto cachedSubCharController = *(uintptr_t*)(player + 0x2F8);
+			auto cachedCharController = *(uintptr_t*)(character + 0x2F0);
+			auto cachedSubCharController = *(uintptr_t*)(character + 0x2F8);
 			if(cachedCharController == 0 || cachedSubCharController == 0)
 				return;
 			Transform_SetPosition setPos((void*)transformGameObj);

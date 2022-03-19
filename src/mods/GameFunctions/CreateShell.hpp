@@ -4,7 +4,7 @@
 //clang-format off
 namespace GameFunctions
 {
-	class CreateShell : public GameFunc<uintptr_t>
+	class CreateShell : public GameFunc<volatile void*>
 	{
 		private:
 			//helper
@@ -98,7 +98,7 @@ namespace GameFunctions
 			};
 		
 		//typedef uintptr_t(__cdecl* spawnShell)(void* rcxArg, void* shellManager, void* prefab, const Vec3 &pos, const Quaternion &rotation, void* owner, int level, int id, const void* delayParam/*, void* a5, void* a6, void *a7, void *a8, void* a9*/);
-		typedef uintptr_t(__cdecl* f_CreateShell)(void* rcxArg, void* shellManager, const void* prefab, Vec3 pos, Quaternion rotation, const void *owner, int level, int id, DelayParam* delay);
+		typedef volatile void* (__cdecl* f_CreateShell)(void* rcxArg, void* shellManager, const void* prefab, Vec3 pos, Quaternion rotation, const void *owner, int level, int id, DelayParam* delay);
 		f_CreateShell create_shell;
 
 		uintptr_t pfb = 0;
@@ -149,11 +149,13 @@ namespace GameFunctions
 
 		int get_id() const {return id; }
 
+		bool is_shell_mng_valid() const { return *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450) != 0; }
+
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke() override
+		volatile void* invoke() override
 		{
-			uintptr_t res = 0;
+			volatile void* res = 0;
 			if (pfb != 0 && fAddr != NULL)
 			{
 				uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
@@ -171,7 +173,7 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		volatile void* invoke(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
 			set_params(prefab, spawnPos, spawnRot, owner, level, id);
 			return invoke();
@@ -179,14 +181,14 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t operator ()(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
+		volatile void* operator ()(uintptr_t prefab, const Vec3& spawnPos, const Quaternion& spawnRot, uintptr_t owner, int level, int id)
 		{
 			return invoke(prefab, spawnPos, spawnRot, owner, level, id);
 		}
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t invoke(const Vec3 &spawnPos, const Quaternion &spawnRot)
+		volatile void* invoke(const Vec3 &spawnPos, const Quaternion &spawnRot)
 		{
 			pos = spawnPos;
 			rot = spawnRot;
@@ -195,7 +197,7 @@ namespace GameFunctions
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
-		uintptr_t operator()(const Vec3& spawnPos, const Quaternion& spawnRot)
+		volatile void* operator()(const Vec3& spawnPos, const Quaternion& spawnRot)
 		{
 			return invoke(spawnPos, spawnRot);
 		}

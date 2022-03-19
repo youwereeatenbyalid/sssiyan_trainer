@@ -12,6 +12,7 @@
 #include "DeepTurbo.hpp"
 #include "mods/GameFunctions/PlayerSetDT.hpp"
 #include "VergilInstantSDT.hpp"
+#include "mods/GameFunctions/GameModelRequestSetEffect.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -282,8 +283,8 @@ public:
 							}
 							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
 							{
-								*(bool*)((uintptr_t)jcShell + 0x440) = isRndJust; //isJust
-								*(float*)((uintptr_t)jcShell + 0x444) = rndAttackRate; //attackRate
+								*(volatile bool*)((uintptr_t)jcShell + 0x440) = isRndJust; //isJust
+								*(volatile float*)((uintptr_t)jcShell + 0x444) = rndAttackRate; //attackRate
 							}
 							else
 								continue;
@@ -340,7 +341,7 @@ public:
 						func::Quaternion defaultRot;
 						jcSpawn.set_params(jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
-						uintptr_t jcShell;
+						volatile void* jcShell;
 						while (can_execute(isBadPtr))
 						{
 							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
@@ -365,8 +366,8 @@ public:
 							}
 							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
 							{
-								*(bool*)((uintptr_t)jcShell + 0x440) = isTrackJust; //isJust
-								*(float*)((uintptr_t)jcShell + 0x444) = trackAttackRate; //attackRate
+								*(volatile bool*)((uintptr_t)jcShell + 0x440) = isTrackJust; //isJust
+								*(volatile float*)((uintptr_t)jcShell + 0x444) = trackAttackRate; //attackRate
 							}
 							else
 								continue;
@@ -441,6 +442,14 @@ public:
 		Type get_jce_type() const {return jceType; }
 
 	};
+
+	enum AutoSDTType
+	{
+		None,
+		LessEfx,
+		SDTBurst
+	};
+	static inline AutoSDTType autoSdtType = LessEfx;
 
     static inline std::unique_ptr<JCEController> jceController{nullptr};
 	static inline bool cheaton = true;
@@ -519,10 +528,13 @@ public:
 	// void on_draw_debug_ui() override;
 
 private:
-	//std::unique_ptr<JCEController> jceController;
 	float rndExeDuration = 0;
 	float trackExeDuration = 0;
+
+	static inline std::shared_ptr<func::GameModelRequestSetEffect::EffectID> sdtBurstEffect = nullptr;
+
 	void init_check_box_info() override;
+
 	std::unique_ptr<FunctionHook> m_can_exe_jce_hook;
 	std::unique_ptr<FunctionHook> m_can_exe_jce1_hook;
 	std::unique_ptr<FunctionHook> m_sub_human_jce_hook;

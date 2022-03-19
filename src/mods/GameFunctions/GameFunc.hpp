@@ -2,6 +2,7 @@
 #include "Mod.hpp"
 #include "utility/Memory.hpp"
 #include <optional>
+#include <type_traits>
 
 //clang-format off
 namespace GameFunctions
@@ -217,9 +218,9 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		virtual uintptr_t get_thread_context()
+		virtual uintptr_t get_thread_context(uint32_t unk = -1)
 		{
-			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context());
+			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context(unk));
 		}
 
 		virtual T __cdecl invoke() = 0;
