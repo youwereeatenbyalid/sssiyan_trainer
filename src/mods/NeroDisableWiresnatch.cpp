@@ -68,12 +68,12 @@ static naked void detour2() {
         cmp byte ptr [NeroDisableWiresnatch::flipoverride], 1 //if flip override jump to jne anyway
         je jnecode
     retinfo:
-        jmp qword ptr [NeroDisableWiresnatch::jmp_ret1]
+        jmp qword ptr [NeroDisableWiresnatch::jmp_ret2]
 
     flipcode:
         cmp byte ptr [NeroDisableWiresnatch::flipoverride], 0 //if not flip override jump to jne
         je jnecode
-        jmp qword ptr [NeroDisableWiresnatch::jmp_ret1]
+        jmp qword ptr [NeroDisableWiresnatch::jmp_ret2]
 
     code:
         cmp byte ptr [rdx+00000ED0h], 00
