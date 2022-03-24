@@ -15,6 +15,8 @@
 
 #include "utility/Module.hpp"
 
+#include "ExceptionHandler.hpp"
+
 #include "Mod.hpp"
 #include "Mods.hpp"
 
@@ -116,6 +118,7 @@ ModFramework::~ModFramework() {
 
 bool ModFramework::hook_d3d11()
 {
+    m_d3d11_hook.reset();
     m_d3d11_hook = std::make_unique<D3D11Hook>();
     m_d3d11_hook->on_present([this](D3D11Hook& hook) { on_frame_d3d11(); });
     m_d3d11_hook->on_resize_buffers([this](D3D11Hook&, const UINT& width, const UINT& height) { on_reset(width, height); });
@@ -157,6 +160,7 @@ bool ModFramework::hook_d3d12()
         return true;
     }
 
+    m_d3d12_hook.reset();
     m_d3d12_hook = std::make_unique<D3D12Hook>();
     m_d3d12_hook->on_present([this](D3D12Hook& hook) { on_frame_d3d12(); });
     m_d3d12_hook->on_resize_buffers([this](D3D12Hook&, const UINT& width, const UINT& height) { on_reset(width, height); });
@@ -187,9 +191,11 @@ bool ModFramework::hook_d3d12()
 }
 
 void ModFramework::set_style(const float& scale) noexcept {
-    ImGui::StyleColorsDark();
-
     auto& style = ImGui::GetStyle();
+    style = ImGuiStyle{};
+    ImGui::StyleColorsDark(&style);
+    style.ScaleAllSizes(scale);
+
     style.WindowRounding = 0.0f * scale;
     style.ChildRounding = 0.0f * scale;
     style.PopupRounding = 0.0f * scale;
@@ -200,9 +206,9 @@ void ModFramework::set_style(const float& scale) noexcept {
     style.TabRounding = 5.0f * scale;
     style.WindowBorderSize = 2.0f * scale;
     style.WindowPadding = ImVec2(8.0f, 5.0f) * scale;
-    style.ItemSpacing.y = 8.0f;
+    style.ItemSpacing.y = 8.0f * scale;
 
-    auto& colors = ImGui::GetStyle().Colors;
+    auto& colors = style.Colors;
 
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
@@ -253,17 +259,14 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-    // Scale
-    style.ScaleAllSizes(scale);
-
     // Font
-    const auto& io = ImGui::GetIO();
+    auto& io = ImGui::GetIO();
     ImFontConfig font_cfg;
     font_cfg.FontDataOwnedByAtlas = false;
 
     const float size = 16.0f * scale;
 
-    io.Fonts->AddFontFromMemoryCompressedTTF(RobotoMedium_compressed_data, RobotoMedium_compressed_size, size, &font_cfg);
+    io.FontDefault = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoMedium_compressed_data, RobotoMedium_compressed_size, size, &font_cfg);
 
     // Notification stuff
     ImGui::MergeIconsWithLatestFont(size, false);
@@ -409,6 +412,8 @@ void ModFramework::queue_notification(const ImGuiToast& notif) {
 }
 
 void ModFramework::on_frame_d3d11() {
+    std::scoped_lock _{ m_ui_mutex };
+
     spdlog::debug("on_frame (D3D11)");
 
     if (!m_initialized) {
@@ -439,10 +444,20 @@ void ModFramework::on_frame_d3d11() {
     ImGui::EndFrame();
     ImGui::Render();
 
-    ComPtr<ID3D11DeviceContext> context;
+    ComPtr<ID3D11DeviceContext> context{};
+
+    constexpr float clear_color[]{ 0.0f, 0.0f, 0.0f, 0.0f };
+
     m_d3d11_hook->get_device()->GetImmediateContext(&context);
 
-    context->OMSetRenderTargets(1, m_d3d11.main_render_target_view.GetAddressOf(), nullptr);
+    context->ClearRenderTargetView(m_d3d11.pd3d_blank_rt_rtv.Get(), clear_color);
+    context->ClearRenderTargetView(m_d3d11.pd3d_rt_rtv.Get(), clear_color);
+    context->OMSetRenderTargets(1, m_d3d11.pd3d_rt_rtv.GetAddressOf(), nullptr);
+
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+    // Set the back buffer to be the render target.
+    context->OMSetRenderTargets(1, m_d3d11.pd3d_backbuffer_rtv.GetAddressOf(), nullptr);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -455,6 +470,8 @@ void ModFramework::on_frame_d3d11() {
 }
 
 void ModFramework::on_frame_d3d12() {
+    std::scoped_lock _{ m_ui_mutex };
+
     spdlog::debug("on_frame (D3D12)");
 
     if (!m_initialized) {
@@ -490,35 +507,68 @@ void ModFramework::on_frame_d3d12() {
     draw_notifs();
 
     ImGui::EndFrame();
-
     ImGui::Render();
 
     //Rendering
     const UINT back_buffer_idx = m_d3d12_hook->get_swap_chain()->GetCurrentBackBufferIndex();
-    const auto& frame_context = m_d3d12.frame_context[back_buffer_idx];
-    frame_context.CommandAllocator->Reset();
+    const auto& bb_frame_context = m_d3d12.frame_context[back_buffer_idx];
 
+    constexpr float clear_color[]{ 0.0f, 0.0f, 0.0f, 0.0f };
+
+    const auto pd3d_device = m_d3d12_hook->get_device();
+
+    D3D12_CPU_DESCRIPTOR_HANDLE render_targets[1]{};
+
+    bb_frame_context.command_allocator->Reset();
+    m_d3d12.pd3d_command_list->Reset(bb_frame_context.command_allocator.Get(), nullptr);
+
+    // Draw to our render target.
     D3D12_RESOURCE_BARRIER barrier{};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = m_d3d12.frame_context[back_buffer_idx].MainRenderTargetResource.Get();
+    barrier.Transition.pResource = m_d3d12.frame_context[m_d3d12.original_buffer_count].rt.Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+    m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+
+    {   
+        m_d3d12.pd3d_command_list->ClearRenderTargetView(m_d3d12.get_cpu_rtv(pd3d_device, m_d3d12.original_buffer_count), clear_color, 0, nullptr);
+        
+        render_targets[0] = m_d3d12.get_cpu_rtv(pd3d_device, m_d3d12.original_buffer_count);
+        
+        m_d3d12.pd3d_command_list->OMSetRenderTargets(1, render_targets, FALSE, nullptr);
+        m_d3d12.pd3d_command_list->SetDescriptorHeaps(1, m_d3d12.pd3d_srv_desc_heap.GetAddressOf());
+        
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_d3d12.pd3d_command_list.Get());
+        
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        
+        m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+    }
+
+    barrier.Transition.pResource = bb_frame_context.rt.Get();
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-    m_d3d12.pd3d_command_list->Reset(frame_context.CommandAllocator.Get(), nullptr);
-    m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+    // Draw UI
+    {
+        m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
 
-    // Render Dear ImGui graphics
-    m_d3d12.pd3d_command_list->OMSetRenderTargets(1, &m_d3d12.frame_context[back_buffer_idx].MainRenderTargetDescriptorHandle, FALSE, nullptr);
-    m_d3d12.pd3d_command_list->SetDescriptorHeaps(1, m_d3d12.pd3d_srv_desc_heap.GetAddressOf());
+        render_targets[0] = m_d3d12.get_cpu_rtv(pd3d_device, back_buffer_idx);
 
-    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_d3d12.pd3d_command_list.Get());
+        m_d3d12.pd3d_command_list->OMSetRenderTargets(1, render_targets, FALSE, nullptr);
+        m_d3d12.pd3d_command_list->SetDescriptorHeaps(1, m_d3d12.pd3d_srv_desc_heap.GetAddressOf());
 
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_d3d12.pd3d_command_list.Get());
 
-    m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        m_d3d12.pd3d_command_list->ResourceBarrier(1, &barrier);
+    }
+
     m_d3d12.pd3d_command_list->Close();
 
     command_queue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(m_d3d12.pd3d_command_list.GetAddressOf()));
@@ -534,28 +584,66 @@ void ModFramework::on_frame_d3d12() {
 void ModFramework::on_reset(const UINT& width, const UINT& height) {
     spdlog::info("Reset!");
 
+    static auto last_size = UI::Vec2<UINT>{ 0, 0 };
+
+    if (m_initialized) {
+        // We need to reset the state of the ImGui keys because it can break some text inputs in D3D12
+        auto& io = ImGui::GetIO();
+
+        // Just setting these to false seems to fix it
+        io.KeyAlt = false;
+        io.KeyCtrl = false;
+        io.KeySuper = false;
+        io.KeyShift = false;
+
+        io.MousePos.x = 0.0f;
+        io.MousePos.y = 0.0f;
+
+        for (auto& key : io.MouseDown) {
+            key = false;
+        }
+
+        for (auto& key : io.KeysDown) {
+            key = false;
+        }
+    }
+
     // Crashes if we don't release it at this point.
     if (m_is_d3d11) {
         if (m_initialized)
         {
-            ImGui_ImplDX11_Shutdown();
-            m_d3d11 = {};
+            reset_d3d11();
         }
-
-        cleanup_render_target_d3d11();
     }
 
     if (m_is_d3d12) {
         if (m_initialized)
         {
-            ImGui_ImplDX12_Shutdown();
-            m_d3d12 = {};
+            reset_d3d12();
         }
-
-        cleanup_render_target_d3d12();
     }
 
+    // Reseting the size and pos conds
+    if (UI::Vec2{ width, height } != last_size) {
+        reset_window_transforms("##SSSiyan's Collaborative Trainer");
+        reset_window_transforms("Settings");
+    }
+
+    last_size = UI::Vec2{ width, height };
+
     m_initialized = false;
+}
+
+void ModFramework::reset_d3d11()
+{
+    ImGui_ImplDX11_Shutdown();
+    m_d3d11 = {};
+}
+
+void ModFramework::reset_d3d12()
+{
+    ImGui_ImplDX12_Shutdown();
+    m_d3d12 = {};
 }
 
 void ModFramework::save_config() const
@@ -603,23 +691,24 @@ void ModFramework::load_config()
 }
 
 bool ModFramework::initialize() {
-
     if (m_initialized) {
         return true;
     }
 
+	eh::setup_exception_handler();
+
     if (m_is_d3d11) {
-        spdlog::info("Attempting to initialize DirectX 11");
+        spdlog::info("[D3D11] Attempting to initialize DirectX 11");
 
         if (!m_d3d11_hook->is_hooked()) {
             return false;
         }
 
-        const ComPtr<ID3D11Device> device = m_d3d11_hook->get_device();
-        const ComPtr<IDXGISwapChain> swap_chain = m_d3d11_hook->get_swap_chain();
+        const auto pd3d_device = m_d3d11_hook->get_device();
+        const auto pd3d_swap_chain = m_d3d11_hook->get_swap_chain();
 
         // Wait.
-        if (!device || !swap_chain) {
+        if (pd3d_device == nullptr || pd3d_swap_chain == nullptr) {
             spdlog::info("Device or SwapChain null. DirectX 12 may be in use. Unhooking D3D11...");
 
             // We unhook D3D11
@@ -639,9 +728,18 @@ bool ModFramework::initialize() {
         }
 
         ComPtr<ID3D11DeviceContext> context;
-        device->GetImmediateContext(&context);
+        pd3d_device->GetImmediateContext(&context);
 
-        swap_chain->GetDesc(&m_swap_desc);
+        pd3d_swap_chain->GetDesc(&m_swap_desc);
+
+        // It can be called when the frame is not properly set yet
+        if (m_swap_desc.BufferDesc.Width < 1 || m_swap_desc.BufferDesc.Height < 1)
+        {
+            spdlog::info("[D3D11] Frame size not set, skipping the initialization in this frame!");
+            return false;
+        }
+
+        m_wnd = m_swap_desc.OutputWindow;
 
         m_scale = 1.0f;
 
@@ -654,30 +752,16 @@ bool ModFramework::initialize() {
             m_scale = max_allowed_ratio * smaller_ratio;
         }
 
-        m_wnd = m_swap_desc.OutputWindow;
+        spdlog::info("[D3D11] Creating render target");
 
-        // Explicitly call destructor first
-        m_windows_message_hook.reset();
-        m_windows_message_hook = std::make_unique<WindowsMessageHook>(m_wnd);
-        m_windows_message_hook->on_message = [this](auto& wnd, auto& msg, auto& wParam, auto& lParam) {
-            return on_message(wnd, msg, wParam, lParam);
-        };
-
-        // just do this instead of rehooking because there's no point.
-        if (m_first_frame) {
-            m_dinput_hook = std::make_unique<DInputHook>(m_wnd);
-            m_controller_hook = std::make_unique<ControllerHook>();
-        }
-        else {
-            m_dinput_hook->set_window(m_wnd);
+        if(!create_render_target_d3d11())
+        {
+            spdlog::error("[D3D11] Failed to create render targets!");
+            return false;
         }
 
-        spdlog::info("Creating render target");
-
-        create_render_target_d3d11();
-
-        spdlog::info("Window Handle: {0:x}", reinterpret_cast<uintptr_t>(m_wnd));
-        spdlog::info("Initializing ImGui");
+        spdlog::info("[D3D11] Window Handle: {0:x}", reinterpret_cast<uintptr_t>(m_wnd));
+        spdlog::info("[D3D11] Initializing ImGui");
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -692,44 +776,65 @@ bool ModFramework::initialize() {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
-        spdlog::info("Initializing ImGui Win32");
+        spdlog::info("[D3D11] Initializing ImGui Win32");
 
         if (!ImGui_ImplWin32_Init(m_wnd)) {
-            spdlog::error("Failed to initialize ImGui.");
+            spdlog::error("[D3D11] Failed to initialize ImGui.");
             return false;
         }
 
-        spdlog::info("Initializing ImGui D3D11");
+        spdlog::info("[D3D11] Initializing ImGui D3D11");
 
-        if (!ImGui_ImplDX11_Init(device.Get(), context.Get())) {
-            spdlog::error("Failed to initialize ImGui.");
+        if (!ImGui_ImplDX11_Init(pd3d_device, context.Get())) {
+            spdlog::error("[D3D11] Failed to initialize ImGui.");
             return false;
         }
 
         // Loading the custom textures for DX11
-        m_logo_dx11 = UI::Texture2DDX11(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), device.Get());
-        m_icons.kbIconDX11 = UI::Texture2DDX11(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get());
-        m_icons.kbIconActiveDX11 = UI::Texture2DDX11(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get());
-        m_icons.keyIconsDX11 = UI::Texture2DDX11(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get());
-        m_icons.gearIconDX11 = UI::Texture2DDX11(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get());
+        m_logo_dx11 = UI::Texture2DDX11(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), pd3d_device);
+        m_icons.kbIconDX11 = UI::Texture2DDX11(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), pd3d_device);
+        m_icons.kbIconActiveDX11 = UI::Texture2DDX11(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), pd3d_device);
+        m_icons.keyIconsDX11 = UI::Texture2DDX11(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), pd3d_device);
+        m_icons.gearIconDX11 = UI::Texture2DDX11(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), pd3d_device);
 
         if (!m_logo_dx11 || !m_icons.kbIconDX11 || !m_icons.kbIconActiveDX11
             || !m_icons.keyIconsDX11 || !m_icons.gearIconDX11) {
-            spdlog::error("Failed to load textures!");
+            spdlog::error("[D3D11] Failed to load textures!");
+
+            if (!m_logo_dx11) {
+                spdlog::error("[D3D11] m_logo_dx11 -> {}", m_logo_dx11.GetLastError().c_str());
+            }
+
+            if (!m_icons.kbIconDX11) {
+                spdlog::error("[D3D11] m_icons.kbIconDX11 -> {}", m_icons.kbIconDX11.GetLastError().c_str());
+            }
+
+            if (!m_icons.kbIconActiveDX11) {
+                spdlog::error("[D3D11] m_icons.kbIconActiveDX11 -> {}", m_icons.kbIconActiveDX11.GetLastError().c_str());
+            }
+
+            if (!m_icons.keyIconsDX11) {
+                spdlog::error("[D3D11] m_icons.keyIconsDX11 -> {}", m_icons.keyIconsDX11.GetLastError().c_str());
+            }
+
+            if (!m_icons.gearIconDX11) {
+                spdlog::error("[D3D11] m_icons.gearIconDX11 -> {}", m_icons.gearIconDX11.GetLastError().c_str());
+            }
+
             return false;
         }
     }
     else if (m_is_d3d12) {
-        spdlog::info("Attempting to initialize DirectX 12");
+        spdlog::info("[D3D12] Attempting to initialize DirectX 12");
 
         if (!m_d3d12_hook->is_hooked()) {
             return false;
         }
 
-        const ComPtr<ID3D12Device> device = m_d3d12_hook->get_device();
-        const ComPtr<IDXGISwapChain3> swap_chain = m_d3d12_hook->get_swap_chain();
+        const auto pd3d_device = m_d3d12_hook->get_device();
+        const auto pd3d_swap_chain = m_d3d12_hook->get_swap_chain();
 
-        if (!device || !swap_chain) {
+        if (pd3d_device == nullptr || pd3d_swap_chain == nullptr) {
             spdlog::info("Device or SwapChain null. DirectX 11 may be in use. Unhooking D3D12...");
 
             // We unhook D3D12
@@ -750,10 +855,18 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        swap_chain->GetDesc(&m_swap_desc);
+        pd3d_swap_chain->GetDesc(&m_swap_desc);
+
+        // It can be called when the frame is not properly set yet
+        if (m_swap_desc.BufferDesc.Width < 1 || m_swap_desc.BufferDesc.Height < 1)
+        {
+            spdlog::info("[D3D12] Frame size not set, skipping the initialization in this frame!");
+            return false;
+        }
 
         m_wnd = m_swap_desc.OutputWindow;
-        m_d3d12.buffer_count = m_swap_desc.BufferCount;
+        m_d3d12.original_buffer_count = m_swap_desc.BufferCount;
+        m_d3d12.buffer_count = m_d3d12.original_buffer_count + 2;
         m_d3d12.frame_context.resize(m_d3d12.buffer_count);
 
         m_scale = 1.0f;
@@ -767,32 +880,8 @@ bool ModFramework::initialize() {
             m_scale = max_allowed_ratio * smaller_ratio;
         }
 
-        m_windows_message_hook.reset();
-        m_windows_message_hook = std::make_unique<WindowsMessageHook>(m_wnd);
-        m_windows_message_hook->on_message = [this](auto& wnd, auto& msg, auto& wParam, auto& lParam) {
-            return on_message(wnd, msg, wParam, lParam);
-        };
-
-        if (m_first_frame) {
-            m_dinput_hook = std::make_unique<DInputHook>(m_wnd);
-            m_controller_hook = std::make_unique<ControllerHook>();
-        }
-        else {
-            m_dinput_hook->set_window(m_wnd);
-        }
-
-        if (!create_rtv_descriptor_heap_d3d12()) {
-            spdlog::error("Failed to create RTV Descriptor.");
-            return false;
-        }
-
-        if (!create_srv_descriptor_heap_d3d12(6)) {
-            spdlog::error("Failed to create SRV Descriptor.");
-            return false;
-        }
-
         if (!create_command_allocator_d3d12()) {
-            spdlog::error("Failed to create Command Allocator.");
+            spdlog::error("[D3D12] Failed to create Command Allocator.");
             return false;
         }
 
@@ -801,7 +890,21 @@ bool ModFramework::initialize() {
             return false;
         }
 
-        create_render_target_d3d12();
+        if (!create_rtv_descriptor_heap_d3d12()) {
+            spdlog::error("[D3D12] Failed to create RTV Descriptor.");
+            return false;
+        }
+
+        if (!create_srv_descriptor_heap_d3d12(8)) {
+            spdlog::error("[D3D12] Failed to create SRV Descriptor.");
+            return false;
+        }
+
+        if(!create_render_target_d3d12())
+        {
+            spdlog::error("[D3D12] Failed to create RenderTargets.");
+            return false;
+        }
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -817,35 +920,67 @@ bool ModFramework::initialize() {
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
         if (!ImGui_ImplWin32_Init(m_wnd)) {
-            spdlog::error("Failed to initialize ImGui ImplWin32.");
+            spdlog::error("[D3D12] Failed to initialize ImGui ImplWin32.");
             return false;
         }
 
-        if (!ImGui_ImplDX12_Init(device.Get(), m_d3d12.buffer_count,
-            DXGI_FORMAT_R8G8B8A8_UNORM, m_d3d12.pd3d_srv_desc_heap.Get(),
-            m_d3d12.pd3d_srv_desc_heap->GetCPUDescriptorHandleForHeapStart(),
-            m_d3d12.pd3d_srv_desc_heap->GetGPUDescriptorHandleForHeapStart()))
+        // Create our imgui and blank rts.
+        const auto& backbuffer = m_d3d12.frame_context[0].rt;
+        const auto bb_desc = backbuffer->GetDesc();
+
+        if (!ImGui_ImplDX12_Init(pd3d_device, 1,
+            bb_desc.Format, m_d3d12.pd3d_srv_desc_heap.Get(),
+            m_d3d12.get_cpu_srv(pd3d_device, 0),
+            m_d3d12.get_gpu_srv(pd3d_device, 0)))
         {
-            spdlog::error("Failed to initialize ImGui ImplDX12.");
+            spdlog::error("[D3D12] Failed to initialize ImGui ImplDX12.");
             return false;
         }
 
-        ImGui_ImplDX12_InvalidateDeviceObjects();
-        if (!ImGui_ImplDX12_CreateDeviceObjects()) {
-            spdlog::error("Failed to initialize ImGui CreateDeviceObjects.");
+        //ImGui_ImplDX12_InvalidateDeviceObjects();
+        //if (!ImGui_ImplDX12_CreateDeviceObjects()) {
+        //    spdlog::error("Failed to initialize ImGui CreateDeviceObjects.");
+        //    return false;
+        //}
+
+        // Getting the command quueue to initialize the textures using it
+        auto cmd_queue = m_d3d12_hook->get_command_queue();
+        if (cmd_queue == nullptr) {
+            spdlog::error("[D3D12] Failed to retrieve the command queue for loading textures!");
             return false;
         }
 
         // Loading the custom textures for DX12
-        m_logo_dx12 = UI::Texture2DDX12(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 1);
-        m_icons.kbIconDX12 = UI::Texture2DDX12(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 2);
-        m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 3);
-        m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 4);
-        m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), device.Get(), m_d3d12.pd3d_srv_desc_heap.Get(), 5);
+        m_logo_dx12 = UI::Texture2DDX12(logo.GetRGBAData(), logo.GetWidth(), logo.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 3);
+        m_icons.kbIconDX12 = UI::Texture2DDX12(kbIcon.GetRGBAData(), kbIcon.GetWidth(), kbIcon.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 4);
+        m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 5);
+        m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 6);
+        m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 7);
 
         if (!m_logo_dx12 || !m_icons.kbIconDX12 || !m_icons.kbIconActiveDX12
             || !m_icons.keyIconsDX12 || !m_icons.gearIconDX12) {
-            spdlog::error("Failed to load textures!");
+            spdlog::error("[D3D12] Failed to load textures!");
+
+            if (!m_logo_dx12) {
+                spdlog::error("[D3D12] m_logo_dx12 -> {}", m_logo_dx12.GetLastError().c_str());
+            }
+
+            if (!m_icons.kbIconDX12) {
+                spdlog::error("[D3D12] m_icons.kbIconDX12 -> {}", m_icons.kbIconDX12.GetLastError().c_str());
+            }
+
+            if (!m_icons.kbIconActiveDX12) {
+                spdlog::error("[D3D12] m_icons.kbIconActiveDX12 -> {}", m_icons.kbIconActiveDX12.GetLastError().c_str());
+            }
+
+            if (!m_icons.keyIconsDX12) {
+                spdlog::error("[D3D12] m_icons.keyIconsDX12 -> {}", m_icons.keyIconsDX12.GetLastError().c_str());
+            }
+
+            if (!m_icons.gearIconDX12) {
+                spdlog::error("[D3D12] m_icons.gearIconDX12 -> {}", m_icons.gearIconDX12.GetLastError().c_str());
+            }
+
             return false;
         }
 
@@ -856,6 +991,22 @@ bool ModFramework::initialize() {
         m_render_height = m_d3d12_hook->get_render_height();*/
     }
     else { return false; }
+
+    // Explicitly call destructor first
+    m_windows_message_hook.reset();
+    m_windows_message_hook = std::make_unique<WindowsMessageHook>(m_wnd);
+    m_windows_message_hook->on_message = [this](auto& wnd, auto& msg, auto& wParam, auto& lParam) {
+        return on_message(wnd, msg, wParam, lParam);
+    };
+
+    // just do this instead of rehooking because there's no point.
+    if (m_first_frame) {
+        m_dinput_hook = std::make_unique<DInputHook>(m_wnd);
+        m_controller_hook = std::make_unique<ControllerHook>();
+    }
+    else {
+        m_dinput_hook->set_window(m_wnd);
+    }
 
     if (m_first_frame) {
         m_first_frame = false;
@@ -930,6 +1081,11 @@ void ModFramework::initialize_key_bindings()
 
 void ModFramework::focus_tab(const std::string_view& window_name)
 {
+    if (!m_initialized)
+    {
+        return;
+    }
+
     ImGuiWindow* window = ImGui::FindWindowByName(window_name.data());
 
     if (window == nullptr || window->DockNode == nullptr || window->DockNode->TabBar == nullptr) {
@@ -941,10 +1097,35 @@ void ModFramework::focus_tab(const std::string_view& window_name)
 
 bool ModFramework::is_window_focused(const std::string_view& window_name)
 {
+    if (!m_initialized)
+    {
+        return false;
+    }
+
     const auto window = ImGui::FindWindowByName(window_name.data());
     const auto focusedWindow = ImGui::GetCurrentContext()->NavWindow;
 
 	return window != nullptr && focusedWindow != nullptr && window == focusedWindow;
+}
+
+void ModFramework::reset_window_transforms(const std::string_view& window_name)
+{
+    if(!m_initialized)
+    {
+        return;
+    }
+
+    const auto window = ImGui::FindWindowByName(window_name.data());
+
+    if (window == nullptr)
+    {
+        return;
+    }
+
+    // Resetting the pos and size conds to be able to be set once afterwards
+
+    window->SetWindowPosAllowFlags |= ImGuiCond_Once;
+    window->SetWindowSizeAllowFlags |= ImGuiCond_Once;
 }
 
 void ModFramework::draw_ui() {
@@ -1017,8 +1198,8 @@ void ModFramework::draw_ui() {
     mainWindowClass.DockNodeFlagsOverrideSet = 000;
     ImGui::SetNextWindowClass(&mainWindowClass);
 
-    ImGui::SetNextWindowPos(m_window_pos * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
-    ImGui::SetNextWindowSize(m_window_size * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
+    ImGui::SetNextWindowPos(m_window_pos * m_scale, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(m_window_size * m_scale, ImGuiCond_Once);
 
     ImGui::SetNextWindowViewport(mainViewport->ID);
 
@@ -1034,6 +1215,7 @@ void ModFramework::draw_ui() {
 	ImGui::PushStyleColor(ImGuiCol_Border, is_trainer_focused ? border_col : border_unfocused);
     ImGui::PushStyleColor(ImGuiCol_BorderShadow, is_trainer_focused ? border_shadow_col : border_shadow_unfocused);
     ImGui::Begin("##SSSiyan's Collaborative Trainer", m_kcw_buffers.drawWindow ? nullptr : &m_draw_ui, windowFlags);
+
     ImGui::PopStyleColor(2);
 
 	const auto trainer_width = ImGui::GetContentRegionAvailWidth();
@@ -1418,8 +1600,8 @@ void ModFramework::draw_trainer_settings()
         return;
     }
 
-    ImGui::SetNextWindowPos(ImVec2(m_window_pos.x + 25.0f, m_window_pos.y + 15.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
-    ImGui::SetNextWindowSize(ImVec2(500.0f, 650.0f) * m_scale, ImGuiCond_Once/*ImGuiCond_FirstUseEver*/);
+    ImGui::SetNextWindowPos(ImVec2(m_window_pos.x + 25.0f, m_window_pos.y + 15.0f) * m_scale, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(500.0f, 650.0f) * m_scale, ImGuiCond_Once);
 
     static const ImVec4 activeTabText = { 0.5f, 1.0f, 1.0f, 1.0f };
     static const ImVec4 inactiveTabText = { 0.5f, 1.0f, 1.0f, 0.7f };
@@ -1504,19 +1686,90 @@ void ModFramework::draw_notifs() const
     ImGui::PopStyleColor();
 }
 
-void ModFramework::create_render_target_d3d11() {
-    ComPtr<ID3D11Texture2D> back_buffer;
-    if (m_d3d11_hook->get_swap_chain()->GetBuffer(0, IID_PPV_ARGS(&back_buffer)) == S_OK) {
-        m_d3d11_hook->get_device()->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_d3d11.main_render_target_view);
-    }
-}
+bool ModFramework::create_render_target_d3d11() {
+    const auto pd3d_device = m_d3d11_hook->get_device();
+    const auto pd3d_swap_chain = m_d3d11_hook->get_swap_chain();
 
-void ModFramework::cleanup_render_target_d3d11() {
-    m_d3d11.main_render_target_view.Reset();
+    if(pd3d_device == nullptr)
+    {
+        spdlog::error("[D3D11] Failed to retrieve the device for creting render targets!");
+        return false;
+    }
+
+    if(pd3d_swap_chain == nullptr)
+    {
+        spdlog::error("[D3D11] Failed to retrieve the swap chain for creting render targets!");
+        return false;
+    }
+
+    ComPtr<ID3D11Texture2D> backbuffer;
+
+    if (FAILED(pd3d_swap_chain->GetBuffer(0, IID_PPV_ARGS(&backbuffer)))) {
+        spdlog::error("[D3D11] Failed to get back buffer!");
+        return false;
+    }
+
+    if(FAILED(pd3d_device->CreateRenderTargetView(backbuffer.Get(), nullptr, &m_d3d11.pd3d_backbuffer_rtv)))
+    {
+        spdlog::error("[D3D11] Failed to create back buffer render target view!");
+        return false;
+    }
+
+    // Get backbuffer description.
+    D3D11_TEXTURE2D_DESC backbuffer_desc{};
+
+    backbuffer->GetDesc(&backbuffer_desc);
+
+    backbuffer_desc.BindFlags |= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    // Create our blank render target.
+    spdlog::info("[D3D11] Creating render targets...");
+
+    if (FAILED(pd3d_device->CreateTexture2D(&backbuffer_desc, nullptr, &m_d3d11.pd3d_blank_rt))) {
+        spdlog::error("[D3D11] Failed to create render target texture!");
+        return false;
+    }
+
+    // Create our render target.
+    if (FAILED(pd3d_device->CreateTexture2D(&backbuffer_desc, nullptr, &m_d3d11.pd3d_rt))) {
+        spdlog::error("[D3D11] Failed to create render target texture!");
+        return false;
+    }
+
+    // Create our blank render target view.
+    spdlog::info("[D3D11] Creating rtvs...");
+
+    if (FAILED(pd3d_device->CreateRenderTargetView(m_d3d11.pd3d_blank_rt.Get(), nullptr, &m_d3d11.pd3d_blank_rt_rtv))) {
+        spdlog::error("[D3D11] Failed to create render terget view!");
+        return false;
+    }
+
+
+    // Create our render target view.
+    if (FAILED(pd3d_device->CreateRenderTargetView(m_d3d11.pd3d_rt.Get(), nullptr, &m_d3d11.pd3d_rt_rtv))) {
+        spdlog::error("[D3D11] Failed to create render terget view!");
+        return false;
+    }
+
+    // Create our render target shader resource view.
+    spdlog::info("[D3D11] Creating srvs...");
+
+    if (FAILED(pd3d_device->CreateShaderResourceView(m_d3d11.pd3d_rt.Get(), nullptr, &m_d3d11.pd3d_rt_srv))) {
+        spdlog::error("[D3D11] Failed to create shader resource view!");
+        return false;
+    }
+
+    return true;
 }
 
 bool ModFramework::create_rtv_descriptor_heap_d3d12() {
-	const auto device = m_d3d12_hook->get_device();
+	const auto pd3d_device = m_d3d12_hook->get_device();
+
+    if(pd3d_device == nullptr)
+    {
+        spdlog::error("[D3D12] Failed to retrieve the device for creating rtv descriptor heap!");
+        return false;
+    }
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -1524,15 +1777,15 @@ bool ModFramework::create_rtv_descriptor_heap_d3d12() {
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     desc.NodeMask = 1;
 
-    if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_d3d12.pd3d_rtv_desc_heap)) != S_OK) {
+    if (pd3d_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_d3d12.pd3d_rtv_desc_heap)) != S_OK) {
         return false;
     }
 
-	const SIZE_T rtv_descriptor_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	const SIZE_T rtv_descriptor_size = pd3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = m_d3d12.pd3d_rtv_desc_heap->GetCPUDescriptorHandleForHeapStart();
     for (UINT i = 0; i < m_d3d12.buffer_count; i++)
     {
-        m_d3d12.frame_context[i].MainRenderTargetDescriptorHandle = rtv_handle;
+        m_d3d12.frame_context[i].rt_cpu_desc_handle = rtv_handle;
         rtv_handle.ptr += rtv_descriptor_size;
     }
 
@@ -1556,7 +1809,7 @@ bool ModFramework::create_srv_descriptor_heap_d3d12(UINT descriptorCount) {
 bool ModFramework::create_command_allocator_d3d12() {
     for (UINT i = 0; i < m_d3d12.buffer_count; i++)
     {
-	    if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_d3d12.frame_context[i].CommandAllocator)) != S_OK)
+	    if (m_d3d12_hook->get_device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_d3d12.frame_context[i].command_allocator)) != S_OK)
 	    {
 		    return false;
 	    }
@@ -1566,30 +1819,74 @@ bool ModFramework::create_command_allocator_d3d12() {
 }
 
 bool ModFramework::create_command_list_d3d12() {
-    if (m_d3d12_hook->get_device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_d3d12.frame_context[0].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_d3d12.pd3d_command_list)) != S_OK || m_d3d12.pd3d_command_list->Close() != S_OK)
+    if (m_d3d12_hook->get_device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_d3d12.frame_context[0].command_allocator.Get(), nullptr, IID_PPV_ARGS(&m_d3d12.pd3d_command_list)) != S_OK)
     {
 	    return false;
+    }
+
+    if (m_d3d12.pd3d_command_list->Close() != S_OK)
+    {
+        spdlog::error("Failed to close command list after creation.");
+        return false;
     }
 
     return true;
 }
 
-void ModFramework::cleanup_render_target_d3d12()
+bool ModFramework::create_render_target_d3d12()
 {
-    for (UINT i = 0; i < m_d3d12.buffer_count; i++) {
-        if (m_d3d12.frame_context[i].MainRenderTargetResource) {
-            m_d3d12.frame_context[i].MainRenderTargetResource.Reset();
+    const auto pd3d_device = m_d3d12_hook->get_device();
+    const auto pd3d_swap_chain = m_d3d12_hook->get_swap_chain();
+
+    if (pd3d_device == nullptr)
+    {
+        spdlog::error("[D3D12] Failed to retrieve the device for creting render targets!");
+        return false;
+    }
+
+    if (pd3d_swap_chain == nullptr)
+    {
+        spdlog::error("[D3D12] Failed to retrieve the swap chain for creting render targets!");
+        return false;
+    }
+
+    for (UINT i = 0; i < m_d3d12.original_buffer_count; i++) {
+        if (pd3d_swap_chain->GetBuffer(i, IID_PPV_ARGS(&m_d3d12.frame_context[i].rt)) == S_OK) {
+            pd3d_device->CreateRenderTargetView(m_d3d12.frame_context[i].rt.Get(), nullptr, m_d3d12.get_cpu_rtv(pd3d_device, i));
         }
     }
-}
 
-void ModFramework::create_render_target_d3d12()
-{
-    //cleanup_render_target_d3d12();
+    // Create our imgui and blank rts.
+    const auto& backbuffer = m_d3d12.frame_context[0].rt;
+    const auto bb_desc = backbuffer->GetDesc();
 
-    for (UINT i = 0; i < m_d3d12.buffer_count; i++) {
-        if (m_d3d12_hook->get_swap_chain()->GetBuffer(i, IID_PPV_ARGS(&m_d3d12.frame_context[i].MainRenderTargetResource)) == S_OK) {
-            m_d3d12_hook->get_device()->CreateRenderTargetView(m_d3d12.frame_context[i].MainRenderTargetResource.Get(), nullptr, m_d3d12.frame_context[i].MainRenderTargetDescriptorHandle);
-        }
+    spdlog::info("[D3D12] Back buffer format is {}", bb_desc.Format);
+
+    D3D12_HEAP_PROPERTIES props{};
+    props.Type = D3D12_HEAP_TYPE_DEFAULT;
+    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    D3D12_CLEAR_VALUE clear_value{};
+    clear_value.Format = bb_desc.Format;
+
+    if (FAILED(pd3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &bb_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear_value,
+        IID_PPV_ARGS(&m_d3d12.frame_context[m_d3d12.original_buffer_count].rt)))) {
+        spdlog::error("[D3D12] Failed to create the ui render target.");
+        return false;
     }
+
+    if (FAILED(pd3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &bb_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear_value,
+        IID_PPV_ARGS(&m_d3d12.frame_context[m_d3d12.original_buffer_count + 1].rt)))) {
+        spdlog::error("[D3D12] Failed to create the blank render target.");
+        return false;
+    }
+
+    // Create imgui and blank rtvs and srvs.
+    pd3d_device->CreateRenderTargetView(m_d3d12.frame_context[m_d3d12.original_buffer_count].rt.Get(), nullptr, m_d3d12.get_cpu_rtv(pd3d_device, m_d3d12.original_buffer_count));
+    pd3d_device->CreateRenderTargetView(m_d3d12.frame_context[m_d3d12.original_buffer_count + 1].rt.Get(), nullptr, m_d3d12.get_cpu_rtv(pd3d_device, m_d3d12.original_buffer_count + 1));
+    pd3d_device->CreateShaderResourceView(m_d3d12.frame_context[m_d3d12.original_buffer_count].rt.Get(), nullptr, m_d3d12.get_cpu_srv(pd3d_device, 1));
+    pd3d_device->CreateShaderResourceView(m_d3d12.frame_context[m_d3d12.original_buffer_count + 1].rt.Get(), nullptr, m_d3d12.get_cpu_srv(pd3d_device, 2));
+
+    return true;
 }

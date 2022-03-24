@@ -13,6 +13,10 @@
 
 #include "ModFramework.hpp"
 
+#include <sstream>
+#include <comdef.h>
+#include <iomanip>
+
 // clang-format off
 
 // Those MIN/MAX values are not define because we need to point to them
@@ -2584,7 +2588,7 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
 }
 
  UI::Texture2DDX11::Texture2DDX11(const char* filename, ID3D11Device* pd3dDevice)
-     : m_pd3dDevice(pd3dDevice)
+     : m_pd3d_device(pd3dDevice)
 {
     // Load from disk into a raw RGBA buffer
     m_image_data = stbi_load(filename, &m_width, &m_height, NULL, 4);
@@ -2595,7 +2599,7 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
 }
 
  UI::Texture2DDX11::Texture2DDX11(const unsigned char* image_data, size_t image_size, ID3D11Device* pd3dDevice)
-     : m_pd3dDevice(pd3dDevice)
+     : m_pd3d_device(pd3dDevice)
 {
     // Load from memory as raw RGBA buffer
     m_image_data = stbi_load_from_memory(image_data, image_size, &m_width, &m_height, NULL, 4);
@@ -2606,7 +2610,7 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
 }
 
  UI::Texture2DDX11::Texture2DDX11(unsigned char* image_data, int width, int height, ID3D11Device* pd3dDevice)
-    : m_image_data(image_data), m_width(width), m_height(height), m_pd3dDevice(pd3dDevice)
+    : m_image_data(image_data), m_width(width), m_height(height), m_pd3d_device(pd3dDevice)
 {
     // Upload the RGBA buffer into VRam
     m_is_loaded = Commit();
@@ -2614,8 +2618,18 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
 
  bool UI::Texture2DDX11::Commit()
 {
-    if (m_image_data == nullptr)
-        return false;
+	 if (m_image_data == nullptr) {
+		 m_last_error = "Invalid image data!";
+		 return false;
+	 }
+
+	 if (m_pd3d_device == nullptr) {
+		 m_last_error = "Invalid device!";
+		 return false;
+	 }
+
+	// An hresult we will use to make sure everything works
+	HRESULT hr = S_OK;
 
     // Create texture
     D3D11_TEXTURE2D_DESC desc;
@@ -2630,29 +2644,47 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     desc.CPUAccessFlags = 0;
 
-    WRL::ComPtr<ID3D11Texture2D> pTexture;
-    D3D11_SUBRESOURCE_DATA subResource;
-    subResource.pSysMem = m_image_data;
-    subResource.SysMemPitch = desc.Width * 4;
-    subResource.SysMemSlicePitch = 0;
-    m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+    WRL::ComPtr<ID3D11Texture2D> p_texture;
+    D3D11_SUBRESOURCE_DATA sub_resource;
+    sub_resource.pSysMem = m_image_data;
+    sub_resource.SysMemPitch = desc.Width * 4;
+    sub_resource.SysMemSlicePitch = 0;
+	hr = m_pd3d_device->CreateTexture2D(&desc, &sub_resource, &p_texture);
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateTexture2D() failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     // Create texture view
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    ZeroMemory(&srvDesc, sizeof(srvDesc));
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = desc.MipLevels;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    m_pd3dDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, &m_srv);
+    D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+    ZeroMemory(&srv_desc, sizeof(srv_desc));
+    srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.Texture2D.MipLevels = desc.MipLevels;
+    srv_desc.Texture2D.MostDetailedMip = 0;
+	hr = m_pd3d_device->CreateShaderResourceView(p_texture.Get(), &srv_desc, &m_srv);
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateShaderResourceView() failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     return true;
 }
 
- UI::Texture2DDX12::Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
-     : m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
+     : m_pd3d_device(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap), m_pd3d_cmd_queue(cmdQueue)
 {
-    m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_handle_increment = m_pd3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     
     m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
     m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
@@ -2668,10 +2700,10 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     stbi_image_free(m_image_data);
 }
 
- UI::Texture2DDX12::Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
-    : m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
+    : m_pd3d_device(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap), m_pd3d_cmd_queue(cmdQueue)
 {
-    m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_handle_increment = m_pd3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     
     m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
     m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
@@ -2687,10 +2719,11 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
     stbi_image_free(m_image_data);
 }
 
- UI::Texture2DDX12::Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
-    : m_image_data(image_data), m_width(width), m_height(height), m_pd3dDevice(pd3dDevice), m_pd3dSrvDescHeap(pd3dSrvDescHeap)
+ UI::Texture2DDX12::Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap)
+    : m_image_data(image_data), m_width(width), m_height(height), m_pd3d_device(pd3dDevice),
+	 m_pd3dSrvDescHeap(pd3dSrvDescHeap), m_pd3d_cmd_queue(cmdQueue)
 {
-    m_handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_handle_increment = m_pd3d_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     
     m_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
     m_texture_srv_cpu_handle.ptr += (m_handle_increment * descIndexInHeap);
@@ -2704,8 +2737,23 @@ bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
 
 bool UI::Texture2DDX12::Commit()
 {
-    if (m_image_data == nullptr)
-        return false;
+	if (m_image_data == nullptr) {
+		m_last_error = "Invalid image data!";
+		return false;
+	}
+
+	if (m_pd3d_device == nullptr) {
+		m_last_error = "Invalid device!";
+		return false;
+	}
+
+	if (m_pd3d_cmd_queue == nullptr) {
+		m_last_error = "Invalid command queue!";
+		return false;
+	}
+
+	// An hresult we will use to make sure everything works
+	HRESULT hr = S_OK;
 
     // Create texture resource
     D3D12_HEAP_PROPERTIES props;
@@ -2728,16 +2776,24 @@ bool UI::Texture2DDX12::Commit()
     desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-    WRL::ComPtr<ID3D12Resource> pTexture;
-    m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&pTexture));
+	hr = m_pd3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_tex_resource));
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateCommittedResource() for main texture upload buffer failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     // Create a temporary upload resource to move the data in
-    UINT uploadPitch = (m_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
-    UINT uploadSize = m_height * uploadPitch;
+    UINT upload_pitch = (m_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+    UINT upload_size = m_height * upload_pitch;
     desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
     desc.Alignment = 0;
-    desc.Width = uploadSize;
+    desc.Width = upload_size;
     desc.Height = 1;
     desc.DepthOrArraySize = 1;
     desc.MipLevels = 1;
@@ -2751,90 +2807,158 @@ bool UI::Texture2DDX12::Commit()
     props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
     props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
-    WRL::ComPtr<ID3D12Resource> uploadBuffer;
-    HRESULT hr = m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
-        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadBuffer));
+    WRL::ComPtr<ID3D12Resource> upload_buffer;
+    hr = m_pd3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload_buffer));
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} << 
+			"CreateCommittedResource() for temporary texture upload buffer failed!" <<
+			" HResult = 0x" << 
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     // Write pixels into the upload resource
     void* mapped = nullptr;
-    D3D12_RANGE range = { 0, uploadSize };
-    hr = uploadBuffer->Map(0, &range, &mapped);
+    D3D12_RANGE range = { 0, upload_size };
+    hr = upload_buffer->Map(0, &range, &mapped);
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"Map() for upload buffer failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     for (int y = 0; y < m_height; y++)
-        memcpy((void*)((uintptr_t)mapped + y * uploadPitch), m_image_data + y * m_width * 4, m_width * 4);
-    uploadBuffer->Unmap(0, &range);
+        memcpy((void*)((uintptr_t)mapped + y * upload_pitch), m_image_data + y * m_width * 4, m_width * 4);
+    upload_buffer->Unmap(0, &range);
 
     // Copy the upload resource content into the real resource
-    D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-    srcLocation.pResource = uploadBuffer.Get();
-    srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-    srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srcLocation.PlacedFootprint.Footprint.Width = m_width;
-    srcLocation.PlacedFootprint.Footprint.Height = m_height;
-    srcLocation.PlacedFootprint.Footprint.Depth = 1;
-    srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+    D3D12_TEXTURE_COPY_LOCATION src_location = {};
+    src_location.pResource = upload_buffer.Get();
+    src_location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+    src_location.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    src_location.PlacedFootprint.Footprint.Width = m_width;
+    src_location.PlacedFootprint.Footprint.Height = m_height;
+    src_location.PlacedFootprint.Footprint.Depth = 1;
+    src_location.PlacedFootprint.Footprint.RowPitch = upload_pitch;
 
-    D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-    dstLocation.pResource = pTexture.Get();
-    dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-    dstLocation.SubresourceIndex = 0;
+    D3D12_TEXTURE_COPY_LOCATION dst_location = {};
+    dst_location.pResource = m_tex_resource.Get();
+    dst_location.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+    dst_location.SubresourceIndex = 0;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = pTexture.Get();
+    barrier.Transition.pResource = m_tex_resource.Get();
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
     // Create a temporary command queue to do the copy with
     WRL::ComPtr<ID3D12Fence> fence;
-    hr = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+    hr = m_pd3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateFence() failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     HANDLE event = CreateEvent(0, 0, 0, 0);
 
-    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    queueDesc.NodeMask = 1;
+    D3D12_COMMAND_QUEUE_DESC queue_desc = {};
+    queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+    queue_desc.NodeMask = 1;
 
-    WRL::ComPtr<ID3D12CommandQueue> cmdQueue;
-    hr = m_pd3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+    WRL::ComPtr<ID3D12CommandAllocator> cmd_alloc;
+    hr = m_pd3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmd_alloc));
 
-    WRL::ComPtr<ID3D12CommandAllocator> cmdAlloc;
-    hr = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateCommandAllocator() failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
-    WRL::ComPtr<ID3D12GraphicsCommandList> cmdList;
-    hr = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc.Get(), nullptr, IID_PPV_ARGS(&cmdList));
+    WRL::ComPtr<ID3D12GraphicsCommandList> cmd_list;
+    hr = m_pd3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmd_alloc.Get(), nullptr, IID_PPV_ARGS(&cmd_list));
 
-    cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
-    cmdList->ResourceBarrier(1, &barrier);
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"CreateCommandList() failed!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
-    hr = cmdList->Close();
+    cmd_list->CopyTextureRegion(&dst_location, 0, 0, 0, &src_location, nullptr);
+    cmd_list->ResourceBarrier(1, &barrier);
+
+    hr = cmd_list->Close();
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"Close() failed for cmd_list!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     // Execute the copy
-    cmdQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(cmdList.GetAddressOf()));
-    hr = cmdQueue->Signal(fence.Get(), 1);
+    m_pd3d_cmd_queue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(cmd_list.GetAddressOf()));
+    hr = m_pd3d_cmd_queue->Signal(fence.Get(), 1);
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"Signal() failed for cmd_queue!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
 
     // Wait for everything to complete
-    fence->SetEventOnCompletion(1, event);
+	hr = fence->SetEventOnCompletion(1, event);
+
+	if (FAILED(hr)) {
+		m_last_error = (std::stringstream{} <<
+			"SetEventOnCompletion() failed for fence!" <<
+			" HResult = 0x" <<
+			std::hex << std::setfill('0') << std::setw(8) << hr <<
+			" -> " << _com_error(hr).ErrorMessage()).str();
+		return false;
+	}
+
     WaitForSingleObject(event, INFINITE);
 
     // Tear down our temporary command queue and release the upload resource
     CloseHandle(event);
 
     // Create a shader resource view for the texture
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    ZeroMemory(&srvDesc, sizeof(srvDesc));
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = desc.MipLevels;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    m_pd3dDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, m_texture_srv_cpu_handle);
+    D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc;
+    ZeroMemory(&srv_desc, sizeof(srv_desc));
+    srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.Texture2D.MipLevels = desc.MipLevels;
+    srv_desc.Texture2D.MostDetailedMip = 0;
+    srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    m_pd3d_device->CreateShaderResourceView(m_tex_resource.Get(), &srv_desc, m_texture_srv_cpu_handle);
 	
     // Return results
-    m_tex_resource = pTexture;
-    
     return true;
 }

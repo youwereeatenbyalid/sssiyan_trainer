@@ -2,6 +2,8 @@
 
 #include "D3D12Hook.hpp"
 
+#include "ModFramework.hpp"
+
 bool D3D12Hook::m_execute_present_detour{ true };
 bool D3D12Hook::m_execute_resize_buffer_detour{ true };
 bool D3D12Hook::m_execute_resize_target_detour{ true };
@@ -221,13 +223,18 @@ void D3D12Hook::skip_detours(const std::function<void()>& code)
     //m_execute_create_swap_chain_detour  = back_create_swap_chain;
 }
 
+thread_local size_t g_d3d12_internal_inside_present = 0;
+HRESULT last_d3d12_present_result = S_OK;
+
 HRESULT WINAPI D3D12Hook::present(IDXGISwapChain3* swap_chain, UINT sync_interval, UINT flags) {
+    std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
+
     auto d3d12 = g_d3d12_hook;
 
     // This line must be called before calling our detour function because we might have to unhook the function inside our detour.
     auto present_fn = d3d12->m_present_hook->get_original<decltype(present)>();
 
-    if (m_execute_present_detour) {
+    if (m_execute_present_detour && g_d3d12_internal_inside_present == 0) {
         D3D12HOOK_INTERNAL({
             d3d12->m_swap_chain = swap_chain;
             swap_chain->GetDevice(IID_PPV_ARGS(&d3d12->m_device));
@@ -281,15 +288,26 @@ HRESULT WINAPI D3D12Hook::present(IDXGISwapChain3* swap_chain, UINT sync_interva
         });
     }
 
-    return present_fn(swap_chain, sync_interval, flags);
+    g_d3d12_internal_inside_present++;
+
+    last_d3d12_present_result = present_fn(swap_chain, sync_interval, flags);
+
+    g_d3d12_internal_inside_present--;
+
+    return last_d3d12_present_result;
 }
 
+thread_local size_t g_d3d12_internal_inside_resize_buffers = 0;
+HRESULT last_d3d12_resize_buffers_result = S_OK;
+
 HRESULT WINAPI D3D12Hook::resize_buffers(IDXGISwapChain3* swap_chain, UINT buffer_count, UINT width, UINT height, DXGI_FORMAT new_format, UINT swap_chain_flags) {
-    auto d3d12 = g_d3d12_hook;
+    std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
+
+	auto d3d12 = g_d3d12_hook;
 
     auto resize_buffers_fn = d3d12->m_resize_buffers_hook->get_original<decltype(resize_buffers)>();
 
-    if (m_execute_resize_buffer_detour) {
+    if (m_execute_resize_buffer_detour && g_d3d12_internal_inside_resize_buffers == 0) {
     	D3D12HOOK_INTERNAL({
             d3d12->m_display_width = width;
             d3d12->m_display_height = height;
@@ -300,16 +318,27 @@ HRESULT WINAPI D3D12Hook::resize_buffers(IDXGISwapChain3* swap_chain, UINT buffe
     	});
     }
 
-    return resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
+    g_d3d12_internal_inside_resize_buffers++;
+
+    last_d3d12_resize_buffers_result = resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
+
+    g_d3d12_internal_inside_resize_buffers--;
+
+    return last_d3d12_resize_buffers_result;
 }
+
+thread_local size_t g_d3d12_internal_inside_resize_target = 0;
+HRESULT last_d3d12_resize_target_result = S_OK;
 
 HRESULT WINAPI D3D12Hook::resize_target(IDXGISwapChain3* swap_chain, const DXGI_MODE_DESC* new_target_parameters)
 {
+    std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
+
     auto d3d12 = g_d3d12_hook;
 
     auto resize_buffers_fn = d3d12->m_resize_target_hook->get_original<decltype(D3D12Hook::resize_target)>();
 
-    if (m_execute_resize_target_detour) {
+    if (m_execute_resize_target_detour && g_d3d12_internal_inside_resize_target == 0) {
         D3D12HOOK_INTERNAL({
             d3d12->m_render_width = new_target_parameters->Width;
             d3d12->m_render_height = new_target_parameters->Height;
@@ -320,7 +349,13 @@ HRESULT WINAPI D3D12Hook::resize_target(IDXGISwapChain3* swap_chain, const DXGI_
         });
     }
 
-    return resize_buffers_fn(swap_chain, new_target_parameters);
+    g_d3d12_internal_inside_resize_target++;
+
+    last_d3d12_resize_target_result = resize_buffers_fn(swap_chain, new_target_parameters);
+
+    g_d3d12_internal_inside_resize_target--;
+
+    return last_d3d12_resize_target_result;
 }
 
 /*HRESULT WINAPI D3D12Hook::create_swap_chain(IDXGIFactory4* factory, IUnknown* device, HWND hwnd, const DXGI_SWAP_CHAIN_DESC* desc, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC* p_fullscreen_desc, IDXGIOutput* p_restrict_to_output, IDXGISwapChain** swap_chain)

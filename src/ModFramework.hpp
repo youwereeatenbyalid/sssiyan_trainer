@@ -71,6 +71,8 @@ public:
     void on_frame_d3d11();
     void on_frame_d3d12();
     void on_reset(const UINT& width, const UINT& height);
+    void reset_d3d11();
+    void reset_d3d12();
     void consume_input();
     bool on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM& l_param);
     void on_direct_input_keys(const std::array<uint8_t, 256>& keys);
@@ -81,6 +83,10 @@ public:
 
     void save_config() const;
     void load_config();
+
+    auto& get_hook_monitor_mutex() {
+        return m_hook_monitor_mutex;
+    }
     
 private:
     enum PanelID_ : uint8_t;
@@ -93,6 +99,7 @@ private:
     void draw_notifs() const;
     void focus_tab(const std::string_view& window_name);
     bool is_window_focused(const std::string_view& window_name);
+    void reset_window_transforms(const std::string_view& window_name);
 
     bool hook_d3d11();
     bool hook_d3d12();
@@ -151,7 +158,8 @@ private:
     std::atomic<bool> m_game_data_initialized{ false };
     
     std::mutex m_input_mutex{};
-    
+    std::mutex m_ui_mutex{};
+
     HWND m_wnd{ 0 };
     HMODULE m_game_module{ 0 };
     
@@ -175,43 +183,61 @@ private:
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
-    
+
+	std::recursive_mutex m_hook_monitor_mutex{};
+
 private: // D3D11 Init
-	void create_render_target_d3d11();
-	void cleanup_render_target_d3d11();
+	bool create_render_target_d3d11();
 
 private: // D3D12 Init
     bool create_rtv_descriptor_heap_d3d12();
     bool create_srv_descriptor_heap_d3d12(UINT descriptorCount = 1);
     bool create_command_allocator_d3d12();
     bool create_command_list_d3d12();
-    void cleanup_render_target_d3d12();
-    void create_render_target_d3d12();
+    bool create_render_target_d3d12();
 
 private: //DXGI members
 	DXGI_SWAP_CHAIN_DESC m_swap_desc{};
 
 private: // D3D11 members
     struct {
-        ComPtr<ID3D11RenderTargetView> main_render_target_view{};
+        ComPtr<ID3D11RenderTargetView> pd3d_backbuffer_rtv{};
+        ComPtr<ID3D11Texture2D> pd3d_blank_rt{};
+        ComPtr<ID3D11Texture2D> pd3d_rt{};
+        ComPtr<ID3D11RenderTargetView> pd3d_blank_rt_rtv{};
+        ComPtr<ID3D11RenderTargetView> pd3d_rt_rtv{};
+        ComPtr<ID3D11ShaderResourceView> pd3d_rt_srv{};
     } m_d3d11;
 
 private: // D3D12 members
     struct FrameContext_D3D12 {
-        D3D12_CPU_DESCRIPTOR_HANDLE MainRenderTargetDescriptorHandle{};
-        ComPtr<ID3D12Resource> MainRenderTargetResource{};
-        ComPtr<ID3D12CommandAllocator> CommandAllocator{};
-        UINT64 FenceValue{ 0 };
+        D3D12_CPU_DESCRIPTOR_HANDLE rt_cpu_desc_handle{};
+        ComPtr<ID3D12Resource> rt{};
+        ComPtr<ID3D12CommandAllocator> command_allocator{};
     };
 
     struct {
+        UINT original_buffer_count{ 0 };
         UINT buffer_count{ 0 };
         std::vector<FrameContext_D3D12> frame_context{};
         ComPtr<ID3D12DescriptorHeap> pd3d_rtv_desc_heap{};
         ComPtr<ID3D12DescriptorHeap> pd3d_srv_desc_heap{};
-        ComPtr<ID3D12CommandQueue> pd3d_command_queue{};
         ComPtr<ID3D12GraphicsCommandList> pd3d_command_list{};
-        //ID3D12Fence* m_pd3d_fence{ NULL };
+
+        D3D12_CPU_DESCRIPTOR_HANDLE get_cpu_rtv(ID3D12Device* device, uint64_t rtv_index) const {
+            return { pd3d_rtv_desc_heap->GetCPUDescriptorHandleForHeapStart().ptr +
+            	rtv_index * (SIZE_T)device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+        }
+
+        D3D12_CPU_DESCRIPTOR_HANDLE get_cpu_srv(ID3D12Device* device, uint64_t srv_index) const {
+            return { pd3d_srv_desc_heap->GetCPUDescriptorHandleForHeapStart().ptr +
+                    srv_index * (SIZE_T)device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+        }
+
+        D3D12_GPU_DESCRIPTOR_HANDLE get_gpu_srv(ID3D12Device* device, uint64_t srv_index) const {
+            return { pd3d_srv_desc_heap->GetGPUDescriptorHandleForHeapStart().ptr +
+                    srv_index * (SIZE_T)device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+        }
     } m_d3d12;
     
 private:

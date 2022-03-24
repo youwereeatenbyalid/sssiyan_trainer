@@ -1,7 +1,8 @@
-#include <algorithm>
 #include <spdlog/spdlog.h>
 
 #include "D3D11Hook.hpp"
+
+#include "ModFramework.hpp"
 
 using namespace std;
 
@@ -81,13 +82,18 @@ void D3D11Hook::skip_detours(const std::function<void()>& code)
     m_execute_resize_buffer_detour  = back_resize_buffer;
 }
 
+thread_local size_t g_d3d11_internal_inside_present = 0;
+HRESULT last_d3d11_present_result = S_OK;
+
 HRESULT WINAPI D3D11Hook::present(IDXGISwapChain* swap_chain, UINT sync_interval, UINT flags) {
+    std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
+
     auto d3d11 = g_d3d11_hook;
 
     // This line must be called before calling our detour function because we might have to unhook the function inside our detour.
     auto present_fn = d3d11->m_present_hook->get_original<decltype(D3D11Hook::present)>();
 
-    if (m_execute_present_detour) {
+    if (m_execute_present_detour && g_d3d11_internal_inside_present == 0) {
         D3D11HOOK_INTERNAL({
             d3d11->m_swap_chain = swap_chain;
             swap_chain->GetDevice(__uuidof(d3d11->m_device), (void**)&d3d11->m_device);
@@ -98,15 +104,26 @@ HRESULT WINAPI D3D11Hook::present(IDXGISwapChain* swap_chain, UINT sync_interval
         });
     }
 
-    return present_fn(swap_chain, sync_interval, flags);
+    g_d3d11_internal_inside_present++;
+
+    last_d3d11_present_result = present_fn(swap_chain, sync_interval, flags);
+
+    g_d3d11_internal_inside_present--;
+
+    return last_d3d11_present_result;
 }
 
+thread_local size_t g_d3d11_internal_inside_resize_buffers = 0;
+HRESULT last_d3d11_resize_buffers_result = S_OK;
+
 HRESULT WINAPI D3D11Hook::resize_buffers(IDXGISwapChain* swap_chain, UINT buffer_count, UINT width, UINT height, DXGI_FORMAT new_format, UINT swap_chain_flags) {
+    std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
+    
     auto d3d11 = g_d3d11_hook;
 
     auto resize_buffers_fn = d3d11->m_resize_buffers_hook->get_original<decltype(D3D11Hook::resize_buffers)>();
 
-    if (m_execute_resize_buffer_detour) {
+    if (m_execute_resize_buffer_detour && g_d3d11_internal_inside_resize_buffers == 0) {
         D3D11HOOK_INTERNAL({
             if (d3d11->m_on_resize_buffers) {
                 d3d11->m_on_resize_buffers(*d3d11, width, height);
@@ -114,5 +131,11 @@ HRESULT WINAPI D3D11Hook::resize_buffers(IDXGISwapChain* swap_chain, UINT buffer
         });
     }
 
-    return resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
+    g_d3d11_internal_inside_resize_buffers++;
+
+    last_d3d11_resize_buffers_result = resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
+
+    g_d3d11_internal_inside_resize_buffers--;
+
+    return last_d3d11_resize_buffers_result;
 }

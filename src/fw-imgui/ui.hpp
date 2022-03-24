@@ -295,6 +295,9 @@ namespace UI {
 		Vec2& operator-=(const Vec2& rhs) { return { x -= rhs.x, y -= rhs.y }; }
 		Vec2& operator*=(const Vec2& rhs) { return { x *= rhs.x, y *= rhs.y }; }
 		Vec2& operator/=(const Vec2& rhs) { return { x /= rhs.x, y /= rhs.y }; }
+		Vec2& operator=(const Vec2& rhs) { this->x = rhs.x; this->y = rhs.y; return *this; }
+		bool operator==(const Vec2& rhs) { return x == rhs.x && y == rhs.y; }
+		bool operator!=(const Vec2& rhs) { return x != rhs.x || y != rhs.y; }
 	};
 
 	class Texture2DDX11 {
@@ -309,6 +312,7 @@ namespace UI {
 		[[nodiscard]] ID3D11ShaderResourceView* GetTexture() const { return m_srv.Get(); }
 		[[nodiscard]] int GetWidth() const { return m_width; }
 		[[nodiscard]] int GetHeight() const { return m_height; }
+		[[nodiscard]] const auto& GetLastError() const { return m_last_error; };
 		template<typename T = float>
 		[[nodiscard]] Vec2<T> GetSize(const T scale = 1.0f) const { return Vec2<T>(m_width, m_height) * scale; }
 		template<typename T = float>
@@ -330,24 +334,29 @@ namespace UI {
 	private:
 		unsigned char* m_image_data{ nullptr };
 		
-		WRL::ComPtr<ID3D11Device> m_pd3dDevice{};
+		ID3D11Device* m_pd3d_device{};
 		WRL::ComPtr<ID3D11ShaderResourceView> m_srv{};
 		int m_width{ 0 };
 		int m_height{ 0 };
 
+		std::string m_last_error{};
 		bool m_is_loaded{ false };
 	};
 
 	class Texture2DDX12 {
 	public:
 		Texture2DDX12() = default;
-		Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
-		Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
-		Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
+		Texture2DDX12(const char* filename, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
+		Texture2DDX12(const unsigned char* image_data, size_t image_size, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
+		Texture2DDX12(unsigned char* image_data, int width, int height, ID3D12Device* pd3dDevice, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* pd3dSrvDescHeap, UINT descIndexInHeap);
+
+		HRESULT SetName(const std::wstring& name) { return m_tex_resource->SetName(name.c_str()); }
+		HRESULT SetName(const std::string& name) { return SetName(name); }
 
 		[[nodiscard]] UINT64 GetTexture() const { return m_texture_srv_gpu_handle.ptr; }
 		[[nodiscard]] int GetWidth() const { return m_width; }
 		[[nodiscard]] int GetHeight() const { return m_height; }
+		[[nodiscard]] const auto& GetLastError() const { return m_last_error; };
 		template<typename T = float>
 		[[nodiscard]] Vec2<T> GetSize(const T scale = 1.0f) const { return Vec2<T>(m_width, m_height) * scale; }
 		template<typename T = float>
@@ -369,8 +378,9 @@ namespace UI {
 	private:
 		unsigned char* m_image_data{ nullptr };
 
+		ID3D12Device* m_pd3d_device{};
+		ID3D12CommandQueue* m_pd3d_cmd_queue{};
 		WRL::ComPtr<ID3D12Resource> m_tex_resource{};
-		WRL::ComPtr<ID3D12Device> m_pd3dDevice{};
 		WRL::ComPtr<ID3D12DescriptorHeap> m_pd3dSrvDescHeap{};
 
 		UINT m_handle_increment;
@@ -380,6 +390,7 @@ namespace UI {
 		int m_width{ 0 };
 		int m_height{ 0 };
 
+		std::string m_last_error{};
 		bool m_is_loaded{ false };
 	};
 }

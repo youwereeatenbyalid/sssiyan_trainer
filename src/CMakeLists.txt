@@ -327,6 +327,8 @@ set(FRAMEWORK_SRC
 	logo.hpp
 	icons.hpp
     InitPatternsManager.hpp
+	ExceptionHandler.hpp
+	ExceptionHandler.cpp
 )
 
 set(LISTEDITOR_SRC
