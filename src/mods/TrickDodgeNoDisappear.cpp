@@ -22,12 +22,12 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilvfxsettings;
+	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "Remove Invisibility On Trick Dodge";
 	m_author_string = "VPZadov";
 	m_description_string = "Vergil stays visible while trick dodging.";
 
-	auto getEndDrawOffAddr = patterns->find_addr(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
+	auto getEndDrawOffAddr = m_patterns_cache->find_addr(base, "33 F3 0F 10 47 64"); //DevilMayCry5.exe+1FDF1A1 (-0x1)
 	if (!getEndDrawOffAddr)
 	{
 		return "Unanable to find TrickDodgeNoDisappear.getEndDrawOffAddr pattern.";

@@ -67,12 +67,12 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
 	m_is_enabled = &cheaton;
-	m_on_page = vergilcheat;
+	m_on_page = Page_VergilCheat;
 	m_full_name_string = "No Concentration Restriction On JCE";
 	m_author_string = "akasha51";
 	m_description_string = "Allow JCE at any concentration level.";
 
-	auto humanConcetrationAddr = patterns->find_addr(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9 0F 5A C0");//"DevilMayCry5.exe"+1C0A520
+	auto humanConcetrationAddr = m_patterns_cache->find_addr(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9 0F 5A C0");//"DevilMayCry5.exe"+1C0A520
 	if (!humanConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";
@@ -84,13 +84,13 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 		return "Unable to find JCENoMotivationLimit.devilConcetrationAddr pattern.";
 	}*/
 
-	auto yamatoConcetrationAddr = patterns->find_addr(base, "83 BB 58 1B 00 00 02 75");//DevilMayCry5.exe+54F45E
+	auto yamatoConcetrationAddr = m_patterns_cache->find_addr(base, "83 BB 58 1B 00 00 02 75");//DevilMayCry5.exe+54F45E
 	if (!yamatoConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.yamatoConcetrationAddr pattern.";
 	}
 
-	auto yamatoSdtConcetrationAddr = patterns->find_addr(base, "83 BB 58 1B 00 00 02 0F 85 76 FF FF FF 48 8B 5C 24 30");//DevilMayCry5.exe+54F495
+	auto yamatoSdtConcetrationAddr = m_patterns_cache->find_addr(base, "83 BB 58 1B 00 00 02 0F 85 76 FF FF FF 48 8B 5C 24 30");//DevilMayCry5.exe+54F495
 	if (!yamatoSdtConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.yamatoSdtConcetrationAddr pattern.";

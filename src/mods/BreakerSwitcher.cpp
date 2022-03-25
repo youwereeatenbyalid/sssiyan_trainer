@@ -1,6 +1,6 @@
 #include "BreakerSwitcher.hpp"
 #include "mods/PlayerTracker.hpp"
-uint32_t bsinputs[] = { Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::resetcamera,Mod::SDT };
+uint32_t bsinputs[] = { Mod::Input_Sword,Mod::Input_Gun,Mod::Input_Jump,Mod::Input_Taunt,Mod::Input_LockOn,Mod::Input_ChangeTarget,Mod::Input_DPadUp,Mod::Input_DPadDown,Mod::Input_DPadLeft,Mod::Input_DPadRight,Mod::Input_Style,Mod::Input_RightTrigger,Mod::Input_ResetCamera,Mod::Input_SDT };
 int breakaway_index = {0};
 uintptr_t BreakerSwitcher::breakersize_jmp_ret{NULL};
 uintptr_t BreakerSwitcher::nextbreaker_jmp_ret{NULL};
@@ -675,7 +675,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &BreakerSwitcher::cheaton;
-  m_on_page    = breaker;
+  m_on_page    = Page_Breaker;
 
   m_full_name_string     = "Breaker Switcher (+)";
   m_author_string        = "The HitchHiker (original version by Nino)\n Disable Breakaway made with assistance from Lidemi";
@@ -760,12 +760,12 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
       }, OnState_Press);
 
 
-  auto breakersize_addr = patterns->find_addr(base, "8B 8E CC 17 00 00 48 85");
-  auto nextbreaker_addr = patterns->find_addr(base, "4C 63 60 20 48 85 D2");
-  auto NeroUIOverride_addr = patterns->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
-  auto breakerinputcontrol_addr = patterns->find_addr(base, "41 8D 41 FF 48 8B FA");
-  auto call_nero_creategauntlet_addr = patterns->find_addr(base, "C3 CC CC 40 53 56 41 55");
-  auto bringerinputcontroller_addr = patterns->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
+  auto breakersize_addr = m_patterns_cache->find_addr(base, "8B 8E CC 17 00 00 48 85");
+  auto nextbreaker_addr = m_patterns_cache->find_addr(base, "4C 63 60 20 48 85 D2");
+  auto NeroUIOverride_addr = m_patterns_cache->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
+  auto breakerinputcontrol_addr = m_patterns_cache->find_addr(base, "41 8D 41 FF 48 8B FA");
+  auto call_nero_creategauntlet_addr = m_patterns_cache->find_addr(base, "C3 CC CC 40 53 56 41 55");
+  auto bringerinputcontroller_addr = m_patterns_cache->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
 
 
   BreakerSwitcher::call_nero_creategauntlet = call_nero_creategauntlet_addr.value()+0x3;

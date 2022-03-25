@@ -56,13 +56,13 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &NeroSuperMovesNoDT::cheaton;
-  m_on_page    = nero;
+  m_on_page    = Page_Nero;
   m_full_name_string     = "Super Moves Outside Of DT";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Use Max Bet & Showdown outside of Devil Trigger.";
 
   set_up_hotkey();
-  auto maxbetnodt_addr = patterns->find_addr(base, "83 BA B0 09 00 00 01 0F 85 CE");
+  auto maxbetnodt_addr = m_patterns_cache->find_addr(base, "83 BA B0 09 00 00 01 0F 85 CE");
 
   if (!maxbetnodt_addr) {
     return "Unable to find maxbetnodt pattern.";
@@ -72,7 +72,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize maxbetnodt";
   }
-  auto showdownnodt_addr = patterns->find_addr(base, "83 BA B0 09 00 00 01 0F 85 17");
+  auto showdownnodt_addr = m_patterns_cache->find_addr(base, "83 BA B0 09 00 00 01 0F 85 17");
 
   if (!showdownnodt_addr) {
     return "Unable to find showdownnodt pattern.";

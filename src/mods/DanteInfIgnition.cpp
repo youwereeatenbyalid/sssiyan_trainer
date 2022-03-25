@@ -80,7 +80,7 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &DanteInfIgnition::cheaton;
-  m_on_page               = dantecheat;
+  m_on_page               = Page_DanteCheat;
 
   m_full_name_string     = "Infinite Ignition";
   m_author_string        = "SSSiyan";
@@ -98,7 +98,7 @@ std::optional<std::string> DanteInfIgnition::on_initialize() {
   if (!addr2) {
     return "Unable to find DanteInfIgnition2 pattern.";
   }*/
-  auto addr = patterns->find_addr(base, "8B 87 60 03 00 00 83");
+  auto addr = m_patterns_cache->find_addr(base, "8B 87 60 03 00 00 83");
   if (!addr) {
     return "Unable to find DanteInfIgnition pattern.";
   }

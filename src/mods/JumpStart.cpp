@@ -89,7 +89,7 @@ std::optional<std::string> JumpStart::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &JumpStart::cheaton ;
-  m_on_page             = animation;
+  m_on_page             = Page_Animation;
 
   m_full_name_string   = "Selective Cancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";

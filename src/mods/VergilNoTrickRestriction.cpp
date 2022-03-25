@@ -34,7 +34,7 @@ std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &VergilNoTrickRestriction::cheaton;
-  m_on_page             = vergiltrick;
+  m_on_page             = Page_VergilTrick;
 
   m_full_name_string   = "No Trick Restriction";
   m_author_string      = "SSSiyan";
@@ -43,7 +43,7 @@ std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = patterns->find_addr(base, "80 B9 A8 00 00 00 00 0F");
+  auto addr      = m_patterns_cache->find_addr(base, "80 B9 A8 00 00 00 00 0F");
   if (!addr) {
     return "Unable to find VergilNoTrickRestriction pattern.";
   }

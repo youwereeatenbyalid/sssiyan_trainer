@@ -317,50 +317,50 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergiltrick;
+	m_on_page = Page_VergilTrick;
 	m_full_name_string = "Air Trick Settings (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Adjust the properties of Vergil's Trick Actions.";
 
   set_up_hotkey();
 
-	auto waitTimeAddr = patterns->find_addr(base, "07 00 00 8B 86 B8 00 00 00"); //DevilMayCry5.exe+1DDCB5D
+	auto waitTimeAddr = m_patterns_cache->find_addr(base, "07 00 00 8B 86 B8 00 00 00"); //DevilMayCry5.exe+1DDCB5D
     if (!waitTimeAddr) {
           return "Unanable to find AirTrick.waitTime pattern.";
     }
 
-	auto finishOffsetAddr = patterns->find_addr(base, "60 F3 0F 10 86 D0 00 00 00"); //DevilMayCry5.exe+1DDC4FF
+	auto finishOffsetAddr = m_patterns_cache->find_addr(base, "60 F3 0F 10 86 D0 00 00 00"); //DevilMayCry5.exe+1DDC4FF
     if (!waitTimeAddr) {
           return "Unanable to find AirTrick.finishOffsetAddr pattern.";
     }
 
-	auto initSpeedAddr = patterns->find_addr(base, "08 00 00 8B 86 A0 00 00 00"); //DevilMayCry5.exe+1DDCB43
+	auto initSpeedAddr = m_patterns_cache->find_addr(base, "08 00 00 8B 86 A0 00 00 00"); //DevilMayCry5.exe+1DDCB43
     if (!initSpeedAddr) {
           return "Unanable to find AirTrick.initSpeedAddr pattern.";
     }
 
-	auto maxSpeedZAddr = patterns->find_addr(base, "0A 00 00 F3 0F 10 86 A8 00 00 00"); //DevilMayCry5.exe+1DDD585
+	auto maxSpeedZAddr = m_patterns_cache->find_addr(base, "0A 00 00 F3 0F 10 86 A8 00 00 00"); //DevilMayCry5.exe+1DDD585
     if (!maxSpeedZAddr) {
           return "Unanable to find AirTrick.maxSpeedZAddr pattern.";
     }
 
-	auto maxXZAddr = patterns->find_addr(base, "06 00 00 F3 0F 10 96 B0 00 00 00"); //DevilMayCry5.exe+1DDCCC5
+	auto maxXZAddr = m_patterns_cache->find_addr(base, "06 00 00 F3 0F 10 96 B0 00 00 00"); //DevilMayCry5.exe+1DDCCC5
     if (!maxXZAddr) {
           return "Unanable to find AirTrick.maxXZAddr pattern.";
     }
 
-	auto speedAccAddr = patterns->find_addr(base, "F3 0F 10 8E A4 00 00 00 0F 5A C0 0F 5A C9 48 85 C0 0F 84 40"); //DevilMayCry5.exe+1DDD539
+	auto speedAccAddr = m_patterns_cache->find_addr(base, "F3 0F 10 8E A4 00 00 00 0F 5A C0 0F 5A C9 48 85 C0 0F 84 40"); //DevilMayCry5.exe+1DDD539
     if (!speedAccAddr) {
           return "Unanable to find AirTrick.speedAccAddr pattern.";
     }
 
-	auto routine3Addr = patterns->find_addr(base, "03 00 00 C7 47 68 03 00 00 00"); //DevilMayCry5.exe+1DE0427
+	auto routine3Addr = m_patterns_cache->find_addr(base, "03 00 00 C7 47 68 03 00 00 00"); //DevilMayCry5.exe+1DE0427
 	if (!routine3Addr)
 	{
 		return "Unanable to find AirTrick.routine3Addr pattern.";
 	}
 
-	auto finishRangeAddr = patterns->find_addr(base, "F3 41 0F 10 86 AC 00 00 00"); //DevilMayCry5.exe+1DDE979
+	auto finishRangeAddr = m_patterns_cache->find_addr(base, "F3 41 0F 10 86 AC 00 00 00"); //DevilMayCry5.exe+1DDE979
 	if (!routine3Addr)
 	{
 		return "Unanable to find AirTrick.finishRangeAddr pattern.";

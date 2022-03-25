@@ -52,7 +52,7 @@ std::optional<std::string> DamageType::on_initialize() {
     init_check_box_info();
 
     m_is_enabled = &DamageType::cheaton;
-    m_on_page = mechanics;
+    m_on_page = Page_Mechanics;
 
     m_full_name_string = "Knockback Edits";
     m_author_string = "Siyan";
@@ -61,7 +61,7 @@ std::optional<std::string> DamageType::on_initialize() {
     set_up_hotkey();
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-    auto addr = patterns->find_addr(base, "8B A8 CC 00 00 00 E8");
+    auto addr = m_patterns_cache->find_addr(base, "8B A8 CC 00 00 00 E8");
     if (!addr) {
         return "Unable to find DamageType pattern.";
     }

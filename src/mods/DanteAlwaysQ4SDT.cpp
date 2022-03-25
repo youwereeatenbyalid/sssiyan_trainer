@@ -43,7 +43,7 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &DanteAlwaysQ4SDT::cheaton;
-  m_on_page             = dantesdt;
+  m_on_page             = Page_DanteSDT;
 
   m_full_name_string   = "Always Quadruple S";
   m_author_string      = "SSSiyan";
@@ -52,12 +52,12 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "83 B8 B0 00 00 00 07");
+  auto addr = m_patterns_cache->find_addr(base, "83 B8 B0 00 00 00 07");
   if (!addr) {
     return "Unable to find DanteAlwaysQ4SDT pattern.";
   }
 
-  DanteAlwaysQ4SDT::jmp_jne = patterns->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
+  DanteAlwaysQ4SDT::jmp_jne = m_patterns_cache->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

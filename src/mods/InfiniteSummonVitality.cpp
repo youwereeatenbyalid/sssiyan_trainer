@@ -39,13 +39,13 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &InfiniteSummonVitality::cheaton;
-  m_on_page    = gilver;
+  m_on_page    = Page_Gilver;
   m_full_name_string     = "Infinite Summon Vitality";
   m_author_string        = "Jessie Kazama";
   m_description_string   = "Pet health is locked to max.";
 
   set_up_hotkey();
-  auto infsummonvitality_addr = patterns->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
+  auto infsummonvitality_addr = m_patterns_cache->find_addr(base, "D2 EB 34 F3 0F 10 48 14 F3 0F 10 40 10");
 
   if (!infsummonvitality_addr) {
     return "Unable to find infsummonvitality pattern.";

@@ -17,7 +17,7 @@ public:
   inline std::optional<std::string> on_initialize() override {
     init_check_box_info();
     m_is_enabled        = &cheaton;
-    m_on_page           = vergilcheat;
+    m_on_page           = Page_VergilCheat;
     m_full_name_string = "Additional JJC in SDT";
     m_author_string    = "VPZadov";
     m_description_string = "Allow Vergil to perform an extra JJC while in SDT.";

@@ -36,13 +36,13 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &InfiniteSummonPowerup::cheaton;
-  m_on_page    = gilver;
+  m_on_page    = Page_Gilver;
   m_full_name_string     = "Infinite Summon Powerup Duration";
   m_author_string        = "Jessie Kazama";
   m_description_string   = "Summon powerup state lasts forever.";
 
   set_up_hotkey();
-  auto infinitesummonpowerupduration_addr = patterns->find_addr(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
+  auto infinitesummonpowerupduration_addr = m_patterns_cache->find_addr(base, "F3 0F 11 87 6C 01 00 00 48 8B 43");
 
   if (!infinitesummonpowerupduration_addr) {
     return "Unable to find infinitesummonpowerupduration pattern.";

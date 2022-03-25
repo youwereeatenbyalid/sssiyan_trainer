@@ -36,14 +36,14 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = dantesdt;
+		m_on_page = Page_DanteSDT;
 		m_full_name_string = "Custom Judgement Cost (+)";
 		m_author_string = "VPZadov";
 		m_description_string = "Set cost for SDT's \"Judgement\" move.";
 
 		set_up_hotkey();
 
-		auto judgementCostAddr = patterns->find_addr(base, "1A 00 00 F3 0F 10 47 68"); //DevilMayCry5.exe+1388CFA(-0x3);
+		auto judgementCostAddr = m_patterns_cache->find_addr(base, "1A 00 00 F3 0F 10 47 68"); //DevilMayCry5.exe+1388CFA(-0x3);
 		if (!judgementCostAddr.has_value())
 		{
 			spdlog::error("[{}] failed to initialize", get_name());

@@ -186,7 +186,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     init_check_box_info();
 
     m_is_enabled = &DanteSDTRework::cheaton;
-    m_on_page = dantesdt;
+    m_on_page = Page_DanteSDT;
 
     m_full_name_string = "SDT Rework";
     m_author_string = "SSSiyan, VPZadov";
@@ -196,7 +196,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
     
-    auto addr1 = patterns->find_addr(base, "83 F8 01 75 12 48 8B CF");
+    auto addr1 = m_patterns_cache->find_addr(base, "83 F8 01 75 12 48 8B CF");
     if (!addr1) {
         return "Unable to find DanteSDTRework pattern1.";
     }
@@ -207,7 +207,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     }
     DanteSDTRework::jmp_jne1 = addr1.value() + 23; // DevilMayCry5.exe+196A4F4 copyright update
     
-    auto addr2 = patterns->find_addr(base, "66 0F 2F D1 73 25 F3 0F 10 8F 14");
+    auto addr2 = m_patterns_cache->find_addr(base, "66 0F 2F D1 73 25 F3 0F 10 8F 14");
     if (!addr2) {
         return "Unable to find DanteSDTRework pattern2.";
     }
@@ -218,7 +218,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     }
     DanteSDTRework::jmp_jae2 = addr2.value() + 43; // DevilMayCry5.exe+19703D7 copyright update
     
-    auto addr3 = patterns->find_addr(base, "D9 F3 0F 10 8F 14 1A 00 00");
+    auto addr3 = m_patterns_cache->find_addr(base, "D9 F3 0F 10 8F 14 1A 00 00");
     if (!addr3) {
         return "Unable to find DanteSDTRework pattern3.";
     }
@@ -228,7 +228,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework3";
     }
     
-    auto addr4 = patterns->find_addr(base, "F3 0F 10 8A 14 1A 00 00 0F");
+    auto addr4 = m_patterns_cache->find_addr(base, "F3 0F 10 8A 14 1A 00 00 0F");
     if (!addr4) {
         return "Unable to find DanteSDTRework pattern4.";
     }
@@ -238,7 +238,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework4";
     }
     
-    auto addr5 = patterns->find_addr(base, "1D F3 0F 10 8A 14 1A 00 00");
+    auto addr5 = m_patterns_cache->find_addr(base, "1D F3 0F 10 8A 14 1A 00 00");
     if (!addr5) {
         return "Unable to find DanteSDTRework pattern5.";
     }
@@ -248,7 +248,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework5";
     }
 
-    auto addr6 = patterns->find_addr(base, "05 05 00 00 F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");
+    auto addr6 = m_patterns_cache->find_addr(base, "05 05 00 00 F3 0F 10 8F 24 11 00 00 F3 0F 10 87 28 01 00 00");
     if (!addr6) {
         return "Unable to find DanteSDTRework pattern6.";
     }
@@ -258,7 +258,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
         return "Failed to initialize DanteSDTRework6";
     }
     
-    auto addr7 = patterns->find_addr(base, "85 C9 0F 85 8A 00 00 00 48 8B 03");
+    auto addr7 = m_patterns_cache->find_addr(base, "85 C9 0F 85 8A 00 00 00 48 8B 03");
     if (!addr7) {
         return "Unable to find DanteSDTRework pattern7.";
     }
@@ -269,7 +269,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     }
     DanteSDTRework::jmp_jne7 = addr7.value() + 146; // DevilMayCry5.exe+16A212B copyright update
 
-    auto addr8 = patterns->find_addr(base, "F3 0F 10 15 39 0F 10 06");
+    auto addr8 = m_patterns_cache->find_addr(base, "F3 0F 10 15 39 0F 10 06");
     if (!addr8) {
         return "Unable to find DanteSDTRework pattern8.";
     }

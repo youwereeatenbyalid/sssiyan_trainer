@@ -43,14 +43,14 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = vergilcheat;
+		m_on_page = Page_VergilCheat;
 		m_full_name_string = "No delay after V's royal fork";
 		m_author_string = "VPZadov";
 		m_description_string = "Remove the delay between royal fork and returning to normal state while performing \"World of V\".";
 
 		set_up_hotkey();
 
-		auto frameTimerAddr = patterns->find_addr(base, "F3 0F 10 47 68 0F 5A C0 66 0F 2F C1 77 3E"); //DevilMayCry5.exe+14CC373
+		auto frameTimerAddr = m_patterns_cache->find_addr(base, "F3 0F 10 47 68 0F 5A C0 66 0F 2F C1 77 3E"); //DevilMayCry5.exe+14CC373
 		if (!frameTimerAddr.has_value())
 		{
 			spdlog::error("[{}] failed to initialize", get_name());

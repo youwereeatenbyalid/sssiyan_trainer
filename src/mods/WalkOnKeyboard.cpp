@@ -47,14 +47,14 @@ std::optional<std::string> WalkOnKeyboard::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &WalkOnKeyboard::cheaton;
-  m_on_page               = qol;
+  m_on_page               = Page_QOL;
   m_full_name_string     = "Walk Using Keyboard Controls";
   m_author_string        = "SSSiyan";
   m_description_string   = "Your character will walk rather than run.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "F3 41 0F 11 46 30 48 8B 46");
+  auto addr = m_patterns_cache->find_addr(base, "F3 41 0F 11 46 30 48 8B 46");
   if (!addr) {
     return "Unable to find WalkOnKeyboard pattern.";
   }

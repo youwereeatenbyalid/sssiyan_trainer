@@ -106,7 +106,7 @@ std::optional<std::string> ChargeChecker::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &ChargeChecker::cheaton;
-  m_on_page             = mechanics;
+  m_on_page             = Page_Mechanics;
 
   m_full_name_string   = "Faster Charges (+)";
   m_author_string      = "SSSiyan";
@@ -115,11 +115,11 @@ std::optional<std::string> ChargeChecker::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "F3 0F 10 4F 5C 0F 57 C0 0F 5A C9 F3"); // "DevilMayCry5.exe"+20BE39E
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 4F 5C 0F 57 C0 0F 5A C9 F3"); // "DevilMayCry5.exe"+20BE39E
   if (!addr) {
     return "Unable to find ChargeChecker pattern.";
   }
-  auto addr2 = patterns->find_addr(base, "95 F3 0F 10 40 10"); // "DevilMayCry5.exe"+20B648B
+  auto addr2 = m_patterns_cache->find_addr(base, "95 F3 0F 10 40 10"); // "DevilMayCry5.exe"+20B648B
   if (!addr2) {
     return "Unable to find ChargeChecker pattern2.";
   }

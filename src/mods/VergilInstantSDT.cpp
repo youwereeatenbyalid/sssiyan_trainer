@@ -99,7 +99,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &VergilInstantSDT::cheaton;
-  m_on_page               = vergilsdt;
+  m_on_page               = Page_VergilSDT;
 
   m_full_name_string     = "Instant SDT";
   m_author_string        = "SSSiyan";
@@ -108,29 +108,29 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = patterns->find_addr(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
+  auto addr1 = m_patterns_cache->find_addr(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
   if (!addr1) {
     return "Unable to find VergilInstantSDT1 pattern.";
   }
 
-  auto addr2 = patterns->find_addr(base, "00 00 00 F3 0F 10 5E 48");
+  auto addr2 = m_patterns_cache->find_addr(base, "00 00 00 F3 0F 10 5E 48");
   if (!addr2) {
     return "Unable to find VergilInstantSDT2 pattern.";
   }
 
-  auto addr3 = patterns->find_addr(base, "66 0F 2F C1 77 19 F3 0F 11 97 34");
+  auto addr3 = m_patterns_cache->find_addr(base, "66 0F 2F C1 77 19 F3 0F 11 97 34");
   if (!addr3) {
     return "Unable to find VergilInstantSDT3 pattern.";
   }
   VergilInstantSDT::jmp_out3 = addr3.value()+31;
 
-  auto addr4 = patterns->find_addr(base, "66 0F 2F D1 73 25 F3 0F 10 8F 20");
+  auto addr4 = m_patterns_cache->find_addr(base, "66 0F 2F D1 73 25 F3 0F 10 8F 20");
   if (!addr4) {
     return "Unable to find VergilInstantSDT4 pattern.";
   }
   VergilInstantSDT::jmp_out4 = addr4.value() + 43;
 
-  VergilInstantSDT::jmp_ja1 = patterns->find_addr(base, "02 02 48 8B 5C 24 30 32").value()+2;
+  VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "02 02 48 8B 5C 24 30 32").value()+2;
 
   if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 6)) {
     //  return a error string in case something goes wrong

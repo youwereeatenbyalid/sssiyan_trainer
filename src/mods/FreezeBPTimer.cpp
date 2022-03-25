@@ -36,7 +36,7 @@ std::optional<std::string> FreezeBPTimer::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &FreezeBPTimer::cheaton;
-  m_on_page               = bloodypalace;
+  m_on_page               = Page_BloodyPalace;
 
   m_full_name_string     = "Freeze Bloody Palace Timer";
   m_author_string        = "SSSiyan";
@@ -45,7 +45,7 @@ std::optional<std::string> FreezeBPTimer::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = patterns->find_addr(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
+  auto addr      = m_patterns_cache->find_addr(base, "F2 0F 5C C8 66 0F 5A C9 F3 0F 11 4B 10");
   if (!addr) {
     return "Unable to find FreezeBPTimer pattern.";
   }

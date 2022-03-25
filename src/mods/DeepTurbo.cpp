@@ -115,7 +115,7 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &DeepTurbo::cheaton;
-  m_on_page             = mechanics;
+  m_on_page             = Page_Mechanics;
 
   m_full_name_string   = "Turbo (+)";
   m_author_string      = "deepdarkkapustka";
@@ -125,16 +125,16 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = patterns->find_addr(base, "89 46 68 44 89 6E 6C");
+  auto addr1 = m_patterns_cache->find_addr(base, "89 46 68 44 89 6E 6C");
   if (!addr1) {
     return "Unable to find DeepTurbo1 pattern.";
   }
-  auto addr2 = patterns->find_addr(base, "F3 0F 10 80 88 03 00 00 48");
+  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 10 80 88 03 00 00 48");
   if (!addr2) {
     return "Unable to find DeepTurbo2 pattern.";
   }
 
-  auto isCutsceneAddr = patterns->find_addr(base, "88 8E 94 00 00 00");//DevilMayCry5.exe+FD9606
+  auto isCutsceneAddr = m_patterns_cache->find_addr(base, "88 8E 94 00 00 00");//DevilMayCry5.exe+FD9606
   if (!isCutsceneAddr)
   {
       return "Unable to find DeepTurbo.isCutsceneAddr.";

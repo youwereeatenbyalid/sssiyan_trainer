@@ -54,18 +54,18 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
 	m_is_enabled= &cheaton;
-	m_on_page = secretmission;
+	m_on_page = Page_SecretMission;
 	m_full_name_string = "Freeze secret missions timer (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Also can prevent starting \"no ground\" timer on sm9.";
 
-	auto timerAddr = patterns->find_addr(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0
+	auto timerAddr = m_patterns_cache->find_addr(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0
 	if (!timerAddr)
 	{
 		return "Unanable to find timerAddr pattern.";
 	}
 
-	auto m9Addr = patterns->find_addr(base, "3F 48 8B 56 28 48 8B CB 48 85 D2 75 1B");// DevilMayCry5.exe+1FA2CC9; +0x8
+	auto m9Addr = m_patterns_cache->find_addr(base, "3F 48 8B 56 28 48 8B CB 48 85 D2 75 1B");// DevilMayCry5.exe+1FA2CC9; +0x8
 	if (!m9Addr)
 	{
 		return "Unanable to find m9Addr pattern.";

@@ -36,7 +36,7 @@ std::optional<std::string> DanteRedlineCav::on_initialize() {
     init_check_box_info();
 
     m_is_enabled = &DanteRedlineCav::cheaton;
-    m_on_page = dantecheat;
+    m_on_page = Page_DanteCheat;
 
     m_full_name_string = "Redline On Cavaliere";
     m_author_string = "The HitchHiker";
@@ -45,7 +45,7 @@ std::optional<std::string> DanteRedlineCav::on_initialize() {
     set_up_hotkey();
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-    auto addr = patterns->find_addr(base, "83 BA B0 18 00 00 06");
+    auto addr = m_patterns_cache->find_addr(base, "83 BA B0 18 00 00 06");
     if (!addr) {
         return "Unable to find DanteRedlineCav pattern.";
     }

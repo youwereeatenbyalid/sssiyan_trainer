@@ -467,7 +467,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   m_is_enabled = &DoppelWeaponSwitcher::cheaton;
-  m_on_page    = vergildoppel;
+  m_on_page    = Page_VergilDoppel;
   m_full_name_string     = "Doppelganger Weapon Switcher";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Assign different weapons to the Doppelganger.\n"
@@ -489,7 +489,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Main function
   /// </summary>
   /// <returns></returns>
-  auto updateweapon_addr = patterns->find_addr(base, "48 8B 0F 45 8B CF");
+  auto updateweapon_addr = m_patterns_cache->find_addr(base, "48 8B 0F 45 8B CF");
   if (!updateweapon_addr) {
     return "Unable to find updateweapon pattern.";
   }
@@ -502,7 +502,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Crash Prevention
   /// </summary>
   /// <returns></returns>
-  auto resetweapon_addr = patterns->find_addr(base, "48 8B 03 48 8B 15 69 CF A5 07");
+  auto resetweapon_addr = m_patterns_cache->find_addr(base, "48 8B 03 48 8B 15 69 CF A5 07");
   if (!resetweapon_addr) {
       return "Unable to find resetweapon pattern.";
   }
@@ -512,7 +512,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize resetweapon";
   }
 
-  auto fixparameter_addr = patterns->find_addr(base, "48 8B 4B 50 4C 8B F0 48 83 79 18 00 0F 85 5E 1B	");
+  auto fixparameter_addr = m_patterns_cache->find_addr(base, "48 8B 4B 50 4C 8B F0 48 83 79 18 00 0F 85 5E 1B	");
   if (!fixparameter_addr) {
       return "Unable to find fixparameter pattern.";
   }
@@ -525,7 +525,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Ensure doppelganger uses correct prefab during JDC
   /// </summary>
   /// <returns></returns>
-  auto fixjdc_addr = patterns->find_addr(base, "48 8B 02 4C 8D 4D A0 40");
+  auto fixjdc_addr = m_patterns_cache->find_addr(base, "48 8B 02 4C 8D 4D A0 40");
   if (!fixjdc_addr) {
       return "Unable to find fixjdc pattern.";
   }
@@ -538,7 +538,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Ensures the doppelganger only just judgement cuts when using a non-yamato weapon
   /// </summary>
   /// <returns></returns>
-  auto jjdcaltcheck_addr = patterns->find_addr(base, "78 B9 01 0F B6 C8 48 8B 43 50");
+  auto jjdcaltcheck_addr = m_patterns_cache->find_addr(base, "78 B9 01 0F B6 C8 48 8B 43 50");
   if (!jjdcaltcheck_addr) {
       return "Unable to find jjdcaltcheck pattern.";
   }
@@ -548,7 +548,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize jjdcaltcheck";
   }
 
-  auto doppeljjdc_addr = patterns->find_addr(base, "75 38 48 8B 97 B0 18 00 00");
+  auto doppeljjdc_addr = m_patterns_cache->find_addr(base, "75 38 48 8B 97 B0 18 00 00");
   if (!doppeljjdc_addr) {
       return "Unable to find doppeljjdc pattern.";
   }
@@ -558,7 +558,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize doppeljjdc";
   }
 
-  auto doppelonlyjjdc_addr = patterns->find_addr(base, "E8 90 74 FE FF");
+  auto doppelonlyjjdc_addr = m_patterns_cache->find_addr(base, "E8 90 74 FE FF");
   if (!doppelonlyjjdc_addr) {
       return "Unable to find doppelonlyjjdc pattern.";
   }
@@ -568,7 +568,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize doppelonlyjjdc";
   }
   
-  auto doppelonlyjjdcteleport_addr = patterns->find_addr(base, "48 8B D7 E8 07 71 FE FF");
+  auto doppelonlyjjdcteleport_addr = m_patterns_cache->find_addr(base, "48 8B D7 E8 07 71 FE FF");
   if (!doppelonlyjjdcteleport_addr) {
       return "Unable to find doppelonlyjjdcteleport pattern.";
   }
@@ -585,7 +585,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Make the doppelganger use proper idle animations
   /// </summary>
   /// <returns></returns>
-  auto doppelidle1_addr = patterns->find_addr(base, "8B BA 78 19 00 00 48");
+  auto doppelidle1_addr = m_patterns_cache->find_addr(base, "8B BA 78 19 00 00 48");
   if (!doppelidle1_addr) {
       return "Unable to find doppelidle1 pattern.";
   }
@@ -601,7 +601,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize doppelidle2";
   }
 
-  auto doppelidle3_addr = patterns->find_addr(base, "8B 80 78 19 00 00");
+  auto doppelidle3_addr = m_patterns_cache->find_addr(base, "8B 80 78 19 00 00");
   if (!doppelidle3_addr) {
       return "Unable to find doppelidle3 pattern.";
   }
@@ -614,7 +614,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Beowulf Charge for Doppel
   /// </summary>
   /// <returns></returns>
-  auto doppelbeowulfcharge_addr = patterns->find_addr(base, "83 BA 78 19 00 00 02 0F 94");
+  auto doppelbeowulfcharge_addr = m_patterns_cache->find_addr(base, "83 BA 78 19 00 00 02 0F 94");
   if (!doppelbeowulfcharge_addr) {
       return "Unable to find doppelbeowulfcharge pattern.";
   }
@@ -624,7 +624,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize doppelbeowulfcharge";
   }
 
-  auto soundchargestart_addr = patterns->find_addr(base, "48 8B 88 80 19 00 00 48 85 C9 74 DB	");
+  auto soundchargestart_addr = m_patterns_cache->find_addr(base, "48 8B 88 80 19 00 00 48 85 C9 74 DB	");
   if (!soundchargestart_addr) {
       return "Unable to find soundchargestart pattern.";
   }
@@ -634,7 +634,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize soundchargestart";
   }
 
-  auto soundchargeend_addr = patterns->find_addr(base, "25 48 8B 50 10 48 8B CB");
+  auto soundchargeend_addr = m_patterns_cache->find_addr(base, "25 48 8B 50 10 48 8B CB");
   if (!soundchargeend_addr) {
       return "Unable to find soundchargeend pattern.";
   }
@@ -644,7 +644,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize soundchargeend";
   }
 
-  auto soundchargelevel1_addr = patterns->find_addr(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 07");
+  auto soundchargelevel1_addr = m_patterns_cache->find_addr(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 07");
   if (!soundchargelevel1_addr) {
       return "Unable to find soundchargelevel1 pattern.";
   }
@@ -654,7 +654,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize soundchargelevel1";
   }
 
-  auto soundchargelevel2_addr = patterns->find_addr(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 56");
+  auto soundchargelevel2_addr = m_patterns_cache->find_addr(base, "48 8B 51 10 48 8B CB 48 85 D2 0F 84 56");
   if (!soundchargelevel2_addr) {
       return "Unable to find soundchargelevel2 pattern.";
   }

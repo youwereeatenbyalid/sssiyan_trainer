@@ -34,14 +34,14 @@ std::optional<std::string> NothingCancelsBubble::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &NothingCancelsBubble::cheaton;
-  m_on_page    = nero;
+  m_on_page    = Page_Nero;
   m_full_name_string     = "Don't Pop Ragtime Bubble";
   m_author_string        = "SSSiyan";
   m_description_string   = "Prevents ragtime bubble from being destroyed prematurely when breaking the ragtime breaker.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
+  auto addr = m_patterns_cache->find_addr(base, "48 8B 41 50 4D 8B F8 48 8B DA 4C");
   if (!addr) {
     return "Unable to find NothingCancelsBubble pattern.";
   }

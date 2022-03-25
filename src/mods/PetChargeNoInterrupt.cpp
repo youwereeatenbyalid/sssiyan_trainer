@@ -41,14 +41,14 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &PetChargeNoInterrupt::cheaton;
-  m_on_page    = gilver;
+  m_on_page    = Page_Gilver;
   m_full_name_string     = "Pet Charges Carry Through Interrupts";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Griffon's charges will continue through a backstep or air hike. Shadow's hedgehog will continue to charge through forced movement.";
 
   set_up_hotkey();
   
-  auto INJECT_addr = patterns->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
+  auto INJECT_addr = m_patterns_cache->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
   PetChargeNoInterrupt::je_return = INJECT_addr.value()+0x12;
   if (!INJECT_addr) {
     return "Unable to find INJECT pattern.";

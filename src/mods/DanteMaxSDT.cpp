@@ -40,7 +40,7 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &DanteMaxSDT::cheaton;
-  m_on_page               = dantesdt;
+  m_on_page               = Page_DanteSDT;
 
   m_full_name_string     = "Infinite SDT";
   m_author_string        = "SSSiyan";
@@ -49,7 +49,7 @@ std::optional<std::string> DanteMaxSDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 8F 14 1A 00 00 BA");
   if (!addr) {
     return "Unable to find DanteMaxSDT pattern.";
   }

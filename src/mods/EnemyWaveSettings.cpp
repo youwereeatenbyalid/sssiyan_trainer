@@ -57,14 +57,14 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = balance;
+	m_on_page = Page_Balance;
 	m_full_name_string = "Enemy waves settings (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Change some enemy waves settings.";
 
   set_up_hotkey();
 
-	auto initAddr1 = patterns->find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
+	auto initAddr1 = m_patterns_cache->find_addr(base, "49 8B F1 4D 8B E8 4C 8B FA"); // "DevilMayCry5.exe"+FE54FB 
 	if (!initAddr1) {
 		return "Unanable to find EnemyWaveSettings pattern.";
 	}

@@ -61,7 +61,7 @@ std::optional<std::string> Reversals::on_initialize() {
 
   
   m_is_enabled               = &Reversals::cheaton;
-  m_on_page                  = mechanics;
+  m_on_page                  = Page_Mechanics;
   m_full_name_string         = "Reversals (+)";
   m_author_string            = "SSSiyan, Nekupaska, socks";
   m_description_string		 = "Allows you to use directional moves in any direction.\n\n"
@@ -71,7 +71,7 @@ std::optional<std::string> Reversals::on_initialize() {
   set_up_hotkey();
 							   
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "80 BF D0 0E 00 00 00 8B");
+  auto addr = m_patterns_cache->find_addr(base, "80 BF D0 0E 00 00 00 8B");
   if (!addr) {
     return "Unable to find Reversals pattern.";
   }
@@ -81,7 +81,7 @@ std::optional<std::string> Reversals::on_initialize() {
     return "Failed to initialize Reversals";
   }
 
-  auto addr2 = patterns->find_addr(base, "48 89 87 40 17 00 00");
+  auto addr2 = m_patterns_cache->find_addr(base, "48 89 87 40 17 00 00");
   if (!addr2) {
     return "Unable to find BufferedReversals pattern.";
   }

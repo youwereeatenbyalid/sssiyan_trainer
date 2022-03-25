@@ -146,7 +146,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &TauntSelector::cheaton;
-  m_on_page    = taunt;
+  m_on_page    = Page_Taunt;
 
   m_full_name_string     = "Taunt Selector (+)";
   m_author_string        = "The HitchHiker";
@@ -154,7 +154,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "80 7F 20 00 48 8B CB 44");
+  auto addr = m_patterns_cache->find_addr(base, "80 7F 20 00 48 8B CB 44");
   if (!addr) {
     return "Unable to find TauntSelector pattern.";
   }

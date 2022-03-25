@@ -96,7 +96,7 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = vergildoppel;
+		m_on_page = Page_VergilDoppel;
 		m_full_name_string = "Summon doppelganger instantly (+)";
 		m_author_string = "VPZadov";
 		m_description_string = "Remove Vergil's i-frame DT activation motion and summon doppelganger instantly (doppel himself still have appears motion)";
@@ -104,13 +104,13 @@ public:
 		set_up_hotkey();
 
 
-		auto setActionDoppelAddr = patterns->find_addr(base, "E8 33 18 01 00");//DevilMayCry5.exe+533E68
+		auto setActionDoppelAddr = m_patterns_cache->find_addr(base, "E8 33 18 01 00");//DevilMayCry5.exe+533E68
 		if (!setActionDoppelAddr)
 		{
 			return "Unable to find InstantDoppel.setActionDoppelAddr pattern.";
 		}
 
-		fVergilSetActionAddr = patterns->find_addr(base, "48 89 5C 24 20 56 57 41 57 48 83 EC 60").value_or(g_framework->get_module().as<uintptr_t>() + 0x5456A0); //DevilMayCry5.exe+5456A0
+		fVergilSetActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 56 57 41 57 48 83 EC 60").value_or(g_framework->get_module().as<uintptr_t>() + 0x5456A0); //DevilMayCry5.exe+5456A0
 
 		if (!install_hook_absolute(setActionDoppelAddr.value(), m_doppel_hook, &detour, &ret, 0x5))
 		{

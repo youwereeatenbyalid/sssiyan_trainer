@@ -134,7 +134,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   init_check_box_info();
 
   m_is_enabled               = &HUDOptions::cheaton  ;
-  m_on_page                  = camera;
+  m_on_page                  = Page_Camera;
 
   m_full_name_string        = "HUD Options (+)";
   m_author_string           = "SSSiyan";
@@ -143,7 +143,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "89 83 C4 00 00 00 F3");
+  auto addr = m_patterns_cache->find_addr(base, "89 83 C4 00 00 00 F3");
   if (!addr) {
     return "Unable to find HUDOptions pattern1.";
   }
@@ -154,7 +154,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   }
 
   // WEAPON WHEELS
-  auto addr2 = patterns->find_addr(base, "F3 0F 11 4F 40 77");
+  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 11 4F 40 77");
   if (!addr2) {
     return "Unable to find donthideweaponandgun pattern.";
   }
@@ -164,7 +164,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
     return "Failed to initialize donthideweaponandgun";
   }
 
-  auto addr3 = patterns->find_addr(base, "0F 2F C8 F3 0F 11 4B 40 77 A3");
+  auto addr3 = m_patterns_cache->find_addr(base, "0F 2F C8 F3 0F 11 4B 40 77 A3");
   if (!addr3) {
       return "Unable to find donthideweaponandgun pattern_vergil.";
   }
@@ -174,7 +174,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
       return "Failed to initialize donthideweaponandgun_vergil";
   }
 
-  auto addr4 = patterns->find_addr(base, "80 BA 08 01 00 00 00 48 89");
+  auto addr4 = m_patterns_cache->find_addr(base, "80 BA 08 01 00 00 00 48 89");
   if (!addr4) {
       return "Unable to find donthideweaponandgun hidetimer.";
   }

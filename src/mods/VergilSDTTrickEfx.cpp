@@ -53,19 +53,19 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilvfxsettings;
+	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "SDT Tricks EFX";
 	m_author_string = "VPZadov";
 	m_description_string = "Always use SDT Tricks EFX and SDT yamato sheath flash EFX.";
 
   set_up_hotkey();
 
-	auto sdtEfxAddr = patterns->find_addr(base, "83 F8 02 74 06 41 83 CE"); //DevilMayCry5.exe+58991C      //patterns->find_addr(base, "8B 86 B0 09 00 00 4C"); //DevilMayCry5.exe+1DDCB5D
+	auto sdtEfxAddr = m_patterns_cache->find_addr(base, "83 F8 02 74 06 41 83 CE"); //DevilMayCry5.exe+58991C      //patterns->find_addr(base, "8B 86 B0 09 00 00 4C"); //DevilMayCry5.exe+1DDCB5D
     if (!sdtEfxAddr) {
           return "Unanable to find VergilSDTTrickEfx.sdtEfxAddr pattern.";
     }
 
-	auto yamatoBehaviorAddr = patterns->find_addr(base, "48 83 78 18 00 75 18 8B 47 74"); //DevilMayCry5.exe+15822AD
+	auto yamatoBehaviorAddr = m_patterns_cache->find_addr(base, "48 83 78 18 00 75 18 8B 47 74"); //DevilMayCry5.exe+15822AD
     if (!yamatoBehaviorAddr) {
           return "Unanable to find VergilSDTTrickEfx.yamatoBehaviorAddr pattern.";
     }

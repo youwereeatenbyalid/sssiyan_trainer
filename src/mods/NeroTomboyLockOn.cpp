@@ -42,7 +42,7 @@ std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &NeroTomboyLockOn::cheaton;
-  m_on_page             = nero;
+  m_on_page             = Page_Nero;
 
   m_full_name_string   = "Lock On With Tomboy";
   m_author_string      = "SSSiyan";
@@ -51,7 +51,7 @@ std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "20 85 C9 75 15 48 8B D3");
+  auto addr = m_patterns_cache->find_addr(base, "20 85 C9 75 15 48 8B D3");
   if (!addr) {
     return "Unable to find NeroTomboyLockOn pattern.";
   }

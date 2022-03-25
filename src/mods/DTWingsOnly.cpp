@@ -33,14 +33,14 @@ std::optional<std::string> DTWingsOnly::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &DTWingsOnly::cheaton;
-  m_on_page               = nero;
+  m_on_page               = Page_Nero;
   m_full_name_string     = "Wings Only DT";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Nero DT only wings.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "48 83 78 18 00 0F 94 C0 48 8B 6C 24 50");
+  auto addr = m_patterns_cache->find_addr(base, "48 83 78 18 00 0F 94 C0 48 8B 6C 24 50");
   if (!addr) {
     return "Unable to find DTWingsOnly pattern.";
   }

@@ -40,14 +40,14 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   init_check_box_info();
 
   m_is_enabled = &VergilAirTrickNoSS::cheaton;
-  m_on_page = vergiltrick;
+  m_on_page = Page_VergilTrick;
 
   m_full_name_string = "Disable Embedded Swords";
   m_author_string        = "VPZadov";
   m_description_string   = "Allows you to trick to enemies without using an embedded sword.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
+  auto addr = m_patterns_cache->find_addr(base, "85 C9 0F 84 BE 01 00 00 F3 0F 10 87");
   if (!addr) {
     return "Unable to find VergilAirTrickNoSS pattern.";
   }

@@ -378,9 +378,9 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) const {
             return e;
         }
     }
-    if(Mod::patterns->is_changed())
-        Mod::patterns->save();
-    Mod::patterns->free();
+    if(Mod::m_patterns_cache->is_changed())
+        Mod::m_patterns_cache->save();
+    Mod::m_patterns_cache->free();
 
     if (load_configs)
     {

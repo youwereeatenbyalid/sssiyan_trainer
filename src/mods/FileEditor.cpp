@@ -283,7 +283,7 @@ std::optional<std::string> FileEditor::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   m_is_enabled = &m_is_active;
-  m_on_page    = gamemode;
+  m_on_page    = Page_GameMode;
 
   m_full_name_string     = "Asset Swapper (+)";
   m_author_string        = "Darkness (TheDarkness704)";
@@ -294,13 +294,13 @@ std::optional<std::string> FileEditor::on_initialize() {
   load_mods();
   load_sys_mods();
 
-  auto file_loader_fn = patterns->find_addr(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
-  auto costume_list_maker_fn = patterns->find_addr(base, "48 8B C4 55 53 41 55 41 56 48 8D 68 A1");
-  auto selected_costume_processor_fn = patterns->find_addr(base, "48 89 5C 24 18 57 48 83 EC 20 C7 82 C0 00 00 00 09 00 00 00 48 8B FA");
-  auto ui_costume_name_fn = patterns->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 41 8B F8 48 8D 59 40 4C 8B C2 48 8B CB 48 8D 54 24 30 E8 DF FD FF FF 48 8B 44 24 30 48 3B 03");
+  auto file_loader_fn = m_patterns_cache->find_addr(base, "40 53 57 41 55 41 57 48 83 EC 48 49");
+  auto costume_list_maker_fn = m_patterns_cache->find_addr(base, "48 8B C4 55 53 41 55 41 56 48 8D 68 A1");
+  auto selected_costume_processor_fn = m_patterns_cache->find_addr(base, "48 89 5C 24 18 57 48 83 EC 20 C7 82 C0 00 00 00 09 00 00 00 48 8B FA");
+  auto ui_costume_name_fn = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 41 8B F8 48 8D 59 40 4C 8B C2 48 8B CB 48 8D 54 24 30 E8 DF FD FF FF 48 8B 44 24 30 48 3B 03");
 
-  auto scroll_list_addr = patterns->find_addr(base, "41 89 07 41 8B 07");
-  auto costume_list_addr = patterns->find_addr(base, "3B 42 18 7D 56");
+  auto scroll_list_addr = m_patterns_cache->find_addr(base, "41 89 07 41 8B 07");
+  auto costume_list_addr = m_patterns_cache->find_addr(base, "3B 42 18 7D 56");
   //auto ui_costume_name_manager_addr = patterns->find_addr(base, "49 8B 44 C1 38 48 8B 5C 24 38 48 83 C4 20 5F");
 
   if (!file_loader_fn) {

@@ -64,7 +64,7 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &NoDTCooldown::cheaton;
-  m_on_page               = mechanics;
+  m_on_page               = Page_Mechanics;
 
   m_full_name_string     = "No DT Cooldown";
   m_author_string        = "SSSiyan";
@@ -73,7 +73,7 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
+  auto addr = m_patterns_cache->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 83");
   if (!addr) {
     return "Unable to find NoDTCooldownNero pattern.";
   }
@@ -83,7 +83,7 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
     return "Failed to initialize NoDTCooldownNero";
   }
 
-  auto addr2 = patterns->find_addr(base, "0F 87 A6 00 00 00 48 8B 15");
+  auto addr2 = m_patterns_cache->find_addr(base, "0F 87 A6 00 00 00 48 8B 15");
   if (!addr2) {
       return "Unable to find NoDTCooldownV pattern.";
   }
@@ -94,7 +94,7 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
   }
   NoDTCooldown::jmp_ja2 = addr2.value() + 0xAC;
 
-  auto addr3 = patterns->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48");
+  auto addr3 = m_patterns_cache->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48");
   if (!addr3) {
       return "Unable to find NoDTCooldownV pattern.";
   }

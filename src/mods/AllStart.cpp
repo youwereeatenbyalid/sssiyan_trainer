@@ -153,7 +153,7 @@ std::optional<std::string> AllStart::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &AllStart::cheaton;
-  m_on_page             = animation;
+  m_on_page             = Page_Animation;
 
   m_full_name_string   = "Selective Omnicancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
@@ -162,7 +162,7 @@ std::optional<std::string> AllStart::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = patterns->find_addr(base, "66 C7 47 5E 00 00");
+  auto addr      = m_patterns_cache->find_addr(base, "66 C7 47 5E 00 00");
   if (!addr) {
     return "Unable to find AllStart pattern.";
   }

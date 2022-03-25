@@ -71,7 +71,7 @@ void VergilSDTAccumulateRework::on_config_save(utility::Config &cfg) {
 std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   init_check_box_info();
   m_is_enabled = &VergilSDTAccumulateRework::cheaton;
-  m_on_page = vergilsdt;
+  m_on_page = Page_VergilSDT;
   m_full_name_string = "SDT Accumulate Rework (+)";
   m_author_string = "VPZadov";
   m_description_string = "Vergil's SDT meter fills alongside his DT meter.";
@@ -80,7 +80,7 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto dtchange_addr = patterns->find_addr(base, "F3 0F 11 A5 10 11 00 00");
+  auto dtchange_addr = m_patterns_cache->find_addr(base, "F3 0F 11 A5 10 11 00 00");
   if (!dtchange_addr) {
     return "Unanable to find VergilSDTAccum::dtchange_addr pattern.";
   }

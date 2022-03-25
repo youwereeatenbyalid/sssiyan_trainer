@@ -4,7 +4,7 @@
 #include "mods/GameInput.hpp"
 uintptr_t DisableBreakaway::jmp_ret{NULL};
 bool DisableBreakaway::cheaton{NULL};
-uint32_t inputs[] = {Mod::sword,Mod::gun,Mod::jump,Mod::tauntinput,Mod::lockon,Mod::changetarget,Mod::dpad,Mod::deviltrigger,Mod::dpadup,Mod::dpaddown,Mod::dpadleft,Mod::dpadright,Mod::style,Mod::righttrigger,Mod::lefttrigger,Mod::resetcamera,Mod::SDT};
+uint32_t inputs[] = {Mod::Input_Sword,Mod::Input_Gun,Mod::Input_Jump,Mod::Input_Taunt,Mod::Input_LockOn,Mod::Input_ChangeTarget,Mod::Input_DPad,Mod::Input_DevilTrigger,Mod::Input_DPadUp,Mod::Input_DPadDown,Mod::Input_DPadLeft,Mod::Input_DPadRight,Mod::Input_Style,Mod::Input_RightTrigger,Mod::Input_LeftTrigger,Mod::Input_ResetCamera,Mod::Input_SDT};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 uint32_t DisableBreakaway::overrideinput{0x1000};
@@ -57,7 +57,7 @@ std::optional<std::string> DisableBreakaway::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
+  auto addr = m_patterns_cache->find_addr(base, "48 83 78 18 00 0F 85 7E 01 00 00 48 B8");
   if (!addr) {
     return "Unable to find DisableBreakaway pattern.";
   }

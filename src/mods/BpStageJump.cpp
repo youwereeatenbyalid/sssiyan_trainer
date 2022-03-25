@@ -249,7 +249,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   init_check_box_info();
 
   m_is_enabled               = &BpStageJump::cheaton;
-  m_on_page                  = bloodypalace;
+  m_on_page                  = Page_BloodyPalace;
   m_full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
   m_author_string           = "SSSiyan, The HitchHiker";
   m_description_string      = "Allows you to skip to a BP stage of your choosing.";
@@ -257,7 +257,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "38 4B 79 75 03");
+  auto addr = m_patterns_cache->find_addr(base, "38 4B 79 75 03");
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }

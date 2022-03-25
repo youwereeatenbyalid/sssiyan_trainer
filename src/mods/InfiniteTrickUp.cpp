@@ -24,14 +24,14 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilcheat;
+	m_on_page = Page_VergilCheat;
 	m_full_name_string = "Infinite Trick Up";
 	m_author_string = "VPZadov";
 	m_description_string = "Allow vergil to infinitely trick up.";
 
   set_up_hotkey();
 
-	auto trickUpAddr = patterns->find_addr(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
+	auto trickUpAddr = m_patterns_cache->find_addr(base, "80 BF BC 19 00 00 00"); //DevilMayCry5.exe+550BA5
 	if (!trickUpAddr) {
 		return "Unanable to find InfiniteTrickUp.trickUpAddr pattern.";
 	}

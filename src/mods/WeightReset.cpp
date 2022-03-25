@@ -137,7 +137,7 @@ std::optional<std::string> WeightReset::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &WeightReset::cheaton;
-  m_on_page               = mechanics;
+  m_on_page               = Page_Mechanics;
 
   m_full_name_string     = "Reset Weight";
   m_author_string        = "SSSiyan";
@@ -146,7 +146,7 @@ std::optional<std::string> WeightReset::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "88 43 24 48 8B 42 38");
+  auto addr = m_patterns_cache->find_addr(base, "88 43 24 48 8B 42 38");
   if (!addr) {
     return "Unable to find WeightReset pattern.";
   }

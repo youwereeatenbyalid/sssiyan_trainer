@@ -33,14 +33,14 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &DisableAutoAssist::cheaton;
-  m_on_page    = qol;
+  m_on_page    = Page_QOL;
   m_full_name_string     = "Disable Auto Assist";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Prevents Auto Assist from being activated.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "BE 89 48 14 48 8B 5C 24 30");
+  auto addr = m_patterns_cache->find_addr(base, "BE 89 48 14 48 8B 5C 24 30");
   if (!addr) {
     return "Unable to find DisableAutoAssist pattern.";
   }

@@ -39,7 +39,7 @@ std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled = &NeroAlwaysInitialDT::cheaton;
-  m_on_page    = nero;
+  m_on_page    = Page_Nero;
 
   m_full_name_string   = "Forced Initial DT Animation";
   m_author_string      = "SSSiyan";
@@ -48,7 +48,7 @@ std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "80 BF B0 1A 00 00 00"); // DevilMayCry5.exe+2104DE2 Vergil exe
+  auto addr = m_patterns_cache->find_addr(base, "80 BF B0 1A 00 00 00"); // DevilMayCry5.exe+2104DE2 Vergil exe
   if (!addr) {
     return "Unable to find NeroAlwaysInitialDT pattern.";
   }

@@ -42,7 +42,7 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &DanteTwoTricks::cheaton;
-  m_on_page             = dantecheat;
+  m_on_page             = Page_DanteCheat;
 
   m_full_name_string   = "DMC4 Trick Count";
   m_author_string      = "SSSiyan";
@@ -51,7 +51,7 @@ std::optional<std::string> DanteTwoTricks::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "60 17 00 00 48 85 C0 75 1E");
+  auto addr = m_patterns_cache->find_addr(base, "60 17 00 00 48 85 C0 75 1E");
   if (!addr) {
     return "Unable to find DanteTwoTricks pattern.";
   }

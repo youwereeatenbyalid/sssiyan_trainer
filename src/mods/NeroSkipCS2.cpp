@@ -40,7 +40,7 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &NeroSkipCS2::cheaton;
-  m_on_page               = nero;
+  m_on_page               = Page_Nero;
 
   m_full_name_string     = "Skip Charge Shot 2";
   m_author_string        = "SSSiyan";
@@ -49,7 +49,7 @@ std::optional<std::string> NeroSkipCS2::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "FF 47 58 48 8B 43 50 48 39");
+  auto addr = m_patterns_cache->find_addr(base, "FF 47 58 48 8B 43 50 48 39");
   if (!addr) {
     return "Unable to find NeroSkipCS2 pattern.";
   }

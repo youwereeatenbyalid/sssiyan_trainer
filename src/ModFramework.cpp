@@ -66,7 +66,7 @@ ModFramework::ModFramework()
     spdlog::info(LOG_ENTRY);
 
     // Initialize the pattern manager
-    Mod::patterns = std::make_unique<InitPatternsManager>(AOB_LIST_FILENAME, "IsUsingPatternsList");
+    Mod::m_patterns_cache = std::make_unique<InitPatternsManager>(AOB_LIST_FILENAME, "IsUsingPatternsList");
 
     // Loading stuff we saved in the config file
     utility::Config cfg(CONFIG_FILENAME);
@@ -414,15 +414,15 @@ void ModFramework::queue_notification(const ImGuiToast& notif) {
 void ModFramework::on_frame_d3d11() {
     std::scoped_lock _{ m_ui_mutex };
 
-    spdlog::debug("on_frame (D3D11)");
+    spdlog::debug("[D3D11] on_frame");
 
     if (!m_initialized) {
         if (!initialize()) {
-            spdlog::error("Failed to initialize the trainer on DirectX 11");
+            spdlog::error("[D3D11] Failed to initialize the trainer on DirectX 11");
             return;
         }
 
-        spdlog::info("Trainer initialized");
+        spdlog::info("[D3D11] Trainer initialized");
         m_initialized = true;
         return;
     }
@@ -472,15 +472,15 @@ void ModFramework::on_frame_d3d11() {
 void ModFramework::on_frame_d3d12() {
     std::scoped_lock _{ m_ui_mutex };
 
-    spdlog::debug("on_frame (D3D12)");
+    spdlog::debug("[D3D12] on_frame");
 
     if (!m_initialized) {
         if (!initialize()) {
-            spdlog::error("Failed to initialize the trainer on DirectX 12");
+            spdlog::error("[D3D12] Failed to initialize the trainer on DirectX 12");
             return;
         }
 
-        spdlog::info("Trainer initialized");
+        spdlog::info("[D3D12] Trainer initialized");
         m_initialized = true;
         return;
     }
@@ -488,7 +488,7 @@ void ModFramework::on_frame_d3d12() {
     auto command_queue = m_d3d12_hook->get_command_queue();
 
     if (command_queue == nullptr) {
-        spdlog::error("Null Command Queue");
+        spdlog::error("[D3D12] Null Command Queue");
         return;
     }
 
@@ -886,7 +886,7 @@ bool ModFramework::initialize() {
         }
 
         if (!create_command_list_d3d12()) {
-            spdlog::error("Failed to create Command List.");
+            spdlog::error("[D3D12] Failed to create Command List.");
             return false;
         }
 
@@ -939,7 +939,7 @@ bool ModFramework::initialize() {
 
         //ImGui_ImplDX12_InvalidateDeviceObjects();
         //if (!ImGui_ImplDX12_CreateDeviceObjects()) {
-        //    spdlog::error("Failed to initialize ImGui CreateDeviceObjects.");
+        //    spdlog::error("[D3D12] Failed to initialize ImGui CreateDeviceObjects.");
         //    return false;
         //}
 
@@ -1381,23 +1381,23 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("Shared Cheats");
-            m_mods->on_pagelist_ui(Mod::commoncheat, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_CommonCheat, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Common Mechanics");
-            m_mods->on_pagelist_ui(Mod::mechanics, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Mechanics, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Animation");
-            m_mods->on_pagelist_ui(Mod::animation, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Animation, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Enemy Step");
-            m_mods->on_pagelist_ui(Mod::enemystep, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_EnemyStep, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Taunts");
-            m_mods->on_pagelist_ui(Mod::taunt, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Taunt, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1414,15 +1414,15 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("Game Balance");
-            m_mods->on_pagelist_ui(Mod::balance, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Balance, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Game Modes");
-            m_mods->on_pagelist_ui(Mod::gamemode, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_GameMode, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Bloody Palace");
-            m_mods->on_pagelist_ui(Mod::bloodypalace, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_BloodyPalace, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1439,11 +1439,11 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("Camera");
-            m_mods->on_pagelist_ui(Mod::camera, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Camera, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Quality-of-life");
-            m_mods->on_pagelist_ui(Mod::qol, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_QOL, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1460,15 +1460,15 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("Breaker");
-            m_mods->on_pagelist_ui(Mod::breaker, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Breaker, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Wiresnatch");
-            m_mods->on_pagelist_ui(Mod::wiresnatch, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Wiresnatch, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Cheats");
-            m_mods->on_pagelist_ui(Mod::nero, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Nero, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1485,11 +1485,11 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("SDT");
-            m_mods->on_pagelist_ui(Mod::dantesdt, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_DanteSDT, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Cheats");
-            m_mods->on_pagelist_ui(Mod::dantecheat, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_DanteCheat, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1506,7 +1506,7 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("Cheats");
-            m_mods->on_pagelist_ui(Mod::gilver, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_Gilver, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1523,23 +1523,23 @@ void ModFramework::draw_panels() const
     {
         if (m_error.empty() && m_game_data_initialized) {
             ImGui::Text("SDT");
-            m_mods->on_pagelist_ui(Mod::vergilsdt, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_VergilSDT, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Dark Slayer");
-            m_mods->on_pagelist_ui(Mod::vergiltrick, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_VergilTrick, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Cheats");
-            m_mods->on_pagelist_ui(Mod::vergilcheat, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_VergilCheat, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("Doppelganger");
-            m_mods->on_pagelist_ui(Mod::vergildoppel, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_VergilDoppel, modListIndent);
 
             ImGui::Separator();
             ImGui::Text("VFX Settings");
-            m_mods->on_pagelist_ui(Mod::vergilvfxsettings, modListIndent);
+            m_mods->on_pagelist_ui(Mod::Page_VergilVFXSettings, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");
@@ -1826,7 +1826,7 @@ bool ModFramework::create_command_list_d3d12() {
 
     if (m_d3d12.pd3d_command_list->Close() != S_OK)
     {
-        spdlog::error("Failed to close command list after creation.");
+        spdlog::error("[D3D12] Failed to close command list after creation.");
         return false;
     }
 

@@ -79,14 +79,14 @@ void VergilNoAfterimages::init_check_box_info() {
 std::optional<std::string> VergilNoAfterimages::on_initialize() {
   init_check_box_info();
   m_is_enabled        = &VergilNoAfterimages::cheaton;
-  m_on_page           = vergilvfxsettings;
+  m_on_page           = Page_VergilVFXSettings;
   m_full_name_string = "Disable Afterimages (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Disable the afterimages Vergil leaves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = patterns->find_addr(base, "4C 39 78 18 0F 85 03 03 00 00 48");//DevilMayCry5.exe+58B450 
+  auto init_addr = m_patterns_cache->find_addr(base, "4C 39 78 18 0F 85 03 03 00 00 48");//DevilMayCry5.exe+58B450 
   if (!init_addr) {
     return "Unanable to find VergilNoAfterimages pattern.";
   }

@@ -32,7 +32,7 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &NoScreenShake::cheaton;
-  m_on_page               = camera;
+  m_on_page               = Page_Camera;
 
   m_full_name_string     = "No Screen Shake";
   m_author_string        = "deepdarkkapustka";
@@ -41,7 +41,7 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = patterns->find_addr(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
+  auto addr      = m_patterns_cache->find_addr(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
   if (!addr) {
     return "Unable to find NoScreenShake pattern.";
   }

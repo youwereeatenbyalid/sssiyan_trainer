@@ -47,7 +47,7 @@ std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &VergilDirectionalMappings::cheaton;
-  m_on_page               = vergiltrick;
+  m_on_page               = Page_VergilTrick;
   
   m_full_name_string     = "Down Trick On Back + Trick";
   m_author_string        = "The HitchHiker";
@@ -56,7 +56,7 @@ std::optional<std::string> VergilDirectionalMappings::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "8B 57 10 48 85 C0 0F 84 67");
+  auto addr = m_patterns_cache->find_addr(base, "8B 57 10 48 85 C0 0F 84 67");
   if (!addr) {
     return "Unable to find VergilDirectionalMappings pattern.";
   }

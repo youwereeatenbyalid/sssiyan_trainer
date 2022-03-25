@@ -220,10 +220,10 @@ std::optional<std::string> MoveReplacer::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "41 8B 1E 49 8B CD");
-  auto filtercalladdr = patterns->find_addr(base, "FE FE FF FF 48 83 C3 04 48 FF C7");
-  auto startmovecalladdr = patterns->find_addr(base, "49 8B 46 20 41 8B CC");
-  auto endmovecalladdr   = patterns->find_addr(base, "66 44 21 73 1A");
+  auto addr = m_patterns_cache->find_addr(base, "41 8B 1E 49 8B CD");
+  auto filtercalladdr = m_patterns_cache->find_addr(base, "FE FE FF FF 48 83 C3 04 48 FF C7");
+  auto startmovecalladdr = m_patterns_cache->find_addr(base, "49 8B 46 20 41 8B CC");
+  auto endmovecalladdr   = m_patterns_cache->find_addr(base, "66 44 21 73 1A");
   MoveReplacer::filtercall = filtercalladdr.value();
   MoveReplacer::startmovecall = startmovecalladdr.value();
   MoveReplacer::endmovecall   = endmovecalladdr.value();

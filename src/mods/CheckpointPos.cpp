@@ -67,14 +67,14 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   init_check_box_info();
   auto base        = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled        = &cheaton;
-  m_on_page           = gamemode;
+  m_on_page           = Page_GameMode;
   m_full_name_string = "Custom Checkpoints (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Create a custom checkpoint to reset to. Uses boss checkpoints by default.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
-  auto restartPosAddr = patterns->find_addr(base, "44 0F 29 4C 24 70 F3 44 0F 10 48"); // DevilMayCry5.exe+24A4DB7
+  auto restartPosAddr = m_patterns_cache->find_addr(base, "44 0F 29 4C 24 70 F3 44 0F 10 48"); // DevilMayCry5.exe+24A4DB7
   if (!restartPosAddr) {
     return "Unanable to find CheckpointPos.restartPosAddr pattern.";
   }

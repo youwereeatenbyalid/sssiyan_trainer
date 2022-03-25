@@ -73,7 +73,7 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &DanteAlwaysOvertop::cheaton;
-  m_on_page             = dantecheat;
+  m_on_page             = Page_DanteCheat;
 
   m_full_name_string   = "Cavaliere Always Overtop";
   m_author_string      = "SSSiyan";
@@ -82,15 +82,15 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "89 B7 40 03 00 00 48 8B");
+  auto addr = m_patterns_cache->find_addr(base, "89 B7 40 03 00 00 48 8B");
   if (!addr) {
     return "Unable to find DanteAlwaysOvertop pattern1.";
   }
-  auto addr2 = patterns->find_addr(base, "89 86 BC 00 00 00 4C");
+  auto addr2 = m_patterns_cache->find_addr(base, "89 86 BC 00 00 00 4C");
   if (!addr2) {
     return "Unable to find DanteAlwaysOvertop pattern2.";
   }
-  auto addr3 = patterns->find_addr(base, "09 00 00 48 8B 43 50 48 83 78 18 00 75 26 48 85 FF 74 A1 89 AF 40 03 00 00");
+  auto addr3 = m_patterns_cache->find_addr(base, "09 00 00 48 8B 43 50 48 83 78 18 00 75 26 48 85 FF 74 A1 89 AF 40 03 00 00");
   if (!addr3) {
     return "Unable to find DanteAlwaysOvertop pattern3.";
   }

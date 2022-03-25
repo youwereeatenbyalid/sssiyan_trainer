@@ -52,7 +52,7 @@ void VergilSetMaxJJC::on_config_save(utility::Config& cfg) {
 std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   init_check_box_info();
   m_is_enabled        = &VergilSetMaxJJC::cheaton;
-  m_on_page           = vergilcheat;
+  m_on_page           = Page_VergilCheat;
   m_full_name_string = "Just Judgement Cut Limit (+)";
   m_author_string    = "SSSiyan, VPZadov";
   m_description_string = "Set the maximum number of Just Judgment Cuts Vergil can perform in a row.";
@@ -60,7 +60,7 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto init_addr = patterns->find_addr(base, "8B 47 48 39 81 E0 18 00 00");
+  auto init_addr = m_patterns_cache->find_addr(base, "8B 47 48 39 81 E0 18 00 00");
   if (!init_addr)
     return "Unable to find VergilSetMaxJJC pattern.";
 

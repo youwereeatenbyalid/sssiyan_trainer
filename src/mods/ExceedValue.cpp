@@ -40,14 +40,14 @@ std::optional<std::string> ExceedValue::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &ExceedValue::cheaton;
-  m_on_page = nero;
+  m_on_page = Page_Nero;
   m_full_name_string     = "Set Exceed Level (+)";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Set/Lock Nero's Exceed.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "48 8B 88 48 19 00 00 33 F6 48 85");
+  auto addr = m_patterns_cache->find_addr(base, "48 8B 88 48 19 00 00 33 F6 48 85");
   if (!addr) {
     return "Unable to find ExceedValue pattern.";
   }

@@ -412,7 +412,7 @@ std::optional<std::string> LandCancels::on_initialize() {
   init_check_box_info();
 
   m_is_enabled = &LandCancels::cheaton;
-  m_on_page    = mechanics;
+  m_on_page    = Page_Mechanics;
 
   m_full_name_string = "Land Cancels";
   m_author_string    = "SSSiyan";
@@ -420,7 +420,7 @@ std::optional<std::string> LandCancels::on_initialize() {
       "Only certain attacks are set to be land cancellable and this list will expand with time. Feel free to @ me with ideas!";
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "C7 42 34 00 00 00 00 C3 CC CC 48");
+  auto addr = m_patterns_cache->find_addr(base, "C7 42 34 00 00 00 00 C3 CC CC 48");
   if (!addr) {
     return "Unable to find LandCancels pattern.";
   }

@@ -550,48 +550,48 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   m_is_enabled        = &cheaton;
-  m_on_page           = balance;
+  m_on_page           = Page_Balance;
   m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "VPZadov";
   m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 
   fadeStaticBase = g_framework->get_module().as<uintptr_t>() + 0x7E836F8;
-  auto emDataLstAddr = patterns->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
+  auto emDataLstAddr = m_patterns_cache->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
   if (!emDataLstAddr) {
     return "Unanable to find emDataLstAddr pattern.";
   }
 
-  auto emPrefabLoad = patterns->find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
+  auto emPrefabLoad = m_patterns_cache->find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
   if (!emPrefabLoad)
   {
       return "Unanable to find emPrefabLoad pattern.";
   }
 
-  auto bpFlowIdAddr = patterns->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
+  auto bpFlowIdAddr = m_patterns_cache->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
   if (!bpFlowIdAddr)
   {
       return "Unanable to find bpFlowIdAddr pattern.";
   }
 
-  auto retryMissionAddr = patterns->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
+  auto retryMissionAddr = m_patterns_cache->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
   if (!retryMissionAddr)
   {
       return "Unanable to find retryMissionAddr pattern.";
   }
 
-  auto exitMissionAddr = patterns->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
+  auto exitMissionAddr = m_patterns_cache->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
   if (!retryMissionAddr)
   {
       return "Unanable to find exitMissionAddr pattern.";
   }
 
-  auto checkpointMissionAddr = patterns->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 41 0F B6 F8");// DevilMayCry5.exe+249DFA0
+  auto checkpointMissionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 41 0F B6 F8");// DevilMayCry5.exe+249DFA0
   if (!checkpointMissionAddr)
   {
       return "Unanable to find checkpointMissionAddr pattern.";
   }
 
-  auto exitBpMissionAddr = patterns->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
+  auto exitBpMissionAddr = m_patterns_cache->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
   if (!exitBpMissionAddr)
   {
       return "Unanable to find exitBpMissionAddr pattern.";
@@ -599,13 +599,13 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
 
-  auto requestResultAddr = patterns->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
+  auto requestResultAddr = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
   if (!exitBpMissionAddr)
   {
       return "Unanable to find requestResultAddr pattern.";
   }
 
-  auto bossDanteCrashAddr = patterns->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
+  auto bossDanteCrashAddr = m_patterns_cache->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
   if (!bossDanteCrashAddr)
   {
       return "Unanable to find bossDanteCrashAddr pattern.";

@@ -43,7 +43,7 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &DisplayEnemyHPInOrbs::cheaton;
-  m_on_page               = camera;
+  m_on_page               = Page_Camera;
 
   m_full_name_string     = "Display Enemy HP in Orbs";
   m_author_string        = "SSSiyan";
@@ -52,8 +52,8 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "8B 6A 78 EB 02");
-  DisplayEnemyHPInOrbs::jmp_cont = patterns->find_addr(base, "44 8B 05 D5 FC 9E 05").value();
+  auto addr = m_patterns_cache->find_addr(base, "8B 6A 78 EB 02");
+  DisplayEnemyHPInOrbs::jmp_cont = m_patterns_cache->find_addr(base, "44 8B 05 D5 FC 9E 05").value();
   // DisplayEnemyHPInOrbs::jmp_cont = (base + 0x02494A0C); // ?? 
 
   if (!addr) {

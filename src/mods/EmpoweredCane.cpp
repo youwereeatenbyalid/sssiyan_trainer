@@ -43,14 +43,14 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   m_is_enabled = &EmpoweredCane::cheaton;
-  m_on_page    = gilver;
+  m_on_page    = Page_Gilver;
   m_full_name_string     = "Infinite Empowered Cane";
   m_author_string        = "SSSiyan";
   m_description_string   = "V's BP Taunt buffed cane will last forever.";
 
   set_up_hotkey();
   
-  auto bettercane_addr = patterns->find_addr(base, "77 5B 89 53 20");
+  auto bettercane_addr = m_patterns_cache->find_addr(base, "77 5B 89 53 20");
 
   EmpoweredCane::ja_return = bettercane_addr.value()+0x5D;
   if (!bettercane_addr) {

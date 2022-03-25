@@ -41,14 +41,14 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
 
    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
    m_is_enabled = &NeroGP01overGerberaPickup::cheaton;
-   m_on_page    = bloodypalace;
+   m_on_page    = Page_BloodyPalace;
    m_full_name_string     = "GP01 Over Gerbera Pickup";
    m_author_string        = "Dr. Penguin, Siyan";
    m_description_string   = "Replace all Gerbera picked up in BP with GP01.";
 
   set_up_hotkey();
 
-   auto addr = patterns->find_addr(base, "44 89 59 20 41 B9 01 00 00 00");
+   auto addr = m_patterns_cache->find_addr(base, "44 89 59 20 41 B9 01 00 00 00");
    if (!addr) {
     return "Unable to find NeroGP01overGerberaPickup pattern.";
   }

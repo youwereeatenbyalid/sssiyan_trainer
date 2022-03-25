@@ -118,7 +118,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &EntitySpeeds::cheaton;
-  m_on_page             = animation;
+  m_on_page             = Page_Animation;
   m_full_name_string   = "Faster Moves (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Adjust the speed of various moves.";
@@ -126,7 +126,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "F3 0F 11 96 B4 00 00 00 48");
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 11 96 B4 00 00 00 48");
   if (!addr) {
     return "Unable to find EntitySpeeds pattern.";
   }
@@ -289,7 +289,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
     init_check_box_info();
 
     m_is_enabled = &EntitySpeeds::cheaton;
-    m_on_page = animation;
+    m_on_page = Page_Animation;
     m_full_name_string = "Faster Moves (+)";
     m_author_string = "SSSiyan";
     m_description_string = "Adjust the speed of various moves.";
@@ -297,7 +297,7 @@ std::optional<std::string> EntitySpeeds::on_initialize() {
     set_up_hotkey();
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-    auto addr = patterns->find_addr(base, "F3 0F 11 41 4C 48 8B 5C");
+    auto addr = m_patterns_cache->find_addr(base, "F3 0F 11 41 4C 48 8B 5C");
     if (!addr) {
         return "Unable to find EntitySpeeds pattern.";
     }

@@ -37,7 +37,7 @@ std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &EnemyStepBanHeight::cheaton;
-  m_on_page               = enemystep;
+  m_on_page               = Page_EnemyStep;
   m_full_name_string     = "Remove Enemy Step Height Restriction";
   m_author_string        = "SSSiyan";
   m_description_string   = "Allows you to enemy step as close to the floor as possible.";
@@ -45,7 +45,7 @@ std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "F3 0F 10 40 14 0F 5A C0 66 0F 2F F0 76");
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 40 14 0F 5A C0 66 0F 2F F0 76");
   if (!addr) {
     return "Unable to find EnemyStepBanHeight pattern.";
   }

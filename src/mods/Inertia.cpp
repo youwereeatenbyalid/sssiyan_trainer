@@ -122,7 +122,7 @@ std::optional<std::string> Inertia::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &Inertia::cheaton;
-  m_on_page    = mechanics;
+  m_on_page    = Page_Mechanics;
 
   m_full_name_string     = "Inertia Redirection";
   m_author_string        = "The HitchHiker";
@@ -130,7 +130,7 @@ std::optional<std::string> Inertia::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "48 8B 41 08 44 8B 40 78");
+  auto addr = m_patterns_cache->find_addr(base, "48 8B 41 08 44 8B 40 78");
   if (!addr) {
     return "Unable to find Inertia pattern.";
   }

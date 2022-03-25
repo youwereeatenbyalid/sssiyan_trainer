@@ -121,7 +121,7 @@ std::optional<std::string> AllStartManual::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &AllStartManual::cheaton;
-  m_on_page             = enemystep;
+  m_on_page             = Page_EnemyStep;
 
   m_full_name_string   = "Instant Enemy Step Cancels";
   m_author_string      = "SSSiyan";

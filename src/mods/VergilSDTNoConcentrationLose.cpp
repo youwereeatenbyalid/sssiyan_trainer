@@ -29,14 +29,14 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilcheat;
+	m_on_page = Page_VergilCheat;
 	m_full_name_string = "No Concentration Loss When Hit In SDT";
 	m_author_string = "VPZadov";
 	m_description_string = "Disable losing concentration when taking damage in SDT.";
 
   set_up_hotkey();
 
-	auto initAddr1 = patterns->find_addr(base, "2B FF FF FF F3 0F 10 90 8C 00 00 00");// DevilMayCry5.exe+572C5D
+	auto initAddr1 = m_patterns_cache->find_addr(base, "2B FF FF FF F3 0F 10 90 8C 00 00 00");// DevilMayCry5.exe+572C5D
 	if (!initAddr1) {
 		return "Unanable to find VergilSDTNoConcentrationLose pattern.";
 	}

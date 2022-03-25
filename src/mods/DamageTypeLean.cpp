@@ -55,7 +55,7 @@ std::optional<std::string> DamageTypeLean::on_initialize() {
   // set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "8B A8 C8 00 00 00 E8");
+  auto addr = m_patterns_cache->find_addr(base, "8B A8 C8 00 00 00 E8");
   if (!addr) {
     return "Unable to find DamageTypeLean pattern.";
   }

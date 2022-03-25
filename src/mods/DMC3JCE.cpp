@@ -466,7 +466,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
 	m_is_enabled = &cheaton;
-	m_on_page = vergiltrick;
+	m_on_page = Page_VergilTrick;
 	m_full_name_string = "DMC3 Judgement Cut End (+)";
 	m_author_string = "VPZadov";
 	m_description_string = "Replaces Vergil's Judgment Cut End in human form with his Judgement Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.\nWARNING: This mod can crash the game.";
@@ -476,55 +476,55 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	jceTimerStaticBase = *(uintptr_t*)jceTimerStaticBase;
 	rayCastAddr = dmc5Base + 0x7E53744;
 
-	auto canExeJceAddr = patterns->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
+	auto canExeJceAddr = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
 	if (!canExeJceAddr)
 	{
 		return "Unable to find DMC3JCE.canExeJceAddr pattern.";
 	}
 
-	auto canExeJceAddr1 = patterns->find_addr(base, "0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 D8");//DevilMayCry5.exe+1C0A54C
+	auto canExeJceAddr1 = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 D8");//DevilMayCry5.exe+1C0A54C
 	if (!canExeJceAddr1)
 	{
 		return "Unable to find DMC3JCE.canExeJceAddr1 pattern.";
 	}
 
-	auto subHumanJceAddr = patterns->find_addr(base, "F3 41 0F 11 88 20 1B 00 00");//DevilMayCry5.exe+25009B2
+	auto subHumanJceAddr = m_patterns_cache->find_addr(base, "F3 41 0F 11 88 20 1B 00 00");//DevilMayCry5.exe+25009B2
 	if (!subHumanJceAddr)
 	{
 		return "Unable to find DMC3JCE.subHumanJceAddr pattern.";
 	}
 
-	auto jcePrefab2Addr = patterns->find_addr(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
+	auto jcePrefab2Addr = m_patterns_cache->find_addr(base, "48 39 78 18 0F 85 C8 18 00 00");//DevilMayCry5.exe+1C0739D
 	if (!jcePrefab2Addr)
 	{
 		return "Unable to find DMC3JCE.jcePrefab2Addr pattern.";
 	}
 
-	auto jceTimerAddr = patterns->find_addr(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
+	auto jceTimerAddr = m_patterns_cache->find_addr(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
 	if (!jceTimerAddr)
 	{
 		return "Unable to find DMC3JCE.jceTimerAddr pattern.";
 	}
 
-	auto crashPointAddr = patterns->find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
+	auto crashPointAddr = m_patterns_cache->find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
 	if (!crashPointAddr)
 	{
 		return "Unable to find DMC3JCE.crashPointAddr pattern.";
 	}
 
-	auto finishPfbAddr = patterns->find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7
+	auto finishPfbAddr = m_patterns_cache->find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7
 	if (!finishPfbAddr)
 	{
 		return "Unable to find DMC3JCE.finishPfbAddr pattern.";
 	}
 
-	auto endTeleportAddr = patterns->find_addr(base, "48 8B 43 50 48 83 78 18 00 75 5A 48 8B 57 60 48 8B");//DevilMayCry5.exe+409E57
+	auto endTeleportAddr = m_patterns_cache->find_addr(base, "48 8B 43 50 48 83 78 18 00 75 5A 48 8B 57 60 48 8B");//DevilMayCry5.exe+409E57
 	if (!endTeleportAddr)
 	{
 		return "Unable to find DMC3JCE.endTeleportAddr pattern.";
 	}
 
-	auto vergilSetActiveActionAddr = patterns->find_addr(base, "45 33 C9 41 8D 40 F9");//DevilMayCry5.exe+546D10
+	auto vergilSetActiveActionAddr = m_patterns_cache->find_addr(base, "45 33 C9 41 8D 40 F9");//DevilMayCry5.exe+546D10
 	if (!vergilSetActiveActionAddr)
 	{
 		return "Unable to find DMC3JCE.vergilSetActiveActionAddr pattern.";

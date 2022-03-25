@@ -36,14 +36,14 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = dantecheat;
+		m_on_page = Page_DanteCheat;
 		m_full_name_string = "Remove DT Activation Cost";
 		m_author_string = "VPZadov";
 		m_description_string = "Remove the activation cost of entering DT.";
 
 		set_up_hotkey();
 
-		auto activationCostAddr = patterns->find_addr(base, "84 C0 0F 84 14 01 00 00 4D"); //DevilMayCry5.exe+19725E8
+		auto activationCostAddr = m_patterns_cache->find_addr(base, "84 C0 0F 84 14 01 00 00 4D"); //DevilMayCry5.exe+19725E8
 		if (!activationCostAddr.has_value())
 		{
 			spdlog::error("[{}] failed to initialize", get_name());

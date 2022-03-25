@@ -32,7 +32,7 @@ std::optional<std::string> DisableGauntletStages::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &DisableGauntletStages::cheaton;
-  m_on_page             = bloodypalace;
+  m_on_page             = Page_BloodyPalace;
 
   m_full_name_string   = "Skip Nero's BP Gauntlet Stages";
   m_author_string      = "Dante";
@@ -41,7 +41,7 @@ std::optional<std::string> DisableGauntletStages::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = patterns->find_addr(base, "0F 85 5D 02 00 00 38");
+  auto addr = m_patterns_cache->find_addr(base, "0F 85 5D 02 00 00 38");
   if (!addr) {
     return "Unable to find DisableGauntletStages pattern.";
   }

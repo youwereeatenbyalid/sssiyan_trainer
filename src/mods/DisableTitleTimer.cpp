@@ -37,14 +37,14 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &DisableTitleTimer::cheaton;
-  m_on_page    = qol;
+  m_on_page    = Page_QOL;
   m_full_name_string     = "Disable Titlescreen Timer";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";
 
   set_up_hotkey();
 
-  auto addr = patterns->find_addr(base, "F3 0F 10 05 CF FF 45 06");
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 05 CF FF 45 06");
   if (!addr) {
     return "Unable to find DisableTitleTimer pattern.";
   }

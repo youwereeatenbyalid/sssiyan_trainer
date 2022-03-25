@@ -31,7 +31,7 @@ void VergilDisableSDTAccumulate::init_check_box_info() {
 std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   init_check_box_info();
   m_is_enabled          = &VergilDisableSDTAccumulate::cheaton;
-  m_on_page             = vergilsdt;
+  m_on_page             = Page_VergilSDT;
   m_full_name_string   = "Disable SDT Accumulate";
   m_author_string      = "VPZadov";
   m_description_string = "Disable the \"accumulate\" skill. Works best with the "
@@ -41,12 +41,12 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = patterns->find_addr(base, "E8 09 F0 DB 00");
+  auto init_addr = m_patterns_cache->find_addr(base, "E8 09 F0 DB 00");
   if (!init_addr) {
     return "Unanable to find VergilDisableSDTAccumulate::init_addr pattern.";
   }
 
-  auto func_addr_temp = patterns->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
+  auto func_addr_temp = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
   if (!func_addr_temp) {
     return "Unanable to find VergilDisableSDTAccumulate::func_addr pattern.";
   }

@@ -43,7 +43,7 @@ std::optional<std::string> LongerRagtimeBubble::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &LongerRagtimeBubble::cheaton;
-  m_on_page = nero;
+  m_on_page = Page_Nero;
   m_full_name_string     = "Longer Ragtime Bubbles";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Nero's Ragtime Bubbles will last longer.";

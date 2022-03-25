@@ -76,7 +76,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &BypassBPCav::cheaton;
-  m_on_page    = bloodypalace;
+  m_on_page    = Page_BloodyPalace;
   m_full_name_string = "Bypass BP Cavaliere Restriction";
   m_author_string = "SSSiyan";
   m_description_string = "Allows you to take Cavaliere R into Bloody Palace.";

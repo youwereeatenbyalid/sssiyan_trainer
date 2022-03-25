@@ -291,35 +291,55 @@ protected:
     using ValueList = std::vector<std::reference_wrapper<IModValue>>;
 
 public:
-    enum page_enum : uint32_t {
-        breaker,
-        wiresnatch,
-        nero,
-        dantesdt,
-        dantecheat,
-        commoncheat,
-        vergilsdt,
-        vergiltrick,
-        vergildoppel,
-        vergilcheat,
-        vergilvfxsettings,
-        gamemode,
-        bloodypalace,
-        balance,
-        camera,
-        qol,
-        mechanics,
-        enemystep,
-        animation,
-        taunt, 
-        gilver,
-		secretmission
+    enum Page : uint32_t {
+        Page_None,
+        Page_Breaker,
+        Page_Wiresnatch,
+        Page_Nero,
+        Page_DanteSDT,
+        Page_DanteCheat,
+        Page_CommonCheat,
+        Page_VergilSDT,
+        Page_VergilTrick,
+        Page_VergilDoppel,
+        Page_VergilCheat,
+        Page_VergilVFXSettings,
+        Page_GameMode,
+        Page_BloodyPalace,
+        Page_Balance,
+        Page_Camera,
+        Page_QOL,
+        Page_Mechanics,
+        Page_EnemyStep,
+        Page_Animation,
+        Page_Taunt, 
+        Page_Gilver,
+		Page_SecretMission,
+        Page_Count
     };
-    static inline std::unique_ptr<InitPatternsManager> patterns = nullptr;
-    enum input_enum {sword = 0x1, gun = 0x2, jump = 0x4, tauntinput =0x8, lockon = 0x10, changetarget = 0x20, 
-                    dpad = 0x40, deviltrigger = 0x80, dpadup = 0x100, dpaddown = 0x200, dpadleft = 0x400, dpadright = 0x800, 
-                    style = 0x1000,righttrigger=0x4000,lefttrigger=0x2000, resetcamera = 0x8000,SDT = 0x10000};
-    //enum old_enum {common, gamemode, nero, dantecheat, vpage, vergiltrick };
+
+    enum Input {
+		Input_Sword         = 0x1,
+		Input_Gun           = 0x2,
+		Input_Jump          = 0x4,
+		Input_Taunt         = 0x8,
+		Input_LockOn        = 0x10,
+        Input_ChangeTarget  = 0x20,
+        Input_DPad          = 0x40,
+        Input_DevilTrigger  = 0x80,
+        Input_DPadUp        = 0x100,
+        Input_DPadDown      = 0x200,
+        Input_DPadLeft      = 0x400,
+        Input_DPadRight     = 0x800, 
+        Input_Style         = 0x1000,
+        Input_RightTrigger  = 0x4000,
+        Input_LeftTrigger   = 0x2000,
+        Input_ResetCamera   = 0x8000,
+        Input_SDT           = 0x10000
+    };
+
+	static inline std::unique_ptr<InitPatternsManager> m_patterns_cache = nullptr;
+
     virtual ~Mod() {};
     virtual std::string_view get_name() const { return "UnknownMod"; };
     // can be used for ModValues, like Mod_ValueName
@@ -390,7 +410,7 @@ public:
 	virtual void on_draw_debug_ui() {}
     bool* m_is_enabled{ nullptr };
     //bool& m_is_enabled = *ischecked;
-    int m_on_page =-1;
+    int m_on_page = Page_None;
     //ModKey modkeytoggle = ModKey("hotkey_on");
     std::string m_full_name_string = "Mod Name";
     std::string m_raw_full_name = "Mod Name";
