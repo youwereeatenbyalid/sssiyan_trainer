@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma comment(lib, "../lib/jsonstthm.lib")
+//#pragma comment(lib, "../lib/jsonstthm.lib")
 
 #include "Mod.hpp"
 #include "EnemySwapper.hpp"
