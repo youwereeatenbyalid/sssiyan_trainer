@@ -1,6 +1,9 @@
+build/
 build64/
 lsp/
 compile_commands.json
 .clangd/
 src/Config.hpp
 *.bak
+.vs/
+.vscode/

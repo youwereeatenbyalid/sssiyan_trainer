@@ -1,7 +1,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "String.hpp"
+#include <utility/String.hpp>
 #include "Config.hpp"
 
 // clang-format off

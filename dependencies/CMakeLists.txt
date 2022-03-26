@@ -46,3 +46,11 @@ add_library(imgui STATIC
             imgui/misc/cpp/imgui_stdlib.h
             imgui/misc/fonts/binary_to_compressed_c.cpp
             imgui/misc/single_file/imgui_single_file.h)
+
+set(REF_BUILD_FRAMEWORK OFF CACHE BOOL "" FORCE)
+set(REF_BUILD_DMC5_SDK ON CACHE BOOL "" FORCE)
+set(REF_BUILD_DEPENDENCIES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(reframework)
+target_include_directories(utility PRIVATE minhook/src/hde/)
+target_include_directories(DMC5SDK PRIVATE minhook/src/hde/)

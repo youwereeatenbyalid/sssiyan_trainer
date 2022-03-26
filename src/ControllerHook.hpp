@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sdk/ReClass.hpp>
+#include <sdk/DMC5.hpp>
 #include "utility/FunctionHook.hpp"
 
 class ControllerHook
@@ -37,6 +37,6 @@ private:
 
 	static bool m_is_ignoring_input;
 
-	static void Sub14288CD10(uintptr_t uknPtr, HIDGamePadDevice*& gamePadDeviceP, uint64_t uknArg, uint64_t uknIndex);
+	static void Sub14288CD10(uintptr_t uknPtr, dmc5::HIDGamePadDevice*& gamePadDeviceP, uint64_t uknArg, uint64_t uknIndex);
 };
 

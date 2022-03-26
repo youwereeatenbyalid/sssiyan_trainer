@@ -220,7 +220,7 @@ namespace GameFunctions
 
 		virtual uintptr_t get_thread_context(uint32_t unk = -1)
 		{
-			return (uintptr_t)((void*)sdk::VM::get()->get_thread_context(unk));
+			return (uintptr_t)((void*)sdk::get_thread_context(unk));
 		}
 
 		virtual T __cdecl invoke() = 0;

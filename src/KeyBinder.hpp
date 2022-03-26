@@ -13,7 +13,7 @@
 #include "Config.hpp"
 #include "utility/FunctionHook.hpp"
 
-#include "sdk/ReClass.hpp"
+#include "sdk/DMC5.hpp"
 
 typedef uint32_t REGPK_Flag;
 
@@ -186,7 +186,7 @@ public: // Keyboard
 	static void RemoveDuplicatesOf(const KBKeyList& keys, const std::string& keep);
 
 public: // Controller
-	static void OnGamePadUpdate(const HIDGamePadDevice& controllerState);
+	static void OnGamePadUpdate(const dmc5::HIDGamePadDevice& controllerState);
 
 	static void AddBind(const std::string& name, const OptFunc& pressFunc, const OptFunc& holdFunc, const OptFunc& releaseFunc, const REGPK_Flag& controllerKeys);
 	static void AddBind(const std::string& name, const OptFunc& pressFunc, const OptFunc& holdFunc, const OptFunc& releaseFunc, const std::vector<REGPK_Flag>& controllerKeys);

@@ -3,6 +3,8 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include <sdk/SDK.hpp>
+
 // ours
 #include "fw-imgui/imgui_impl_win32.h"
 #include "fw-imgui/imgui_impl_dx11.h"
@@ -378,7 +380,7 @@ void ModFramework::on_direct_input_keys(const std::array<uint8_t, 256>& keys) {
     m_last_keys = keys;
 }
 
-void ModFramework::on_gamepad_keys(const HIDGamePadDevice& gamePadDevice) {
+void ModFramework::on_gamepad_keys(const dmc5::HIDGamePadDevice& gamePadDevice) {
     KeyBinder::OnGamePadUpdate(gamePadDevice);
 
     if (!m_kcw_buffers.needConfirmBuffer && m_kcw_buffers.drawWindow && gamePadDevice.m_buttonsDown != REGPK_None)
@@ -1011,12 +1013,13 @@ bool ModFramework::initialize() {
     if (m_first_frame) {
         m_first_frame = false;
 
+        spdlog::info("Loading REFramework SDK");
+        reframework::initialize_sdk();
+
         spdlog::info("Loading trainer specific settings.");
 
         KeyBinder::LoadBind("Menu Key");
         KeyBinder::LoadBind("Close Menu Key");
-
-        spdlog::info("Loading RETypes");
 
         // Game specific initialization stuff
         std::thread init_thread([this]() {

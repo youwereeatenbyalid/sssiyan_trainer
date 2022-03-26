@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <cstdint>
 
-#include "Address.hpp"
+#include <utility/Address.hpp>
 
 class FunctionHook {
 public:

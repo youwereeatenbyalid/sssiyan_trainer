@@ -43,7 +43,7 @@ public:
     
     Address get_module() const { return m_game_module; }
 
-    auto get_thread_context() const { sdk::VM::get()->get_thread_context(); }
+    auto get_thread_context() const { sdk::get_thread_context(); }
     
     bool is_ready() const { return m_game_data_initialized; }
 
@@ -76,7 +76,7 @@ public:
     void consume_input();
     bool on_message(HWND& wnd, UINT& message, WPARAM& w_param, LPARAM& l_param);
     void on_direct_input_keys(const std::array<uint8_t, 256>& keys);
-    void on_gamepad_keys(const HIDGamePadDevice& gamePadDevice);
+    void on_gamepad_keys(const dmc5::HIDGamePadDevice& gamePadDevice);
 
     void save_trainer_settings(utility::Config& cfg) const;
     void load_trainer_settings(utility::Config& cfg);
