@@ -307,8 +307,6 @@ set(utility_SOURCES "")
 
 list(APPEND utility_SOURCES
 	"shared/utility/Address.cpp"
-	"shared/utility/Config.cpp"
-	"shared/utility/FunctionHook.cpp"
 	"shared/utility/Memory.cpp"
 	"shared/utility/Module.cpp"
 	"shared/utility/Patch.cpp"
@@ -318,8 +316,6 @@ list(APPEND utility_SOURCES
 	"shared/utility/String.cpp"
 	"shared/utility/Thread.cpp"
 	"shared/utility/Address.hpp"
-	"shared/utility/Config.hpp"
-	"shared/utility/FunctionHook.hpp"
 	"shared/utility/Memory.hpp"
 	"shared/utility/Module.hpp"
 	"shared/utility/Patch.hpp"

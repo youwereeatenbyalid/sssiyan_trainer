@@ -1,5 +1,6 @@
 build/
 build64/
+build64_all/
 lsp/
 compile_commands.json
 .clangd/
