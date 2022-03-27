@@ -383,12 +383,12 @@ void ModFramework::on_direct_input_keys(const std::array<uint8_t, 256>& keys) {
 void ModFramework::on_gamepad_keys(const dmc5::HIDGamePadDevice& gamePadDevice) {
     KeyBinder::OnGamePadUpdate(gamePadDevice);
 
-    if (!m_kcw_buffers.needConfirmBuffer && m_kcw_buffers.drawWindow && gamePadDevice.m_buttonsDown != REGPK_None)
+    if (!m_kcw_buffers.needConfirmBuffer && m_kcw_buffers.drawWindow && gamePadDevice.buttonsDown != REGPK_None)
     {
         m_last_key_mode = UI::KeyMode_t::Controller;
     }
 
-    m_last_controller_state = gamePadDevice.m_buttons & 0b11111111111111111; // Least significant 17 Bits
+    m_last_controller_state = gamePadDevice.buttons & 0b11111111111111111; // Least significant 17 Bits
 }
 
 void ModFramework::save_trainer_settings(utility::Config& cfg) const
@@ -1013,9 +1013,6 @@ bool ModFramework::initialize() {
     if (m_first_frame) {
         m_first_frame = false;
 
-        spdlog::info("Loading REFramework SDK");
-        reframework::initialize_sdk();
-
         spdlog::info("Loading trainer specific settings.");
 
         KeyBinder::LoadBind("Menu Key");
@@ -1023,6 +1020,9 @@ bool ModFramework::initialize() {
 
         // Game specific initialization stuff
         std::thread init_thread([this]() {
+			spdlog::info("Loading REFramework SDK");
+            reframework::initialize_sdk();
+
             m_mods = std::make_unique<Mods>();
 
             auto e = m_mods->on_initialize(m_load_on_startup);

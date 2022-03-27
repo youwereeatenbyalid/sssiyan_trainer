@@ -51,11 +51,11 @@ void ControllerHook::Sub14288CD10(uintptr_t uknPtr, dmc5::HIDGamePadDevice*& gam
 
 		if(m_is_ignoring_input)
 		{
-			gamePadDeviceP->m_buttons = 0;
-			gamePadDeviceP->m_buttonsDown = 0;
-			gamePadDeviceP->m_buttonsUp = 0;
-			gamePadDeviceP->m_triggerL = 0.0f;
-			gamePadDeviceP->m_triggerR = 0.0f;
+			gamePadDeviceP->buttons = 0;
+			gamePadDeviceP->buttonsDown = 0;
+			gamePadDeviceP->buttonsUp = 0;
+			gamePadDeviceP->triggerL = 0.0f;
+			gamePadDeviceP->triggerR = 0.0f;
 		}
 	}
 }

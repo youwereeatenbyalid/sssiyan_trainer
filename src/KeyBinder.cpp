@@ -1519,7 +1519,7 @@ void KeyBinder::OnGamePadUpdate(const dmc5::HIDGamePadDevice& controllerState)
 	{
 		for (auto& binding : m_bindingsVec)
 		{
-			switch (GetControllerKeyState(*binding, controllerState.m_buttons & 0b11111111111111111, m_lastControllerState))
+			switch (GetControllerKeyState(*binding, controllerState.buttons & 0b11111111111111111, m_lastControllerState))
 			{
 			case OnState_Press:
 			{
@@ -1552,7 +1552,7 @@ void KeyBinder::OnGamePadUpdate(const dmc5::HIDGamePadDevice& controllerState)
 		}
 	}
 
-	m_lastControllerState = controllerState.m_buttons & 0b11111111111111111;
+	m_lastControllerState = controllerState.buttons & 0b11111111111111111;
 }
 
 // Controller AddBind

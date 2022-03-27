@@ -11,12 +11,12 @@ static_assert(sizeof(HIDNativeDeviceBase) == 0x120);
 
 class HIDGamePadDevice : public HIDNativeDeviceBase {
 public:
-    uint32_t m_buttons;     // 0x120
-    uint32_t m_buttonsDown; // 0x124
-    uint32_t m_buttonsUp;    // 0x128
+    uint32_t buttons;     // 0x120
+    uint32_t buttonsDown; // 0x124
+    uint32_t buttonsUp;    // 0x128
     char padd_12C[68];      // 0x12C
-    float m_triggerL;       // 0x170
-    float m_triggerR;       // 0x174
+    float triggerL;       // 0x170
+    float triggerR;       // 0x174
     char padd_178[296];     // 0x178
 };                      // Size: 0x02A0
 static_assert(sizeof(HIDGamePadDevice) == 0x2A0);
@@ -35,7 +35,7 @@ class SceneManager
 {
 public:
     char pad_0000[0x48];                // 0x00
-    class SceneView* main_scene_view; // 0x48
+    class SceneView* mainSceneView; // 0x48
 }; // Size: 0x50
 static_assert(sizeof(SceneManager) == 0x50);
 
@@ -50,14 +50,14 @@ class UI_String_t {
 public:
     UI_String_t(const wchar_t* english = L"", const wchar_t* italian = L"", const wchar_t* polish = L"") 
         : text1{L"AdditionalMenu_costume"}, text2 {L"AdditonalMenu_PauseKey"},
-        m_English{(wchar_t*)english}, m_Italian{(wchar_t*)italian}, m_Polish{(wchar_t*)polish}
+        english{(wchar_t*)english}, italian{(wchar_t*)italian}, polish{(wchar_t*)polish}
     {
         if (italian == L"") {
-            m_Italian = m_Polish;
+            italian = polish;
         }
 
         if (polish == L"") {
-            m_Polish = m_English;
+            polish = english;
         }
     }
 
@@ -66,18 +66,18 @@ public:
 	wchar_t		*text2;		   // 0x0018
 	wchar_t		*N00000055;	   // 0x0020
 	wchar_t		*N00000056;	   // 0x0028
-	wchar_t		*m_English;	   // 0x0030
-	wchar_t		*m_French;	   // 0x0038
-	wchar_t		*m_Italian;	   // 0x0040
-	wchar_t		*m_German;	   // 0x0048
-	wchar_t		*m_Spanish;	   // 0x0050
+	wchar_t		*english;	   // 0x0030
+	wchar_t		*french;	   // 0x0038
+	wchar_t		*italian;	   // 0x0040
+	wchar_t		*german;	   // 0x0048
+	wchar_t		*spanish;	   // 0x0050
 	void		*N0000005C;	   // 0x0058
-	wchar_t		*m_Polish;	   // 0x0060
+	wchar_t		*polish;	   // 0x0060
 	wchar_t		*N0000005E;	   // 0x0068
 	wchar_t		*N000000E0;	   // 0x0070
-	wchar_t		*m_Portuguese; // 0x0078
-	wchar_t		*m_Russian;	   // 0x0080
-	wchar_t		*m_Japanese;   // 0x0088
+	wchar_t		*portuguese; // 0x0078
+	wchar_t		*russian;	   // 0x0080
+	wchar_t		*japanese;   // 0x0088
 	wchar_t		*N000000CE;	   // 0x0090
 	wchar_t		*N000000CF;	   // 0x0098
 	wchar_t		*N000000D0;	   // 0x00A0
