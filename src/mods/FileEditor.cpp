@@ -753,7 +753,7 @@ void FileEditor::on_draw_ui() {
         std::map<std::string, Info_Back> priorities;
         
         for (auto& asset_mod : *m_hot_swaps) {
-            priorities[asset_mod->main_name] = Info_Back{ *asset_mod->on_ptr, asset_mod->priority };
+            priorities[asset_mod->main_name] = Info_Back{ *asset_mod->on_ptr, (uint32_t)asset_mod->priority };
         }
         
         load_mods();

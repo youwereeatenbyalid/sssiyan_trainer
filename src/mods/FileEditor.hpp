@@ -233,7 +233,7 @@ private: // structs
         // Needs proper memory allocation
         Costume_List_t(const Costume_List_t& other, uint32_t org_size, std::vector<uint32_t> extra) 
             :ukn1{ other.ukn1 }, ukn2{ other.ukn2 }, ukn3{ other.ukn3 },
-            ukn4{ other.ukn4 }, ukn5{ other.ukn5 }, size{ org_size + extra.size() }
+            ukn4{ other.ukn4 }, ukn5{ other.ukn5 }, size{ org_size + (uint32_t)extra.size() }
         {
             // Transfering original costume list to the new list
             for (UINT i = 0; i < org_size; i++) {

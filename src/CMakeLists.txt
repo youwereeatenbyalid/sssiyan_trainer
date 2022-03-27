@@ -284,33 +284,16 @@ set(IMGUI_EXTENSIONS_SRC
 )
 
 set(SDK_SRC
-    sdk/ReClass.hpp
-    sdk/ReClass_Internal.hpp
+    sdk/DMC5.hpp
     sdk/Enums_Internal.hpp
     sdk/Offsets.hpp
-    sdk/REContext.cpp
-    sdk/REContext.hpp
 )
 
 set(UTILITY_SRC
-    utility/Address.hpp
-    utility/Address.cpp
     utility/Config.hpp
     utility/Config.cpp
     utility/FunctionHook.hpp
     utility/FunctionHook.cpp
-    utility/Memory.hpp
-    utility/Memory.cpp
-    utility/Module.hpp
-    utility/Module.cpp
-    utility/Patch.hpp
-    utility/Patch.cpp
-    utility/Pattern.hpp
-    utility/Pattern.cpp
-    utility/Scan.hpp
-    utility/Scan.cpp
-    utility/String.hpp
-    utility/String.cpp
 )
 
 set(FRAMEWORK_SRC
@@ -388,11 +371,12 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui minhook d3d11 d3d12 glm_static shlwapi jsonstthm)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC DMC5SDK imgui minhook d3d11 d3d12 glm_static shlwapi jsonstthm)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE dependencies/reframework/shared)
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 

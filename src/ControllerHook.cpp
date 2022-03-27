@@ -41,7 +41,7 @@ bool ControllerHook::hook()
 	return m_hooked;
 }
 
-void ControllerHook::Sub14288CD10(uintptr_t uknPtr, HIDGamePadDevice*& gamePadDeviceP, uint64_t uknArg, uint64_t uknIndex)
+void ControllerHook::Sub14288CD10(uintptr_t uknPtr, dmc5::HIDGamePadDevice*& gamePadDeviceP, uint64_t uknArg, uint64_t uknIndex)
 {
 	const auto Sub14288CD10Fn = g_controllerHook->m_controllerUpdateHook->get_original<decltype(Sub14288CD10)>();
 	Sub14288CD10Fn(uknPtr, gamePadDeviceP, uknArg, uknIndex);

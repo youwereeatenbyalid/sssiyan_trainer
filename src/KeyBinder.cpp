@@ -1513,7 +1513,7 @@ void KeyBinder::AddBind(const std::string& name, const OptFunc& func, const OnSt
 	AddBind(name, func, keyState, KBKeyList{ key });
 }
 
-void KeyBinder::OnGamePadUpdate(const HIDGamePadDevice& controllerState)
+void KeyBinder::OnGamePadUpdate(const dmc5::HIDGamePadDevice& controllerState)
 {
 	if (!m_isIgnoring)
 	{
