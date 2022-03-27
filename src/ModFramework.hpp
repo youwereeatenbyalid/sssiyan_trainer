@@ -15,6 +15,7 @@ class Mods;
 #include "fw-imgui/ui.hpp"
 #include "sdk/ReClass.hpp"
 #include "sdk/REContext.hpp"
+#include <sdk/SDKHelpers.hpp>
 
 
 using Microsoft::WRL::ComPtr;

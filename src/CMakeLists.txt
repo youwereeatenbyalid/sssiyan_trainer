@@ -287,6 +287,8 @@ set(SDK_SRC
     sdk/DMC5.hpp
     sdk/Enums_Internal.hpp
     sdk/Offsets.hpp
+	sdk/SDKHelpers.hpp
+	sdk/SDKHelpers.cpp
 )
 
 set(UTILITY_SRC
