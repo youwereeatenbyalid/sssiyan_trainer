@@ -113,6 +113,7 @@ static naked void newmem_detour_timer() {
         jne code
     cheatcode:
         mov [rsp+0x58], rsi
+        mov sil, 0
         jmp qword ptr[HUDOptions::jmp_ret4]
     code:
         cmp byte ptr [rdx+0x00000108], 00

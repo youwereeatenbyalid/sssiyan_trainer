@@ -6,7 +6,7 @@ namespace GameFunctions
 	class PlayerSetDT : public GameFunc<bool>
 	{
 	public:
-		enum DevilTrigger: const uint16_t
+		enum DevilTrigger : uint32_t
 		{
 			Human,
 			Devil,

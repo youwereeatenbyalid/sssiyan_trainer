@@ -1338,7 +1338,10 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   for (int i = 0; i < EnemySwapper::emNames.size(); i++) {
     key = std::string(EnemySwapper::emNames[i]) + "_swapTo";
     swapTo = cfg.get<uint32_t>(key).value_or(i);
-    set_swapper_setting(i, swapTo);
+    //set_swapper_setting(i, swapTo);
+    selectedToSwap[i] = swapTo;
+    swapSettings[i].set_current_id(i);
+    swapSettings[i].set_swap_id(selectedToSwap[i]);
   }
 }
 
@@ -1564,16 +1567,6 @@ void EnemySwapper::on_draw_ui() {
       ImGui::Separator();
       ImGui::Spacing();
   }
-  /*ImGui::TextWrapped("Vector itemSize is: %d", swapDataAddrs.itemSize());
-  ImGui::Spacing();
-  ImGui::TextWrapped("ReswapCount: %d", reswapCount);*/
-
-  //ImGui::Separator();
-
-
-
-
-
 
   ImGui::Checkbox("Swap all enemies", &isSwapAll);
   if (isSwapAll) {
@@ -1638,25 +1631,6 @@ void EnemySwapper::on_draw_ui() {
     ImGui::Spacing();
     ImGui::Separator();
 
-    /*
-    for (int i = 0; i < emNames.size(); i++) {
-        if (i % 3 == 0) {
-            ImGui::Columns(1);
-            ImGui::Separator();
-            ImGui::Columns(3, NULL, false);
-        }
-      ImGui::TextWrapped(emNames[i]);
-      uniqComboStr = std::to_string(i) + "##SwapTo";
-      ImGui::Combo(uniqComboStr.c_str(), (int*)&selectedToSwap[i], emNames.data(), emNames.size(), 20);
-      //set_swapper_setting(i, selectedToSwap[i]);
-      swapSettings[i].set_current_id(i);
-      swapSettings[i].set_swap_id(selectedToSwap[i]);
-      ImGui::NextColumn();
-    }
-    ImGui::Columns(1);
-    ImGui::Separator();
-    */
-
     
     if (ImGui::Button("Randomize enemies", ImVec2(165, 25))) {
         random_em_swap(curMinIndx, curMaxIndx);
@@ -1689,20 +1663,6 @@ void EnemySwapper::on_draw_ui() {
     
   }
   
-  /*
-  ImGui::Separator();
-  ImGui::TextWrapped("Some debug shit");
-  ImGui::Spacing();
-  if (ImGui::Button("Clear vector")) {
-    swapDataAddrs.clear();
-    reswapCount = 0;
-  }
-  ImGui::TextWrapped("Clear and reserve space for vector of enemyData addresses");
-  ImGui::InputInt("NewSize", (int*)&reservedForReswap);
-  if (ImGui::Button("reserve")) {
-    reserveReswapVector(reservedForReswap);
-  }
-*/
 }
 
 void EnemySwapper::btn_set_plpos_to(Vector3f& to, const char* btnContent)

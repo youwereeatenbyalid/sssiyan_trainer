@@ -41,17 +41,27 @@ bool AirMoves::is_movecheat_enabled_asm(Moves move)
 
 void AirMoves::str_cur_action_asm(uintptr_t dotNetString)
 {
-	if (curMoveHook != nullptr)
+	//if (curMoveHook != nullptr)
+	//{
+	//	auto str = GameFunctions::PtrController::get_str(dotNetString);
+	//	if (curMoveHook->cheatOn && strcmp(str, curMoveHook->get_ingame_name()) == 0)
+	//	{
+	//		isAirProcess = true;
+	//	}
+	//	else if(strcmp(str, "None") != 0 && strcmp(str, "PutOut") != 0)//PutOut - Dante's stingers 2nd phase
+	//	{
+	//		isAirProcess = false;
+	//		curMoveHook = nullptr;
+	//	}
+	//}
+	if (AirMoves::curMoveHook != nullptr)
 	{
-		auto str = GameFunctions::PtrController::get_str(dotNetString);
-		if (curMoveHook->cheatOn && strcmp(str, curMoveHook->get_ingame_name()) == 0)
+		if (AirMoves::curMoveHook->cheatOn && gf::StringController::str_cmp(dotNetString, AirMoves::curMoveHook->get_ingame_name()))
+			AirMoves::isAirProcess = true;
+		else if (!gf::StringController::str_cmp(dotNetString, "None") && !gf::StringController::str_cmp(dotNetString, "PutOut"))
 		{
-			isAirProcess = true;
-		}
-		else if(strcmp(str, "None") != 0 && strcmp(str, "PutOut") != 0)//PutOut - Dante's stingers 2nd phase
-		{
-			isAirProcess = false;
-			curMoveHook = nullptr;
+			AirMoves::isAirProcess = false;
+			AirMoves::curMoveHook = nullptr;
 		}
 	}
 }
@@ -320,36 +330,36 @@ static naked void beo_kick13_air_detour()
 	}
 }
 
-static naked void pl_set_action_detour()
-{
-	__asm {
-		cmp byte ptr [AirMoves::cheaton], 0
-		je originalcode
-
-		push rax
-		push rcx
-		push rdx
-		push r8
-		push r9
-		push r10
-		push r11
-		mov rcx, r8
-		sub rsp, 32
-		call qword ptr [AirMoves::str_cur_action_asm]
-		add rsp, 32
-		pop r11
-		pop r10
-		pop r9
-		pop r8
-		pop rdx
-		pop rcx
-		pop rax
-
-		originalcode:
-		mov [rsp + 0x08], rbx
-		jmp qword ptr [AirMoves::CurMoveStrRet]
-	}
-}
+//static naked void pl_set_action_detour()
+//{
+//	__asm {
+//		cmp byte ptr [AirMoves::cheaton], 0
+//		je originalcode
+//
+//		push rax
+//		push rcx
+//		push rdx
+//		push r8
+//		push r9
+//		push r10
+//		push r11
+//		mov rcx, r8
+//		sub rsp, 32
+//		call qword ptr [AirMoves::str_cur_action_asm]
+//		add rsp, 32
+//		pop r11
+//		pop r10
+//		pop r9
+//		pop r8
+//		pop rdx
+//		pop rcx
+//		pop rax
+//
+//		originalcode:
+//		mov [rsp + 0x08], rbx
+//		jmp qword ptr [AirMoves::CurMoveStrRet]
+//	}
+//}
 
 static naked void check_ground_hit_detour()
 {
@@ -409,11 +419,11 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Unable to find AirMoves.rapidSlashIsAirAddr pattern.";
 	}
 
-	auto plSetActionAddr = patterns->find_addr(base, "CC CC CC CC 48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 83 EC 60 80 BC");//DevilMayCry5.app_Player__setAction171195 (-0x4)
-	if (!plSetActionAddr)
-	{
-		return "Unable to find AirMoves.plSetActionAddr pattern.";
-	}
+	//auto plSetActionAddr = patterns->find_addr(base, "CC CC CC CC 48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 83 EC 60 80 BC");//DevilMayCry5.app_Player__setAction171195 (-0x4)
+	//if (!plSetActionAddr)
+	//{
+	//	return "Unable to find AirMoves.plSetActionAddr pattern.";
+	//}
 
 	auto checkGroundHitAddr = patterns->find_addr(base, "41 FF 90 A0 05 00 00");//DevilMayCry5.app_character_Character__checkGroundHit167863+60B
 	if (!checkGroundHitAddr)
@@ -468,11 +478,11 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Failed to initialize AirMoves.rapidSlashIsAir";
 	}
 
-	if (!install_hook_absolute(plSetActionAddr.value() + 0x4, cur_action_hook, &pl_set_action_detour, &CurMoveStrRet, 0x5))
+	/*if (!install_hook_absolute(plSetActionAddr.value() + 0x4, cur_action_hook, &pl_set_action_detour, &CurMoveStrRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.plSetAction";
-	}
+	}*/
 
 	if (!install_hook_absolute(checkGroundHitAddr.value(), m_check_ground_hit_hook, &check_ground_hit_detour, &checkGroundHitCallRet, 0x7))
 	{

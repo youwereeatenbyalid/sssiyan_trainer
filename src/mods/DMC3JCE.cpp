@@ -232,6 +232,11 @@ void DMC3JCE::setup_sdt_asm(int vergilActionId)
 		else if (vergilActionId == 0x10)
 		{
 			set_sdt_asm(func::PlayerSetDT::DevilTrigger::SDT);
+			if (autoSdtType == SDTBurst)
+			{
+				func::GameModelRequestSetEffect setBurst { PlayerTracker::vergilentity, sdtBurstEffect };
+				setBurst(*(func::Vec3*)(PlayerTracker::vergiltransform + 0x30), *(func::Quaternion*)(PlayerTracker::vergiltransform + 0x40));
+			}
 			return;
 		}
 		JCEController::isSdtRequestedAsm = false;
@@ -382,8 +387,8 @@ static naked void end_teleport_detour()
 	__asm {
 		cmp byte ptr [DMC3JCE::cheaton], 0
 		je originalcode
-		cmp byte ptr [DMC3JCE::isAutoSdt], 1
-		je cheat
+		cmp dword ptr [DMC3JCE::autoSdtType], DMC3JCE::AutoSDTType::None
+		jne cheat
 
 		originalcode:
 		mov rax, [rbx+0x50]
@@ -422,8 +427,8 @@ static naked void vergil_action_detour()
 	__asm {
 		cmp byte ptr [DMC3JCE::cheaton], 0
 		je originalcode
-		cmp byte ptr [DMC3JCE::isAutoSdt], 1
-		je cheat
+		cmp dword ptr [DMC3JCE::autoSdtType], DMC3JCE::AutoSDTType::None
+		jne cheat
 
 		originalcode:
 		xor r9d, r9d
@@ -530,6 +535,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	crashPointJeJmp = crashPointAddr.value() + 0xB;
 	jceController = std::make_unique<JCEController>();
 	jcePfbJneJmp = jcePrefab2Addr.value() + 0x18D2;
+	sdtBurstEffect = std::make_shared<func::GameModelRequestSetEffect::EffectID>(3, 6);
 
 	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
 	{
@@ -610,7 +616,7 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 		jceController->executionTimeAsm = rndExeDuration;
 	else
 		jceController->executionTimeAsm = trackExeDuration;
-	isAutoSdt = cfg.get<bool>("DMC3JCE.isAutoSdt").value_or(false);
+	autoSdtType = (AutoSDTType)cfg.get<int>("DMC3JCE.autoSdtType").value_or(AutoSDTType::LessEfx);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
@@ -623,7 +629,7 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 	cfg.set<float>("DMC3JCE.minSdt", minSdt);
 	cfg.set<float>("DMC3JCE.rndExeDuration", rndExeDuration);
 	cfg.set<float>("DMC3JCE.trackExeDuration", trackExeDuration);
-	cfg.set<bool>("DMC3JCE.isAutoSdt", isAutoSdt);
+	cfg.set<int>("DMC3JCE.autoSdtType", (int)autoSdtType);
 }
 
 void DMC3JCE::on_draw_ui()
@@ -656,10 +662,17 @@ void DMC3JCE::on_draw_ui()
 
 	if (!isUsingDefaultJce)
 	{
-		ImGui::Checkbox("Auto SDT", &isAutoSdt);
-		ImGui::ShowHelpMarker("Vergil will automatically enter to SDT form if jce was started in human form. After appearing Vergil will automatically go to human form. JCE interruption also force "
-		"Vergil to go to human form.");
-		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::TextWrapped("Auto SDT type:");
+		ImGui::ShowHelpMarker("Vergil will automatically enter to SDT form if jce was started in human form. After appearing Vergil will automatically go to the human form. JCE interruption also force "
+			"Vergil to go to the human form.");
+		//ImGui::Checkbox("Auto SDT", &isAutoSdt);
+		ImGui::RadioButton("Off", (int*)&autoSdtType, 0);
+		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+		ImGui::RadioButton("Without SDT explosion efx", (int*)&autoSdtType, 1);
+		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+		ImGui::RadioButton("With SDT explosion efx", (int*)&autoSdtType, 2);
+		ImGui::Separator();
 		ImGui::TextWrapped("Select DMC3 JCE type:");
 
 		if (ImGui::RadioButton("Random", (int*)&jcTypeUi, 0))

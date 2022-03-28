@@ -3,6 +3,9 @@
 #include "GameFunctions/GameFunc.hpp"
 #include <initializer_list>
 #include "PlayerTracker.hpp"
+
+namespace gf = GameFunctions;
+
 class AirMoves : public Mod
 {
 public:
@@ -77,7 +80,7 @@ private:
 	std::unique_ptr<FunctionHook> m_ds_stinger_air_hook;
 	std::unique_ptr<FunctionHook> m_brk_updraft_air_hook;
 	std::unique_ptr<FunctionHook> m_kick_air_hook;
-	std::unique_ptr<FunctionHook> cur_action_hook;
+	//std::unique_ptr<FunctionHook> cur_action_hook;
 	std::unique_ptr<FunctionHook> m_check_ground_hit_hook;
 	std::unique_ptr<FunctionHook> m_air_dodge_crash_hook;
 
@@ -96,7 +99,7 @@ public:
 	static inline uintptr_t balrogUpdraftAirRet = 0;
 	static inline uintptr_t kick13AirRet = 0;
 
-	static inline uintptr_t CurMoveStrRet = 0;
+	//static inline uintptr_t CurMoveStrRet = 0;
 	static inline uintptr_t checkGroundHitCallRet = 0;
 	static inline uintptr_t airTrickDodgeCrashRet = 0;
 	static inline uintptr_t airTrickDodgeCrashJne = 0;

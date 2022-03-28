@@ -259,8 +259,11 @@ set(MODS_SRC
     mods/DamageType.hpp 
     mods/DamageType.cpp
     mods/InstantDoppel.hpp
+    mods/VergilTrickTrailsEfx.hpp
+    mods/VergilTrickTrailsEfx.cpp
     mods/AirMoves.hpp
     mods/AirMoves.cpp
+    mods/PlSetActionData.hpp
 )
 
 set(HOOKS_SRC
@@ -346,6 +349,7 @@ set(GAME_FUNC_SRC
     Mods/GameFunctions/PlayerSetDT.hpp
     Mods/GameFunctions/PlVergilDoppel.hpp
     Mods/GameFunctions/GameModelSetAction.hpp
+    Mods/GameFunctions/GameModelRequestSetEffect.hpp
 )
 
 set(IMGUI_SRC

@@ -200,34 +200,28 @@ static naked void emlist_detour()
         jmp qword ptr [EnemyWaveEditor::retJmp]
 
         cheat:
-        mov qword ptr [rdx_reg], rdx
+        //mov qword ptr [rdx_reg], rdx
         push rax
-        push rbx
-        push rcx
-        //push rdx
-        push rsi
+		push rcx
+		push rdx
+        push rsp
 		push r8
 		push r9
 		push r10
 		push r11
-        push r13
-        push r15
         mov rcx, rax//[EnemyWaveEditor::curListAddr]
         sub rsp, 32
         call qword ptr [EnemyWaveEditor::handle_emlist_asm]
         add rsp, 32
-        pop r15
-        pop r13
         pop r11
 		pop r10
-	    pop r9
+		pop r9
 		pop r8
-        pop rsi
-        //pop rdx
+        pop rsp
+		pop rdx
 		pop rcx
-        pop rbx
-        pop rax
-        mov rdx, qword ptr [rdx_reg]
+		pop rax
+        //mov rdx, qword ptr [rdx_reg]
         jmp originalcode
 
         ret_jl:
@@ -530,6 +524,27 @@ static naked void request_result_detour()
     }
 }
 
+static naked void boss_dante_crash_detour()//Ffs this shit happens only on some missions with some(!) enemies when trying to add Dante at the end of the list
+{
+    __asm {
+        cmp byte ptr [EnemyWaveEditor::cheaton], 1
+        je cheat
+
+        originalcode:
+        mov [r14+0x08],r15d
+        mov [r14 + 0x00000098], dl
+        jmp qword ptr [EnemyWaveEditor::bossDanteCrashRet]
+
+        cheat:
+        cmp r14, 0
+        je skip
+        jmp originalcode
+
+        skip:
+        jmp qword ptr[EnemyWaveEditor::bossDanteCrashSkip]
+    }
+}
+
 std::optional<std::string> EnemyWaveEditor::on_initialize() {
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -590,7 +605,14 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       return "Unanable to find requestResultAddr pattern.";
   }
 
+  auto bossDanteCrashAddr = patterns->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
+  if (!bossDanteCrashAddr)
+  {
+      return "Unanable to find bossDanteCrashAddr pattern.";
+  }
+
   retJl = emDataLstAddr.value() + 0x270;
+  bossDanteCrashSkip = bossDanteCrashAddr.value() + 0x3E;
 
   if (!install_hook_absolute(emDataLstAddr.value(), m_emwave_hook, &emlist_detour, &retJmp, 0xA)) {
     spdlog::error("[{}] failed to initialize", get_name());
@@ -642,6 +664,12 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize EnemyWaveEditor.requestResult";
+  }
+
+  if (!install_hook_absolute(bossDanteCrashAddr.value(), m_bossdante_crash_hook, &boss_dante_crash_detour, &bossDanteCrashRet, 0xB))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.bossDanteCrash";
   }
 
   mode = Mode::Mod;
