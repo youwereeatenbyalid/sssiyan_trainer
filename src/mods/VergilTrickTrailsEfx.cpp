@@ -23,12 +23,21 @@ void VergilTrickTrailsEfx::set_trick_efx(uintptr_t netStr, uintptr_t vergil)
 {
 	if (*(int*)(vergil + 0xE64) != 4)
 		return;
-	if ( ( gf::StringController::str_cmp(netStr, "AirTrick_Enemy") || gf::StringController::str_cmp(netStr, "GrimTrick") ) && trickActionsSettings[0]->is_enabled())
+	/*if ( ( gf::StringController::str_cmp(netStr, "AirTrick_Enemy") || gf::StringController::str_cmp(netStr, "GrimTrick") ) && trickActionsSettings[0]->is_enabled())
 		trickActionsSettings[0]->request_efx(vergil);
 	else if(gf::StringController::str_cmp(netStr, "TrickUp"))
 		trickActionsSettings[1]->request_efx(vergil);
 	else if (gf::StringController::str_cmp(netStr, "TrickDown"))
-		trickActionsSettings[2]->request_efx(vergil);
+		trickActionsSettings[2]->request_efx(vergil);*/
+
+	for (auto& mod : trickActionsSettings)
+	{
+		if (mod->cmp_move_name(netStr) && mod->is_enabled())
+		{
+			mod->request_efx(vergil);
+			break;
+		}
+	}
 }
 
 static naked void trick_end_draw_self_detour()

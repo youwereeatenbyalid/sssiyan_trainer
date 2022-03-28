@@ -105,6 +105,7 @@ private:
 		TrickType mode;
 
 		const char* trickName;
+		std::vector<const char*> inGameTrickNames;
 
 		std::string modCfgName = "VergilTrickTrailsEfx.";
 
@@ -231,19 +232,25 @@ private:
 
 	public:
 
-		TrickModeSetup(TrickType trickType, const char* trickActionName) : mode(trickType), trickName(trickActionName) 
+		TrickModeSetup(TrickType trickType, const char* trickActionName, std::vector<const char*> inGameTrickMoveNames) : mode(trickType), trickName(trickActionName), inGameTrickNames(std::move(inGameTrickMoveNames))
 		{
 			modCfgName += std::string(trickActionName);
 		}
 
-		TrickType get_mode() const noexcept
-		{
-			return mode;
-		}
+		TrickType get_mode() const noexcept { return mode; }
 
-		const char* get_trick_action_name() const noexcept
+		const char* get_trick_action_name() const noexcept { return trickName; }
+
+		const std::vector<const char*> const &get_ingame_trick_name() const noexcept { return inGameTrickNames; }
+
+		bool cmp_move_name(uintptr_t dotNetActionStr) const 
 		{
-			return trickName;
+			for (const auto &str : inGameTrickNames)
+			{
+				if(gf::StringController::str_cmp(dotNetActionStr, str))
+					return true;
+			}
+			return false;
 		}
 
 		void add_efx(Efx efx)
@@ -451,6 +458,7 @@ private:
 			mode = mTrickUp;
 			trickName = "Trick Up";
 			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickUp");
 		}
 
 		volatile void* request_efx(uintptr_t vergil) override
@@ -505,6 +513,7 @@ private:
 			mode = mTrickDown;
 			trickName = "Trick Down";
 			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickDown");
 		}
 
 		volatile void* request_efx(uintptr_t vergil) override
@@ -640,7 +649,7 @@ private:
 	};
 
 	static inline std::array<std::unique_ptr<TrickModeSetup>, 3> trickActionsSettings {
-		std::make_unique<TrickModeSetup>(mAirTrick, "Air Trick"),
+		std::make_unique<TrickModeSetup>(mAirTrick, "Air Trick", std::vector{"AirTrick_Enemy", "GrimTrick"}),
 		std::make_unique<TrickUpSetup>(),
 		std::make_unique<TrickDownSetup>()
 	};
