@@ -551,12 +551,9 @@ private:
 				if (efx->offsetZ != 0)
 					spawnPos.z += efx->offsetZ;
 
-				if (isAlwaysVertical && efx->canBeRotated)
-					spawnRot *= verticalRot;
-
 				auto dirTmp = fxDirection;
 				if(!efx->canBeSideRotated)
-					dirTmp = Horizontal;
+					fxDirection = Horizontal;
 
 				switch (fxDirection)
 				{
@@ -569,6 +566,9 @@ private:
 						
 					case VergilTrickTrailsEfx::TrickDownSetup::Vertical:
 					{
+						if(!efx->canBeRotated)
+							break;
+						spawnRot *= verticalRot;
 						isAlwaysVertical = true;
 						trick_pos_type(efx.get(), spawnOffsAngle, pRot, vergil, spawnPos, spawnRot);
 						break;
@@ -612,9 +612,9 @@ private:
 			{
 				ImGui::TextWrapped("Select trick down efx angle spawn type:");
 				ImGui::RadioButton("Always horizontal", (int*)&fxDirection, 0);
-				ImGui::SameLine(); ImGui::Separator(); ImGui::SameLine();
+				ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 				ImGui::RadioButton("Always vertical", (int*)&fxDirection, 1);
-				ImGui::SameLine(); ImGui::Separator(); ImGui::SameLine();
+				ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 				ImGui::RadioButton("Angled dependence of current Vergils air state", (int*)&fxDirection, 2);
 				print_common_fx_info();
 			}
