@@ -14,8 +14,9 @@ class Mods;
 #include "fw-imgui/imgui_notify.h"
 #include "fw-imgui/ui.hpp"
 #include "sdk/ReClass.hpp"
+#include "sdk/RETypeDB.hpp"
 #include "sdk/REContext.hpp"
-#include <sdk/SDKHelpers.hpp>
+#include "sdk/SDKHelpers.hpp"
 
 
 using Microsoft::WRL::ComPtr;
