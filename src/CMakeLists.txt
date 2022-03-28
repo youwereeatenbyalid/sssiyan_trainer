@@ -259,6 +259,11 @@ set(MODS_SRC
     mods/DamageType.hpp 
     mods/DamageType.cpp
     mods/InstantDoppel.hpp
+    mods/VergilTrickTrailsEfx.hpp
+    mods/VergilTrickTrailsEfx.cpp
+    mods/AirMoves.hpp
+    mods/AirMoves.cpp
+    mods/PlSetActionData.hpp
 )
 
 set(HOOKS_SRC
