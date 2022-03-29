@@ -208,11 +208,12 @@ public:
 			bool isBadPtr = false;
 			std::optional<bool> isPause;
 			auto jcPrefab = func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true); 
+			func::Quaternion defaultRot = *(func::Quaternion*)(PlayerTracker::vergiltransform + 0x40);
 			switch (jceType)
 			{
 				case JCEController::Random:
 				{
-					std::thread([this, id, lvl, isBadPtr, isPause, jcPrefab]() mutable
+					std::thread([this, id, lvl, isBadPtr, isPause, jcPrefab, defaultRot]() mutable
 					{
 						func::Vec3 pPos = CheckpointPos::get_player_coords();
 						if (!jcPrefab.has_value() || jcPrefab.value() == 0)
@@ -225,7 +226,6 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						func::Quaternion defaultRot;
 						func::Vec3 curPos;
 						func::Vec3 prevPos;
 						isBadPtr = false;
