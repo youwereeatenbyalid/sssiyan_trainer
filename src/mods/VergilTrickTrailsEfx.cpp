@@ -109,7 +109,7 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	auto pBase = g_framework->get_module().as<uintptr_t>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = vergilvfxsettings;
+	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "Tricks efx settings (+)";
 	m_author_string = "VPZadov";
 	m_description_string = /*"Add boss trails to trick efx and setup rotation for different trick actions. Fu capcom. Part of Lordranis's trick mod or recolor still is a must if you want cool smoke cloud.\n"
@@ -125,13 +125,13 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 
 	airTrickEndDrawSelfCall = pBase + 0x12E2BA0;
 
-	auto endAirTrickAddr = patterns->find_addr(base, "E8 47 3B 50 FF");//DevilMayCry5.exe+1DDF054
+	auto endAirTrickAddr = m_patterns_cache->find_addr(base, "E8 47 3B 50 FF");//DevilMayCry5.exe+1DDF054
 	if (!endAirTrickAddr)
 	{
 		return "Unable to find VergilTrickTrailsEfx.endAirTrickAddr pattern.";
 	}
 
-	auto actionEndSetDrawSeflAddr = patterns->find_addr(base, "E8 75 BD 68 00");//DevilMayCry5.exe+C56E26
+	auto actionEndSetDrawSeflAddr = m_patterns_cache->find_addr(base, "E8 75 BD 68 00");//DevilMayCry5.exe+C56E26
 	if (!endAirTrickAddr)
 	{
 		return "Unable to find VergilTrickTrailsEfx.actionEndSetDrawSeflAddr pattern.";

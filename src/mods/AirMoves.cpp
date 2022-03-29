@@ -406,14 +406,14 @@ std::optional<std::string> AirMoves::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	auto p64Base = g_framework->get_module().as<uintptr_t>();
 	m_is_enabled = &cheaton;
-	m_on_page = mechanics;
+	m_on_page = Page_Mechanics;
 	m_full_name_string = "Air Moves";
 	m_author_string = "VPZadov";
 	m_description_string = "Allow perform some ground moves in the air.";
 
 	set_up_hotkey();
 
-	auto rapidSlashIsAirAddr = patterns->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 CD 85 C9 74 34");//DevilMayCry5.exe+1C0930F
+	auto rapidSlashIsAirAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 CD 85 C9 74 34");//DevilMayCry5.exe+1C0930F
 	if (!rapidSlashIsAirAddr)
 	{
 		return "Unable to find AirMoves.rapidSlashIsAirAddr pattern.";
@@ -425,19 +425,19 @@ std::optional<std::string> AirMoves::on_initialize()
 	//	return "Unable to find AirMoves.plSetActionAddr pattern.";
 	//}
 
-	auto checkGroundHitAddr = patterns->find_addr(base, "41 FF 90 A0 05 00 00");//DevilMayCry5.app_character_Character__checkGroundHit167863+60B
+	auto checkGroundHitAddr = m_patterns_cache->find_addr(base, "41 FF 90 A0 05 00 00");//DevilMayCry5.app_character_Character__checkGroundHit167863+60B
 	if (!checkGroundHitAddr)
 	{
 		return "Unable to find AirMoves.checkGroundHitAddr pattern.";
 	}
 
-	auto feDriveAirAddr = patterns->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 CD 85 C9 74 7C");//DevilMayCry5.exe+C85970
+	auto feDriveAirAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 CD 85 C9 74 7C");//DevilMayCry5.exe+C85970
 	if (!feDriveAirAddr)
 	{
 		return "Unable to find AirMoves.feDriveAirAddr pattern.";
 	}
 
-	auto rbStingerAirAddr = patterns->find_addr(base, "07 2E 01 32 C0 48 8B 5C 24 60 48 83 C4 50 5F C3 48 8B 02 48 8B 48 F0");//DevilMayCry5.exe+1261038 (-0x23)
+	auto rbStingerAirAddr = m_patterns_cache->find_addr(base, "07 2E 01 32 C0 48 8B 5C 24 60 48 83 C4 50 5F C3 48 8B 02 48 8B 48 F0");//DevilMayCry5.exe+1261038 (-0x23)
 	if (!rbStingerAirAddr)
 	{
 		return "Unable to find AirMoves.rbStingerAirAddr pattern.";
@@ -449,19 +449,19 @@ std::optional<std::string> AirMoves::on_initialize()
 	//	return "Unable to find AirMoves.rbStingerAirAddr pattern.";
 	//}
 
-	auto balrogUpdraftAirAddr = patterns->find_addr(base, "4F B9 83 FF 0F B6 C8 48 8B 43 50");//DevilMayCry5.exe+C1F4A1 (-0x4)
+	auto balrogUpdraftAirAddr = m_patterns_cache->find_addr(base, "4F B9 83 FF 0F B6 C8 48 8B 43 50");//DevilMayCry5.exe+C1F4A1 (-0x4)
 	if (!balrogUpdraftAirAddr)
 	{
 		return "Unable to find AirMoves.balrogUpdraftAirAddr pattern.";
 	}
 
-	auto kick13AirAddr = patterns->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 98 85 C9 74 33");//DevilMayCry5.exe+11DB125
+	auto kick13AirAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 75 98 85 C9 74 33");//DevilMayCry5.exe+11DB125
 	if (!balrogUpdraftAirAddr)
 	{
 		return "Unable to find AirMoves.kick13AirAddr pattern.";
 	}
 
-	auto airDodgeCrashAddr = patterns->find_addr(base, "1D 11 01 48 8B 43 50 48 83 78 18 00");//DevilMayCry5.exe+542474 (-0x7)
+	auto airDodgeCrashAddr = m_patterns_cache->find_addr(base, "1D 11 01 48 8B 43 50 48 83 78 18 00");//DevilMayCry5.exe+542474 (-0x7)
 	if (!airDodgeCrashAddr)
 	{
 		return "Unable to find AirMoves.airDodgeCrashAddr pattern.";

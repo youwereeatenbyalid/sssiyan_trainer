@@ -319,7 +319,7 @@ public:
 				}
 				case JCEController::Track:
 				{
-					std::thread([&, id, lvl, isBadPtr, isPause, jcPrefab]() mutable
+					std::thread([&, id, lvl, isBadPtr, isPause, jcPrefab, defaultRot]() mutable
 					{
 						auto pPos = CheckpointPos::get_player_coords();
 						func::Vec3 prevPos;
@@ -338,7 +338,6 @@ public:
 							bad_ptr_stop();
 							return;
 						}
-						func::Quaternion defaultRot;
 						jcSpawn.set_params(jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
 						isBadPtr = false;
 						volatile void* jcShell;
