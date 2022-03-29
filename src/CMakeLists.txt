@@ -261,6 +261,11 @@ set(MODS_SRC
     mods/InstantDoppel.hpp
     mods/AprilFools.hpp
     mods/AprilFools.cpp
+    mods/VergilTrickTrailsEfx.hpp
+    mods/VergilTrickTrailsEfx.cpp
+    mods/AirMoves.hpp
+    mods/AirMoves.cpp
+    mods/PlSetActionData.hpp
 )
 
 set(HOOKS_SRC

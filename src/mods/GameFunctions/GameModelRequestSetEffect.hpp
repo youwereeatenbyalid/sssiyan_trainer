@@ -1,3 +1,4 @@
+#pragma once
 #include "GameFunc.hpp"
 
 namespace GameFunctions
@@ -24,7 +25,7 @@ namespace GameFunctions
 			bool mng1F = false;
 
 		public:
-			EffectID() 
+			EffectID()
 			{
 				auto id = g_framework->get_module().as<uintptr_t>() + 0x7E60C88;
 				memcpy(mng, (const void*)(*(uintptr_t*)id), 0xF);
@@ -39,36 +40,48 @@ namespace GameFunctions
 				IsElementIDOnly = isElementIDOnly;
 			}
 
-			EffectID(int containerID, int elementID) : EffectID(-1, containerID, elementID, true, false, false) { }
+			EffectID(int containerID, int elementID) : EffectID(-1, containerID, elementID, true, false, false)
+			{
+			}
 		};
 
 	private:
 		uintptr_t model;
-		typedef volatile void* (__cdecl *f_request_set_effect)(uintptr_t threadVM, uintptr_t gameModel, EffectID *effectID, Vec3 pos, Quaternion rot);
+		uintptr_t killEfxAddr = 0x12F5CE0;
+
+		typedef volatile void* (__cdecl* f_request_set_effect)(uintptr_t threadVM, uintptr_t gameModel, EffectID* effectID, Vec3 pos, Quaternion rot);
+		typedef void(__cdecl* f_kill_effect)(uintptr_t threadVM, uintptr_t gameModel, EffectID* effectID);
+
 		f_request_set_effect request_set_effect;
+		f_kill_effect kill_effect;
 
 		std::shared_ptr<EffectID> effectID;
-		
+
 		Vec3 pos;
 		Quaternion rot;
 
 	public:
-		GameModelRequestSetEffect(uintptr_t gameModel, std::shared_ptr<EffectID> &staticEffectID) : model(gameModel), effectID(staticEffectID)
+		GameModelRequestSetEffect(uintptr_t gameModel, std::shared_ptr<EffectID>& staticEffectID) : model(gameModel), effectID(staticEffectID)
 		{
-			if(staticEffectID == nullptr)
+			if (staticEffectID == nullptr)
 				throw std::runtime_error("staticEffectID can't be NULL");
+			killEfxAddr += fAddr;
 			fAddr += 0x12F3E00;
 			request_set_effect = (f_request_set_effect)fAddr;
+			kill_effect = (f_kill_effect)killEfxAddr;
 		}
 
-		volatile void* invoke() override 
+		volatile void* invoke() override
 		{
-			if(!utility::isGoodReadPtr(model, 8))
+			if (!utility::isGoodReadPtr(model, 8))
 				return nullptr;
 			return request_set_effect(get_thread_context(), model, effectID.get(), pos, rot);
 		}
 
-		volatile void* operator()() override { return invoke(); }
+		volatile void* operator()() override
+		{
+			return invoke();
+		}
 
 		volatile void* invoke(Vec3 pos, Quaternion rot)
 		{
@@ -77,8 +90,26 @@ namespace GameFunctions
 			return invoke();
 		}
 
-		volatile void* operator()(Vec3 pos, Quaternion rot) { return invoke(pos, rot); }
+		void kill_efx()
+		{
+			if (!utility::isGoodReadPtr(model, 8))
+				return;
+			kill_effect(get_thread_context(), model, effectID.get());
+		}
 
-		std::shared_ptr<EffectID> get_effect_id() { return effectID; }
+		volatile void* operator()(Vec3 pos, Quaternion rot)
+		{
+			return invoke(pos, rot);
+		}
+
+		std::shared_ptr<EffectID> get_effect_id()
+		{
+			return effectID;
+		}
+
+		uintptr_t get_kill_efx_addr() const noexcept
+		{
+			return killEfxAddr;
+		}
 	};
 }
