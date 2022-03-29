@@ -83,7 +83,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
 
   set_up_hotkey();
 
-  auto cavrfix1_addr = utility::scan(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix1_addr = m_patterns_cache->find_addr(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
   if (!cavrfix1_addr) {
     return "Unable to find cavrfix1 pattern.";
@@ -95,7 +95,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   }
   
   
-  auto cavrfix2_addr = utility::scan(base, "96 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix2_addr = m_patterns_cache->find_addr(base, "96 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
   if (!cavrfix2_addr) {
     return "Unable to find cavrfix2 pattern.";
@@ -105,7 +105,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix2";
   }
-  auto cavrfix3_addr = utility::scan(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix3_addr = m_patterns_cache->find_addr(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
   if (!cavrfix3_addr) {
       return "Unable to find cavrfix3 pattern.";

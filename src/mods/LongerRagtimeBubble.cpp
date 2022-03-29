@@ -50,7 +50,7 @@ std::optional<std::string> LongerRagtimeBubble::on_initialize() {
 
   set_up_hotkey();
 
-  auto ragtimebreakeradjust_addr = utility::scan(base, "48 8B CB 0F 5A C9 0F 5A C6");
+  auto ragtimebreakeradjust_addr = m_patterns_cache->find_addr(base, "48 8B CB 0F 5A C9 0F 5A C6");
 
   if (!ragtimebreakeradjust_addr) {
     return "Unable to find ragtimebreakeradjust pattern.";
