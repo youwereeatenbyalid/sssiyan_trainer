@@ -367,7 +367,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<InstantDoppel>());
 
 #ifdef DEVELOPER
-    m_mods.emplace_back(std::make_unique<DeveloperTools>());
+    //m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
 }
 
