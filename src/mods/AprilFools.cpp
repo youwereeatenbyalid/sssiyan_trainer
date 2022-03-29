@@ -78,15 +78,14 @@ void AprilFools::init_check_box_info() {
 
 std::optional<std::string> AprilFools::on_initialize() {
   init_check_box_info();
-
   
   m_is_enabled               = &AprilFools::cheaton;
-  m_on_page                  = Page_Mechanics;
+  m_on_page                  = Page_None;
   m_full_name_string         = "AprilFools (+)";
   m_author_string            = "The Hitchhiker";
   m_description_string		 = "if you're seeing this we fucked up. forces character selection to always be v.";
   set_up_hotkey();
-							   
+
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   auto addr = staticbase+0x422299;
@@ -123,5 +122,17 @@ std::optional<std::string> AprilFools::on_initialize() {
   }
 
   return Mod::on_initialize();
+}
+
+void AprilFools::on_frame()
+{
+	{ // God does not have mercy on this date
+		time_t now = time(0);
+		tm* ltm = localtime(&now);
+
+		if (ltm->tm_year == 2022 - 1900 && ltm->tm_mon == 3 && ltm->tm_mday == 1) {
+			cheaton = true;
+		}
+	}
 }
 
