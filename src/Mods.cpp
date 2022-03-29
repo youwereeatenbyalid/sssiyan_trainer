@@ -20,6 +20,7 @@
         #include "mods/StyleRank.hpp"
         #include "mods/GameInput.hpp"
         #include "mods/TextEditor.hpp"
+		#include "mods/AprilFools.hpp"
     // Common
         #include "mods/HeavyDay.hpp"
         #include "mods/MoveReplacer.hpp"
@@ -205,6 +206,7 @@ Mods::Mods()
 		m_mods.emplace_back(std::make_unique<HoldToMash>()); //has to come before game input??
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
+		m_mods.emplace_back(std::make_unique<AprilFools>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
