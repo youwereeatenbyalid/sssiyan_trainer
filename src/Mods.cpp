@@ -432,6 +432,10 @@ void Mods::on_frame() const {
 
 void Mods::save_mods() {
     for (auto& mod : m_mods) {
+        if (mod->get_name() == "AprilFools") {
+            continue;
+        }
+
         spdlog::info("{:s}::on_config_save()", mod->get_name().data());
         std::string togglename = std::string(mod->get_name());
         togglename.append("_on");
