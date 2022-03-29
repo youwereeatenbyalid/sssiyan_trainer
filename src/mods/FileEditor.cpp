@@ -88,6 +88,8 @@ bool FileEditor::m_gilver_csize{ false };
 
 uint32_t FileEditor::m_vergil_costume_count{ NULL };
 uint32_t FileEditor::m_vergil_last_og_costume_count{ NULL };
+
+
 bool FileEditor::m_vergil_csize{ false };
 
 //uintptr_t FileEditor::costume_select_jmp_ret{NULL};
@@ -266,7 +268,18 @@ naked void FileEditor::costume_list_detour() {
 }
 
 FileEditor::FileEditor()
-    :m_mod_roots{{}}, m_hot_swaps{{}}, m_sys_hot_swaps{ {} }, m_nero_swaps{ {} }, m_dante_swaps{ {} }, m_gilver_swaps{ {} }, m_vergil_swaps{ {} }, m_show_costume_options{ false }
+    :m_mod_roots{{}}, 
+    m_hot_swaps{{}}, 
+    m_sys_hot_swaps{ {} }, 
+    m_nero_swaps{ {} }, 
+    m_dante_swaps{ {} }, 
+    m_gilver_swaps{ {} }, 
+    m_vergil_swaps{ {} }, 
+    m_show_costume_options{ false }, 
+    m_nero_portraits{ L"UI/GUI/ui2100/tex/ui2100_N1_iam.tex",L"UI/GUI/ui2100/tex/ui2100_N2_iam.tex",L"UI/GUI/ui2100/tex/ui2100_N3_iam.tex",L"UI/GUI/ui2100/tex/ui2100_N4_iam.tex",L"UI/GUI/ui2100/tex/ui2100_N5_iam.tex",L"UI/GUI/ui2100/tex/ui2100_N6_iam.tex" },
+    m_dante_portraits{ L"UI/GUI/ui2100/tex/ui2100_D1_iam.tex",L"UI/GUI/ui2100/tex/ui2100_D2_iam.tex",L"UI/GUI/ui2100/tex/ui2100_D3_iam.tex",L"UI/GUI/ui2100/tex/ui2100_D4_iam.tex",L"UI/GUI/ui2100/tex/ui2100_D5_iam.tex",L"UI/GUI/ui2100/tex/ui2100_D6_iam.tex" },
+    m_gilver_portraits{ L"UI/GUI/ui2100/tex/ui2100_G1_iam.tex",L"UI/GUI/ui2100/tex/ui2100_G2_iam.tex",L"UI/GUI/ui2100/tex/ui2100_G3_iam.tex",L"UI/GUI/ui2100/tex/ui2100_G4_iam.tex",L"UI/GUI/ui2100/tex/ui2100_G5_iam.tex",L"UI/GUI/ui2100/tex/ui2100_G6_iam.tex" },
+    m_vergil_portraits{ L"UI/GUI/ui2100/tex/ui2100_V1_iam.tex",L"UI/GUI/ui2100/tex/ui2100_V2_iam.tex",L"UI/GUI/ui2100/tex/ui2100_V3_iam.tex",L"UI/GUI/ui2100/tex/ui2100_V4_iam.tex",L"UI/GUI/ui2100/tex/ui2100_V5_iam.tex",L"UI/GUI/ui2100/tex/ui2100_V6_iam.tex" }
 {
 	g_FileEditor = this;
     m_costume_list_size_addr = (uintptr_t)&get_costume_list_size;
@@ -346,7 +359,7 @@ std::optional<std::string> FileEditor::on_initialize() {
   m_file_loader_hook = std::make_unique<FunctionHook>(*file_loader_fn, (uintptr_t)&FileEditor::file_loader_internal);
   m_costume_list_maker_hook = std::make_unique<FunctionHook>(*costume_list_maker_fn, (uintptr_t)&FileEditor::costume_list_maker_internal);
   m_selected_costume_processor_hook = std::make_unique<FunctionHook>(*selected_costume_processor_fn, (uintptr_t)&FileEditor::selected_costume_processor_internal);
-  m_ui_costume_name_hook = std::make_unique<FunctionHook>(*ui_costume_name_fn, (uintptr_t)&FileEditor::ui_costume_name_internal);
+  //m_ui_costume_name_hook = std::make_unique<FunctionHook>(*ui_costume_name_fn, (uintptr_t)&FileEditor::ui_costume_name_internal);
 
   // This redirects what assets the game loads
   if (!m_file_loader_hook->create()) {
@@ -362,13 +375,14 @@ std::optional<std::string> FileEditor::on_initialize() {
       return "Failed to hook Selected Costume Processor.";
   }
 
-  if (!m_ui_costume_name_hook->create()) {
-      return "Failed to hook UI Costume Name.";
-  }
+  //if (!m_ui_costume_name_hook->create()) {
+  //    return "Failed to hook UI Costume Name.";
+  //}
 
   return Mod::on_initialize();
 }
 #include <iostream>
+#include <reframework/include/reframework/API.hpp>
 void FileEditor::load_mods()
 {
     m_show_costume_options = false;
@@ -473,7 +487,7 @@ void FileEditor::load_mods()
                     switch(mod->character.value()){
                     case (uint8_t)HotSwapCFG::CharacterValue::ev_nero:
                         m_nero_csize = true;
-                        mod->costume_id = 4 + nero_costume_slot;
+                        mod->costume_id = 25 + nero_costume_slot;
                         mod->slot_in_select_menu = nero_costume_slot++;
                         m_nero_swaps.value().push_back(mod);
                         m_nero_extra_costumes.push_back(mod->costume_id);
@@ -481,7 +495,7 @@ void FileEditor::load_mods()
                         break;
                     case (uint8_t)HotSwapCFG::CharacterValue::ev_dante:
                         m_dante_csize = true;
-                        mod->costume_id = 4 + dante_costume_slot;
+                        mod->costume_id = 26 + dante_costume_slot;
                         mod->slot_in_select_menu = dante_costume_slot++;
                         m_dante_swaps.value().push_back(mod);
                         m_dante_extra_costumes.push_back(mod->costume_id);
@@ -489,7 +503,7 @@ void FileEditor::load_mods()
                         break;
                     case (uint8_t)HotSwapCFG::CharacterValue::ev_v:
                         m_gilver_csize = true;
-                        mod->costume_id = 4 + gilver_costume_slot;
+                        mod->costume_id = 27 + gilver_costume_slot;
                         mod->slot_in_select_menu = gilver_costume_slot++;
                         m_gilver_swaps.value().push_back(mod);
                         m_gilver_extra_costumes.push_back(mod->costume_id);
@@ -497,7 +511,7 @@ void FileEditor::load_mods()
                         break;
                     case (uint8_t)HotSwapCFG::CharacterValue::ev_vergil:
                         m_vergil_csize = true;
-                        mod->costume_id = 4 + vergil_costume_slot;
+                        mod->costume_id = 22 + vergil_costume_slot;
                         mod->slot_in_select_menu = vergil_costume_slot++;
                         m_vergil_swaps.value().push_back(mod);
                         m_vergil_extra_costumes.push_back(mod->costume_id);
@@ -940,7 +954,6 @@ void __fastcall FileEditor::costume_list_maker(uintptr_t RCX, uintptr_t ui2120GU
 {
     uint32_t character = *(uint32_t*)(ui2120GUI + 0xE8) + 1;
     auto& original_costume_list = *(Costume_List_t*)(*(uintptr_t*)(*(uintptr_t*)(ui2120GUI + 0xE0) + 0x10));
-
     // Clearing the last loaded extra portrait ID list to load the current one
     std::vector<uint32_t> extra_costumes{};
 
@@ -1024,12 +1037,84 @@ void __fastcall FileEditor::costume_list_maker(uintptr_t RCX, uintptr_t ui2120GU
     //std::cout << (void*)m_new_costume_list_p << "Done!" << std::endl;
     auto costume_list_maker_fn = m_costume_list_maker_hook->get_original<decltype(FileEditor::costume_list_maker_internal)>();
     costume_list_maker_fn(RCX, ui2120GUI);
+    //get ui object
+    auto uiobject = (::REManagedObject*)ui2120GUI;
+    //get scroll list
+    auto panellist = sdk::get_object_field<REManagedObject*>(uiobject,"costumeList");
+    //get panels
+    auto panelSystemArray = sdk::call_object_func_easy<sdk::SystemArray*>(*panellist, "get_Items");
+    auto panelarray = panelSystemArray->get_elements();
+    for (REManagedObject* i : panelarray) {
+        //get index of panel
+        auto index = sdk::call_object_func_easy<uint32_t>(i, "get_ListIndex");
+        //if panel > original costume count we need custom text
+        if (index >= originalg_costume_count) {
+            //define custom text
+            SystemString* costumestring = srtc::create_managed_string(L"Default Name");
+            switch (character) {
+                //assign costume text from char swaps (if everything actually works somehow)
+                case (uint8_t)HotSwapCFG::CharacterValue::ev_nero:
+                    costumestring = srtc::create_managed_string(utility::widen(m_nero_swaps.value()[index-originalg_costume_count]->name));
+                    break;
+
+                case (uint8_t)HotSwapCFG::CharacterValue::ev_dante:
+                    costumestring = srtc::create_managed_string(utility::widen(m_dante_swaps.value()[index - originalg_costume_count]->name));
+                    break;
+
+                case (uint8_t)HotSwapCFG::CharacterValue::ev_v:
+                    costumestring = srtc::create_managed_string(utility::widen(m_gilver_swaps.value()[index - originalg_costume_count]->name));
+                    break;
+
+                case (uint8_t)HotSwapCFG::CharacterValue::ev_vergil:
+                    costumestring = srtc::create_managed_string(utility::widen(m_vergil_swaps.value()[index - originalg_costume_count]->name));
+                    break;
+            }
+            //get gui text (I fucking hope)
+            auto guitext = sdk::call_object_func_easy<REManagedObject*>(i, "getObject(System.String, System.Type)", srtc::create_managed_string(L"m_style_title"), sdk::find_type_definition("via.gui.Text")->get_runtime_type());
+            sdk::call_object_func_easy<void*>(uiobject, "setMessage(via.gui.Text, System.String)", guitext, costumestring);
+
+        }
+    }
+
+    //auto t = sdk::find_type_definition("asdf");
+    //auto& method = *t->get_method("whatever");
+    //method(sdk::get_thread_context(), args...)
+    
+    
+    
 }
 
 void __fastcall FileEditor::costume_list_maker_internal(uintptr_t RCX, uintptr_t ui2120GUI)
 {
     g_FileEditor->costume_list_maker(RCX, ui2120GUI);
 }
+
+
+
+std::optional<std::wstring> __fastcall FileEditor::portraitRemapper(const wchar_t* file_path, std::vector<std::wstring> portraits, std::optional<std::vector<std::shared_ptr<FileEditor::Asset_Hotswap>>> swaps) {
+    for (int i = 0; i < portraits.size(); i++) {
+        //if we have dante swaps
+        if (asset_check(portraits[i].c_str(), file_path)) {
+            if (swaps) {
+                //if we have enough dante swaps to justify the 
+                if (swaps.value().size() > i) {
+                    //get the files swapped in the vergil path
+                    for (auto& mod_replace_paths : swaps.value()[i]->redirection_list) {
+                        //if there is a file path for a custom portrait (as shown here) then
+                        if (asset_check(mod_replace_paths.org_path.c_str(), L"UI/GUI/ui2100/tex/ui2100_PT_iam.tex")) {
+                            spdlog::info("Found Portrait info.");
+                            //replace the v1 portrait with the custom portrait
+                            return std::make_optional(mod_replace_paths.new_path);
+                            //spdlog::info(mod_replace_paths.new_path);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return std::nullopt;
+}
+
 
 void* __fastcall FileEditor::file_loader(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path)
 {
@@ -1062,7 +1147,31 @@ void* __fastcall FileEditor::file_loader(uintptr_t this_p, uintptr_t RDX, const 
             }
         }
     }; _mod();
-
+    //Why could the filepath not just be adjusted inside the const why is it like this
+    if (asset_check(L"UI/GUI/ui2100/tex/ui2100_N", file_path)) {
+        std::optional<std::wstring> portraitfile = portraitRemapper(file_path, m_nero_portraits, m_nero_swaps);
+        if (portraitfile.has_value()) {
+            file_path = portraitfile.value().c_str();
+        }
+    }
+    if (asset_check(L"UI/GUI/ui2100/tex/ui2100_D", file_path)) {
+        std::optional<std::wstring> portraitfile = portraitRemapper(file_path, m_dante_portraits, m_dante_swaps);
+        if (portraitfile.has_value()) {
+            file_path = portraitfile.value().c_str();
+        }
+    }
+    if (asset_check(L"UI/GUI/ui2100/tex/ui2100_G", file_path)) {
+        std::optional<std::wstring> portraitfile = portraitRemapper(file_path, m_gilver_portraits, m_gilver_swaps);
+        if (portraitfile.has_value()) {
+            file_path = portraitfile.value().c_str();
+        }
+    }
+    if (asset_check(L"UI/GUI/ui2100/tex/ui2100_V", file_path)) {
+        std::optional<std::wstring> portraitfile = portraitRemapper(file_path, m_vergil_portraits, m_vergil_swaps);
+        if (portraitfile.has_value()) {
+            file_path = portraitfile.value().c_str();
+        }
+    }
 
     auto file_loader_fn = m_file_loader_hook->get_original<decltype(FileEditor::file_loader_internal)>();
 	return file_loader_fn(this_p, RDX, file_path);

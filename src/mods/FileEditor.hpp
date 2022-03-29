@@ -161,6 +161,7 @@ private:
     static void* __fastcall file_loader_internal(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
     void* __fastcall file_loader(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);
 
+    
     static void __fastcall costume_list_maker_internal(uintptr_t RCX, uintptr_t ui2120GUI);
     void __fastcall costume_list_maker(uintptr_t RCX, uintptr_t ui2120GUI);
 
@@ -174,6 +175,7 @@ private:
     void load_sys_mods();
     void bind_sys_mod(std::string modname, bool* on_value);
     inline bool asset_check(const wchar_t* game_path, const wchar_t* mod_path) const;
+    void portrait_replace();
 
 private: // structs
     struct Asset_Path{
@@ -295,6 +297,11 @@ private:
     std::vector<uint32_t> m_dante_extra_costumes;
     std::vector<uint32_t> m_gilver_extra_costumes;
     std::vector<uint32_t> m_vergil_extra_costumes;
+    std::vector<std::wstring> m_dante_portraits;
+    std::vector<std::wstring> m_nero_portraits;
+    std::vector<std::wstring> m_gilver_portraits;
+    std::vector<std::wstring> m_vergil_portraits;
+    std::optional<std::wstring> __fastcall portraitRemapper(const wchar_t* file_path, std::vector<std::wstring> portraits, std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>> swaps);
 
     void asset_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& hot_swaps);
     void costume_swap_ui(std::optional<std::vector<std::shared_ptr<Asset_Hotswap>>>& costume_swaps);
