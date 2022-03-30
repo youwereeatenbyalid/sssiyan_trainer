@@ -81,44 +81,44 @@ std::optional<std::string> AprilFools::on_initialize() {
   
   m_is_enabled               = &AprilFools::cheaton;
   m_on_page                  = Page_None;
-  m_full_name_string         = "AprilFools (+)";
+  m_full_name_string         = "APFcode (+)";
   m_author_string            = "The Hitchhiker";
-  m_description_string		 = "if you're seeing this we fucked up. forces character selection to always be v.";
+  m_description_string		 = "if you're seeing this we fucked up.";
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   auto addr = staticbase+0x422299;
   if (!addr) {
-    return "Unable to find AprilFools pattern.";
+    return "Unable to find APFcode pattern.";
   }
   if (!install_hook_absolute(addr, m_function_hook, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize AprilFools";
+    return "Failed to initialize APFcode";
   }
 
   auto addr2 = m_patterns_cache->find_addr(base, "48 8B 50 18 48 85 D2 0F 85 93 01 00 00 85");
   if (!addr2) {
-    return "Unable to find AprilFools vergil pattern.";
+    return "Unable to find APFcode vergil pattern.";
   }
  
   if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize AprilFools";
+    return "Failed to initialize APFcode vergil";
   } 
  
   auto addr3 = m_patterns_cache->find_addr(base, "44 8B 48 14 8B 48 18 48 85 ED");
 
   if (!addr3) {
-    return "Unable to find AprilFools mission pattern.";
+    return "Unable to find APFcode mission pattern.";
   }
 
   if (!install_hook_absolute(addr3.value(), m_function_hook3, &detour3, &jmp_ret3, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize  AprilFools mission pattern";
+    return "Failed to initialize  APFcode mission";
   }
 
   return Mod::on_initialize();
