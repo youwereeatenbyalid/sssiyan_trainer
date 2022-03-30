@@ -10,7 +10,7 @@ class PlSetActionData : public Mod
 {
 public:
 
-	static inline const unsigned int ACTION_STR_LENGTH = 25;
+	static inline const unsigned int ACTION_STR_LENGTH = 50;
 
 	PlSetActionData() = default;
 
