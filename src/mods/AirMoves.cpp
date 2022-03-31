@@ -41,19 +41,6 @@ bool AirMoves::is_movecheat_enabled_asm(Moves move)
 
 void AirMoves::str_cur_action_asm(uintptr_t dotNetString)
 {
-	//if (curMoveHook != nullptr)
-	//{
-	//	auto str = GameFunctions::PtrController::get_str(dotNetString);
-	//	if (curMoveHook->cheatOn && strcmp(str, curMoveHook->get_ingame_name()) == 0)
-	//	{
-	//		isAirProcess = true;
-	//	}
-	//	else if(strcmp(str, "None") != 0 && strcmp(str, "PutOut") != 0)//PutOut - Dante's stingers 2nd phase
-	//	{
-	//		isAirProcess = false;
-	//		curMoveHook = nullptr;
-	//	}
-	//}
 	if (AirMoves::curMoveHook != nullptr)
 	{
 		if (AirMoves::curMoveHook->cheatOn && gf::StringController::str_cmp(dotNetString, AirMoves::curMoveHook->get_ingame_name()))
@@ -297,6 +284,72 @@ static naked void balrog_updraft_air_detour()
 	}
 }
 
+static naked void cerberus_ice_age_air_detour()
+{
+	__asm {
+		cmp byte ptr [AirMoves::cheaton], 0 
+		je originalcode
+
+		cmp al, 1
+		je setnull
+		push rax
+		push rcx
+		mov ecx, AirMoves::Moves::IceAge
+		sub rsp, 32
+		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		add rsp, 32
+		cmp al, 0
+		pop rcx
+		pop rax
+		je originalcode
+
+		cheat:
+		mov al, 1
+
+		originalcode:
+		movzx ecx,al
+		mov rax, [rbx + 0x50]
+		jmp qword ptr [AirMoves::cerberusIceAgeAirRet]
+
+		setnull:
+		mov AirMoves::curMoveHook, 0
+		jmp originalcode
+	}
+}
+
+static naked void cerberus_blitz_air_detour()
+{
+	__asm {
+		cmp byte ptr [AirMoves::cheaton], 0 
+		je originalcode
+
+		cmp al, 1
+		je setnull
+		push rax
+		push rcx
+		mov ecx, AirMoves::Moves::CerbBlitz
+		sub rsp, 32
+		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		add rsp, 32
+		cmp al, 0
+		pop rcx
+		pop rax
+		je originalcode
+
+		cheat:
+		mov al, 1
+
+		originalcode:
+		movzx ecx,al
+		mov rax, [rbx + 0x50]
+		jmp qword ptr [AirMoves::cerberusBlitzAirRet]
+
+		setnull:
+		mov AirMoves::curMoveHook, 0
+		jmp originalcode
+	}
+}
+
 static naked void beo_kick13_air_detour()
 {
 	__asm {
@@ -329,37 +382,6 @@ static naked void beo_kick13_air_detour()
 		jmp originalcode
 	}
 }
-
-//static naked void pl_set_action_detour()
-//{
-//	__asm {
-//		cmp byte ptr [AirMoves::cheaton], 0
-//		je originalcode
-//
-//		push rax
-//		push rcx
-//		push rdx
-//		push r8
-//		push r9
-//		push r10
-//		push r11
-//		mov rcx, r8
-//		sub rsp, 32
-//		call qword ptr [AirMoves::str_cur_action_asm]
-//		add rsp, 32
-//		pop r11
-//		pop r10
-//		pop r9
-//		pop r8
-//		pop rdx
-//		pop rcx
-//		pop rax
-//
-//		originalcode:
-//		mov [rsp + 0x08], rbx
-//		jmp qword ptr [AirMoves::CurMoveStrRet]
-//	}
-//}
 
 static naked void check_ground_hit_detour()
 {
@@ -419,12 +441,6 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Unable to find AirMoves.rapidSlashIsAirAddr pattern.";
 	}
 
-	//auto plSetActionAddr = patterns->find_addr(base, "CC CC CC CC 48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 83 EC 60 80 BC");//DevilMayCry5.app_Player__setAction171195 (-0x4)
-	//if (!plSetActionAddr)
-	//{
-	//	return "Unable to find AirMoves.plSetActionAddr pattern.";
-	//}
-
 	auto checkGroundHitAddr = m_patterns_cache->find_addr(base, "41 FF 90 A0 05 00 00");//DevilMayCry5.app_character_Character__checkGroundHit167863+60B
 	if (!checkGroundHitAddr)
 	{
@@ -467,6 +483,18 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Unable to find AirMoves.airDodgeCrashAddr pattern.";
 	}
 
+	auto iceAgeAirAddr = m_patterns_cache->find_addr(base, "14 7C FE 0F B6 C8 48 8B 43 50");//DevilMayCry5.exe+1C99917 (-0x3)
+	if (!iceAgeAirAddr)
+	{
+		return "Unable to find AirMoves.iceAgeAirAddr pattern.";
+	}
+
+	auto blitzAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 18 00 0F 85 C1 FE FF FF 85 C9 0F");//DevilMayCry5.exe+1C9A245
+	if (!iceAgeAirAddr)
+	{
+		return "Unable to find AirMoves.blitzAddr pattern.";
+	}
+
 	uintptr_t voidSlashAirAddr = p64Base + 0x1C0A3D5;
 	uintptr_t spStingerAirAddr = p64Base + 0x16E3058;
 	uintptr_t dsStingerAirAddr = p64Base + 0x1CCE4E7;
@@ -477,12 +505,6 @@ std::optional<std::string> AirMoves::on_initialize()
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rapidSlashIsAir";
 	}
-
-	/*if (!install_hook_absolute(plSetActionAddr.value() + 0x4, cur_action_hook, &pl_set_action_detour, &CurMoveStrRet, 0x5))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize AirMoves.plSetAction";
-	}*/
 
 	if (!install_hook_absolute(checkGroundHitAddr.value(), m_check_ground_hit_hook, &check_ground_hit_detour, &checkGroundHitCallRet, 0x7))
 	{
@@ -536,6 +558,18 @@ std::optional<std::string> AirMoves::on_initialize()
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.airDodgeCrash";
+	}
+
+	if (!install_hook_absolute(iceAgeAirAddr.value() + 0x3, m_cerberus_ice_edge_air_hook, &cerberus_ice_age_air_detour, &cerberusIceAgeAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.airDodgeCrash";
+	}
+
+	if (!install_hook_absolute(blitzAddr.value(), m_cerberus_blitz_air_hook, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.blitz";
 	}
 
 	return Mod::on_initialize();
