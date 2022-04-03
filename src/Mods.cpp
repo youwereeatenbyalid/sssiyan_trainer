@@ -208,7 +208,7 @@ Mods::Mods()
 		m_mods.emplace_back(std::make_unique<HoldToMash>()); //has to come before game input??
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
-		m_mods.emplace_back(std::make_unique<AprilFools>());
+		// m_mods.emplace_back(std::make_unique<AprilFools>());
     // Common
         m_mods.emplace_back(std::make_unique<HeavyDay>());
         m_mods.emplace_back(std::make_unique<MoveReplacer>());

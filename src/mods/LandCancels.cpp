@@ -435,7 +435,7 @@ std::optional<std::string> LandCancels::on_initialize() {
 
 void LandCancels::on_frame() {
     if (PlayerTracker::ingameplay) {
-        if (landCancelTestWeightToggle) {
+        if (landCancelTestWeightToggle && LandCancels::cheaton) {
             (*(float*)(PlayerTracker::playerentity + 0x2C4)) = desiredWeight;
         }
     }
