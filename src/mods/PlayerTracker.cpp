@@ -17,7 +17,11 @@
 	uintptr_t PlayerTracker::playerinertiay{NULL};
 	uintptr_t PlayerTracker::playerinertiaz{NULL};
 	uint32_t PlayerTracker::playermoveid{0};
-  
+	uint32_t PlayerTracker::motionID{ 0 };
+	uint32_t PlayerTracker::motionBank{ 0 };
+	float PlayerTracker::motionFrame{ 0.0 };
+
+
 	uintptr_t PlayerTracker::neroentity{NULL};
 	uintptr_t PlayerTracker::nerotransform{NULL};
   
@@ -474,6 +478,14 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 void PlayerTracker::on_frame() {
 	auto updatetime = GameFunctions::PtrController::get_ptr_val<float>(PlayerTracker::playermanager, updatetime_array, false);
 	PlayerTracker::ingameplay = (updatetime.has_value() && updatetime.value() > 2.0);
+	if (PlayerTracker::ingameplay) {
+		auto playerentity = (::REManagedObject*)PlayerTracker::playerentity;
+		auto playermotion = sdk::call_object_func_easy<REManagedObject*>(playerentity, "get_cachedMotion");
+		auto playerlayer = sdk::call_object_func_easy<REManagedObject*>(playermotion, "getLayer", 0);
+		PlayerTracker::motionBank = sdk::call_object_func_easy<uint32_t>(playerlayer, "get_MotionBankID");
+		PlayerTracker::motionID = sdk::call_object_func_easy<uint32_t>(playerlayer, "get_MotionID");
+		PlayerTracker::motionFrame = sdk::call_object_func_easy<float>(playerlayer, "get_Frame");
+	}
 }
 
 // will show up in debug window, dump ImGui widgets you want here

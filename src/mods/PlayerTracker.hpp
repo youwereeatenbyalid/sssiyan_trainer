@@ -69,6 +69,9 @@ public:
   static uintptr_t playermanager;
 
   static uint32_t incombat;
+  static uint32_t motionID;
+  static uint32_t motionBank;
+  static float motionFrame;
   static bool ingameplay;
   static float sinvalue;
   static float cosvalue;
