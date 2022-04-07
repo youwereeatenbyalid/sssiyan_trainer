@@ -19,7 +19,9 @@ public:
 		DSStinger,
 		SPStinger,
 		BRKUpdraft,
-		BWKick13
+		BWKick13,
+		IceAge,
+		CerbBlitz
 	};
 private:
 
@@ -80,6 +82,8 @@ private:
 	std::unique_ptr<FunctionHook> m_ds_stinger_air_hook;
 	std::unique_ptr<FunctionHook> m_brk_updraft_air_hook;
 	std::unique_ptr<FunctionHook> m_kick_air_hook;
+	std::unique_ptr<FunctionHook> m_cerberus_ice_edge_air_hook;
+	std::unique_ptr<FunctionHook> m_cerberus_blitz_air_hook;
 	//std::unique_ptr<FunctionHook> cur_action_hook;
 	std::unique_ptr<FunctionHook> m_check_ground_hit_hook;
 	std::unique_ptr<FunctionHook> m_air_dodge_crash_hook;
@@ -98,6 +102,8 @@ public:
 	static inline uintptr_t dsStingerAirRet = 0;
 	static inline uintptr_t balrogUpdraftAirRet = 0;
 	static inline uintptr_t kick13AirRet = 0;
+	static inline uintptr_t cerberusIceAgeAirRet = 0;
+	static inline uintptr_t cerberusBlitzAirRet = 0;
 
 	//static inline uintptr_t CurMoveStrRet = 0;
 	static inline uintptr_t checkGroundHitCallRet = 0;
@@ -117,7 +123,9 @@ public:
 	{ Moves::RBStinger, "Rebellion stinger", "RB_Stinger"},
 	{ Moves::SPStinger, "Sparda stinger", "SP_Stinger"},
 	{ Moves::DSStinger, "DSD stinger", "DS_Stinger" },
-	{ Moves::BRKUpdraft, "Balrog Updraft", ""/*"BRK_SomerSalt"*/}//Empty str to skip ground reset hook
+	{ Moves::BRKUpdraft, "Balrog Updraft", ""/*"BRK_SomerSalt"*/},//Empty str to skip ground reset hook
+	{ Moves::IceAge, "Cerberus Ice Age", "CBN_IceAge" },
+	{ Moves::CerbBlitz, "Cerberus Percussion", "CBT_Blitz" },
 	}));
 
 	/*static inline std::unique_ptr<HookedMoves> neroMoves = std::make_unique<HookedMoves>(std::initializer_list<MoveInfo>({
