@@ -24,26 +24,16 @@ static naked void detour() {
 
     playercheck:
         push r14
-        /*mov r14, [rsi+0x28]
-        cmp r14, [PlayerTracker::playerentity]*/
-        mov r14, [rsi + 0x58]
+        mov r14, [rsi + 0x58]//gameModel nullptr check
         test r14, r14
         je regpop
-        cmp dword ptr [r14 + 0x108], 1 
+        cmp dword ptr [r14 + 0x108], 1 //player or enemy
         je regpop
-        cmp dword ptr [r14 + 0xE64], 0
+        cmp dword ptr [r14 + 0xE64], 0 //plId
         je nerospeeds
         cmp dword ptr [r14 + 0xE64], 1
         je dantespeeds
-        /*pop r14
-        jne code*/
         jmp regpop
-
-       /* cmp [PlayerTracker::playerid], 0
-        je nerospeeds
-        cmp [PlayerTracker::playerid], 1
-        je dantespeeds
-        jmp code*/
 
     nerospeeds:
     // snatch
