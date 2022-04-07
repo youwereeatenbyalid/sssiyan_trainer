@@ -563,7 +563,7 @@ std::optional<std::string> AirMoves::on_initialize()
 	if (!install_hook_absolute(iceAgeAirAddr.value() + 0x3, m_cerberus_ice_edge_air_hook, &cerberus_ice_age_air_detour, &cerberusIceAgeAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize AirMoves.airDodgeCrash";
+		return "Failed to initialize AirMoves.iceAgeAir";
 	}
 
 	if (!install_hook_absolute(blitzAddr.value(), m_cerberus_blitz_air_hook, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
