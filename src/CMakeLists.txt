@@ -266,6 +266,7 @@ set(MODS_SRC
     mods/AirMoves.hpp
     mods/AirMoves.cpp
     mods/PlSetActionData.hpp
+    mods/EndLvlHooks.hpp
 )
 
 set(HOOKS_SRC

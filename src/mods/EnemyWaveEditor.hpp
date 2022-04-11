@@ -161,7 +161,7 @@ namespace WaveEditorMod
 		std::map<int, int> emIds;// Key - emId, T - num of occurs;
 		const size_t DEFAULT_ADD_OFFSET = 0x10;
 
-		inline bool check_all_allocated()
+		bool check_all_allocated()
 		{
 			if (mimicObjectsList.empty())
 			{
@@ -180,7 +180,7 @@ namespace WaveEditorMod
 			return true;
 		}
 
-		inline void recheck_emids()
+		void recheck_emids()
 		{
 			emIds.clear();
 			for (const auto& lst : mimicObjectsList)
@@ -250,7 +250,7 @@ namespace WaveEditorMod
 			return &emIds;
 		}
 
-		inline void copy_to(int from, int to, bool byId = true)
+		void copy_to(int from, int to, bool byId = true)
 		{
 			auto lstFrom = get_mimic_list_ptr(from, byId);
 			if (lstFrom == nullptr)
@@ -259,7 +259,7 @@ namespace WaveEditorMod
 				get_mimic_list_ptr(to, byId)->mimicList.add_alloc_data(new AllocatedEmData(*(static_cast<AllocatedEmData*>(lstFrom->mimicList.get_allocated_base_data(i)))));
 		}
 
-		inline void alloc_all(std::vector<GameEmList> *emList = nullptr)
+		void alloc_all(std::vector<GameEmList> *emList = nullptr)
 		{
 			for (auto& mimic : mimicObjectsList)
 			{
@@ -271,7 +271,7 @@ namespace WaveEditorMod
 			recheck_emids();
 		}
 
-		inline void dealloc_all()
+		void dealloc_all()
 		{
 			for (auto& mimic : mimicObjectsList)
 			{
@@ -285,7 +285,7 @@ namespace WaveEditorMod
 			remove_all_binds();
 		}
 
-		inline void restore_all_data()
+		void restore_all_data()
 		{
 			for (auto& mimic : mimicObjectsList)
 			{
@@ -296,7 +296,7 @@ namespace WaveEditorMod
 			isAllDataSwapped = false;
 		}
 
-		inline void set_const_label(const char* name)
+		void set_const_label(const char* name)
 		{
 			constLabelName = name;
 		}
@@ -322,7 +322,7 @@ namespace WaveEditorMod
 			mimicObjectsList[listIndx].get()->mimicList.add_alloc_data(data);
 		}
 
-		inline void remove_last()
+		void remove_last()
 		{
 			if (mimicObjectsList.empty())
 				return;
@@ -331,7 +331,7 @@ namespace WaveEditorMod
 			recheck_emids();
 		}
 
-		inline void remove_at(int indx)
+		void remove_at(int indx)
 		{
 			if (mimicObjectsList.empty() || indx >= mimicObjectsList.size() || indx < 0)
 				return;
@@ -340,7 +340,7 @@ namespace WaveEditorMod
 			recheck_emids();
 		}
 
-		inline void remove_all()
+		void remove_all()
 		{
 			mimicObjectsList.clear();
 			objNames.clear();
@@ -384,7 +384,7 @@ namespace WaveEditorMod
 			return isAllAllocated;
 		}
 
-		inline bool is_all_data_swapped(bool recheck = true)
+		bool is_all_data_swapped(bool recheck = true)
 		{
 			if (!recheck)
 				return isAllDataSwapped;
@@ -400,7 +400,7 @@ namespace WaveEditorMod
 			return true;
 		}
 
-		inline void change_loadid(int indx, int newId)
+		void change_loadid(int indx, int newId)
 		{
 			std::string newStr = std::string(constLabelName + std::to_string(newId));
 			update_idstr(newStr, newId);
@@ -408,7 +408,7 @@ namespace WaveEditorMod
 			mimicObjectsList[indx]->loadId = newId;
 		}
 
-		inline void bind_game_em_data(GameEmList *emData, int mimicIndx)
+		void bind_game_em_data(GameEmList *emData, int mimicIndx)
 		{
 			if(emData == nullptr)
 				return;
@@ -477,12 +477,6 @@ namespace WaveEditorMod
 		static uintptr_t prefabLoadJmp;
 		static uintptr_t bpRetJmp;
 		static uintptr_t fadeStaticBase;
-		static inline uintptr_t retryMissionRet = 0;
-		static inline uintptr_t exitMissionRet = 0;
-		static inline uintptr_t checkpointMissionRet = 0;
-		static inline uintptr_t secretMissionRet = 0;
-		static inline uintptr_t exitBpMissionRet = 0;
-		static inline uintptr_t requestResultRet = 0;
 		static inline uintptr_t bossDanteCrashRet = 0;
 		static inline uintptr_t bossDanteCrashSkip = 0;
 		
@@ -578,15 +572,6 @@ namespace WaveEditorMod
 		std::unique_ptr<FunctionHook> m_emwave_hook;
 		std::unique_ptr<FunctionHook> m_loadall_hook;
 		std::unique_ptr<FunctionHook> m_bploadflow_hook;
-		std::unique_ptr<FunctionHook> m_exitproc_hook;
-		std::unique_ptr<FunctionHook> m_exitproc1_hook;
-		std::unique_ptr<FunctionHook> m_request_retire_mission_hook;
-		std::unique_ptr<FunctionHook> m_retry_mission_hook;
-		std::unique_ptr<FunctionHook> m_exit_mission_hook;
-		std::unique_ptr<FunctionHook> m_checkpoint_mission_hook;
-		std::unique_ptr<FunctionHook> m_secret_mission_hook;
-		std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
-		std::unique_ptr<FunctionHook> m_request_result_hook;
 		std::unique_ptr<FunctionHook> m_bossdante_crash_hook;
 
 		class ProfileManager
