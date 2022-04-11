@@ -1,13 +1,15 @@
-//#pragma once
+#pragma once
 #include "Mod.hpp"
 #include "GameFunctions/PlVergilDoppel.hpp"
-#include "PlayerTracker.hpp"
+
 //clang-format off
 namespace f = GameFunctions;
 class InstantDoppel : public Mod
 {
 public:
 	InstantDoppel() = default;
+
+	static inline bool cheaton = true;
 
 	enum DoppelSpeed
 	{
@@ -17,65 +19,20 @@ public:
 		Slow
 	};
 
-	static inline DoppelSpeed delay = DoppelSpeed::Fast;
-
-	static inline bool cheaton = true;
-	static inline bool isControlledBySpeedState = false;
-
-	static inline uintptr_t ret = 0;
-	static inline uintptr_t fVergilSetActionAddr = 0;
-
-	static bool setup_doppel_asm()
+	static inline bool setup_fast_doppel_asm(uintptr_t vergil)
 	{
-		auto vergil = PlayerTracker::vergilentity;
+		if(!cheaton)
+			return false;
 		if (isControlledBySpeedState)
 		{
-			if(*(DoppelSpeed*)(vergil + 0x18CC) != delay)
+			if (*(InstantDoppel::DoppelSpeed*)(vergil + 0x18CC) != InstantDoppel::delay)
 				return false;
 		}
-		f::SetDoppelMode setDoppel{vergil};
+		f::SetDoppelMode setDoppel { vergil };
 		setDoppel(true);
-		f::GenerateDoppel genDoppel{vergil};
+		f::GenerateDoppel genDoppel { vergil };
 		genDoppel(f::Vec3(0, 1.2f, 0), false);
 		return true;
-	}
-
-	static naked void detour()
-	{
-		__asm {
-			cmp byte ptr [InstantDoppel::cheaton], 1
-			je cheat
-
-			originalcode:
-			call qword ptr [InstantDoppel::fVergilSetActionAddr]
-			jmp qword ptr[InstantDoppel::ret]
-
-			cheat:
-			cmp r8d, 1
-			jne originalcode
-			push rax
-			push rdx
-			push rcx
-			push rsi
-			push r8
-			push r9
-			push r10
-			push r12
-			sub rsp, 32
-			call qword ptr [InstantDoppel::setup_doppel_asm]
-			add rsp, 32
-			cmp al, 0
-			pop r12
-			pop r10
-			pop r9
-			pop r8
-			pop rsi
-			pop rcx
-			pop rdx
-			pop rax
-			je originalcode
-			jmp qword ptr[InstantDoppel::ret]
-		}
 	}
 
 	std::string_view get_name() const override
@@ -102,21 +59,6 @@ public:
 		m_description_string = "Remove Vergil's i-frame DT activation motion and summon doppelganger instantly (doppel himself still have appears motion)";
 
 		set_up_hotkey();
-
-
-		auto setActionDoppelAddr = m_patterns_cache->find_addr(base, "E8 33 18 01 00");//DevilMayCry5.exe+533E68
-		if (!setActionDoppelAddr)
-		{
-			return "Unable to find InstantDoppel.setActionDoppelAddr pattern.";
-		}
-
-		fVergilSetActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 56 57 41 57 48 83 EC 60").value_or(g_framework->get_module().as<uintptr_t>() + 0x5456A0); //DevilMayCry5.exe+5456A0
-
-		if (!install_hook_absolute(setActionDoppelAddr.value(), m_doppel_hook, &detour, &ret, 0x5))
-		{
-			spdlog::error("[{}] failed to initialize", get_name());
-			return "Failed to initialize InstantDoppel.setActionDoppel";
-		}
 
 		return Mod::on_initialize();
 	}
@@ -160,9 +102,12 @@ private:
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
-	std::unique_ptr<FunctionHook> m_doppel_hook;
 
 	const std::array<char*, 3> delayNames {"Fast mode", "Default mode", "Slow mode"};
+
+	static inline DoppelSpeed delay = DoppelSpeed::Fast;
+
+	static inline bool isControlledBySpeedState = false;
 
 };
 //clang-format on

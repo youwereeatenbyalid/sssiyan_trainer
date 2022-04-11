@@ -178,6 +178,7 @@
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
        #include "mods/VergilNoRoyalForkDelay.hpp"
+       #include "mods/VergilDoppelInitSetup.hpp"
        #include "mods/InstantDoppel.hpp"
        #include "mods/AirMoves.hpp"
        #include "mods/VergilTrickTrailsEfx.hpp"
@@ -370,6 +371,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
         m_mods.emplace_back(std::make_unique<AirTrickDodge>());
         m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
+        m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
         m_mods.emplace_back(std::make_unique<InstantDoppel>());
         m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
 

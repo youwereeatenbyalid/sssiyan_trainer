@@ -258,6 +258,7 @@ set(MODS_SRC
     mods/LongerRagtimeBubble.cpp 
     mods/DamageType.hpp 
     mods/DamageType.cpp
+    mods/VergilDoppelInitSetup.hpp
     mods/InstantDoppel.hpp
     mods/AprilFools.hpp
     mods/AprilFools.cpp
