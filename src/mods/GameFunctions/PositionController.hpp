@@ -54,7 +54,7 @@ namespace GameFunctions
 		void *get_transform() const { return transform; }
 
 		//Change character pos and colliders pos. Only for character obj.
-		static void set_player_pos(uintptr_t character, Vec3 newPos)
+		static void set_character_pos(uintptr_t character, Vec3 newPos)
 		{
 			if(character == 0)
 				return;
