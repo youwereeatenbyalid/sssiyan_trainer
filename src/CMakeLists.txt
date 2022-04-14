@@ -268,6 +268,8 @@ set(MODS_SRC
     mods/AirMoves.cpp
     mods/PlSetActionData.hpp
     mods/EndLvlHooks.hpp
+    mods/BossTrickUp.hpp
+    mods/VergilSDTAlwaysCancels.hpp
 )
 
 set(HOOKS_SRC

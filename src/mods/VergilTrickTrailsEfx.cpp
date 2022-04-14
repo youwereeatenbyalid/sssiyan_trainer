@@ -1,7 +1,11 @@
 #include "VergilTrickTrailsEfx.hpp"
+#include "BossTrickUp.hpp"
 
 void VergilTrickTrailsEfx::set_up_end_efx_asm(uintptr_t vergil)
 {
+	BossTrickUp::set_appear_pos(vergil);
+	if (!cheaton)
+		return;
 	if(lastTrick == None)
 		return;
 	if (vergil != PlayerTracker::vergilentity)
@@ -9,6 +13,7 @@ void VergilTrickTrailsEfx::set_up_end_efx_asm(uintptr_t vergil)
 		if(vergil != PlayerTracker::doppelentity)
 			return;
 	}
+	
 	for (auto &trick : trickActionsSettings)
 	{
 		if (lastTrick == trick->get_mode())
@@ -71,6 +76,8 @@ static naked void trick_end_draw_self_detour()
 static naked void action_set_draw_self_detour()
 {
 	__asm {
+		cmp byte ptr[BossTrickUp::cheaton], 1
+		je cheat
 		cmp byte ptr [VergilTrickTrailsEfx::cheaton], 1
 		je cheat
 
@@ -112,10 +119,7 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "Tricks efx settings (+)";
 	m_author_string = "VPZadov";
-	m_description_string = /*"Add boss trails to trick efx and setup rotation for different trick actions. Fu capcom. Part of Lordranis's trick mod or recolor still is a must if you want cool smoke cloud.\n"
-	"This mod used boss Vergil's trails data that loading to player Vergil also (always has been), so all changes to boss trails will also affect trails that this mod create. "
-	"Mod doesn't disable default game's trick efx.";*/
-	"Add and cusomize some efx (like 1 of boss's trick trails that been on plVergil all this time ty cumpcom) to trick moves without changing default efx itself. Changing any of efx by filemods "
+	m_description_string = "Add and cusomize some efx (like 1 of boss's trick trails that been on plVergil all this time ty cumpcom) to trick moves without changing default efx itself. Changing any of efx by filemods "
 	"will also affect what this mod spawns. If you want to recreate only boss trick - Lordranis'es trick alternate or my recolor file mods is a must for cool boss's trick smoke cloud.";
 
 	set_up_hotkey();
