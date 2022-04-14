@@ -180,6 +180,7 @@
        #include "mods/InstantDoppel.hpp"
        #include "mods/AirMoves.hpp"
        #include "mods/VergilTrickTrailsEfx.hpp"
+       #include "mods/BossTrickUp.hpp"
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 
@@ -370,6 +371,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
         m_mods.emplace_back(std::make_unique<InstantDoppel>());
         m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
+        m_mods.emplace_back(std::make_unique<BossTrickUp>());
 
 #ifdef DEVELOPER
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());

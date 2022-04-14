@@ -141,7 +141,7 @@ void CheckpointPos::on_draw_ui() {
       {
           if(PlayerTracker::playerentity == 0 || EnemySwapper::nowFlow != 22)
               return;
-          GameFunctions::Transform_SetPosition::set_player_pos(PlayerTracker::playerentity, newPlPos);
+          GameFunctions::Transform_SetPosition::set_character_pos(PlayerTracker::playerentity, newPlPos);
       }
   ImGui::ShowHelpMarker("It's actually instant teleport to a selected pos, so it can throw character in out of bounds.");
   }

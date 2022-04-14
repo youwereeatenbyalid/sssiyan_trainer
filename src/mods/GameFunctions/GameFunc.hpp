@@ -30,6 +30,20 @@ namespace GameFunctions
 			z = vec.z;
 		}
 
+		Vec3(const Vec3& vec)
+		{
+			x = vec.x;
+			y = vec.y;
+			z = vec.z;
+		}
+
+		Vec3(const volatile Vec3& vec)
+		{
+			x = vec.x;
+			y = vec.y;
+			z = vec.z;
+		}
+
 		Vec3& operator = (const Vector3f& vec)
 		{
 			x = vec.x;
@@ -236,9 +250,9 @@ namespace GameFunctions
 		/// <param name="isDerefedBase">Is dereference base passed</param>
 		/// <returns>Returns pointer if it's valid, otherwise nullptr.</returns>
 		template <typename T, size_t offsCount>
-		volatile T* get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false) noexcept
+		static volatile T* get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false) noexcept
 		{
-			auto res = PtrController::get_ptr<uintptr_t>(base, offsets, isDerefedBase);
+			auto res = PtrController::get_ptr(base, offsets, isDerefedBase);
 			if(!res.has_value())
 				return nullptr;
 			return (volatile T*)res.value();

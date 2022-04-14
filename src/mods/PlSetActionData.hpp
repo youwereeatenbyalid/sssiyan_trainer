@@ -9,8 +9,37 @@ namespace gf = GameFunctions;
 class PlSetActionData : public Mod
 {
 public:
-
 	static inline const unsigned int ACTION_STR_LENGTH = 50;
+
+private:
+	void init_check_box_info() override
+	{
+		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
+		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
+	};
+
+	static inline std::array<char, ACTION_STR_LENGTH> actionStr;
+	static inline std::array<char, ACTION_STR_LENGTH> realActionStr;
+
+	static inline unsigned int actualLength = 1;
+	static inline unsigned int realActionLength = 1;
+
+	std::unique_ptr<FunctionHook> cur_action_hook;
+
+	static bool cmp_action_str(const std::array<char, ACTION_STR_LENGTH>& srcStr, int srcRealLength, const char* str)
+	{
+		size_t strLen = strlen(str);
+		if (strLen != srcRealLength)
+			return false;
+		for (int i = 0; i < srcRealLength; i++)
+		{
+			if (srcStr[i] != str[i])
+				return false;
+		}
+		return true;
+	}
+
+public:
 
 	PlSetActionData() = default;
 
@@ -27,9 +56,9 @@ public:
 
 	static inline uintptr_t curMoveStrRet = 0;
 
-	static bool cmp_cur_action(const char* str)
+	static inline bool cmp_cur_action(const char* str)
 	{
-		size_t strLen = strlen(str);
+		/*size_t strLen = strlen(str);
 		if(strLen != actualLength)
 			return false;
 		for (int i = 0; i < actualLength; i++)
@@ -37,7 +66,13 @@ public:
 			if(actionStr[i] != str[i])
 				return false;
 		}
-		return true;
+		return true;*/
+		return cmp_action_str(actionStr, actualLength, str);
+	}
+
+	static inline bool cmp_real_cur_action(const char* str)
+	{
+		return cmp_action_str(realActionStr, realActionLength, str);
 	}
 
 	static void PlSetActionData::str_cur_action_asm(uintptr_t dotNetString, uintptr_t curPl)
@@ -122,32 +157,4 @@ public:
 
 		return Mod::on_initialize();
 	};
-
-	//// Override this things if you want to store values in the config file
-	//void on_config_load(const utility::Config& cfg) override;
-	//void on_config_save(utility::Config& cfg) override;
-
-	//// on_frame() is called every frame regardless whether the gui shows up.
-	//void on_frame() override {};
-	//// on_draw_ui() is called only when the gui shows up
-	//// you are in the imgui window here.
-	//void on_draw_ui() override {};
-	//// on_draw_debug_ui() is called when debug window shows up
-	//void on_draw_debug_ui() override {};
-
-private:
-	void init_check_box_info() override
-	{
-		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
-		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
-	};
-
-	static inline std::array<char, ACTION_STR_LENGTH> actionStr;
-	static inline std::array<char, ACTION_STR_LENGTH> realActionStr;
-
-	static inline unsigned int actualLength = 1;
-	static inline unsigned int realActionLength = 1;
-
-	std::unique_ptr<FunctionHook> cur_action_hook;
-
 };
