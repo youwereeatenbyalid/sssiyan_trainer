@@ -157,13 +157,6 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	float oldTargetZ = targetPos.z + colliderZUp;
 	targetPos.z += teleportZOffs;
 
-	/*auto cachedCharController = *(uintptr_t*)(vergil + 0x2F0);
-	auto cachedSubCharController = *(uintptr_t*)(vergil + 0x2F8);
-	if(cachedCharController == 0 || cachedSubCharController == 0)
-		return;*/
-	//*(bool*)(cachedCharController + 0x30) = false;
-	//*(bool*)(cachedSubCharController + 0x30) = false;
-
 	GameFunctions::Transform_SetPosition set_pos{transform};
 	set_pos(targetPos);
 	targetPos.z = oldTargetZ;
@@ -178,17 +171,6 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	//-------------------------------------------------------------------------------------------------------------//
 
 	GameFunctions::Transform_SetPosition::set_character_pos(vergil, targetPos, true);
-
-	/**(GameFunctions::Vec3*)(cachedCharController + 0x140) = targetPos;
-	*(GameFunctions::Vec3*)(cachedCharController + 0x150) = targetPos;
-	*(GameFunctions::Vec3*)(cachedCharController + 0x160) = targetPos;
-
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x140) = targetPos;
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x150) = targetPos;
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x160) = targetPos;*/
-
-	//*(bool*)(cachedCharController + 0x30) = true;
-	//*(bool*)(cachedSubCharController + 0x30) = true;
 
 	//*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
