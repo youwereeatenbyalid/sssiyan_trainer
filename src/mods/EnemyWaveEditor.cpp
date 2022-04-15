@@ -26,7 +26,6 @@ uintptr_t EnemyWaveEditor::retJmp{NULL};
 uintptr_t EnemyWaveEditor::retJl{NULL};
 uintptr_t EnemyWaveEditor::curListAddr{NULL};
 uintptr_t EnemyWaveEditor::prefabLoadJmp{NULL};
-uintptr_t EnemyWaveEditor::bpRetJmp{NULL};
 uintptr_t EnemyWaveEditor::fadeStaticBase{NULL};
 
 std::vector<GameEmList> EnemyWaveEditor::gameDataList;
@@ -90,7 +89,7 @@ void EnemyWaveEditor::set_em_data_asm(std::shared_ptr<HandleMimicObj> &curHandle
 void EnemyWaveEditor::edit_gamelists_asm(uintptr_t lstAddr)
 {
     //std::unique_lock<std::mutex> lck(mt);
-    if (mimObjManager.is_bind_mode() && !isBpAllocation && EnemySwapper::gameMode != 3)
+    if (mimObjManager.is_bind_mode() && !isBpAllocation && GameplayStateTracker::gameMode != 3)
     {
         auto curEmData = get_game_emdata_asm(lstAddr, false);
         for (int i = 0; i < mimObjManager.count(); i++)
@@ -232,7 +231,7 @@ static naked void emlist_detour()
 void EnemyWaveEditor::load_prefabs_asm(uintptr_t prefabManagerAddr)
 {
     //isPfbLoadRequested = false;
-    if(EnemySwapper::gameMode == 3)//Crash after exit from BP stage
+    if(GameplayStateTracker::gameMode == 3)//Crash after exit from BP stage
         return;
     if(!mimObjManager.is_all_allocated())
         return;
@@ -305,44 +304,44 @@ void EnemyWaveEditor::restore_list_data_asm()
     emSetterCounter = 0;
 }
 
-static naked void bp_forceload_detour()
-{
-    __asm {
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-        cmp byte ptr [EnemyWaveEditor::isBPFixRequested], 0
-        je originalcode
-
-        cheat:
-        cmp byte ptr [EnemyWaveEditor::isRequestEndBpStage], 1
-        je endbpstage
-        cmp byte ptr [rcx+0x60], 0x15 //21
-        jne originalcode
-        //mov byte ptr [EnemyWaveEditor::isBPFixRequested], 0
-        mov dword ptr [rcx+0x60], 0x16 //22
-        //----------FadeManager.RequestType-------------//
-        mov rax, [EnemyWaveEditor::fadeStaticBase]
-        mov rax, [rax]
-        mov rax, [rax+0x158]
-        mov rax, [rax+0x328]
-        mov rax, [rax+0x60]
-        mov rax, [rax+0x20]
-        mov rax, [rax+0x40]
-        mov dword ptr [rax+0x170], 0x1
-        //----------FadeManager.RequestType-------------//
-
-        originalcode:
-        mov eax, [rcx+0x60]
-        mov dword ptr [EnemyWaveEditor::bpFlowId], eax
-        sub eax, 0x16
-        jmp qword ptr [EnemyWaveEditor::bpRetJmp]
-
-        endbpstage:
-        mov byte ptr [EnemyWaveEditor::isRequestEndBpStage], 0
-        mov dword ptr [rcx+0x60], 0x1E //30
-        jmp originalcode
-    }
-}
+//static naked void bp_forceload_detour()
+//{
+//    __asm {
+//        cmp byte ptr [EnemyWaveEditor::cheaton], 0
+//        je originalcode
+//        cmp byte ptr [EnemyWaveEditor::isBPFixRequested], 0
+//        je originalcode
+//
+//        cheat:
+//        cmp byte ptr [EnemyWaveEditor::isRequestEndBpStage], 1
+//        je endbpstage
+//        cmp byte ptr [rcx+0x60], 0x15 //21
+//        jne originalcode
+//        //mov byte ptr [EnemyWaveEditor::isBPFixRequested], 0
+//        mov dword ptr [rcx+0x60], 0x16 //22
+//        //----------FadeManager.RequestType-------------//
+//        mov rax, [EnemyWaveEditor::fadeStaticBase]
+//        mov rax, [rax]
+//        mov rax, [rax+0x158]
+//        mov rax, [rax+0x328]
+//        mov rax, [rax+0x60]
+//        mov rax, [rax+0x20]
+//        mov rax, [rax+0x40]
+//        mov dword ptr [rax+0x170], 0x1
+//        //----------FadeManager.RequestType-------------//
+//
+//        originalcode:
+//        mov eax, [rcx+0x60]
+//        mov dword ptr [EnemyWaveEditor::bpFlowId], eax
+//        sub eax, 0x16
+//        jmp qword ptr [EnemyWaveEditor::bpRetJmp]
+//
+//        endbpstage:
+//        mov byte ptr [EnemyWaveEditor::isRequestEndBpStage], 0
+//        mov dword ptr [rcx+0x60], 0x1E //30
+//        jmp originalcode
+//    }
+//}
 
 static naked void boss_dante_crash_detour()//Ffs this shit happens only on some missions with some(!) enemies when trying to add Dante at the end of the list
 {
@@ -387,12 +386,6 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       return "Unanable to find emPrefabLoad pattern.";
   }
 
-  auto bpFlowIdAddr = m_patterns_cache->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
-  if (!bpFlowIdAddr)
-  {
-      return "Unanable to find bpFlowIdAddr pattern.";
-  }
-
   auto bossDanteCrashAddr = m_patterns_cache->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
   if (!bossDanteCrashAddr)
   {
@@ -410,12 +403,6 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   if (!install_hook_absolute(emPrefabLoad.value(), m_loadall_hook, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemyWaveEditor.emDataLstAddr"; 
-  }
-
-  if (!install_hook_absolute(bpFlowIdAddr.value() + 0x1, m_bploadflow_hook, &bp_forceload_detour, &bpRetJmp, 0x6))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.bpFlowId";
   }
 
   if (!install_hook_absolute(bossDanteCrashAddr.value(), m_bossdante_crash_hook, &boss_dante_crash_detour, &bossDanteCrashRet, 0xB))

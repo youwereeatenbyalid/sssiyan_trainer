@@ -142,6 +142,7 @@
     // Background
        #include "mods/PlSetActionData.hpp"
        #include "mods/EndLvlHooks.hpp"
+       #include "mods/GameplayStateTracker.hpp"
     // Common
     // Gameplay
        #include "mods/EnemySwapper.hpp"
@@ -192,6 +193,9 @@ Mods::Mods()
 {
   // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
+        // VPZadov
+            // Background
+        m_mods.emplace_back(std::make_unique<GameplayStateTracker>());//Global stuff like isCutscene for turbo, current gameplay states, etc
 //// Darkness
 //    // Background
         m_mods.emplace_back(std::make_unique<FileEditor>());

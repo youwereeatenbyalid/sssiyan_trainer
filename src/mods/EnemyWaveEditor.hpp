@@ -13,7 +13,7 @@
 #include <map>
 #include <sstream>
 #include "ImGuiExtensions/ImGuiExtensions.h"
-#include "EnemySwapper.hpp"
+#include "GameplayStateTracker.hpp"
 
 #define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)
 #define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
@@ -460,7 +460,6 @@ namespace WaveEditorMod
 		static int selectedMimicListItem;
 		static int addListInRangeMin;
 		static int addListInRangeMax;
-		static inline uint32_t bpFlowId = 0;
 		static inline int emChangeState = 0; //0 - add new; 1 - Edit emList
 
 		static bool cheaton;
@@ -475,7 +474,6 @@ namespace WaveEditorMod
 		static uintptr_t retJl;
 		static uintptr_t curListAddr;
 		static uintptr_t prefabLoadJmp;
-		static uintptr_t bpRetJmp;
 		static uintptr_t fadeStaticBase;
 		static inline uintptr_t bossDanteCrashRet = 0;
 		static inline uintptr_t bossDanteCrashSkip = 0;

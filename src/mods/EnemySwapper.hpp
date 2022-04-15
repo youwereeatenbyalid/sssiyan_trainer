@@ -9,6 +9,7 @@
 #include "MissionManager.hpp"
 #include "PlayerTracker.hpp"
 //#include "EnemyDataSettings.hpp"
+#include "GameplayStateTracker.hpp"
 
 class EnemySwapper : public Mod {
 
@@ -119,7 +120,6 @@ static bool isDanteM20;
 static bool canKillShadow;
 static bool canKillGriffon;
 static bool isNightmareFix;
-static bool isInMission;//NowFlow.isOnMission
 static bool isCavFixEnabled;
 static bool isVergilFixEnabled;
 static bool isFastDiveBombAttack;
@@ -142,9 +142,6 @@ static uint32_t newEnemyId2;
 static uint32_t newEnemyId3;
 static uint32_t newEnemyId5;
 static uint32_t newEnemyId6;
-static uint32_t nowFlow;//22-game, 17 - start
-static uint32_t prevFlow;
-static uint32_t gameMode;
 
 static float spawnPosZOffset;
 static float spawnPosXOffset;
@@ -287,8 +284,6 @@ private:
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
   //std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
   std::unique_ptr<FunctionHook> m_spawn_pos_hook;
-  std::unique_ptr<FunctionHook> m_now_flow_hook;
-  std::unique_ptr<FunctionHook> m_gamemode_hook;
   std::unique_ptr<FunctionHook> m_m19check_hook;
   std::unique_ptr<FunctionHook> m_griffon_hook;
   std::unique_ptr<FunctionHook> m_shadow_hook;

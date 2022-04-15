@@ -270,6 +270,8 @@ set(MODS_SRC
     mods/EndLvlHooks.hpp
     mods/BossTrickUp.hpp
     mods/VergilSDTAlwaysCancels.hpp
+    mods/GameplayStateTracker.hpp
+    mods/GameplayStateTracker.cpp
 )
 
 set(HOOKS_SRC

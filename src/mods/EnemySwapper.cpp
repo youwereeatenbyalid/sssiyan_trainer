@@ -13,7 +13,6 @@ bool EnemySwapper::isDanteM20{false};
 bool EnemySwapper::canKillGriffon{false};
 bool EnemySwapper::canKillShadow{false};
 bool EnemySwapper::isNightmareFix{false};
-bool EnemySwapper::isInMission{false};
 bool EnemySwapper::isCavFixEnabled{false};
 bool EnemySwapper::isVergilFixEnabled{false};
 bool EnemySwapper::isFastDiveBombAttack{false};
@@ -44,8 +43,6 @@ uintptr_t EnemySwapper::setEnemyDataRet5{NULL};
 uintptr_t EnemySwapper::setEnemyDataRet6{NULL};
 //uintptr_t EnemySwapper::setEnemyDataRet7{NULL};
 //uintptr_t EnemySwapper::swapIdRet{NULL};
-uintptr_t EnemySwapper::nowFlowRet{NULL};
-uintptr_t EnemySwapper::gameModeRet{NULL};
 uintptr_t EnemySwapper::bossDanteAiRet{NULL};
 uintptr_t EnemySwapper::bossDanteAiJne{NULL};
 uintptr_t EnemySwapper::killShadowRet{NULL};
@@ -79,11 +76,6 @@ uint32_t EnemySwapper::newEnemyId2 = 0;
 uint32_t EnemySwapper::newEnemyId3 = 0;
 uint32_t EnemySwapper::newEnemyId5 = 0;
 uint32_t EnemySwapper::newEnemyId6 = 0;
-
-uint32_t EnemySwapper::nowFlow        = 0;
-uint32_t EnemySwapper::prevFlow       = 0;
-uint32_t flowTmp = 0;
-uint32_t EnemySwapper::gameMode       = 0;
 
 float EnemySwapper::spawnPosZOffset = 0.0f;
 float EnemySwapper::spawnPosXOffset = 0.0f;
@@ -182,7 +174,7 @@ static naked void enemy_swap_detour1() {
         jmp originalcode*/
 
         swapsettings:
-        cmp dword ptr [EnemySwapper::gameMode], 3
+        cmp dword ptr [GameplayStateTracker::gameMode], 3
         jne originalcode
         //mov byte ptr [r15+0x5C], 00  // IsEndSaveData
         mov [curSetDataAddr], rcx
@@ -261,7 +253,7 @@ static naked void enemy_swap_detour2() {
         //cmp byte ptr [EnemySwapper::isBp], 1
         //je originalcode
        // mov byte ptr [checkForReswap], 1
-        cmp dword ptr [EnemySwapper::gameMode], 3
+        cmp dword ptr [GameplayStateTracker::gameMode], 3
         jne originalcode
         //mov byte ptr [r15+0x5C], 00 // IsEndSaveData
 
@@ -345,7 +337,7 @@ static naked void enemy_swap_detour3() {
 
 
         swapsettings:
-        cmp dword ptr [EnemySwapper::gameMode], 3 //for bp skip
+        cmp dword ptr [GameplayStateTracker::gameMode], 3 //for bp skip
         je checkdataoption
         //mov byte ptr [checkForReswap], 1
         mov ecx, [r14+0x10]
@@ -636,41 +628,6 @@ static naked void spawn_pos_detour() {
         shortjne:
         jmp qword ptr [EnemySwapper::posSpawnTestJne]
 
-  }
-}
-
-static naked void now_flow_detour() {
-    __asm {
-        mov dword ptr [EnemySwapper::nowFlow], eax
-        mov eax, [rdx+0x88]
-        mov [EnemySwapper::isInMission], ah
-        mov eax, dword ptr [rdx + 0x54]//nowFlow
-        cmp [flowTmp], eax
-        jne changeprev
-        jmp originalcode
-
-        changeprev:
-        mov eax, [flowTmp]
-        mov [EnemySwapper::prevFlow], eax
-        mov eax, dword ptr [EnemySwapper::nowFlow]
-        mov [flowTmp], eax
-        jmp originalcode
-
-        originalcode:
-        mov rbx,rdx
-        mov rdi,rcx
-        jmp qword ptr [EnemySwapper::nowFlowRet]
-  }
-}
-
-static naked void gamemode_detour() {
-    __asm {
-        push rcx
-        mov ecx, dword ptr [rax+0x90]
-        mov dword ptr [EnemySwapper::gameMode], ecx
-        pop rcx
-        cmp [rax+0x00000090],edi
-        jmp qword ptr [EnemySwapper::gameModeRet]
   }
 }
 
@@ -1669,7 +1626,7 @@ void EnemySwapper::btn_set_plpos_to(Vector3f& to, const char* btnContent)
 {
     if (ImGui::Button(btnContent))
     {
-        if (nowFlow == 22)
+        if (GameplayStateTracker::nowFlow == 22)
             to = CheckpointPos::get_player_coords();
     }
 }
@@ -1859,18 +1816,6 @@ std::optional<std::string> EnemySwapper::on_initialize() {
       return "Unanable to find EnemySwapper.cerberusThunderBallAddr pattern.";
   }
 
-  auto nowFlowAddr = m_patterns_cache->find_addr(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+89429E 
-  if (!nowFlowAddr)
-  {
-      return "Unanable to find EnemySwapper.nowFlowAddr pattern.";
-  }
-
-  auto gameModeAddr = m_patterns_cache->find_addr(base, "39 B8 90 00 00 00 48"); // DevilMayCry5.exe+132B592
-  if (!gameModeAddr)
-  {
-      return "Unanable to find EnemySwapper.gameMode pattern.";
-  }
-
   //auto shadowOnlyWarpAddr = patterns->find_addr(base, "48 8B 43 50 49 8B 4C 24 60 F3 0F 11 45 B0"); // DevilMayCry5.exe+21B0233
   //if (!nowFlowAddr)
   //{
@@ -1936,7 +1881,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
 
   if (!install_hook_absolute(m19CheckAddr.value(), m_m19check_hook, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemySwapper.gameModeAddr"; 
+    return "Failed to initialize EnemySwapper.m19CheckAddr"; 
   }
 
   if (!install_hook_absolute(griffonKillAddr.value(), m_griffon_hook, &kill_griffon_detour, &killGriffonRet, 0x7)) {
@@ -2031,22 +1976,10 @@ std::optional<std::string> EnemySwapper::on_initialize() {
       return "Failed to initialize EnemySwapper.cerberusThunderWave";
   }
 
-  if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemySwapper.nowFlowAddr";
-  }
-
   /*if (!install_hook_absolute(swapIdAddr, m_enemy_swapper_hook7, &swap_id_detour, &swapIdRet, 0x7)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemySwapper.swapIdAddr";
   }*/
-
-  if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemySwapper.gameModeAddr";
-  }
 
   if (!install_hook_absolute(shadowFsmToCenterAddr.value() + 0x3, m_shadow_warp_func_hook, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
   {

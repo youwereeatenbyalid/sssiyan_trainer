@@ -3,16 +3,15 @@
 #include <random>
 #include "CheckpointPos.hpp"
 #include "mods/GameFunctions/CreateShell.hpp"
-#include "EnemySwapper.hpp"
 #include <atomic>
 #include <condition_variable>
 #include "VergilSDTFormTracker.hpp"
 #include "PlayerTracker.hpp"
-#include "EnemyWaveEditor.hpp"
 #include "DeepTurbo.hpp"
 #include "mods/GameFunctions/PlayerSetDT.hpp"
 #include "VergilInstantSDT.hpp"
 #include "mods/GameFunctions/GameModelRequestSetEffect.hpp"
+#include "GameplayStateTracker.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -114,11 +113,11 @@ public:
 
 		bool can_execute(bool isBadPtr)
 		{
-			if (EnemySwapper::nowFlow == 0x16 && isExecuting.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
+			if (GameplayStateTracker::nowFlow == 0x16 && isExecuting.load() && !isBadPtr && !GameplayStateTracker::isCutscene && PlayerTracker::vergilentity != 0)
 			{
-				if (EnemySwapper::gameMode == 3)
+				if (GameplayStateTracker::gameMode == 3)
 				{
-					if(WaveEditorMod::EnemyWaveEditor::bpFlowId != 0x16)
+					if(GameplayStateTracker::bpFlowId != 0x16)
 						return false;
 				}
 				return true;

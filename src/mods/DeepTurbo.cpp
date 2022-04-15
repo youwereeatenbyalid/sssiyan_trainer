@@ -43,14 +43,14 @@ static naked void detour2() {
         jmp qword ptr [DeepTurbo::jmp_ret2]
 
         menucheck:
-        cmp byte ptr [DeepTurbo::isCutscene], 1
+        cmp byte ptr [GameplayStateTracker::isCutscene], 1
         je code
         push rbx
         //cmp dword ptr [EnemySwapper::nowFlow], 0x11 // start //but it doesnt work for some reason. Guess Deep's prev check also skips it
         //je menuturbo
-        cmp dword ptr [EnemySwapper::gameMode], 1 //secretMission
+        cmp dword ptr [GameplayStateTracker::gameMode], 1 //secretMission
         je setturbospeed
-        cmp dword ptr [EnemySwapper::nowFlow], 0x16//Gameplay
+        cmp dword ptr [GameplayStateTracker::nowFlow], 0x16//Gameplay
         jne menuturbo
         mov rbx, [DeepTurbo::pauseBase]
         test rbx, rbx
@@ -95,15 +95,6 @@ static naked void detour2() {
 	}
 }
 
-static naked void is_cutscene_detour()
-{
-    __asm {
-        mov byte ptr [DeepTurbo::isCutscene], cl
-        mov [rsi + 0x00000094], cl
-        jmp qword ptr [DeepTurbo::isCutsceneRet]
-    }
-}
-
 // clang-format on
 
 void DeepTurbo::init_check_box_info() {
@@ -134,12 +125,6 @@ std::optional<std::string> DeepTurbo::on_initialize() {
     return "Unable to find DeepTurbo2 pattern.";
   }
 
-  auto isCutsceneAddr = m_patterns_cache->find_addr(base, "88 8E 94 00 00 00");//DevilMayCry5.exe+FD9606
-  if (!isCutsceneAddr)
-  {
-      return "Unable to find DeepTurbo.isCutsceneAddr.";
-  }
-
   pauseBase = g_framework->get_module().as<uintptr_t>() + 0x7E55910;
 
   if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 7)) {
@@ -151,13 +136,6 @@ std::optional<std::string> DeepTurbo::on_initialize() {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DeepTurbo2";
-  }
-
-  if (!install_hook_absolute(isCutsceneAddr.value(), m_cutscene_hook, &is_cutscene_detour, &isCutsceneRet, 6))
-  {
-      //  return a error string in case something goes wrong
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize DeepTurbo.isCutscene";
   }
 
   // save bytes, remember false = detour enabled

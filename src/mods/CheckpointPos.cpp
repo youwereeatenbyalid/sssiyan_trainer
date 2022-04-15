@@ -113,7 +113,7 @@ void CheckpointPos::on_draw_ui() {
     ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, "%.3f");
     if (ImGui::Button("Get current player position (don't click it if you are not in a mission)")) {
-      if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+      if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
         playerPos = get_player_coords();
       }
     ImGui::TextWrapped("X: %.3f", playerPos.x);
@@ -129,7 +129,7 @@ void CheckpointPos::on_draw_ui() {
   ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
   if (ImGui::Button("Get current player's position"))
   {
-      if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+      if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
           newPlPos = get_player_coords();
   }
   ImGui::Spacing();
@@ -139,7 +139,7 @@ void CheckpointPos::on_draw_ui() {
   
   if (ImGui::Button("Set position"))
       {
-          if(PlayerTracker::playerentity == 0 || EnemySwapper::nowFlow != 22)
+          if(PlayerTracker::playerentity == 0 || GameplayStateTracker::nowFlow != 22)
               return;
           GameFunctions::Transform_SetPosition::set_character_pos(PlayerTracker::playerentity, newPlPos);
       }
