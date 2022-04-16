@@ -339,7 +339,7 @@ Mods::Mods()
 // VPZadov
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
-        m_mods.emplace_back(std::make_unique<EndLvlHooks>());
+        m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
         // Common
         // Gameplay
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper

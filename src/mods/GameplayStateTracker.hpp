@@ -1,5 +1,6 @@
 #pragma once
 #include "Mod.hpp"
+#include "GameFunctions/GameFunc.hpp"
 
 class GameplayStateTracker : public Mod
 {
@@ -16,6 +17,7 @@ public:
 	static inline uintptr_t bpRetJmp = 0;
 	static inline uint32_t bpFlowId = 0;
 	static inline uintptr_t isCutsceneRet = 0;
+	static inline uintptr_t isPauseBase = 0x07E55910;
 
 	static inline uint32_t nowFlow = 0;//22-game, 17 - start
 	static inline uint32_t prevFlow = 0;
@@ -25,7 +27,11 @@ public:
 	static inline bool isInMission = false;//NowFlow.isOnMission
 	static inline bool isCutscene = false;
 
+	static inline const std::array<uintptr_t, 4> isPauseOffst = { 0x100, 0x288, 0xC8, 0x5C4 };
+
 	GameplayStateTracker() = default;
+
+	static std::optional<bool> is_pause();
 
 	std::string_view get_name() const override
 	{

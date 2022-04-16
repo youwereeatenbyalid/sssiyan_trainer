@@ -14,6 +14,7 @@
 #include <sstream>
 #include "ImGuiExtensions/ImGuiExtensions.h"
 #include "GameplayStateTracker.hpp"
+#include "EndLvlHooks.hpp"
 
 #define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)
 #define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
@@ -436,7 +437,7 @@ namespace WaveEditorMod
 		bool is_bind_mode() const {return isBindMode; }
 	};
 
-	class EnemyWaveEditor : public Mod
+	class EnemyWaveEditor : public Mod, private EndLvlHooks::EndLvlReset
 	{
 	public:
 		static std::mutex mt;
@@ -541,6 +542,10 @@ namespace WaveEditorMod
 		static inline std::string jsonEmDataPath = "";//std::filesystem::current_path().string() + "\\" + "emListsProfile.json";
 		SetEmData curCustomEmData;
 		int selectedEmDataItem = 0;
+		void reset() override
+		{
+			restore_list_data_asm();
+		}
 		void init_check_box_info() override;
 		void print_emdata_input(SetEmData& data);
 		void draw_mimic_list_ui();

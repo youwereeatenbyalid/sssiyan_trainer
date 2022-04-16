@@ -10,9 +10,9 @@
 #include "PlayerTracker.hpp"
 //#include "EnemyDataSettings.hpp"
 #include "GameplayStateTracker.hpp"
+#include "EndLvlHooks.hpp"
 
-class EnemySwapper : public Mod {
-
+class EnemySwapper : public Mod, private EndLvlHooks::EndLvlReset {
 
 public:
 
@@ -206,6 +206,12 @@ static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
   static void set_swapper_settings(std::array<int, enemyListCount> &settingsList);
 
   static void clear_swap_data_asm();
+
+  void reset() override
+  {
+	  if(EnemySwapper::cheaton)
+		  clear_swap_data_asm();
+  }
 
   static inline std::array<const char*, enemyListCount> emNames{
 	  "Hell Caina", //0

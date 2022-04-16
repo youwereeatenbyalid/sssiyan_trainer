@@ -268,6 +268,7 @@ set(MODS_SRC
     mods/AirMoves.cpp
     mods/PlSetActionData.hpp
     mods/EndLvlHooks.hpp
+    mods/EndLvlHooks.cpp
     mods/BossTrickUp.hpp
     mods/VergilSDTAlwaysCancels.hpp
     mods/GameplayStateTracker.hpp

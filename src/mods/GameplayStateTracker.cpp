@@ -85,6 +85,10 @@ static naked void is_cutscene_detour()
     }
 }
 
+std::optional<bool> GameplayStateTracker::is_pause()
+{
+    return GameFunctions::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
+}
 
 std::optional<std::string> GameplayStateTracker::on_initialize()
 {
@@ -114,6 +118,8 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
     {
         return "Unable to find GameplayStateTracker.isCutsceneAddr.";
     }
+
+    isPauseBase += g_framework->get_module().as<uintptr_t>();
 
     if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6))
     {

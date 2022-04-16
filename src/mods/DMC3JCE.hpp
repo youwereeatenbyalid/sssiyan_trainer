@@ -12,6 +12,7 @@
 #include "VergilInstantSDT.hpp"
 #include "mods/GameFunctions/GameModelRequestSetEffect.hpp"
 #include "GameplayStateTracker.hpp"
+#include "EndLvlHooks.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -20,8 +21,9 @@ namespace func = GameFunctions;
 class DMC3JCE : public Mod
 {
 public:
-	class JCEController
+	class JCEController : private EndLvlHooks::EndLvlReset
 	{
+
 	private:
 		func::Vec3 maxOffset;
 		func::Vec3 minOffset;
@@ -51,6 +53,11 @@ public:
 		bool isPtrBaseInit;
 		const bool isRndJust = true;
 		const bool isTrackJust = false;
+
+		void reset() override
+		{
+			update_status(false);
+		}
 
 		func::Vec3 get_lockon_pos(bool& isNullPtr)
 		{
@@ -439,7 +446,7 @@ public:
 
 		Type get_jce_type() const {return jceType; }
 
-	};
+};
 
 	enum AutoSDTType
 	{

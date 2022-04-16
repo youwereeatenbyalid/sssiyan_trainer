@@ -172,17 +172,6 @@ namespace GameFunctions
 				res = inverseQ * r2 * r1;
 			return Vec3(res.x, res.y, res.z);
 		}
-
-		/*friend Vec3 operator *(const Quaternion& r1, const Vec3& v1)
-		{
-			auto inverseQ = Quaternion::conjugate(r1);
-			Quaternion r2(v1.x, v1.y, v1.z, 0);
-			auto res = r1 * r2;
-			res = res * inverseQ;
-			return Vec3(res.x, res.y, res.z);
-
-		}*/
-
 	};
 
 	class PtrController
@@ -194,6 +183,16 @@ namespace GameFunctions
 		static bool is_bad_ptr(uintptr_t ptr) noexcept
 		{
 			return !utility::isGoodReadPtr(ptr, sizeof(ptr));
+		}
+
+		static bool is_bad_ptr(volatile void *ptr) noexcept
+		{
+			return !utility::isGoodReadPtr((uintptr_t)ptr, sizeof(ptr));
+		}
+
+		static bool is_bad_ptr(void* ptr) noexcept
+		{
+			return !utility::isGoodReadPtr((uintptr_t)ptr, sizeof(ptr));
 		}
 
 		/// <summary>
