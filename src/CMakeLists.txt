@@ -273,6 +273,7 @@ set(MODS_SRC
     mods/VergilSDTAlwaysCancels.hpp
     mods/GameplayStateTracker.hpp
     mods/GameplayStateTracker.cpp
+    mods/DoppelNoComeBack.hpp
 )
 
 set(HOOKS_SRC
