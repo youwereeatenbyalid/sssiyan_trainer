@@ -38,7 +38,7 @@ public:
 	static float waitTime;
 	static float finishOffsetZ;
 	static inline float teleportZOffs = -1.3f;
-	static inline float colliderZUp = 1.5f;
+	static inline float colliderZUp = 0.5f;
 
 	static uintptr_t initSpeedRet;
     static uintptr_t speedAccRet;

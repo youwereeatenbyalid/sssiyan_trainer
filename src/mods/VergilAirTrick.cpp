@@ -152,25 +152,15 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 		}
 	}
 	xypos_teleport(vergil, curType, xTmp, yTmp, pPos, trickVec.x, trickVec.y, trickVecLen);
+	float oldTargetZ = targetPos.z + colliderZUp;
+	GameFunctions::PositionErrorCorrector setPos{(void*)*(uintptr_t*)(vergil + 0x8E8)};
+
+	//targetPos.z += colliderZUp;
+	GameFunctions::Transform_SetPosition::set_character_pos(vergil, targetPos, true);
+	targetPos.z += teleportZOffs;
 	targetPos.x = xTmp;
 	targetPos.y = yTmp;
-	float oldTargetZ = targetPos.z + colliderZUp;
-	targetPos.z += teleportZOffs;
-
-	GameFunctions::Transform_SetPosition set_pos{transform};
-	set_pos(targetPos);
-	targetPos.z = oldTargetZ;
-
-	//------------------This stuff can ignore walls, whats no good, especially for back step trick-----------------//
-	// Actually code above do this too, but seems little more safer;
-	//void *posCorPtr = (void*)(*(uintptr_t*)(vergil + 0x8E8));
-	//////*(uintptr_t*)((uintptr_t)posCorPtr+0x18) = 0;
-	//GameFunctions::PositionErrorCorrector posCor{posCorPtr};
-	//posCor.set_rcx(posCor.get_thread_context().value());
-	//posCor.set_position(targetPos);
-	//-------------------------------------------------------------------------------------------------------------//
-
-	GameFunctions::Transform_SetPosition::set_character_pos(vergil, targetPos, true);
+	setPos.set_position(targetPos);
 
 	//*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
