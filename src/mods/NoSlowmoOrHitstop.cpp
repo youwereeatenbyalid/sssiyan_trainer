@@ -10,7 +10,8 @@ float noHitstopSpeed = 1.0f;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-static naked void detour() { // DevilMayCry5.app_WorkRate__setHitStop74027 
+// hitstop
+static naked void detour() { // AttackUserData->? accessed from DevilMayCry5.app_WorkRate__setHitStop74027 (DevilMayCry5.exe+CCD9B2 copyright)
 	__asm {
         cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
         je cheatcode
@@ -24,8 +25,8 @@ static naked void detour() { // DevilMayCry5.app_WorkRate__setHitStop74027
 		jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
 	}
 }
-
-static naked void detour2() { // DamageUserData->SlowTime (+B0)
+/*
+static naked void detour2() { // DamageUserData->SlowTime (+B0) accessed from DevilMayCry5.app_HitController__checkJustEscape158532 (DevilMayCry5.exe+24CE8C3 copyright)
 	__asm {
         cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
         je cheatcode
@@ -36,6 +37,21 @@ static naked void detour2() { // DamageUserData->SlowTime (+B0)
     cheatcode:
         comiss xmm0, xmm0
 		jmp qword ptr [NoSlowmoOrHitstop::jmp_ret2]
+	}
+}
+*/
+
+// other
+static naked void detour2() { // DevilMayCry5.app_WorkRateSystem__setWorkRate96344 (DevilMayCry5.exe+77EFE0 copyright)
+	__asm {
+        cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
+        je cheatcode
+    code:
+        mov [rsp+0x20],rbp
+		jmp qword ptr [NoSlowmoOrHitstop::jmp_ret2]
+
+    cheatcode:
+        ret
 	}
 }
 
@@ -67,12 +83,22 @@ std::optional<std::string> NoSlowmoOrHitstop::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NoSlowmoOrHitstop";
   }
-
+  /*
   auto addr2 = m_patterns_cache->find_addr(base, "0F 2F 80 B0 00 00 00 73");
   if (!addr) {
       return "Unable to find NoSlowmoOrHitstop2 pattern.";
   }
   if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
+      //  return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize NoSlowmoOrHitstop2";
+  }
+  */
+    auto addr2 = m_patterns_cache->find_addr(base, "48 89 6C 24 20 57 41 54 41 55 41 56 41 57 48 81 EC 80");
+  if (!addr2) {
+      return "Unable to find NoSlowmoOrHitstop2 pattern.";
+  }
+  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize NoSlowmoOrHitstop2";

@@ -20,19 +20,20 @@ static naked void detour() {
 	__asm {
         cmp byte ptr [EntitySpeeds::cheaton], 1
         jne code
-        jmp playercheck
+        //jmp playercheck
 
     playercheck:
         push r14
-        mov r14, [rsi+0x28]
-        cmp r14, [PlayerTracker::playerentity]
-        pop r14
-        jne code
-        cmp [PlayerTracker::playerid], 0
+        mov r14, [rsi + 0x58]//gameModel nullptr check
+        test r14, r14
+        je regpop
+        cmp dword ptr [r14 + 0x108], 1 //player or enemy
+        je regpop
+        cmp dword ptr [r14 + 0xE64], 0 //plId
         je nerospeeds
-        cmp [PlayerTracker::playerid], 1
+        cmp dword ptr [r14 + 0xE64], 1
         je dantespeeds
-        jmp code
+        jmp regpop
 
     nerospeeds:
     // snatch
@@ -61,7 +62,7 @@ static naked void detour() {
         je nerosnatchp2
         cmp dword ptr [PlayerTracker::playermoveid], 07DB0046h // Ground Pull (High)
         je nerosnatchp2
-        jmp code
+        jmp regpop
 
     dantespeeds:
     // million stab startup
@@ -73,34 +74,37 @@ static naked void detour() {
         je dantemstab
         cmp dword ptr [PlayerTracker::playermoveid], 157C01F4h // dante sky star
         je danteskystar
-        jmp code
+        jmp regpop
 
 // nero mults
     nerosnatchp1:
         cmp byte ptr [nerosnatchspeedup], 1
-        jne code
+        jne regpop
         mulss xmm2, [nerosnatchspeed]
-        jmp code
+        jmp regpop
     nerosnatchp2:
         cmp byte ptr [nerosnatchspeedup], 1
-        jne code
+        jne regpop
         mulss xmm2, [nerosnatchpullspeed]
-        jmp code
+        jmp regpop
 
 // dante mults
     dantemstab:
         cmp byte ptr [dantemillionstabspeedup], 1
-        jne code
+        jne regpop
         mulss xmm2, [dantemillionstabstartspeed]
-        jmp code
+        jmp regpop
 
     danteskystar:
         cmp byte ptr [danteskystarspeedup], 1
-        jne code
+        jne regpop
         mulss xmm2, [danteskystarspeed]
-        jmp code
+        jmp regpop
 
 // code
+    regpop:
+    pop r14
+
     code:
         movss [rsi+0x000000B4], xmm2
 		jmp qword ptr [EntitySpeeds::jmp_ret]

@@ -28,15 +28,21 @@ static naked void detour() { // Nero
         cmp [PlayerTracker::playerid], 2
         jne code
         cmp byte ptr [NoDTCooldown::cheaton], 1
-        je retcode
+        je cheatcode
     code:
         comiss xmm0, xmm6
         ja ja_return
-    retcode:
         jmp qword ptr [NoDTCooldown::jmp_ret2]
+
+    cheatcode: // was also affecting other spawn attacks so here we filter out everything that isn't nightmare's
+        cmp dword ptr [rsi+0x10], 1279713002 // nightmare spawn action ID (ServantAppearAction>ServantAction>CharacterAction>Action>ID)
+        je jmp_return
+        jmp code
 
     ja_return:
         jmp qword ptr [NoDTCooldown::jmp_ja2]
+    jmp_return:
+        jmp qword ptr [NoDTCooldown::jmp_ret2]
   }
 }
 
@@ -82,26 +88,26 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NoDTCooldownNero";
   }
-
-  auto addr2 = m_patterns_cache->find_addr(base, "0F 87 A6 00 00 00 48 8B 15");
+  
+  auto addr2 = m_patterns_cache->find_addr(base, "0F 2F C6 0F 87 A6 00 00 00 48");
   if (!addr2) {
       return "Unable to find NoDTCooldownV pattern.";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 6)) {
+  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 9)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize NoDTCooldownV";
   }
-  NoDTCooldown::jmp_ja2 = addr2.value() + 0xAC;
-
+  NoDTCooldown::jmp_ja2 = addr2.value() + 0xAF;
+  
   auto addr3 = m_patterns_cache->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48");
   if (!addr3) {
-      return "Unable to find NoDTCooldownV pattern.";
+      return "Unable to find NoDTCooldownDante pattern.";
   }
   if (!install_hook_absolute(addr3.value(), m_function_hook3, &detour3, &jmp_ret3, 6)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize NoDTCooldownV";
+      return "Failed to initialize NoDTCooldownDante";
   }
 
   return Mod::on_initialize();
