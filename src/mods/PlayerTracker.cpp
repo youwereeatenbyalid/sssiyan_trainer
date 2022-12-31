@@ -77,7 +77,6 @@ static naked void player_detour() {
 	mov r9, [r9+0xE64]
 	mov [PlayerTracker::playerid], r9
 
-
 	//groundmem
 	mov r9, [rdx+0x60]
 	mov r9, [r9+0x3B0]
@@ -118,7 +117,6 @@ static naked void player_detour() {
 	mov [PlayerTracker::playermoveid+2], r10d
 
 	playerarray:
-
 		
 	cmp qword ptr [rdx+0x78], 0
 	je playerexit
@@ -187,6 +185,8 @@ static naked void player_detour() {
 	//doppelganger
 	mov r8, [r8+0x18B0]
 	mov [PlayerTracker::doppelentity], r8
+	test r8, r8
+	je playerexit
 	//doppelganger transform
 	mov r10, [r8+0x1F0]
 	mov [PlayerTracker::doppeltransform], r10
@@ -382,6 +382,207 @@ static naked void vergildata_detour() {
 		jmp qword ptr [PlayerTracker::vergildata_jmp_ret]
 	}
 }
+
+//clang-format off
+
+naked void PlayerTracker::trickster_cmp_detour()
+{
+	__asm
+	{
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push rdi
+		push rsp
+		push r8
+		push r9
+		push r10
+		push r11
+		mov rcx, rbx
+		mov edx, 0 
+		sub rsp, 32
+		call qword ptr[PlayerTracker::plDante_request_set_style_asm]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rsp
+		pop rdi
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		cmp [rbx + 0x0000188C], r8d
+		jmp qword ptr [PlayerTracker::_setTrickStyleRet]
+	}
+}
+
+naked void PlayerTracker::swordmaster_cmp_detour()
+{
+	__asm
+	{
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push rdi
+		push rsp
+		push r8
+		push r9
+		push r10
+		push r11
+		mov rcx, rbx
+		mov edx, 1
+		sub rsp, 32
+		call qword ptr[PlayerTracker::plDante_request_set_style_asm]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rsp
+		pop rdi
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		cmp dword ptr [rbx + 0x0000188C], 01
+		jmp qword ptr[PlayerTracker::_setSwordStyleRet]
+	}
+}
+
+naked void PlayerTracker::gunslinger_cmp_detour()
+{
+	__asm
+	{
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push rdi
+		push rsp
+		push r8
+		push r9
+		push r10
+		push r11
+		mov rcx, rbx
+		mov edx, 2
+		sub rsp, 32
+		call qword ptr[PlayerTracker::plDante_request_set_style_asm]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rsp
+		pop rdi
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		cmp dword ptr [rbx + 0x0000188C], 02
+		jmp qword ptr[PlayerTracker::_setGunStyleRet]
+	}
+}
+
+naked void PlayerTracker::royalguard_cmp_detour()
+{
+	__asm
+	{
+		push rax
+		push rbx
+		push rcx
+		push rdx
+		push rdi
+		push rsp
+		push r8
+		push r9
+		push r10
+		push r11
+		mov rcx, rbx
+		mov edx, 3
+		sub rsp, 32
+		call qword ptr [PlayerTracker::plDante_request_set_style_asm]
+		add rsp, 32
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rsp
+		pop rdi
+		pop rdx
+		pop rcx
+		pop rbx
+		pop rax
+		cmp dword ptr [rbx + 0x0000188C], 03
+		jmp qword ptr[PlayerTracker::_setRoyalStyleRet]
+	}
+}
+
+void PlayerTracker::plDante_request_set_style_asm(uintptr_t plDante, PlDanteStyleType requestedStyle)
+{
+	_mod->_plDanteSetStyleRequest.invoke(plDante, requestedStyle);
+}
+
+void PlayerTracker::pl_reset_pad_input_hook(uintptr_t vm, uintptr_t pl, bool clearAutoPad)
+{
+	bool callOrig = true;
+	_mod->_beforeResetPadInput.invoke(pl, clearAutoPad, &callOrig);
+	if(callOrig)
+		_mod->m_pad_input_reset_hook->get_original<decltype(pl_reset_pad_input_hook)>()(vm, pl, clearAutoPad);
+}
+
+int PlayerTracker::pl0800_on_guard_hook(uintptr_t threadCtxt, uintptr_t vergil, uintptr_t hitCtrlDamageInfo)
+{
+	int res = _mod->m_pl0800_on_guard_hook->get_original<decltype(pl0800_on_guard_hook)>()(threadCtxt, vergil, hitCtrlDamageInfo);
+	_mod->_afterPl0800GuardCheck.invoke(threadCtxt, vergil, hitCtrlDamageInfo, &res);
+	return res;
+}
+
+void PlayerTracker::pl_manager_add_pl_hook(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl)
+{
+	_mod->m_pl_manager_add_pl_hook->get_original<decltype(pl_manager_add_pl_hook)>()(threadCtxt, plManager, pl);
+	_mod->_playerAdded.invoke(threadCtxt, pl);                                                                                                                   
+}
+
+void PlayerTracker::pl_set_die_hook(uintptr_t threadCtxt, uintptr_t pl)
+{
+	_mod->_onPlSetDie.invoke(threadCtxt, pl);
+	_mod->m_pl_set_die_hook->get_original<decltype(pl_set_die_hook)>()(threadCtxt, pl);
+}
+
+void PlayerTracker::pl_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl)
+{
+	_mod->_onPlLockOnUpdate.invoke(threadCtxt, pl);
+	_mod->m_pl_lock_on_update_hook->get_original<decltype(pl_update_lock_on_hook)>()(threadCtxt, pl);
+}
+
+void PlayerTracker::pl0000_quicksilver_slow_world_action_start_hook(uintptr_t threadCtxt, uintptr_t shellQuicksilverWorldSlowAction, uintptr_t behaviorTreeArg)
+{
+	_mod->m_pl0000_quicksilver_slow_world_action_start_hook->get_original<decltype(pl0000_quicksilver_slow_world_action_start_hook)>()(threadCtxt, shellQuicksilverWorldSlowAction, behaviorTreeArg);
+	_mod->_afterPl0000QuickSilverWorldSlowActionStart.invoke(threadCtxt, shellQuicksilverWorldSlowAction, behaviorTreeArg);
+}
+
+void PlayerTracker::pl0000_quicksilver_stop_world_action_start_hook(uintptr_t threadCtxt, uintptr_t shellQuicksilverWorldStopAction, uintptr_t behaviorTreeArg)
+{
+	_mod->m_pl0000_quicksilver_stop_world_action_start_hook->get_original<decltype(pl0000_quicksilver_slow_world_action_start_hook)>()(threadCtxt, shellQuicksilverWorldStopAction, behaviorTreeArg);
+	_mod->_afterPl0000QuickSilverWorldStopActionStart.invoke(threadCtxt, shellQuicksilverWorldStopAction, behaviorTreeArg);
+}
+
+void PlayerTracker::pl_add_dt_gauge_hook(uintptr_t threadCtxt, uintptr_t pl, float val, int dtAddType, bool fixedValue)
+{
+	_mod->_onPlAddDtGauge.invoke(threadCtxt, pl, &val, dtAddType, fixedValue);
+	_mod->m_pl_add_dt_gauge_hook->get_original<decltype(pl_add_dt_gauge_hook)>()(threadCtxt, pl, val, dtAddType, fixedValue);
+}
+
+void PlayerTracker::pl_just_escape_hook(uintptr_t threadCtxt, uintptr_t pl, uintptr_t hitCntrl)
+{
+	_mod->_onPlJustEscape.invoke(threadCtxt, pl, hitCntrl);
+	_mod->m_pl_add_dt_gauge_hook->get_original<decltype(pl_just_escape_hook)>()(threadCtxt, pl, hitCntrl);
+}
+
     // clang-format on
 
 void PlayerTracker::init_check_box_info() {
@@ -427,6 +628,77 @@ std::optional<std::string> PlayerTracker::on_initialize() {
   if (!vergildata_addr) {
 	  return "Unable to find vergildata pattern.";
   }
+  auto plManagerAddPlAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 55 56 41 56 48 83 EC 20 4D");//DevilMayCry5.app_PlayerManager__addPlayer272229
+  if (!plManagerAddPlAddr)
+  {
+	  return "Unable to find PlayerTracker.plManagerAddPlAddr pattern.";
+  }
+
+  auto plResetPadInputAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B 41 50 48 8B F9");//DevilMayCry5.app_Player__resetPadInput171164
+  if (!plResetPadInputAddr)
+  {
+	  return "Unable to find PlayerTracker.plResetPadInputAddr pattern.";
+  }
+
+  auto pl0800GuardCheckAddr = m_patterns_cache->find_addr(base, "40 53 56 57 48 81 EC 80 00 00 00 49 8B F0 48 8B FA 48 8B D9 4D 85 C0 75 17");
+  //DevilMayCry5.app_PlayerVergilPL__guardCheck114086
+  if (!pl0800GuardCheckAddr)
+  {
+	  return "Unable to find PlayerTracker.pl0800GuardCheckAddr pattern.";
+  }
+
+  auto plSetDieAddr = m_patterns_cache->find_addr(base, "02 03 00 00 C3 CC 48 89 5C 24 08");
+  //DevilMayCry5.app_Player__setDie171231 (-0x6)
+  if (!pl0800GuardCheckAddr)
+  {
+	  return "Unable to find PlayerTracker.plSetDieAddr pattern.";
+  }
+
+  auto plLockOnUpdateAddr = m_patterns_cache->find_addr(base, "30 48 83 C4 20 5F C3 CC CC CC CC 48 89 5C 24 18 57 48 83 EC 20 48 8B 41");
+  //DevilMayCry5.app_Player__updateLockOn171422 (-0xB)
+  if (!plLockOnUpdateAddr)
+  {
+	  return "Unable to find PlayerTracker.plLockOnUpdateAddr pattern.";
+  }
+
+  auto pl0000QuickSilverWorldStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 CB D2");
+  //DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldSlowAction__start315768
+  if (!pl0000QuickSilverWorldStartAddr)
+  {
+	  return "Unable to find PlayerTracker.pl0000QuickSilverWorldStartAddr pattern.";
+  }
+
+  auto pl0000QuickSilverWorldStopStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 30 48 8B FA 48 8B D9 E8 2B BA");
+  //DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldStopAction__start315771
+  if (!pl0000QuickSilverWorldStopStartAddr)
+  {
+	  return "Unable to find PlayerTracker.pl0000QuickSilverWorldStopStartAddr pattern.";
+  }
+
+  auto plOnJustEscapeAddr = m_patterns_cache->find_addr(base, "CD CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 57 48 83 EC 40");
+  //DevilMayCry5.app_Player__onJustEscape171220 (-0xA)
+  if (!plOnJustEscapeAddr)
+  {
+	  return "Unable to find PlayerTracker.plOnJustEscapeAddr pattern.";
+  }
+
+  auto setTrickStyleAddr = m_patterns_cache->find_addr(base, "44 39 83 8C 18 00 00"); //DevilMayCry5.exe+1967C35
+  if (!setTrickStyleAddr)
+  {
+	  return "Unable to find PlayerTracker.setTrickStyleAddr pattern.";
+  }
+
+  auto plAddDtGaugeAddr = m_patterns_cache->find_addr(base, "48 89 6C 24 20 56 57 41 56 48 83 EC 30 48 8B 41");
+  //DevilMayCry5.app_Player__addDevilTriggerGauge171566
+  if (!plAddDtGaugeAddr)
+  {
+	  return "Unable to find PlayerTracker.plAddDtGaugeAddr pattern.";
+  }
+
+  auto setSwordStyleAddr = setTrickStyleAddr.value() - 0x22;
+  auto setGunStyleAddr = setSwordStyleAddr - 0x22;
+  auto setRoyalStyleAddr = setGunStyleAddr - 0x22;
+
   if (!install_hook_absolute(player_addr.value(), m_player_hook, &player_detour, &player_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -460,8 +732,62 @@ std::optional<std::string> PlayerTracker::on_initialize() {
     return "Failed to initialize stick threshhold";
   }
 
+  if (!install_hook_absolute(setTrickStyleAddr.value(), m_set_trick_style_hook, &trickster_cmp_detour, &_setTrickStyleRet, 7)) {
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize PlayerTracker.setTrickStyle";
+  }
+
+  if (!install_hook_absolute(setSwordStyleAddr, m_set_sword_style_hook, &swordmaster_cmp_detour, &_setSwordStyleRet, 7)) {
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize PlayerTracker.setSwordStyle";
+  }
+
+  if (!install_hook_absolute(setGunStyleAddr, m_set_gun_style_hook, &gunslinger_cmp_detour, &_setGunStyleRet, 7)) {
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize PlayerTracker.setGunStyle";
+  }
+
+  if (!install_hook_absolute(setRoyalStyleAddr, m_set_royal_style_hook, &royalguard_cmp_detour, &_setRoyalStyleRet, 7)) {
+	  spdlog::error("[{}] failed to initialize", get_name());
+	  return "Failed to initialize PlayerTracker.setRoyalStyle";
+  }
+
   PlayerTracker::summon_jmp_je     = summon_addr.value() + 0x15B;
   PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x11 + 0x14;
+
+  m_pl_manager_add_pl_hook = std::make_unique<FunctionHook>(plManagerAddPlAddr.value(), &pl_manager_add_pl_hook);
+  m_pl_manager_add_pl_hook->create();
+
+  m_pad_input_reset_hook = std::make_unique<FunctionHook>(plResetPadInputAddr.value(), &pl_reset_pad_input_hook);
+  m_pad_input_reset_hook->create();
+
+  m_pl0800_on_guard_hook = std::make_unique<FunctionHook>(pl0800GuardCheckAddr.value(), &pl0800_on_guard_hook);
+  m_pl0800_on_guard_hook->create();
+
+  m_pl_set_die_hook = std::make_unique<FunctionHook>(plSetDieAddr.value() + 0x6, &pl_set_die_hook);
+  if (!m_pl_set_die_hook->create())
+	  return "Faild to install PlayerTracker.m_pl_set_die_hook;";
+
+  m_pl_lock_on_update_hook = std::make_unique<FunctionHook>(plLockOnUpdateAddr.value() + 0xB, &pl_update_lock_on_hook);
+  if (!m_pl_lock_on_update_hook->create())
+	  return "Faild to install PlayerTracker.m_pl_lock_on_update_hook;";
+
+  m_pl0000_quicksilver_slow_world_action_start_hook = std::make_unique<FunctionHook>(pl0000QuickSilverWorldStartAddr.value(), &pl0000_quicksilver_slow_world_action_start_hook);
+  if (!m_pl0000_quicksilver_slow_world_action_start_hook->create())
+	  return "Faild to install PlayerTracker.m_pl0000_quicksilver_slow_world_action_start_hook;";
+
+  m_pl0000_quicksilver_stop_world_action_start_hook = std::make_unique<FunctionHook>(pl0000QuickSilverWorldStopStartAddr.value(), &pl0000_quicksilver_stop_world_action_start_hook);
+  if (!m_pl0000_quicksilver_stop_world_action_start_hook->create())
+	  return "Faild to install PlayerTracker.m_pl0000_quicksilver_stop_world_action_start_hook;";
+
+  m_pl_add_dt_gauge_hook = std::make_unique<FunctionHook>(plAddDtGaugeAddr.value(), &pl_add_dt_gauge_hook);
+  if (!m_pl_add_dt_gauge_hook->create())
+	  return "Faild to install PlayerTracker.m_pl_add_dt_gauge_hook;";
+
+  m_pl_just_escape_hook = std::make_unique<FunctionHook>(plOnJustEscapeAddr.value() + 0xA, &pl_just_escape_hook);
+  if (!m_pl_just_escape_hook->create())
+	  return "Faild to install PlayerTracker.m_pl_just_escape_hook;";
+
 
   return Mod::on_initialize();
 }

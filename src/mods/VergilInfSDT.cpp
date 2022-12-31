@@ -1,48 +1,11 @@
 #include "VergilInfSDT.hpp"
 #include "PlayerTracker.hpp"
-uintptr_t VergilInfSDT::jmp_ret1{NULL};
-uintptr_t VergilInfSDT::jmp_ret2{NULL};
-bool VergilInfSDT::cheaton{NULL};
 
-float desiredsdtvalue = 10000.0f;
-
-// clang-format off
-// only in clang/icl mode on x64, sorry
-
-static naked void detour1() {
-	__asm {
-        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
-        jne code
-        cmp byte ptr [VergilInfSDT::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-        movss xmm1, [desiredsdtvalue]
-        movss [rbx+00001B20h], xmm1
-		jmp qword ptr [VergilInfSDT::jmp_ret1]
-
-    code:
-        movss xmm1,[rbx+00001B20h]
-		jmp qword ptr [VergilInfSDT::jmp_ret1]
-	}
-}
-
-static naked void detour2() {
-	__asm {
-        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
-        jne code
-        cmp byte ptr [VergilInfSDT::cheaton], 1
-        je cheatcode
-        jmp code
-
-    cheatcode:
-		jmp qword ptr [VergilInfSDT::jmp_ret2]
-
-    code:
-        movss [rdi+00001B20h], xmm0
-        jmp qword ptr [VergilInfSDT::jmp_ret2]
-	}
+void VergilInfSDT::dt_update_hook(uintptr_t threadCntx, uintptr_t pl0800)
+{
+    _mod->_pl0800DtUpdateHook->get_original<decltype(dt_update_hook)>()(threadCntx, pl0800);
+    if (cheaton)
+        *(float*)(pl0800 + 0x1B20) = 10000.0f;
 }
 
 // clang-format on
@@ -59,31 +22,22 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
   m_on_page               = Page_VergilSDT;
 
   m_full_name_string     = "Infinite SDT";
-  m_author_string        = "SSSiyan";
+  m_author_string        = "SSSiyan, V.P.Zadov";
   m_description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
 
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = m_patterns_cache->find_addr(base, "F3 0F 10 8B 20 1B 00 00 8B");
-  if (!addr1) {
-    return "Unable to find VergilInfSDT pattern.";
-  }
-  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 11 87 20 1B 00 00 48 8B 43 50 48");
-  if (!addr2) {
+
+  auto addr = m_patterns_cache->find_addr(base, "40 53 57 48 83 EC 58 80");
+  //DevilMayCry5.app_PlayerVergilPL__updateDevilTrigger113907
+  if (!addr) {
     return "Unable to find VergilInfSDT pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 8)) {
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize VergilInfSDT1";
-  }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 8)) {
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize VergilInfSDT2";
-  }
+  _pl0800DtUpdateHook = std::make_unique<FunctionHook>(addr.value(), &dt_update_hook);
+  if (!_pl0800DtUpdateHook->create())
+      return "Unable to create VergilInfSDT._pl0800DtUpdateHook";
   return Mod::on_initialize();
 }
 

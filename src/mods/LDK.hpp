@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include "Coroutine/Coroutines.hpp"
 
 enum HitVfxState { DrawAll, DamageOnly, Nothing };
 
@@ -33,8 +34,22 @@ private:
   void set_container_limit_all(uint32_t num);
   void set_container_limit_blood_only(uint32_t num);
 
+  void update_em_limit();
+
+  Coroutines::Coroutine<decltype(&LDK::update_em_limit), LDK*> _spawnPauseCoroutine{&LDK::update_em_limit};
+
+  static inline LDK* _mod = nullptr;
+
+  int _emLimitTmp = 0;
+
+  std::mutex _pauseSpawnMtx;
+
 public:
-  LDK() = default;
+    LDK()
+    {
+        _mod = this;
+        _spawnPauseCoroutine.set_delay(SPAWN_PAUSE_TIME);
+    }
   // mod name string for config
   std::string_view get_name() const override { return "LDK"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
@@ -70,8 +85,7 @@ public:
   static uintptr_t nohitlns_ret;
   static uintptr_t nohitlns_ret_je;
 
-
-  static const uint32_t SPAWN_PAUSE_TIME = 3;
+  static inline const float SPAWN_PAUSE_TIME = 4000.0f;
 
   static bool hitvfx_fix_on;
   static bool pausespawn_enabled;
@@ -111,6 +125,8 @@ public:
   // function hook instance for our detour, convinient wrapper 
   // around minhook
   void init_check_box_info() override;
+
+  static void pause_spawn_asm();
 
   std::unique_ptr<FunctionHook> m_enemynumber_hook;
   std::unique_ptr<FunctionHook> m_capbypass_hook1;

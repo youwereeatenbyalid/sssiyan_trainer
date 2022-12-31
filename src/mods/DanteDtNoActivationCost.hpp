@@ -38,7 +38,7 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteCheat;
 		m_full_name_string = "Remove DT Activation Cost";
-		m_author_string = "VPZadov";
+		m_author_string = "V.P.Zadov";
 		m_description_string = "Remove the activation cost of entering DT.";
 
 		set_up_hotkey();

@@ -2,23 +2,22 @@
 #include "Mod.hpp"
 #include "mods/GameFunctions/PositionController.hpp"
 #include "PlayerTracker.hpp"
+#include "InputSystem.hpp"
+#include "PlSetActionData.hpp"
+#include "Mods.hpp"
+#include "GameFunctions/CreateShell.hpp"
+
 class VergilAirTrick : public Mod
 {
 public:
-	enum TeleportType
-	{
-		Front,
-		Behind
-	};
-
-	static inline TeleportType trickType = Front;
-
 	static bool cheaton;
 	static bool isSpeedUp;
 	static bool isCustomOffset;
 	static bool isCustomWaitTime;
 	static inline bool isTeleport = false;
 	static inline bool isDoppelOppositeTeleport = false;
+	static inline bool forceGroundTrick = true;
+	static inline bool isAutoRotate = true;
 
 	/*static constexpr float defaultInitSpeed = 0.7f;
 	static constexpr float defaultFinishRange = 1.2f;
@@ -37,8 +36,7 @@ public:
 	static float initSpeed;
 	static float waitTime;
 	static float finishOffsetZ;
-	static inline float teleportZOffs = -1.3f;
-	static inline float colliderZUp = 1.5f;
+	
 
 	static uintptr_t initSpeedRet;
     static uintptr_t speedAccRet;
@@ -49,6 +47,7 @@ public:
     static uintptr_t maxSpeedZRet;
 	static uintptr_t maxXZRet;
 	static uintptr_t routineStartRet;
+	static inline uintptr_t trickUpdateStartRet = 0;
 
 	VergilAirTrick() = default;
 
@@ -73,9 +72,51 @@ public:
 	static void change_pos_asm(uintptr_t trickAction);
 
 private:
+	enum TeleportType
+	{
+		Front,
+		Behind,
+		Dynamic
+	};
+
+	enum GroundTrickType
+	{
+		Default,
+		AlwaysGround
+	};
+
+	TeleportType trickType = Front;
+
+	GroundTrickType groundTrickType = Default;
+
+	enum class AfterimageState
+	{
+		Default,
+		HumanOnly,
+		SDTOnly,
+		Always
+	};
+
+	enum class AfterimageMode
+	{
+		OnStart,
+		OnEnd,
+		Both,
+		Trail
+	};
+	AfterimageState teleportAfterImageState  = AfterimageState::Default;
+	AfterimageMode teleportAfterImageMode = AfterimageMode::Trail;
+
+	float teleportZOffs = -1.3f;
+	const float colliderZUp = 0.75f;
+
+	float afterImagesInterval = 1.0f;
+
+	void setup_afterimage_shell(uintptr_t shell, uintptr_t afterImageParam);
+	void create_afterimages(TeleportType teleportType, uintptr_t vergil, uintptr_t charTransform, gf::Vec3 startPlPos, gf::Vec3 targetPos, gf::Vec3 trickVec, float distance);
 	void init_check_box_info() override;
-	static void xypos_teleport(uintptr_t vergil, TeleportType type, float &x, float &y, GameFunctions::Vec3 pPos, float trickX, float trickY, float trickLen);
-	//static inline std::unique_ptr<GameFunctions::Transform_SetPosition> set_pos{nullptr};
+	void pos_teleport(TeleportType type, gf::Vec3 &outVec, GameFunctions::Vec3 pPos, gf::Vec3 trickVec, float trickCorrect, float trickLen);
+
 	std::unique_ptr<FunctionHook> m_airtrick_hook;
     std::unique_ptr<FunctionHook> m_initspeed_hook;
 	std::unique_ptr<FunctionHook> m_waittime_hook;
@@ -85,5 +126,8 @@ private:
     std::unique_ptr<FunctionHook> m_speed_acc_hook;
 	std::unique_ptr<FunctionHook> m_teleport_hook;
 	std::unique_ptr<FunctionHook> m_finish_range_hook;
+
+	InputSystem *_inputSystem = nullptr;
+	static inline VergilAirTrick *_mod;
 };
 

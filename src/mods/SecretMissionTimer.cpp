@@ -56,7 +56,7 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 	m_is_enabled= &cheaton;
 	m_on_page = Page_SecretMission;
 	m_full_name_string = "Freeze secret missions timer (+)";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Also can prevent starting \"no ground\" timer on sm9.";
 
 	auto timerAddr = m_patterns_cache->find_addr(base, "F3 0F 10 43 5C 0F 5A C0 F2");// DevilMayCry5.exe+9473C0

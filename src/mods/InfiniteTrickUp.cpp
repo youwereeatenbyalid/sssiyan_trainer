@@ -26,7 +26,7 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilCheat;
 	m_full_name_string = "Infinite Trick Up";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Allow vergil to infinitely trick up.";
 
   set_up_hotkey();

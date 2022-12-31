@@ -2,6 +2,8 @@
 #include "Mods.hpp"
 #include "Config.hpp"
 #include "imgui_internal.h"
+#include "mods/Coroutine/Coroutines.hpp"
+#include "mods/PrefabFactory/PrefabFactory.hpp"
 // Example
          #include "mods/SimpleMod.hpp"
 // Darkness
@@ -138,12 +140,19 @@
     // V
     // Vergil
        #include "mods/VergilDoppelBanish.hpp"
-// VPZadov
+// V.P.Zadov
     // Background
        #include "mods/PlSetActionData.hpp"
+       #include "mods/EndLvlHooks.hpp"
+       #include "mods/GameplayStateTracker.hpp"
+       #include "mods/FsmPlPosCtrActionStartHooks.hpp"
+       #include "mods/InputSystem.hpp"
     // Common
+       #include "mods/LockOnNoHold.hpp"
+       #include "mods/WitchTime.hpp"
     // Gameplay
        #include "mods/EnemySwapper.hpp"
+       #include "mods/EnemyFixes.hpp"
        #include "mods/EnemyDataSettings.hpp"
        //#include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
@@ -151,6 +160,8 @@
        //#include "mods/EnemyWaveEditor.hpp"
        #include "mods/SecretMissionTimer.hpp"
        #include "mods/BossDanteSetup.hpp"
+       #include "mods/PosActionEditor.hpp"
+       #include "mods/NoRoundtripCallback.hpp"
     // Nero
     // Dante
        #include "mods/DanteAirTrickSettings.hpp"
@@ -158,6 +169,10 @@
        #include "mods/DanteNoSdtStun.hpp"
        #include "mods/JudgementCustomCost.hpp"
        #include "mods/DanteDtNoActivationCost.hpp"
+       #include "mods/DanteSDTRegen.hpp"
+       #include "mods/DanteSelectReleaseType.hpp"
+       #include "mods/DanteQuickSilver.hpp"
+       #include "mods/DanteAirMustang.hpp"
     // V
     // Vergil
        #include "mods/VergilSDTFormTracker.hpp"
@@ -177,9 +192,21 @@
        #include "mods/VergilGuardYamatoBlock.hpp"
        #include "mods/AirTrickDodge.hpp"
        #include "mods/VergilNoRoyalForkDelay.hpp"
+       #include "mods/VergilDoppelInitSetup.hpp"
        #include "mods/InstantDoppel.hpp"
        #include "mods/AirMoves.hpp"
        #include "mods/VergilTrickTrailsEfx.hpp"
+       #include "mods/BossTrickUp.hpp"
+       #include "mods/VergilSDTAlwaysCancels.hpp"
+       #include "mods/DoppelNoComeBack.hpp"
+       #include "mods/EnemySpawner.hpp"
+       #include "mods/BossVergilMoves.hpp"
+       #include "mods/Pl0300ControllerManager.hpp"
+       #include "mods/VergilGuardSlowMotion.hpp"
+       #include "mods/BossVergilSettings.hpp"
+       #include "mods/Pl0000SlowWorldStop.hpp"
+       #include "mods/VergilQuickSilver.hpp"
+       #include "mods/ParryWithFinesse.hpp" 
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 
@@ -188,6 +215,10 @@ Mods::Mods()
 {
   // Example
         m_mods.emplace_back(std::make_unique<SimpleMod>());
+        // V.P.Zadov
+            // Background
+        m_mods.emplace_back(std::make_unique<GameplayStateTracker>());//Global stuff like isCutscene for turbo, current gameplay states, etc
+        m_mods.emplace_back(std::make_unique<InputSystem>());//Game actions inputs. Init before other mods 'cause you may want to get ptr to this on mods ctor or init();
 //// Darkness
 //    // Background
         m_mods.emplace_back(std::make_unique<FileEditor>());
@@ -328,10 +359,15 @@ Mods::Mods()
     // Vergil
         m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
-// VPZadov
+// V.P.Zadov
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
+        m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
+        m_mods.emplace_back(std::make_unique<EnemyFixes>());
+        m_mods.emplace_back(std::make_unique<Pl0300Controller::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods.
         // Common
+        m_mods.emplace_back(std::make_unique<LockOnNoHold>());
+        m_mods.emplace_back(std::make_unique<WitchTime>());
         // Gameplay
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
@@ -340,15 +376,24 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());
+        m_mods.emplace_back(std::make_unique<BossVergilSettings>());
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        m_mods.emplace_back(std::make_unique<PosActionEditor>());
+        m_mods.emplace_back(std::make_unique<NoRoundtripCallback>());
+        m_mods.emplace_back(std::make_unique<EnemySpawner>());
         // Nero
+        m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
         // Dante
         m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
         m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
         m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
         m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
         m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
+        m_mods.emplace_back(std::make_unique<DanteSDTRegen>());
+        m_mods.emplace_back(std::make_unique<DanteSelectReleaseType>());
+        m_mods.emplace_back(std::make_unique<DanteQuickSilver>());
+        m_mods.emplace_back(std::make_unique<DanteAirMustang>());
         // V
         //Vergil
         m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
@@ -368,15 +413,25 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
         m_mods.emplace_back(std::make_unique<AirTrickDodge>());
         m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
+        m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
         m_mods.emplace_back(std::make_unique<InstantDoppel>());
         m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
+        m_mods.emplace_back(std::make_unique<BossTrickUp>());
+        m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>());
+        m_mods.emplace_back(std::make_unique<DoppelNoComeBack>());
+        m_mods.emplace_back(std::make_unique<ActionStartHooks::FsmPlPosCtrActionStartHooks>());
+        m_mods.emplace_back(std::make_unique<BossVergilMoves>());
+        //m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>());
+        m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
+        m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
 
 #ifdef DEVELOPER
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
 }
 
-std::optional<std::string> Mods::on_initialize(const bool& load_configs) const {
+std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
+    Coroutines::Impl::CoroutineBase::init_sub_f_addr(Mod::m_patterns_cache.get(), g_framework->get_module().as<HMODULE>());
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_initialize()", mod->get_name().data());
 
@@ -385,14 +440,18 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) const {
             return e;
         }
     }
-    if(Mod::m_patterns_cache->is_changed())
-        Mod::m_patterns_cache->save();
-    Mod::m_patterns_cache->free();
+
+    for (auto& i : m_mods)
+        i->after_all_inits();
 
     if (load_configs)
     {
         load_mods();
     }
+
+    if (Mod::m_patterns_cache->is_changed())
+        Mod::m_patterns_cache->save();
+    Mod::m_patterns_cache->free();
 
 	m_focused_mod = "";
     return std::nullopt;

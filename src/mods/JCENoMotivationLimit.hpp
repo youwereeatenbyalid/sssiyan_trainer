@@ -1,5 +1,6 @@
 #pragma once
 #include "Mod.hpp"
+#include "BossVergilMoves.hpp"
 //clang-format off
 class JCENoMotivationLimit : public Mod
 {
@@ -16,7 +17,10 @@ public:
 	static inline uintptr_t yamatoSdtConcSkip;
 
 
-	JCENoMotivationLimit() = default;
+	JCENoMotivationLimit()
+	{
+		_mod = this;
+	}
 
 	std::string_view get_name() const override
 	{
@@ -45,6 +49,8 @@ public:
 	// on_draw_debug_ui() is called when debug window shows up
 	// void on_draw_debug_ui() override;
 
+	static bool check_mods_settnigs_asm(uintptr_t vergil);
+
 private:
 	void init_check_box_info() override;
 	std::unique_ptr<FunctionHook> m_humnan_motivation_hook;
@@ -52,5 +58,10 @@ private:
 	std::unique_ptr<FunctionHook> m_yamato_motivation_hook;
 	std::unique_ptr<FunctionHook> m_sdtyamato_motivation_hook;
 
+	BossVergilMoves* _bossMovesMod = nullptr;
+
+	static inline JCENoMotivationLimit* _mod = nullptr;
+
+	void after_all_inits() override;
 };
 //clang-format on

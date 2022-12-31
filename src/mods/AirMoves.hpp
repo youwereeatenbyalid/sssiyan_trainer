@@ -21,7 +21,9 @@ public:
 		BRKUpdraft,
 		BWKick13,
 		IceAge,
-		CerbBlitz
+		CerbBlitz,
+		SpardaRT,
+		RebellionRT
 	};
 private:
 
@@ -53,11 +55,6 @@ private:
 	public:
 		HookedMoves(const std::initializer_list<MoveInfo> &movesList) : moves(movesList) { }
 
-		/*void append(std::initializer_list<MoveInfo> l)
-		{
-			moves.insert(moves.end(), l.begin(), l.end());
-		}*/
-
 		size_t size() const { return moves.size(); }
 
 		MoveInfo &operator[](int indx) { return moves[indx]; }
@@ -84,7 +81,8 @@ private:
 	std::unique_ptr<FunctionHook> m_kick_air_hook;
 	std::unique_ptr<FunctionHook> m_cerberus_ice_edge_air_hook;
 	std::unique_ptr<FunctionHook> m_cerberus_blitz_air_hook;
-	//std::unique_ptr<FunctionHook> cur_action_hook;
+	std::unique_ptr<FunctionHook> _spRtAirHook;
+	std::unique_ptr<FunctionHook> _rbRtAirHook;
 	std::unique_ptr<FunctionHook> m_check_ground_hit_hook;
 	std::unique_ptr<FunctionHook> m_air_dodge_crash_hook;
 
@@ -104,8 +102,9 @@ public:
 	static inline uintptr_t kick13AirRet = 0;
 	static inline uintptr_t cerberusIceAgeAirRet = 0;
 	static inline uintptr_t cerberusBlitzAirRet = 0;
+	static inline uintptr_t _spardaRTAirRet = 0;
+	static inline uintptr_t _rbRTAirRet = 0;
 
-	//static inline uintptr_t CurMoveStrRet = 0;
 	static inline uintptr_t checkGroundHitCallRet = 0;
 	static inline uintptr_t airTrickDodgeCrashRet = 0;
 	static inline uintptr_t airTrickDodgeCrashJne = 0;
@@ -123,15 +122,12 @@ public:
 	{ Moves::RBStinger, "Rebellion stinger", "RB_Stinger"},
 	{ Moves::SPStinger, "Sparda stinger", "SP_Stinger"},
 	{ Moves::DSStinger, "DSD stinger", "DS_Stinger" },
+	{ Moves::RebellionRT, "Rebellion round trip", "RB_RoundTrip" },
+	{ Moves::SpardaRT, "Sparda round trip", "SP_RoundTrip" },
 	{ Moves::BRKUpdraft, "Balrog Updraft", ""/*"BRK_SomerSalt"*/},//Empty str to skip ground reset hook
 	{ Moves::IceAge, "Cerberus Ice Age", "CBN_IceAge" },
 	{ Moves::CerbBlitz, "Cerberus Percussion", "CBT_Blitz" },
 	}));
-
-	/*static inline std::unique_ptr<HookedMoves> neroMoves = std::make_unique<HookedMoves>(std::initializer_list<MoveInfo>({
-	{ Moves::RapidSlash, false, "Rapid slash" },
-	{ Moves::FEDrive, false, "Drive##Vergil" }
-	}));*/
 
 	AirMoves() = default;
 
@@ -163,5 +159,5 @@ public:
 	void on_draw_debug_ui() override;
 
 	static bool is_movecheat_enabled_asm(Moves move);
-	static void str_cur_action_asm(uintptr_t dotNetString);
+	static void str_cur_action_asm(uintptr_t curPl);
 };

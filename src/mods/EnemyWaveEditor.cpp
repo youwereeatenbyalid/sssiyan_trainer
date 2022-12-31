@@ -1,17 +1,13 @@
 #include "EnemyWaveEditor.hpp"
+#include "EnemyDataSettings.hpp"
+#include "EnemyFixes.hpp"
+
 using namespace WaveEditorMod;
 
-std::mutex EnemyWaveEditor::mt;
+std::mutex EnemyWaveEditor::mtx;
 
 bool EnemyWaveEditor::cheaton{false};
-bool EnemyWaveEditor::isAllAllocCorrectly {false};
-bool EnemyWaveEditor::forceLoadAll{true};
-bool EnemyWaveEditor::isPfbLoadRequested{true};
-bool EnemyWaveEditor::isBPFixRequested{false};
-bool EnemyWaveEditor::isBpAllocation{false};
-bool EnemyWaveEditor::isRequestEndBpStage{false};
-
-bool isRtReady = true;
+bool EnemyWaveEditor::isBpWarmUpMode{false};
 
 EnemyWaveEditor::Mode EnemyWaveEditor::mode = EnemyWaveEditor::Mode::Mod;
 
@@ -26,99 +22,166 @@ uintptr_t EnemyWaveEditor::retJmp{NULL};
 uintptr_t EnemyWaveEditor::retJl{NULL};
 uintptr_t EnemyWaveEditor::curListAddr{NULL};
 uintptr_t EnemyWaveEditor::prefabLoadJmp{NULL};
-uintptr_t EnemyWaveEditor::bpRetJmp{NULL};
-uintptr_t EnemyWaveEditor::fadeStaticBase{NULL};
 
-std::vector<GameEmList> EnemyWaveEditor::gameDataList;
-
-std::condition_variable EnemyWaveEditor::cv;
-
-MimicMngObjManager EnemyWaveEditor::mimObjManager{};
-
-EnemyWaveEditor::SetupEmMode EnemyWaveEditor::setupEmMode = EnemyWaveEditor::SetupEmMode::First;
+EnemyWaveEditor::SetupEmMode EnemyWaveEditor::setupEmMode = EnemyWaveEditor::SetupEmMode::Last;
 
 int selectedMimObj = 0;
 int selectedAllocObj = -1;
 int newLoadId = 0;
 
-void EnemyWaveEditor::set_em_data_asm(std::shared_ptr<HandleMimicObj> &curHandleObj, uintptr_t lstAddr)
+void EnemyWaveEditor::set_em_data_asm(const std::shared_ptr<MimicListData> &curHandleObj, uintptr_t lstAddr)
 {
-    curHandleObj->mimicList.set_game_list_data(lstAddr);
-    //uintptr_t obj = (uintptr_t)curHandleObj->mimicList.get_mimic_obj();
-    uintptr_t temp = *(uintptr_t*)(curHandleObj->mimicList.get_game_mng_obj_ptr());
+    if(curHandleObj->isSwapped)
+        return;
+    curHandleObj->mimicList.set_list_data(lstAddr);
     uintptr_t emItem;
-    int count = curHandleObj->mimicList.get_orig_list_count() - 1;
+    int count = curHandleObj->mimicList.get_net_list_count() - 1;
     switch (setupEmMode)
     {
         case SetupEmMode::First:
         {
-            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_game_mng_obj_ptr() + 0x20);
+            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_items_ptr() + 0x20);
             break;
         }
         case SetupEmMode::Last:
         {
-            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_game_mng_obj_ptr() + 0x20 + 0x8 * count);
+            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_items_ptr() + 0x20 + 0x8 * count);
             break;
         }
         default:
         {
-            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_game_mng_obj_ptr() + 0x20);
+            emItem = *(uintptr_t*)(curHandleObj->mimicList.get_items_ptr() + 0x20);
             break;
         }
     }
-    for (int i = 0; i < curHandleObj->mimicList.get_allocated_count(); i++)
+    for (int i = 0; i < curHandleObj->mimicList.get_mimic_count(); i++)
     {
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x48), 0x48);//AddParamIndexDataListPtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x58), 0x58);//eventDataPtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x60), 0x60);//posDataListPtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x68), 0x68);//presetNoPtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x70), 0x70);//hpRatePtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x78), 0x78);//attackRatePtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<uintptr_t>(*(uintptr_t*)(emItem + 0x18), 0x18);//commentPtr
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<int>(*(int*)(emItem + 0x34), 0x34);//greenOrbAddType
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<int>(*(int*)(emItem + 0x38), 0x38);//whiteOrbAddType
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<int>(*(int*)(emItem + 0x3C), 0x3C);//addParamIndex
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<int>(*(int*)(emItem + 0x54), 0x54);//playerLimit
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<bool>(*(bool*)(emItem + 0x40), 0x40);//isAddParamSetPlayer
-        curHandleObj->mimicList.get_allocated_base_data(i)->set_to_allocated_data<bool>(*(bool*)(emItem + 0x50), 0x50);//isNetworkPlayerLimit
+        curHandleObj->mimicList[i]->AddParamIndexDataListPtr = *(uintptr_t*)(emItem + 0x48);//AddParamIndexDataListPtr
+        curHandleObj->mimicList[i]->eventDataPtr = *(uintptr_t*)(emItem + 0x58);//eventDataPtr
+        curHandleObj->mimicList[i]->posDataListPtr = *(uintptr_t*)(emItem + 0x60);//eventDataPtr
+        curHandleObj->mimicList[i]->presetNoPtr = *(uintptr_t*)(emItem + 0x68);//eventDataPtr
+        curHandleObj->mimicList[i]->hpRatePtr = *(uintptr_t*)(emItem + 0x70);//eventDataPtr
+        curHandleObj->mimicList[i]->attackRatePtr = *(uintptr_t*)(emItem + 0x78);//eventDataPtr
+        curHandleObj->mimicList[i]->strComment = *(uintptr_t*)(emItem + 0x18);//commentPtr
+        curHandleObj->mimicList[i]->greenOrbAddType = *(int*)(emItem + 0x34);//greenOrbAddType
+        curHandleObj->mimicList[i]->whiteOrbAddType = *(int*)(emItem + 0x38);//whiteOrbAddType
+        curHandleObj->mimicList[i]->addParamIndex = *(int*)(emItem + 0x3C);//addParamIndex
+        curHandleObj->mimicList[i]->playerLimit = *(int*)(emItem + 0x54);//playerLimit
+        curHandleObj->mimicList[i]->isAddParamSetPlayer = *(bool*)(emItem + 0x40);//isAddParamSetPlayer
+        curHandleObj->mimicList[i]->isNetworkPlayerLimit = *(bool*)(emItem + 0x50);//isNetworkPlayerLimit
     }
-    //memcpy(curHandleObj->mimicList.get_mimic_obj(), (void*)temp, 0x18);
-    curHandleObj->mimicList.swap_original_list_data();
+    curHandleObj->mimicList.swap();
     curHandleObj->isSwapped = true;
+    mimListManager->set_is_any_swapped(true);
 }
 
 void EnemyWaveEditor::edit_gamelists_asm(uintptr_t lstAddr)
 {
-    //std::unique_lock<std::mutex> lck(mt);
-    if (mimObjManager.is_bind_mode() && !isBpAllocation && EnemySwapper::gameMode != 3)
+    std::unique_lock<std::mutex> lck(mtx);
+    int missionN = -1;
+
+    if (prflManager->is_custom_gamemode())
     {
-        auto curEmData = get_game_emdata_asm(lstAddr, false);
-        for (int i = 0; i < mimObjManager.count(); i++)
+        auto gmMng = sdk::get_managed_singleton<REManagedObject>("app.GameManager");
+        if (gmMng != nullptr)
         {
-            auto pMimObj = mimObjManager.get_mimic_list_ptr(i);
-            if(pMimObj->isSwapped)
-                continue;
-            if (pMimObj->bindedEmData != nullptr)
+            missionN = *(int*)((uintptr_t)gmMng + 0x80);
+            if (auto gameData = &mimListManager->get_game_data_list(); missionN == 20 && !gameData->empty() && IsEmDataStartedLoading && !(*gameData)[0].emDataInfo.empty())//This shit should be rewrite with MissionSettingsData but meh...
             {
-                if (*(pMimObj->bindedEmData) == curEmData)
+                if (*(bool*)(gmMng + 0x94))
                 {
-                    set_em_data_asm(pMimObj, lstAddr);
-                    break;
+                    missionN == 23;
+                    IsEmDataStartedLoading = false;
+
+                }
+                else if ((*gameData)[0].emDataInfo[0].emId == 3 || (*gameData)[0].emDataInfo[0].emId == 55 || (*gameData)[0].emDataInfo[0].emId == 42)
+                {
+                    auto curEmData = get_game_emdata_asm(lstAddr, false, false);
+                    switch (curEmData.emDataInfo[0].emId)
+                    {
+                        case 3:
+                        {
+                            missionN = 21;
+                            if(prflManager->get_last_misison_num() == 21)
+                                break;
+                            IsEmDataStartedLoading = false;
+                            break;
+                        }
+                        case 42:
+                        {
+                            missionN = 22;
+                            if (prflManager->get_last_misison_num() == 22)
+                                break;
+                            IsEmDataStartedLoading = false;
+                            break;
+                        }
+                        default:
+                        {
+                            missionN = prflManager->get_last_misison_num();
+                            break;
+                        }
+                    }
                 }
             }
         }
     }
-    else
+
+    if (!IsEmDataStartedLoading)
     {
-        auto curHandleObj = mimObjManager.get_mimic_list_ptr(emSetterCounter, true);
-        emSetterCounter.fetch_add(1);
-        if (curHandleObj == nullptr)
-            return;
-        set_em_data_asm(curHandleObj, lstAddr);
+        if (prflManager->is_custom_gamemode())
+            prflManager->load_custom_mission_data(missionN);
+        mimListManager->recheck_emids();
     }
+
+    if (mimListManager->count() != 0)
+    {
+        if (mimListManager->is_bind_mode() && !isBpWarmUpMode)
+        {
+            auto curEmData = get_game_emdata_asm(lstAddr, false);
+            for (int i = 0; i < mimListManager->count(); i++)
+            {
+                auto pMimObj = mimListManager->get_mimic_list_data(i);
+                if (pMimObj->isSwapped)
+                    continue;
+                if (pMimObj->bindedEmData != nullptr)
+                {
+                    if (*(pMimObj->bindedEmData) == curEmData)
+                    {
+                        set_em_data_asm(pMimObj, lstAddr);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (isBpWarmUpMode)
+            {
+                if (!mimListManager->is_any_swapped(false))
+                {
+                    if (mimListManager->count() > 1)
+                    {
+                        for (int i = 1; i < mimListManager->count(); i++)
+                            mimListManager->remove_at(1);
+                    }
+                    for (int i = 1; i <= 108; i++)
+                        mimListManager->add(i);
+                    for (int i = 1; i < mimListManager->count(); i++)
+                        mimListManager->copy_to(0, i, false);
+                }
+            }
+
+            auto curHandleObj = mimListManager->get_mimic_list_data(emSetterCounter, true);
+            emSetterCounter.fetch_add(1);
+            if (curHandleObj == nullptr)
+                return;
+            set_em_data_asm(curHandleObj, lstAddr);
+        }
+    }
+    IsEmDataStartedLoading = true;
 }
 
-GameEmList WaveEditorMod::EnemyWaveEditor::get_game_emdata_asm(uintptr_t lstAddr, bool incReaderCounter = true)
+GameEmList WaveEditorMod::EnemyWaveEditor::get_game_emdata_asm(uintptr_t lstAddr, bool incReaderCounter = true, bool autoIdFix)
 {
     GameEmList emList;
     if(incReaderCounter)
@@ -139,8 +202,11 @@ GameEmList WaveEditorMod::EnemyWaveEditor::get_game_emdata_asm(uintptr_t lstAddr
         emDataAddr = addr + 0x20 + i * 0x8;
         emDataAddr = *(uintptr_t*)emDataAddr;
         data.emId = *(int*)(emDataAddr + 0x10);
-        if (data.emId == 56)//Friendly Dante of mission 21
-            data.emId--;
+        if (autoIdFix)
+        {
+            if (data.emId == 56)//Friendly Dante of mission 21
+                data.emId--;
+        }
         if (data.emId == 55)//seems like they use smth else somewhere else to set actual enemy Dante num
             data.num = 1;
         else
@@ -153,7 +219,7 @@ GameEmList WaveEditorMod::EnemyWaveEditor::get_game_emdata_asm(uintptr_t lstAddr
 void EnemyWaveEditor::read_em_data_asm(uintptr_t lstAddr)
 {
     auto emList = get_game_emdata_asm(lstAddr);
-    gameDataList.push_back(emList);
+    mimListManager->add_game_em_data(emList);
 }
 
 void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
@@ -162,20 +228,17 @@ void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
     {
         case Mode::Mod:
         {
-            //if(!EnemySwapper::gamemode != 3)
-            if(mimObjManager.is_all_allocated())
-                edit_gamelists_asm(lstAddr);
+            edit_gamelists_asm(lstAddr);
             break;
         }
         case Mode::ViewUserData:
         {
-            //if (EnemySwapper::gamemode != 3)
-                edit_gamelists_asm(lstAddr);
+            edit_gamelists_asm(lstAddr);
             break;
         }
         case EnemyWaveEditor::Mode::ReadGameData:
         {
-            std::unique_lock<std::mutex> lg(mt);
+            std::unique_lock<std::mutex> lg(mtx);
             read_em_data_asm(lstAddr);
             break;
         }
@@ -183,8 +246,6 @@ void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
             break;
     }
 }
-
-uintptr_t rdx_reg;//for bind mode
 
 static naked void emlist_detour()
 {
@@ -200,7 +261,6 @@ static naked void emlist_detour()
         jmp qword ptr [EnemyWaveEditor::retJmp]
 
         cheat:
-        //mov qword ptr [rdx_reg], rdx
         push rax
 		push rcx
 		push rdx
@@ -221,7 +281,6 @@ static naked void emlist_detour()
 		pop rdx
 		pop rcx
 		pop rax
-        //mov rdx, qword ptr [rdx_reg]
         jmp originalcode
 
         ret_jl:
@@ -231,12 +290,10 @@ static naked void emlist_detour()
 
 void EnemyWaveEditor::load_prefabs_asm(uintptr_t prefabManagerAddr)
 {
-    //isPfbLoadRequested = false;
-    if(EnemySwapper::gameMode == 3)//Crash after exit from BP stage
+    std::unique_lock<std::mutex> lck(prefab_mtx);
+    if(mimListManager->count() == 0)
         return;
-    if(!mimObjManager.is_all_allocated())
-        return;
-    if(mimObjManager.get_emids()->empty())
+    if(mimListManager->get_emids()->empty())
         return;
     uintptr_t prefabList = *(uintptr_t*)(prefabManagerAddr+0x10);
     uintptr_t mngObj = *(uintptr_t*)(prefabList + 0x10);
@@ -244,7 +301,7 @@ void EnemyWaveEditor::load_prefabs_asm(uintptr_t prefabManagerAddr)
     int curId = 0;
     uintptr_t prefabInfo = 0;
     uintptr_t prefabDataInfo = 0;
-    for (const auto &id : *mimObjManager.get_emids())
+    for (const auto &id : *mimListManager->get_emids())
     {
         for (int i = 0; i < lstCount - 1; i++)
         {
@@ -253,11 +310,12 @@ void EnemyWaveEditor::load_prefabs_asm(uintptr_t prefabManagerAddr)
             curId = *(int*)(prefabDataInfo + 0x10);
             if (curId == id.first)
             {
-                if (*(int*)(prefabInfo + 0x40) == 0 && *(uintptr_t*)(prefabInfo + 0x18) == NULL)
+                if (*(int*)(prefabInfo + 0x40) == 0 /*&& *(uintptr_t*)(prefabInfo + 0x18) == NULL*/)
                 {
-                    *(int*)(prefabInfo + 0x30) += id.second;//LoadRequestCount;
+                    *(int*)(prefabInfo + 0x30) += id.second + 1;//LoadRequestCount;
                     //*(int*)(prefabInfo + 0x34) = 0;//UnloadRequestCount;
                     *(uintptr_t*)(prefabInfo + 0x18) = *(uintptr_t*)(prefabInfo + 0x20);
+                    sdk::call_object_func_easy<void*>((REManagedObject*)prefabManagerAddr, "requestLoad(app.EnemyID, System.Boolean)", curId, false);
                     *(int*)(prefabInfo + 0x40) = 1;//LoadStep 1 - loading;
                 }
             }
@@ -270,13 +328,12 @@ static naked void load_enemy_detour()
     __asm {
         cmp byte ptr [EnemyWaveEditor::cheaton], 0
         je originalcode
-        cmp byte ptr [EnemyWaveEditor::isPfbLoadRequested], 0
-        je originalcode
 
         cheat:
         push rax//
         push rcx//
         push rdx//
+        push rsp
 		push r8//
 		push r9//
 		push r10//
@@ -289,6 +346,7 @@ static naked void load_enemy_detour()
 		pop r10//
 	    pop r9//
 		pop r8//
+        pop rsp
         pop rdx//
 		pop rcx//
 		pop rax//
@@ -301,247 +359,48 @@ static naked void load_enemy_detour()
 
 void EnemyWaveEditor::restore_list_data_asm() 
 { 
-    mimObjManager.restore_all_data();
+    mimListManager->restore_all_data();
     emSetterCounter = 0;
-}
-
-static naked void bp_forceload_detour()
-{
-    __asm {
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-        cmp byte ptr [EnemyWaveEditor::isBPFixRequested], 0
-        je originalcode
-
-        cheat:
-        cmp byte ptr [EnemyWaveEditor::isRequestEndBpStage], 1
-        je endbpstage
-        cmp byte ptr [rcx+0x60], 0x15 //21
-        jne originalcode
-        //mov byte ptr [EnemyWaveEditor::isBPFixRequested], 0
-        mov dword ptr [rcx+0x60], 0x16 //22
-        //----------FadeManager.RequestType-------------//
-        mov rax, [EnemyWaveEditor::fadeStaticBase]
-        mov rax, [rax]
-        mov rax, [rax+0x158]
-        mov rax, [rax+0x328]
-        mov rax, [rax+0x60]
-        mov rax, [rax+0x20]
-        mov rax, [rax+0x40]
-        mov dword ptr [rax+0x170], 0x1
-        //----------FadeManager.RequestType-------------//
-
-        originalcode:
-        mov eax, [rcx+0x60]
-        mov dword ptr [EnemyWaveEditor::bpFlowId], eax
-        sub eax, 0x16
-        jmp qword ptr [EnemyWaveEditor::bpRetJmp]
-
-        endbpstage:
-        mov byte ptr [EnemyWaveEditor::isRequestEndBpStage], 0
-        mov dword ptr [rcx+0x60], 0x1E //30
-        jmp originalcode
-    }
-}
-
-static naked void retry_mission_detour()
-{
-    __asm {
-        cmp byte ptr [EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp + 0x18], rbx
-        jmp qword ptr [EnemyWaveEditor::retryMissionRet]
-    }
-}
-
-static naked void exit_mission_detour()
-{
-    __asm {
-        cmp byte ptr[EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp + 0x10], rbx
-        jmp qword ptr [EnemyWaveEditor::exitMissionRet]
-    }
-}
-
-static naked void checkpoint_mission_detour()
-{
-    __asm {
-        cmp byte ptr [EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp + 0x10], rbx
-        jmp qword ptr [EnemyWaveEditor::checkpointMissionRet]
-    }
-}
-
-static naked void smiss_exit_detour()
-{
-    __asm {
-        cmp byte ptr [EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp + 0x10], rbx
-        jmp qword ptr [EnemyWaveEditor::secretMissionRet]
-    }
-}
-
-static naked void exit_bp_mission_detour()
-{
-    __asm {
-        cmp byte ptr[EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp+0x10],rbx
-        jmp qword ptr [EnemyWaveEditor::exitBpMissionRet]
-    }
-}
-
-static naked void request_result_detour()
-{
-    __asm {
-        cmp byte ptr [EnemySwapper::cheaton], 1
-        je fcall
-        cmp byte ptr [EnemyWaveEditor::cheaton], 0
-        je originalcode
-
-        fcall:
-        push rax
-        push rcx
-        push rdx
-        push r8
-        push r9
-        sub rsp, 32
-        call qword ptr [EnemyWaveEditor::restore_list_data_asm]
-        call qword ptr [EnemySwapper::clear_swap_data_asm]
-        add rsp, 32
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rax
-
-        originalcode :
-        mov [rsp + 0x18], rbx
-        jmp qword ptr [EnemyWaveEditor::requestResultRet]
-    }
 }
 
 static naked void boss_dante_crash_detour()//Ffs this shit happens only on some missions with some(!) enemies when trying to add Dante at the end of the list
 {
     __asm {
-        cmp byte ptr [EnemyWaveEditor::cheaton], 1
-        je cheat
-
-        originalcode:
-        mov [r14+0x08],r15d
-        mov [r14 + 0x00000098], dl
-        jmp qword ptr [EnemyWaveEditor::bossDanteCrashRet]
+       /* cmp byte ptr [EnemyWaveEditor::cheaton], 1
+        je cheat*/
 
         cheat:
         cmp r14, 0
         je skip
         jmp originalcode
 
+        originalcode:
+        mov [r14+0x08],r15d
+        mov [r14 + 0x00000098], dl
+        jmp qword ptr [EnemyWaveEditor::bossDanteCrashRet]
+
         skip:
         jmp qword ptr[EnemyWaveEditor::bossDanteCrashSkip]
+    }
+}
+
+static naked void bp_fadein_detour()
+{
+    __asm {
+        cmp byte ptr [EnemyWaveEditor::cheaton], 1
+        je cheat
+        cmp byte ptr [EnemyDataSettings::cheaton], 1
+        je cheat
+
+        originalcode:
+        cmp ecx, [rax+0x74]
+        jl jlret
+
+        cheat:
+        jmp qword ptr [EnemyWaveEditor::updateBpFadeInRet]
+
+        jlret:
+        jmp qword ptr [EnemyWaveEditor::updateBpFadeInJlRet]
     }
 }
 
@@ -552,10 +411,9 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   m_is_enabled        = &cheaton;
   m_on_page           = Page_Balance;
   m_full_name_string = "Enemy Wave Editor (+)";
-  m_author_string    = "VPZadov";
+  m_author_string    = "V.P.Zadov";
   m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
 
-  fadeStaticBase = g_framework->get_module().as<uintptr_t>() + 0x7E836F8;
   auto emDataLstAddr = m_patterns_cache->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
   if (!emDataLstAddr) {
     return "Unanable to find emDataLstAddr pattern.";
@@ -567,103 +425,30 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       return "Unanable to find emPrefabLoad pattern.";
   }
 
-  auto bpFlowIdAddr = m_patterns_cache->find_addr(base, "19 8B 41 60 83 E8 16");// DevilMayCry5.exe+1547B29
-  if (!bpFlowIdAddr)
-  {
-      return "Unanable to find bpFlowIdAddr pattern.";
-  }
-
-  auto retryMissionAddr = m_patterns_cache->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
-  if (!retryMissionAddr)
-  {
-      return "Unanable to find retryMissionAddr pattern.";
-  }
-
-  auto exitMissionAddr = m_patterns_cache->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
-  if (!retryMissionAddr)
-  {
-      return "Unanable to find exitMissionAddr pattern.";
-  }
-
-  auto checkpointMissionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 41 0F B6 F8");// DevilMayCry5.exe+249DFA0
-  if (!checkpointMissionAddr)
-  {
-      return "Unanable to find checkpointMissionAddr pattern.";
-  }
-
-  auto exitBpMissionAddr = m_patterns_cache->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
-  if (!exitBpMissionAddr)
-  {
-      return "Unanable to find exitBpMissionAddr pattern.";
-  }
-
-  auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
-
-  auto requestResultAddr = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
-  if (!exitBpMissionAddr)
-  {
-      return "Unanable to find requestResultAddr pattern.";
-  }
-
   auto bossDanteCrashAddr = m_patterns_cache->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
   if (!bossDanteCrashAddr)
   {
       return "Unanable to find bossDanteCrashAddr pattern.";
   }
 
+  auto bpFadeInFix = m_patterns_cache->find_addr(base, "3B 48 74 0F 8C 9F 01 00 00");// DevilMayCry5.exe+36ED34
+  if (!bpFadeInFix)
+  {
+      return "Unanable to find bpFadeInFix pattern.";
+  }
+
   retJl = emDataLstAddr.value() + 0x270;
   bossDanteCrashSkip = bossDanteCrashAddr.value() + 0x3E;
+  updateBpFadeInJlRet = bpFadeInFix.value() + 0x1A8;
 
   if (!install_hook_absolute(emDataLstAddr.value(), m_emwave_hook, &emlist_detour, &retJmp, 0xA)) {
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemyWaveEditor.emDataLstAddr"; 
+    return "Failed to initialize EnemyWaveEditor.emDataLst"; 
   }
 
   if (!install_hook_absolute(emPrefabLoad.value(), m_loadall_hook, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
     spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize EnemyWaveEditor.emDataLstAddr"; 
-  }
-
-  if (!install_hook_absolute(bpFlowIdAddr.value() + 0x1, m_bploadflow_hook, &bp_forceload_detour, &bpRetJmp, 0x6))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.bpFlowId";
-  }
-
-  if (!install_hook_absolute(retryMissionAddr.value() + 0x6, m_retry_mission_hook, &retry_mission_detour, &retryMissionRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.retryMission";
-  }
-
-  if (!install_hook_absolute(exitMissionAddr.value() + 0x9, m_exit_mission_hook, &exit_mission_detour, &exitMissionRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.exitMission";
-  }
-
-  if (!install_hook_absolute(checkpointMissionAddr.value(), m_checkpoint_mission_hook, &checkpoint_mission_detour, &checkpointMissionRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.checkpointMission";
-  }
-
-  if (!install_hook_absolute(exitSecretMissionAddr, m_secret_mission_hook, &smiss_exit_detour, &secretMissionRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.exitSecretMission";
-  }
-
-  if (!install_hook_absolute(exitBpMissionAddr.value()+0x2, m_exit_bp_mission_hook, &exit_bp_mission_detour, &exitBpMissionRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.exitBpMission";
-  }
-
-  if (!install_hook_absolute(requestResultAddr.value() + 0x4, m_request_result_hook, &request_result_detour, &requestResultRet, 0x5))
-  {
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize EnemyWaveEditor.requestResult";
+    return "Failed to initialize EnemyWaveEditor.emPrefabLoad"; 
   }
 
   if (!install_hook_absolute(bossDanteCrashAddr.value(), m_bossdante_crash_hook, &boss_dante_crash_detour, &bossDanteCrashRet, 0xB))
@@ -672,39 +457,36 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       return "Failed to initialize EnemyWaveEditor.bossDanteCrash";
   }
 
+  if (!install_hook_absolute(bpFadeInFix.value(), m_bp_fadein_hook, &bp_fadein_detour, &updateBpFadeInRet, 0x9))
+  {
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize EnemyWaveEditor.bpFadeIn";
+  }
+  mimListManager = std::make_unique<MimicListManager>();
   mode = Mode::Mod;
   curCustomEmData.set_default();
+  prflManager = std::make_unique<ProfileManager>();
+  rndWaveGen = std::make_unique<WaveRandomGenerator>(this);
   return Mod::on_initialize();
 }
 
 void EnemyWaveEditor::on_config_load(const utility::Config& cfg) 
 {
-    isPfbLoadRequested = cfg.get<bool>("EnemyWaveEditor.isPfbLoadRequested").value_or(true);
-    isBPFixRequested = cfg.get<bool>("EnemyWaveEditor.isBPFixRequested").value_or(false);
-    jsonEmDataPath = cfg.get("EnemyWaveEditor.jsonEmDataPath").value_or(std::filesystem::current_path().string() + "\\natives\\x64\\EmListEditor\\" + "EmData.json");
-    setupEmMode = (SetupEmMode)(cfg.get<int>("EnemyWaveEditor.setupEmMode").value_or(0));
     cheaton = false;
+    prflManager->on_config_load(cfg);
+    setupEmMode = SetupEmMode::Last;//(SetupEmMode)(cfg.get<int>("EnemyWaveEditor.setupEmMode").value_or(1));
+    rndWaveGen->on_config_load(cfg);
 }
 
 void EnemyWaveEditor::on_config_save(utility::Config& cfg) 
 {
-    cfg.set<bool>("EnemyWaveEditor.isBPFixRequested", isBPFixRequested);
-    cfg.set<int>("EnemyWaveEditor.setupEmMode", setupEmMode);
+    //cfg.set<int>("EnemyWaveEditor.setupEmMode", setupEmMode);
+    prflManager->on_config_save(cfg);
+    rndWaveGen->on_config_save(cfg);
 }
 
 void EnemyWaveEditor::on_frame() 
 {
-    //if (cheaton)
-    //{
-    //    if (EnemySwapper::nowFlow == 0x17) //23
-    //    {
-    //        mimObjManager.restore_all_data();
-    //        mimObjManager.dealloc_all();
-    //        mimObjManager.remove_all_binds();
-    //        emSetterCounter = 0;
-    //        cheaton = false;
-    //    }
-    //}
 }
 
 void EnemyWaveEditor::on_draw_ui() {
@@ -716,77 +498,133 @@ void EnemyWaveEditor::on_draw_ui() {
     ImGui::Separator();
     if (ImGui::CollapsingHeader("How-to-use & Current issues"))
     {
-        ImGui::BulletText("For missions");
-        print_spacing("Get original enemy data of a mission: select \"Read game enemy data\" and start mission. Wait when info appears in trainer's window;");
+        ImGui::BulletText("For missions/BP");
+        print_spacing("Get original enemy data of a mission: select \"Get game's enemy data\" and start mission. Wait when info appears in trainer's window;");
         print_spacing("Setup custom enemy data for waves that you want to change;");
         print_spacing("Game can change an order of loading data for same mission. If you didn't get game data for mission, mod will sort custom data in ascending order by load id and swap data in that order. "
-        "Otherwise your custom data will be \"bind\" to original game's enemy list by load id (wrong swap still can orrurs if mission have same enemy lists);");
-        print_spacing("After you finish setup enemy data, press \"Allocate all custom enemy data\" button;");
-        //print_spacing("(Optional) If you want to swap game's data manually during the loading process, use \"Run-time edit\" mode;");
+        "Otherwise your custom data will be \"link\" to original game's enemy list by load id (wrong swap still can orrurs if mission have same enemy lists);");
         print_spacing("(Re)Load mission;");
-        print_spacing("Dealloc memory when you want to change wawes data or disable mod.");
         ImGui::Separator();
-        ImGui::BulletText("For BP (correctly works only on \"warm up\" mode)");
+        ImGui::BulletText("For BP warm up mode");
         print_spacing("Enable \"Bp alloc mode\", create 1 enemy list and setup set up it;");
-        print_spacing("After you finish setup enemy data, press \"Allocate all custom enemy data\" button;");
-        print_spacing("Select stage what you want. Some stages can't be loaded without \"bp load fix\";");
+        ImGui::Separator();
+        ImGui::BulletText("Custom gamemodes");
+        ImGui::TextWrapped(_txtHelper); ImGui::SameLine(0, ImGui::GetCursorPosX() - _txtHelperSize);
+        ImGui::TextHyperlink("enemy list exporter shit from nexus", "https://www.nexusmods.com/devilmaycry5/mods/2181", ImVec4{ 0.46f, 0.46f, 0.92f, 1.0f });
+        ImGui::SameLine(0, 0);
+        ImGui::TextWrapped(" to serialize custom enemy data to .json and load it here;");
+        ImGui::Spacing();
+        print_spacing("Create profiles with names M01, M02, M03, ... M21 for each mission that you want to edit;");
+        print_spacing("Bind default game data to profile (note that different default game modes (like human, sos, dmd) and modded LDK has different enemy lists, + Vergil mode also may have changes for some missions);");
+        print_spacing(std::string("Save .json file in " + prflManager->get_gm_data_path()).c_str());
+        print_spacing("In trainer window: select \"Import profile\", choose \"Custom game mode\" and select file with custom game mode;");
         ImGui::Separator();
         ImGui::BulletText("Current issues");
-        //print_spacing("Some missions, like m13, have a \"puppet waves\" (last nobody encounter for ex). You need to kill all enemies before going to battle arena, or enemies will not load.");
         print_spacing("Spawning a few different bosses at once can crash the game.");
-        print_spacing("In run-time mode some times game thread still freezed after pressing \"Skip all next\" button. Select run-time edit mode and press this button again.");
         print_spacing("M18: Shadow/Griffon can't be swapped correctly (red seal will not disappear). If you want to add enemies to Griffon list, add all familiars to 0 list and enemies that u want to have in Griffon fight. "
         "Also add them to Griffon list itself.");
-        print_spacing("Some waves (like m2, 3 caina 2 death scrissors) must have > 1 enemies or read seal will not disappear after finish battle.");
-        print_spacing("Restoring original data during fight can crash the game if not all enemies from list was spawned.");
-        print_spacing("Bosses can block spawn if them placed not in the end of the list in BP/some missions;");
-        print_spacing("Urizen 2 on m8 can not be swapped;");
+        print_spacing("Restoring original data during enemy spawn might crash the game;");
+        print_spacing("Bosses can block spawn if them placed not in the end of the list or don't using \"near player\" flag in BP/some missions;");
+        print_spacing("Urizen 2 on m8 can not be swapped correctly (softlock happens);");
+        print_spacing("Changing \"boss wave\" on m7 LDK breaks Nico's van (softlock after exiting from van menu) for some reason...");
+        print_spacing("You need to manually delete all enemies after fight if shadow/griffon/Dante was spawned in a custom wave and their bodies wasn't disappeared after death.");
         ImGui::TextWrapped("On Vergil mode m19 shares data with m20, so after finish m19 all enemy data will apply to m20 and game will be softlocked, if boss Dante is absent. Use coop trainer's \"Boss Swap\" feature "
         "to prevent that. And m19/20 always loads two waves: 1 with boss Vergil, 1 with boss Dante (at least if you have Vergil DLC).");
         ImGui::Separator();
     }
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::TextWrapped("Choose an enemy from original game's list, whoose settings will be used for spawn position and animation for custom lists:");
-    ImGui::ShowHelpMarker("Each enemy has a list with settings of spawn pos & spawn animation. You can choose from what enemy from original list mod should take settings. Desync may happend in coop if settings not shared between players.");
-    ImGui::RadioButton("First", (int*)&setupEmMode, 0); ImGui::SameLine();
-    ImGui::Spacing(); ImGui::SameLine();
-    ImGui::RadioButton("Last", (int*)&setupEmMode, 1);
-    ImGui::Separator();
-    ImGui::Checkbox("BP load fix", &isBPFixRequested);
-    ImGui::ShowHelpMarker("If you have blackscreen after load bp stage, but BGM started playing and enemies started action, try this one. May not help with some stages and some enemies. "
-        "After finishing stage with this bug, you should quit from it and re-enter from warm up menu, otherwise you will get blackscreen again even with fix :(");
-    if (isBPFixRequested)
-    {
-        if (ImGui::Button("Show end-stage menu"))
-        {
-            isRequestEndBpStage = true;
-        }
-        ImGui::ShowHelpMarker("Force game to end the stage and show menu with retry/quit options. Use this if you retried stage with black screen bug. Don't forget to restore list data.");
-        if (isRequestEndBpStage)
-            ImGui::TextWrapped("End stage requested...");
-    }
-    ImGui::Checkbox("Bp alloc mode", &isBpAllocation);
-    ImGui::ShowHelpMarker("Select this before allocate data if want to go to BP. Creates 107 lists and copy data from first list to them.");
 
+    /*if (ImGui::CollapsingHeader("Enemy fixes"))
+    {
+        ImGui::Spacing();
+        EnemyFixes::draw_em_fixes();
+        ImGui::Separator();
+        ImGui::Spacing();
+    }
+    ImGui::ShowHelpMarker("Same stuff that enemy swapper has, just doubled here for comfort. Enable spawns offset for sure if you are adding flying enemies.");*/
+    if (ImGui::CollapsingHeader("Active fixes"))
+    {
+        if (ImGui::Button("Request portal to next bp stage"))
+        {
+            if (GameplayStateTracker::gameMode == 3 && GameplayStateTracker::bpFlowId == 29)
+            {
+                auto bpManager = sdk::get_managed_singleton<REManagedObject*>("app.BloodyPalaceManager");
+                if (bpManager != nullptr)
+                    *(int*)((uintptr_t)bpManager + 0x60) = 26;
+            }
+        }
+        ImGui::ShowHelpMarker("There is a bug when portal doesn't apeears after continue bp run from main menu with wave editor. Press this button to force to open a portal.");
+        ImGui::Spacing();
+        if (ImGui::Button("Kill all enemies in current wave"))
+        {
+            auto emManager = sdk::get_managed_singleton<REManagedObject>("app.EnemyManager");
+            if (emManager != nullptr)
+                sdk::call_object_func_easy<void*>(emManager, "killAllEnemy()");
+        }
+        ImGui::ShowHelpMarker("If you got softlocked 'cause Dante, parrot or cat don't despawning, or some another shit happened liek enemies was spawned behind the wall - here you go. "
+        "Also always prees this after beat cat/parrot/Dante in completed enemy wave.");
+    }
+    //ImGui::Spacing();
+    ImGui::ShowHelpMarker("Well, you need to press this buttons manually.");
     ImGui::Separator();
+
+    if (prflManager->is_custom_gamemode())
+    {
+        ImGui::TextWrapped("Custom game mode are enabled. After start a mission mod will automatically load enemy data from .json for current mission if it exists.");
+        if(ImGui::Button("Go to default mode"))
+            prflManager->reset_custom_gm();
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Separator();
+    }
+    else
+    {
+        if (ImGui::CollapsingHeader("Wave editor ranomizer"))
+        {
+            ImGui::TextWrapped("Enemies that can be randommed to waves (click on enemy to select/remove):");
+            rndWaveGen->show_enemy_selection();
+            ImGui::Spacing();
+            rndWaveGen->print_settings();
+            if (ImGui::Button("Generate waves"))
+            {
+                if (mimListManager->get_game_data_list().empty())
+                    prflManager->import_bp_default();
+                rndWaveGen->generate_random_waves();
+            }
+            ImGui::ShowHelpMarker("Pressing this will remove all current setup and generate random waves. If there is no scanned enemy data, default BP data will be loaded and random waves for BP will be created. "
+                "\nFor coop all setup must be shared between all players for correct sync. Also better disable spawn near player parameter.");
+        }
+        ImGui::ShowHelpMarker("Use this to randomize enemy waves. Add enemies to random pool (think that Nidhogg and Gilgamesh are here as a joke), setup other stuff that you want to be random or not and prees \"Generate waves\" button. "
+            "You need to scan enemy data if you want random waves for missions/secret missions, otherwise 108 enemy lists for Bloody Palace will be generated. "
+            "Better enable height spawn offset option for flying enemies in \"Enemy fixes\".");
+
+        ImGui::Separator();
+        /*ImGui::TextWrapped("Choose an enemy from original game's list, whoose settings will be used for spawn position and animation for custom lists:");
+        ImGui::ShowHelpMarker("Each enemy has a list with settings of spawn pos & spawn animation. You can choose from what enemy from original list mod should take settings. Desync may happend in coop if settings not shared between players.");
+        ImGui::RadioButton("First", (int*)&setupEmMode, 0); ImGui::SameLine();
+        ImGui::Spacing(); ImGui::SameLine();
+        ImGui::RadioButton("Last", (int*)&setupEmMode, 1);
+        ImGui::Separator();*/
+        ImGui::Checkbox("Bp warm up mode", &isBpWarmUpMode);
+        ImGui::ShowHelpMarker("Select this if you want to go to warm up BP. Create 1 custom list and customize it. It will be copied to all bp game's list automatically.");
+       
+        ImGui::Separator();
+    }
+    
     draw_mimic_list_ui();
-    //ImGui::TextWrapped("Unique ids count: %d", mimObjManager.get_emids()->size());
-    //ImGui::TextWrapped("Is bind mode: %d", mimObjManager.is_bind_mode());
     break;
   }
   case EnemyWaveEditor::ViewUserData: 
   {
     ImGui::ShowHelpMarker("View all custom enemy lists data.");
     ImGui::Separator();
-    if (!isBpAllocation)
+    if (!isBpWarmUpMode)
     {
         ImGui::RadioButton("List all", (int*)&viewUserDataState, 0); ImGui::SameLine();
         ImGui::Spacing(); ImGui::SameLine();
         ImGui::RadioButton("By selecting specific list", (int*)&viewUserDataState, 1);
         if (viewUserDataState == All)
         {
-            for (int i = 0; i < mimObjManager.count(); i++)
+            for (int i = 0; i < mimListManager->count(); i++)
             {
                 print_mimiclist_items(i);
                 ImGui::Separator();
@@ -795,14 +633,14 @@ void EnemyWaveEditor::on_draw_ui() {
         }
         else
         {
-            if(mimObjManager.count() == 0)
+            if(mimListManager->count() == 0)
                 return;
             draw_emlist_combo();
             print_mimiclist_items(selectedMimicListItem);
         }
         
     }
-    else if (mimObjManager.count() != 0)
+    else if (mimListManager->count() != 0)
         print_mimiclist_items(0);
     
     break;
@@ -819,36 +657,7 @@ void EnemyWaveEditor::on_draw_ui() {
   case EnemyWaveEditor::Serialization:
   {
       ImGui::ShowHelpMarker("Load enemy data from .json file.");
-      ImGui::Separator();
-      ImGui::TextWrapped(std::string("Place save-file here: " + jsonEmDataPath).c_str());
-      ImGui::ShowHelpMarker("You can change path to save file (and it's name) in trainer's config file. Open \"DMC5_fw_config.txt\" and add line without quotes: \"EnemyWaveEditor.jsonEmDataPath = <YourPathToFileWithFileName.json>\"");
-      if (ImGui::Button("Read enemy data settings"))
-      {
-          prflManager.read_data(jsonEmDataPath.c_str());
-      }
-      if (prflManager.is_data_read())
-      {
-          bool isSelected = false;
-          if (ImGui::BeginCombo("Seleceted profile", prflManager.get_profile_name(selectedProfile)->c_str()))
-          {
-              for (int i = 0; i < prflManager.count(); i++)
-              {
-                  isSelected = (selectedProfile == i);
-                  if (ImGui::Selectable(prflManager.get_profile_name(i)->c_str(), isSelected))
-                      selectedProfile = i;
-                  if (isSelected)
-                      ImGui::SetItemDefaultFocus();
-              }
-              ImGui::EndCombo();
-          }
-          ImGui::Spacing();
-          if (ImGui::Button("Load profile##EmWaveEditor.import_data()"))
-          {
-              prflManager.import_data(selectedProfile);
-              mode = Mode::Mod;
-          }
-          ImGui::ShowHelpMarker("This will remove your current custom data and load data from selected profile. Memory shouldn't be allocated before this stage.");
-      }
+      prflManager->print_setup();
       break;
   }
 
@@ -859,29 +668,29 @@ void EnemyWaveEditor::on_draw_ui() {
 
 void EnemyWaveEditor::print_mimiclist_items(int i)
 {
-    ImGui::TextWrapped("List load id: %d", mimObjManager.get_mimic_list_ptr(i)->loadId);
+    ImGui::TextWrapped("List load id: %d", mimListManager->get_mimic_list_data(i)->loadId);
     ImGui::Spacing();
-    for (int j = 0; j < mimObjManager.get_mimic_list_ptr(i)->mimicList.get_count(); j++)
+    for (int j = 0; j < mimListManager->get_mimic_list_data(i)->mimicList.get_mimic_count(); j++)
     {
         ImGui::TextWrapped("Enemy index in list: %d", j);
-        ImGui::TextWrapped("Enemy: %s", EnemySwapper::emNames[get_em_name_indx(mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->emId)]);
-        ImGui::TextWrapped("Enemy num: %d", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->num);
-        ImGui::TextWrapped("Odds: %.1f", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->odds);
-        ImGui::TextWrapped("Use boss hp bar and boss camera: %d", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->isBoss);
-        ImGui::TextWrapped("Enemy can't be killed: %d", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->isNoDie);
-        ImGui::TextWrapped("Wait time min: %.1f", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->waitTimeMin);
-        ImGui::TextWrapped("Wait time max: %.1f", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->waitTimeMax);
-        ImGui::TextWrapped("Don't set orbs: %d", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->isDontSetOrb);
-        ImGui::TextWrapped("Is near player?: %d", mimObjManager.get_mimic_list_ptr(i)->mimicList.get_allocated_base_data(j)->get_data()->isNearPlayer);
+        ImGui::TextWrapped("Enemy: %s", (*_emNames)[EnemyData::id_to_indx(mimListManager->get_mimic_list_data(i)->mimicList[j]->emId)]);
+        ImGui::TextWrapped("Enemy num: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->num);
+        ImGui::TextWrapped("Odds: %.1f", mimListManager->get_mimic_list_data(i)->mimicList[j]->odds);
+        ImGui::TextWrapped("Use boss hp bar and boss camera: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->isBoss);
+        ImGui::TextWrapped("Enemy can't be killed: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->isNoDie);
+        ImGui::TextWrapped("Wait time min: %.1f", mimListManager->get_mimic_list_data(i)->mimicList[j]->waitTimeMin);
+        ImGui::TextWrapped("Wait time max: %.1f", mimListManager->get_mimic_list_data(i)->mimicList[j]->waitTimeMax);
+        ImGui::TextWrapped("Don't set orbs: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->isDontSetOrb);
+        ImGui::TextWrapped("Is near player?: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->isNearPlayer);
         ImGui::Separator();
     }
 }
 
 void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Enemy:");
-  ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, EnemySwapper::emNames.data(), EnemySwapper::emNames.size(), 20);
+  ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, _emNames->data(), _emNames->size(), 20);
   ImGui::ShowHelpMarker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
-  data.emId = get_em_id(data.selectedItem);
+  data.emId = EnemyData::id_to_indx(data.selectedItem);
   ImGui::Spacing();
   ImGui::TextWrapped("Enemy num:");
   ImGui::InputInt("##EmNumInput", &data.num);
@@ -919,27 +728,11 @@ void EnemyWaveEditor::init_check_box_info() {
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
 }
 
-int EnemyWaveEditor::get_em_id(int selected) {
-  if(selected == 39)//Dante go brrr
-    return 55;
-  if (selected >= 20)
-    selected += 3;
-  return selected;
-}
-
-int EnemyWaveEditor::get_em_name_indx(int emId) { 
-  if (emId == 55)
-    return 39;
-  if (emId >=23)
-  return emId - 3;
-  return emId;
-}
-
 void EnemyWaveEditor::print_emlist_data()
 {
-    ImGui::TextWrapped("All lists count: %d", gameDataList.size());
+    ImGui::TextWrapped("All lists count: %d", mimListManager->get_game_data_list().size());
     ImGui::Separator();
-    for (const auto& item : gameDataList)
+    for (const auto& item : *&mimListManager->get_game_data_list())
     {
         ImGui::TextWrapped("Load id: %d", item.loadId);
         //ImGui::TextWrapped("Enemy list address: %X", item.listAddr);
@@ -947,7 +740,7 @@ void EnemyWaveEditor::print_emlist_data()
         ImGui::Spacing();
         for (const auto &data : item.emDataInfo)
         {
-            ImGui::TextWrapped("Enemy: %s", EnemySwapper::emNames[get_em_name_indx(data.emId)]);
+            ImGui::TextWrapped("Enemy: %s", (*_emNames)[EnemyData::id_to_indx(data.emId)]);
             ImGui::TextWrapped("Enemy num: %d", data.num);
             ImGui::Spacing();
         }
@@ -958,16 +751,16 @@ void EnemyWaveEditor::print_emlist_data()
 
 void EnemyWaveEditor::emlist_btn()
 {
-    if (!gameDataList.empty())
+    if (!mimListManager->get_game_data_list().empty())
     {
-        if (ImGui::Button("Clear list and reset counter"))
+        if (ImGui::Button("Clear list"))
             clear_emlist();
-        ImGui::ShowHelpMarker("Data must be deallocated before that.");
+        ImGui::ShowHelpMarker("Custom data should not be swapped before doing this.");
         ImGui::Spacing();
         if (ImGui::Button("Copy to clipboard"))
         {
             std::string all = "";
-            for (auto& item : gameDataList)
+            for (const auto& item : *&mimListManager->get_game_data_list())
             {
                 all += "Load id: ";
                 all += std::string(std::to_string(item.loadId) + "\n");
@@ -975,7 +768,7 @@ void EnemyWaveEditor::emlist_btn()
                 all += "\n\n";
                 for (const auto &data : item.emDataInfo)
                 {
-                    all += std::string("Enemy: " + std::string(EnemySwapper::emNames[get_em_name_indx(data.emId)]));
+                    all += std::string("Enemy: " + std::string((*_emNames)[EnemyData::id_to_indx(data.emId)]));
                     all += "\n";
                     all += std::string("Enemy num: " + std::to_string(data.num));
                     all +="\n\n";
@@ -990,11 +783,10 @@ void EnemyWaveEditor::emlist_btn()
 
 void WaveEditorMod::EnemyWaveEditor::clear_emlist()
 {
-    if (!mimObjManager.is_all_allocated())
+    if (!mimListManager->is_any_swapped(false))
     {
         emReaderCounter = -1;
-        mimObjManager.remove_all_binds();
-        gameDataList.clear();
+        mimListManager->clear_game_em_data();
     }
 }
 
@@ -1006,30 +798,30 @@ void EnemyWaveEditor::draw_copy_list_data()
     ImGui::InputInt("To list", &toLst);
     if (ImGui::Button("Copy"))//had some crashes with it, need to check it later
     {
-        if (fromLst == toLst || mimObjManager.get_mimic_list_ptr(fromLst, true) == nullptr || mimObjManager.get_mimic_list_ptr(toLst, true) == nullptr)
+        if (fromLst == toLst || mimListManager->get_mimic_list_data(fromLst, true) == nullptr || mimListManager->get_mimic_list_data(toLst, true) == nullptr)
         {
             fromLst = -1;
             toLst = -1;
         }
         else
-            mimObjManager.copy_to(fromLst, toLst);
+            mimListManager->copy_to(fromLst, toLst);
     }
     ImGui::ShowHelpMarker("You need to input list's load id, not it's num on list of all custom lists. And you can't copy data to the same list.");
     if(ImGui::Button("Copy to all"))
     {
-        if(mimObjManager.get_mimic_list_ptr(fromLst, true) == nullptr)
+        if(mimListManager->get_mimic_list_data(fromLst, true) == nullptr)
             fromLst = -1;
         else
         {
-            for (int i = 0; i < mimObjManager.count(); i++)
+            for (int i = 0; i < mimListManager->count(); i++)
             {
-                if (mimObjManager.get_mimic_list_ptr(i)->loadId == fromLst)
+                if (mimListManager->get_mimic_list_data(i)->loadId == fromLst)
                 {
-                    for (int j = 0; j < mimObjManager.count(); j++)
+                    for (int j = 0; j < mimListManager->count(); j++)
                     {
                         if (j == i)
                             continue;
-                        mimObjManager.copy_to(i, j, false);
+                        mimListManager->copy_to(i, j, false);
                     }
                     break;
                 }
@@ -1043,37 +835,45 @@ void EnemyWaveEditor::draw_copy_list_data()
 void EnemyWaveEditor::draw_emlist_combo()
 {
     bool isSelected = false;
-    if (ImGui::BeginCombo("Current enemy list", mimObjManager.get_list_name(selectedMimicListItem)->c_str()))
+    if (ImGui::BeginCombo("Current enemy list", mimListManager->get_list_name(selectedMimicListItem)->c_str()))
     {
-        for (int i = 0; i < mimObjManager.count(); i++)
+        for (int i = 0; i < mimListManager->count(); i++)
         {
-            if(mimObjManager.get_mimic_list_ptr(i)->isUsedByRtEdit)
-                continue;
             isSelected = (selectedMimicListItem == i);
-            if (ImGui::Selectable(mimObjManager.get_list_name(i)->c_str(), isSelected))
+            if (ImGui::Selectable(mimListManager->get_list_name(i)->c_str(), isSelected))
                 selectedMimicListItem = i;
             if (isSelected)
                 ImGui::SetItemDefaultFocus();
         }
         ImGui::EndCombo();
     }
+    std::string s = "Bineded game's data will be showed here if it exists;\n\n";
+    if (mimListManager->get_mimic_list_data(selectedMimicListItem)->bindedEmData != nullptr)
+    {
+        for (const auto& emDt : mimListManager->get_mimic_list_data(selectedMimicListItem)->bindedEmData->emDataInfo)
+        {
+            s += "Enemy: " + std::string((*_emNames)[EnemyData::id_to_indx(emDt.emId)]) + ";\n";
+            s += "Enemy num: " + std::to_string(emDt.num) + ";\n\n";
+        }
+    }
+    ImGui::ShowHelpMarker(s.c_str());
 }
 
 void EnemyWaveEditor::bpmode_data_setup()
 {
     clear_emlist();
-    int listCount = mimObjManager.count();
+    int listCount = mimListManager->count();
     if (listCount > 1)
     {
         for (int i = 1; i < listCount; i++)
         {
-            mimObjManager.remove_at(1);
+            mimListManager->remove_at(1);
         }
     }
     for (int i = 0; i <= 108; i++)
-        mimObjManager.add(i);
+        mimListManager->add(i);
     for (int i = 1; i <= 108; i++)
-        mimObjManager.copy_to(0, i, false);
+        mimListManager->copy_to(0, i, false);
 }
 
 void WaveEditorMod::EnemyWaveEditor::print_em_colums(int indx)
@@ -1081,7 +881,7 @@ void WaveEditorMod::EnemyWaveEditor::print_em_colums(int indx)
     bool isSelected = false;
     if(ImGui::BeginListBox("##EnemiesDataListBox"))
     {
-        for (int row = 0; row < mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count(); row++)
+        for (int row = 0; row < mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList.get_mimic_count(); row++)
         {
             isSelected = (selectedEmDataItem == row);
             ImVec4 backgroundcolor = isSelected ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : SELECTABLE_STYLE_ACT;
@@ -1089,9 +889,9 @@ void WaveEditorMod::EnemyWaveEditor::print_em_colums(int indx)
                 backgroundcolor = SELECTABLE_STYLE_HVR;
             ImGui::PushStyleColor(ImGuiCol_Header, backgroundcolor);
             ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECTABLE_STYLE_ACT_HVR);
-            auto uniqStr = EnemySwapper::emNames[mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data()->selectedItem] + std::string(" x") + 
-                std::to_string(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data()->num);  //+ std::string("##") + std::to_string(row);
-            auto addInfo = add_line_em_info(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(row)->get_data());
+            auto uniqStr = (*_emNames)[mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]->selectedItem] + std::string(" x") +
+                std::to_string(mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]->num);  //+ std::string("##") + std::to_string(row);
+            auto addInfo = add_line_em_info(mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]);
             if (!addInfo.empty())
                 uniqStr += ", ";
             uniqStr += addInfo + "##" + std::to_string(row);
@@ -1145,7 +945,7 @@ std::string WaveEditorMod::EnemyWaveEditor::add_line_em_info(SetEmData* data)
 
 void EnemyWaveEditor::draw_mimic_list_ui()
 {
-    if (!mimObjManager.is_all_allocated())
+    if (!mimListManager->is_any_swapped(false))
     {
         ImGui::TextWrapped("Enemy list's load id:");
         ImGui::InputInt("##emListIdinput", &emListId);
@@ -1153,8 +953,8 @@ void EnemyWaveEditor::draw_mimic_list_ui()
             emListId = 0;
         if (ImGui::Button("Create enemy list"))
         {
-            mimObjManager.add(emListId);
-            selectedMimicListItem = mimObjManager.count() - 1;
+            mimListManager->add(emListId);
+            selectedMimicListItem = mimListManager->count() - 1;
         }
         ImGui::Spacing();
         ImGui::InputInt("Begin id", &addListInRangeMin);
@@ -1163,20 +963,20 @@ void EnemyWaveEditor::draw_mimic_list_ui()
         {
             for (int i = addListInRangeMin; i <= addListInRangeMax; i++)
             {
-                mimObjManager.add(i);
-                selectedMimicListItem = mimObjManager.count() - 1;
+                mimListManager->add(i);
+                selectedMimicListItem = mimListManager->count() - 1;
             }
         }
         ImGui::ShowHelpMarker("Create a few enemy lists with identificators on setted range");
         ImGui::Separator();
         ImGui::Spacing();
-        if (mimObjManager.count() != 0)
+        if (mimListManager->count() != 0)
         {
-            if (!mimObjManager.is_all_allocated() && mimObjManager.count() != 0)
+            if (!mimListManager->is_any_swapped(false) && mimListManager->count() != 0)
             {
                 draw_emlist_combo();
                 ImGui::Spacing();
-                if (!gameDataList.empty())
+                if (!mimListManager->get_game_data_list().empty())
                 {
                     ImGui::Separator();
                     ImGui::InputInt("New load id", &newLoadId);
@@ -1184,7 +984,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                     if (ImGui::Button("Change load id"))
                     {
                         if(newLoadId >= 0)
-                            mimObjManager.change_loadid(selectedMimicListItem, newLoadId);
+                            mimListManager->change_loadid(selectedMimicListItem, newLoadId);
                         else newLoadId = -1;
                     }
                     ImGui::Separator();
@@ -1193,7 +993,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
 
                 if (ImGui::Button("Remove selected enemy list"))
                 {
-                    mimObjManager.remove_at(selectedMimicListItem);
+                    mimListManager->remove_at(selectedMimicListItem);
                     if (selectedMimicListItem != 0)
                         selectedMimicListItem--;
                     else
@@ -1204,7 +1004,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 if (ImGui::Button("Clear all"))
                 {
                     selectedMimicListItem = 0;
-                    mimObjManager.remove_all();
+                    mimListManager->remove_all();
                     return;
                 }
                 ImGui::Separator();
@@ -1214,7 +1014,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                 ImGui::RadioButton("Add new enemy data", &emChangeState, 0); ImGui::SameLine();
                 ImGui::Spacing(); ImGui::SameLine();
                 ImGui::RadioButton("Edit existed enemy data", &emChangeState, 1);
-                if (mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count() == 0)
+                if (mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList.get_mimic_count() == 0)
                 {
                     emChangeState = 0;
                     selectedEmDataItem = 0;
@@ -1226,7 +1026,7 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                     ImGui::Spacing();
                     if (ImGui::Button("Add enemy data to enemy list"))
                     {
-                        mimObjManager.add_data(new AllocatedEmData(&curCustomEmData, SET_ENEMY_DATA_SIZE), selectedMimicListItem);
+                        mimListManager->add_data(new SetEmData(curCustomEmData), selectedMimicListItem);
                     }
                 }
                 else
@@ -1234,48 +1034,33 @@ void EnemyWaveEditor::draw_mimic_list_ui()
                     print_em_colums(selectedMimicListItem);
                     if (selectedEmDataItem < 0)//if first item was removed
                         selectedEmDataItem = 0;
-                    print_emdata_input(*(mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_allocated_base_data(selectedEmDataItem)->get_data()));
+                    print_emdata_input(*(mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[selectedEmDataItem]));
                     ImGui::Spacing();
                     if (ImGui::Button("Remove selected enemy data item from list"))
                     {
-                        mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.remove(selectedEmDataItem--);
+                        mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList.remove_at(selectedEmDataItem--);
                     }
                 }
                 ImGui::Separator();
-                ImGui::TextWrapped("Current enemy list count = %d;", mimObjManager.get_mimic_list_ptr(selectedMimicListItem)->mimicList.get_count());
+                ImGui::TextWrapped("Current enemy list count = %d;", mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList.get_mimic_count());
                 ImGui::Separator();
                 
                 if(ImGui::CollapsingHeader("Copy data"))
                     draw_copy_list_data();
                 ImGui::Separator();
             }
-            if (ImGui::Button("Allocate memory for all custom enemy data"))
-            {
-                if(isBpAllocation)
-                    bpmode_data_setup();
-                if (!gameDataList.empty())
-                {
-                    if (mimObjManager.is_all_id_uniq())
-                        mimObjManager.alloc_all(&gameDataList);
-                    else newLoadId = -2;
-                }
-                else mimObjManager.alloc_all();
-            }
-            ImGui::ShowHelpMarker("Allocate memory for custom enemy lists. After that you can't edit list's data. All load ids must be unique before allocation.");
         }
     }
     else
     {
-        ImGui::TextWrapped("Memory for all custom data was allocated successfully, edit mode disabled. You can (re)load a mission.");
+        ImGui::TextWrapped("Original game's enemy data was successfully swapped with custom data.");
         ImGui::Spacing();
-        if (ImGui::Button("Dealloc all memory"))
+        if (ImGui::Button("Restore original data"))
         {
-            mimObjManager.restore_all_data();
-            mimObjManager.dealloc_all();
+            mimListManager->restore_all_data();
             emSetterCounter = 0;
         }
-        ImGui::ShowHelpMarker("After pressing this all original data also will be restored if this didnt happen already. You will get softlock/crash if continue mission after restoring data "
-        "without restarting.");
+        ImGui::ShowHelpMarker("If you want to change custom enemy data during gameplay, press this button, make changes and reload level.");
     }
 }
 
@@ -1300,4 +1085,161 @@ void EnemyWaveEditor::print_spacing(const char* ch)
 {
     ImGui::TextWrapped(ch);
     ImGui::Spacing();
+}
+
+void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::show_enemy_selection()
+{
+    bool isSelected = false;
+
+    if (ImGui::BeginTable("##RndTableEnemy", 3))
+    {
+        for (int i = 0; i < _emNames->size(); i++)
+        {
+            ImGui::TableNextColumn();
+            ImVec4 backgroundcolor = isSelected ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : SELECTABLE_STYLE_ACT;
+            isSelected = is_in_list(i);
+            if (isSelected)
+                backgroundcolor = SELECTABLE_STYLE_HVR;
+            ImGui::PushStyleColor(ImGuiCol_Header, backgroundcolor);
+            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECTABLE_STYLE_ACT_HVR);
+            
+            if (!isSelected)
+            {
+                if (ImGui::Selectable((*_emNames)[i], isSelected))
+                {
+                    availableEnemies.push_back(i);
+                    sort();
+                }
+                else
+                    backgroundcolor = SELECTABLE_STYLE_HVR;
+            }
+            else
+            {
+                if (ImGui::Selectable((*_emNames)[i], isSelected))
+                {
+                    remove_item(i);
+                    sort();
+                }
+            }
+            ImGui::PopStyleColor(2);
+        }
+        ImGui::EndTable();
+    }
+}
+
+inline void EnemyWaveEditor::WaveRandomGenerator::on_config_load(const utility::Config &cfg)
+{
+    set_seed(cfg.get<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.seed").value_or(mt.default_seed));
+    minGen = cfg.get<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.minGen").value_or(1);
+    maxGen = cfg.get<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.maxGen").value_or(4);
+    minNum = cfg.get<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.minNum").value_or(1);
+    maxNum = cfg.get<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.maxNum").value_or(3);
+
+    minOdds = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.minOdds").value_or(100.0f);
+    maxOdds = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.maxOdds").value_or(100.0f);
+    /*waitTimeMinRndMin = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMinRndMin").value_or(0);
+    waitTimeMinRndMax = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMinRndMax").value_or(0);
+    waitTimeMaxRndMin = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMaxRndMin").value_or(0);
+    waitTimeMaxRndMax = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMaxRndMax").value_or(0);*/
+    waitTimeMin = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMin").value_or(0);
+    waitTimeMax = cfg.get<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMax").value_or(0);
+
+    isRandomNumGen = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRandomNumGen").value_or(true);
+    isRandomEmNumGen = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRandomEmNumGen").value_or(true);
+    isRndOdds = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndOdds").value_or(false);
+    isNoOrbs = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isNoOrbs").value_or(false);
+    isRndNoOrbs = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndNoOrbs").value_or(true);
+    isNearPl = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isNearPl").value_or(false);
+    isRndNearPl = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndNearPl").value_or(false);
+    isAlwaysBossHUDForBosses = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysBossHUDForBosses").value_or(true);
+    //isRndWaitTime = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndWaitTime").value_or(true);
+    isAddEnemiesToBosses = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isAddEnemiesToBosses").value_or(false);
+    isBossNumAlwaysOne = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isBossNumAlwaysOne").value_or(true);
+    isAlwaysSingleGenBossInWave = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysSingleGenBossInWave").value_or(true);
+    isAlwaysSingleBossInWave = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysSingleBossInWave").value_or(true);
+    isNearPlIfBoss = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isNearPlIfBoss").value_or(false);
+    isRndOnRestart = false;//cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndOnRestart").value_or(false);
+
+    std::string emNameParam = "EnemyWaveEditor.WaveRandomGenerator.availableEnemies.";
+    for (int i = 0; i < _emNames->size(); i++)
+    {
+        if (cfg.get<bool>(emNameParam + (*_emNames)[i]).value_or(false))
+            availableEnemies.push_back(i);
+    }
+    for (auto& em : heavyEmList)
+        em.on_config_load(cfg);
+}
+
+inline void EnemyWaveEditor::WaveRandomGenerator::on_config_save(utility::Config& cfg) const
+{
+    cfg.set<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.seed", seed);
+    cfg.set<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.minGen", minGen);
+    cfg.set<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.maxGen", maxGen);
+    cfg.set<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.minNum", minNum);
+    cfg.set<unsigned int>("EnemyWaveEditor.WaveRandomGenerator.maxNum", maxNum);
+
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.minOdds", minOdds);
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.maxOdds", maxOdds);
+  /*  cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMinRndMin", waitTimeMinRndMin);
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMinRndMax", waitTimeMinRndMax);
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMaxRndMin", waitTimeMaxRndMin);
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMaxRndMax", waitTimeMaxRndMax);*/
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMin", waitTimeMin);
+    cfg.set<float>("EnemyWaveEditor.WaveRandomGenerator.waitTimeMax", waitTimeMax);
+
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRandomNumGen", isRandomNumGen);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRandomEmNumGen", isRandomEmNumGen);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndOdds", isRndOdds);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isNoOrbs", isNoOrbs);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndNoOrbs", isRndNoOrbs);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isNearPl", isNearPl);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndNearPl", isRndNearPl);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysBossHUDForBosses", isAlwaysBossHUDForBosses);
+    //cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndWaitTime", isRndWaitTime);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isAddEnemiesToBosses", isAddEnemiesToBosses);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isBossNumAlwaysOne", isBossNumAlwaysOne);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysSingleGenBossInWave", isAlwaysSingleGenBossInWave);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isAlwaysSingleBossInWave", isAlwaysSingleBossInWave);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isNearPlIfBoss", isNearPlIfBoss);
+    //cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndOnRestart", isRndOnRestart);
+
+    std::string emNameParam = "EnemyWaveEditor.WaveRandomGenerator.availableEnemies.";
+    for (int i : availableEnemies)
+    {
+        cfg.set<bool>(emNameParam + (*_emNames)[i], true);
+    }
+    for(const auto &em : heavyEmList)
+        em.on_config_save(cfg);
+}
+
+void EnemyWaveEditor::WaveRandomGenerator::EmRestriction::print_settings()
+{
+    ImGui::Checkbox(("Special settings for " + std::string((*_emNames)[curEmId])).c_str(), &isEnabled);
+    if (isEnabled)
+    {
+        ImGui::TextWrapped(("Max " + std::string((*_emNames)[curEmId]) + " in enemy list:").c_str());
+        wrg->input_int(("##MaxGenSpecEm" + std::string((*_emNames)[curEmId])).c_str(), maxGenInList);
+        ImGui::TextWrapped(("Min num for each " + std::string((*_emNames)[curEmId])).c_str());
+        wrg->input_int(("##SpecEnemyMin" + std::string((*_emNames)[curEmId])).c_str(), minNum);
+        ImGui::TextWrapped(("Max num for each " + std::string((*_emNames)[curEmId])).c_str());
+        wrg->input_int(("##SpecEnemyMax" + std::string((*_emNames)[curEmId])).c_str(), maxNum);
+    }
+}
+
+inline void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::EmRestriction::on_config_load(const utility::Config& cfg)
+{
+    auto emName = std::string((*_emNames)[curEmId]);
+    minNum = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.minNum_" + emName).value_or(1);
+    maxNum = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxNum_" + emName).value_or(2);
+    maxGenInList = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxGenInList_" + emName).value_or(2);
+    isEnabled = cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.isEnabled_" + emName).value_or(false);
+}
+
+inline void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::EmRestriction::on_config_save(utility::Config& cfg) const
+{
+    auto emName = std::string((*_emNames)[curEmId]);
+    cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.isEnabled_" + emName, isEnabled);
+    cfg.set<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxGenInList_" + emName, maxGenInList);
+    cfg.set<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.minNum_" + emName, minNum);
+    cfg.set<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxNum_" + emName, maxNum);
 }

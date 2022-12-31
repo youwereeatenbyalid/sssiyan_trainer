@@ -14,10 +14,8 @@ private:
 #define SELECTABLE_STYLE_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.61f)
 #define SELECTABLE_STYLE_ACT_HVR	ImVec4(0.26f, 0.59f, 0.98f, 0.91f) 
 
-	static inline std::shared_ptr<gf::GameModelRequestSetEffect::EffectID> trickEfxID = nullptr;
-	static inline std::shared_ptr<gf::GameModelRequestSetEffect::EffectID> trickEfxIDReverse = nullptr;
-
 	static constexpr float sin45 = 0.7071067811865f;
+	static constexpr float sin22_5 = 0.38268343236508f;
 
 	static inline const gf::Quaternion verticalRot {sin45, 0, 0, sin45};
 	static inline const gf::Quaternion reverseVerticalRot { -sin45, 0, 0, sin45 };
@@ -48,7 +46,10 @@ private:
 		mAirTrick,
 		mTrickUp,
 		mTrickDown,
-		mTrickDodge
+		mTrickDodgeFront,
+		mTrickDodgeBack,
+		mTrickDodgeLeft,
+		mTrickDodgeRight
 	};
 
 	static inline TrickType lastTrick = mAirTrick;
@@ -63,19 +64,21 @@ private:
 
 	struct EfxInfo
 	{
+		std::shared_ptr<gf::GameModelRequestSetEffect::EffectID> effectID;
+
 		const Efx efx;
-		const int containerID;
-		const int elementID;
 		const char* name;
 		const bool canBeRotated = true;
 		const bool canBeSideRotated;
 		float offsetXY;
-		float offsetZ;		
+		float offsetZ;
+		int spawnNum = 1;
 
-		EfxInfo(Efx fx, int containerId, int elemId, const char* fxName, bool canRotate = true, bool can2Spawn = true, float offsXY = 0, float offsZ = 0) : efx(fx), containerID(containerId), elementID(elemId), name(fxName), 
-		offsetXY(offsXY), offsetZ(offsZ), canBeRotated(canRotate), canBeSideRotated(can2Spawn) {}
-
-		EfxInfo(const EfxInfo& obj) : EfxInfo(obj.efx, obj.containerID, obj.elementID, obj.name, obj.canBeRotated, obj.canBeSideRotated, obj.offsetXY, obj.offsetZ) {}
+		EfxInfo(Efx fx, int containerId, int elementId, const char* fxName, bool canRotate = true, bool can2Spawn = true, float offsXY = 0, float offsZ = 0) : efx(fx), name(fxName), 
+		offsetXY(offsXY), offsetZ(offsZ), canBeRotated(canRotate), canBeSideRotated(can2Spawn) 
+		{
+			effectID = std::make_shared<gf::GameModelRequestSetEffect::EffectID>(containerId, elementId);
+		}
 	};
 
 	struct ModeInfo
@@ -100,6 +103,8 @@ private:
 	class TrickModeSetup : IActionFxModSetup
 	{
 	protected:
+		std::mutex mt;
+
 		std::vector<std::unique_ptr<EfxInfo>> linkedEfx;
 
 		TrickType mode;
@@ -116,8 +121,8 @@ private:
 			Both
 		};
 
-		SpawnPosType spawnType = Back;
-		SpawnPosType endSpawnType = Back;
+		SpawnPosType _spawnType = Back;
+		SpawnPosType _endSpawnType = Back;
 
 		bool isEnabled = false;
 		bool isSpawnOnEnd = false;
@@ -145,19 +150,19 @@ private:
 		{
 			ImGui::Checkbox(("Spawn after end of the trick move##" + std::string(trickName)).c_str(), &isSpawnOnEnd);
 			ImGui::TextWrapped("Spawn position type:");
-			ImGui::RadioButton(("Back side##" + std::string(trickName)).c_str(), (int*)&spawnType, 0);
+			ImGui::RadioButton(("Back side##" + std::string(trickName)).c_str(), (int*)&_spawnType, 0);
 			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton(("Front side##" + std::string(trickName)).c_str(), (int*)&spawnType, 1);
+			ImGui::RadioButton(("Front side##" + std::string(trickName)).c_str(), (int*)&_spawnType, 1);
 			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton(("Both sides##" + std::string(trickName)).c_str(), (int*)&spawnType, 2);
+			ImGui::RadioButton(("Both sides##" + std::string(trickName)).c_str(), (int*)&_spawnType, 2);
 			if (isSpawnOnEnd)
 			{
 				ImGui::TextWrapped("End spawn position type:");
-				ImGui::RadioButton(("Back side##End" + std::string(trickName)).c_str(), (int*)&endSpawnType, 0);
+				ImGui::RadioButton(("Back side##End" + std::string(trickName)).c_str(), (int*)&_endSpawnType, 0);
 				ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-				ImGui::RadioButton(("Front side##End" + std::string(trickName)).c_str(), (int*)&endSpawnType, 1);
+				ImGui::RadioButton(("Front side##End" + std::string(trickName)).c_str(), (int*)&_endSpawnType, 1);
 				ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-				ImGui::RadioButton(("Both sides##End" + std::string(trickName)).c_str(), (int*)&endSpawnType, 2);
+				ImGui::RadioButton(("Both sides##End" + std::string(trickName)).c_str(), (int*)&_endSpawnType, 2);
 			}
 			ImGui::Spacing();
 			for (auto& fx : linkedEfx)
@@ -171,6 +176,9 @@ private:
 				ImGui::TextWrapped(uniqStr.c_str());
 				uniqStr += " ##" + std::string(trickName);
 				ImGui::InputFloat(std::string("##" + uniqStr).c_str(), (float*)&(fx->offsetZ), 0.1f, 0.1f, "%.2f");
+				uniqStr = "Spawn num for " + std::string(fx->name) + ":";
+				ImGui::TextWrapped(uniqStr.c_str());
+				UI::SliderInt(std::string("##" + uniqStr).c_str(), (int*)&(fx->spawnNum), 1, 3, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 			}
 		}
 
@@ -184,11 +192,11 @@ private:
 
 		TrickModeSetup() {}
 
-		void trick_pos_type(const EfxInfo* efx, gf::Vec3 spawnOffsAngle, const gf::Quaternion& pRot, uintptr_t vergil, gf::Vec3& spawnPos, gf::Quaternion& spawnRot)
+		void trick_pos_type(EfxInfo* efx, gf::Vec3 spawnOffsAngle, const gf::Quaternion& pRot, uintptr_t vergil, gf::Vec3& spawnPos, gf::Quaternion& spawnRot)
 		{
 			if (!efx->canBeSideRotated)
 				return;
-			switch (spawnType)
+			switch (_spawnType)
 			{
 				case VergilTrickTrailsEfx::TrickModeSetup::Back:
 				{
@@ -214,20 +222,59 @@ private:
 					else
 						spawnRot2 = spawnRot * reverseHorRot;
 					gf::Vec3 spawnPos2;
-					gf::GameModelRequestSetEffect fxSecReq { vergil, trickEfxIDReverse };
-					trickEfxIDReverse->ContainerID = efx->containerID;
-					trickEfxIDReverse->ElementID = efx->elementID;
-					trickEfxIDReverse->IsDataContainerIndxOnly = false;
-					trickEfxIDReverse->DataContainerIndx = 1;
+					gf::GameModelRequestSetEffect fxSecReq { vergil, efx->effectID };
 					spawnPos2 = spawnPos - (2 * spawnOffsAngle);
 					if (isAlwaysVertical)
 						spawnPos2.z -= efx->offsetZ;
-					fxSecReq(spawnPos2, spawnRot2);
+					for (int i = 0; i < efx->spawnNum; i++)
+						fxSecReq(spawnPos2, spawnRot2);
 					break;
 				}
 				default:
 					break;
 			}
+		}
+
+		virtual volatile void* request_efx(uintptr_t vergil, bool changeBaseRot, gf::Quaternion baseModRot = gf::Quaternion{0,0,0,0})
+		{
+			if (!isEnabled)
+				return nullptr;
+			volatile void* res = nullptr;
+			gf::Vec3 pPos;
+			gf::Quaternion pRot;
+			get_pl_transform_data(vergil, pPos, pRot);
+			gf::Quaternion spawnRot;
+			gf::Vec3 spawnPos;
+
+			for (const auto& efx : linkedEfx)
+			{
+				gf::GameModelRequestSetEffect fxRequest { vergil, efx->effectID };
+				spawnPos = pPos;
+				spawnRot = pRot;
+				if(changeBaseRot)
+					spawnRot *= baseModRot;
+
+				gf::Vec3 spawnOffsAngle;
+				if (efx->offsetXY != 0)
+				{
+					gf::Vec3 fVec(0, efx->offsetXY, 0);
+					spawnOffsAngle = gf::Quaternion::q_rot(spawnRot, fVec);
+					spawnPos += spawnOffsAngle;
+				}
+
+				if (efx->offsetZ != 0)
+					spawnPos.z += efx->offsetZ;
+
+				if (isAlwaysVertical && efx->canBeRotated)
+					spawnRot *= verticalRot;
+
+				trick_pos_type(efx.get(), spawnOffsAngle, pRot, vergil, spawnPos, spawnRot);
+
+				for (int i = 0; i < efx->spawnNum; i++)
+					res = fxRequest(spawnPos, spawnRot);
+			}
+			lastTrick = mode;
+			return res;
 		}
 
 	public:
@@ -306,43 +353,7 @@ private:
 
 		virtual volatile void* request_efx(uintptr_t vergil)
 		{
-			if(!isEnabled)
-				return nullptr;
-			volatile void* res = nullptr;
-			gf::Vec3 pPos;
-			gf::Quaternion pRot;
-			get_pl_transform_data(vergil, pPos, pRot);
-			gf::Quaternion spawnRot;
-			gf::Vec3 spawnPos;
-			gf::GameModelRequestSetEffect fxRequest { vergil, trickEfxID };
-			
-			for (const auto &efx : linkedEfx)
-			{
-				spawnPos = pPos;
-				spawnRot = pRot;
-				trickEfxID->ContainerID = efx->containerID;
-				trickEfxID->ElementID = efx->elementID;
-				
-				gf::Vec3 spawnOffsAngle;
-				if (efx->offsetXY != 0)
-				{
-					gf::Vec3 fVec(0, efx->offsetXY, 0);
-					spawnOffsAngle = gf::Quaternion::q_rot(spawnRot, fVec);
-					spawnPos += spawnOffsAngle;
-				}
-
-				if(efx->offsetZ != 0)
-					spawnPos.z += efx->offsetZ;
-
-				if (isAlwaysVertical && efx->canBeRotated)
-					spawnRot *= verticalRot;
-
-				trick_pos_type(efx.get(), spawnOffsAngle, pRot, vergil, spawnPos, spawnRot);
-
-				res = fxRequest(spawnPos, spawnRot);
-			}
-			lastTrick = mAirTrick;
-			return res;
+			return request_efx(vergil, false);
 		}
 
 		virtual volatile void* request_end_efx(uintptr_t vergil)
@@ -350,10 +361,11 @@ private:
 			volatile void *res = nullptr;
 			if (isEnabled && isSpawnOnEnd && lastTrick == mode && *(int*)(vergil + 0xE64) == 4)
 			{
-				SpawnPosType temp = spawnType;
-				spawnType = endSpawnType;
+				std::unique_lock<std::mutex> lck(mt);
+				SpawnPosType temp = _spawnType;
+				_spawnType = _endSpawnType;
 				res = request_efx(vergil);
-				spawnType = temp;
+				_spawnType = temp;
 			}
 			lastTrick = None;
 			return res;
@@ -410,8 +422,8 @@ private:
 			isEnabled = cfg.get<bool>(modCfgName + ".isEnabled").value_or(true);
 			isAlwaysVertical = cfg.get<bool>(modCfgName + ".isAlwaysVertical").value_or(false);
 			isSpawnOnEnd = cfg.get<bool>(modCfgName + ".isSpawnOnEnd").value_or(false);
-			spawnType = (SpawnPosType)cfg.get<int>(modCfgName + ".spawnType").value_or(SpawnPosType::Back);
-			endSpawnType = (SpawnPosType)cfg.get<int>(modCfgName + ".endSpawnType").value_or(SpawnPosType::Back);
+			_spawnType = (SpawnPosType)cfg.get<int>(modCfgName + ".spawnType").value_or(SpawnPosType::Back);
+			_endSpawnType = (SpawnPosType)cfg.get<int>(modCfgName + ".endSpawnType").value_or(SpawnPosType::Back);
 			for (const auto fx : efxList)
 			{
 				auto tmp = cfg.get<bool>(modCfgName + "_" + std::string(fx->name)).value_or(false);
@@ -420,6 +432,7 @@ private:
 					add_efx(fx);
 					linkedEfx[linkedEfx.size() - 1]->offsetXY = cfg.get<float>(modCfgName + "_" + std::string(fx->name) + ".offsetXY").value_or(0);
 					linkedEfx[linkedEfx.size() - 1]->offsetZ = cfg.get<float>(modCfgName + "_" + std::string(fx->name) + ".offsetZ").value_or(0);
+					linkedEfx[linkedEfx.size() - 1]->spawnNum = cfg.get<int>(modCfgName + "_" + std::string(fx->name) + ".spawnNum").value_or(1);
 				}
 			}
 		}
@@ -429,8 +442,8 @@ private:
 			cfg.set<bool>(modCfgName + ".isEnabled", isEnabled);
 			cfg.set<bool>(modCfgName + ".isAlwaysVertical", isAlwaysVertical);
 			cfg.set<bool>(modCfgName + ".isSpawnOnEnd", isSpawnOnEnd);
-			cfg.set<int>(modCfgName + ".spawnType", (int)spawnType);
-			cfg.set<int>(modCfgName + ".endSpawnType", (int)endSpawnType);
+			cfg.set<int>(modCfgName + ".spawnType", (int)_spawnType);
+			cfg.set<int>(modCfgName + ".endSpawnType", (int)_endSpawnType);
 			for(const auto fx : efxList)
 				cfg.set<bool>(modCfgName + "_" + std::string(fx->name), false);
 			for (const auto& fx : linkedEfx)
@@ -439,6 +452,7 @@ private:
 				cfg.set<bool>(fxName, true);
 				cfg.set<float>(fxName + ".offsetXY", fx->offsetXY);
 				cfg.set<float>(fxName + ".offsetZ", fx->offsetZ);
+				cfg.set<int>(fxName + ".spawnNum", fx->spawnNum);
 			}
 		}
 
@@ -526,21 +540,19 @@ private:
 			get_pl_transform_data(vergil, pPos, pRot);
 			gf::Quaternion spawnRot;
 			gf::Vec3 spawnPos;
-			gf::GameModelRequestSetEffect fxRequest { vergil, trickEfxID };
 
 			for (const auto& efx : linkedEfx)
 			{
+				gf::GameModelRequestSetEffect fxRequest { vergil, efx->effectID };
 				spawnPos = pPos;
 				spawnRot = pRot;
-				trickEfxID->ContainerID = efx->containerID;
-				trickEfxID->ElementID = efx->elementID;
 
 				gf::Vec3 spawnOffsAngle;
 				if (efx->offsetXY != 0)
 				{
 
 					gf::Vec3 fVec(0,0,0);//(0, efx->offsetXY, 0);
-					if(spawnType == Front && lastTrick != mTrickDown)
+					if(_spawnType == Front && lastTrick != mTrickDown)
 						fVec.y = -efx->offsetXY;
 					else
 						fVec.y = efx->offsetXY;
@@ -579,17 +591,13 @@ private:
 						gf::PlayerCheckNormalJump checkAir{vergil};
 						if (!checkAir() && lastTrick != mTrickDown)
 						{
-							/*if(spawnType == Front)
-								efx->offsetXY *= -1.0f;*/
-							if (spawnType == Back)
+							if (_spawnType == Back)
 							{
 								spawnPos.z += 1.95f;
 								spawnPos -= spawnOffsAngle;
 							}
 							spawnRot *= gf::Quaternion(0.923f, 0, 0, 0.382f);
 							trick_pos_type(efx.get(), spawnOffsAngle, pRot, vergil, spawnPos, spawnRot);
-							/*if (spawnType == Front)
-								efx->offsetXY *= -1.0f;*/
 						}
 						else
 							trick_pos_type(efx.get(), spawnOffsAngle, pRot, vergil, spawnPos, spawnRot);
@@ -633,30 +641,108 @@ private:
 		}
 	};
 
-	void init_check_box_info() override;
+	class TrickDodgeBase : public TrickModeSetup
+	{
+	public:
+		TrickDodgeBase()
+		{
+			isAlwaysVertical = false;
+		}
+		volatile void* request_efx(uintptr_t vergil) override = 0;
+		void print_spec_settings() override
+		{
+			print_name_selection();
+			if(isEnabled)
+				print_common_fx_info();
+		}
+	};
+	
+	class TrickDodgeFront final : public TrickDodgeBase 
+	{
+	public:
+		TrickDodgeFront()
+		{
+			mode = mTrickDodgeFront;
+			trickName = "Trick Dodge Forward";
+			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickEscape_Front");
+		}
 
-	static inline const std::array<EfxInfo*, 8> efxList {
-		new EfxInfo{BossStartTrails, 1, 12, "Boss start trick trails", true, true, -2.0f, 0},
-		new EfxInfo{SmallTrails, 0, 20, "Rapid slash'es or yamato helm breaker's trails", true, true, 0.5f, 0},
-		new EfxInfo{M18WindAndDust, 3, 3, "Some dust and wind", false, false, 0, 0},
-		new EfxInfo{BlueFlame, 4, 47, "(M)FE unused blue flame efx", true, true, 0, 0},
-		//new EfxInfo{YMStinger, 0, 16, "Yamato stinger flashes", -0.5f, 0},
-		new EfxInfo{SDTTrickDodge, 300, 17, "Player's SDT trick dodge", true, true, 0.95f, 0},
-		new EfxInfo{SDTAirTrick, 300, 27, "Player's SDT air trick", false, false, -0.5f, 0},
-		new EfxInfo{PlBlurTrick, 1, 17, "Player's blur when trick (boss's cloud if using file mod)", false, true, 0, 0},
-		new EfxInfo{JceEndTeleport, 10, 33, "JCE end teleport", true, true, 0, 0},
-		//new EfxInfo{JceEndTeleLighttnings, 10, 34, "JCE end lightnings", true, true, 0, 0}
+		volatile void* request_efx(uintptr_t vergil) override
+		{
+			return TrickModeSetup::request_efx(vergil);
+		}
 	};
 
-	static inline std::array<std::unique_ptr<TrickModeSetup>, 3> trickActionsSettings {
+	class TrickDodgeBack final : public TrickDodgeBase
+	{
+	public:
+		TrickDodgeBack()
+		{
+			mode = mTrickDodgeBack;
+			trickName = "Trick Dodge Back";
+			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickEscape_Back");
+		}
+
+		volatile void* request_efx(uintptr_t vergil) override
+		{
+			return TrickModeSetup::request_efx(vergil);
+		}
+	};
+
+	class TrickDodgeLeft final : public TrickDodgeBase
+	{
+	public:
+		TrickDodgeLeft()
+		{
+			mode = mTrickDodgeLeft;
+			trickName = "Trick Dodge Left";
+			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickEscape_Left");
+		}
+
+		volatile void* request_efx(uintptr_t vergil) override
+		{
+			return TrickModeSetup::request_efx(vergil, true, gf::Quaternion(0,0, sin45, sin45));
+		}
+	};
+
+	class TrickDodgeRight final : public TrickDodgeBase
+	{
+	public:
+		TrickDodgeRight()
+		{
+			mode = mTrickDodgeRight;
+			trickName = "Trick Dodge Right";
+			modCfgName += std::string(trickName);
+			inGameTrickNames.emplace_back("TrickEscape_Right");
+		}
+
+		volatile void* request_efx(uintptr_t vergil) override
+		{
+			return TrickModeSetup::request_efx(vergil, true, gf::Quaternion(0, 0, -sin45, -sin45));
+		}
+	};
+
+	void init_check_box_info() override;
+
+	static inline std::array<EfxInfo*, 8> efxList;// init in Mod::on_init();
+
+	static inline std::array<std::unique_ptr<TrickModeSetup>, 7> trickActionsSettings {
 		std::make_unique<TrickModeSetup>(mAirTrick, "Air Trick", std::vector{"AirTrick_Enemy", "GrimTrick"}),
 		std::make_unique<TrickUpSetup>(),
-		std::make_unique<TrickDownSetup>()
+		std::make_unique<TrickDownSetup>(),
+		std::make_unique<TrickDodgeFront>(),
+		std::make_unique<TrickDodgeBack>(),
+		std::make_unique<TrickDodgeLeft>(),
+		std::make_unique<TrickDodgeRight>()
 	};
 
 	std::unique_ptr<FunctionHook> m_trick_start_hook;
 	std::unique_ptr<FunctionHook> m_air_trick_end_hook;
 	std::unique_ptr<FunctionHook> m_trick_set_draw_self_hook;
+	std::unique_ptr<FunctionHook> m_trickdodge_set_draw_self_hook;
 
 public:
 
@@ -665,6 +751,9 @@ public:
 	static inline uintptr_t airTrickEndRet = 0;
 	static inline uintptr_t actionSetDrawSelfRet = 0;
 	static inline uintptr_t airTrickEndDrawSelfCall = 0;
+	static inline uintptr_t trickDodgeSetDrawSelfRet = 0;
+	static inline uintptr_t trickDodgeSetDrawSelfJne = 0;
+
 
 	VergilTrickTrailsEfx() = default;
 
@@ -703,7 +792,7 @@ public:
 
 	static inline bool useCustomRot = false;
 
-	static void set_up_end_efx_asm(uintptr_t vergil);
+	static void set_up_end_efx_asm(uintptr_t threadCtxt, uintptr_t vergil, bool setDrawSelf);
 
 	static void set_trick_efx(uintptr_t netStr, uintptr_t vergil);
 };

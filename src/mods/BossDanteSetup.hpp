@@ -1,5 +1,11 @@
 #pragma once
 #include "Mod.hpp"
+#include "GameFunctions/GameFunc.hpp"
+#include "PlSetActionData.hpp"
+#include <random>
+
+namespace gf = GameFunctions;
+
 class BossDanteSetup : public Mod
 {
 public:
@@ -11,7 +17,9 @@ public:
 	inline static bool isCustomDtDuration = false;
 	inline static bool isNoFinishSdtStun = false;
 	inline static bool isNoMovesDelay = false;
-
+	static inline bool isSdtRegen = false;
+	static inline bool allowRoyalRelease = true;
+	//static inline bool allowFlipper = true;
 
 	inline static uint32_t sdtTransformMode = 1; //0 - normal, 1 - allFast; 2 - firstNormalOtherFast;
 	
@@ -24,15 +32,28 @@ public:
 	inline static uintptr_t emDanteDelayRet = 0x0;
 	inline static uintptr_t emDanteDelayJmpRet = 0x0;
 	inline static uintptr_t emDanteDelayJneRet = 0x0;
+	static inline uintptr_t workRateRoyalRevengeRet = 0;
+	static inline uintptr_t setWorkRateCall = 0;
+	static inline uintptr_t sdtRegenRet = 0;
+	static inline uintptr_t sdtRegenJmp = 0;
+	static inline uintptr_t setRoyalReleaseRet = 0;
+	static inline uintptr_t damageReactRet = 0;
+	static inline uintptr_t setGuardReactionEmDante = 0;
 
 	inline static float dtTimer = 5.0f;
 	inline static float dtTimerStartPoint = 0.0f;
 	inline static const float dtTimerMax = 29.9f;
 	inline static float dtDuration = 35.0f;
-
-
+	static inline float rgPower = 15100.0f;
 
 	BossDanteSetup() = default;
+
+	/*~BossDanteSetup()
+	{
+		PlSetActionData::new_pl_boss_action_event_unsub(new Events::EventHandler<BossDanteSetup, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>&, uintptr_t>(this, &BossDanteSetup::on_boss_action_update));
+	}*/
+
+	static bool set_rg_action_asm(uintptr_t plDante);
 
 	std::string_view get_name() const override
 	{
@@ -72,5 +93,17 @@ private:
 	std::unique_ptr<FunctionHook> m_dttimer_hook;
 	std::unique_ptr<FunctionHook> m_dtduration_hook;
 	std::unique_ptr<FunctionHook> m_emdante_delay_hook;
+	std::unique_ptr<FunctionHook> m_royal_revenge_delay_hook;
+	std::unique_ptr<FunctionHook> m_sdt_regen_hook;
+	std::unique_ptr<FunctionHook> m_set_royal_release_hook;
+	std::unique_ptr<FunctionHook> m_set_guard_ract_hook;
+
+	static gf::Vec3 get_char_pos(uintptr_t character);
+
+	static inline std::random_device rd;
+
+	static inline std::default_random_engine generator{rd()};
+
+	static inline std::uniform_int_distribution<int> releaseDistrib{0, 1};
 };
 

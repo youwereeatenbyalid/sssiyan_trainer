@@ -1,6 +1,7 @@
-
 #include "VergilTrickUpLockedOn.hpp"
 #include "PlayerTracker.hpp"
+#include "BossTrickUp.hpp"
+
 uintptr_t VergilTrickUpLockedOn::jmp_ret1{NULL};
 uintptr_t VergilTrickUpLockedOn::jmp_jne1{NULL};
 
@@ -24,14 +25,40 @@ static naked void detour1() { // Disable Trick To
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
+        cmp byte ptr [BossTrickUp::cheaton], 1
+        je cheatcode
         jmp code
 
     cheatcode:
-        movss [xmm0backup1], xmm0
+       /* movss [xmm0backup1], xmm0
         movss xmm0, [rdx+00000FF4h]
         comiss xmm0, [leftstickthreshold]
         movss xmm0, [xmm0backup1]
-        ja cheatcode2
+        ja cheatcode2*/
+        //jmp cheatcode2
+
+        push rax
+        push rcx
+        push rdx
+        push rsp
+        push r8
+        push r9
+        push r10
+        push r11
+        mov rcx, rdx
+        sub rsp, 32
+        call qword ptr [BossTrickUp::check_angle]
+        add rsp, 32
+        cmp al, 1
+        pop r11
+        pop r10
+        pop r9
+        pop r8
+        pop rsp
+        pop rdx
+        pop rcx
+        pop rax
+        je cheatcode2
 
     code:
         cmp [rdx+00000ED0h], sil
@@ -51,6 +78,8 @@ static naked void detour2() { // Enable Trick Up While Locked On
         cmp [PlayerTracker::playerid], 4
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
+        je cheatcode
+        cmp byte ptr [BossTrickUp::cheaton], 1
         je cheatcode
         jmp code
 
@@ -80,6 +109,8 @@ static naked void detour3() { // Disable Directional Dodges
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
+        cmp byte ptr [BossTrickUp::cheaton], 1
+        je cheatcode
         jmp code
 
     cheatcode:
@@ -103,6 +134,22 @@ static naked void detour3() { // Disable Directional Dodges
 
 // clang-format on
 
+void VergilTrickUpLockedOn::on_config_load(const utility::Config& cfg)
+{
+    leftStickAngle = cfg.get<float>("VergilTrickUpLockedOn.leftStickAngle").value_or(25.0f);
+}
+
+void VergilTrickUpLockedOn::on_config_save(utility::Config& cfg)
+{
+    cfg.set<float>("VergilTrickUpLockedOn.leftStickAngle", leftStickAngle);
+}
+
+void VergilTrickUpLockedOn::on_draw_ui()
+{
+    ImGui::TextWrapped("Left stick forward angle threshold:");
+    UI::SliderFloat("##angleForwardThreshold", &leftStickAngle, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+}
+
 void VergilTrickUpLockedOn::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
@@ -114,7 +161,7 @@ std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
   m_is_enabled            = &VergilTrickUpLockedOn::cheaton;
   m_on_page               = Page_VergilTrick;
 
-  m_full_name_string     = "Trick Up On Forward + Trick";
+  m_full_name_string     = "Trick Up On Forward + Trick (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Trick Up without letting go of Lock On.";
 

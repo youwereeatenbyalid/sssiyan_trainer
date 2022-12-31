@@ -38,7 +38,7 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteSDT;
 		m_full_name_string = "Custom Judgement Cost (+)";
-		m_author_string = "VPZadov";
+		m_author_string = "V.P.Zadov";
 		m_description_string = "Set cost for SDT's \"Judgement\" move.";
 
 		set_up_hotkey();

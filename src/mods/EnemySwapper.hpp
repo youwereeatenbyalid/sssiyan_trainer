@@ -9,9 +9,15 @@
 #include "MissionManager.hpp"
 #include "PlayerTracker.hpp"
 //#include "EnemyDataSettings.hpp"
+#include "GameplayStateTracker.hpp"
+#include "EndLvlHooks.hpp"
+#include "GameFunctions/GameFunc.hpp"
+#include "EnemyData.hpp"
 
-class EnemySwapper : public Mod {
+namespace gf = GameFunctions;
 
+class EnemySwapper : public Mod, private EndLvlHooks::IEndLvl 
+{
 
 public:
 
@@ -79,59 +85,12 @@ static uintptr_t setEnemyDataRet3;
 static uintptr_t setEnemyDataRet5;
 //static uintptr_t setEnemyData4Jmp;
 static uintptr_t setEnemyDataRet6;
-static uintptr_t nowFlowRet;
-static uintptr_t gameModeRet;
-//static uintptr_t swapIdRet;
 
-static uintptr_t posSpawnRet;
-static uintptr_t posSpawnTestJne;
-static uintptr_t bossDanteAiRet;
-static uintptr_t bossDanteAiJne;
-static uintptr_t killShadowRet;
-static uintptr_t killGriffonRet;
-static uintptr_t nightmareStartingPosRet;
-static uintptr_t nightmareArrivalPosRet;
-static uintptr_t plPosBase;
-static uintptr_t cavFixRet;
-static uintptr_t vergilFixRet;
-static uintptr_t vergilFixJs;
-static uintptr_t airRaidControllerRet;
-static uintptr_t goliathSuckJmpRet;
-static uintptr_t goliathLeaveJmpRet;
-static uintptr_t artemisFixRet;
-static uintptr_t urizen3TpRet;
-static uintptr_t urizen3TpJne;
-static uintptr_t malphasRet;
-static uintptr_t cerberusFixRet;
-static uintptr_t cerberusThunderWaveRet;
-static uintptr_t cerberusThunderBallRet;
-static uintptr_t cerberusThunderBallJmp;
-static inline uintptr_t shadowWarpFuncRet = 0;
-static inline uintptr_t nightmireExtFarPosRet = 0;
 
 static bool isSwapAll;
 static bool cheaton;
 static bool isCustomRandomSettings;
 static bool isCustomSeed;
-static bool isCustomSpawnPos;
-static bool isBossDanteAiEnabled;
-static bool isDanteM20;
-static bool canKillShadow;
-static bool canKillGriffon;
-static bool isNightmareFix;
-static bool isInMission;//NowFlow.isOnMission
-static bool isCavFixEnabled;
-static bool isVergilFixEnabled;
-static bool isFastDiveBombAttack;
-static bool isGoliathFixEnabled;
-static bool isArtemisFixEnabled;
-static bool isArtemisPlayersXY;
-static bool isUrizen3FixEnabled;
-static bool isMalphasFixEnabled;
-static bool malphasFixPlPos;
-static bool isCerberusFixEnabled;
-static bool cerberusFixPlPos;
-static bool cerberusThunderWavePlPos;
 
 static uint32_t selectedToSwap[enemyListCount];
 static uint32_t selectedSwapAll;
@@ -142,36 +101,18 @@ static uint32_t newEnemyId2;
 static uint32_t newEnemyId3;
 static uint32_t newEnemyId5;
 static uint32_t newEnemyId6;
-static uint32_t nowFlow;//22-game, 17 - start
-static uint32_t prevFlow;
-static uint32_t gameMode;
 
-static float spawnPosZOffset;
-static float spawnPosXOffset;
-static float spawnPosYOffset;
-static float curSpawnPosZ;
-static float curSpawnPosX;
-static float curSpawnPosY;
+static inline constexpr float shadow_warp_offs_z = 0.85f;
+
 static float waitTimeMin;
 static float waitTimeMax;
 static float odds;
-static float divebombDistanceGroundCheck; // default = 5
-static float divebombHeightOfArenaSide; // default = 1.5
-static float divebombHeightOfOutside;// default = 8
-//static float inline radiusOfArea = 15.0f;//43.0
-//static float inline radiusOfRevolution = 35.0f;//80
-static float cerberusThunderWaveZ;
 
 static int enemyNum;
 
 static std::array<EnemyId, enemyListCount> swapSettings;
 static EnemyId swapForAll;
 
-static Vector3f nightmareStartPosOffs;
-static inline Vector3f cavOffset{1.5f, 2.32f, -0.8f};
-static inline Vector3f artemisCenterOfFloor{-368.0f, -308.5f, -10.35f};
-static inline Vector3f malphasCenterOfFloor{0.0f,0.0f,0.0f};
-static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
 
   EnemySwapper() = default;
 
@@ -210,56 +151,24 @@ static inline Vector3f cerberusCenterOfFloor{0.0f, -0.1f, 0.0f};
 
   static void clear_swap_data_asm();
 
-  static inline std::array<const char*, enemyListCount> emNames{
-	  "Hell Caina", //0
-	  "Hell Antenora",//1
-	  "Hell Judecca", //2
-	  "Empusa",//3
-	  "Green Empusa",//4
-	  "Red Empusa", //5
-	  "Empusa Queen",//6
-	  "Riot", //7
-	  "Chaos", //8
-	  "Fury", //9
-	  "Baphomet",//10 
-	  "Lusachia", //11
-	  "Behemoth", //12
-	  "Nobody", //13
-	  "Scudo Angelo",//14, 
-	  "Proto Angelo", //15
-	  "Death Scrissors",//16
-	  "Hellbat", //17
-	  "Pyrobat", //18
-	  "Qliphoth's tentacle",//19 
-	  "Goliath", //20
-	  "Malphas", //21
-	  "Nidhogg", //22
-	  "Artemis", //23
-	  "Gilgamesh", //24
-	  "Elder Geryon Knight",//25
-	  "Cavaliere", //26
-	  "Qliphoth Root Boss",//27 
-	  "King Cerberus", //28
-	  "Griffon (NoDie)", //29
-	  "Shadow (NoDie)", //30
-	  "Nightmare", //31
-	  "Urizen 1",//32
-      "Urizen 2",//33
-      "Urizen 3",//34
-      "Vergil", //35
-	  "Phantom Goliath",//36
-      "Phantom Artemis",//37
-      "Phantom Cavaliere",//38
-      //"Vergil M20",//39
-      "Dante (Ai disabled by default)",//40
-      //"Dante M20"//41 No:)
-  };
+  void reset(EndLvlHooks::EndType end) override
+  {
+	  if(EnemySwapper::cheaton)
+		  clear_swap_data_asm();
+  }
 
   static std::vector<uintptr_t> swapDataAddrs;
   //static std::mutex mtx;
 
 
 private:
+
+	static inline bool isSpawnOffsForFlyingEnemiesOnly = false;
+	static inline bool isForceVerticalSpawnRot = false;
+	static inline bool isAlwaysSpawnOnPlPos = false;
+	
+    static inline const std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
+
   void restore_default_settings();
   static void set_swapper_setting(int emListIndx, int swapToIndx);
   static inline std::random_device rd;
@@ -272,8 +181,8 @@ private:
   const int maxIndx = 19;
   size_t reservedForReswap = 4000;
   void reserveReswapVector(size_t newSize);
-  static void btn_set_plpos_to(Vector3f &to, const char* btnContent = "Set center of floor to current player position");
 
+  static inline EnemySwapper *_mod = nullptr;
 
   // function hook instance for our detour, convinient wrapper
   // around minhook
@@ -286,25 +195,4 @@ private:
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook5;
   std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
   //std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
-  std::unique_ptr<FunctionHook> m_spawn_pos_hook;
-  std::unique_ptr<FunctionHook> m_now_flow_hook;
-  std::unique_ptr<FunctionHook> m_gamemode_hook;
-  std::unique_ptr<FunctionHook> m_m19check_hook;
-  std::unique_ptr<FunctionHook> m_griffon_hook;
-  std::unique_ptr<FunctionHook> m_shadow_hook;
-  std::unique_ptr<FunctionHook> m_nightmire_starting_hook;
-  std::unique_ptr<FunctionHook> m_nightmire_arrival_hook;
-  std::unique_ptr<FunctionHook> m_cavfix_hook;
-  std::unique_ptr<FunctionHook> m_vergilcenterfloor_hook;
-  std::unique_ptr<FunctionHook> m_airraid_controller_hook;
-  std::unique_ptr<FunctionHook> m_goliath_suctionjmp_hook;
-  std::unique_ptr<FunctionHook> m_goliath_leavejmp_hook;
-  std::unique_ptr<FunctionHook> m_artemis_centerfloor_hook;
-  std::unique_ptr<FunctionHook> m_urizen3_tp_hook;
-  std::unique_ptr<FunctionHook> m_malphas_tp_hook;
-  std::unique_ptr<FunctionHook> m_cerberus_pos_hook;
-  std::unique_ptr<FunctionHook> m_cerberus_thunderwave_hook;
-  std::unique_ptr<FunctionHook> m_cerberus_thunderball_hook;
-  std::unique_ptr<FunctionHook> m_shadow_warp_func_hook;
-  std::unique_ptr<FunctionHook> m_nightmirepos_ext_far_hook;
 };

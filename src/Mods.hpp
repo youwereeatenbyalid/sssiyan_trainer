@@ -3,12 +3,13 @@
 #include <filesystem>
 #include "fw-imgui/ui.hpp"
 #include "InitPatternsManager.hpp"
+#include "events/Events.hpp"
 class Mods {
 public:
     Mods();
     virtual ~Mods() {}
 
-    std::optional<std::string> on_initialize(const bool& load_configs) const;
+    std::optional<std::string> on_initialize(const bool& load_configs);
 
     void on_frame() const;
     void on_draw_ui() const;

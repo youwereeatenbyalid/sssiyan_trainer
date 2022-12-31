@@ -81,7 +81,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
   m_is_enabled        = &VergilNoAfterimages::cheaton;
   m_on_page           = Page_VergilVFXSettings;
   m_full_name_string = "Disable Afterimages (+)";
-  m_author_string    = "VPZadov";
+  m_author_string    = "V.P.Zadov";
   m_description_string = "Disable the afterimages Vergil leaves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

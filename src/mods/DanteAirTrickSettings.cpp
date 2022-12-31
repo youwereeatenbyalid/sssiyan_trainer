@@ -69,7 +69,7 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_DanteCheat;
 	m_full_name_string = "Trick Settings (+)";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Adjust the properties of Dante's Trick Actions.";
 
   set_up_hotkey();

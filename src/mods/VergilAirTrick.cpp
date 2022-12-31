@@ -1,4 +1,6 @@
 #include "VergilAirTrick.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
+#include "EnemyData.hpp"
 
 bool VergilAirTrick::cheaton = false;
 bool VergilAirTrick::isSpeedUp = false;
@@ -20,9 +22,6 @@ uintptr_t VergilAirTrick::speedAccRet{NULL};
 uintptr_t VergilAirTrick::initSpeedRet{NULL};
 uintptr_t VergilAirTrick::routineStartRet{NULL};
 uintptr_t VergilAirTrick::finishRangeRet{NULL};
-
-volatile uintptr_t rsi_b = 0;
-//volatile uintptr_t rbx_b = 0;
 
 static naked void waittime_detour() {
 	__asm {
@@ -85,34 +84,120 @@ static naked void initspeed_detour() {
 	}
 }
 
-void VergilAirTrick::xypos_teleport(uintptr_t vergil, TeleportType type, float& x, float& y, GameFunctions::Vec3 pPos, float trickX, float trickY, float trickLen)
+void VergilAirTrick::pos_teleport(TeleportType type, gf::Vec3& outVec, GameFunctions::Vec3 pPos, gf::Vec3 trickVec, float trickCorrect, float trickLen)
 {
 	switch (type)
 	{
 		case VergilAirTrick::Front:
 		{
-			x = pPos.x + (trickLen - trickCorrection) * trickX / (float)trickLen;
-			y = pPos.y + (trickLen - trickCorrection) * trickY / (float)trickLen;
+			outVec.x = pPos.x + (trickLen - trickCorrect) * trickVec.x / (float)trickLen;
+			outVec.y = pPos.y + (trickLen - trickCorrect) * trickVec.y / (float)trickLen;
+			outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 		case VergilAirTrick::Behind:
 		{
-			x = pPos.x + (trickLen + trickCorrection) * trickX / (float)trickLen;
-			y = pPos.y + (trickLen + trickCorrection) * trickY / (float)trickLen;
+			outVec.x = pPos.x + (trickLen + trickCorrect) * trickVec.x / (float)trickLen;
+			outVec.y = pPos.y + (trickLen + trickCorrect) * trickVec.y / (float)trickLen;
+			outVec.z = pPos.z + (trickLen + trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 		default:
 		{
-			x = pPos.x + (trickLen - trickCorrection) * trickX / (float)trickLen;
-			y = pPos.y + (trickLen - trickCorrection) * trickY / (float)trickLen;
+			outVec.x = pPos.x + (trickLen - trickCorrect) * trickVec.x / (float)trickLen;
+			outVec.y = pPos.y + (trickLen - trickCorrect) * trickVec.y / (float)trickLen;
+			outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 	}
 }
 
+void VergilAirTrick::setup_afterimage_shell(uintptr_t shell, uintptr_t afterImageParam)
+{
+	if(shell == 0)
+		return;
+	*(bool*)(shell + 0x440) = true;//useOwnerMotBank
+	*(int*)(shell + 0x44C) = 0;//SetMotion
+	*(int*)(shell + 0x450) = 1;//SetMotFrame
+	*(int*)(shell + 0x454) = 0;//targetLayer
+	*(bool*)(shell + 0x458) = false;//UseOwnerMotBlendRate;
+	*(uintptr_t*)(shell + 0x470) = *(uintptr_t*)(afterImageParam + 0x30);//AlphaRateAnim
+	*(float*)(shell + 0x478) = 1.069f;//overwriteStartFrame;
+	*(float*)(shell + 0x480) = *(float*)(afterImageParam + 0x24);//playMotDelayFrame
+	*(bool*)(shell + 0x484) = false;//notOwnerDynamicMotBank;
+	//*(float*)(shell + 0x498) = 0;//*(float*)(afterImageParam + 0x28);//currentTimer
+	//*(float*)(shell + 0x488) = 2.369f;//ownerStartMotionFrame
+	*(int*)(shell + 0x270) = 7;//CheckDisable; 
+	*(float*)(shell + 0x338) = *(float*)(afterImageParam + 0x20);//lifeTime
+	*(bool*)(shell + 0x398) = *(bool*)(shell + 0x320) = false;//isDelete, isDeleteRequest;
+	//*(bool*)(shell + 0x3E8) = false;//isPaused;
+	//*(bool*)(shell + 0x380) = true;//isInitialized;
+	*(bool*)(shell + 0x47C) = true;//isPlayMotion;
+}
+
+void VergilAirTrick::create_afterimages(TeleportType teleportType, uintptr_t vergil, uintptr_t charTransform, gf::Vec3 startPlPos, gf::Vec3 targetPos, gf::Vec3 trickVec, float distance)
+{
+	auto afterImageParam = *(uintptr_t*)(vergil + 0x1960);
+	if(afterImageParam == 0)
+		return;
+	int dtState = *(int*)(vergil + 0x9B0);
+	uintptr_t afterImagePfb;
+	if(dtState == 0 || dtState == 1)
+		afterImagePfb = *(uintptr_t*)(afterImageParam + 0x10);
+	else
+		afterImagePfb = *(uintptr_t*)(afterImageParam + 0x18);
+	if(afterImagePfb == 0)
+		return;
+	gf::CreateShell createAfterImage{afterImagePfb};
+	auto plPos = *(gf::Vec3*)(charTransform + 0x30);
+	auto plRot = *(gf::Quaternion*)(charTransform + 0x40);
+	uintptr_t shell = 0;
+	auto reverseRot = plRot * gf::Quaternion(0, 0, 1.0f, 0);
+	gf::Quaternion curRot = teleportType == TeleportType::Behind? reverseRot : plRot;
+	switch (teleportAfterImageMode)
+	{
+		case AfterimageMode::OnStart:
+		{
+			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, startPlPos, curRot, vergil, 0, 0), afterImageParam);
+			break;
+		}
+
+		case AfterimageMode::OnEnd:
+		{
+			plPos.z += colliderZUp + 0.16f;
+			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, plPos, plRot, vergil, 0, 0), afterImageParam);
+			break;
+		}
+
+		case AfterimageMode::Both:
+		{
+			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, startPlPos, curRot, vergil, 0, 0), afterImageParam);
+			plPos.z += colliderZUp + 0.16f;
+			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, plPos, plRot, vergil, 0, 0), afterImageParam);
+			break;
+		}
+
+		case AfterimageMode::Trail:
+		{
+			int afterImagesCount = distance / afterImagesInterval;
+			float distanceOffs = distance;
+			gf::Vec3 curPos = startPlPos;
+			for (int i = 0; i < afterImagesCount; i++)
+			{
+				setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, curPos, curRot, vergil, 0, 0), afterImageParam);
+				pos_teleport(Front, curPos, startPlPos, trickVec, distanceOffs, distance);
+				distanceOffs -= afterImagesInterval;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
 void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 {
-	if(PlayerTracker::vergilentity == 0 || trickAction == 0)
+	if(trickAction == 0)
 		return;
 	uint16_t trickOffsAddr = 0;
 	__asm (
@@ -123,75 +208,180 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	:"g"(trickAction)
 	:"rax"
 	);
-	if (trickOffsAddr == 0xF208)
+	if (trickOffsAddr == 0xF208)//GrimTrick
 		return;
 	uintptr_t vergil = *(uintptr_t*)(trickAction + 0x60);//Also for doppel when he summoned;
-	if(vergil == 0)
+	if (vergil == 0)
 		return;
+	auto trickTargetCtrl = *(uintptr_t*)(vergil + 0x19B0);
+	uintptr_t enemyToTrick = 0, shellToTrick = 0;
+	if (trickTargetCtrl != 0)
+	{
+		if (*(int*)(trickTargetCtrl + 0x10) == 2)//grimTrick
+			return;
+		auto lockOnObj = *(uintptr_t*)(trickTargetCtrl + 0x18);
+		if (lockOnObj != 0)
+		{
+			auto target = *(uintptr_t*)(lockOnObj + 0x10);
+			if (target != 0)
+			{
+				enemyToTrick = *(uintptr_t*)(target + 0x60);
+				shellToTrick = *(uintptr_t*)(target + 0x68);
+			}
+		}
+	}
+	auto emId = EnemyData::get_em_id(enemyToTrick);
+	if (enemyToTrick != 0 && shellToTrick == 0)
+	{
+		if (emId == EnemyData::Nidhogg)//fuck nidhogg
+			return;
+		if (emId == EnemyData::DeathScrissors)
+		{
+			auto terrainChecker = *(uintptr_t*)(enemyToTrick + 0xD80);
+			if (terrainChecker == 0 || *(bool*)(terrainChecker + 0x50))//isOutOfArea
+				return;
+		}
+		if (emId == EnemyData::Vergil || emId == 42)//Vergil
+		{
+			auto airRaidCtrl = *(uintptr_t*)(enemyToTrick + 0x1C90);
+			if (airRaidCtrl == 0 || *(bool*)(airRaidCtrl + 0x30))//isOutOfArea
+				return;
+		}
+	}
+	
 	bool isDoppel = *(bool*)(vergil + 0x17F0);
-	GameFunctions::Vec3 targetPos = *(GameFunctions::Vec3*)(trickAction + 0xF0);
-	auto gameObj = *(uintptr_t*)(vergil + 0x10);
-	auto transformGameObj = *(uintptr_t*)(gameObj + 0x18);
+	gf::Vec3 targetPos = *(gf::Vec3*)(trickAction + 0xF0);
 	float xTmp, yTmp;
 
 	void *transform = (void*)(*(uintptr_t*)(vergil + 0x1F0));
-	auto pPos = *(GameFunctions::Vec3*)((uintptr_t)transform + 0x30);
+	auto pPos = *(gf::Vec3*)((uintptr_t)transform + 0x30);
 
-	GameFunctions::Vec3 trickVec(targetPos.x - pPos.x, targetPos.y - pPos.y, targetPos.z - pPos.z);
-	float trickVecLen = GameFunctions::Vec3::vec_length(pPos, targetPos);
-	TeleportType curType = trickType;
+	gf::Vec3 trickVec(targetPos.x - pPos.x, targetPos.y - pPos.y, targetPos.z - pPos.z);
+	float trickVecLen = gf::Vec3::vec_length(pPos, targetPos);
+	TeleportType curType = _mod->trickType;
 
-	if (isDoppelOppositeTeleport)
+	bool isWallEnemy = false;
+	float correctionTmp = trickCorrection;
+	if(enemyToTrick != 0 && shellToTrick == 0)
 	{
-		if (isDoppel)
+		if (emId == EnemyData::Urizen1 /*|| *(int*)((uintptr_t)enemyToTrick + 0xB18) == 25*/) //fuck nidhogg still go through the invisible wall
 		{
-			if(trickType == Front)
-				curType = Behind;
-			else
-				curType = Front;
+			isWallEnemy = true;
+			curType = Front;
+			correctionTmp += 2.5f;
 		}
 	}
-	xypos_teleport(vergil, curType, xTmp, yTmp, pPos, trickVec.x, trickVec.y, trickVecLen);
-	targetPos.x = xTmp;
-	targetPos.y = yTmp;
-	float oldTargetZ = targetPos.z + colliderZUp;
-	targetPos.z += teleportZOffs;
 
-	auto cachedCharController = *(uintptr_t*)(vergil + 0x2F0);
-	auto cachedSubCharController = *(uintptr_t*)(vergil + 0x2F8);
-	if(cachedCharController == 0 || cachedSubCharController == 0)
-		return;
-	//*(bool*)(cachedCharController + 0x30) = false;
-	//*(bool*)(cachedSubCharController + 0x30) = false;
+	if (curType == Dynamic)
+	{
+		if (_mod->_inputSystem != nullptr)
+		{
+			try
+			{
+				const bool isTrickPressed = _mod->_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::Special0);
+				if (isDoppel && isDoppelOppositeTeleport)
+				{
+					if (isTrickPressed)
+						curType = Front;
+					else curType = Behind;
+				}
+				else
+				{
+					if (isTrickPressed)
+						curType = Behind;
+					else curType = Front;
+				}
+				
+			}
+			catch (const std::exception &exc)
+			{
+				curType = Front;
+			}
+		}
+	}
 
-	GameFunctions::Transform_SetPosition set_pos{transform};
-	set_pos(targetPos);
-	targetPos.z = oldTargetZ;
+	if (isDoppel && isDoppelOppositeTeleport)
+	{
+		if (_mod->trickType == Front)
+			curType = Behind;
+		else if (_mod->trickType == Behind)
+			curType = Front;
+	}
+	gf::Vec3 tmpPos = targetPos;
+	_mod->pos_teleport(curType, tmpPos, pPos, trickVec, correctionTmp, trickVecLen);
+	float oldTargetZ = targetPos.z + _mod->colliderZUp;
+	
+	if (curType == Behind && isAutoRotate)
+	{
+		gf::Quaternion reverse(0, 0, 1.0f, 0);
+		*(gf::Quaternion*)((uintptr_t)transform + 0x40) *= reverse;
+	}
 
-	//------------------This stuff can ignore walls, whats no good, especially for back step trick-----------------//
-	// Actually code above do this too, but seems little more safer;
-	//void *posCorPtr = (void*)(*(uintptr_t*)(vergil + 0x8E8));
-	//////*(uintptr_t*)((uintptr_t)posCorPtr+0x18) = 0;
-	//GameFunctions::PositionErrorCorrector posCor{posCorPtr};
-	//posCor.set_rcx(posCor.get_thread_context().value());
-	//posCor.set_position(targetPos);
-	//-------------------------------------------------------------------------------------------------------------//
+	if(!isWallEnemy)
+		gf::Transform_SetPosition::set_character_pos(vergil, targetPos, true);
+	targetPos.z += _mod->teleportZOffs;
+	targetPos.x = tmpPos.x;
+	targetPos.y = tmpPos.y;
 
-	*(GameFunctions::Vec3*)(cachedCharController + 0x140) = targetPos;
-	*(GameFunctions::Vec3*)(cachedCharController + 0x150) = targetPos;
-	*(GameFunctions::Vec3*)(cachedCharController + 0x160) = targetPos;
-
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x140) = targetPos;
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x150) = targetPos;
-	*(GameFunctions::Vec3*)(cachedSubCharController + 0x160) = targetPos;
-
-	//*(bool*)(cachedCharController + 0x30) = true;
-	//*(bool*)(cachedSubCharController + 0x30) = true;
-
-	//*(bool*)(trickAction + 0x144) = true; //isPushHit;
+	if (forceGroundTrick && shellToTrick == 0)
+	{
+		if (enemyToTrick != 0)
+		{
+			if (_mod->groundTrickType == Default)
+			{
+				auto adjustTerrain = *(uintptr_t*)(enemyToTrick + 0x310);
+				if (emId == EnemyData::Urizen1 || (adjustTerrain != 0 && !(*(bool*)(adjustTerrain + 0x82)) && emId != EnemyData::GreenEmpusa && emId != EnemyData::Lusachia && 
+					emId != EnemyData::DeathScrissors && emId != EnemyData::Hellbat && emId != EnemyData::Pyrobat && emId != EnemyData::Artemis && emId != EnemyData::Griffon && 
+					emId != EnemyData::PhantomArtemis && emId != EnemyData::QliphotsTentacle && emId != EnemyData::Malphas && emId != EnemyData::Dante && emId != EnemyData::Vergil && emId != 42 && emId != 56))
+					targetPos.z = (*(gf::Vec3*)(enemyToTrick + 0x3E0)).z - 1.6f;
+			}
+			else
+				targetPos.z = (*(gf::Vec3*)(enemyToTrick + 0x3E0)).z - 1.6f;
+		}
+	}
+	if (!isWallEnemy)
+	{
+		gf::PositionErrorCorrector setPos { (void*)*(uintptr_t*)(vergil + 0x8E8) };
+		setPos.set_position(targetPos);
+	}
+	else
+	{
+		gf::Transform_SetPosition setPos{transform};
+		setPos(targetPos);
+	}
+	*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
-}
+	
+	switch (_mod->teleportAfterImageState)
+	{
+		case AfterimageState::HumanOnly:
+		{
+			if (*(int*)(vergil + 0x9B0) != 0)
+				break;
+			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
+			break;
+		}
 
+		case AfterimageState::SDTOnly:
+		{
+			if (*(int*)(vergil + 0x9B0) != 2)
+				break;
+			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
+			break;
+		}
+
+		case AfterimageState::Always:
+		{
+			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
+			break;
+		}
+
+		case AfterimageState::Default:
+			break;
+		default:
+			break;
+	}
+}
 
 static naked void speed_acc_detour() {
   __asm {
@@ -255,7 +445,6 @@ static naked void max_xz_detour() {
   }
 }
 
-volatile uintptr_t r9_b = 0;
 static naked void air_trick_routine3_detour()
 {
 	__asm {
@@ -267,24 +456,28 @@ static naked void air_trick_routine3_detour()
 		cheat:
 		je originalcode
 		push rax
-		//mov [rbx_b], rbx
+		push rbx
 		push rcx
 		push rdx
-		mov [rsi_b], rsi
+		push rdi
+		push rsp
 		push r8
-		mov [r9_b], r9
-		//push r9
+		push r9
+		push r10
+		push r11
 		mov rcx, rdi
 		sub rsp, 32
 		call qword ptr [VergilAirTrick::change_pos_asm]
 		add rsp, 32
-		mov r9, qword ptr [r9_b]
-		//pop r9
+		pop r11
+		pop r10
+		pop r9
 		pop r8
-		mov rsi, qword ptr [rsi_b]
+		pop rsp
+		pop rdi
 		pop rdx
 		pop rcx
-		//mov rbx, qword ptr [rbx_b]
+		pop rbx
 		pop rax
 
 		originalcode:
@@ -319,10 +512,13 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilTrick;
 	m_full_name_string = "Air Trick Settings (+)";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Adjust the properties of Vergil's Trick Actions.";
 
-  set_up_hotkey();
+	set_up_hotkey();
+
+	_inputSystem = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
+	_mod = this;
 
 	auto waitTimeAddr = m_patterns_cache->find_addr(base, "07 00 00 8B 86 B8 00 00 00"); //DevilMayCry5.exe+1DDCB5D
     if (!waitTimeAddr) {
@@ -405,8 +601,6 @@ std::optional<std::string> VergilAirTrick::on_initialize()
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.finishRange"; 
     }
-
-
 	return Mod::on_initialize();
 }
 
@@ -420,9 +614,15 @@ void VergilAirTrick::on_config_load(const utility::Config& cfg)
 	isCustomOffset = cfg.get<bool>("VergilAirTrick.isCustomOffset").value_or(false);
 	isTeleport = cfg.get<bool>("VergilAirTrick.isTeleport").value_or(false);
 	isDoppelOppositeTeleport = cfg.get<bool>("VergilAirTrick.isDoppelOppositeTeleport").value_or(false);
-	trickType = (TeleportType)cfg.get<int>("VergilAirTrick.trickType").value_or(Front);
+	forceGroundTrick = cfg.get<bool>("VergilAirTrick.forceGroundTrick").value_or(false);
+	isAutoRotate = cfg.get<bool>("VergilAirTrick.isAutoRotate").value_or(true);
+	trickType = (TeleportType)cfg.get<int>("VergilAirTrick.trickType").value_or(Dynamic);
 	trickCorrection = cfg.get<float>("VergilAirTrick.trickCorrection").value_or(1.8f);
 	teleportZOffs = cfg.get<float>("VergilAirTrick.teleportZOffs").value_or(-1.3f);
+	teleportAfterImageState = (AfterimageState)cfg.get<int>("VergilAirTrick.teleportAfterImageState").value_or(0);
+	teleportAfterImageMode = (AfterimageMode)cfg.get<int>("VergilAirTrick.teleportAfterImageMode").value_or((int)AfterimageMode::Both);
+	afterImagesInterval = cfg.get<float>("VergilAirTrick.afterImagesInterval").value_or(2.3f);
+	groundTrickType = (GroundTrickType)cfg.get<int>("VergilAirTrick.groundTrickType").value_or(GroundTrickType::Default);
 }
 
 void VergilAirTrick::on_config_save(utility::Config& cfg)
@@ -434,10 +634,16 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 	cfg.set<bool>("VergilAirTrick.isSpeedUp", isSpeedUp);
 	cfg.set<bool>("VergilAirTrick.isCustomOffset", isCustomOffset);
 	cfg.set<bool>("VergilAirTrick.isTeleport", isTeleport);
-	cfg.set<bool>("VergilAirTrick.isDoppelOppositeTeleport", isDoppelOppositeTeleport);
+	cfg.set<bool>("VergilAirTrick.forceGroundTrick", forceGroundTrick);
+	cfg.set<bool>("VergilAirTrick.isAutoRotate", isAutoRotate);
+	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
 	cfg.set<int>("VergilAirTrick.trickType", (int)trickType);
 	cfg.set<float>("VergilAirTrick.trickCorrection", trickCorrection);
 	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
+	cfg.set<int>("VergilAirTrick.teleportAfterImageState", (int)teleportAfterImageState);
+	cfg.set<int>("VergilAirTrick.teleportAfterImageMode", (int)teleportAfterImageMode);
+	cfg.set<float>("VergilAirTrick.afterImagesInterval", afterImagesInterval);
+	cfg.set<int>("VergilAirTrick.groundTrickType", (int)groundTrickType);
 }
 
 // void VergilAirTrick::on_frame(){}
@@ -451,34 +657,82 @@ void VergilAirTrick::on_draw_ui()
 	}
 	ImGui::Separator();
 
-	ImGui::TextWrapped("Removes Velocity & Acceleration limits on teleportation movement.");
-	ImGui::Checkbox("Unclamp Air Trick Speed", &isSpeedUp);
-	if (isSpeedUp) {
-		ImGui::TextWrapped("High values can cause glitches. 0.7 - default game value.");
-          UI::SliderFloat("Air Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
+	if (!isTeleport)
+	{
+		ImGui::TextWrapped("Removes Velocity & Acceleration limits on teleportation movement.");
+		ImGui::Checkbox("Unclamp Air Trick Speed", &isSpeedUp);
+		if (isSpeedUp)
+		{
+			ImGui::TextWrapped("High values can cause glitches. 0.7 - default game value.");
+			UI::SliderFloat("Air Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
+		}
+		ImGui::Separator();
 	}
-	ImGui::Separator();
-
-	ImGui::TextWrapped("Teleport directly to coordinates instead of moving through the air invisibly. Can send you out of bounds (you have been warned).");
+	
+	ImGui::TextWrapped("Teleport directly to coordinates instead of moving through the air invisibly. Can send you out of bounds (you have been warned). Doesn't work with Vergil or Death Scrissors when they are out of bounds. "
+	"Also doesn't work with Nidhogg at all.");
 	ImGui::Checkbox("Instant Transmission", &isTeleport);
 	if (isTeleport)
 	{
 		ImGui::Spacing();
-		ImGui::TextWrapped("Teleport position:");
-		ImGui::RadioButton("In front of the enemy", (int*)&trickType, 0);
+		ImGui::TextWrapped("Trick teleport type:");
+		ImGui::RadioButton("Front trick", (int*)&trickType, 0);
+		ImGui::ShowHelpMarker("Appears in the front of the enemy relative to trick start position.");
 		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("Behind the enemy", (int*)&trickType, 1);
+		ImGui::RadioButton("Backstep trick", (int*)&trickType, 1);
+		ImGui::ShowHelpMarker("Appears behind of the enemy relative to trick start position.");
+		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+		ImGui::RadioButton("Auto", (int*)&trickType, 2);
+		ImGui::ShowHelpMarker("Hold trick button when Vergil starts teleporting to perform back-step trick. Otherwise Vergil will perform a front trick. You need to set some startup delay to use this.");
 		ImGui::Checkbox("Teleport doppelganger to opposite side", &isDoppelOppositeTeleport);
+		ImGui::Checkbox("Rotate after backstep trick", &isAutoRotate);
+		ImGui::ShowHelpMarker("Automatically rotate to enemy target before appearing");
 		ImGui::TextWrapped("Distance from enemy:");
 		UI::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
 		ImGui::TextWrapped("Height above/below enemy.");
 		UI::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
+		ImGui::Checkbox("Force ground trick", &forceGroundTrick);
+		ImGui::ShowHelpMarker("Always appears on the ground after teleporting to enemies like Empusa Queen, Goliath, Baphomet when they are not in the air.");
+		if (forceGroundTrick)
+		{
+			ImGui::TextWrapped("Ground trick type:");
+			ImGui::RadioButton("Default", (int*)&groundTrickType, Default);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Always ground trick", (int*)&groundTrickType, AlwaysGround);
+			ImGui::ShowHelpMarker("Vergil will appear on the ground regardless of current enemy and it's air position. Try it with \"boss trick up\" mod.");
+		}
+		ImGui::Separator();
+		if (ImGui::CollapsingHeader("Instant transmission afterimages setup"))
+		{
+			ImGui::TextWrapped("Instant transmission afterimages state:");
+			ImGui::RadioButton("Default", (int*)&teleportAfterImageState, (int)AfterimageState::Default);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Only in human form", (int*)&teleportAfterImageState, (int)AfterimageState::HumanOnly);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Only in SDT", (int*)&teleportAfterImageState, (int)AfterimageState::SDTOnly);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("In all forms", (int*)&teleportAfterImageState, (int)AfterimageState::Always);
+			ImGui::Spacing();
+			ImGui::TextWrapped("Afterimages mode:");
+			ImGui::RadioButton("On start teleport", (int*)&teleportAfterImageMode, (int)AfterimageMode::OnStart);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("On end teleport", (int*)&teleportAfterImageMode, (int)AfterimageMode::OnEnd);
+			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Both", (int*)&teleportAfterImageMode, (int)AfterimageMode::Both);
+			ImGui::SameLine(); /*ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("\"Trail\" from start to an end", (int*)&teleportAfterImageMode, (int)AfterimageMode::Trail);
+			ImGui::TextWrapped("AfterImages interval for \"trail\" mode:");
+			UI::SliderFloat("#afterImagesInterval", &afterImagesInterval, 1.0f, 5.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);*/
+		}
+		
 	}
 	ImGui::Separator();
 
-	ImGui::Checkbox("Custom height offset when finishing Air Trick", &isCustomOffset);
-	if (isCustomOffset) {
-		UI::SliderFloat("Height offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
+	if (!isTeleport)
+	{
+		ImGui::Checkbox("Custom height offset when finishing Air Trick", &isCustomOffset);
+		if (isCustomOffset)
+			UI::SliderFloat("Height offset", &finishOffsetZ, 0.0f, 3.0f, "%.1f");
 	}
 }
 

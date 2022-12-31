@@ -10,9 +10,9 @@ private:
 	bool isInitViaPatternsList = true;
 	std::string listInitKey;
 	bool isEmptyFile = false;
-	bool IsChangesWasMade = false;
+	bool isChangesWasMade = false;
 
-	uintptr_t to_uintptr_t(const std::string& address)
+	uintptr_t to_uintptr_t(const std::string& address) const
 	{
 		uintptr_t ret;
 		std::stringstream stream(address);
@@ -20,7 +20,7 @@ private:
 		return ret;
 	}
 
-	std::string to_hex_str(uintptr_t num)
+	std::string to_hex_str(uintptr_t num) const
 	{
 		std::stringstream stream;
 		stream << std::hex << num;
@@ -40,7 +40,7 @@ private:
 		if (patternsCfg == nullptr)
 			return;
 		patternsCfg->set(pattern, to_hex_str(offs));
-		IsChangesWasMade = true;
+		isChangesWasMade = true;
 	}
 
 public:
@@ -84,7 +84,7 @@ public:
 
 	bool is_init() const noexcept { return patternsCfg != nullptr; }
 
-	bool is_changed() const noexcept { return IsChangesWasMade; }
+	bool is_changed() const noexcept { return isChangesWasMade; }
 
 	void free()
 	{

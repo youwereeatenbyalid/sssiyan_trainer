@@ -54,7 +54,7 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   m_is_enabled        = &VergilSetMaxJJC::cheaton;
   m_on_page           = Page_VergilCheat;
   m_full_name_string = "Just Judgement Cut Limit (+)";
-  m_author_string    = "SSSiyan, VPZadov";
+  m_author_string    = "SSSiyan, V.P.Zadov";
   m_description_string = "Set the maximum number of Just Judgment Cuts Vergil can perform in a row.";
 
   set_up_hotkey();

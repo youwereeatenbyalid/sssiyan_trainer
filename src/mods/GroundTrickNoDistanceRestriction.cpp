@@ -45,7 +45,7 @@ std::optional<std::string> GroundTrickNoDistanceRestriction::on_initialize()
 	m_is_enabled = &cheaton;
 	//m_on_page = dantecheat;
 	m_full_name_string = "Ground Trick no distance restriction";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Increase max distance of Ground Trick.";
 
   set_up_hotkey();

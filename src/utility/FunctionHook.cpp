@@ -7,10 +7,11 @@ using namespace std;
 
 bool g_isMinHookInitialized{ false };
 
-FunctionHook::FunctionHook(Address target, Address destination)
+FunctionHook::FunctionHook(Address target, Address destination, bool useLog)
     : m_target{ 0 },
     m_destination{ 0 },
-    m_original{ 0 }
+    m_original{ 0 },
+    _useLog(useLog)
 {
     std::scoped_lock _{ m_hook_mutex };
 
@@ -24,8 +25,8 @@ FunctionHook::FunctionHook(Address target, Address destination)
     {
         s_hook_init_begin_call_back(::GetCurrentThread());
     }
-
-    spdlog::info("Attempting to hook {:p}->{:p}", target.ptr(), destination.ptr());
+    if(_useLog)
+        spdlog::info("Attempting to hook {:p}->{:p}", target.ptr(), destination.ptr());
 
     // Initialize MinHook if it hasn't been already.
     if (!g_isMinHookInitialized && MH_Initialize() == MH_OK) {
@@ -37,9 +38,10 @@ FunctionHook::FunctionHook(Address target, Address destination)
         m_target = target;
         m_destination = destination;
 
-        spdlog::info("Hook init successful {:p}->{:p}", target.ptr(), destination.ptr());
+        if (_useLog)
+            spdlog::info("Hook init successful {:p}->{:p}", target.ptr(), destination.ptr());
     }
-    else {
+    else if (_useLog) {
         spdlog::error("Failed to hook {:p}: {}", target.ptr(), MH_StatusToString(status));
     }
 
@@ -56,7 +58,8 @@ FunctionHook::~FunctionHook() {
 
 bool FunctionHook::create() {
     if (m_target == 0 || m_destination == 0 || m_original == 0) {
-        spdlog::error("FunctionHook not initialized");
+        if (_useLog)
+            spdlog::error("FunctionHook not initialized");
         return false;
     }
 
@@ -65,11 +68,13 @@ bool FunctionHook::create() {
         m_destination = 0;
         m_target = 0;
 
-        spdlog::error("Failed to hook {:x}: {}", m_target, MH_StatusToString(status));
+        if (_useLog)
+            spdlog::error("Failed to hook {:x}: {}", m_target, MH_StatusToString(status));
         return false;
     }
 
-    spdlog::info("Hooked {:x}->{:x}", m_target, m_destination);
+    if (_useLog)
+        spdlog::info("Hooked {:x}->{:x}", m_target, m_destination);
     return true;
 }
 

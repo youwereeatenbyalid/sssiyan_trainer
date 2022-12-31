@@ -4,6 +4,7 @@
 #include "mods/GameFunctions/PositionController.hpp"
 #include "PlayerTracker.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
+#include "sdk/DMC5.hpp"
 class CheckpointPos : public Mod
 {
 public:
@@ -70,8 +71,6 @@ private:
   glm::vec3 newPlPos;
   void init_check_box_info() override;
   Vector3f get_boss_pos();
-  static uintptr_t get_player_coords_ptr(uintptr_t addr);
-  static bool is_null_ptr(uintptr_t ptr);
   std::unique_ptr<FunctionHook> m_checkpointpos_hook;
   std::unique_ptr<FunctionHook> m_startpos_hook;
 };
