@@ -206,7 +206,7 @@
        #include "mods/BossVergilSettings.hpp"
        #include "mods/Pl0000SlowWorldStop.hpp"
        #include "mods/VergilQuickSilver.hpp"
-       #include "mods/ParryWithFinesse.hpp" 
+       #include "mods/ParryWithFinesse.hpp"
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 
