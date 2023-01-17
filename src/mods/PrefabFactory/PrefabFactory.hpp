@@ -15,7 +15,7 @@ namespace PfbFactory
 		PrefabFactory() = delete;
 		PrefabFactory(const PrefabFactory&& other) = delete;
 
-		//Don't forget to delete pfb manually
+		//Don't forget to delete pfb manually. This already calls add_ref(...) so you don't need to do it.
 		template<typename TRet = REManagedObject*>
 		static TRet create_prefab(const GameFunctions::SysString* path, uintptr_t threadCtxt = 0, bool simplify = false)
 		{

@@ -17,6 +17,7 @@ namespace Events
 		bool _isAsyncInvoke = false;
 
 	public:
+		//isAsyncInvoke - Call all listeners via async std::for_each(...)
 		Event(bool isAsyncInvoke = false) : _isAsyncInvoke(isAsyncInvoke)
 		{
 		}

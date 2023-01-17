@@ -110,6 +110,8 @@ public:
 
   static void plDante_request_set_style_asm(uintptr_t plDante, PlDanteStyleType requestedStyle);
 
+  //--------------------------------------Sub methods for events that called from different hooks related to app.Player stuff somehow--------------------------------------//
+
   //uintptr_t threadCtxt, uintptr_t pl
   template<typename T>
   static bool pl_added_event_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> handler)
@@ -164,8 +166,9 @@ public:
   //4 - AttackFailL;
   //5 - BothFail;
   //6 - GuardBreak;
+  //uintptr_t tc, uintptr_t pl, uintptr_t hc.DamageInfo, int *origFuncRes
   template<typename T>
-  static void after_pl0800_guard_check_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t, int*/*origFuncRes*/>> handler)
+  static void after_pl0800_guard_check_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*pl*/, uintptr_t/*hc.DamageInfo*/, int*/*origFuncRes*/>> handler)
   {
 	  if (handler != nullptr && _mod != nullptr)
 		  _mod->_afterPl0800GuardCheck.subscribe(handler);
@@ -178,8 +181,9 @@ public:
 		  _mod->_afterPl0800GuardCheck.unsubscribe(handler);
   }
 
+  //uintptr_t tc, uintptr_t player
   template<typename T>
-  static void on_pl_die_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> handler)
+  static void on_pl_die_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*player*/>> handler)
   {
 	  if (handler != nullptr && _mod != nullptr)
 		  _mod->_onPlSetDie.subscribe(handler);
@@ -192,8 +196,9 @@ public:
 		  _mod->_onPlSetDie.unsubscribe(handler);
   }
 
+  //uintptr_t tc, uintptr_t player
   template<typename T>
-  static void on_pl_lock_on_update_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> handler)
+  static void on_pl_lock_on_update_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*player*/>> handler)
   {
 	  if (handler != nullptr && _mod != nullptr)
 		  _mod->_onPlLockOnUpdate.subscribe(handler);
@@ -206,8 +211,10 @@ public:
 		  _mod->_onPlLockOnUpdate.unsubscribe(handler);
   }
 
+  //uintptr_t tc, uintptr_t pl0000.shell.QuicksilverWorldSlowAction, uintptr_t behaviortree.ActionArg
   template<typename T>
-  static void after_pl0000_quicksilver_slow_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t>> handler)
+  static void after_pl0000_quicksilver_slow_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, 
+	  uintptr_t/*pl0000.shell.QuicksilverWorldSlowAction*/, uintptr_t/*behaviortree.ActionArg*/>> handler)
   {
 	  if (handler != nullptr && _mod != nullptr)
 		  _mod->_afterPl0000QuickSilverWorldSlowActionStart.subscribe(handler);
@@ -220,8 +227,10 @@ public:
 		  _mod->_afterPl0000QuickSilverWorldSlowActionStart.unsubscribe(handler);
   }
 
+  //uintptr_t tc, uintptr_t pl0000.shell.QuicksilverWorldStopAction, uintptr_t behaviortree.ActionArg
   template<typename T>
-  static void after_pl0000_quicksilver_stop_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t>> handler)
+  static void after_pl0000_quicksilver_stop_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, 
+	  uintptr_t/*pl0000.shell.QuicksilverWorldStopAction*/, uintptr_t/*behaviortree.ActionArg*/>> handler)
   {
 	  if (handler != nullptr && _mod != nullptr)
 		  _mod->_afterPl0000QuickSilverWorldStopActionStart.subscribe(handler);
@@ -235,6 +244,7 @@ public:
   }
 
   //Hook installed before game checks is this style already setted and calls setStyle func
+  //uintptr_t plDante, PlDanteStyleType style
   template<typename T>
   static void pl0100_style_set_request_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*Dante*/, PlDanteStyleType /*style*/>> handler)
   {
@@ -249,6 +259,7 @@ public:
 		  _mod->_plDanteSetStyleRequest.unsubscribe(handler);
   }
 
+  //uintptr_t threadCtxt uintptr_t pl, float* val, int dtAddType, bool fixedValue
   template<typename T>
   static void pl_add_dt_gauge_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ float* /*val*/, int/*dtAddType*/, bool/*fixedValue*/>> handler)
   {
@@ -263,6 +274,7 @@ public:
 		  _mod->_onPlAddDtGauge.unsubscribe(handler);
   }
 
+  // uintptr_t threadCtxt, uintptr_t pl, uintptr_t hitCntrl
   template<typename T>
   static void pl_on_just_escape_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ uintptr_t /*hitCntrl*/>> handler)
   {
@@ -277,15 +289,14 @@ public:
 		  _mod->_onPlJustEscape.unsubscribe(handler);
   }
 
+  //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 private:
 
-  // function hook instance for our detour, convinient wrapper 
-  // around minhook
   void init_check_box_info() override;
 
   Events::Event<uintptr_t/*threadCtxt*/, uintptr_t/*player*/> _playerAdded;
   Events::Event<uintptr_t, bool, bool*/*skip base func call*/> _beforeResetPadInput;
-  Events::Event<uintptr_t, uintptr_t/*hitCtrlDamageInfo*/, bool*/*skip base func call*/, bool*/*isUsingResFromDefaultFunc*/, int*/*return value*/ > _onPl0800GuardCheck;
   Events::Event<uintptr_t, uintptr_t, /*pl0800*/ uintptr_t/*hitCtrlDamageInfo*/, int*/*return value*/ > _afterPl0800GuardCheck;
   Events::Event<uintptr_t, uintptr_t/*player*/> _onPlSetDie;
   Events::Event<uintptr_t, uintptr_t/*player*/> _onPlLockOnUpdate;
@@ -310,6 +321,8 @@ private:
   static void pl_add_dt_gauge_hook(uintptr_t threadCtxt, uintptr_t pl, float val, int dtAddType, bool fixedValue);
 
   static void pl_just_escape_hook(uintptr_t threadCtxt, uintptr_t pl, uintptr_t hitCntrl);
+
+  //Check style set for pl0100 (single call)
 
   static naked void trickster_cmp_detour();
 

@@ -216,6 +216,8 @@ public:
 	REManagedObject* get_PadManager() const noexcept { return PadManager; }
 
 	//Uses padInput from PadMaanger singleton
+	//ignoreCharKeyBind - (only for gamepad input) different character can treat action buttons by a different way. For example all dpad actions like "ChgStyleTS", "ChgStyleRG" is "DevilTrigger" for pl0800. 
+	//Set this to "true" to ignore special action binding treatment.
 	bool is_action_button_pressed(PadInputGameAction gameAction, bool ignoreCharKeyBind = false) const
 	{
 		if (*_inputMode == MouseAndKey && _padInputIsKeyboardDownMethod != nullptr)
@@ -258,6 +260,8 @@ public:
 			return false;
 		return is_action_button_pressed(gameAction, *(GamePadButton*)(padInput + 0x94), keyAssignArray, ignoreCharKeyBind);
 	}
+
+	//-----------------------------------------------------------Left stick inputs-------------------------------------------------------------//
 
 	bool is_back_input(float deg)
 	{
@@ -338,6 +342,8 @@ public:
 	{
 		return _isRightInputMethod->call<bool>(threadCtxt, padInput, deg);
 	}
+
+	//----------------------------------------------------------------------------------------------------------------------------------//
 
 	std::optional<std::string> on_initialize() override
 	{

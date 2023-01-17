@@ -89,6 +89,7 @@ void Pl0300Controller::Pl0300ControllerManager::reset(EndLvlHooks::EndType reset
 void Pl0300Controller::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
 {
     _mod->_pl0300StartHook->get_original<decltype(Pl0300ControllerManager::pl0300_start_func_hook)>()(threadCntx, pl0300);
+    //pl0300.Start() setting up many fields, so i need to reset it after Start() was called for controlled pl0300.
     for (const auto& i : _mod->_pl0300List)
     {
         if (i->get_pl0300() == pl0300)
@@ -254,25 +255,25 @@ void Pl0300Controller::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(u
     _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
 }
 
-void Pl0300Controller::Pl0300ControllerManager::pl0300_on_change_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
-{
-    for (const auto& i : _mod->_pl0300List)
-    {
-        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
-            return;
-    }
-    _mod->_pl0300OnChangePlayerActionFromThinkHook->get_original<decltype(pl0300_on_change_pl_action_from_think)>()(threadCtxt, pl0300);
-}
+//void Pl0300Controller::Pl0300ControllerManager::pl0300_on_change_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
+//{
+//    for (const auto& i : _mod->_pl0300List)
+//    {
+//        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+//            return;
+//    }
+//    _mod->_pl0300OnChangePlayerActionFromThinkHook->get_original<decltype(pl0300_on_change_pl_action_from_think)>()(threadCtxt, pl0300);
+//}
 
-void Pl0300Controller::Pl0300ControllerManager::pl0300_on_prepare_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
-{
-    for (const auto& i : _mod->_pl0300List)
-    {
-        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
-            return;
-    }
-    _mod->_pl0300OnPreparePlayerActionFromThinkHook->get_original<decltype(pl0300_on_prepare_pl_action_from_think)>()(threadCtxt, pl0300);
-}
+//void Pl0300Controller::Pl0300ControllerManager::pl0300_on_prepare_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
+//{
+//    for (const auto& i : _mod->_pl0300List)
+//    {
+//        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+//            return;
+//    }
+//    _mod->_pl0300OnPreparePlayerActionFromThinkHook->get_original<decltype(pl0300_on_prepare_pl_action_from_think)>()(threadCtxt, pl0300);
+//}
 
 Pl0300Controller::Pl0300ControllerManager::Pl0300ControllerManager()
 {
@@ -308,10 +309,10 @@ std::weak_ptr<Pl0300Controller::Pl0300Controller> Pl0300Controller::Pl0300Contro
     if (pl0300GameObj == 0)
         return std::weak_ptr<Pl0300Controller>();
     auto bossType = sdk::find_type_definition("app.player.pl0300.PlayerVergil")->get_runtime_type();
-    auto pl0300 = (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pl0300GameObj, "getComponent(System.Type)", bossType);
+    auto pl0300 = (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pl0300GameObj, "getComponent(System.Type)", bossType);//Get pl0300 script from GameObj
     try
     {
-        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));
+        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
     }
     catch (const std::exception& e)
     {
@@ -319,7 +320,6 @@ std::weak_ptr<Pl0300Controller::Pl0300Controller> Pl0300Controller::Pl0300Contro
     }
     if (controllerType == Pl0300Controller::Pl0300Type::PlHelper)
     {
-        //sdk::call_object_func_easy<void*>(_pl0300List[_pl0300List.size() - 1]->get_pl_manager(), "addPlayer(app.Player)", _pl0300List[_pl0300List.size() - 1]->get_pl0300());
         *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl0300() + 0x4C6) = true;//isControl
         *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl0300() + 0x17E0) = false;//IsEnemy
         auto manualPl = *(uintptr_t*)((uintptr_t)_pl0300List[_pl0300List.size() - 1]->get_pl_manager() + 0x60);

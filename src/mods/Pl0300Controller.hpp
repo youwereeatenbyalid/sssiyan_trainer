@@ -62,8 +62,8 @@ namespace Pl0300Controller
 
 		enum class Pl0300Type
 		{
-			Em6000Friendly,
-			PlHelper
+			Em6000Friendly,//Regular pl0300 with m21 AI
+			PlHelper //Pl0300 with (optional) main player's pad input and special settings for using it as playable character
 		};
 
 		enum class DT
@@ -157,7 +157,7 @@ namespace Pl0300Controller
 
 		HitControllerSettings _hcLastSettings;
 
-		//static inline const wchar_t* _jceStr = L"Zigenzan_Zetsu_Start";
+		//static inline const wchar_t* _jceStr = L"Zigenzan_Zetsu_Start";//I just want to keep this move's name here
 
 		//dctor also calls this
 		void destroy_game_obj();
@@ -223,7 +223,7 @@ namespace Pl0300Controller
 			*(gf::Vec3*)(emParam + 0xA0) = pos;
 		}
 
-		//Function: f(uintptr_t fsmPl0300Teleport, const std::shared_ptr& pl0300, bool* isSkipPl0300_teleport_calc_f)
+		//Function: f(uintptr_t fsmPl0300Teleport, const std::shared_ptr& pl0300, bool* isSkipPl0300_teleport_calc_f), called every physics frame when pl0300 teleporting
 		template<typename F>
 		inline void set_trick_update_f(F &&func) noexcept { _trick_update = func; }
 
@@ -252,6 +252,7 @@ namespace Pl0300Controller
 			return false;
 		}
 		
+		//Check if PlayerManager.plList has only 1 character.
 		bool is_only_1_pl_character()
 		{
 			if (_playerManager == 0)
@@ -261,6 +262,7 @@ namespace Pl0300Controller
 
 		inline bool is_enemy() const { return *(bool*)(_pl0300 + 0x17E0); }
 
+		//Is GameModel's Start() function called;
 		inline bool is_started() const noexcept { return _isStarted; }
 
 		inline bool is_done_air_raid() const { return *(bool*)(_pl0300 + 0x1BB2); }
@@ -368,6 +370,7 @@ namespace Pl0300Controller
 
 		inline Pl0300Type get_pl0300_type() const noexcept { return _pl0300Type; }
 
+		//Is pl_manager_request_add() was called;
 		inline bool is_in_players_list() const noexcept { return _isInPlList; }
 
 		inline bool is_doppels_owner(uintptr_t pl0300Doppel) 
@@ -379,6 +382,7 @@ namespace Pl0300Controller
 
 		bool is_doppel() const noexcept { return *(bool*)(_pl0300 + 0x1F60); }
 
+		//Use custom function for fsm.pl0300TrickUpdate
 		void use_custom_trick_update(bool val) noexcept { _useCustomTrickUpdate = val; }
 
 		inline bool is_using_custom_trick_update() const noexcept { return _useCustomTrickUpdate; }
@@ -395,6 +399,7 @@ namespace Pl0300Controller
 			}
 		}
 
+		//Set pl0300 action via Player.SetAction(...). Do not create doppel with this, use generate_doppel() function instead;
 		void set_action(const gf::SysString* actionStr, int layerNo = 0, float startFrame = 0.0f, float interpolationFrame = 0.0f, InterpolationMode mode = InterpolationMode::SyncCrossFade,
 			InterpolationCurve curve = InterpolationCurve::Smooth, bool isImmediate = false, bool passSelect = true, bool isPuppetTransition = false,
 			ActionPriority actionPriority = ActionPriority::Normal) const noexcept
@@ -441,6 +446,7 @@ namespace Pl0300Controller
 			return *(gf::Quaternion*)(transform + 0x40);
 		}
 
+		//Summoned swords will not disappear by itself
 		void destroy_all_related_shells()
 		{
 			auto shellMgr = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
@@ -456,7 +462,7 @@ namespace Pl0300Controller
 				{
 					sdk::call_object_func_easy<void*>(shellMgr, "requestRemoveObject(app.Shell)", i);
 					sdk::call_object_func_easy<void*>(shellMgr, "doUpdate()");
-					if (_gameObjDestroyMethod != nullptr)
+					if (_gameObjDestroyMethod != nullptr)//ThreadCntx is not needed here
 						_gameObjDestroyMethod->call((REManagedObject*)(*(uintptr_t*)((uintptr_t)i + 0x10)), (REManagedObject*)(*(uintptr_t*)((uintptr_t)i + 0x10)));
 				}
 			}
@@ -499,12 +505,14 @@ namespace Pl0300Controller
 
 		inline REManagedObject* get_mission_setting_manager() const noexcept { return _missionSettingsManager; }
 
+		// Calls GameModel.set_draw_self(...)
 		inline void set_draw_self(bool val) const noexcept
 		{
 			if (_gameModelSetDrawSelfMethod != nullptr)
 				_gameModelSetDrawSelfMethod->call(sdk::get_thread_context(), _pl0300, val);
 		}
 
+		//Calls GameModel.set_enable(...)
 		inline void set_enable(bool val) const noexcept
 		{
 			if (_gameModelSetEnableMethod != nullptr)
@@ -518,6 +526,7 @@ namespace Pl0300Controller
 			*(bool*)(charController + 0x30) = *(bool*)(subCharController + 0x30) = val;
 		}
 
+		//Activate/deactivate network type and physics char controller
 		inline void set_network_base_active(bool val)
 		{
 			auto networkSubType = *(uintptr_t*)(_pl0300 + 0x60);

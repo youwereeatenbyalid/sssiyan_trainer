@@ -178,6 +178,7 @@ namespace EndLvlHooks
     class IEndLvl
     {
     protected:
+        //This function calls before game starting to release all level's resources (bp, mission, secret mission)
         virtual void reset(EndType end) = 0;
 
     public:

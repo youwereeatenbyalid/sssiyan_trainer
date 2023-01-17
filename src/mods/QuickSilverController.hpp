@@ -40,6 +40,7 @@ namespace QuickSilverCtrl
 
 		void destroy_game_obj(REManagedObject* shell);
 
+		//Use this to set main qs pfb to spawn. If you have a few pfb, prev can be accessed via get_shell_pfb_backup();
 		void set_shell_pfb(REManagedObject* shell);
 
 		REManagedObject* get_shell_pfb_backup() const noexcept { return _shellPfbBackup; }
@@ -55,11 +56,13 @@ namespace QuickSilverCtrl
 
 		virtual REManagedObject* create_slow_time_shell(gf::Vec3 pos, gf::Quaternion rot);
 
-		//Get last shell that was spawned and handled by create_slow_time_shell() func;
+		//Get last shell that was spawned and handled by create_slow_time_shell();
 		REManagedObject* get_cur_quicksilver_shell() const noexcept { return _curQuickSilverShell; }
 
+		//Get shell's character owner
 		inline uintptr_t get_owner() const noexcept { return _owner; }
 
+		//Set shell's character owner
 		inline void set_owner(uintptr_t owner) noexcept { _owner = owner; }
 	};
 
@@ -77,6 +80,7 @@ namespace QuickSilverCtrl
 		static constexpr wchar_t* _wcPfbWorldSlowPath = L"Prefab/Character/Player/Shell/shl00_011_qs_worldslow.pfb";
 		static constexpr wchar_t* _wcPfbWorldStopPath = L"Prefab/Character/Player/Shell/shl00_011_qs_worldstop.pfb";
 
+		//Nero's slow world/stop world shells are uses special fsm methods, there are hooked in PlayerTracker
 		std::shared_ptr<Events::EventHandler<QuickSilverSlowWorldController, uintptr_t, uintptr_t, uintptr_t>> _slowWorldActionEventHandler;
 		std::shared_ptr<Events::EventHandler<QuickSilverSlowWorldController, uintptr_t, uintptr_t, uintptr_t>> _stopWorldActionEventHandler;
 
@@ -170,6 +174,7 @@ namespace QuickSilverCtrl
 
 		static inline constexpr wchar_t* const get_world_stop_pfb_path() noexcept { return _wcPfbWorldStopPath; }
 
+		//Create some cool timer & time wave efx like Nero do with rigtime.
 		static uintptr_t request_slow_world_efx(uintptr_t slowWorldGameModel, gf::Vec3 pos, gf::Quaternion rot)
 		{
 			if (_slowWorldStartEfx == nullptr)

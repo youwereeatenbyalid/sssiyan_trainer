@@ -14,6 +14,7 @@ namespace Events
 		};
 	}
 
+	//A callable wrap for method and pointer to class instance for Events. Imagine to use std::function...
 	template<typename T, typename... Args>
 	class EventHandler : public Impl::BaseEventHandler<Args...>
 	{
@@ -38,6 +39,7 @@ namespace Events
 				(_instance->*_func)(args...);
 		}
 
+		//Equals check by function ptr and instance ptr.
 		virtual bool operator ==(const Impl::BaseEventHandler<Args...>& other) const override
 		{
 			const EventHandler<T, Args...>* castedOther = static_cast<const EventHandler<T, Args...>*>(&other);
@@ -48,6 +50,7 @@ namespace Events
 	};
 }
 
+//lld-link go brrrrrrrrrrrrrr
 template<typename... Args>
 Events::Impl::BaseEventHandler<Args...>::~BaseEventHandler()
 {

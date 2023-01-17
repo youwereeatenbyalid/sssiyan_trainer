@@ -17,7 +17,7 @@ namespace Coroutines
 			virtual void invoke() = 0;
 		};
 
-
+		//Installing hook to main game loop(?) and calls all coroutine from there so thread context is always valid.
 		class CoroutineBase
 		{
 		protected:
@@ -50,6 +50,7 @@ namespace Coroutines
 
 		private:
 
+			//Main engine loop method probably. Calls all coroutine.
 			static void* _sub_1425A9B00_detour(uintptr_t rcx, uintptr_t behaviorGroup)
 			{
 				void *res = ((_subOrig)_subOriginal)(rcx, behaviorGroup);
@@ -63,6 +64,7 @@ namespace Coroutines
 
 			static inline std::unique_ptr<FunctionHook> _sub_1425A9B00_hook = nullptr;
 
+			//Inc timer for this val in every sub func call;
 			static inline const float _timeStep = 0.1f;
 
 			static inline uintptr_t _sub_1425A9B00Addr;
@@ -74,6 +76,7 @@ namespace Coroutines
 
 			static void run()
 			{
+				//Main loop is mt so lock is a must;
 				std::lock_guard<std::recursive_mutex> lock(_mtx);
 				for (auto &item : _coroutines) 
 				{
@@ -176,6 +179,7 @@ namespace Coroutines
 
 			static inline bool _is_depending_on_turbo() noexcept { return CoroutineBase::_isDependingOnTurbo; }
 
+			//_sub func doen't depends on turbo speed. You can sync all coroutines with turbo by calling this with true.
 			static inline void set_depend_on_turbo(bool val) noexcept { CoroutineBase::_isDependingOnTurbo = val; }
 
 			inline float get_timer() const noexcept { return _timer; }
@@ -184,6 +188,7 @@ namespace Coroutines
 
 			inline void set_delay(float delay) noexcept { _delay = delay; }
 
+			//Do not run action when paus menu is opened
 			inline void ignoring_update_on_pause(bool val) { _isIgnoringUpdateOnPause = val; }
 
 			inline void update_timer(bool val) noexcept { _requestIgnoreTimerUpdate = val; }
@@ -245,11 +250,19 @@ namespace Coroutines
 	class Coroutine : public virtual Impl::CoroutineBase
 	{
 	public:
+		//isInstantStartFirst - start action immediately on sub_f executing after start(...) was called;
+		//isIgnoringGlobalTurboSpeedSetting - always execute curoutine with setted delay independing of turbo speed even if global sync with turbo setting is on;
 		Coroutine(bool isInstantStartFirst = false, bool isIgnoringGlobalTurboSpeedSetting = false) : CoroutineBase(isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting) {}
 
+		//Action - coroutine's action
+		//isInstantStartFirst - start action immediately on sub_f executing after start(...) was called;
+		//isIgnoringGlobalTurboSpeedSetting - always execute curoutine with setted delay independing of turbo speed even if global sync with turbo setting is on;
 		Coroutine(std::shared_ptr<DelayedAction<TAction, Args...>> action, bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) : 
 			CoroutineBase(action, isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting) {}
 
+		//Action - pointer to action method/function for coroutine;
+		//isInstantStartFirst - start action immediately on sub_f executing after start(...) was called;
+		//isIgnoringGlobalTurboSpeedSetting - always execute curoutine with setted delay independing of turbo speed even if global sync with turbo setting is on;
 		Coroutine(TAction action, bool isInstantStartFirst = false, bool isIgnoringGlobalTurboSpeedSetting = false) : 
 			CoroutineBase(std::make_shared<DelayedAction<TAction, Args...>>(action), isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting) {}
 
@@ -286,6 +299,7 @@ namespace Coroutines
 			}
 		}
 
+		//Call setted coroutine's action directly
 		void start_action() override
 		{
 			if (_action == nullptr)
