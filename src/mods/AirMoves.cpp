@@ -46,13 +46,7 @@ void AirMoves::str_cur_action_asm(uintptr_t curPl)
 	{
 		if (*(int*)(curPl + 0xE64) == 4 && *(bool*)(curPl + 0x17F0))
 		{
-			if ((AirMoves::curMoveHook->cheatOn) && (PlSetActionData::cmp_real_cur_action(AirMoves::curMoveHook->get_ingame_name()) || PlSetActionData::cmp_doppel_real_cur_action(AirMoves::curMoveHook->get_ingame_name())))
-				AirMoves::isAirProcess = true;
-			else if ( (!PlSetActionData::cmp_cur_action("None") && !PlSetActionData::cmp_cur_action("PutOut")) || ( !PlSetActionData::cmp_doppel_cur_action("None") && !PlSetActionData::cmp_doppel_cur_action("PutOut")))
-			{
-				AirMoves::isAirProcess = false;
-				AirMoves::curMoveHook = nullptr;
-			}
+			return;
 		}
 		else
 		{
