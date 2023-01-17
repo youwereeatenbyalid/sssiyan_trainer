@@ -5,11 +5,9 @@
 #include "EndLvlHooks.hpp"
 #include "InputSystem.hpp"
 
-class LockOnNoHold : public Mod, private EndLvlHooks::IEndLvl
+class LockOnNoHold : public Mod
 {
 private:
-
-	bool _isPlLockedOn = false;
 
 	InputSystem* _inputSystem = nullptr;
 
@@ -21,21 +19,15 @@ private:
 
 	void on_pl_lock_on_update(uintptr_t threadCtxt, uintptr_t pl)
 	{
-		if (!cheaton || *(int*)(pl + 0xE64) == 3)
+		if (!cheaton || *(int*)(pl + 0x108) == 1)
 			return;
-		if (_inputSystem->is_action_button_down(InputSystem::PadInputGameAction::LockOn))
+		auto padInput = *(uintptr_t*)(pl + 0xEF0);
+		if (_inputSystem->is_action_button_down(padInput, InputSystem::PadInputGameAction::LockOn))
 		{
 			if (*(int*)(pl + 0xE64) == 4 && *(bool*)(pl + 0x17F0))//is pl0800 doppel
 				return;
-			_isPlLockedOn = !_isPlLockedOn;
-			auto padInput = *(uintptr_t*)(pl + 0xEF0);
-			*(bool*)(padInput + 0x28) = _isPlLockedOn;
+			*(bool*)(padInput + 0x28) = !*(bool*)(padInput + 0x28);
 		}
-	}
-
-	void reset(EndLvlHooks::EndType type) override
-	{
-		_isPlLockedOn = false;
 	}
 
 	void after_all_inits() override
