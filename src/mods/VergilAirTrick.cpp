@@ -112,88 +112,6 @@ void VergilAirTrick::pos_teleport(TeleportType type, gf::Vec3& outVec, GameFunct
 	}
 }
 
-void VergilAirTrick::setup_afterimage_shell(uintptr_t shell, uintptr_t afterImageParam)
-{
-	if(shell == 0)
-		return;
-	*(bool*)(shell + 0x440) = true;//useOwnerMotBank
-	*(int*)(shell + 0x44C) = 0;//SetMotion
-	*(int*)(shell + 0x450) = 1;//SetMotFrame
-	*(int*)(shell + 0x454) = 0;//targetLayer
-	*(bool*)(shell + 0x458) = false;//UseOwnerMotBlendRate;
-	*(uintptr_t*)(shell + 0x470) = *(uintptr_t*)(afterImageParam + 0x30);//AlphaRateAnim
-	*(float*)(shell + 0x478) = 1.069f;//overwriteStartFrame;
-	*(float*)(shell + 0x480) = *(float*)(afterImageParam + 0x24);//playMotDelayFrame
-	*(bool*)(shell + 0x484) = false;//notOwnerDynamicMotBank;
-	//*(float*)(shell + 0x498) = 0;//*(float*)(afterImageParam + 0x28);//currentTimer
-	//*(float*)(shell + 0x488) = 2.369f;//ownerStartMotionFrame
-	*(int*)(shell + 0x270) = 7;//CheckDisable; 
-	*(float*)(shell + 0x338) = *(float*)(afterImageParam + 0x20);//lifeTime
-	*(bool*)(shell + 0x398) = *(bool*)(shell + 0x320) = false;//isDelete, isDeleteRequest;
-	//*(bool*)(shell + 0x3E8) = false;//isPaused;
-	//*(bool*)(shell + 0x380) = true;//isInitialized;
-	*(bool*)(shell + 0x47C) = true;//isPlayMotion;
-}
-
-void VergilAirTrick::create_afterimages(TeleportType teleportType, uintptr_t vergil, uintptr_t charTransform, gf::Vec3 startPlPos, gf::Vec3 targetPos, gf::Vec3 trickVec, float distance)
-{
-	auto afterImageParam = *(uintptr_t*)(vergil + 0x1960);
-	if(afterImageParam == 0)
-		return;
-	int dtState = *(int*)(vergil + 0x9B0);
-	uintptr_t afterImagePfb;
-	if(dtState == 0 || dtState == 1)
-		afterImagePfb = *(uintptr_t*)(afterImageParam + 0x10);
-	else
-		afterImagePfb = *(uintptr_t*)(afterImageParam + 0x18);
-	if(afterImagePfb == 0)
-		return;
-	gf::CreateShell createAfterImage{afterImagePfb};
-	auto plPos = *(gf::Vec3*)(charTransform + 0x30);
-	auto plRot = *(gf::Quaternion*)(charTransform + 0x40);
-	uintptr_t shell = 0;
-	auto reverseRot = plRot * gf::Quaternion(0, 0, 1.0f, 0);
-	gf::Quaternion curRot = teleportType == TeleportType::Behind? reverseRot : plRot;
-	switch (teleportAfterImageMode)
-	{
-		case AfterimageMode::OnStart:
-		{
-			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, startPlPos, curRot, vergil, 0, 0), afterImageParam);
-			break;
-		}
-
-		case AfterimageMode::OnEnd:
-		{
-			plPos.z += colliderZUp + 0.16f;
-			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, plPos, plRot, vergil, 0, 0), afterImageParam);
-			break;
-		}
-
-		case AfterimageMode::Both:
-		{
-			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, startPlPos, curRot, vergil, 0, 0), afterImageParam);
-			plPos.z += colliderZUp + 0.16f;
-			setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, plPos, plRot, vergil, 0, 0), afterImageParam);
-			break;
-		}
-
-		case AfterimageMode::Trail:
-		{
-			int afterImagesCount = distance / afterImagesInterval;
-			float distanceOffs = distance;
-			gf::Vec3 curPos = startPlPos;
-			for (int i = 0; i < afterImagesCount; i++)
-			{
-				setup_afterimage_shell((uintptr_t)createAfterImage(afterImagePfb, curPos, curRot, vergil, 0, 0), afterImageParam);
-				pos_teleport(Front, curPos, startPlPos, trickVec, distanceOffs, distance);
-				distanceOffs -= afterImagesInterval;
-			}
-			break;
-		}
-		default:
-			break;
-	}
-}
 
 void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 {
@@ -351,36 +269,6 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	}
 	*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
-	
-	switch (_mod->teleportAfterImageState)
-	{
-		case AfterimageState::HumanOnly:
-		{
-			if (*(int*)(vergil + 0x9B0) != 0)
-				break;
-			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
-			break;
-		}
-
-		case AfterimageState::SDTOnly:
-		{
-			if (*(int*)(vergil + 0x9B0) != 2)
-				break;
-			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
-			break;
-		}
-
-		case AfterimageState::Always:
-		{
-			_mod->create_afterimages(curType, vergil, (uintptr_t)transform, pPos, targetPos, trickVec, trickVecLen);
-			break;
-		}
-
-		case AfterimageState::Default:
-			break;
-		default:
-			break;
-	}
 }
 
 static naked void speed_acc_detour() {
@@ -619,9 +507,6 @@ void VergilAirTrick::on_config_load(const utility::Config& cfg)
 	trickType = (TeleportType)cfg.get<int>("VergilAirTrick.trickType").value_or(Dynamic);
 	trickCorrection = cfg.get<float>("VergilAirTrick.trickCorrection").value_or(1.8f);
 	teleportZOffs = cfg.get<float>("VergilAirTrick.teleportZOffs").value_or(-1.3f);
-	teleportAfterImageState = (AfterimageState)cfg.get<int>("VergilAirTrick.teleportAfterImageState").value_or(0);
-	teleportAfterImageMode = (AfterimageMode)cfg.get<int>("VergilAirTrick.teleportAfterImageMode").value_or((int)AfterimageMode::Both);
-	afterImagesInterval = cfg.get<float>("VergilAirTrick.afterImagesInterval").value_or(2.3f);
 	groundTrickType = (GroundTrickType)cfg.get<int>("VergilAirTrick.groundTrickType").value_or(GroundTrickType::Default);
 }
 
@@ -640,9 +525,6 @@ void VergilAirTrick::on_config_save(utility::Config& cfg)
 	cfg.set<int>("VergilAirTrick.trickType", (int)trickType);
 	cfg.set<float>("VergilAirTrick.trickCorrection", trickCorrection);
 	cfg.set<float>("VergilAirTrick.teleportZOffs", teleportZOffs);
-	cfg.set<int>("VergilAirTrick.teleportAfterImageState", (int)teleportAfterImageState);
-	cfg.set<int>("VergilAirTrick.teleportAfterImageMode", (int)teleportAfterImageMode);
-	cfg.set<float>("VergilAirTrick.afterImagesInterval", afterImagesInterval);
 	cfg.set<int>("VergilAirTrick.groundTrickType", (int)groundTrickType);
 }
 
@@ -700,33 +582,8 @@ void VergilAirTrick::on_draw_ui()
 			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("Always ground trick", (int*)&groundTrickType, AlwaysGround);
 			ImGui::ShowHelpMarker("Vergil will appear on the ground regardless of current enemy and it's air position. Try it with \"boss trick up\" mod.");
-		}
-		ImGui::Separator();
-		if (ImGui::CollapsingHeader("Instant transmission afterimages setup"))
-		{
-			ImGui::TextWrapped("Instant transmission afterimages state:");
-			ImGui::RadioButton("Default", (int*)&teleportAfterImageState, (int)AfterimageState::Default);
-			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("Only in human form", (int*)&teleportAfterImageState, (int)AfterimageState::HumanOnly);
-			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("Only in SDT", (int*)&teleportAfterImageState, (int)AfterimageState::SDTOnly);
-			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("In all forms", (int*)&teleportAfterImageState, (int)AfterimageState::Always);
-			ImGui::Spacing();
-			ImGui::TextWrapped("Afterimages mode:");
-			ImGui::RadioButton("On start teleport", (int*)&teleportAfterImageMode, (int)AfterimageMode::OnStart);
-			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("On end teleport", (int*)&teleportAfterImageMode, (int)AfterimageMode::OnEnd);
-			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("Both", (int*)&teleportAfterImageMode, (int)AfterimageMode::Both);
-			ImGui::SameLine(); /*ImGui::Spacing(); ImGui::SameLine();
-			ImGui::RadioButton("\"Trail\" from start to an end", (int*)&teleportAfterImageMode, (int)AfterimageMode::Trail);
-			ImGui::TextWrapped("AfterImages interval for \"trail\" mode:");
-			UI::SliderFloat("#afterImagesInterval", &afterImagesInterval, 1.0f, 5.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);*/
-		}
-		
+		}		
 	}
-	ImGui::Separator();
 
 	if (!isTeleport)
 	{

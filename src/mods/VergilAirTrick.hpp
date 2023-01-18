@@ -89,31 +89,9 @@ private:
 
 	GroundTrickType groundTrickType = Default;
 
-	enum class AfterimageState
-	{
-		Default,
-		HumanOnly,
-		SDTOnly,
-		Always
-	};
-
-	enum class AfterimageMode
-	{
-		OnStart,
-		OnEnd,
-		Both,
-		Trail
-	};
-	AfterimageState teleportAfterImageState  = AfterimageState::Default;
-	AfterimageMode teleportAfterImageMode = AfterimageMode::Trail;
-
 	float teleportZOffs = -1.3f;
 	const float colliderZUp = 0.75f;
 
-	float afterImagesInterval = 1.0f;
-
-	void setup_afterimage_shell(uintptr_t shell, uintptr_t afterImageParam);
-	void create_afterimages(TeleportType teleportType, uintptr_t vergil, uintptr_t charTransform, gf::Vec3 startPlPos, gf::Vec3 targetPos, gf::Vec3 trickVec, float distance);
 	void init_check_box_info() override;
 	void pos_teleport(TeleportType type, gf::Vec3 &outVec, GameFunctions::Vec3 pPos, gf::Vec3 trickVec, float trickCorrect, float trickLen);
 
