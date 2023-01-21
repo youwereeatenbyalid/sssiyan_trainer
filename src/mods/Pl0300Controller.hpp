@@ -413,11 +413,14 @@ namespace Pl0300Controller
 
 		void set_action_from_think(const wchar_t* action, UINT32 hash) const noexcept
 		{
+			gf::SysString actionStr = action;
+			set_action_from_think(&actionStr, hash);
+		}
+
+		void set_action_from_think(const gf::SysString* action, UINT32 hash) const noexcept
+		{
 			if (_pl0300SetActionFromThinkMethod != nullptr)
-			{
-				gf::SysString actionStr = action;
-				_pl0300SetActionFromThinkMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl0300, actionStr.get_net_str(), hash);
-			}
+				_pl0300SetActionFromThinkMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl0300, action->get_net_str(), hash);
 		}
 
 		void set_pl_command_action(const wchar_t* action, bool initAdd, bool initOverwrite, bool isPuppetTransition, ActionPriority priority, float interpolationFrame, InterpolationMode mode) const noexcept

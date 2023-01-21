@@ -72,6 +72,8 @@ private:
 			//"Wait"
 		};
 
+		static inline std::unique_ptr<gf::SysString> _stabStr = nullptr;
+
 		static inline std::mt19937 _rndGen{};
 
 		static inline std::uniform_real_distribution<float> _rndTeleportOffsXY{ -3.25f, 4.15f};
@@ -282,6 +284,8 @@ private:
 				_pl0800ResetStatusMethod = sdk::find_method_definition("app.PlayerVergilPL", "resetStatus(app.GameModel.ResetType)");
 			if (_pl0800EndCutSceneMethod == nullptr)
 				_pl0800EndCutSceneMethod = sdk::find_method_definition("app.PlayerVergilPL", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
+			if (_stabStr == nullptr)
+				_stabStr = std::make_unique<gf::SysString>(L"Stab");
 
 			pl0300.lock()->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<Pl0300Controller::Pl0300Controller>& pl0300, bool* skipOrig)
 				{
@@ -317,6 +321,7 @@ private:
 			_plDoCharUpdateMethod = other._plDoCharUpdateMethod;
 			_pl0800ResetStatusMethod = other._pl0800ResetStatusMethod;
 			_isInit = other._isInit;
+			_stabStr = std::move(other._stabStr);
 		}
 
 		~PlPair()
@@ -432,15 +437,8 @@ private:
 			*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(_pl0800);
 			pl0300->set_is_control(true);
 			set_pl0800_lock_on_to_pl0300(pl0300);
-			pl0300->get_pl_goto_wait_method()->call(sdk::get_thread_context(), pl0300->get_pl0300(), *(uintptr_t*)(pl0300->get_pl0300() + 0x190), _waitStr->get_net_str(), 0, true, true);
-
-			if (pl0300->get_network_base_bhvr_update_method() != nullptr)
-				pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl0300());
-			_plDoCharUpdateMethod->call(sdk::get_thread_context(), pl0300->get_pl0300());
 			pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::SDT);
-			pl0300->set_pl_command_action(_airRaidNames[0], false, false, true, Pl0300Controller::Pl0300Controller::ActionPriority::Normal,
-					-1.0f, Pl0300Controller::Pl0300Controller::InterpolationMode::None);
-			set_pl0300_post_action(pl0300);
+			pl0300->set_action(_airRaidNames[0]);
 			set_pl0300_scale(pl0300->get_pl0300(), gf::Vec3(1.15f, 1.15f, 1.15f));
 			if(useCoroutine)
 				_pl0300ActionUpdateCoroutine.start(this, Pl0300Actions::AirRaid);
@@ -462,13 +460,11 @@ private:
 			_moveStartPos = *get_char_pos(_pl0800);
 
 			pl0300->use_custom_trick_update(useCustomRandomTrickOffs);
-			pl0300->set_is_control(true);
 			set_pl0800_lock_on_to_pl0300(pl0300);
-			pl0300->get_pl_goto_wait_method()->call(sdk::get_thread_context(), pl0300->get_pl0300(), *(uintptr_t*)(pl0300->get_pl0300() + 0x190), _waitStr->get_net_str(), 0, true, true);
-			pl0300->set_action_from_think(L"Stab", 0x94A9A36A);
-			pl0300->set_pl_command_action(L"Stab", false, false, true, Pl0300Controller::Pl0300Controller::ActionPriority::Normal,
-				-1.0f, Pl0300Controller::Pl0300Controller::InterpolationMode::None);
 			*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(_pl0800);
+			pl0300->set_is_control(true);
+			pl0300->set_action(_stabStr.get());
+			pl0300->set_action_from_think(_stabStr.get(), 0x94A9A36A);
 			_pl0300ActionUpdateCoroutine.start(this, Pl0300Actions::Stab);
 			_isTrickStabPerforming = true;
 		}
@@ -547,7 +543,7 @@ private:
 			_curPl = plId;
 
 			//sdk::call_object_func_easy<void*>((REManagedObject*)missionSettingMngr, "doUpdate()");
-			sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "updateManualPlayer()");
+			//sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "updateManualPlayer()");
 			//sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "doUpdate()");
 			return pl;
 		}

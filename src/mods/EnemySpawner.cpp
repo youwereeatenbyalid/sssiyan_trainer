@@ -11,6 +11,7 @@ void EnemySpawner::reset(EndLvlHooks::EndType endType)
 {
 	_em6000FriendlyList.clear();
 	_em6000PlHelpersList.clear();
+	_isPlSpawned = false;
 }
 
 std::optional<std::string> EnemySpawner::on_initialize()
@@ -170,15 +171,15 @@ void EnemySpawner::on_draw_ui()
 	UI::SliderInt("##EmNum", &emNum, 1, 20, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 	ImGui::TextWrapped("Spawn position:");
 	ImGui::InputFloat3("##_spawnPos", (float*)&_spawnPos, "%.1f");
-	if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Get player's position"))
+	if (_isPlSpawned && ImGui::Button("Get player's position"))
 		_spawnPos = CheckpointPos::get_player_coords();
 	ImGui::Spacing();
-	if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Try to spawn enemy"))
+	if (_isPlSpawned && ImGui::Button("Try to spawn enemy"))
 	{
 		_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
 	}
 	ImGui::Spacing();
-	if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Kill all enemies in current wave"))
+	if (_isPlSpawned && ImGui::Button("Kill all enemies in current wave"))
 	{
 		auto emManager = sdk::get_managed_singleton<REManagedObject>("app.EnemyManager");
 		if (emManager != nullptr)
@@ -194,20 +195,20 @@ void EnemySpawner::on_draw_ui()
 		ImGui::Checkbox("Attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
 		ImGui::Separator();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Try to spawn friendly Vergil"))
+		if (_isPlSpawned && ImGui::Button("Try to spawn friendly Vergil"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
 			_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, FriendlyVergil);
 		}
 
-		if (GameplayStateTracker::nowFlow == 22)
+		if (_isPlSpawned)
 			ImGui::ShowHelpMarker("Try to spawn enemy Vergil with credit AI even when special fix from \"Enemy Fixes\" mod is disabled. This also prevent to add him to global enemy list "
 			" and break regular enemy spawn so \"kill all enemies\" button will not remove friendly Vergils. His \"global\" AI depends of current game difficulty.");
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Change all friendly Vergils settings"))
+		if (_isPlSpawned && ImGui::Button("Change all friendly Vergils settings"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -219,7 +220,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Set player's position for all friendly Vergils"))
+		if (_isPlSpawned && ImGui::Button("Set player's position for all friendly Vergils"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -228,7 +229,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Kill all friendly Vergils"))
+		if (_isPlSpawned && ImGui::Button("Kill all friendly Vergils"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -245,7 +246,7 @@ void EnemySpawner::on_draw_ui()
 		ImGui::Checkbox("Enable junk boss's enemy step", &_bobEmStep);
 		ImGui::Separator();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Try to spawn BOB Vergil"))
+		if (_isPlSpawned && ImGui::Button("Try to spawn BOB Vergil"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -254,7 +255,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Change all BOB Vergils settings"))
+		if (_isPlSpawned && ImGui::Button("Change all BOB Vergils settings"))
 		{
 			for (const auto i : _em6000PlHelpersList)
 			{
@@ -267,7 +268,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Set player's position for all BOB Vergils"))
+		if (_isPlSpawned && ImGui::Button("Set player's position for all BOB Vergils"))
 		{
 			for (const auto i : _em6000PlHelpersList)
 				i.lock()->set_pos_full(CheckpointPos::get_player_coords());
@@ -275,7 +276,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (GameplayStateTracker::nowFlow == 22 && ImGui::Button("Kill all BOB Vergils"))
+		if (_isPlSpawned == 22 && ImGui::Button("Kill all BOB Vergils"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;

@@ -40,6 +40,7 @@ private:
 	int _bobJcNum = 2;
 
 	bool _bobEmStep = false;
+	bool _isPlSpawned = false;
 
 	gf::Vec3 _spawnPos{ 0,0,0 };
 
@@ -64,6 +65,11 @@ private:
 
 	gf::Vec3 get_pl_pos(const REManagedObject* plManager);
 
+	void on_pl_added(uintptr_t threadCntxt, uintptr_t pl)
+	{
+		_isPlSpawned = true;
+	}
+
 	inline int indx_to_id(int indx)
 	{
 		if (indx == 39)
@@ -83,6 +89,8 @@ public:
 	EnemySpawner()
 	{
 		_mod = this;
+		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t>>(this, &EnemySpawner::on_pl_added));
+
 	}
 
 	static inline bool cheaton = true;
