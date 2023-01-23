@@ -184,7 +184,6 @@ private:
     bool m_is_notif_enabled{ false };
     bool m_save_after_close_ui{ false };
     bool m_load_on_startup{ true };
-    bool m_is_corotines_depends_on_turbo = false;
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;

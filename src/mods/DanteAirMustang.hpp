@@ -134,7 +134,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteCheat;
-		m_full_name_string = "\"Air Mustang Air\" to \"Air Mustang\"";
+		m_full_name_string = "\"Mustang Air\" to \"Mustang\"";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Air mustang move gives you air indstead of ground if lock on or selected left stick direction holded.";
 
@@ -149,7 +149,7 @@ public:
 		if (!install_hook_absolute(airMustangAirSetActionCodeAddr.value(), _mustangAirActionHook, &detour, &ret, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
-			return "Failed to initialize DanteAirMustang.airMustangAirSetActionCode";
+			return "Failed to initialize DanteAirMustang.airMustangSetActionCode";
 		}
 
 		return Mod::on_initialize();

@@ -501,6 +501,39 @@ static naked void rebellion_rt_air_detour()
 	}
 }
 
+//static naked void jce_air_detour()
+//{
+//	__asm {
+//		cmp byte ptr [AirMoves::cheaton], 0 
+//		je originalcode
+//
+//		cmp al, 1
+//		je setnull
+//		push rax
+//		push rcx
+//		mov ecx, AirMoves::Moves::JCE
+//		sub rsp, 32
+//		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+//		add rsp, 32
+//		cmp al, 0
+//		pop rcx
+//		pop rax
+//		je originalcode
+//
+//		cheat:
+//		mov al, 1
+//
+//		originalcode:
+//		movzx ecx,al
+//		mov rax, [rbx + 0x50]
+//		jmp qword ptr [AirMoves::_jceAirRet]
+//
+//		setnull:
+//		mov AirMoves::curMoveHook, 0
+//		jmp originalcode
+//	}
+//}
+
 
 std::optional<std::string> AirMoves::on_initialize()
 {
@@ -581,6 +614,7 @@ std::optional<std::string> AirMoves::on_initialize()
 	airTrickDodgeCrashJne = airDodgeCrashAddr.value() + 0x7 + 0xBF;
 	uintptr_t spRtAirAddr = p64Base + 0x16E3988;
 	uintptr_t rbRtAirAddr = p64Base + 0x12617F8;
+	//uintptr_t jceAirAddr = p64Base + 0x1C0A4E0;
 
 	if (!install_hook_absolute(rapidSlashIsAirAddr.value(), m_rapidslash_air_hook, &rapidslash_aircheck_detour, &rapidSlashIsAirRet, 0x7))
 	{
@@ -659,6 +693,12 @@ std::optional<std::string> AirMoves::on_initialize()
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rbRtAir";
 	}
+
+	/*if (!install_hook_absolute(jceAirAddr, _jceAirHook, &jce_air_detour, &_jceAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.jceAir";
+	}*/
 
 	return Mod::on_initialize();
 }

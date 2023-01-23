@@ -196,10 +196,10 @@ public:
 	// Override this things if you want to store values in the config file
 	void on_config_load(const utility::Config& cfg) override
 	{
-		_neroSlowShellLifeTime = cfg.get<float>("WitchTime._neroSlowShellLifeTime").value_or(425.0f);
-		_danteSlowShellLifeTime = cfg.get<float>("WitchTime._danteSlowShellLifeTime").value_or(425.0f);
-		_vSlowShellLifeTime = cfg.get<float>("WitchTime._vSlowShellLifeTime").value_or(425.0f);
-		_vergilPlSlowShellLifeTime = cfg.get<float>("WitchTime._vergilPlSlowShellLifeTime").value_or(425.0f);
+		_neroSlowShellLifeTime = cfg.get<float>("WitchTime._neroSlowShellLifeTime").value_or(825.0f);
+		_danteSlowShellLifeTime = cfg.get<float>("WitchTime._danteSlowShellLifeTime").value_or(825.0f);
+		_vSlowShellLifeTime = cfg.get<float>("WitchTime._vSlowShellLifeTime").value_or(825.0f);
+		_vergilPlSlowShellLifeTime = cfg.get<float>("WitchTime._vergilPlSlowShellLifeTime").value_or(825.0f);
 		_banTime = cfg.get<float>("WitchTime._banTime").value_or(220.0f);
 
 		_useBanTime = cfg.get<bool>("WitchTime._useBanTime").value_or(false);

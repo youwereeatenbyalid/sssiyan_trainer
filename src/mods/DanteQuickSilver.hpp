@@ -11,6 +11,8 @@ class DanteQuickSilver : public PlayerQuicksilver
 {
 private:
 
+	bool _isOnAnyStyle = false;
+
 	PlayerTracker::PlDanteStyleType _quickSilverBtn = PlayerTracker::PlDanteStyleType::Trickster;
 
 	std::shared_ptr<Events::EventHandler<DanteQuickSilver, uintptr_t, uintptr_t, float*, int, bool>> _plAddDtEventHandler = 
@@ -57,27 +59,30 @@ private:
 			return;
 		if (!check_activation_mode(plDante))
 			return;
-		if (style == *(PlayerTracker::PlDanteStyleType*)(plDante + 0x188C) && _quickSilverBtn == style)
+		if (style == *(PlayerTracker::PlDanteStyleType*)(plDante + 0x188C))
 		{
-			if (_useBanTime)
+			if (_isOnAnyStyle || _quickSilverBtn == style)
 			{
-				if (is_ban_time())
-					return;
+				if (_useBanTime)
+				{
+					if (is_ban_time())
+						return;
+					else
+						start_ban_time();
+				}
+				if (!_quickSilverCtrl->is_started())
+				{
+					auto transform = *(uintptr_t*)((*(uintptr_t*)(plDante + 0x10)) + 0x18);
+					auto pos = *(gf::Vec3*)(transform + 0x30);
+					auto rot = *(gf::Quaternion*)(transform + 0x40);
+					setup_quicksilver_ctrl(plDante, (volatile float*)(plDante + 0x1110));
+					_quickSilverCtrl->create_slow_time_shell(pos, rot);
+					if (_useTimerEfx)
+						create_clock_efx((uintptr_t)(_quickSilverCtrl->get_cur_quicksilver_shell()), pos, rot);
+				}
 				else
-					start_ban_time();
+					_quickSilverCtrl->stop_quicksilver();
 			}
-			if (!_quickSilverCtrl->is_started())
-			{
-				auto transform = *(uintptr_t*)((*(uintptr_t*)(plDante + 0x10)) + 0x18);
-				auto pos = *(gf::Vec3*)(transform + 0x30);
-				auto rot = *(gf::Quaternion*)(transform + 0x40);
-				setup_quicksilver_ctrl(plDante, (volatile float*)(plDante + 0x1110));
-				_quickSilverCtrl->create_slow_time_shell(pos, rot);
-				if (_useTimerEfx)
-					create_clock_efx((uintptr_t)(_quickSilverCtrl->get_cur_quicksilver_shell()), pos, rot);
-			}
-			else
-				_quickSilverCtrl->stop_quicksilver();
 		}
 	}
 
@@ -123,11 +128,13 @@ public:
 	void on_config_load(const utility::Config& cfg) override
 	{
 		_quickSilverBtn = (PlayerTracker::PlDanteStyleType)cfg.get<int>("DanteQuickSilver._quickSilverBtn").value_or((int)PlayerTracker::PlDanteStyleType::Trickster);
+		_isOnAnyStyle = cfg.get<bool>("DanteQuickSilver._isOnAnyStyle").value_or(false);
 		PlayerQuicksilver::on_config_load(cfg);
 	}
 	void on_config_save(utility::Config& cfg) override
 	{
 		cfg.set<int>("DanteQuickSilver._quickSilverBtn", (int)_quickSilverBtn);
+		cfg.set<bool>("DanteQuickSilver._isOnAnyStyle", _isOnAnyStyle);
 		PlayerQuicksilver::on_config_save(cfg);
 	}
 
@@ -135,18 +142,22 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override
 	{
-		bool isSelected = false;
-		if (ImGui::BeginCombo("##_quickSilverBtn", _styleNames[(int)_quickSilverBtn]))
+		ImGui::Checkbox("Activate QS with any style button", &_isOnAnyStyle);
+		if (!_isOnAnyStyle)
 		{
-			for (int i = 0; i < _styleNames.size(); i++)
+			bool isSelected = false;
+			if (ImGui::BeginCombo("##_quickSilverBtn", _styleNames[(int)_quickSilverBtn]))
 			{
-				isSelected = (_quickSilverBtn == (PlayerTracker::PlDanteStyleType)i);
-				if (ImGui::Selectable(_styleNames[i], isSelected))
-					_quickSilverBtn = (PlayerTracker::PlDanteStyleType)i;
-				if (isSelected)
-					ImGui::SetItemDefaultFocus();
+				for (int i = 0; i < _styleNames.size(); i++)
+				{
+					isSelected = (_quickSilverBtn == (PlayerTracker::PlDanteStyleType)i);
+					if (ImGui::Selectable(_styleNames[i], isSelected))
+						_quickSilverBtn = (PlayerTracker::PlDanteStyleType)i;
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
 		}
 		ImGui::Spacing();
 		PlayerQuicksilver::on_draw_ui();

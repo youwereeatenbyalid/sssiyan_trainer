@@ -23,7 +23,8 @@ public:
 		IceAge,
 		CerbBlitz,
 		SpardaRT,
-		RebellionRT
+		RebellionRT,
+		JCE
 	};
 private:
 
@@ -83,6 +84,7 @@ private:
 	std::unique_ptr<FunctionHook> m_cerberus_blitz_air_hook;
 	std::unique_ptr<FunctionHook> _spRtAirHook;
 	std::unique_ptr<FunctionHook> _rbRtAirHook;
+	std::unique_ptr<FunctionHook> _jceAirHook;
 	std::unique_ptr<FunctionHook> m_check_ground_hit_hook;
 	std::unique_ptr<FunctionHook> m_air_dodge_crash_hook;
 
@@ -104,6 +106,7 @@ public:
 	static inline uintptr_t cerberusBlitzAirRet = 0;
 	static inline uintptr_t _spardaRTAirRet = 0;
 	static inline uintptr_t _rbRTAirRet = 0;
+	//static inline uintptr_t _jceAirRet = 0;
 
 	static inline uintptr_t checkGroundHitCallRet = 0;
 	static inline uintptr_t airTrickDodgeCrashRet = 0;
@@ -116,6 +119,7 @@ public:
 	{ Moves::FEDrive, "Drive##Vergil", "FE_Drive"},
 	{ Moves::VoidSlash, "Void slash", "YM_Spaceslash"},
 	{ Moves::BWKick13, "Kick 13", "BW_Kick13"}
+	//{ Moves::JCE, "JCE", "YM_JudgeMentCutEnd"}//Vergil falling during jce preparation :(
 	}));
 
 	static inline std::unique_ptr<HookedMoves> danteMoves = std::make_unique<HookedMoves>(std::initializer_list<MoveInfo>({

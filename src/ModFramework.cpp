@@ -31,8 +31,6 @@
 
 #include "Config.hpp"
 
-#include "mods/Coroutine/Coroutines.hpp"
-
 // clang-format off
 
 static ImVec2 operator*(const ImVec2& lhs, const float rhs) { return {lhs.x * rhs, lhs.y * rhs}; }
@@ -1645,7 +1643,6 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
-        ImGui::Checkbox("Coroutines Depends On Turbo Mod Speed", &m_is_corotines_depends_on_turbo);
         ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilvers\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
             "all this delays with turbo mod speed when it enabled.");
 

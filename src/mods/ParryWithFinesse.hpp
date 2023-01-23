@@ -453,7 +453,6 @@ public:
 	{
 		_parryReact = (ParryReact)cfg.get<int>("ParryWithFinesse._parryReact").value_or((int)ParryReact::ParryOptional);
 		_plParryType = (Pl0800ParryType)cfg.get<int>("ParryWithFinesse._plParryType").value_or((int)Pl0800ParryType::YamatoPlParry);
-		cheaton = true;
 	}
 	void on_config_save(utility::Config& cfg) override
 	{
