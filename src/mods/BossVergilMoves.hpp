@@ -95,8 +95,6 @@ private:
 
 		bool _isInit = false;
 
-		int _curPl = 4;
-
 		gf::Vec3 _airRaidStartPos;
 		gf::Vec3 _moveStartPos;
 
@@ -370,10 +368,10 @@ private:
 
 		void force_end_moves()
 		{
-			if (_curPl == 4 || !_pl0300ActionUpdateCoroutine.is_started())
-				return;
 			auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr)
+				return;
+			if (int* curPlId = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())); curPlId == nullptr || *curPlId == 4 || !_pl0300ActionUpdateCoroutine.is_started())
 				return;
 			if(pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT)
 				pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
@@ -382,7 +380,6 @@ private:
 			_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = _isTrickStabPerforming = false;
 			pl0300->set_pos_full(_moveStartPos);
 			gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
-			pl0300->get_pl_goto_wait_method()->call(sdk::get_thread_context(), pl0300->get_pl0300(), *(uintptr_t*)(pl0300->get_pl0300() + 0x190), _waitStr->get_net_str(), 0, false, true);
 			change_manual_pl(4);
 		}
 
@@ -469,26 +466,30 @@ private:
 			_isTrickStabPerforming = true;
 		}
 
-		uintptr_t change_manual_pl(int plId, bool callPl0800GoToWait = true)
+		int *get_cur_pl_id(uintptr_t missionSettingMngr) const noexcept
+		{
+			if (missionSettingMngr == 0)
+				return nullptr;
+			auto settings = *(uintptr_t*)(missionSettingMngr + 0xA0);
+			if (settings == 0)
+				return nullptr;
+			auto plInfo = *(uintptr_t*)(settings + 0x10);
+			if (plInfo == 0)
+				return nullptr;
+			return (int*)(plInfo + 0x10);
+		}
+
+		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true, bool callPl0300GoToWait = false)
 		{
 			auto plManager = (uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
 			const auto pl0300 = _pl0300.lock();
-			if (pl0300 == nullptr)
+			if (pl0300 == nullptr || plManager == 0)
 				return 0;
-			auto missionSettingMngr = (uintptr_t)pl0300->get_mission_setting_manager();
-			if (missionSettingMngr == 0 || plManager == 0)
-				return 0;
-			/*auto manualPl = *(uintptr_t*)(plManager + 0x60);
-			if (manualPl == 0)
-				return 0;*/
-			auto settings = *(uintptr_t*)(missionSettingMngr + 0xA0);
-			if (settings == 0)
-				return 0;
-			auto plInfo = *(uintptr_t*)(settings + 0x10);
-			if (plInfo == 0)
+			int* curPl = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager()));
+			if (curPl == nullptr)
 				return 0;
 			auto pl = plId == 4 ? _pl0800 : pl0300->get_pl0300();
-			*(int*)(plInfo + 0x10) = plId;
+			*curPl = plId;
 
 			if (plId == 4)
 			{
@@ -505,7 +506,7 @@ private:
 					*(bool*)(pl0800PadInput + 0x24) = true;
 				}
 				
-				if (callPl0800GoToWait && _pl0800EndCutSceneMethod != nullptr)
+				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
 				{
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
 				}
@@ -514,7 +515,7 @@ private:
 				*get_char_rot(pl) = *get_char_rot(pl0300->get_pl0300());
 				if (pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT)
 					pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
-				
+				pl0300->end_cutscene();
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
 			}
@@ -540,7 +541,6 @@ private:
 
 			/*_plDoCharUpdateMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl0800);
 			_plDoCharUpdateMethod->call(sdk::get_thread_context(), (REManagedObject*)(pl0300->get_pl0300()));*/
-			_curPl = plId;
 
 			//sdk::call_object_func_easy<void*>((REManagedObject*)missionSettingMngr, "doUpdate()");
 			//sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "updateManualPlayer()");
@@ -653,6 +653,11 @@ private:
 
 	void reset(EndLvlHooks::EndType end) override
 	{
+		if (!_vergilsList.empty())
+		{
+			auto msm = (uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.MissionSettingManager");
+			*(_vergilsList[0].get_cur_pl_id(msm)) = 4;
+		}
 		_loadStep = nullptr;
 		_isFirstDoppelUpdate = true;
 		_isEm6000PfbFound =_isPl0300Loaded = _isDoppelsActive = _isPl0800CheckCommHookInstalled = false;
@@ -675,10 +680,11 @@ private:
 
 	uintptr_t get_em_params(const std::weak_ptr<Pl0300Controller::Pl0300Controller>& pl0300) const noexcept { return *(uintptr_t*)(pl0300.lock()->get_pl0300() + 0x1768); }
 
+	//Fuuuuuuuuck this shit got called after any trainig reset
 	void on_pfb_manager_inited()
 	{
 		std::unique_lock<std::mutex> lck(_onPfbInitMtx);
-		if (!cheaton)
+		if (!cheaton || _isPl0300Loaded)
 			return;
 		auto missionSettingMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.MissionSettingManager");
 		if (missionSettingMngr == 0)
@@ -711,16 +717,24 @@ private:
 	{
 		if (!cheaton)
 			return;
+		if (_vergilsList.size() > 0/* && !_vergilsList[_vergilsList.size() - 1].is_init()*/)
+			_vergilsList[_vergilsList.size() - 1]._pl0300.lock()->update_pl_manager();
 		if (_isEm6000PfbFound && *(int*)(player + 0xE64) == 4)
 		{
 			if (_pl0300Manager != nullptr)
 			{
 				if (_vergilsList.size() > 0/* && !_vergilsList[_vergilsList.size() - 1].is_init()*/)
 				{
+					/*if (_isLastResetWasTraining)
+					{
+						_vergilsList.clear();
+						_vergilsList.emplace_back(PlPair(player, _pl0300Manager->create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type::PlHelper, gf::Vec3(), _loadStep, true), _inputSystem));
+					}*/
 					_vergilsList[_vergilsList.size() - 1]._pl0800 = player;
 					auto pl0300 = _vergilsList[_vergilsList.size() - 1]._pl0300.lock();
 					if (pl0300 == nullptr)
 						return;
+					pl0300->update_pl_manager();
 					pl0300->set_network_base_active(true);
 					pl0300->set_enable(false);
 					pl0300->set_draw_self(false);

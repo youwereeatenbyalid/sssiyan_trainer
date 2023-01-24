@@ -107,7 +107,6 @@ namespace Pl0300Controller
 
 		bool _isIgnorePadInputRestoring = false;
 		bool _isStarted = false;
-		bool _isInPlList = false;
 		bool _isHitCtrlDataSetRequested = false;
 		bool _isJcNumSetRequested = false;
 		bool _isEmStepSetRequested = false;
@@ -119,6 +118,7 @@ namespace Pl0300Controller
 		bool _isSetTeleportTimingParamsRequested = false;
 		bool _isKeepingOriginalPadInput = false;
 		bool _useCustomTrickUpdate = false;
+		bool _isIgnoringReleaseOnTrainingReset = false;
 
 		int _requestedJcNum = 1;
 
@@ -149,6 +149,7 @@ namespace Pl0300Controller
 		static inline sdk::REMethodDefinition* _plGotoWaitMethod = nullptr;
 		static inline sdk::REMethodDefinition* _pl0300SetActionFromThinkMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plSetCommandActionMethod = nullptr;
+		static inline sdk::REMethodDefinition* _plEndCutSceneMethod = nullptr;
 
 		std::weak_ptr<Pl0300Controller> _doppel;
 		std::weak_ptr<Pl0300Controller> _owner;
@@ -204,6 +205,8 @@ namespace Pl0300Controller
 		static inline sdk::REMethodDefinition* get_pl_goto_wait_method() noexcept { return _plGotoWaitMethod; }
 
 		static inline sdk::REMethodDefinition* get_pl_reset_status_method() noexcept { return _plResetStatusMethod; }
+
+		static inline sdk::REMethodDefinition* get_pl_end_cutscene_method() noexcept { return _plEndCutSceneMethod; }
 
 		//get doppel's controller if exists
 		inline std::weak_ptr<Pl0300Controller> get_doppel_ctrl() { return _doppel; }
@@ -272,6 +275,10 @@ namespace Pl0300Controller
 		inline bool is_control() const noexcept { return *(bool*)(_pl0300 + 0x4C6); }
 
 		inline bool get_is_no_die() const noexcept { return *(bool*)(_pl0300 + 0x11F1); }
+
+		inline bool is_ignoring_training_reset() const noexcept { return _isIgnoringReleaseOnTrainingReset; }
+
+		void ignore_release_on_trainig_reset(bool val) noexcept { _isIgnoringReleaseOnTrainingReset = val; }
 
 		inline void set_is_no_die(bool val) noexcept 
 		{ 
@@ -370,8 +377,19 @@ namespace Pl0300Controller
 
 		inline Pl0300Type get_pl0300_type() const noexcept { return _pl0300Type; }
 
-		//Is pl_manager_request_add() was called;
-		inline bool is_in_players_list() const noexcept { return _isInPlList; }
+		inline bool is_in_players_list() const noexcept
+		{
+			if (_playerManager == 0)
+				throw std::exception("PlayerManager is null.");
+			auto list = *(uintptr_t*)((uintptr_t)_playerManager + 0x70);
+			auto lstCount = gf::ListController::get_list_count(list);
+			for (int i = 0; i < lstCount; i++)
+			{
+				if (gf::ListController::get_item<uintptr_t>(list, i) == _pl0300)
+					return true;
+			}
+			return false;
+		}
 
 		inline bool is_doppels_owner(uintptr_t pl0300Doppel) 
 		{ 
@@ -593,16 +611,19 @@ namespace Pl0300Controller
 
 		inline void pl_manager_request_add()
 		{
-			if (_isInPlList)
-				return;
 			if (!_isStarted)
 			{
 				_isAddToPlListRequested = true;
 				return;
 			}
-			if(_playerManager != nullptr && !_isInPlList)
+			if(_playerManager != nullptr)
 				sdk::call_object_func_easy<void*>(_playerManager, "addPlayer(app.Player)", (REManagedObject*)_pl0300);
-			_isInPlList = true;
+		}
+
+		inline void pl_manager_request_remove()
+		{
+			if (_playerManager != nullptr)
+				sdk::call_object_func_easy<void*>(_playerManager, "removePlayer(app.Player, System.Boolean)", (REManagedObject*)_pl0300, false);
 		}
 
 		inline void goto_wait(const wchar_t *actionName1 = L"", const wchar_t* actionName2 = L"", float interpolationFrame = 0.0f, bool forceInterpolationFrameZero = true, bool puppetTransition = true)
@@ -614,11 +635,30 @@ namespace Pl0300Controller
 			_plGotoWaitMethod->call(sdk::get_thread_context(), _pl0300, str1.get_net_str(), str2.get_net_str(), interpolationFrame, forceInterpolationFrameZero, puppetTransition);
 		}
 
+		inline void goto_wait(uintptr_t actionName1, uintptr_t actionName2, float interpolationFrame = 0.0f, bool forceInterpolationFrameZero = true, bool puppetTransition = true)
+		{
+			if (_plGotoWaitMethod == nullptr)
+				return;
+			_plGotoWaitMethod->call(sdk::get_thread_context(), _pl0300, actionName1, actionName2, interpolationFrame, forceInterpolationFrameZero, puppetTransition);
+		}
+
+		inline void end_cutscene(int actionId = 0, float commonTimer = 0.0F, int charWetType = 0, float startFrame = 0.0F)
+		{
+			if (_plEndCutSceneMethod == nullptr)
+				return;
+			_plEndCutSceneMethod->call(sdk::get_thread_context(), _pl0300, actionId, commonTimer, charWetType, startFrame);
+		}
+
 		inline void pl0300_reset_status()
 		{
 			if (_plResetStatusMethod == nullptr)
 				return;
 			_plResetStatusMethod->call(sdk::get_thread_context(), _pl0300);
+		}
+
+		inline void update_pl_manager()
+		{
+			_playerManager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
 		}
 	};
 }

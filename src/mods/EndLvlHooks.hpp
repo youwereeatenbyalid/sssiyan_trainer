@@ -8,11 +8,13 @@ namespace EndLvlHooks
     {
         RetryMission,
         CheckpointMission,
+        //Also for training exit, not reset
         ExitMission,
         SecretMissionExit,
         Bp,
         RequestResult,
-        RequestResultStaffRoll //cool, capcom, cool, this calles after Dante credit fight if fight skipped/ losed to Vergil(?)
+        RequestResultStaffRoll, //cool, capcom, cool, this calles after Dante credit fight if fight skipped/ losed to Vergil(?)
+        ResetTraining
     };
     class EndLvlHooks : public Mod
     {
@@ -49,6 +51,7 @@ namespace EndLvlHooks
         std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
         std::unique_ptr<FunctionHook> m_request_result_hook;
         std::unique_ptr<FunctionHook> m_request_result_staffroll_hook;
+        std::unique_ptr<FunctionHook> m_restart_training_hook;
 
     public:
 
@@ -95,6 +98,12 @@ namespace EndLvlHooks
         {
             endLvlEvent.invoke(RequestResultStaffRoll);
             _mod->m_request_result_staffroll_hook->get_original<decltype(EndLvlHooks::request_staffresult_detour)>()(threadCtxt, obj, isOverlayCapture);
+        }
+
+        static inline void restart_training_hook(uintptr_t threadCtxt, uintptr_t obj)
+        {
+            endLvlEvent.invoke(ResetTraining);
+            _mod->m_restart_training_hook->get_original<decltype(EndLvlHooks::restart_training_hook)>()(threadCtxt, obj);
         }
 
         std::string_view get_name() const override
@@ -155,6 +164,13 @@ namespace EndLvlHooks
                 return "Unanable to find requestResultStaffRollAddr pattern.";
             }
 
+            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 0B 69");
+            //DevilMayCry5.app_MissionSettingManager__restartTraining115258
+            if (!restartTrainingAddr)
+            {
+                return "Unanable to find restartTraining pattern.";
+            }
+
             m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
             m_retry_mission_hook->create();
             m_exit_mission_hook = std::make_unique<FunctionHook>(exitMissionAddr.value() + 0x9, &EndLvlHooks::exit_mission_detour);
@@ -169,6 +185,8 @@ namespace EndLvlHooks
             m_request_result_hook->create();
             m_request_result_staffroll_hook = std::make_unique<FunctionHook>(requestResultStaffRollAddr.value() + 0x10, &EndLvlHooks::request_staffresult_detour);
             m_request_result_staffroll_hook->create();
+            m_restart_training_hook = std::make_unique<FunctionHook>(restartTrainingAddr.value(), &EndLvlHooks::restart_training_hook);
+            m_restart_training_hook->create();
 
             return Mod::on_initialize();
         };

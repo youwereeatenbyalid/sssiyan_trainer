@@ -7,9 +7,9 @@ void Pl0300Controller::Pl0300Controller::destroy_game_obj()
 	if (_pl0300 != 0 && !is_doppel())
 	{
 		destroy_all_related_shells();
-		if (_isInPlList)
+		if (is_in_players_list())
 		{
-			sdk::call_object_func_easy<void*>(_playerManager, "removePlayer(app.Player, System.Boolean)", (REManagedObject*)_pl0300, true);
+			sdk::call_object_func_easy<void*>(_playerManager, "removePlayer(app.Player, System.Boolean)", (REManagedObject*)_pl0300, false);
 		}
 		if (auto dp = _doppel.lock(); dp != nullptr)
 		{
@@ -17,7 +17,8 @@ void Pl0300Controller::Pl0300Controller::destroy_game_obj()
 		}
 
 		if (_gameObjDestroyMethod != nullptr)
-			_gameObjDestroyMethod->call(*(uintptr_t*)(_pl0300 + 0x10), *(uintptr_t*)(_pl0300 + 0x10));
+			_gameObjDestroyMethod->call(sdk::get_thread_context(), *(uintptr_t*)(_pl0300 + 0x10));
+			//((void(*)(uintptr_t, uintptr_t))((uintptr_t)(_gameObjDestroyMethod->get_function())))(*(uintptr_t*)(_pl0300 + 0x10), *(uintptr_t*)(_pl0300 + 0x10));
 	}
 	_pl0300 = 0;
 }
@@ -120,6 +121,9 @@ Pl0300Controller::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, Pl0300Typ
 
 	if (_plSetCommandActionMethod == nullptr)
 		_plSetCommandActionMethod = sdk::find_method_definition("app.Player", "setCommandAction(System.String, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority, System.Single, via.motion.InterpolationMode)");
+
+	if (_plEndCutSceneMethod == nullptr)
+		_plEndCutSceneMethod = sdk::find_method_definition("app.Player", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
 
 	//_baseBehaviorStartMethod->call(sdk::get_thread_context(), _pl0300);
 	//pl0300_do_start();

@@ -83,7 +83,22 @@ void Pl0300Controller::Pl0300ControllerManager::after_all_inits()
 
 void Pl0300Controller::Pl0300ControllerManager::reset(EndLvlHooks::EndType resetType)
 {
-    _pl0300List.clear();
+    if (resetType == EndLvlHooks::EndType::ResetTraining)
+    {
+        _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [](const std::shared_ptr<Pl0300Controller> &obj)
+            {
+                if (obj->is_ignoring_training_reset())
+                {
+                    obj->destroy_all_related_shells();
+                    obj->destroy_doppel();
+                    obj->end_cutscene();
+                    return false;
+                }
+                return true;
+            }), _pl0300List.end());
+    }
+    else
+        _pl0300List.clear();
 }
 
 void Pl0300Controller::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
