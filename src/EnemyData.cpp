@@ -16,7 +16,7 @@ int EnemyData::id_to_indx(int emId) noexcept
 	if (emId == 42)
 		return 35;
 	if (emId >= 23)
-		return emId = 3;
+		return emId - 3;
 	return emId;
 }
 

@@ -690,7 +690,7 @@ void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Enemy:");
   ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, _emNames->data(), _emNames->size(), 20);
   ImGui::ShowHelpMarker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
-  data.emId = EnemyData::id_to_indx(data.selectedItem);
+  data.emId = EnemyData::indx_to_id(data.selectedItem);
   ImGui::Spacing();
   ImGui::TextWrapped("Enemy num:");
   ImGui::InputInt("##EmNumInput", &data.num);
