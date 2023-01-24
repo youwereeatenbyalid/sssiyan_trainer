@@ -129,14 +129,6 @@ private:
 			_transformSetLocalScaleMethod->call(sdk::get_thread_context(), transform, scale);
 		}
 
-		inline void set_pl0300_post_action(const std::shared_ptr<Pl0300Controller::Pl0300Controller> &pl0300)
-		{
-			pl0300->set_action(L"None", 0, 0.0f, 0.0f, Pl0300Controller::Pl0300Controller::InterpolationMode::None,
-				Pl0300Controller::Pl0300Controller::InterpolationCurve::Smooth, false, false, false, Pl0300Controller::Pl0300Controller::ActionPriority::Normal);
-			pl0300->set_action(L"None", 0, 0.0f, 0.0f, Pl0300Controller::Pl0300Controller::InterpolationMode::None,
-				Pl0300Controller::Pl0300Controller::InterpolationCurve::Smooth, false, false, false, Pl0300Controller::Pl0300Controller::ActionPriority::Normal);
-		}
-
 		void update_pl0300_behavior(Pl0300Actions action)
 		{
 			auto pl0300 = _pl0300.lock();
@@ -169,6 +161,12 @@ private:
 						{
 							pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
 							stop_air_raid_coroutine();
+							auto airRaidCtrl = *(uintptr_t*)(pl0300->get_pl0300() + 0x1C90);
+							if (airRaidCtrl != 0)
+							{
+								if (*(bool*)(airRaidCtrl + 0x30))
+									pl0300->set_pos_full(_moveStartPos);
+							}
 							change_manual_pl(4);
 							return;
 						}

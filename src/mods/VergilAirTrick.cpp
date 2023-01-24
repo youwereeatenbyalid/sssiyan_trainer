@@ -92,21 +92,21 @@ void VergilAirTrick::pos_teleport(TeleportType type, gf::Vec3& outVec, GameFunct
 		{
 			outVec.x = pPos.x + (trickLen - trickCorrect) * trickVec.x / (float)trickLen;
 			outVec.y = pPos.y + (trickLen - trickCorrect) * trickVec.y / (float)trickLen;
-			outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
+			//outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 		case VergilAirTrick::Behind:
 		{
 			outVec.x = pPos.x + (trickLen + trickCorrect) * trickVec.x / (float)trickLen;
 			outVec.y = pPos.y + (trickLen + trickCorrect) * trickVec.y / (float)trickLen;
-			outVec.z = pPos.z + (trickLen + trickCorrect) * trickVec.z / (float)trickLen;
+			//outVec.z = pPos.z + (trickLen + trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 		default:
 		{
 			outVec.x = pPos.x + (trickLen - trickCorrect) * trickVec.x / (float)trickLen;
 			outVec.y = pPos.y + (trickLen - trickCorrect) * trickVec.y / (float)trickLen;
-			outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
+			//outVec.z = pPos.z + (trickLen - trickCorrect) * trickVec.z / (float)trickLen;
 			break;
 		}
 	}
@@ -227,7 +227,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	}
 	gf::Vec3 tmpPos = targetPos;
 	_mod->pos_teleport(curType, tmpPos, pPos, trickVec, correctionTmp, trickVecLen);
-	float oldTargetZ = targetPos.z + _mod->colliderZUp;
+	targetPos.z += _mod->colliderZUp;
 	
 	if (curType == Behind && isAutoRotate)
 	{
@@ -237,6 +237,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 
 	if(!isWallEnemy)
 		gf::Transform_SetPosition::set_character_pos(vergil, targetPos, true);
+	targetPos.z -= _mod->colliderZUp;
 	targetPos.z += _mod->teleportZOffs;
 	targetPos.x = tmpPos.x;
 	targetPos.y = tmpPos.y;
@@ -261,13 +262,15 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 	{
 		gf::PositionErrorCorrector setPos { (void*)*(uintptr_t*)(vergil + 0x8E8) };
 		setPos.set_position(targetPos);
+		/*gf::Transform_SetPosition setPlPos{ transform };
+		setPlPos(targetPos);*/
 	}
 	else
 	{
 		gf::Transform_SetPosition setPos{transform};
 		setPos(targetPos);
 	}
-	*(bool*)(trickAction + 0x144) = true; //isPushHit;
+	//*(bool*)(trickAction + 0x144) = true; //isPushHit;
 	*(bool*)(trickAction + 0x146) = true; //isInterrupted;
 }
 

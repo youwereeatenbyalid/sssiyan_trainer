@@ -49,6 +49,16 @@ private:
         }
     }
 
+    static inline void update_spawn(uintptr_t generateData, bool isFlyingEm)
+    {
+        if (isSpawnOffsForFlyingEnemiesOnly && !isFlyingEm)
+            return;
+        if (isAlwaysSpawnOnPlPos)
+            *(gf::Vec3*)(generateData + 0x30) = *(gf::Vec3*)(PlayerTracker::playertransform + 0x30);
+        gf::Vec3 posOffs{ spawnPosXOffset, spawnPosYOffset, spawnPosZOffset };
+        *(gf::Vec3*)(generateData + 0x30) += posOffs;
+    }
+
     static void update_spawn_pos_asm(uintptr_t generateData, uintptr_t posData)
 	{
 		if(generateData == 0 || posData == 0)
@@ -57,14 +67,7 @@ private:
         auto idInfo = *(uintptr_t*)(generateData + 0x60);
         int emId = *(int*)(idInfo + 0x10);
         bool isFlyingEm = emId == 4 || emId == 10 || emId == 11 || emId == 16 || emId == 17 || emId == 18 || emId == 23 || emId == 37 || emId == 29; //Id for flying enemies
-		if (isAlwaysSpawnOnPlPos || (isSpawnOffsForFlyingEnemiesOnly && isFlyingEm) )
-			*(gf::Vec3*)(generateData + 0x30) = *(gf::Vec3*)(PlayerTracker::playertransform + 0x30);
-		if (!isSpawnOffsForFlyingEnemiesOnly)
-		{
-			*(gf::Vec3*)(generateData + 0x30) += posOffs;
-		}
-		else if (isFlyingEm)
-		   *(gf::Vec3*)(generateData + 0x30) += posOffs;
+        update_spawn(generateData, isFlyingEm);
 		if (isForceVerticalSpawnRot)
 		{
 			auto appear = emId >= 23 ? AppearNoEnum::BossGeneral0 : selectedAppear->n;
