@@ -67,7 +67,7 @@ public:
 		m_on_page = Page_QOL;
 		m_full_name_string = "Toggle Lock On";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Switch lock on state by pressing the lock on button without holding it.";
+		m_description_string = "Allows you to toggle the lock-on state by pressing the lock on button without holding it.";
 
 		set_up_hotkey();
 

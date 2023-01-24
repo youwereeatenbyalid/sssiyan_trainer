@@ -115,7 +115,7 @@ public:
 		m_on_page = Page_DanteCheat;
 		m_full_name_string = "Quicksilver style (+)";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Add quicksilver style for Dante. Press twise to selected style button to enable/disable quicksilver. This mod must be enabled before player will be loaded to a level.";
+		m_description_string = "Adds a quicksilver style for Dante. Press twicee on the selected style button to enable/disable quicksilver. This mod must be enabled before loading into a level.";
 
 		set_up_hotkey();
 
@@ -142,7 +142,7 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override
 	{
-		ImGui::Checkbox("Activate QS with any style button", &_isOnAnyStyle);
+		ImGui::Checkbox("Activate Quicksilver with any style button", &_isOnAnyStyle);
 		if (!_isOnAnyStyle)
 		{
 			bool isSelected = false;

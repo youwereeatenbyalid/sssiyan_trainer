@@ -242,7 +242,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	m_on_page = Page_Enemies;
 	m_full_name_string = "Boss Dante settings (+)";
 	m_author_string = "V.P.Zadov";
-	m_description_string = "Vergil's nightmare begins here.";
+	m_description_string = "Modifies the properties of the Enemy Dante Boss. Vergil's nightmare begins here.";
 
 	auto dtAddr = m_patterns_cache->find_addr(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
 
@@ -403,32 +403,32 @@ void BossDanteSetup::on_config_save(utility::Config& cfg)
 
 void BossDanteSetup::on_draw_ui()
 {
-	ImGui::Checkbox("Enable HP regeneration in DT", &isDtRegenEnabled);
-	ImGui::Checkbox("Specify SDT Transformation Type", &isSdtTransformSetup);
+	ImGui::Checkbox("Allow Dante to regenerate HP in Devil Trigger", &isDtRegenEnabled);
+	ImGui::Checkbox("Modify SDT Transformation Type", &isSdtTransformSetup); //if the sdt transform is the default, can't this just be a checkbox?
 	if (isSdtTransformSetup)
 	{
 		ImGui::Spacing();
-		ImGui::Combo("Transformation Type", (int*)&sdtTransformMode, "Always Normal Transform\0Always SSSS Transform (Default)\0");
+		ImGui::Combo("SDT Transformation Type", (int*)&sdtTransformMode, "Normal SDT Transform\0 SSSS SDT Transform (Default)\0");
 		//ImGui::TextWrapped("Change transform mode to: 0 - always normal transform, 1 - always fast transform (default), 2 - first normal other fast (idk is this one even working?)");
 		//ImGui::SliderInt("##TransformMode", (int*)&sdtTransformMode, 0, 2);
 	}
-	ImGui::Checkbox("Modify DT & SDT cooldown", &isDtsTimerSkip);
+	ImGui::Checkbox("Modify Dante's DT & SDT cooldown", &isDtsTimerSkip);
 	if(isDtsTimerSkip)
 	{
-		ImGui::TextWrapped("Cooldown timer (depends on current mission):");
+		ImGui::TextWrapped("Cooldown timer (depends on current mission):"); //as in the default values?
 		UI::SliderFloat("##customTimerDelay", &dtTimer, 0.1f, 30.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 		//dtTimerStartPoint = 30.0f - dtTimer + 0.08f;
 	}
-	ImGui::Checkbox("Modify DT duration", &isCustomDtDuration);
+	ImGui::Checkbox("Modify Dante's DT duration", &isCustomDtDuration);
 	if (isCustomDtDuration)
 	{
-		ImGui::TextWrapped("Set DT duration on Mission 19 (game's default - 15):");
+		ImGui::TextWrapped("Change how long Dante stays in Devil Trigger in Mission 19 (game's default - 15):");//can we get a "reset to default" option?
 		ImGui::InputFloat("##dtDurationSlider", &dtDuration, 1.0f, 2.0f, "%.1f");
 	}
-	ImGui::Checkbox("No recovery after SDT exit", &isNoFinishSdtStun);
-	ImGui::Checkbox("Disable increased startup times on certain moves (Revolver, Stinger, etc.)", &isNoMovesDelay);
-	ImGui::Checkbox("Enable SDT HP regeneration", &isSdtRegen);
-	ImGui::Checkbox("Use royal release", &allowRoyalRelease);
+	ImGui::Checkbox("Remove Dante's recovery animation after SDT exit", &isNoFinishSdtStun);
+	ImGui::Checkbox("Remove Dante's startup times on certain moves (Revolver, Stinger, etc.)", &isNoMovesDelay); //this needs a full list.
+	ImGui::Checkbox("Allow Dante to regenerate HP in SDT", &isSdtRegen);
+	ImGui::Checkbox("Allow Dante to use royal release", &allowRoyalRelease);
 	//ImGui::Checkbox("Allow \"Flipper\"", &allowFlipper);
 }
 

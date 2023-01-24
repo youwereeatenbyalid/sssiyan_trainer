@@ -68,7 +68,7 @@ public:
 		m_on_page = Page_Breaker;
 		m_full_name_string = "Slow World Works Like Bangle Of Time";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Ragtime's \"Slow World\" skill complitelly freeze time for enemies like in DMC1.";
+		m_description_string = "Ragtime's \"Slow World\" Brealage completely freezes time for enemies like in DMC1.";
 
 		set_up_hotkey();
 

@@ -23,7 +23,7 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
 
   m_full_name_string     = "Infinite SDT";
   m_author_string        = "SSSiyan, V.P.Zadov";
-  m_description_string   = "Sets the SDT Bar to maximum and stops it from decreasing.";
+  m_description_string   = "Freeze Vergil SDT to max.";
 
   set_up_hotkey();
 

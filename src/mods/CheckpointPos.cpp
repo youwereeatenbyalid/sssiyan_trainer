@@ -71,7 +71,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   m_on_page           = Page_GameMode;
   m_full_name_string = "Custom Checkpoints (+)";
   m_author_string    = "V.P.Zadov";
-  m_description_string = "Create a custom checkpoint to reset to. Uses boss checkpoints by default.";
+  m_description_string = "Create a custom checkpoint position. Uses boss checkpoints by default.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
@@ -105,15 +105,15 @@ void CheckpointPos::on_config_save(utility::Config& cfg) {
 // void CheckpointPos::on_frame() {}
 
 void CheckpointPos::on_draw_ui() {
-  ImGui::TextWrapped("Select \"Checkpoint\" in mission menu (or press \"Continue\" from main menu) to load at the coordinates below.");
+  ImGui::TextWrapped("Select \"Checkpoint\" in the mission menu (or press \"Continue\" from main menu) to load at the coordinates below.");
   ImGui::Separator();
-  ImGui::Checkbox("Use custom checkpoint position", &isCustomPos);
-  ImGui::ShowHelpMarker("If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
+  ImGui::Checkbox("Use a custom checkpoint position", &isCustomPos);
+  ImGui::ShowHelpMarker("Check this to use a custom checkpoint. If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
   if (isCustomPos) {
     ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, "%.3f");
-    if (ImGui::Button("Get current player position (don't click it if you are not in a mission)")) {
+    if (ImGui::Button("Get the current player position (don't click it if you are not in a mission)")) {
       if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
         playerPos = get_player_coords();
       }
@@ -128,23 +128,23 @@ void CheckpointPos::on_draw_ui() {
   ImGui::TextWrapped("Set player's position:");
   ImGui::DragFloat3("##TeleportPos", (float*)&newPlPos);
   ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-  if (ImGui::Button("Get current player's position"))
+  if (ImGui::Button("Get the player's position"))
   {
       if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
           newPlPos = get_player_coords();
   }
   ImGui::Spacing();
-  if (ImGui::Button("Get boss pos"))
+  if (ImGui::Button("Get boss position"))
       newPlPos = get_boss_pos();
   ImGui::Spacing();
   
-  if (ImGui::Button("Set position"))
+  if (ImGui::Button("Teleport to position"))
       {
           if(PlayerTracker::playerentity == 0 || GameplayStateTracker::nowFlow != 22)
               return;
           GameFunctions::Transform_SetPosition::set_character_pos(PlayerTracker::playerentity, newPlPos);
       }
-  ImGui::ShowHelpMarker("It's actually instant teleport to a selected pos, so it can throw character in out of bounds.");
+  ImGui::ShowHelpMarker("Instantly teleport to a selected position. Can teleport the player out-of-bounds.");
   }
 
 // void CheckpointPos::on_draw_debug_ui() {}

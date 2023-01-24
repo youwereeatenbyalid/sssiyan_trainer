@@ -22,7 +22,7 @@ std::optional<std::string> EnemySpawner::on_initialize()
 	m_on_page = Page_CommonCheat;
 	m_full_name_string = "Enemy Spawner (+)";
 	m_author_string = "V.P.Zadov";
-	m_description_string = "Spawn enemies in any place. Delay can be happened if enemy prefab wasn't preloaded by default mission settings. Sometimes collisions are not working on spawned enemies.";
+	m_description_string = "Spawn enemies on command.";
 
 	_spawnEmCoroutine.set_delay(0.3f);
 
@@ -165,16 +165,23 @@ uintptr_t EnemySpawner::spawn_enemy(int emId, gf::Vec3 pos, volatile int*& outLo
 
 void EnemySpawner::on_draw_ui()
 {
+
+
+	if (ImGui::CollapsingHeader("Current issues"))
+	{
+		ImGui::TextWrapped("A Delay can occur if the enemy prefab wasn't preloaded by default mission settings. Sometimes collisions don't work on spawned enemies.");
+	}
+
 	ImGui::TextWrapped("Select enemy:");
 	ImGui::Combo("##emCombo", &selectedIndx, _emNames->data(), _emNames->size(), 25);
-	ImGui::TextWrapped("Enemy num: ");
+	ImGui::TextWrapped("Enemy number: ");
 	UI::SliderInt("##EmNum", &emNum, 1, 20, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-	ImGui::TextWrapped("Spawn position:");
+	ImGui::TextWrapped("Spawn point:");
 	ImGui::InputFloat3("##_spawnPos", (float*)&_spawnPos, "%.1f");
-	if (_isPlSpawned && ImGui::Button("Get player's position"))
+	if (_isPlSpawned && ImGui::Button("Use player's position as spawn point"))
 		_spawnPos = CheckpointPos::get_player_coords();
 	ImGui::Spacing();
-	if (_isPlSpawned && ImGui::Button("Try to spawn enemy"))
+	if (_isPlSpawned && ImGui::Button("Spawn enemy"))
 	{
 		_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
 	}
@@ -188,14 +195,11 @@ void EnemySpawner::on_draw_ui()
 
 	ImGui::Separator();
 
-	if (ImGui::CollapsingHeader("Friendly Vergils settings"))
+	if (ImGui::CollapsingHeader("Friendly Vergil settings"))
 	{
-		ImGui::TextWrapped("Damage multiplier:");
-		UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
-		ImGui::Separator();
 
-		if (_isPlSpawned && ImGui::Button("Try to spawn friendly Vergil"))
+
+		if (_isPlSpawned && ImGui::Button("Spawn friendly Vergil"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -203,12 +207,22 @@ void EnemySpawner::on_draw_ui()
 		}
 
 		if (_isPlSpawned)
-			ImGui::ShowHelpMarker("Try to spawn enemy Vergil with credit AI even when special fix from \"Enemy Fixes\" mod is disabled. This also prevent to add him to global enemy list "
-			" and break regular enemy spawn so \"kill all enemies\" button will not remove friendly Vergils. His \"global\" AI depends of current game difficulty.");
+			ImGui::ShowHelpMarker("Spawns an enemy Vergil with the credits AI.");
+
+		//Unsure what this means.
+		//This also prevent to add him to global enemy list "
+		//	" and break regular enemy spawn so \"kill all enemies\" button will not remove friendly Vergils. His \"global\" AI depends of current game difficulty.");
+
+		ImGui::Separator();
+
+		ImGui::TextWrapped("Damage multiplier:");
+		UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::Checkbox("Vergil attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
+		ImGui::Separator();
 
 		ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Change all friendly Vergils settings"))
+		if (_isPlSpawned && ImGui::Button("Update all friendly Vergils settings"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -220,7 +234,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Set player's position for all friendly Vergils"))
+		if (_isPlSpawned && ImGui::Button("Teleport all friendly Vergil's to player's current position"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -236,6 +250,8 @@ void EnemySpawner::on_draw_ui()
 			_pl0300Manager->kill_all_friendly_em6000();
 		}
 	}
+
+	/*
 	if (ImGui::CollapsingHeader("Battle Of Brothers Vergils settings"))
 	{
 		ImGui::TextWrapped("Damage multiplier:");
@@ -288,4 +304,5 @@ void EnemySpawner::on_draw_ui()
 		ImGui::Spacing();
 	}
 	ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vegrgil(s) to your side.");
+	*/
 }

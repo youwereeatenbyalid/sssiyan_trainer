@@ -290,7 +290,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	m_on_page = Page_VergilTrick;
 	m_full_name_string = "DMC3 Judgement Cut End (+)";
 	m_author_string = "V.P.Zadov";
-	m_description_string = "Replaces Vergil's Judgment Cut End in human form with his Judgement Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.\nWARNING: This mod can crash the game.";
+	m_description_string = "When not in Devil Trigger, replaces Vergil's Judgment Cut End with his Judgment Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
 
 	auto canExeJceAddr = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
@@ -399,7 +399,7 @@ void DMC3JCE::on_config_load(const utility::Config& cfg)
 	rndDelay = jceController->get_rndspawn_delay();
 	jceController->set_trackspawn_delay(cfg.get<int>("DMC3JCE._trackDelayTime").value_or(jceController->defaultTrackDelay));
 	trackDelay = jceController->get_trackspawn_delay();
-	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
+	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Dynamic) );
 	jcTypeUi = jceController->get_jce_type();
 	jceController->rndEmTrackInterval = cfg.get<int>("DMC3JCE.rndEmTrackInterval").value_or(22);
 	humanJCECost = cfg.get<float>("DMC3JCE.humanJCECost").value_or(3000.0f);
@@ -426,30 +426,32 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 void DMC3JCE::on_draw_ui()
 {
 	
-	ImGui::TextWrapped("Random mode uses Just Judgement Cut projectile and 2x increased damage. Tracking mode uses default Judgement Cut projectile and 1.2x damage. The modes also use different execution times.");
-	ImGui::Separator();
-	ImGui::TextWrapped("Minimum SDT to perform JCE in human form:");
+	//ImGui::TextWrapped("Random mode uses Just Judgement Cut projectile and 2x increased damage. Tracking mode uses default Judgement Cut projectile and 1.2x damage. The modes also use different execution times.");
+	//ImGui::Separator();
+	ImGui::TextWrapped("SDT Requirement:");
 	UI::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
 	ImGui::Separator();
 
-	ImGui::TextWrapped("Auto SDT type:");
-	ImGui::ShowHelpMarker("Vergil will automatically enter to SDT form if jce was started in human form. After appearing Vergil will automatically go to the human form. JCE interruption also force "
-		"Vergil to go to the human form.");
-	ImGui::RadioButton("Without SDT explosion efx", (int*)&autoSdtType, 1);
+	ImGui::TextWrapped("Automatically enter SDT:");
+	ImGui::ShowHelpMarker("Vergil will automatically enter SDT when performing the Judgment Cut Barrage input. After re-appearing or being interrupted, Vergil will automatically exit SDT.");
+	ImGui::RadioButton("Disable SDT explosion efx", (int*)&autoSdtType, 1);
 	ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-	ImGui::RadioButton("With SDT explosion efx", (int*)&autoSdtType, 2);
+	ImGui::RadioButton("Enable SDT explosion efx", (int*)&autoSdtType, 2);
 	ImGui::Separator();
-	ImGui::TextWrapped("Select DMC3 JCE type:");
+	ImGui::TextWrapped("Select Tracking Mode:");
+
+	if (ImGui::RadioButton("Dynamic", (int*)&jcTypeUi, 2))
+		jceController->set_jce_type(jcTypeUi);
+	ImGui::ShowHelpMarker("Hold the attack button when Vergil starts the Judgment Cut Barrage to perform a JCE that tracks the enemy. Otherwise, the barrage will spread out in a circle around the starting point.");
 
 	if (ImGui::RadioButton("Random", (int*)&jcTypeUi, 0))
 		jceController->set_jce_type(jcTypeUi);
 	ImGui::SameLine(); ImGui::Spacing();
-	if (ImGui::RadioButton("Tracking", (int*)&jcTypeUi, 1))
+	if (ImGui::RadioButton("Target", (int*)&jcTypeUi, 1))
 		jceController->set_jce_type(jcTypeUi);
-	if (ImGui::RadioButton("Auto", (int*)&jcTypeUi, 2))
-		jceController->set_jce_type(jcTypeUi);
-	ImGui::ShowHelpMarker("Hold attack button when Vergil starts JCE teleport to perform track JCE. Otherwise random JCE will be performed.");
+	
+	
 
 	switch (jceController->get_jce_type())
 	{
@@ -479,8 +481,8 @@ void DMC3JCE::on_draw_ui()
 	ImGui::Separator();
 	//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);
 
-	ImGui::TextWrapped("If something goes wrong(TM) and JCE execution doesn't stop after Vergil appears, press this:");
-	if (ImGui::Button("Stop JCE"))
+	ImGui::TextWrapped("If something goes wrong and Judgment Cuts continue to spawn after Vergil appears, press this:");
+	if (ImGui::Button("Stop JCE Barrage."))
 	{
 		isJceRunning = false;
 		jceController->stop_jce();

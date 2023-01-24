@@ -186,7 +186,7 @@ public:
 		m_on_page = Page_CommonCheat;
 		m_full_name_string = "Witch time";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Dodge with side roll gives you slow world. Mod must be enabled before player will be loaded.";
+		m_description_string = "Successfully dodging with a side roll gives you slow world. This mod must be enabled before loading into a level.";
 
 		set_up_hotkey();
 
@@ -241,7 +241,7 @@ public:
 
 		ImGui::TextWrapped("Nero:");
 		UI::SliderFloat("##_neroSlowShellLifeTime", &_neroSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Activate witch time only on table hopper", &_pl0000WTTableHopperOnly);
+		ImGui::Checkbox("Only activate witch time on table hopper", &_pl0000WTTableHopperOnly);
 
 		ImGui::Separator();
 
