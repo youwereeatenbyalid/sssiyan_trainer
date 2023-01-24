@@ -307,6 +307,8 @@ public:
         Page_GameMode,
         Page_BloodyPalace,
         Page_Balance,
+        Page_Enemies,
+        Page_Encounters,
         Page_Camera,
         Page_QOL,
         Page_Mechanics,

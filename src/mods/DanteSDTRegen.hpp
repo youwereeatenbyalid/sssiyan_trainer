@@ -84,7 +84,7 @@ public:
 		m_on_page = Page_DanteSDT;
 		m_full_name_string = "SDT HP regeneration";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Enable DT HP regeneration in SDT.";
+		m_description_string = "HP regenerates in SDT like it does in DT.";
 
 		set_up_hotkey();
 

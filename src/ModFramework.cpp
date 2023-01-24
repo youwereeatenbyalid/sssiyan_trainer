@@ -1427,14 +1427,22 @@ void ModFramework::draw_panels() const
     ImGui::PopStyleColor();
     {
         if (m_error.empty() && m_game_data_initialized) {
-            ImGui::Text("Game Balance");
-            m_mods->on_pagelist_ui(Mod::Page_Balance, modListIndent);
 
-            ImGui::Separator();
             ImGui::Text("Game Modes");
             m_mods->on_pagelist_ui(Mod::Page_GameMode, modListIndent);
 
             ImGui::Separator();
+            
+            ImGui::Text("Encounter Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Encounters, modListIndent);
+
+            ImGui::Separator();
+
+            ImGui::Text("Enemy Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Enemies, modListIndent);
+
+            ImGui::Separator();
+            
             ImGui::Text("Bloody Palace");
             m_mods->on_pagelist_ui(Mod::Page_BloodyPalace, modListIndent);
         }
@@ -1643,8 +1651,8 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
-        ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilvers\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
-            "all this delays with turbo mod speed when it enabled.");
+        //ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilver\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
+         //   "all this delays with turbo mod speed when it enabled.");
 
         ImGui::Spacing();
         if (ImGui::TreeNodeEx("About")) {

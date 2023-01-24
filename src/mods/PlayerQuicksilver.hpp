@@ -193,12 +193,12 @@ public:
 		bool isSelected = false;
 		
 		ImGui::TextWrapped("Select quicksilver type:");
-		ImGui::RadioButton("DMC3/5", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::Slow); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("DMC1", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::StopOnSlowPfb);
+		ImGui::RadioButton("DMC3/5 (Slow world)", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::Slow); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+		ImGui::RadioButton("DMC1 (Frozen world)", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::StopOnSlowPfb);
 
 		ImGui::Spacing();
 
-		ImGui::TextWrapped("Activation mode:");
+		ImGui::TextWrapped("Activation command:");
 		ImGui::RadioButton("Default", (int*)&_activationMode, (int)ActivationMode::DPad); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("Default + Lock On", (int*)&_activationMode, (int)ActivationMode::DPadLockOn); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("Default + no Lock On", (int*)&_activationMode, (int)ActivationMode::DPadNoLockOn);
@@ -206,17 +206,18 @@ public:
 		ImGui::RadioButton("Default + Lock On + Back", (int*)&_activationMode, (int)ActivationMode::LockOnBack);
 		ImGui::Spacing();
 
+		/* I think we can just lock this
 		ImGui::TextWrapped("DT consumption update frequency:");
 		UI::SliderFloat("##_dtUpdateFrequency", &_dtUpdateFrequency, 100.0f, 1500.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-
-		ImGui::TextWrapped("DT consumption on update:");
+		*/
+		ImGui::TextWrapped("DT cost per tick:");
 		UI::SliderFloat("##_dtConsumption", &_dtConsumption, 5.0f, 200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Spacing();
 
 		ImGui::Checkbox("Enable clock-wave efx on qs startup", &_useTimerEfx);
-		ImGui::Checkbox("Use activation/deactivation delay", &_useBanTime);
-		ImGui::ShowHelpMarker("Delay after activation/deactivation quicksilver when you can't use it again.");
+		ImGui::Checkbox("Use activation/deactivation cooldown", &_useBanTime);
+		ImGui::ShowHelpMarker("Creates a delay after activating/deactivating quicksilver during which you can't toggle it.");
 		UI::SliderFloat("##_banTime", &_banTime, 100.0f, 850.0f, "%.1f", 1.0f);
 	}
 };

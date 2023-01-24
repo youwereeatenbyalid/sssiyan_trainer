@@ -163,10 +163,10 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = Page_Balance;
+		m_on_page = Page_Enemies;
 		m_full_name_string = "Boss Vergil Settings (+)";
 		m_author_string = "V.P. Zadov";
-		m_description_string = "Make boss Vergil suck a little less. Settings can't be changed after boss was spawned. I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";
+		m_description_string = "Buff's some of Boss Vergil's moves to increase the fight difficulty. Settings can't be changed mid-fight."; // I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";
 
 		set_up_hotkey();
 
@@ -272,25 +272,25 @@ public:
 			ImGui::RadioButton("Fast", (int*)&_teleportsState, 0); ImGui::SameLine(); ImGui::Spacing();
 			ImGui::RadioButton("Instant", (int*)&_teleportsState, 1); ImGui::SameLine(); ImGui::Spacing();
 			ImGui::RadioButton("Custom", (int*)&_teleportsState, 2);
-			if (ImGui::CollapsingHeader("Trick custom settings:"))
+			if (ImGui::CollapsingHeader("Customize trick settings:"))
 			{
-				ImGui::TextWrapped("Appears time:");
+				ImGui::TextWrapped("Trick Appearance time:");
 				UI::SliderFloat("##appearsSec", &(_teleportParams[2].appearsSec), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time long:");
+				ImGui::TextWrapped("Appearance time long:");
 				UI::SliderFloat("##appearsSecLong", &(_teleportParams[2].appearsSecLong), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time back:");
+				ImGui::TextWrapped("Appearance time back:");
 				UI::SliderFloat("##appearsSecOnBack", &(_teleportParams[2].appearsSecOnBack), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time up:");
+				ImGui::TextWrapped("Appearance time up:");
 				UI::SliderFloat("##appearsSecOfOverhead", &(_teleportParams[2].appearsSecOfOverhead), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time on center of arena:");
+				ImGui::TextWrapped("Appearance time on center of arena:");
 				UI::SliderFloat("##appearsSecOnCenter", &(_teleportParams[2].appearsSecOnCenter), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time on air raid teleport:");
+				ImGui::TextWrapped("Appearance time on air raid teleport:");
 				UI::SliderFloat("##appearsSecOnAirRaid", &(_teleportParams[2].appearsSecOnAirRaid), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time on yamato stab:");
+				ImGui::TextWrapped("Appearance time on yamato stab:");
 				UI::SliderFloat("##appearsSecOnStab", &(_teleportParams[2].appearsSecOnStab), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time on phase 3 combo(?):");
+				ImGui::TextWrapped("Appearance time on phase 3 combo(?):");
 				UI::SliderFloat("##appearsSecOnCommandCombo", &(_teleportParams[2].appearsSecOnCommandCombo), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Appears time on doppel returns to owner:");
+				ImGui::TextWrapped("Appearance time on doppel returns to owner:");
 				UI::SliderFloat("##apeearsSec2Owner", &(_teleportParams[2].apeearsSec2Owner), 0, 4.0f, "%.3f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 			}
 		}

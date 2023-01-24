@@ -99,7 +99,7 @@ public:
 		m_on_page = Page_Animation;
 		m_full_name_string = "Disable Roundtrip Callback Animation";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Disable hand callback animation for Dante's/Vergil's roundtrip move.";
+		m_description_string = "Disables the callback animations for Dante & Vergil's roundtrip moves.";
 
 		auto FEBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 AF F8");//DevilMayCry5.exe+C85DE6
 		if (!FEBackAddr)

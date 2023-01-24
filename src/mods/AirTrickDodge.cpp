@@ -36,7 +36,7 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 	m_on_page = Page_VergilTrick;
 	m_full_name_string = "Air Trick Dodge (+)";
 	m_author_string = "V.P.Zadov & The HitchHiker";
-	m_description_string = "Allow trick dodge while airborne.";
+	m_description_string = "Allow trick dodges while airborne.";
 	set_up_hotkey();
 
 	auto isInAirAddr = m_patterns_cache->find_addr(base, "0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 75 63 85 D2 0F 84 01"); //DevilMayCry5.exe+55088C
@@ -70,8 +70,8 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 
  void AirTrickDodge::on_draw_ui()
  {
-	 ImGui::Checkbox("Remove crazy jump inertia", &isNoInertia);
-	 ImGui::ShowHelpMarker("Use same junk power as air moves mod does.");
+	 ImGui::Checkbox("Remove trick inertia", &isNoInertia);
+	 ImGui::ShowHelpMarker("Removes Inertia from directional air tricks. Disabling this can result in vergil performing \"Super jumps\" when directionally tricking.");
 	 ImGui::Checkbox("Remove height forward dodge restriction", &isOverwriteGroundFitLength);
  }
 

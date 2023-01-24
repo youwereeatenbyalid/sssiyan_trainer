@@ -17,7 +17,7 @@ private:
 	std::shared_ptr<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t, float*, int, bool>> _plAddDtEventHandler = 
 		std::make_shared<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t, float*, int, bool>>(this, &VergilQuickSilver::on_pl_add_dt);
 
-	const std::array<char*, 4> _delayNames{ "Doppel banish (dpad down)", "Fast mode", "Default mode", "Slow mode"};
+	const std::array<char*, 4> _delayNames{ "Doppel banish (dpad down)", "Increased doppel speed", "Normal doppel speed", "Slow doppel speed"};
 
 	VergilDoppelInitSetup::DoppelDelayState _quickSilverBtn = VergilDoppelInitSetup::DoppelDelayState::None;
 
@@ -140,7 +140,7 @@ public:
 		m_on_page = Page_VergilCheat;
 		m_full_name_string = "Quicksilver style (+)";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Add quicksilver style for Vergil. Summon doppel with specific delay to on/off QS. This mod must be enabled before player will be loaded to a level. "
+		m_description_string = "Add's quicksilver style to Vergil. Use specified doppelganger command to enable/disable quicksilver. This mod must be enabled before loading into a level."
 			"You can't on/off QS while doppel is active.";
 
 		set_up_hotkey();
@@ -183,9 +183,9 @@ public:
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::ShowHelpMarker("Activate quicksilver instead of summon doppel. Make sure that selected input doesn't conflict with \"Summon Doppelganger Instantly\" mod or "
-			"\Boss Vergil Moves\" if you use no Lock On activation mode.");
-		ImGui::Checkbox("Consume SDT gauge instead of DT while QS is active;", &_isSDTConsume);
+		ImGui::ShowHelpMarker("Selected command will activate quicksilver instead of summoning the doppelganger. Make sure that selected input doesn't conflict with the \"Summon Doppelganger Instantly\" mod or "
+			"\Boss Vergil Moves\" if you use the no Lock-On activation mode.");
+		ImGui::Checkbox("Consume SDT gauge instead of DT gauge while Quicksilver is active;", &_isSDTConsume);
 		ImGui::Spacing();
 
 		PlayerQuicksilver::on_draw_ui();

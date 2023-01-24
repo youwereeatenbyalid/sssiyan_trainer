@@ -450,9 +450,9 @@ RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/RelWithDebInfo
 RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/MinSize
 OUTPUT_NAME sssiyan)
 
-add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
-                   POST_BUILD
-                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
+#add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
+                  # POST_BUILD
+                   #COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
                    target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)

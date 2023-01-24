@@ -537,7 +537,7 @@ void VergilAirTrick::on_draw_ui()
 {
 	ImGui::Checkbox("Change Air Trick startup.", &isCustomWaitTime);
 	if (isCustomWaitTime) {
-          ImGui::TextWrapped("Delay before trick movement starts. 6 - default game value.");
+          ImGui::TextWrapped("Controls the delay before trick movement starts. 6 - default game value.");
           UI::SliderFloat("##WaitTimeSlider", &waitTime, 0.0f, 20.0f, "%.1f");
 	}
 	ImGui::Separator();
@@ -548,43 +548,43 @@ void VergilAirTrick::on_draw_ui()
 		ImGui::Checkbox("Unclamp Air Trick Speed", &isSpeedUp);
 		if (isSpeedUp)
 		{
-			ImGui::TextWrapped("High values can cause glitches. 0.7 - default game value.");
+			ImGui::TextWrapped("Controls the speed of the Air Trick movement. High values can cause glitches. 0.7 - default game value.");
 			UI::SliderFloat("Air Trick speed", &initSpeed, 0.7f, 3.0f, "%.1f");
 		}
 		ImGui::Separator();
 	}
 	
-	ImGui::TextWrapped("Teleport directly to coordinates instead of moving through the air invisibly. Can send you out of bounds (you have been warned). Doesn't work with Vergil or Death Scrissors when they are out of bounds. "
-	"Also doesn't work with Nidhogg at all.");
+	ImGui::TextWrapped("Vergil teleports directly to the target instead of moving through the air invisibly. Can send you out of bounds." //  Doesn't work with Vergil or Death Scrissors when they are out of bounds. " I think this goes without saying? maybe not.
+	"Doesn't work with Nidhogg.");
 	ImGui::Checkbox("Instant Transmission", &isTeleport);
 	if (isTeleport)
 	{
 		ImGui::Spacing();
-		ImGui::TextWrapped("Trick teleport type:");
+		ImGui::TextWrapped("Teleport type:");
 		ImGui::RadioButton("Front trick", (int*)&trickType, 0);
-		ImGui::ShowHelpMarker("Appears in the front of the enemy relative to trick start position.");
+		ImGui::ShowHelpMarker("Vergil appears in front of the enemy relative to the trick start position.");
 		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("Backstep trick", (int*)&trickType, 1);
-		ImGui::ShowHelpMarker("Appears behind of the enemy relative to trick start position.");
+		ImGui::RadioButton("Reverse trick", (int*)&trickType, 1);
+		ImGui::ShowHelpMarker("Vergil appears behind the enemy relative to the trick start position.");
 		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("Auto", (int*)&trickType, 2);
-		ImGui::ShowHelpMarker("Hold trick button when Vergil starts teleporting to perform back-step trick. Otherwise Vergil will perform a front trick. You need to set some startup delay to use this.");
+		ImGui::RadioButton("Dynamic trick", (int*)&trickType, 2);
+		ImGui::ShowHelpMarker("Hold the trick button when Vergil starts teleporting to perform a reverse trick, otherwise perform a front trick. Requires some startup delay to use.");
 		ImGui::Checkbox("Teleport doppelganger to opposite side", &isDoppelOppositeTeleport);
 		ImGui::Checkbox("Rotate after backstep trick", &isAutoRotate);
-		ImGui::ShowHelpMarker("Automatically rotate to enemy target before appearing");
-		ImGui::TextWrapped("Distance from enemy:");
+		ImGui::ShowHelpMarker("Vergil automatically rotates to face the enemy target before appearing");
+		ImGui::TextWrapped("Distance from enemy:"); //redo this text at some point
 		UI::SliderFloat("##CorrectionFinishOffset", &trickCorrection, 0.25f, 2.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
-		ImGui::TextWrapped("Height above/below enemy.");
+		ImGui::TextWrapped("Height above/below enemy."); //redo this text at some point
 		UI::SliderFloat("##CorrectionFinishZOffset", &teleportZOffs, -1.5f, 3.25f, "%.2f", 1.0F, ImGuiSliderFlags_None);
 		ImGui::Checkbox("Force ground trick", &forceGroundTrick);
-		ImGui::ShowHelpMarker("Always appears on the ground after teleporting to enemies like Empusa Queen, Goliath, Baphomet when they are not in the air.");
+		ImGui::ShowHelpMarker("Vergil always appears on the ground after teleporting to enemies like Empusa Queen, Goliath, Baphomet when they are not in the air.");
 		if (forceGroundTrick)
 		{
 			ImGui::TextWrapped("Ground trick type:");
 			ImGui::RadioButton("Default", (int*)&groundTrickType, Default);
 			ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("Always ground trick", (int*)&groundTrickType, AlwaysGround);
-			ImGui::ShowHelpMarker("Vergil will appear on the ground regardless of current enemy and it's air position. Try it with \"boss trick up\" mod.");
+			ImGui::ShowHelpMarker("Vergil always appears on the ground. Try using this with the \"boss trick up\" mod.");
 		}		
 	}
 
