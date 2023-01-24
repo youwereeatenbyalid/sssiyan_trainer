@@ -1085,7 +1085,7 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = Page_Balance;
+		m_on_page = Page_Enemies;
 		m_full_name_string = "Enemy Fixes (+)";
 		m_author_string = "V.P. Zadov";
 		m_description_string = "Fixes for enemies spawn positions and bosses behaviors. Use it with \"Enemy Swapper\", \"Enemy Wave Editor\", \"Enemy Spawner\" or maybe some file mods that "

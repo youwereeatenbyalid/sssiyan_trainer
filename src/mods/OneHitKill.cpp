@@ -34,7 +34,7 @@ std::optional<std::string> OneHitKill::on_initialize() {
   init_check_box_info();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_on_page = Page_Balance;
+  m_on_page = Page_CommonCheat;
   m_is_enabled = &OneHitKill::cheaton;
   m_full_name_string     = "One Hit Kill";
   m_author_string        = "The HitchHiker";

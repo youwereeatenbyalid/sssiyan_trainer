@@ -1427,14 +1427,22 @@ void ModFramework::draw_panels() const
     ImGui::PopStyleColor();
     {
         if (m_error.empty() && m_game_data_initialized) {
-            ImGui::Text("Game Balance");
-            m_mods->on_pagelist_ui(Mod::Page_Balance, modListIndent);
 
-            ImGui::Separator();
             ImGui::Text("Game Modes");
             m_mods->on_pagelist_ui(Mod::Page_GameMode, modListIndent);
 
             ImGui::Separator();
+            
+            ImGui::Text("Encounter Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Encounters, modListIndent);
+
+            ImGui::Separator();
+
+            ImGui::Text("Enemy Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Enemies, modListIndent);
+
+            ImGui::Separator();
+            
             ImGui::Text("Bloody Palace");
             m_mods->on_pagelist_ui(Mod::Page_BloodyPalace, modListIndent);
         }

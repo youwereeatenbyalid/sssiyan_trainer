@@ -163,7 +163,7 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = Page_Balance;
+		m_on_page = Page_Enemies;
 		m_full_name_string = "Boss Vergil Settings (+)";
 		m_author_string = "V.P. Zadov";
 		m_description_string = "Make boss Vergil suck a little less. Settings can't be changed after boss was spawned. I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";

@@ -29,7 +29,7 @@ public:
 		init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
-		m_on_page = Page_Balance;
+		m_on_page = Page_Encounters;
 		m_full_name_string = "Increased Enemy Spawns (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Increase the number of enemies that spawn and adjust the time between spawns.";

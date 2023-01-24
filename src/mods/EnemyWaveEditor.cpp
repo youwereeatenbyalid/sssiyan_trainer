@@ -409,7 +409,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   m_is_enabled        = &cheaton;
-  m_on_page           = Page_Balance;
+  m_on_page           = Page_Encounters;
   m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "V.P.Zadov";
   m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";

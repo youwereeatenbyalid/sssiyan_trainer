@@ -239,7 +239,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
 	m_is_enabled = &cheaton;
-	m_on_page = Page_Balance;
+	m_on_page = Page_Enemies;
 	m_full_name_string = "Boss Dante settings (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Vergil's nightmare begins here.";

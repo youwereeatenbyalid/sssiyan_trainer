@@ -19,7 +19,7 @@ std::optional<std::string> EnemySpawner::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
-	m_on_page = Page_Balance;
+	m_on_page = Page_CommonCheat;
 	m_full_name_string = "Enemy Spawner (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Spawn enemies in any place. Delay can be happened if enemy prefab wasn't preloaded by default mission settings. Sometimes collisions are not working on spawned enemies.";

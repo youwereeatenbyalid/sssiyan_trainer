@@ -67,7 +67,7 @@ std::optional<std::string> PlayerDamageMult::on_initialize() {
   init_check_box_info();
 
   m_is_enabled          = &PlayerDamageMult::cheaton;
-  m_on_page             = Page_Balance;
+  m_on_page             = Page_CommonCheat;
   m_full_name_string   = "Damage Multiplier (+)";
   m_author_string      = "Dante";
   m_description_string = "Adjust the damage output of players and enemies.";
