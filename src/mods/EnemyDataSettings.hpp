@@ -112,16 +112,16 @@ public:
 		}
         ImGui::Checkbox("Share settings for all enemies", &shareSettings);
 		if (shareSettings) {
-		  ImGui::TextWrapped("Enemy num: change amount of enemies produced at each spawn point. Setting it to 0 removes all enemies at that spawn point.");
+		  ImGui::TextWrapped("Enemy number: changes the amount of enemies produced at each spawn point. Setting it to 0 removes all enemies at that spawn point.");
 		  ImGui::InputInt("##enemyNumShared", &enemyNum, 1);
 		  ImGui::Spacing();
 		  ImGui::TextWrapped("Minimum spawn time & Maximum spawn time: Adjust in-engine settings controlling the delay between enemy spawns.");
 		  ImGui::Columns(2, NULL, false);
-          ImGui::TextWrapped("Wait time min");
+          ImGui::TextWrapped("Wait time mininum");
 		  ImGui::Spacing();
           ImGui::InputFloat("##WaitTimeMinShared", &waitTimeMin);
 		  ImGui::NextColumn();
-		  ImGui::TextWrapped("Wait time max");
+		  ImGui::TextWrapped("Wait time maximum");
 		  ImGui::Spacing();
           ImGui::InputFloat("##WaitTimeMaxShared", &waitTimeMax);
 		  ImGui::Columns(1);

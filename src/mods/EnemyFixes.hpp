@@ -916,8 +916,9 @@ public:
         }
         ImGui::Checkbox("Boss Vergil credit AI", &isFriendlyVergilAI);
         ImGui::Separator();
-        ImGui::TextWrapped("Fix enemy familiars. Fixes for able killing Shadow, Griphon, fix for Shadow teleport and fix for Nightmare healing teleport pos will be automatically enabled "
-            "if Enemy Swapper or Wave Editor are enabled (player position will be using).");
+        ImGui::TextWrapped("Fix enemy familiars. Enables outright killing Shadow & Griphon. "
+            "Fixes for Shadow's and Nightmare's teleport positions will be automatically enabled "
+            "if using the Enemy Swapper or Wave Editor.");
         /*ImGui::Checkbox("Enable kill shadow", &canKillShadow);
         ImGui::Checkbox("Enable kill griffon", &canKillGriffon);*/
         ImGui::Checkbox("Fix Nightmare meteor position", &isNightmareFix);
@@ -1091,8 +1092,7 @@ public:
 		m_on_page = Page_Enemies;
 		m_full_name_string = "Enemy Fixes (+)";
 		m_author_string = "V.P. Zadov";
-		m_description_string = "Fixes for enemies spawn positions and bosses behaviors. Use it with \"Enemy Swapper\", \"Enemy Wave Editor\", \"Enemy Spawner\" or maybe some file mods that "
-            "changes default enemy waves to fix out of bounds spawn or junk bosses behavior.";
+        m_description_string = "Fixes for enemy spawn positions and boss behaviors. Use with \"Enemy Swapper\", \"Enemy Wave Editor\", \"Enemy Spawner\" or other mods that effect enemy spawning.";
 
         auto customSpawnAddr = m_patterns_cache->find_addr(base, "F3 41 0F11 4D 34 48 8B 4B 18 48 85 C9 75 10"); // DevilMayCry5.exe+11C58BC
         if (!customSpawnAddr) {

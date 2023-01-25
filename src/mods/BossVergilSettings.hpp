@@ -166,7 +166,7 @@ public:
 		m_on_page = Page_Enemies;
 		m_full_name_string = "Boss Vergil Settings (+)";
 		m_author_string = "V.P. Zadov";
-		m_description_string = "Buff's some of Boss Vergil's moves to increase the fight difficulty. Settings can't be changed mid-fight."; // I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";
+		m_description_string = "Buffs some of Boss Vergil's moves to increase the fight difficulty. Settings can't be changed mid-fight."; // I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";
 
 		set_up_hotkey();
 

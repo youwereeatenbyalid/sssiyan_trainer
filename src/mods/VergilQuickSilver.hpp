@@ -140,7 +140,7 @@ public:
 		m_on_page = Page_VergilCheat;
 		m_full_name_string = "Quicksilver style (+)";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Add's quicksilver style to Vergil. Use specified doppelganger command to enable/disable quicksilver. This mod must be enabled before loading into a level."
+		m_description_string = "Add's quicksilver style to Vergil. Use the specified doppelganger command to enable/disable quicksilver. This mod must be enabled before loading into a level."
 			"You can't on/off QS while doppel is active.";
 
 		set_up_hotkey();
