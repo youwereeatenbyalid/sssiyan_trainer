@@ -134,9 +134,9 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteCheat;
-		m_full_name_string = "\"Mustang Air\" to \"Mustang\"";
+		m_full_name_string = "Grounded Mustang in Air";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Air mustang move gives you air indstead of ground if lock on or selected left stick direction holded.";
+		m_description_string = "Perform the grounded version of Mustang while airborne.";
 
 		set_up_hotkey();
 
@@ -176,7 +176,7 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override 
 	{
-		ImGui::TextWrapped("Select special input to swap \"Air Mustang Air\" with \"Ait Mustang\":");
+		ImGui::TextWrapped("Selected input for alternate Mustang:");
 		ImGui::RadioButton("Always Swap", (int*)&_mustangInput, (int)MustangInput::Always); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("Holding Lock On", (int*)&_mustangInput, (int)MustangInput::LockOn); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("Left Stick Back", (int*)&_mustangInput, (int)MustangInput::LSBack); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();

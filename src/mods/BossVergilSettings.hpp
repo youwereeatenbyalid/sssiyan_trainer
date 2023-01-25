@@ -299,13 +299,13 @@ public:
 
 		if (ImGui::CollapsingHeader("Doppelganger settings"))
 		{
-			ImGui::Checkbox("Use doppel settings", &_useDoppelCheats);
-			ImGui::Checkbox("Doppel will parry attacks", &_isDoppelParryAttacks);
-			ImGui::Checkbox("Doppel will parry shells", &_isDoppelParryShells);
-			ImGui::Checkbox("Doppel uses SDT", &_isDoppelInSDT);
-			ImGui::TextWrapped("Doppel's HP:");
+			ImGui::Checkbox("Use custom Doppelganger settings", &_useDoppelCheats);
+			ImGui::Checkbox("Doppelganger will parry attacks", &_isDoppelParryAttacks);
+			ImGui::Checkbox("Doppelganger will parry shells", &_isDoppelParryShells);
+			ImGui::Checkbox("Doppelganger uses SDT", &_isDoppelInSDT);
+			ImGui::TextWrapped("Doppelganger's HP:");
 			UI::SliderFloat("##DoppelHP", &_doppelHP, 100.0f, 10000.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-			ImGui::TextWrapped("Doppel's attack rate:");
+			ImGui::TextWrapped("Doppelganger's attack rate:");
 			UI::SliderFloat("##DoppelAttackRate", &_doppelAttackRate, 0.01f, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		}
 
@@ -313,9 +313,8 @@ public:
 
 		if (ImGui::CollapsingHeader("Air Raid settings"))
 		{
-			ImGui::Checkbox("Use Air Raid settings", &_useAirRaidCheats);
-			ImGui::ShowHelpMarker("\"Dive bomb\" or whatever you call this");
-			ImGui::TextWrapped("Attack num:");
+			ImGui::Checkbox("Use custom Air Raid settings", &_useAirRaidCheats);
+			ImGui::TextWrapped("Number of attacks per air raid:");
 			UI::SliderInt("##_airRaidAttackNum", &_airRaidAttackNum, 1, 10, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 			ImGui::TextWrapped("Speed (50 - game default):");
 			ImGui::InputFloat("##_airRaidSpeed", &_airRaidSpeed, 1.0f, 5.0f, "%.2f", 1.0f);
@@ -329,12 +328,12 @@ public:
 
 		ImGui::Separator();
 
-		if (ImGui::CollapsingHeader("Judgement cut settings"))
+		if (ImGui::CollapsingHeader("Judgment cut settings"))
 		{
 			ImGui::Checkbox("Use Judgement Cut settings", &_useJcCheats);
-			ImGui::TextWrapped("Delay before JC:");
+			ImGui::TextWrapped("Delay before JdC:");
 			UI::SliderFloat("##_jcWaitSec", &_jcWaitSec, 0, 2.0f, "%.3f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-			ImGui::TextWrapped("JC max height:");
+			ImGui::TextWrapped("JdC max height:");
 			UI::SliderFloat("##_jcMaxHeight", &_jcMaxHeight, 2.75f, 228.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 		}
 
@@ -342,7 +341,7 @@ public:
 
 		if (ImGui::CollapsingHeader("Trick stab settings"))
 		{
-			ImGui::Checkbox("Use Yamato stab settings", &_useStabCheats);
+			ImGui::Checkbox("Use custom Yamato stab settings", &_useStabCheats);
 			ImGui::TextWrapped("Stab speed (45 - game default):");
 			UI::SliderFloat("##_stabSpeed", &_stabSpeed, 35.0f, 150.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 			ImGui::TextWrapped("Stab distance (15 - game default):");
@@ -355,14 +354,14 @@ public:
 
 		if (ImGui::CollapsingHeader("SDT settings"))
 		{
-			ImGui::Checkbox("Use SDT settings", &_useDTCheats);
-			ImGui::TextWrapped("Hp recovery:");
+			ImGui::Checkbox("Use custom SDT settings", &_useDTCheats);
+			ImGui::TextWrapped("Vergil's hp recovery in SDT:");
 			UI::SliderFloat("##_dtHpRecoveryVal", &_dtHpRecoveryVal, 0.0f, 1.0f, "%.3f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-			ImGui::TextWrapped("Actions speed:");
+			ImGui::TextWrapped("Vergil's move speed in SDT:");
 			UI::SliderFloat("##_dtActionSpeed", &_dtActionSpeed, 0.1f, 2.5f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-			ImGui::TextWrapped("Damage reaction (e.g. hyperarmor):");
+			ImGui::TextWrapped("Vergil's Hyperarmor/flinch resist in SDT:");
 			UI::SliderFloat("##_dtReactionDamageRate", &_dtReactionDamageRate, 0.0f, 1.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-			ImGui::TextWrapped("Damage reaction from SDT attacks:");
+			ImGui::TextWrapped("Vergil's attack Guardbreak in SDT:");
 			UI::SliderFloat("##_dtReactionDamageRateFromMajin", &_dtReactionDamageRateFromMajin, 0.0f, 1.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 		}
 
