@@ -144,8 +144,8 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "Tricks efx settings (+)";
 	m_author_string = "V.P.Zadov";
-	m_description_string = "Add and cusomize some efx (like 1 of boss's trick trails that been on plVergil all this time ty cumpcom) to trick moves without changing default efx itself. Changing any of efx by filemods "
-		"will also affect what this mod spawns. If you want to recreate only boss trick - Lordranis'es trick alternate or my recolor file mods is a must for cool boss's trick smoke cloud.";
+	m_description_string = "Add and customize some efx on trick moves without changing the default efxs. Changing any efx with filemods "
+		"will also affect what this mod creates. If you want to recreate boss Vergil's trick effects - Lordranis'es trick alternate or my recolor file mods are a must for the boss's trick smoke cloud.";
 
 	set_up_hotkey();
 
