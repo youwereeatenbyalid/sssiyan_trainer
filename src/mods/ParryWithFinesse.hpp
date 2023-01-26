@@ -139,7 +139,11 @@ private:
 				}
 				default:
 				{
-					set_pl_action(threadCntx, attackChar, L"Parry", 0, 0, 0, 0, 0, true, true, false, 0);
+					gf::PlayerCheckNormalJump checkJump{ attackChar };
+					if(checkJump())
+						set_pl_action(threadCntx, attackChar, L"Parry", 0, 0, 0, 0, 0, true, true, false, 0);
+					else
+						set_pl_action(threadCntx, attackChar, L"ParryAir", 0, 0, 0, 0, 0, true, true, false, 0);
 					break;
 				}
 			}

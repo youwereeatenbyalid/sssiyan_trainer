@@ -14,11 +14,6 @@
 //clang-format off
 namespace gf = GameFunctions;
 
-namespace Pl0300Controller
-{
-	class Pl0300ControllerManager;
-}
-
 class EnemySpawner : public Mod, private EndLvlHooks::IEndLvl
 {
 private:
@@ -31,7 +26,7 @@ private:
 
 	static inline const std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
 
-	Pl0300Controller::Pl0300ControllerManager* _pl0300Manager;
+	PlCntr::Pl0300Cntr::Pl0300ControllerManager* _pl0300Manager;
 	InputSystem* _inputSystemMod = nullptr;
 	static inline EnemySpawner* _mod = nullptr;
 
@@ -44,11 +39,11 @@ private:
 
 	gf::Vec3 _spawnPos{ 0,0,0 };
 
-	Pl0300Controller::Pl0300Controller::HitControllerSettings _hcNextSpawnSettings;
-	Pl0300Controller::Pl0300Controller::HitControllerSettings _manualEm6000HcSettings;
+	PlCntr::HitControllerSettings _hcNextSpawnSettings;
+	PlCntr::HitControllerSettings _manualEm6000HcSettings;
 
-	std::vector<std::weak_ptr<Pl0300Controller::Pl0300Controller>> _em6000PlHelpersList;
-	std::vector<std::weak_ptr<Pl0300Controller::Pl0300Controller>> _em6000FriendlyList;
+	std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000PlHelpersList;
+	std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000FriendlyList;
 
 	void load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType loadType = Enemy);
 

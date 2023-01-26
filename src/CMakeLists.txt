@@ -285,6 +285,7 @@ set(MODS_SRC
     mods/BossVergilMoves.hpp
     mods/Pl0300ControllerManager.hpp
     mods/Pl0300ControllerManager.cpp
+    mods/PlController.hpp
     mods/Pl0300Controller.hpp
     mods/Pl0300Controller.cpp
     mods/EnemyFixes.hpp

@@ -19,19 +19,21 @@ namespace gf = GameFunctions;
 
 class BossVergilMoves : public Mod, private EndLvlHooks::IEndLvl
 {
+public:
+	enum class Pl0300TrickType
+	{
+		ToEnemy,
+		InPlace
+	};
+
 private:
+
+	Pl0300TrickType _pl0300TrickType = Pl0300TrickType::ToEnemy;
 
 	class PlPair
 	{
 
 	public:
-		enum class Pl0300Actions
-		{
-			AirRaid,
-			Stab,
-			DodgeLeft,
-			DodgeRight
-		};
 
 		void destroy_doppel() noexcept
 		{
@@ -41,6 +43,22 @@ private:
 		}
 
 	private:
+
+		enum class Pl0300Actions
+		{
+			AirRaid,
+			Stab,
+			DodgeLeft,
+			DodgeRight
+		};
+
+		enum class LastPlSwap
+		{
+			ViaPlId,
+			ViaCamSwap
+		};
+
+		LastPlSwap _lastPlSwap = LastPlSwap::ViaPlId;
 
 		static inline const std::array<const wchar_t*, 12> _airRaidNames
 		{
@@ -82,23 +100,38 @@ private:
 		static inline sdk::REMethodDefinition* _plDoCharUpdateMethod = nullptr;
 		static inline sdk::REMethodDefinition* _pl0800ResetStatusMethod = nullptr;
 		static inline sdk::REMethodDefinition* _pl0800EndCutSceneMethod = nullptr;
+		static inline sdk::REMethodDefinition* _plCamCntrlSetPlAccMethod = nullptr;
+
+		static inline sdk::RETypeDefinition* _lockOnObjTD = nullptr;
+		static inline sdk::RETypeDefinition* _plAccessorTD = nullptr;
 
 		sdk::REMethodDefinition* _gameModelSetDrawSelfMethod = nullptr;
 		sdk::REMethodDefinition* _gameModelSetEnableMethod = nullptr;
 		sdk::REMethodDefinition* _networkBBUpdateMethod = nullptr;
 		sdk::REMethodDefinition* _networkBBUpdateNetworkTypeMethod = nullptr;
 
+		REManagedObject* _pl0300Accessor = nullptr;
+		//REManagedObject* _pl0300LockOnObj = nullptr;
+
+		static inline std::unique_ptr<FunctionHook> _plCamCntrSetPlHook = nullptr;
+		static inline uintptr_t _plCamCntrlSetPlAddr = 0;
+
+		static inline bool _isStaticInitRequested = true;
+
 		bool _isAfterFirstAirRaidState = false;
 		bool _isAfterFirstTrickStabState = false;
 
 		bool _isTrickStabPerforming = false;
 
-		bool _isInit = false;
-
 		gf::Vec3 _airRaidStartPos;
 		gf::Vec3 _moveStartPos;
 
 		const InputSystem* _inputSys = nullptr;
+
+		static inline void pl_cam_cntrl_set_pl_hook(uintptr_t threadCntx, uintptr_t obj, uintptr_t plAcessor)
+		{
+			//Disallow cam set while pl0300 is active
+		}
 
 		inline void stop_air_raid_coroutine()
 		{
@@ -109,7 +142,7 @@ private:
 			if (auto pl0300 = _pl0300.lock(); pl0300 != nullptr)
 			{
 				pl0300->destroy_all_related_shells();
-				set_pl0300_scale(pl0300->get_pl0300(), gf::Vec3(1.0f, 1.0f, 1.0f));
+				set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.0f, 1.0f, 1.0f));
 			}
 		}
 
@@ -117,8 +150,8 @@ private:
 		{
 			_isAfterFirstTrickStabState = _isTrickStabPerforming = false;
 			_pl0300ActionUpdateCoroutine.stop();
-			if (auto pl0300 = _pl0300.lock(); pl0300 != nullptr && pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT)
-				pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
+			if (auto pl0300 = _pl0300.lock(); pl0300 != nullptr && pl0300->get_cur_dt() == PlCntr::DT::SDT)
+				pl0300->set_dt(PlCntr::DT::Human);
 		}
 
 		void set_pl0300_scale(uintptr_t pl0300, gf::Vec3 scale)
@@ -129,17 +162,26 @@ private:
 			_transformSetLocalScaleMethod->call(sdk::get_thread_context(), transform, scale);
 		}
 
+		inline void pl0300_move_end_char_swap()
+		{
+			if (_lastPlSwap == LastPlSwap::ViaPlId)
+				change_manual_pl(4);
+			else
+				change_pl_via_cam((uintptr_t)sdk::get_thread_context(), 4);
+		}
+
 		void update_pl0300_behavior(Pl0300Actions action)
 		{
 			auto pl0300 = _pl0300.lock();
-			if (pl0300 == nullptr)
+			if (pl0300 == nullptr || GameplayStateTracker::isCutscene)
 			{
 				force_end_moves();
 				return;
 			}
-			if (_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset) && _inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::ChangeLockOn))
+			if (_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset) && 
+				_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::ChangeLockOn))
 				force_end_moves();
-			auto actionStr = gf::StringController::get_raw_wstr(*(uintptr_t*)(pl0300->get_pl0300() + 0x190));
+			auto actionStr = gf::StringController::get_raw_wstr(*(uintptr_t*)(pl0300->get_pl() + 0x190));
 			switch (action)
 			{
 				case BossVergilMoves::PlPair::Pl0300Actions::AirRaid:
@@ -159,23 +201,23 @@ private:
 						auto it = std::find_if(_airRaidNames.begin(), _airRaidNames.end(), [&](const wchar_t* name) { return wcscmp(name, actionStr) == 0; });
 						if (it == _airRaidNames.end())
 						{
-							pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
+							pl0300->set_dt(PlCntr::DT::Human);
 							stop_air_raid_coroutine();
-							auto airRaidCtrl = *(uintptr_t*)(pl0300->get_pl0300() + 0x1C90);
+							auto airRaidCtrl = *(uintptr_t*)(pl0300->get_pl() + 0x1C90);
 							if (airRaidCtrl != 0)
 							{
 								if (*(bool*)(airRaidCtrl + 0x30))
 									pl0300->set_pos_full(_moveStartPos);
 							}
-							change_manual_pl(4);
+							pl0300_move_end_char_swap();
 							return;
 						}
 					}
 					
-					if (_isAfterFirstAirRaidState && pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT && wcscmp(actionStr, _airRaidNames[_airRaidNames.size() - 1]) == 0)
+					if (_isAfterFirstAirRaidState && pl0300->get_cur_dt() == PlCntr::DT::SDT && wcscmp(actionStr, _airRaidNames[_airRaidNames.size() - 1]) == 0)
 					{
-							pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
-							set_pl0300_scale(pl0300->get_pl0300(), gf::Vec3(1.0f, 1.0f, 1.0f));
+							pl0300->set_dt(PlCntr::DT::Human);
+							set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.0f, 1.0f, 1.0f));
 					}
 					break;
 				}
@@ -195,7 +237,7 @@ private:
 						if (it == _trickStabNames.end())
 						{
 							stop_trick_stab_coroutine();
-							change_manual_pl(4);
+							pl0300_move_end_char_swap();
 							return;
 						}
 					}
@@ -219,13 +261,13 @@ private:
 			}
 		}
 
-		void set_pl0800_lock_on_to_pl0300(const std::shared_ptr<Pl0300Controller::Pl0300Controller>& pl0300)
+		void set_pl0800_lock_on_to_pl0300(const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300)
 		{
 			auto pl0800LockOnTargetWork = *(uintptr_t*)(_pl0800 + 0x428);
 			if (pl0800LockOnTargetWork != 0)
 			{
 				auto target = *(uintptr_t*)(pl0800LockOnTargetWork + 0x10);
-				auto ccc = *(uintptr_t*)(pl0300->get_pl0300() + 0x1818);
+				auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
 				if (ccc != 0 && target != 0)
 				{
 					auto character = *(uintptr_t*)(target + 0x58);
@@ -233,9 +275,31 @@ private:
 					*(gf::Vec3*)(ccc + 0x60) = *get_char_pos(character);
 				}
 			}
-			auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl0300() + 0xEF0);
-			auto pl0300EnemyPadInput = *(uintptr_t*)(pl0300->get_pl0300() + 0xEF8);
-			auto pl0300TracePadInput = *(uintptr_t*)(pl0300->get_pl0300() + 0xF00);
+
+			/*if(_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
+			{
+				PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
+				_pl0300LockOnObj = nullptr;
+			}
+
+			if (pl0800LockOnTargetWork != 0)
+			{
+				pl0300->use_custom_lock_on_update(true);
+				_pl0300LockOnObj = _lockOnObjTD->create_instance_full();
+				PfbFactory::PrefabFactory::add_ref();
+				auto u03LockObj = (uintptr_t)_pl0300LockOnObj;
+				*(bool*)(u03LockObj + 0x18) = false;
+				*(uintptr_t*)(u03LockObj + 0x20) = 0;
+				*(uintptr_t*)(u03LockObj + 0x10) = *(uintptr_t*)(pl0800LockOnTargetWork + 0x10);
+
+				*(uintptr_t*)(pl0300->get_pl() + 0x428) = u03LockObj;
+			}
+			else
+				pl0300->use_custom_lock_on_update(false);*/
+
+			auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF0);
+			auto pl0300EnemyPadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF8);
+			auto pl0300TracePadInput = *(uintptr_t*)(pl0300->get_pl() + 0xF00);
 
 			if (pl0300PadInput != 0)
 			{
@@ -252,16 +316,18 @@ private:
 			}
 		}
 
-		 Coroutines::Coroutine<decltype(&PlPair::destroy_doppel), PlPair*> _doppelDestroyCoroutine{ &PlPair::destroy_doppel, false };
-		 Coroutines::Coroutine<decltype(&PlPair::update_pl0300_behavior), PlPair*, Pl0300Actions> _pl0300ActionUpdateCoroutine{ &PlPair::update_pl0300_behavior, true, true };
+		Coroutines::Coroutine<decltype(&PlPair::destroy_doppel), PlPair*> _doppelDestroyCoroutine{ &PlPair::destroy_doppel, false };
+		Coroutines::Coroutine<decltype(&PlPair::update_pl0300_behavior), PlPair*, Pl0300Actions> _pl0300ActionUpdateCoroutine{ &PlPair::update_pl0300_behavior, true, true };
 
 	public:
 
 		uintptr_t _pl0800;
-		const std::weak_ptr<Pl0300Controller::Pl0300Controller> _pl0300;
+		const std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> _pl0300;
+
+		static inline Pl0300TrickType _stabTrickUpdateType = Pl0300TrickType::ToEnemy;
 
 		PlPair() = delete;
-		PlPair(uintptr_t pl0800, std::weak_ptr<Pl0300Controller::Pl0300Controller> pl0300, const InputSystem* inputSysMod) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
+		PlPair(uintptr_t pl0800, std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, const InputSystem* inputSysMod) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
 		{
 			_doppelDestroyCoroutine.ignoring_update_on_pause(true);
 			_gameModelSetDrawSelfMethod = pl0300.lock()->get_game_model_set_draw_self_method();
@@ -272,35 +338,65 @@ private:
 			_pl0300ActionUpdateCoroutine.set_delay(0);
 			_pl0300ActionUpdateCoroutine.ignoring_update_on_pause(true);
 
-			if (_transformSetLocalScaleMethod == nullptr)
+			if (_isStaticInitRequested)
+			{
 				_transformSetLocalScaleMethod = sdk::find_method_definition("via.Transform", "set_LocalScale(via.vec3)");
-			if (_plDoCharUpdateMethod == nullptr)
 				_plDoCharUpdateMethod = sdk::find_method_definition("app.Player", "doCharacterUpdate()");
-			if (_pl0800ResetStatusMethod == nullptr)
 				_pl0800ResetStatusMethod = sdk::find_method_definition("app.PlayerVergilPL", "resetStatus(app.GameModel.ResetType)");
-			if (_pl0800EndCutSceneMethod == nullptr)
 				_pl0800EndCutSceneMethod = sdk::find_method_definition("app.PlayerVergilPL", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
-			if (_stabStr == nullptr)
+				_plCamCntrlSetPlAccMethod = sdk::find_method_definition("app.PlayerCameraController", "set_player(app.IPlayerAccessor)");
+
+				_lockOnObjTD = sdk::find_type_definition("app.LockOnObject");
+				_plAccessorTD = sdk::find_type_definition("app.PlayerAccessor");
+				
 				_stabStr = std::make_unique<gf::SysString>(L"Stab");
 
-			pl0300.lock()->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<Pl0300Controller::Pl0300Controller>& pl0300, bool* skipOrig)
+				_plCamCntrlSetPlAddr = g_framework->get_module().as<uintptr_t>() + 0xCD1920;
+				_isStaticInitRequested = false;
+			}
+
+			auto shared = pl0300.lock();
+
+			shared->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300, bool* skipOrig)
 				{
-					auto upl0300 = pl0300->get_pl0300();
-					if (*(int*)(upl0300 + 0x1AE0) != 5)
+					auto upl0300 = pl0300->get_pl();
+					auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
+					if (ccc == 0)
+						return;
+					if (*(int*)(upl0300 + 0x1AE0) == 6)
 					{
-						*skipOrig = false;
+						auto characterTarget = *(uintptr_t*)(ccc + 0x58);
+						if (characterTarget == 0)
+							return;
+						gf::Vec3 targetPos = *(gf::Vec3*)(ccc + 0x60);
+						gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), targetPos.z);
+						*skipOrig = true;
+						*(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) = newPos;
 						return;
 					}
-					auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
-					if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
+					else
 					{
 						auto characterTarget = *(uintptr_t*)(ccc + 0x58);
 						gf::Vec3 targetPos = *(gf::Vec3*)(ccc + 0x60);
-						gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), (*(gf::Vec3*)(characterTarget + 0x3E0)).z);
+						if (_stabTrickUpdateType == Pl0300TrickType::ToEnemy)
+						{
+							gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), (*(gf::Vec3*)(characterTarget + 0x3E0)).z);
+							*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) =  newPos;
+						}
+						else
+							*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) = pl0300->get_ground_pos();
+						*(int*)(pl0300->get_pl() + 0x2008) = 24; //24 - Stab //25 - StabFromWalk;
 						*skipOrig = true;
-						*(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) = newPos;
 					}
 				});
+			shared->use_custom_trick_update(true);
+
+			shared->set_lock_on_update_f([](uintptr_t threadCntxt, const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300, bool* skipOrig)
+				{
+					*skipOrig = true;
+				});
+
+			shared->use_custom_lock_on_update(false);
 		}
 
 		PlPair(PlPair&& other) : _pl0800(other._pl0800), _pl0300(std::move(other._pl0300)), _inputSys(other._inputSys)
@@ -316,19 +412,30 @@ private:
 			_transformSetLocalScaleMethod = other._transformSetLocalScaleMethod;
 			_plDoCharUpdateMethod = other._plDoCharUpdateMethod;
 			_pl0800ResetStatusMethod = other._pl0800ResetStatusMethod;
-			_isInit = other._isInit;
 			_stabStr = std::move(other._stabStr);
+			_pl0300Accessor = other._pl0300Accessor;
 		}
 
 		~PlPair()
 		{
 			destroy_doppel();
 			stop_air_raid_coroutine();
+			if (_pl0300Accessor != nullptr)
+				PfbFactory::PrefabFactory::release(_pl0300Accessor);
+			_pl0300Accessor = nullptr;
+			_plCamCntrSetPlHook = nullptr;
+			/*if(_pl0300LockOnObj != nullptr)
+				PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
+			_pl0300LockOnObj = nullptr;*/
 		}
 
-		void set_init() noexcept { _isInit = true; }
-
-		bool is_init() const noexcept { return _isInit; }
+		void on_pl_reload_reset()
+		{
+			force_end_moves();
+			_isTrickStabPerforming = false;
+			_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = false;
+			_pl0300ActionUpdateCoroutine.stop();
+		}
 
 		static inline sdk::REMethodDefinition* get_pl_do_char_update_method() noexcept { return _plDoCharUpdateMethod; }
 
@@ -336,12 +443,12 @@ private:
 
 		inline bool is_trick_stab_performing() const noexcept { return _isTrickStabPerforming; }
 
-		std::weak_ptr<Pl0300Controller::Pl0300Controller> createDoppel(bool useLifeTime, float lifeTime, gf::Vec3 doppelScale = gf::Vec3{1.0f, 1.0f, 1.0f}, bool isFirst = false, 
+		std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> createDoppel(bool useLifeTime, float lifeTime, gf::Vec3 doppelScale = gf::Vec3{1.0f, 1.0f, 1.0f}, bool isFirst = false, 
 			float hp = 250.0f, float AttackRate = 0.35f) noexcept
 		{
 			auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr && _pl0800 == 0)
-				return std::weak_ptr<Pl0300Controller::Pl0300Controller>();
+				return std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>();
 			if (is_doppel_mode())
 				return _pl0300.lock()->get_doppel_ctrl();
 			
@@ -350,7 +457,7 @@ private:
 			auto pl0300Doppel = pl0300->get_doppel_ctrl().lock();
 			if ( pl0300Doppel != nullptr)
 			{
-				set_pl0300_scale(pl0300Doppel->get_pl0300(), gf::Vec3(1.15f, 1.15f, 1.15f));
+				set_pl0300_scale(pl0300Doppel->get_pl(), gf::Vec3(1.15f, 1.15f, 1.15f));
 				if (useLifeTime)
 				{
 					_doppelDestroyCoroutine.set_delay(lifeTime);
@@ -367,18 +474,26 @@ private:
 		void force_end_moves()
 		{
 			auto pl0300 = _pl0300.lock();
-			if (pl0300 == nullptr)
+			if (pl0300 == nullptr || !_pl0300ActionUpdateCoroutine.is_started())
 				return;
-			if (int* curPlId = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())); curPlId == nullptr || *curPlId == 4 || !_pl0300ActionUpdateCoroutine.is_started())
+			if(_lastPlSwap == LastPlSwap::ViaPlId)
+			{
+				if (int* curPlId = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())); curPlId == nullptr || *curPlId == 4)
+					return;
+			}
+			else if(gf::StringController::str_cmp(*(uintptr_t*)(pl0300->get_pl() + 0x190), "Wait"))
 				return;
-			if(pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT)
-				pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
-			set_pl0300_scale(pl0300->get_pl0300(), gf::Vec3(1.0f, 1.0f, 1.0f));
+			if(pl0300->get_cur_dt() == PlCntr::DT::SDT)
+				pl0300->set_dt(PlCntr::DT::Human);
+			set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.0f, 1.0f, 1.0f));
 			_pl0300ActionUpdateCoroutine.stop();
 			_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = _isTrickStabPerforming = false;
 			pl0300->set_pos_full(_moveStartPos);
 			gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
-			change_manual_pl(4);
+			if (_lastPlSwap == LastPlSwap::ViaPlId)
+				change_manual_pl(4);
+			else
+				change_pl_via_cam((uintptr_t)sdk::get_thread_context(), 4);
 		}
 
 		void change_pl0300_enable_state(bool enable)
@@ -409,7 +524,7 @@ private:
 				*(bool*)(charController + 0x30) = *(bool*)(subCharController + 0x30) = enable;
 		}
 
-		void start_air_raid(gf::Vec3 centerFloor, const Pl0300Controller::Pl0300Controller::AirRaidSettings &settings, const Pl0300Controller::Pl0300Controller::HitControllerSettings &hcSettings, bool useCoroutine = true)
+		void start_air_raid(gf::Vec3 centerFloor, const PlCntr::Pl0300Cntr::AirRaidSettings &settings, const PlCntr::HitControllerSettings &hcSettings, bool useCoroutine = true)
 		{
 			auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr)
@@ -417,7 +532,7 @@ private:
 			if (pl0300->get_doppel() != 0)
 				destroy_doppel();
 			_airRaidStartPos = *get_char_pos(_pl0800);
-			auto emParam = pl0300->get_pl0300();
+			auto emParam = pl0300->get_pl();
 			emParam = *(uintptr_t*)(emParam + 0x1768);
 			if (emParam == 0)
 				return;
@@ -429,22 +544,33 @@ private:
 
 			pl0300->set_air_raid_settings(settings, *(gf::Vec3*)(_pl0800 + 0x3E0));
 			pl0300->set_hitcontroller_settings(hcSettings);
-			*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(_pl0800);
+			*get_char_rot(pl0300->get_pl()) = *get_char_rot(_pl0800);
 			pl0300->set_is_control(true);
-			set_pl0800_lock_on_to_pl0300(pl0300);
-			pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::SDT);
+			pl0300->set_dt(PlCntr::DT::SDT);
 			pl0300->set_action(_airRaidNames[0]);
-			set_pl0300_scale(pl0300->get_pl0300(), gf::Vec3(1.15f, 1.15f, 1.15f));
+			set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.15f, 1.15f, 1.15f));
+			pl0300->use_custom_trick_update(true);
+			auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
+			if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
+			{
+				auto characterTarget = *(uintptr_t*)(ccc + 0x58);
+				gf::Vec3 targetPos = *(gf::Vec3*)(ccc + 0x60);
+				gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), targetPos.z);
+				*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = newPos;
+				*(int*)(pl0300->get_pl() + 0x2008) = 37; //24 - Stab //25 - StabFromWalk;
+				*(int*)(pl0300->get_pl() + 0x1AE0) = 6;
+			}
+			pl0300->update_em_teleport();
 			if(useCoroutine)
 				_pl0300ActionUpdateCoroutine.start(this, Pl0300Actions::AirRaid);
 		}
 
-		void start_trick_stab(gf::Vec3 centerOfFloor, const Pl0300Controller::Pl0300Controller::HitControllerSettings& hcSettings, bool useCustomRandomTrickOffs = false)
+		void start_trick_stab(gf::Vec3 centerOfFloor, const PlCntr::HitControllerSettings& hcSettings, Pl0300TrickType warpType)
 		{
 			auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr)
 				return;
-			auto emParam = pl0300->get_pl0300();
+			auto emParam = pl0300->get_pl();
 			emParam = *(uintptr_t*)(emParam + 0x1768);
 			if (emParam == 0)
 				return;
@@ -454,12 +580,26 @@ private:
 			pl0300->set_hp(20000.0f);
 			_moveStartPos = *get_char_pos(_pl0800);
 
-			pl0300->use_custom_trick_update(useCustomRandomTrickOffs);
-			set_pl0800_lock_on_to_pl0300(pl0300);
-			*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(_pl0800);
 			pl0300->set_is_control(true);
 			pl0300->set_action(_stabStr.get());
-			pl0300->set_action_from_think(_stabStr.get(), 0x94A9A36A);
+			pl0300->use_custom_trick_update(true);
+			auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
+			pl0300->update_em_teleport();
+			if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
+			{
+				auto characterTarget = *(uintptr_t*)(ccc + 0x58);
+				gf::Vec3 targetPos = *(gf::Vec3*)(ccc + 0x60);
+				if (warpType == Pl0300TrickType::ToEnemy)
+				{
+					gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), (*(gf::Vec3*)(characterTarget + 0x3E0)).z);
+					*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = newPos;
+				}
+				else
+					*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = pl0300->get_ground_pos();
+				*(int*)(pl0300->get_pl() + 0x2008) = 24; //24 - Stab //25 - StabFromWalk;
+				*(int*)(pl0300->get_pl() + 0x1AE0) = 5;
+			}
+			//pl0300->set_action_from_think(_stabStr.get(), 0x94A9A36A);
 			_pl0300ActionUpdateCoroutine.start(this, Pl0300Actions::Stab);
 			_isTrickStabPerforming = true;
 		}
@@ -477,7 +617,84 @@ private:
 			return (int*)(plInfo + 0x10);
 		}
 
-		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true, bool callPl0300GoToWait = false)
+		void change_pl_via_cam(uintptr_t threadCntxt, int plId, bool callPl0800EndCutscene = true)
+		{
+			auto pl0300 = _pl0300.lock();
+			if (pl0300 == nullptr)
+				return;
+			if (*get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())) == 3 && plId == 3)
+				return;
+			auto camCntr = get_pl_camera_controller();
+			if (camCntr == 0)
+				return;
+			if (plId == 3)
+			{
+				pl0300->set_pos_full(*get_char_pos(_pl0800));
+				*get_char_rot(pl0300->get_pl()) = *get_char_rot(_pl0800);
+				*(bool*)(_pl0800 + 0x4C6) = false;
+
+				set_pl0800_lock_on_to_pl0300(pl0300);
+				pl0300->set_hp(20000.0f);
+				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
+				{
+					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
+				}
+				change_pl0800_enable_state(false);
+				change_pl0300_enable_state(true);
+
+				if (_pl0800ResetStatusMethod != nullptr)
+					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
+				pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, _pl0800);
+				
+				if (_pl0300Accessor != nullptr)
+					PfbFactory::PrefabFactory::release(_pl0300Accessor);
+				_pl0300Accessor = _plAccessorTD->create_instance_full();
+				PfbFactory::PrefabFactory::add_ref(_pl0300Accessor);
+				auto uPlAcc = (uintptr_t)_pl0300Accessor;
+				*(uintptr_t*)(uPlAcc + 0x10) = pl0300->get_transform();
+				*(uintptr_t*)(uPlAcc + 0x18) = pl0300->get_pl();
+				_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0300Accessor);
+				_plCamCntrSetPlHook = std::make_unique<FunctionHook>(_plCamCntrlSetPlAddr, &pl_cam_cntrl_set_pl_hook, false);
+				_plCamCntrSetPlHook->create();
+			}
+			else
+			{
+				*(bool*)(_pl0800 + 0x4C6) = true;
+				auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF0);
+				if (pl0300PadInput != 0)
+				{
+					*(bool*)(pl0300PadInput + 0x24) = false;
+					*(bool*)(pl0300PadInput + 0x28) = false;
+				}
+
+				auto pl0800PadInput = *(uintptr_t*)(_pl0800 + 0xEF0);
+				if (pl0800PadInput != 0)
+					*(bool*)(pl0800PadInput + 0x24) = true;
+
+				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
+					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
+
+				gf::Transform_SetPosition::set_character_pos(_pl0800, pl0300->get_pl_pos());
+				*get_char_rot(_pl0800) = *get_char_rot(pl0300->get_pl());
+				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
+					pl0300->set_dt(PlCntr::DT::Human);
+				pl0300->end_cutscene();
+				change_pl0300_enable_state(false);
+				change_pl0800_enable_state(true);
+				_plCamCntrSetPlHook = nullptr;
+				PfbFactory::PrefabFactory::release(_pl0300Accessor);
+				_pl0300Accessor = nullptr;
+				/*if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
+				{
+					PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
+					_pl0300LockOnObj = nullptr;
+				}*/
+			}
+			_lastPlSwap = LastPlSwap::ViaCamSwap;
+
+		}
+
+		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true)
 		{
 			auto plManager = (uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
 			const auto pl0300 = _pl0300.lock();
@@ -486,13 +703,13 @@ private:
 			int* curPl = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager()));
 			if (curPl == nullptr)
 				return 0;
-			auto pl = plId == 4 ? _pl0800 : pl0300->get_pl0300();
+			auto pl = plId == 4 ? _pl0800 : pl0300->get_pl();
 			*curPl = plId;
 
 			if (plId == 4)
 			{
 				*(bool*)(_pl0800 + 0x4C6) = true;
-				auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl0300() + 0xEF0);
+				auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF0);
 				if (pl0300PadInput != 0)
 				{
 					*(bool*)(pl0300PadInput + 0x24) = false;
@@ -500,49 +717,45 @@ private:
 				}
 				auto pl0800PadInput = *(uintptr_t*)(_pl0800 + 0xEF0);
 				if (pl0800PadInput != 0)
-				{
 					*(bool*)(pl0800PadInput + 0x24) = true;
-				}
 				
 				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
-				{
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
-				}
-				
-				gf::Transform_SetPosition::set_character_pos(pl, pl0300->get_pl0300_pos());
-				*get_char_rot(pl) = *get_char_rot(pl0300->get_pl0300());
-				if (pl0300->get_cur_dt() == Pl0300Controller::Pl0300Controller::DT::SDT)
-					pl0300->set_dt(Pl0300Controller::Pl0300Controller::DT::Human);
+
+				gf::Transform_SetPosition::set_character_pos(pl, pl0300->get_pl_pos());
+				*get_char_rot(pl) = *get_char_rot(pl0300->get_pl());
+				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
+					pl0300->set_dt(PlCntr::DT::Human);
 				pl0300->end_cutscene();
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
+				/*if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
+				{
+					PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
+					_pl0300LockOnObj = nullptr;
+				}*/
 			}
 			else
 			{
 				pl0300->set_pos_full(*get_char_pos(_pl0800));
-				*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(pl);
+				*get_char_rot(pl0300->get_pl()) = *get_char_rot(pl);
 				*(bool*)(_pl0800 + 0x4C6) = false;
 
 				set_pl0800_lock_on_to_pl0300(pl0300);
-				*get_char_rot(pl0300->get_pl0300()) = *get_char_rot(pl);
 				pl0300->set_hp(20000.0f);
 				change_pl0800_enable_state(false);
 				change_pl0300_enable_state(true);
+				*get_char_rot(pl0300->get_pl()) = *get_char_rot(pl);
 				
 				if (_pl0800ResetStatusMethod != nullptr)
 				{
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
+					pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), _pl0800);
 				}
 				
 			}
 			*(uintptr_t*)(plManager + 0x60) = pl;
-
-			/*_plDoCharUpdateMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl0800);
-			_plDoCharUpdateMethod->call(sdk::get_thread_context(), (REManagedObject*)(pl0300->get_pl0300()));*/
-
-			//sdk::call_object_func_easy<void*>((REManagedObject*)missionSettingMngr, "doUpdate()");
-			//sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "updateManualPlayer()");
-			//sdk::call_object_func_easy<void*>((REManagedObject*)plManager, "doUpdate()");
+			_lastPlSwap = LastPlSwap::ViaPlId;
 			return pl;
 		}
 	};
@@ -577,16 +790,15 @@ private:
 	bool _isAirRaidAutoSetup = true;
 
 	bool _isTrickStabEnebled = true;
-	bool _useCustomTrickStabOffs = false;
 
-	Pl0300Controller::Pl0300Controller::DT _doppelsDtState = Pl0300Controller::Pl0300Controller::DT::Human;
+	PlCntr::DT _doppelsDtState = PlCntr::DT::Human;
 
-	Pl0300Controller::Pl0300Controller::HitControllerSettings _pl0300doppelsHCS;
-	Pl0300Controller::Pl0300Controller::HitControllerSettings _pl0300AirRaidHCS;
-	Pl0300Controller::Pl0300Controller::HitControllerSettings _pl0300TrickStabHCS;
+	PlCntr::HitControllerSettings _pl0300doppelsHCS;
+	PlCntr::HitControllerSettings _pl0300AirRaidHCS;
+	PlCntr::HitControllerSettings _pl0300TrickStabHCS;
 
-	Pl0300Controller::Pl0300Controller::TeleportTimingParams _defaultGameParams;
-	Pl0300Controller::Pl0300Controller::TeleportTimingParams _instantTeleportParams;
+	PlCntr::Pl0300Cntr::TeleportTimingParams _defaultGameParams;
+	PlCntr::Pl0300Cntr::TeleportTimingParams _instantTeleportParams;
 
 	static inline BossVergilMoves *_mod = nullptr;
 
@@ -598,9 +810,9 @@ private:
 
 	WitchTime* _wtMod = nullptr;
 
-	Pl0300Controller::Pl0300ControllerManager* _pl0300Manager = nullptr;
+	PlCntr::Pl0300Cntr::Pl0300ControllerManager* _pl0300Manager = nullptr;
 
-	Pl0300Controller::Pl0300Controller::AirRaidSettings _airRaidSettings{};
+	PlCntr::Pl0300Cntr::AirRaidSettings _airRaidSettings{};
 
 	volatile int* _loadStep = nullptr;
 
@@ -627,7 +839,7 @@ private:
 		if (*_loadStep == 2)
 			return;
 		auto startPos = *(gf::Vec3*)(missionSettingMngr + 0xB0);
-		auto pl0300 = _pl0300Manager->create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type::PlHelper, startPos, _loadStep, true);
+		auto pl0300 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, startPos, _loadStep, true);
 		if (pl0300.lock() == nullptr)
 			return;
 		VergilDoppelInitSetup::on_doppel_summon_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>
@@ -635,7 +847,6 @@ private:
 		_vergilsList.emplace_back(PlPair(0, pl0300, _inputSystem));
 		_isPl0300Loaded = true;
 		auto shared = pl0300.lock();
-		//shared->set_is_control(false);
 		shared->pl_manager_request_add();
 		shared->set_is_no_die(true);
 		_addPl0300Corutine.stop();
@@ -671,12 +882,20 @@ private:
 	{
 		_spawnerMod = static_cast<EnemySpawner*>(g_framework->get_mods()->get_mod("EnemySpawner"));
 		_inputSystem = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
-		_pl0300Manager = static_cast<Pl0300Controller::Pl0300ControllerManager*>(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
+		_pl0300Manager = static_cast<PlCntr::Pl0300Cntr::Pl0300ControllerManager*>(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
 		_vergilQSMod = static_cast<VergilQuickSilver*>(g_framework->get_mods()->get_mod("VergilQuickSilver"));
 		_wtMod = static_cast<WitchTime*>(g_framework->get_mods()->get_mod("WitchTime"));
 	}
 
-	uintptr_t get_em_params(const std::weak_ptr<Pl0300Controller::Pl0300Controller>& pl0300) const noexcept { return *(uintptr_t*)(pl0300.lock()->get_pl0300() + 0x1768); }
+	static uintptr_t get_pl_camera_controller()
+	{
+		auto camMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.CameraManager");
+		if (camMngr == 0)
+			return 0;
+		return *(uintptr_t*)(camMngr + 0x98);
+	}
+
+	uintptr_t get_em_params(const std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300) const noexcept { return *(uintptr_t*)(pl0300.lock()->get_pl() + 0x1768); }
 
 	//Fuuuuuuuuck this shit got called after any trainig reset
 	void on_pfb_manager_inited()
@@ -721,13 +940,8 @@ private:
 		{
 			if (_pl0300Manager != nullptr)
 			{
-				if (_vergilsList.size() > 0/* && !_vergilsList[_vergilsList.size() - 1].is_init()*/)
+				if (_vergilsList.size() > 0)
 				{
-					/*if (_isLastResetWasTraining)
-					{
-						_vergilsList.clear();
-						_vergilsList.emplace_back(PlPair(player, _pl0300Manager->create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type::PlHelper, gf::Vec3(), _loadStep, true), _inputSystem));
-					}*/
 					_vergilsList[_vergilsList.size() - 1]._pl0800 = player;
 					auto pl0300 = _vergilsList[_vergilsList.size() - 1]._pl0300.lock();
 					if (pl0300 == nullptr)
@@ -738,7 +952,7 @@ private:
 					pl0300->set_draw_self(false);
 					pl0300->enable_physics_char_controller(false);
 					pl0300->set_is_control(false);
-					_vergilsList[_vergilsList.size() - 1].set_init();
+					_vergilsList[0].on_pl_reload_reset();
 				}
 			}
 		}
@@ -781,7 +995,7 @@ private:
 							if (_isFirstDoppelUpdate)
 							{
 								_isFirstDoppelUpdate = false;
-								_defaultGameParams = doppel->get_teleport_timing_params().value_or(Pl0300Controller::Pl0300Controller::TeleportTimingParams{});
+								_defaultGameParams = doppel->get_teleport_timing_params().value_or(PlCntr::Pl0300Cntr::TeleportTimingParams{});
 							}
 							if (_useInstantDoppelsTeleports)//this params shared with main Vergil :(
 								doppel->set_teleport_timing_params(_instantTeleportParams);
@@ -841,7 +1055,7 @@ private:
 						float pl0800CurHp = pl0300->get_game_model_get_hp_method()->call<float>(threadCtxt, i._pl0800);
 						pl0800CurHp = pl0800CurHp >= 17000.0f ? 20000.0f : pl0800CurHp + 3000.0f;
 						pl0300->get_game_model_set_hp_method()->call(threadCtxt, i._pl0800, pl0800CurHp);
-						i.change_manual_pl(3);
+						i.change_pl_via_cam(threadCtxt, 3);
 						if (_mod->_isAirRaidAutoSetup)
 						{
 							auto pl0800GroundPos = get_ground_char_pos(i._pl0800);
@@ -886,11 +1100,12 @@ private:
 						if (*(int*)(plInfo + 0x10) == 3)
 							return false;
 					}
-					*(float*)(pl0800 + 0x1B50) -= 85.0f;
+					if(*(bool*)(pl0800 + 0xECA))
+						*(float*)(pl0800 + 0x1B50) -= 85.0f;
 					_mod->_vergilQSMod->request_end_quicksilver();
 					_mod->_wtMod->request_stop_witchtime();
 					i.change_manual_pl(3);
-					i.start_trick_stab(*get_char_pos(pl0800), _mod->_pl0300TrickStabHCS, _mod->_useCustomTrickStabOffs);
+					i.start_trick_stab(*get_char_pos(pl0800), _mod->_pl0300TrickStabHCS, _mod->_pl0300TrickType);
 					return false;
 				}
 			}
@@ -1035,7 +1250,6 @@ public:
 		_airRaidSettings.useSummonedSwords = cfg.get<bool>("BossVergilMoves._airRaidSettings.useSummonedSwords").value_or(false);
 		_pl0300AirRaidHCS.isAttackNoDie = cfg.get<bool>("BossVergilMoves._pl0300AirRaidHCS.isAttackNoDie").value_or(false);
 		_isTrickStabEnebled = cfg.get<bool>("BossVergilMoves._isTrickStabEnebled").value_or(true);
-		_useCustomTrickStabOffs = cfg.get<bool>("BossVergilMoves._useCustomTrickStabOffs").value_or(true);
 		_pl0300TrickStabHCS.isAttackNoDie = cfg.get<bool>("BossVergilMoves._pl0300TrickStabHCS.isAttackNoDie").value_or(false);
 
 		_doppelLifeTime = cfg.get<float>("BossVergilMoves._doppelLifeTime").value_or(850.0F);
@@ -1055,8 +1269,9 @@ public:
 		_airRaidHeightOnOutsideAutoOffs = cfg.get<float>("BossVergilMoves._airRaidHeightOnOutsideAutoOffs").value_or(5.5f);
 		_airRaidDistanceCheckGroundAutoOffs = cfg.get<float>("BossVergilMoves._airRaidDistanceCheckGroundAutoOffs").value_or(2.5f);
 
-		_doppelsDtState = (Pl0300Controller::Pl0300Controller::DT)cfg.get<int>("BossVergilMoves._doppelsDtState").value_or((int)Pl0300Controller::Pl0300Controller::DT::Human);
+		_doppelsDtState = (PlCntr::DT)cfg.get<int>("BossVergilMoves._doppelsDtState").value_or((int)PlCntr::DT::Human);
 		_airRaidSettings.attackNum = cfg.get<int>("BossVergilMoves._airRaidSettings.attackNum").value_or(4);
+		PlPair::_stabTrickUpdateType = (Pl0300TrickType)cfg.get<int>("BossVergilMoves::PlPair::_stabTrickUpdateType").value_or((int)Pl0300TrickType::InPlace);
 	}
 	void on_config_save(utility::Config& cfg) override
 	{
@@ -1071,7 +1286,6 @@ public:
 		cfg.set<bool>("BossVergilMoves._airRaidSettings.useOptionalTrick", _airRaidSettings.useOptionalTrick);
 		cfg.set<bool>("BossVergilMoves._airRaidSettings.useSummonedSwords", _airRaidSettings.useSummonedSwords);
 		cfg.set<bool>("BossVergilMoves._isTrickStabEnebled", _isTrickStabEnebled);
-		cfg.set<bool>("BossVergilMoves._useCustomTrickStabOffs", _useCustomTrickStabOffs);
 
 		cfg.set<float>("BossVergilMoves._doppelLifeTime", _doppelLifeTime);
 		cfg.set<float>("BossVergilMoves._doppelAttackRate", _doppelAttackRate);
@@ -1090,6 +1304,7 @@ public:
 
 		cfg.set<int>("BossVergilMoves._doppelsDtState", (int)_doppelsDtState);
 		cfg.set<float>("BossVergilMoves._airRaidSettings.attackNum", _airRaidSettings.attackNum);
+		cfg.set<int>("BossVergilMoves::PlPair::_stabTrickUpdateType", (int)PlPair::_stabTrickUpdateType);
 	}
 
 	// on_draw_ui() is called only when the gui shows up
@@ -1246,8 +1461,9 @@ public:
 			ImGui::Separator();
 
 			ImGui::TextWrapped("Stab settings ");
-			ImGui::Checkbox("Use non-game offsets for teleport", &_useCustomTrickStabOffs);
-			ImGui::ShowHelpMarker("Use offsets that will teleport Vergil closer to enemy.");
+			ImGui::TextWrapped("Stab teleport");
+			ImGui::RadioButton("To enemy", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::ToEnemy); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("In place", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::InPlace);
 		}
 		ImGui::ShowHelpMarker("Press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes some concetration value.");
 

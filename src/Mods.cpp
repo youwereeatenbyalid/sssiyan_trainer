@@ -364,7 +364,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
         m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
         m_mods.emplace_back(std::make_unique<EnemyFixes>());
-        m_mods.emplace_back(std::make_unique<Pl0300Controller::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods.
+        m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods.
         // Common
         m_mods.emplace_back(std::make_unique<LockOnNoHold>());
         m_mods.emplace_back(std::make_unique<WitchTime>());

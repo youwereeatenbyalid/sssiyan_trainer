@@ -775,9 +775,9 @@ public:
 	static inline float waitTimeMax = 0;
 	static inline float odds = 0;
     static inline float _artemisZInitOffs = 5.0f;
-	static inline const float divebombDistanceGroundCheck = 5.0f; // default = 5
-	static inline const float divebombHeightOfArenaSide = -1.5f; // default = 1.5
-	static inline const float divebombHeightOfOutside = 8.0f;// default = 8
+	static inline float divebombDistanceGroundCheck = 5.0f; // default = 5
+	static inline float divebombHeightOfArenaSide = -1.5f; // default = 1.5
+	static inline float divebombHeightOfOutside = 8.0f;// default = 8
 	//static float inline radiusOfArea = 15.0f;//43.0
 	//static float inline radiusOfRevolution = 35.0f;//80
 	static inline float cerberusThunderWaveZ = 0;
@@ -950,12 +950,12 @@ public:
         ImGui::ShowHelpMarker("Replace pre-coded divebomb position with boss's current coordinates.");
         if (isVergilFixEnabled)
         {
-           /* ImGui::TextWrapped("Height of arena sides  (default = 1.5)");
+            ImGui::TextWrapped("Offset for height of arena sides  (default = 1.5)");
             ImGui::InputFloat("##divebombHeightOfArenaSide", &divebombHeightOfArenaSide, 0, 0, "%.1f");
-            ImGui::TextWrapped("Height outside arena (default = 8)");
+            ImGui::TextWrapped("Offset for height outside arena (default = 8)");
             ImGui::InputFloat("##divebombHeightOfOutside", &divebombHeightOfOutside, 0, 0, "%.1f");
-            ImGui::TextWrapped("Distance from ground (default = 5)");
-            ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, "%.1f");*/
+            ImGui::TextWrapped("Offset for distance from ground (default = 5)");
+            ImGui::InputFloat("##divebombDistanceGroundCheck", &divebombDistanceGroundCheck, 0, 0, "%.1f");
             ImGui::Checkbox("Fast divebomb attack", &isFastDiveBombAttack);
             ImGui::ShowHelpMarker("Force Vergil to attack you earlier in the dive bomb. Vergil will also lock-on to you while flying making him harder to dodge. This can help if he starts infinitely flying in a circle.");
             ImGui::Separator();
@@ -1388,9 +1388,9 @@ public:
         nightmareStartPosOffs.x = cfg.get<float>("EnemyFixes.nightmareStartPosOffsX").value_or(135.83f);
         nightmareStartPosOffs.y = cfg.get<float>("EnemyFixes.nightmareStartPosOffsY").value_or(-112.45f);
         nightmareStartPosOffs.z = cfg.get<float>("EnemyFixes.nightmareStartPosOffsZ").value_or(82.784f);
-       /* divebombHeightOfArenaSide = cfg.get<float>("EnemyFixes.divebombHeightOfArenaSide").value_or(-95.5f);
-        divebombHeightOfOutside = cfg.get<float>("EnemyFixes.divebombHeightOfOutside").value_or(-95.0f);
-        divebombDistanceGroundCheck = cfg.get<float>("EnemyFixes.divebombDistanceGroundCheck").value_or(100.0f);*/
+        divebombHeightOfArenaSide = cfg.get<float>("EnemyFixes.divebombHeightOfArenaSide").value_or(-1.5f);
+        divebombHeightOfOutside = cfg.get<float>("EnemyFixes.divebombHeightOfOutside").value_or(8);
+        divebombDistanceGroundCheck = cfg.get<float>("EnemyFixes.divebombDistanceGroundCheck").value_or(5.0f);
         artemisCenterOfFloor.x = cfg.get<float>("EnemyFixes.artemisCenterOfFloorX").value_or(-368.0f);
         artemisCenterOfFloor.y = cfg.get<float>("EnemyFixes.artemisCenterOfFloorY").value_or(-308.5f);
         artemisCenterOfFloor.z = cfg.get<float>("EnemyFixes.artemisCenterOfFloorZ").value_or(1.15f);

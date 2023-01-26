@@ -2,7 +2,7 @@
 
 void EnemySpawner::after_all_inits()
 {
-	_pl0300Manager = (Pl0300Controller::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
+	_pl0300Manager = (PlCntr::Pl0300Cntr::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
 	_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
 	//GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<EnemySpawner>>(this, &EnemySpawner::on_pfb_inits));
 }
@@ -73,24 +73,24 @@ void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType lo
 			}
 			case FriendlyVergil:
 			{
-				auto em6000 = _pl0300Manager->create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type::Em6000Friendly, pos, loadStep);
+				auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly, pos, loadStep);
 				em6000.lock()->set_hitcontroller_settings(_hcNextSpawnSettings);
 				_em6000FriendlyList.push_back(em6000);
 				break;
 			}
 			case BOBVergil:
 			{
-				_em6000PlHelpersList.emplace_back(_pl0300Manager->create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type::PlHelper, pos, loadStep));
+				_em6000PlHelpersList.emplace_back(_pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, pos, loadStep));
 				auto pl0300 = _em6000PlHelpersList[_em6000PlHelpersList.size() - 1].lock();
 				pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
 				pl0300->set_em_step_enabled(_bobEmStep);
 				//pl0300->set_network_base_active(true);
 				pl0300->set_jcut_num(_bobJcNum);
 				pl0300->use_custom_trick_update(true);
-				pl0300->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<Pl0300Controller::Pl0300Controller>& pl0300, bool *skipOrig)
+				pl0300->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300, bool *skipOrig)
 					{
 						*skipOrig = true;
-						auto upl0300 = pl0300->get_pl0300();
+						auto upl0300 = pl0300->get_pl();
 						if (_mod->_inputSystemMod != nullptr && _mod->_inputSystemMod->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset))
 						{
 							*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
@@ -238,7 +238,7 @@ void EnemySpawner::on_draw_ui()
 		{
 			if (_pl0300Manager == nullptr)
 				return;
-			_pl0300Manager->set_pos_to_all(CheckpointPos::get_player_coords(), Pl0300Controller::Pl0300Controller::Pl0300Type::Em6000Friendly);
+			_pl0300Manager->set_pos_to_all(CheckpointPos::get_player_coords(), PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly);
 		}
 
 		ImGui::Spacing();
@@ -250,8 +250,7 @@ void EnemySpawner::on_draw_ui()
 			_pl0300Manager->kill_all_friendly_em6000();
 		}
 	}
-
-	/*
+	
 	if (ImGui::CollapsingHeader("Battle Of Brothers Vergils settings"))
 	{
 		ImGui::TextWrapped("Damage multiplier:");
@@ -292,7 +291,7 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 
-		if (_isPlSpawned == 22 && ImGui::Button("Kill all BOB Vergils"))
+		if (_isPlSpawned && ImGui::Button("Kill all BOB Vergils"))
 		{
 			if (_pl0300Manager == nullptr)
 				return;
@@ -304,5 +303,5 @@ void EnemySpawner::on_draw_ui()
 		ImGui::Spacing();
 	}
 	ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vegrgil(s) to your side.");
-	*/
+	
 }

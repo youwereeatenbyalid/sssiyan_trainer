@@ -21,7 +21,7 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	static inline Pl0300Controller::Pl0300Controller::TeleportTimingParams _teleportParams[3];//Fast, instant, custom
+	static inline PlCntr::Pl0300Cntr::TeleportTimingParams _teleportParams[3];//Fast, instant, custom
 	
 	static inline bool _useTeleportCheats = false;
 	static inline bool _useDoppelCheats = false;
@@ -103,7 +103,7 @@ public:
 		if (!isDoppel)
 		{
 			if (_useTeleportCheats)
-				*(Pl0300Controller::Pl0300Controller::TeleportTimingParams*)(teleportParams + 0x60) = _teleportParams[_teleportsState];
+				*(PlCntr::Pl0300Cntr::TeleportTimingParams*)(teleportParams + 0x60) = _teleportParams[_teleportsState];
 
 			if (_useDoppelCheats && doppelParams != 0)
 			{

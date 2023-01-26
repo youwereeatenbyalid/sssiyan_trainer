@@ -2,17 +2,17 @@
 #include "BossVergilSettings.hpp"
 #include "EnemyFixes.hpp"
 
-void Pl0300Controller::Pl0300ControllerManager::is_pl0300_controller_asm(uintptr_t threadCtxt, uintptr_t emManager, uintptr_t pl0300)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::is_pl0300_controller_asm(uintptr_t threadCtxt, uintptr_t emManager, uintptr_t pl0300)
 {
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300 && (i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper || i->get_pl0300_type() == Pl0300Controller::Pl0300Type::Em6000Friendly))
+        if (i->get_pl() == pl0300 && (i->get_pl0300_type() == Pl0300Type::PlHelper || i->get_pl0300_type() == Pl0300Type::Em6000Friendly))
             return;
     }
     ((_EmManager_RequestAddObj)_mod->requestAddEmFuncAddr)(threadCtxt, emManager, pl0300);
 }
 
-naked void Pl0300Controller::Pl0300ControllerManager::em6000_request_add_em_detour()
+naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_request_add_em_detour()
 {
     __asm
     {
@@ -39,17 +39,17 @@ naked void Pl0300Controller::Pl0300ControllerManager::em6000_request_add_em_deto
     }
 }
 
-bool Pl0300Controller::Pl0300ControllerManager::check_pl0300_asm(uintptr_t pl0300)
+bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_pl0300_asm(uintptr_t pl0300)
 {
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300)
+        if (i->get_pl() == pl0300)
             return true;
     }
     return false;
 }
 
-naked void Pl0300Controller::Pl0300ControllerManager::em6000_damage_check_detour()
+naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_damage_check_detour()
 {
     __asm
     {
@@ -75,13 +75,13 @@ naked void Pl0300Controller::Pl0300ControllerManager::em6000_damage_check_detour
     }
 }
 
-void Pl0300Controller::Pl0300ControllerManager::after_all_inits()
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::after_all_inits()
 {
     emSpawnerMod = (EnemySpawner*)g_framework->get_mods()->get_mod("EnemySpawner");
     //_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
 }
 
-void Pl0300Controller::Pl0300ControllerManager::reset(EndLvlHooks::EndType resetType)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType resetType)
 {
     if (resetType == EndLvlHooks::EndType::ResetTraining)
     {
@@ -101,22 +101,22 @@ void Pl0300Controller::Pl0300ControllerManager::reset(EndLvlHooks::EndType reset
         _pl0300List.clear();
 }
 
-void Pl0300Controller::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
 {
     _mod->_pl0300StartHook->get_original<decltype(Pl0300ControllerManager::pl0300_start_func_hook)>()(threadCntx, pl0300);
     //pl0300.Start() setting up many fields, so i need to reset it after Start() was called for controlled pl0300.
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300)
+        if (i->get_pl() == pl0300)
         {
             if (!i->_isStarted)
             {
                 i->_isStarted = true;
-                if (i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper && !i->is_keeping_original_pad_input())
+                if (i->get_pl0300_type() == Pl0300Type::PlHelper && !i->is_keeping_original_pad_input())
                 {
                     auto manualPl = *(uintptr_t*)((uintptr_t)(i->get_pl_manager()) + 0x60);
                     if (manualPl != 0)
-                        *(uintptr_t*)(i->get_pl0300() + 0xEF0) = *(uintptr_t*)(manualPl + 0xEF0);
+                        *(uintptr_t*)(i->get_pl() + 0xEF0) = *(uintptr_t*)(manualPl + 0xEF0);
                 }
 
                 if (i->_isHitCtrlDataSetRequested)
@@ -180,7 +180,7 @@ void Pl0300Controller::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t
     }
 }
 
-int Pl0300Controller::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintptr_t threadCntx, uintptr_t pl0300)
+int PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintptr_t threadCntx, uintptr_t pl0300)
 {
     if (EnemyFixes::cheaton && EnemyFixes::isFriendlyVergilAI)
     {
@@ -188,40 +188,40 @@ int Pl0300Controller::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintptr
     }
     for (const auto& pl0300Ctrl : _mod->_pl0300List)
     {
-        if (pl0300 != pl0300Ctrl->get_pl0300())
+        if (pl0300 != pl0300Ctrl->get_pl())
             continue;
-        if (auto plType = pl0300Ctrl->get_pl0300_type(); plType == Pl0300Controller::Pl0300Type::PlHelper || plType == Pl0300Controller::Pl0300Type::Em6000Friendly)
+        if (auto plType = pl0300Ctrl->get_pl0300_type(); plType == Pl0300Type::PlHelper || plType == Pl0300Type::Em6000Friendly)
             return 0x3E;
     }
     return _mod->_pl0300GetMissionHook->get_original<decltype(pl0300_get_mission_n_hook)>()(threadCntx, pl0300);
 }
 
-bool Pl0300Controller::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(uintptr_t threadCtxt, uintptr_t pl0300)
+bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
-    auto charGroup = *(Pl0300Controller::CharGroup*)(pl0300 + 0x108);
+    auto charGroup = *(CharGroup*)(pl0300 + 0x108);
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300 && i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper && charGroup == Pl0300Controller::CharGroup::Enemy)
+        if (i->get_pl() == pl0300 && i->get_pl0300_type() == Pl0300Type::PlHelper && charGroup == CharGroup::Enemy)
         {
-            i->change_character_group(Pl0300Controller::CharGroup::Player);
+            i->change_character_group(CharGroup::Player);
             break;
         }
     }
     bool res = _mod->_pl0300CheckDtCancelHook->get_original<decltype(pl0300_check_dt_cancel_hook)>()(threadCtxt, pl0300);
-    *(Pl0300Controller::CharGroup*)(pl0300 + 0x108) = charGroup;
+    *(CharGroup*)(pl0300 + 0x108) = charGroup;
     return res;
 }
 
-bool Pl0300Controller::Pl0300ControllerManager::check_em_think_off_hook(uintptr_t threadCtxt, uintptr_t character)
+bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintptr_t threadCtxt, uintptr_t character)
 {
     bool res = _mod->_checkEmThinkOffHook->get_original<decltype(check_em_think_off_hook)>()(threadCtxt, character);
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == character)
+        if (i->get_pl() == character)
         {
-            if (i->is_doppel() && i->get_pl0300_type() == Pl0300Controller::Pl0300Type::Em6000Friendly)
+            if (i->is_doppel() && i->get_pl0300_type() == Pl0300Type::Em6000Friendly)
                 return false;
-            else if (i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper)
+            else if (i->get_pl0300_type() == Pl0300Type::PlHelper)
                 return true;
         }
     }
@@ -229,28 +229,35 @@ bool Pl0300Controller::Pl0300ControllerManager::check_em_think_off_hook(uintptr_
     return res;
 }
 
-void Pl0300Controller::Pl0300ControllerManager::pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300 && i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+        if (i->get_pl() == pl0300 && i->get_pl0300_type() == Pl0300Type::PlHelper && i->get_char_group() == CharGroup::Enemy)
         {
-            i->change_character_group(Pl0300Controller::CharGroup::Player);
+            if (i->is_using_custom_lock_on_update() && i->_lock_on_update != nullptr)
+            {
+                bool skipOrig = false;
+                i->_lock_on_update(threadCtxt, i, &skipOrig);
+                if (skipOrig)
+                    return;
+            }
+            i->change_character_group(CharGroup::Player);
             _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
-            i->change_character_group(Pl0300Controller::CharGroup::Enemy);
+            i->change_character_group(CharGroup::Enemy);
             return;
         }
     }
     _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
 }
 
-void Pl0300Controller::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(uintptr_t threadCtxt, uintptr_t fsmPl0300Teleport)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(uintptr_t threadCtxt, uintptr_t fsmPl0300Teleport)
 {
     auto pl0300 = *(uintptr_t*)(fsmPl0300Teleport + 0x60);
     for (const auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl0300() == pl0300 && i->is_using_custom_trick_update() && i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper && 
-            i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+        if (i->get_pl() == pl0300 && i->is_using_custom_trick_update() && i->get_pl0300_type() == Pl0300Type::PlHelper && 
+            i->get_char_group() == CharGroup::Enemy)
         {
             bool skipOrig = false;
             i->_trick_update(fsmPl0300Teleport, i, &skipOrig);
@@ -259,7 +266,7 @@ void Pl0300Controller::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(u
             else
             {
                 auto groupTmp = i->get_char_group();
-                i->change_character_group(Pl0300Controller::CharGroup::Enemy);
+                i->change_character_group(CharGroup::Enemy);
                 _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
                 i->change_character_group(groupTmp);
                 return;
@@ -270,32 +277,32 @@ void Pl0300Controller::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(u
     _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
 }
 
-//void Pl0300Controller::Pl0300ControllerManager::pl0300_on_change_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
+//void PlController::Pl0300Controller::Pl0300ControllerManager::pl0300_on_change_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
 //{
 //    for (const auto& i : _mod->_pl0300List)
 //    {
-//        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+//        if (pl0300 == i->get_pl() && i->get_char_group() == CharGroup::Enemy)
 //            return;
 //    }
 //    _mod->_pl0300OnChangePlayerActionFromThinkHook->get_original<decltype(pl0300_on_change_pl_action_from_think)>()(threadCtxt, pl0300);
 //}
 
-//void Pl0300Controller::Pl0300ControllerManager::pl0300_on_prepare_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
+//void PlController::Pl0300Controller::Pl0300ControllerManager::pl0300_on_prepare_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
 //{
 //    for (const auto& i : _mod->_pl0300List)
 //    {
-//        if (pl0300 == i->get_pl0300() && i->get_char_group() == Pl0300Controller::CharGroup::Enemy)
+//        if (pl0300 == i->get_pl() && i->get_char_group() == CharGroup::Enemy)
 //            return;
 //    }
 //    _mod->_pl0300OnPreparePlayerActionFromThinkHook->get_original<decltype(pl0300_on_prepare_pl_action_from_think)>()(threadCtxt, pl0300);
 //}
 
-Pl0300Controller::Pl0300ControllerManager::Pl0300ControllerManager()
+PlCntr::Pl0300Cntr::Pl0300ControllerManager::Pl0300ControllerManager()
 {
     _mod = this;
 }
 
-bool Pl0300Controller::Pl0300ControllerManager::destroy_game_obj(const std::weak_ptr<Pl0300Controller> &obj)
+bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::weak_ptr<Pl0300Controller> &obj)
 {
     auto elevated = obj.lock();
     if (elevated == nullptr)
@@ -317,7 +324,7 @@ bool Pl0300Controller::Pl0300ControllerManager::destroy_game_obj(const std::weak
     return false;
 }
 
-std::weak_ptr<Pl0300Controller::Pl0300Controller> Pl0300Controller::Pl0300ControllerManager::create_em6000(Pl0300Controller::Pl0300Controller::Pl0300Type controllerType, gf::Vec3 pos, 
+std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300ControllerManager::create_em6000(Pl0300Type controllerType, gf::Vec3 pos, 
     volatile int *&loadStepOut, bool isKeepingOrigPadInput)
 {
     auto pl0300GameObj = emSpawnerMod->spawn_enemy(38, pos, loadStepOut);
@@ -333,53 +340,53 @@ std::weak_ptr<Pl0300Controller::Pl0300Controller> Pl0300Controller::Pl0300Contro
     {
         return std::weak_ptr<Pl0300Controller>();
     }
-    if (controllerType == Pl0300Controller::Pl0300Type::PlHelper)
+    if (controllerType == Pl0300Type::PlHelper)
     {
-        *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl0300() + 0x4C6) = true;//isControl
-        *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl0300() + 0x17E0) = false;//IsEnemy
+        *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl() + 0x4C6) = true;//isControl
+        *(bool*)(_pl0300List[_pl0300List.size() - 1]->get_pl() + 0x17E0) = false;//IsEnemy
         auto manualPl = *(uintptr_t*)((uintptr_t)_pl0300List[_pl0300List.size() - 1]->get_pl_manager() + 0x60);
         if(manualPl != 0)
-            *(uintptr_t*)(_pl0300List[_pl0300List.size() - 1]->get_pl0300() + 0xEF0) = *(uintptr_t*)(manualPl + 0xEF0);
+            *(uintptr_t*)(_pl0300List[_pl0300List.size() - 1]->get_pl() + 0xEF0) = *(uintptr_t*)(manualPl + 0xEF0);
     }
     return std::weak_ptr<Pl0300Controller>(_pl0300List[_pl0300List.size() - 1]);
 }
 
-std::weak_ptr<Pl0300Controller::Pl0300Controller> Pl0300Controller::Pl0300ControllerManager::register_doppelganger(const Pl0300Controller* controllerOwner)
+std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300ControllerManager::register_doppelganger(const Pl0300Controller* controllerOwner)
 {
     if (controllerOwner == nullptr || controllerOwner->get_doppel() == 0)
         return std::weak_ptr<Pl0300Controller>();
     std::shared_ptr<Pl0300Controller> owner;
     for (const auto& i : _pl0300List)
     {
-        if (i->get_pl0300() == controllerOwner->get_doppel())//Doppel already summoned
+        if (i->get_pl() == controllerOwner->get_doppel())//Doppel already summoned
             return std::weak_ptr<Pl0300Controller>();
         
     }
     int indx = 0;
     for (int i = 0; i < _pl0300List.size(); i++)
     {
-        if (_pl0300List[i]->get_pl0300() == controllerOwner->get_doppel())//Doppel already summoned
+        if (_pl0300List[i]->get_pl() == controllerOwner->get_doppel())//Doppel already summoned
             return std::weak_ptr<Pl0300Controller>();
         if (_pl0300List[i].get() == controllerOwner)
             indx = i;
     }
-    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Controller::Pl0300Type::Em6000Friendly));
+    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly));
     _pl0300List.push_back(doppel);
     doppel->_owner = std::weak_ptr<Pl0300Controller>(_pl0300List[indx]);
     return std::weak_ptr<Pl0300Controller>(doppel);
 }
 
-void Pl0300Controller::Pl0300ControllerManager::remove_doppelganger(const Pl0300Controller* doppelController)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppelganger(const Pl0300Controller* doppelController)
 {
     if (doppelController == nullptr || !doppelController->is_doppel())
         return;
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj)
         {
-            return obj->get_pl0300() == doppelController->get_pl0300();
+            return obj->get_pl() == doppelController->get_pl();
         }), _pl0300List.end());
 }
 
-void Pl0300Controller::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, Pl0300Controller::Pl0300Type type)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, Pl0300Type type)
 {
     for (const auto& i : _pl0300List)
     {
@@ -388,16 +395,16 @@ void Pl0300Controller::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, Pl0
     }
 }
 
-void Pl0300Controller::Pl0300ControllerManager::kill_all_friendly_em6000()
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::kill_all_friendly_em6000()
 {
-    _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj) {return obj->get_pl0300_type() == Pl0300Controller::Pl0300Type::Em6000Friendly; }), _pl0300List.end());
+    _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj) {return obj->get_pl0300_type() == Pl0300Type::Em6000Friendly; }), _pl0300List.end());
 }
 
-void Pl0300Controller::Pl0300ControllerManager::on_pl_pad_input_reset(uintptr_t pl, bool isAutoPad, bool* callOrig)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_pl_pad_input_reset(uintptr_t pl, bool isAutoPad, bool* callOrig)
 {
     for (const auto& i : _pl0300List)
     {
-        if (!i->is_keeping_original_pad_input() && i->get_pl0300_type() == Pl0300Controller::Pl0300Type::PlHelper && pl == i->get_pl0300())
+        if (!i->is_keeping_original_pad_input() && i->get_pl0300_type() == Pl0300Type::PlHelper && pl == i->get_pl())
         {
             auto manualPl = *(uintptr_t*)((uintptr_t)(i->get_pl_manager()) + 0x60);
             if (manualPl != 0)
@@ -410,7 +417,7 @@ void Pl0300Controller::Pl0300ControllerManager::on_pl_pad_input_reset(uintptr_t 
     }
 }
 
-std::optional<std::string> Pl0300Controller::Pl0300ControllerManager::on_initialize()
+std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initialize()
 {
     init_check_box_info();
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -529,6 +536,6 @@ std::optional<std::string> Pl0300Controller::Pl0300ControllerManager::on_initial
     return Mod::on_initialize();
 }
 
-void Pl0300Controller::Pl0300ControllerManager::on_draw_ui()
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_draw_ui()
 {
 }
