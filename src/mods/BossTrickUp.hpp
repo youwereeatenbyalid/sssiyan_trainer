@@ -215,8 +215,7 @@ public:
 		m_on_page = Page_VergilTrick;
 		m_full_name_string = "Boss's Trick Up (+)";
 		m_author_string = "V.P.Zadov, SSSiyan";
-		m_description_string = "Lock on + forward + trick will instantly teleport Vergil up to enemy head like boss Vergil trick up works. Trick up without lock on works like it works by default. "
-		"Can send you out of bounds. Sometimes trick up sound is missing after teleport. Doesn't work vs Nidhogg.";
+		m_description_string = "Lock on + forward + trick will instantly teleport Vergil directly above the enemies head, similarly to how Boss Vergil teleports. Trick-up without lock on works as normal.";
 
 		set_up_hotkey();
 
@@ -260,13 +259,16 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override 
 	{
+		if (ImGui::CollapsingHeader("Issues")) {
+			ImGui::TextWrapped("This mod can send you out of bounds.\n Sometimes the trick up sound doesn't play after teleporting.\nDoesn't work vs Nidhogg.");
+		};
 		ImGui::TextWrapped("Height offset:");
 		UI::SliderFloat("##zOffs", &zOffs, 3.0f, 8.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::TextWrapped("Front distance offset:");
+		ImGui::TextWrapped("Horizontal offset:");
 		UI::SliderFloat("##distOffs", &distanceOffs, 0.2f, 4.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::TextWrapped("Left stick forward angle threshold:");
 		UI::SliderFloat("##angleForwardThreshold", &angleForwardThreshold, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Auto come back doppel after trick up teleport", &isDoppelComeBack);
+		ImGui::Checkbox("Doppelganger auto-return after boss trick", &isDoppelComeBack);
 	}
 };
 //clang-format on

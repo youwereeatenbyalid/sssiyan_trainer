@@ -69,7 +69,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteCheat;
-		m_full_name_string = "Force RG Release Type";
+		m_full_name_string = "Set Royal Guard Release Type (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Always perform just release or royal release.";
 

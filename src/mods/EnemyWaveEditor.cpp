@@ -412,7 +412,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   m_on_page           = Page_Encounters;
   m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "V.P.Zadov";
-  m_description_string = "Actually enemy list swapper for now. Swap game's enemies lists with yours own. Uses spawn animation and position from original enemy list.";
+  m_description_string = "Replace a mission's set of encounters with your own. Uses the spawn animation and position from the original mission.";
 
   auto emDataLstAddr = m_patterns_cache->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
   if (!emDataLstAddr) {
@@ -494,7 +494,7 @@ void EnemyWaveEditor::on_draw_ui() {
   switch (mode) {
   case EnemyWaveEditor::Mod: 
   {
-    ImGui::ShowHelpMarker("Create custom enemy lists for swap its with originals game's lists.");
+    ImGui::ShowHelpMarker("Create custom enemy lists to swap with the originals game's lists.");
     ImGui::Separator();
     if (ImGui::CollapsingHeader("How-to-use & Current issues"))
     {
@@ -564,7 +564,7 @@ void EnemyWaveEditor::on_draw_ui() {
         "Also always prees this after beat cat/parrot/Dante in completed enemy wave.");
     }
     //ImGui::Spacing();
-    ImGui::ShowHelpMarker("Well, you need to press this buttons manually.");
+    ImGui::ShowHelpMarker("Use these buttons to troubleshoot if something goes wrong.");
     ImGui::Separator();
 
     if (prflManager->is_custom_gamemode())
@@ -578,9 +578,9 @@ void EnemyWaveEditor::on_draw_ui() {
     }
     else
     {
-        if (ImGui::CollapsingHeader("Wave editor ranomizer"))
+        if (ImGui::CollapsingHeader("Wave editor randomizer"))
         {
-            ImGui::TextWrapped("Enemies that can be randommed to waves (click on enemy to select/remove):");
+            ImGui::TextWrapped("Enemies that can appear in randomized missions (click on enemy to select/remove):");
             rndWaveGen->show_enemy_selection();
             ImGui::Spacing();
             rndWaveGen->print_settings();

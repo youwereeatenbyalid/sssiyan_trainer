@@ -242,7 +242,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	m_on_page = Page_Enemies;
 	m_full_name_string = "Boss Dante settings (+)";
 	m_author_string = "V.P.Zadov";
-	m_description_string = "Modifies the properties of the Enemy Dante Boss. Vergil's nightmare begins here.";
+	m_description_string = "Modifies the properties of the Dante boss fight. Vergil's nightmare begins here.";
 
 	auto dtAddr = m_patterns_cache->find_addr(base, "80 7E 20 00 0F 84 01 02 00 00"); // DevilMayCry5.exe+19C34A9
 

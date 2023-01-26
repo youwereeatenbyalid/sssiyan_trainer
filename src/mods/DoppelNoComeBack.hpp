@@ -102,9 +102,9 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilDoppel;
-		m_full_name_string = "Doppelganger no auto come back";
+		m_full_name_string = "Disable doppelganger auto-return";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Disable doppelganger's auto come back based of distance restriction or after perfect JC.";
+		m_description_string = "Disable the doppelganger automatically returning after a just JdC or when it gets too far away from Vergil.";
 
 		set_up_hotkey();
 
@@ -169,8 +169,8 @@ public:
 	// you are in the imgui window here.
 	void on_draw_ui() override
 	{
-		ImGui::Checkbox("By distance", &byDistance);
-		ImGui::Checkbox("By perfect JC", &byJC);
+		ImGui::Checkbox("Disable auto-return after traveling too far away from Vergil", &byDistance);
+		ImGui::Checkbox("Disable auto-return after a just JdC.", &byJC);
 	}
 };
 //clang-format on

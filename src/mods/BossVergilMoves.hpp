@@ -1188,8 +1188,8 @@ public:
 		m_on_page = Page_VergilTrick;
 		m_full_name_string = "Boss Vergil Moves WIP (+)";
 		m_author_string = "V.P. Zadov";
-		m_description_string = "Add some boss Vergil's moves to player Vergil. This mod spawns and setup enemy Vergil and must be enabled before you enter the mission/bp. \"New\" moves can't hit boss "
-			"himself. \nPress \"Reset camera\" + \"Change lock on\" when boss active to force end move and swap to player Vergil.\nMod really junk, can softlock or crash your game.";
+		m_description_string = "Adds some of boss Vergil's moves to playable Vergil. Must be enabled before entering a mission. "
+			"if something goes wrong during a boss move, press \"Reset camera\" + \"Change lock on\" to forcefully end the move.\nThis mod is currently in beta, see the issues tab for more details.";
 
 		//set_up_hotkey();
 
@@ -1315,20 +1315,23 @@ public:
 		{
 			ImGui::TextWrapped
 			(
-				"Banish of any pl0300 include doppel breaks the camera for boss traking and input system when he is selected as main character;\n\n"
-				"Boss can selects random enemy as target;\n\n"
-				"Air Raid can send you out of bounds;\n\n"
-				"Air Raid can go complitelly wrong and Vergil will fly to idk, another DMC game probably...\n\n"
-				"Enemy wave can be forcelly ended if Vergil fly too far with Air Raid;\n\n"
-				"Sometimes moves doesn't starts :/\n\n"
-				"Changing DT state of boss Vergil crash the game if there are currently more than 10 characters in the arena (it's game's default behavior caused by some "
-				"graphic resources loading stuff, ty cumpcom. Same things with boss spawning). I \"fixed\" that, but you may have some visual glitches on boss for a few seconds;\n\n"
-				"Urizen's spikes can knock out Vergil from concentration state;\n\n"
-				"Trick stab doesn't have \"physics\" hitbox (yet it still deals damage) for non-player objects;\n\n"
-				"Trick stab could be reseted due terrain's hitboxes;\n\n"
-				"In bloody palace boss will be spawned with different costume;\n\n"
-				"Air Raid on LDK can break enemy hitboxes untill misison restart;"
-			);
+				"This mod can can softlock or crash your game."
+				//"\"New\" moves can't hit boss himself.\n"
+				"Banishing the boss doppelganger or deleting any spawned-in boss Vergil's will break camera tracking during a boss move.\n"
+				"The camera will briefly flicker when banishing a doppelganger.\n"
+				"Boss moves can select random enemies as target.\n"
+				"Air Raid can send you out of bounds.\n"
+				"Air Raid can send you severely out of bounds and Vergil will fly off to a better DMC game.\n"
+				"The current enemy wave can be forcelly ended if Vergil flies too far away with Air Raid.\n"
+				"Sometimes moves will not start.\n"
+				"Changing the Devil Trigger state while doing a boss move will crash the game if there are currently more than 10 bosses in an arena. "
+				"I \"fixed\" that, but there may be some visual glitches on bosses for a few seconds.\n"
+				"Urizen's spikes can knock Vergil out from his concentration state.\n" //more details on this one please.
+				"Trick stab doesn't knock the enemy back (but it still deals damage).\n"
+				"Trick stab can end early if it collides with the terrain.\n"
+				"In bloody palace, vergil's outfit will change when performing a boss move.\n"
+				"Air Raid on LDK can break enemy hitboxes until the mission restarts."
+				);
 		}
 
 		if(ImGui::CollapsingHeader("Boss's Doppelganger"))
@@ -1347,40 +1350,39 @@ public:
 				}
 				ImGui::EndCombo();
 			}
-			ImGui::ShowHelpMarker("Summon boss's doppel when pressing on selected delay button. Press button again when boss's doppel is active to remove it.");
+			ImGui::ShowHelpMarker("Summon the boss's doppelganger when pressing on the selected delay button. Press again when the boss's doppelganger is active to banish it.");
 
-			ImGui::TextWrapped("Doppel's attack rate");
+			ImGui::TextWrapped("Doppelganger attack rate");
 			UI::SliderFloat("##DoppelsAttackRate", &_doppelAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 			ImGui::Separator();
 
-			ImGui::Checkbox("Use \"enhanced\" hit controller settings instead of just attack rate:", &_useEnhancedDoppelsHCSettings);
-			ImGui::TextWrapped("Doppel's damage multiplier:");
+			ImGui::Checkbox("Use \"enhanced\" hit controller settings instead of just the attack rate:", &_useEnhancedDoppelsHCSettings);
+			ImGui::TextWrapped("Doppelganger damage multiplier:");
 			ImGui::InputFloat("##DoppelsHCAttackRate", &(_pl0300doppelsHCS.baseAttackRate), 0.05f, 0.5f, "%.2f", 1.0f);
-			ImGui::Checkbox("Doppel can't kill enemy", &_pl0300doppelsHCS.isAttackNoDie);
+			ImGui::Checkbox("Doppelganger can't kill enemy", &_pl0300doppelsHCS.isAttackNoDie);
 
 			ImGui::Separator();
 
-			ImGui::Checkbox("Auto disapper", &_isDoppelsAutoDestroy);
-			ImGui::TextWrapped("Auto disappear time:");
+			ImGui::Checkbox("Auto-banish doppelganger", &_isDoppelsAutoDestroy);
+			ImGui::TextWrapped("Time until doppelganger will automatically be banished");
 			UI::SliderFloat("##DoppelAutoDestroyTime", &_doppelLifeTime, 600.0f, 1200.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
 			ImGui::Separator();
 
-			ImGui::Checkbox("Scale boss's doppel's size like player's", &_isNeedToScaleDoppel);
+			ImGui::Checkbox("Scale doppelganger size to Vergil's current size.", &_isNeedToScaleDoppel);
 
 			ImGui::Separator();
 
-			ImGui::TextWrapped("Doppel mode:");
+			ImGui::TextWrapped("Doppelganger form:");
 			ImGui::RadioButton("Human", (int*)&_doppelsDtState, 0); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("SDT", (int*)&_doppelsDtState, 2);
 
 			ImGui::Separator();
 
-			ImGui::Checkbox("Use instant teleports", &_useInstantDoppelsTeleports);
+			ImGui::Checkbox("Instant doppelganger tricks", &_useInstantDoppelsTeleports);
 		}
-		ImGui::ShowHelpMarker("Spend 3 dt points to summon boss's version of doppelganger instead of player's which will fight by his own. His AI depends of current game's difficulty. I can't completely fix "
-			"camera flex on disappear :(");
+		ImGui::ShowHelpMarker("Spend 3 DT bars to summon the boss's version of the doppelganger instead of the player's. The doppelganger will fight by itself, and its AI depends on the missions current difficulty.");
 
 		if (ImGui::CollapsingHeader("Air Raid"))
 		{
@@ -1397,9 +1399,9 @@ public:
 			ImGui::Spacing();
 
 			ImGui::Separator();
-			ImGui::TextWrapped("Ground check settings:");
+			ImGui::TextWrapped("Arena detection settings:");
 
-			ImGui::Checkbox("Try to figure out ground settings automatically", &_isAirRaidAutoSetup);
+			ImGui::Checkbox("Automatically determine the size and shape of the arena. Used to determine where the Air Raid should travel.", &_isAirRaidAutoSetup);
 			if (_isAirRaidAutoSetup)
 			{
 				ImGui::Spacing();
@@ -1425,29 +1427,29 @@ public:
 
 			ImGui::Separator();
 
-			ImGui::TextWrapped("Radius of revolution (default - 80):");
+			ImGui::TextWrapped("Radius of revolution (default - 80):"); //what is radius of revolution?
 			UI::SliderFloat("##_airRaidSettings.radiusOfRevolution", &_airRaidSettings.radiusOfRevolution, 2.0f, 100.0f, "%.2f");
 
 			ImGui::TextWrapped("Radius of the area (default - 43):");
 			ImGui::InputFloat("##_airRaidSettings.radiusOfArea", &_airRaidSettings.radiusOfArea, 2.0f, 43.0f, "%.2f");
 
-			ImGui::TextWrapped("Radius of the finish attack (default - 5):");
+			ImGui::TextWrapped("Radius of the finish attack (default - 5):"); //what does radius of finish attack mean?
 			UI::SliderFloat("##_airRaidSettings.radiusFinishAttack", &_airRaidSettings.radiusFinishAttack, 0.5f, 5.0f, "%.2f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
-			ImGui::TextWrapped("Concentration time:");
+			ImGui::TextWrapped("Startup time:");
 			UI::SliderFloat("##_airRaidSettings.secConcentrate", &_airRaidSettings.secConcentrate, 0.5f, 3.5f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
-			ImGui::TextWrapped("Attack num:");
+			ImGui::TextWrapped("Number of dive-bomb passes:");
 			ImGui::ShowHelpMarker("Other settings may affect this in-game.");
 			UI::SliderInt("##_airRaidSettings.attackNum", &_airRaidSettings.attackNum, 1, 10);
 
-			ImGui::Checkbox("Use summoned swords", &_airRaidSettings.useSummonedSwords);
-			ImGui::Checkbox("Optional trick on last attack", &_airRaidSettings.useOptionalTrick);
+			ImGui::Checkbox("Spawn summon swords on enemies during air raid", &_airRaidSettings.useSummonedSwords);
+			ImGui::Checkbox("Perform trick on final dive-bomb", &_airRaidSettings.useOptionalTrick);
 
 			ImGui::Spacing();
 		}
-		ImGui::ShowHelpMarker("Instead of performing Deep Stinger in human form, Vergil will slightly heals, restore full concentration and perform Air Raid. He invulnerable in this state, "
-			"except for Dante's royal release or judgement attacks. Requests at least half of SDT gauge.");
+		ImGui::ShowHelpMarker("Instead of performing Deep Stinger in human form, Vergil slightly heals, restores full concentration and performs Air Raid. He invulnerable in this state, "
+			"except for Dante's royal release or judgement attacks. Requires half of the SDT gauge.");
 
 		if (ImGui::CollapsingHeader("Trick Stab"))
 		{
@@ -1465,14 +1467,15 @@ public:
 			ImGui::RadioButton("To enemy", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::ToEnemy); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("In place", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::InPlace);
 		}
-		ImGui::ShowHelpMarker("Press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes some concetration value.");
+		ImGui::ShowHelpMarker("Press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes concentration on use.");
 
-		if (ImGui::CollapsingHeader("Load info"))
+		if (ImGui::CollapsingHeader("Load info:"))
 		{
 			ImGui::TextWrapped("Is em6000 pfb found: %d", _isEm6000PfbFound);
 			ImGui::TextWrapped("Is pl0300 loaded: %d", _isPl0300Loaded);
 			ImGui::TextWrapped("Is pl0800 check command hook installed: %d", _isPl0800CheckCommHookInstalled);
 		}
+		ImGui::ShowHelpMarker("If any of these values are false, the mod will not work.");
 
 		ImGui::Spacing();
 		/*UI::SliderInt("_PlId", &_curPlId, 3, 4, "%d", 1.0f, ImGuiSliderFlags_AlwaysClamp);
@@ -1492,12 +1495,12 @@ public:
 
 		ImGui::Spacing();*/
 
-		if (ImGui::Button("Force end boss's moves and swap to player Vergil"))
+		if (ImGui::Button("Force end boss's moves."))
 		{
 			for (auto& i : _vergilsList)
 				i.force_end_moves();
 		}
-		ImGui::ShowHelpMarker("Press this if smth goes wrong and boss just stays afk or once again flying Moscow - Odessa... "
+		ImGui::ShowHelpMarker("Press this if something goes wrong during a boss move."
 			"You can also do this during gameplay by pressing \"Reset camera\" + \"Change lock on\".");
 		ImGui::Spacing();
 	}
