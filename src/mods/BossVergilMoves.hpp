@@ -1271,7 +1271,7 @@ public:
 
 		_doppelsDtState = (PlCntr::DT)cfg.get<int>("BossVergilMoves._doppelsDtState").value_or((int)PlCntr::DT::Human);
 		_airRaidSettings.attackNum = cfg.get<int>("BossVergilMoves._airRaidSettings.attackNum").value_or(4);
-		PlPair::_stabTrickUpdateType = (Pl0300TrickType)cfg.get<int>("BossVergilMoves::PlPair::_stabTrickUpdateType").value_or((int)Pl0300TrickType::InPlace);
+		PlPair::_stabTrickUpdateType = (Pl0300TrickType)cfg.get<int>("BossVergilMoves::PlPair::_stabTrickUpdateType").value_or((int)Pl0300TrickType::ToEnemy);
 	}
 	void on_config_save(utility::Config& cfg) override
 	{

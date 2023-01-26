@@ -330,7 +330,7 @@ namespace PlCntr
 			void update_em_teleport(bool isFirst = false)
 			{
 				if (_pl0300UpdateEmTeleportMethod != nullptr)
-					_pl0300UpdateEmTeleportMethod->call(sdk::get_thread_context(), isFirst);
+					_pl0300UpdateEmTeleportMethod->call(sdk::get_thread_context(), get_pl(), isFirst);
 			}
 
 			void set_hitcontroller_settings(HitControllerSettings settings) override
