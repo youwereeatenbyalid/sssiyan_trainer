@@ -1467,7 +1467,7 @@ public:
 			ImGui::RadioButton("To enemy", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::ToEnemy); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("In place", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::InPlace);
 		}
-		ImGui::ShowHelpMarker("Press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes concentration on use.");
+		ImGui::ShowHelpMarker("When Yamato selected, press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes concentration on use.");
 
 		if (ImGui::CollapsingHeader("Load info:"))
 		{
