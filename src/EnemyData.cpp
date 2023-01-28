@@ -22,6 +22,8 @@ int EnemyData::id_to_indx(int emId) noexcept
 
 EnemyData::EnemyId EnemyData::get_em_id(uintptr_t enemy)
 {
+	if (enemy == 0)
+		return None;
 	uint32_t classIndex = ((REManagedObject*)enemy)->info->classInfo->type->classIndex;
 	switch (classIndex)
 	{
