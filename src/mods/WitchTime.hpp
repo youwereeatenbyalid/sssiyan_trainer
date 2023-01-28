@@ -27,6 +27,8 @@ private:
 	bool _isEfxCreate = false;
 	bool _pl0000WTTableHopperOnly = false;
 
+	std::mutex _mtx;
+
 	void reset(EndLvlHooks::EndType type) override
 	{
 		if (_isInited)
@@ -70,7 +72,7 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	void on_pl_just_escape(uintptr_t threadCtxt, uintptr_t pl, uintptr_t hitCntrl)
+	void on_pl_just_escape(uintptr_t threadCtxt, uintptr_t pl, uintptr_t hitInfo)
 	{
 		if (!cheaton || pl == 0 || *(int*)(pl + 0x108) == 1 || !_isInited || _qsController->is_started() || _activationDelayCoroutine.is_started())
 			return;
@@ -82,48 +84,48 @@ private:
 		{
 			switch (plId)
 			{
-				case 0:
-				{
-					if (!PlSetActionData::cmp_real_cur_action("TableHopperRightLv3") && !PlSetActionData::cmp_real_cur_action("TableHopperLeftLv3"))
-						return;
-					break;
-				}
-
-				case 2:
-				{
-					if (!PlSetActionData::cmp_real_cur_action("ShadowAvoidLeft") && !PlSetActionData::cmp_real_cur_action("ShadowAvoidRight"))
-						return;
-					break;
-				}
-
-				default:
+			case 0:
+			{
+				if (!PlSetActionData::cmp_real_cur_action("TableHopperRightLv3") && !PlSetActionData::cmp_real_cur_action("TableHopperLeftLv3"))
 					return;
+				break;
+			}
+
+			case 2:
+			{
+				if (!PlSetActionData::cmp_real_cur_action("ShadowAvoidLeft") && !PlSetActionData::cmp_real_cur_action("ShadowAvoidRight"))
+					return;
+				break;
+			}
+
+			default:
+				return;
 			}
 		}
 		switch (plId)
 		{
-			case 0:
-			{
-				_slowWorldLifeTimeCoroutine.set_delay(_neroSlowShellLifeTime * 10.0f);
-				break;
-			}
-			case 1:
-			{
-				_slowWorldLifeTimeCoroutine.set_delay(_danteSlowShellLifeTime * 10.0f);
-				break;
-			}
-			case 2:
-			{
-				_slowWorldLifeTimeCoroutine.set_delay(_vSlowShellLifeTime * 10.0f);
-				break;
-			}
-			case 4:
-			{
-				_slowWorldLifeTimeCoroutine.set_delay(_vergilPlSlowShellLifeTime * 10.0f);
-				break;
-			}
-			default:
-				break;
+		case 0:
+		{
+			_slowWorldLifeTimeCoroutine.set_delay(_neroSlowShellLifeTime * 10.0f);
+			break;
+		}
+		case 1:
+		{
+			_slowWorldLifeTimeCoroutine.set_delay(_danteSlowShellLifeTime * 10.0f);
+			break;
+		}
+		case 2:
+		{
+			_slowWorldLifeTimeCoroutine.set_delay(_vSlowShellLifeTime * 10.0f);
+			break;
+		}
+		case 4:
+		{
+			_slowWorldLifeTimeCoroutine.set_delay(_vergilPlSlowShellLifeTime * 10.0f);
+			break;
+		}
+		default:
+			break;
 		}
 		auto gameObj = *(uintptr_t*)(pl + 0x10);
 		auto transform = *(uintptr_t*)(gameObj + 0x18);
