@@ -40,7 +40,6 @@ public:
 
 	static uintptr_t initSpeedRet;
     static uintptr_t speedAccRet;
-	static uintptr_t finishRangeRet;
 	static uintptr_t airTrickRet;
     static uintptr_t finishOffsetRet;
 	static uintptr_t waitTimeRet;
@@ -89,11 +88,17 @@ private:
 
 	GroundTrickType groundTrickType = Default;
 
+	bool _isIgnoringTrickFinishRange = false;
+	bool _isDefaultFinishRangeRequested = false;
+
 	float teleportZOffs = -1.3f;
 	const float colliderZUp = 0.75f;
 
 	void init_check_box_info() override;
 	void pos_teleport(TeleportType type, gf::Vec3 &outVec, GameFunctions::Vec3 pPos, gf::Vec3 trickVec, float trickCorrect, float trickLen);
+
+	static float trick_action_get_range_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction);
+	static void on_push_hit_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction, uintptr_t gameObj);
 
 	std::unique_ptr<FunctionHook> m_airtrick_hook;
     std::unique_ptr<FunctionHook> m_initspeed_hook;
@@ -104,6 +109,7 @@ private:
     std::unique_ptr<FunctionHook> m_speed_acc_hook;
 	std::unique_ptr<FunctionHook> m_teleport_hook;
 	std::unique_ptr<FunctionHook> m_finish_range_hook;
+	std::unique_ptr<FunctionHook> m_on_push_hit_hook;
 
 	InputSystem *_inputSystem = nullptr;
 	static inline VergilAirTrick *_mod;

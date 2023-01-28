@@ -13,6 +13,7 @@
 #include "GameFunctions/PlayerSetDT.hpp"
 #include "VergilQuickSilver.hpp"
 #include "WitchTime.hpp"
+#include "EnemyData.hpp"
 
 //clang-format off
 namespace gf = GameFunctions;
@@ -24,6 +25,18 @@ public:
 	{
 		ToEnemy,
 		InPlace
+	};
+
+	enum class StabReaction
+	{
+		Stun = 3200,
+		Dying = 3230,
+		DamageStandL = 3001,//0xBB9
+		SlamDamage = 3040,
+		DamageFlyL = 3092,
+		DamageDownFaceUp = 3102,
+		DamageWallLand = 3220,
+		DamageDiagonalBlown = 3060
 	};
 
 private:
@@ -90,6 +103,8 @@ private:
 			//"Wait"
 		};
 
+		std::vector<uintptr_t> _stabHitInfoList;
+
 		static inline std::unique_ptr<gf::SysString> _stabStr = nullptr;
 
 		static inline std::mt19937 _rndGen{};
@@ -101,6 +116,7 @@ private:
 		static inline sdk::REMethodDefinition* _pl0800ResetStatusMethod = nullptr;
 		static inline sdk::REMethodDefinition* _pl0800EndCutSceneMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plCamCntrlSetPlAccMethod = nullptr;
+		static inline sdk::REMethodDefinition* _emSetActionMethod;
 
 		static inline sdk::RETypeDefinition* _lockOnObjTD = nullptr;
 		static inline sdk::RETypeDefinition* _plAccessorTD = nullptr;
@@ -170,6 +186,34 @@ private:
 				change_pl_via_cam((uintptr_t)sdk::get_thread_context(), 4);
 		}
 
+		inline void update_stab_reaction(const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> &pl0300)
+		{
+			auto pl0300HC = *(uintptr_t*)(pl0300->get_pl() + 0x1F8);
+			auto pl0300AttackList = *(uintptr_t*)(pl0300HC + 0x268);
+			if (pl0300AttackList == 0)
+				return;
+			int attackListCount = gf::ListController::get_list_count(pl0300AttackList);
+			for (int i = 0; i < attackListCount; i++)
+			{
+				auto hitInfo = gf::ListController::get_item<uintptr_t>(pl0300AttackList, i);
+				if (hitInfo == 0 || std::find_if(_stabHitInfoList.begin(), _stabHitInfoList.end(), [&](uintptr_t arg)
+						{
+							return hitInfo == arg;
+						}) != _stabHitInfoList.end()
+					)
+					continue;
+				_stabHitInfoList.push_back(hitInfo);
+				if (hitInfo == 0)
+					continue;
+				auto damageHC = *(uintptr_t*)(hitInfo + 0xC0);
+				auto damagedChar = *(uintptr_t*)(damageHC + 0xA0);
+				if (damagedChar == 0)
+					continue;
+				if (auto emId = EnemyData::get_em_id(damagedChar); emId != EnemyData::Dante && emId != EnemyData::Vergil && emId != EnemyData::None)
+					_emSetActionMethod->call(sdk::get_thread_context(), damagedChar, (int32_t)_stabEmReaction, 0, 10.0f, 0.0f, 1, 0, true);
+			}
+		}
+
 		void update_pl0300_behavior(Pl0300Actions action)
 		{
 			auto pl0300 = _pl0300.lock();
@@ -233,6 +277,7 @@ private:
 					}
 					else
 					{
+						update_stab_reaction(pl0300);
 						auto it = std::find_if(_trickStabNames.begin(), _trickStabNames.end(), [&](const wchar_t* name) { return wcscmp(name, actionStr) == 0; });
 						if (it == _trickStabNames.end())
 						{
@@ -326,6 +371,8 @@ private:
 
 		static inline Pl0300TrickType _stabTrickUpdateType = Pl0300TrickType::ToEnemy;
 
+		static inline StabReaction _stabEmReaction = StabReaction::DamageStandL;
+
 		PlPair() = delete;
 		PlPair(uintptr_t pl0800, std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, const InputSystem* inputSysMod) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
 		{
@@ -345,6 +392,8 @@ private:
 				_pl0800ResetStatusMethod = sdk::find_method_definition("app.PlayerVergilPL", "resetStatus(app.GameModel.ResetType)");
 				_pl0800EndCutSceneMethod = sdk::find_method_definition("app.PlayerVergilPL", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
 				_plCamCntrlSetPlAccMethod = sdk::find_method_definition("app.PlayerCameraController", "set_player(app.IPlayerAccessor)");
+				_emSetActionMethod = sdk::find_method_definition("app.Enemy",
+					"setAction(app.Enemy.ActionEnum, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean)");
 
 				_lockOnObjTD = sdk::find_type_definition("app.LockOnObject");
 				_plAccessorTD = sdk::find_type_definition("app.PlayerAccessor");
@@ -581,9 +630,9 @@ private:
 			_moveStartPos = *get_char_pos(_pl0800);
 
 			pl0300->set_is_control(true);
-			pl0300->set_action(_stabStr.get());
-			pl0300->use_custom_trick_update(true);
+
 			auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
+			pl0300->use_custom_trick_update(true);
 			pl0300->update_em_teleport();
 			if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
 			{
@@ -599,6 +648,10 @@ private:
 				*(int*)(pl0300->get_pl() + 0x2008) = 24; //24 - Stab //25 - StabFromWalk;
 				*(int*)(pl0300->get_pl() + 0x1AE0) = 5;
 			}
+			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl());
+			_stabHitInfoList.clear();
+			pl0300->set_action(_stabStr.get());
+			
 			//pl0300->set_action_from_think(_stabStr.get(), 0x94A9A36A);
 			_pl0300ActionUpdateCoroutine.start(this, Pl0300Actions::Stab);
 			_isTrickStabPerforming = true;
@@ -644,7 +697,6 @@ private:
 
 				if (_pl0800ResetStatusMethod != nullptr)
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
-				pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, _pl0800);
 				
 				if (_pl0300Accessor != nullptr)
 					PfbFactory::PrefabFactory::release(_pl0300Accessor);
@@ -679,6 +731,7 @@ private:
 				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
 					pl0300->set_dt(PlCntr::DT::Human);
 				pl0300->end_cutscene();
+				pl0300->get_pl_reset_status_method()->call(threadCntxt, pl0300->get_pl());
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
 				_plCamCntrSetPlHook = nullptr;
@@ -691,7 +744,8 @@ private:
 				}*/
 			}
 			_lastPlSwap = LastPlSwap::ViaCamSwap;
-
+			pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, pl0300->get_pl());
+			pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, _pl0800);
 		}
 
 		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true)
@@ -727,6 +781,7 @@ private:
 				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
 					pl0300->set_dt(PlCntr::DT::Human);
 				pl0300->end_cutscene();
+				pl0300->get_pl_reset_status_method()->call(sdk::get_thread_context(), pl0300->get_pl());
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
 				/*if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
@@ -755,6 +810,8 @@ private:
 				
 			}
 			*(uintptr_t*)(plManager + 0x60) = pl;
+			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl());
+			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), _pl0800);
 			_lastPlSwap = LastPlSwap::ViaPlId;
 			return pl;
 		}
@@ -1272,6 +1329,7 @@ public:
 		_doppelsDtState = (PlCntr::DT)cfg.get<int>("BossVergilMoves._doppelsDtState").value_or((int)PlCntr::DT::Human);
 		_airRaidSettings.attackNum = cfg.get<int>("BossVergilMoves._airRaidSettings.attackNum").value_or(4);
 		PlPair::_stabTrickUpdateType = (Pl0300TrickType)cfg.get<int>("BossVergilMoves::PlPair::_stabTrickUpdateType").value_or((int)Pl0300TrickType::ToEnemy);
+		PlPair::_stabEmReaction = (StabReaction)cfg.get<int>("BossVergilMoves::PlPair::_stabEmReaction").value_or((int)StabReaction::DamageStandL);
 	}
 	void on_config_save(utility::Config& cfg) override
 	{
@@ -1305,6 +1363,7 @@ public:
 		cfg.set<int>("BossVergilMoves._doppelsDtState", (int)_doppelsDtState);
 		cfg.set<float>("BossVergilMoves._airRaidSettings.attackNum", _airRaidSettings.attackNum);
 		cfg.set<int>("BossVergilMoves::PlPair::_stabTrickUpdateType", (int)PlPair::_stabTrickUpdateType);
+		cfg.set<int>("BossVergilMoves::PlPair::_stabEmReaction", (int)PlPair::_stabEmReaction);
 	}
 
 	// on_draw_ui() is called only when the gui shows up
@@ -1463,9 +1522,24 @@ public:
 			ImGui::Separator();
 
 			ImGui::TextWrapped("Stab settings ");
+
+			ImGui::Spacing();
+
 			ImGui::TextWrapped("Stab teleport");
 			ImGui::RadioButton("To enemy", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::ToEnemy); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("In place", (int*)&PlPair::_stabTrickUpdateType, (int)Pl0300TrickType::InPlace);
+
+			ImGui::Spacing();
+
+			ImGui::TextWrapped("Enemy reaction to stab:");
+			ImGui::ShowHelpMarker("Different enemy can have different behaviour for same settings.");
+			ImGui::RadioButton("Stun", (int*)&PlPair::_stabEmReaction, (int)StabReaction::Stun); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Dying state", (int*)&PlPair::_stabEmReaction, (int)StabReaction::Dying);
+			ImGui::RadioButton("Stand knockback damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageStandL); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Slam damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::SlamDamage);
+			ImGui::RadioButton("Down", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageDownFaceUp); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+			ImGui::RadioButton("Directional blow damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageDiagonalBlown);
+			ImGui::RadioButton("Fly damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageFlyL);
 		}
 		ImGui::ShowHelpMarker("When Yamato selected, press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes concentration on use.");
 
