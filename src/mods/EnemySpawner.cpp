@@ -302,6 +302,6 @@ void EnemySpawner::on_draw_ui()
 
 		ImGui::Spacing();
 	}
-	ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vegrgil(s) to your side.");
+	ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vergil(s) to your side.");
 	
 }
