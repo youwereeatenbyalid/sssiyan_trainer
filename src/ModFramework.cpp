@@ -1588,9 +1588,9 @@ void ModFramework::draw_options() const
 
     ImGui::Begin("Options", nullptr, panel_flags);
     {
-        const auto current_mod = m_mods->get_mod(m_mods->get_focused_mod());
+        if (m_game_data_initialized) {
+			const auto& current_mod = m_mods->get_mod(m_mods->get_focused_mod());
 
-        if (current_mod != nullptr) {
             ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
             ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
