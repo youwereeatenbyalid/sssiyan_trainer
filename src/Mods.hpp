@@ -15,8 +15,8 @@ public:
     void on_draw_ui() const;
     void on_draw_debug_ui() const;
     void draw_entry(Mod* mod);
-    Mod* get_mod(std::string modName) const;
-    std::string get_focused_mod() const;
+    Mod* get_mod(const std::string& modName) const;
+    const std::string& get_focused_mod() const;
     void set_focused_mod(const std::string& modName) const;
     void on_pagelist_ui(int page, float indent = 0.f);
     void save_mods();

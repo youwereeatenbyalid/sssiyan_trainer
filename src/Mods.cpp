@@ -458,7 +458,7 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
 }
 
 
-Mod* Mods::get_mod(std::string modName) const {
+Mod* Mods::get_mod(const std::string& modName) const {
   if(modName == "None")
   {
       return nullptr;
@@ -474,7 +474,7 @@ Mod* Mods::get_mod(std::string modName) const {
   return nullptr;
 }
 
-std::string Mods::get_focused_mod() const {
+const std::string& Mods::get_focused_mod() const {
   return m_focused_mod;
 }
 
