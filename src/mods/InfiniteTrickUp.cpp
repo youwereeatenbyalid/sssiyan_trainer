@@ -4,7 +4,7 @@ bool InfiniteTrickUp::cheaton{NULL};
 uintptr_t InfiniteTrickUp::trickupRet{NULL};
 uintptr_t InfiniteTrickUp::trickupJneRet{NULL};
 
-static uintptr_t trickup_detour() {
+static naked uintptr_t trickup_detour() {
 	__asm {
 		cmp byte ptr [InfiniteTrickUp::cheaton], 01
 		je ret_jne
