@@ -36,7 +36,7 @@ std::optional<std::string> EnemyInstantDT::on_initialize() {
   init_check_box_info();
 
   m_is_enabled               = &EnemyInstantDT::cheaton;
-  m_on_page                  = Page_Balance;
+  m_on_page                  = Page_Enemies;
 
   m_full_name_string        = "Instant Enemy DT";
   m_author_string           = "SSSiyan";

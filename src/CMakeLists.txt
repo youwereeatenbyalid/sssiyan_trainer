@@ -258,6 +258,7 @@ set(MODS_SRC
     mods/LongerRagtimeBubble.cpp 
     mods/DamageType.hpp 
     mods/DamageType.cpp
+    mods/VergilDoppelInitSetup.hpp
     mods/InstantDoppel.hpp
     mods/AprilFools.hpp
     mods/AprilFools.cpp
@@ -266,8 +267,40 @@ set(MODS_SRC
     mods/AirMoves.hpp
     mods/AirMoves.cpp
     mods/PlSetActionData.hpp
+    mods/EndLvlHooks.hpp
+    mods/EndLvlHooks.cpp
     mods/BossTrickUp.hpp
     mods/VergilSDTAlwaysCancels.hpp
+    mods/GameplayStateTracker.hpp
+    mods/GameplayStateTracker.cpp
+    mods/DoppelNoComeBack.hpp
+    mods/DanteSDTRegen.hpp
+    mods/FsmPlPosCtrActionStartHooks.hpp
+    mods/PosActionEditor.hpp
+    mods/InputSystem.hpp
+    mods/DanteSelectReleaseType.hpp
+    mods/NoRoundtripCallback.hpp
+    mods/EnemySpawner.hpp
+    mods/EnemySpawner.cpp
+    mods/BossVergilMoves.hpp
+    mods/Pl0300ControllerManager.hpp
+    mods/Pl0300ControllerManager.cpp
+    mods/PlController.hpp
+    mods/Pl0300Controller.hpp
+    mods/Pl0300Controller.cpp
+    mods/EnemyFixes.hpp
+    mods/VergilGuardSlowMotion.hpp
+    mods/BossVergilSettings.hpp
+    mods/LockOnNoHold.hpp
+    mods/Pl0000SlowWorldStop.hpp
+    mods/QuickSilverController.hpp
+    mods/QuickSilverController.cpp
+    mods/PlayerQuicksilver.hpp
+    mods/DanteQuickSilver.hpp
+    mods/VergilQuickSilver.hpp
+    mods/DanteAirMustang.hpp
+    mods/WitchTime.hpp
+    mods/ParryWithFinesse.hpp
 )
 
 set(HOOKS_SRC
@@ -290,6 +323,12 @@ set(HOOKS_SRC
 set(IMGUI_EXTENSIONS_SRC
     ImGuiExtensions/ImGuiExtensions.h
     ImGuiExtensions/ImGuiExtensions.cpp
+)
+
+set(EVENTS_SRC
+    events/Events.hpp
+    events/EventArgs.hpp
+    events/EventHandler.hpp
 )
 
 set(SDK_SRC
@@ -326,8 +365,15 @@ set(FRAMEWORK_SRC
 )
 
 set(LISTEDITOR_SRC
-    ListEditor/AllocatedData.hpp
-    ListEditor/MimicMngObj.hpp
+    ListEditor/MimicList.hpp
+)
+
+set(COROUTINE_SRC
+    Mods/Coroutine/Coroutines.hpp
+)
+
+set(PREFAB_FACTORY_SRC
+    Mods/PrefabFactory/PrefabFactory.hpp
 )
 
 set(GAME_FUNC_SRC
@@ -362,7 +408,10 @@ source_group("Hooks" FILES ${HOOKS_SRC})
 source_group("ImGuiExtensions" FILES ${IMGUI_EXTENSIONS_SRC})
 source_group("Mods" FILES ${MODS_SRC})
 source_group("ListEditor" FILES ${LISTEDITOR_SRC})
+source_group("Events" FILES ${EVENTS_SRC})
 source_group("Mods/GameFunctions" FILES ${GAME_FUNC_SRC})
+source_group("Mods/Coroutine" FILES ${COROUTINE_SRC})
+source_group("Mods/PrefabFactory" FILES ${PREFAB_FACTORY_SRC})
 source_group("SDK" FILES ${SDK_SRC})
 source_group("Utility" FILES ${UTILITY_SRC})
 source_group("Framework" FILES ${FRAMEWORK_SRC})
@@ -371,11 +420,16 @@ source_group("FW-ImGui" FILES ${IMGUI_SRC})
 add_library(${CMAKE_PROJECT_NAME} SHARED
             Main.cpp
             LicenseStrings.hpp
+            EnemyData.hpp
+            EnemyData.cpp
             ${SDK_SRC}
             ${IMGUI_EXTENSIONS_SRC}
             ${MODS_SRC}
             ${GAME_FUNC_SRC}
             ${LISTEDITOR_SRC}
+            ${COROUTINE_SRC}
+            ${PREFAB_FACTORY_SRC}
+            ${EVENTS_SRC}
             ${HOOKS_SRC}
             ${IMGUI_SRC}
             ${UTILITY_SRC}
@@ -383,7 +437,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC DMC5SDK imgui minhook d3d11 d3d12 glm_static shlwapi jsonstthm)
-target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
+target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR- -fshort-wchar)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
@@ -397,9 +451,9 @@ RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/RelWithDebInfo
 RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/MinSize
 OUTPUT_NAME sssiyan)
 
-add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
-                   POST_BUILD
-                   COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
+#add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
+                  # POST_BUILD
+                   #COMMAND xcopy "$(MSBuildProjectDirectory)\\..\\..\\fluffymod" "$(SolutionDir)\\fluffymod\\" /E /Y /R VERBATIM)
                    target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /EHa)
 if(DEVELOPER_MODE)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC DEVELOPER)

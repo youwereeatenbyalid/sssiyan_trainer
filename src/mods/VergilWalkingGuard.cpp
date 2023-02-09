@@ -38,7 +38,7 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilTrick;
 	m_full_name_string = "Walking Guard (+)";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Vergil can block while walking.";
 
 	auto isPadInputAddr = m_patterns_cache->find_addr(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)

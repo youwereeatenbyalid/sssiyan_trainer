@@ -34,7 +34,7 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "DMC5 Shot Block (+)";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Change block to the gunshot block.";
 
 	auto setActionAddr = m_patterns_cache->find_addr(base, "F3 0F 11 44 24 20 E8 F4 F3"); //DevilMayCry5.exe+5762A1

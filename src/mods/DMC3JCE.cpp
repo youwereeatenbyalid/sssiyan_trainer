@@ -1,5 +1,25 @@
 #include "DMC3JCE.hpp"
 
+bool DMC3JCE::can_execute_asm()
+{
+	int sdtState = *(int*)(PlayerTracker::vergilentity + 0x9B0);
+	float curSdt = *(float*)(PlayerTracker::vergilentity + 0x1B20);
+	if (autoSdtType == None)
+	{
+		if (sdtState != 2)
+		{
+			if(curSdt >= minSdt)
+				return true;
+		}
+	}
+	else
+	{
+		if(curSdt >= minSdt)
+			return true;
+	}
+	return false;
+}
+
 static naked void can_exe_jce_detour()
 {
 	__asm {
@@ -14,8 +34,8 @@ static naked void can_exe_jce_detour()
 
 		cheat:
 		push rax
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
-		cmp al, 1
+		call qword ptr [DMC3JCE::can_execute_asm]
+		cmp al, 0
 		pop rax
 		je originalcode
 		cmp dword ptr [rbx + 0x1978], 0 //isYamato
@@ -40,9 +60,8 @@ static naked void can_exe_jce_detour1()//need to check cur weapon too
 
 		cheat:
 		push rax
-		mov rax, [PlayerTracker::vergilentity]
-		mov eax, dword ptr [rax+0x09B0]
-		cmp eax, 2
+		call qword ptr [DMC3JCE::can_execute_asm]
+		cmp al, 0
 		pop rax
 		je originalcode
 
@@ -101,8 +120,6 @@ static naked void jceprefab_detour()
 		jmp qword ptr[DMC3JCE::jcePfbRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
 		push rax
 		sub rsp, 32
 		call qword ptr [DMC3JCE::use_default_behaviour_asm]
@@ -128,8 +145,6 @@ static naked void jceprefab1_detour()
 		jmp qword ptr [DMC3JCE::jcePfb1Ret]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
 		push rax
 		sub rsp, 32
 		call qword ptr [DMC3JCE::use_default_behaviour_asm]
@@ -153,8 +168,6 @@ static naked void jceprefab2_detour()
 		jmp qword ptr [DMC3JCE::jcePfb2Ret]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
 		push rax
 		sub rsp, 32
 		call qword ptr [DMC3JCE::use_default_behaviour_asm]
@@ -168,192 +181,17 @@ static naked void jceprefab2_detour()
 	}
 }
 
-
-void DMC3JCE::stop_jce_asm()
-{
-	jceController->stop_jce();
-}
-
-void DMC3JCE::set_sdt_asm(GameFunctions::PlVergilSetDT::DevilTrigger dtState)
-{
-	if (!isAutoSdt || PlayerTracker::vergilentity == 0)
-	{
-		JCEController::isSdtRequestedAsm = false;
-		isDisableSdtRequest = false;
-		return;
-	}
-	GameFunctions::PlVergilSetDT setDt{ PlayerTracker::vergilentity };
-	std::array<uintptr_t, 1> offs {0x1B20};
-	float curSdt = func::PtrController::get_ptr_val<float>(PlayerTracker::vergilentity, offs, true).value();
-	func::PtrController::try_to_write(PlayerTracker::vergilentity, offs, 10000.0f, true);
-	//*(int*)(PlayerTracker::vergilentity + 0x1938) = 2;//SDTGaugeChargeStatus
-	//*(float*)(PlayerTracker::vergilentity + 0x1C34) = 20.0f;//dtPressTimer
-	bool isInstantSdtOn = VergilInstantSDT::cheaton;
-	VergilInstantSDT::cheaton = true;
-	setDt(dtState, false);
-	func::PtrController::try_to_write<float>(PlayerTracker::vergilentity, offs, curSdt, true);
-	VergilInstantSDT::cheaton = isInstantSdtOn;
-	if (dtState == GameFunctions::PlVergilSetDT::DevilTrigger::SDT)
-	{
-		JCEController::isSdtRequestedAsm = true;
-		isDisableSdtRequest = true;
-	}
-	else
-	{
-		JCEController::isSdtRequestedAsm = false;
-		isDisableSdtRequest = false;
-	}
-
-}
-
-void DMC3JCE::setup_sdt_asm(int vergilActionId)
-{
-	const func::PlayerSetDT::DevilTrigger curDtState = *(func::PlayerSetDT::DevilTrigger*)(PlayerTracker::vergilentity + 0x09B0);
-	if (isUsingDefaultJce)
-	{
-		JCEController::isSdtRequestedAsm = false;
-		isDisableSdtRequest = false;
-		return;
-	}
-	if (curDtState == func::PlayerSetDT::DevilTrigger::SDT)
-	{
-		if(!JCEController::isSdtRequestedAsm)
-			return;
-		else
-			set_sdt_asm(func::PlayerSetDT::DevilTrigger::Human);
-	}
-	else
-	{
-		if (JCEController::isSdtRequestedAsm)
-		{
-			if(vergilActionId != 0x10) //jce
-				set_sdt_asm(func::PlayerSetDT::DevilTrigger::Human);
-		}
-		else if (vergilActionId == 0x10)
-		{
-			set_sdt_asm(func::PlayerSetDT::DevilTrigger::SDT);
-			if (autoSdtType == SDTBurst)
-			{
-				func::GameModelRequestSetEffect setBurst { PlayerTracker::vergilentity, sdtBurstEffect };
-				setBurst(*(func::Vec3*)(PlayerTracker::vergiltransform + 0x30), *(func::Quaternion*)(PlayerTracker::vergiltransform + 0x40));
-			}
-			return;
-		}
-		JCEController::isSdtRequestedAsm = false;
-		isDisableSdtRequest = false;
-	}
-}
-
 bool DMC3JCE::use_default_behaviour_asm()
 {
-	if (isUsingDefaultJce || *(int*)(PlayerTracker::vergilentity + 0x09B0) != 2)
-	{
-		JCEController::isSdtRequestedAsm = false;
-		isDisableSdtRequest = false;
+	if (jceController->is_in_jce_sdt() || jceController->is_executing())
 		return false;
-	}
-	else if(isAutoSdt)
-	{
-		if(JCEController::isSdtRequestedAsm)
-			return false;
-		return true;
-	}
 	return true;
 }
 
-void DMC3JCE::start_jce_asm()
+void DMC3JCE::end_jcesdt_asm(uintptr_t vergil)
 {
-	if (!jceController->is_executing())
-	{
-		jceController->start_jce();
-	}
-}
-
-volatile uintptr_t rdx_back_c = 0;//i guess it's have smth bad with std::vector allocator
-volatile uintptr_t rdx_back_s = 0;//i guess it's have smth bad with std::vector allocator
-
-static volatile naked void jce_exetime_detour()
-{
-	__asm {
-		cmp byte ptr [DMC3JCE::cheaton], 1
-		je cheat
-
-		originalcode:
-		movss xmm0, [DMC3JCE::jceTimerStaticBase]
-		jmp qword ptr [DMC3JCE::jceTimerRet]
-
-		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
-		push rax
-		sub rsp, 32
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
-		add rsp, 32
-		cmp al, 1
-		pop rax
-		je originalcode
-		movss xmm0, [DMC3JCE::JCEController::executionTimeAsm]
-		comiss xmm0, xmm1
-		movss [rdi+0x6C], xmm1
-		ja jce_continue
-
-		push rax
-		sub rsp, 32
-		call qword ptr [DMC3JCE::stop_jce_asm]
-		add rsp, 32
-		pop rax
-
-		jmp qword ptr [DMC3JCE::stopJceTimerRet]
-		//jmp qword ptr [DMC3JCE::jceTimerRet]
-
-		jce_continue:
-		//cmp byte ptr [DMC3JCE::isJceRunning], 1
-		//je jmp_ret
-		push rax
-		push rcx
-		mov qword ptr [rdx_back_c], rdx
-		push r8
-		push r9
-		push r10
-		push r11
-		sub rsp, 32
-		call qword ptr [DMC3JCE::start_jce_asm]
-		add rsp, 32
-		pop r11
-		pop r10
-		pop r9
-		pop r8
-		mov rdx, qword ptr [rdx_back_c]
-		pop rcx
-		pop rax
-
-		jmp_ret:
-		jmp qword ptr [DMC3JCE::jceTimerContinue]
-	}
-}
-
-static naked void crashpoint_detour()//this mb not good idk
-{
-	__asm {
-		cmp byte ptr [DMC3JCE::cheaton], 1
-		je cheat
-
-		originalcode:
-		test byte ptr [rax+0x0C], 01
-		je je_jmp
-		jmp qword ptr [DMC3JCE::crashPointRet]
-
-		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
-		cmp byte ptr [DMC3JCE::isCrashFixEnabled], 0
-		je originalcode
-		cmp rax, 0
-		jne originalcode
-
-		je_jmp:
-		jmp qword ptr [DMC3JCE::crashPointJeJmp]
-	}
+	if (jceController->is_in_jce_sdt())
+		jceController->request_set_jce_dt(vergil, gf::PlVergilSetDT::Human);
 }
 
 static naked void finish_pfb_detour()
@@ -368,11 +206,26 @@ static naked void finish_pfb_detour()
 		jmp qword ptr [DMC3JCE::jceFinishPfbRet]
 
 		cheat:
-		cmp byte ptr [DMC3JCE::isUsingDefaultJce], 1
-		je originalcode
+
 		push rax
-		mov rax, [PlayerTracker::vergilentity]
-		mov eax, dword ptr [rax+0x09B0]
+		push rcx
+		push rdx
+		push rsp
+		push r8
+		push r9
+		push r10
+		push r11
+		mov rcx, r8
+		call qword ptr [DMC3JCE::end_jcesdt_asm]
+		pop r11
+		pop r10
+		pop r9
+		pop r8
+		pop rsp
+		pop rdx
+		pop rcx
+		
+		mov eax, dword ptr [r8+0x09B0]
 		cmp eax, 2
 		pop rax
 		je originalcode
@@ -382,82 +235,50 @@ static naked void finish_pfb_detour()
 	}
 }
 
-static naked void end_teleport_detour()
+void DMC3JCE::jce_cancel_hook(uintptr_t threadCtxt, uintptr_t vergil)
 {
-	__asm {
-		cmp byte ptr [DMC3JCE::cheaton], 0
-		je originalcode
-		cmp dword ptr [DMC3JCE::autoSdtType], DMC3JCE::AutoSDTType::None
-		jne cheat
-
-		originalcode:
-		mov rax, [rbx+0x50]
-		cmp qword ptr [rax + 0x18], 00
-		jmp qword ptr [DMC3JCE::endTeleportRet]
-
-		cheat:
-		cmp byte ptr [DMC3JCE::isDisableSdtRequest], 0
-		je originalcode
-		push rax
-		push rcx
-		push rdx
-		push rsp
-		push r8
-		push r9
-		push r10
-		push r11
-		mov ecx, 0
-		sub rsp, 32
-		call qword ptr [DMC3JCE::set_sdt_asm]
-		add rsp, 32
-		pop r11
-		pop r10
-		pop r9
-		pop r8
-		pop rsp
-		pop rdx
-		pop rcx
-		pop rax
-		jmp originalcode
-	}
+	_mod->m_jce_cancel_hook->get_original<decltype(jce_cancel_hook)>()(threadCtxt, vergil);
+	if (!DMC3JCE::cheaton)
+		return;
+	if(jceController->is_executing())
+		jceController->stop_jce();
+	if (jceController->is_in_jce_sdt())
+		jceController->request_set_jce_dt(vergil, gf::PlVergilSetDT::DevilTrigger::Human);
+	_mod->_jceTimer = 0;
 }
 
-static naked void vergil_action_detour()
+void DMC3JCE::pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJce, uintptr_t actionArg)
 {
-	__asm {
-		cmp byte ptr [DMC3JCE::cheaton], 0
-		je originalcode
-		cmp dword ptr [DMC3JCE::autoSdtType], DMC3JCE::AutoSDTType::None
-		jne cheat
-
-		originalcode:
-		xor r9d, r9d
-		lea eax, [r8 - 0x07]
-		jmp qword ptr [DMC3JCE::vergilActionRet]
-
-		cheat:
-		push rax
-		push rcx
-		push rdx
-		//push rsp
-		push r8
-		push r9
-		push r10
-		push r11
-		mov ecx, r8d
-		sub rsp, 32
-		call qword ptr [DMC3JCE::setup_sdt_asm]
-		add rsp, 32
-		pop r11
-		pop r10
-		pop r9
-		pop r8
-		//pop rsp
-		pop rdx
-		pop rcx
-		pop rax
-		jmp originalcode
+	_mod->m_update_jce_hook->get_original<decltype(DMC3JCE::pl0800_start_jce_update)>()(threadCtxt, fsmStartJce, actionArg);
+	if (!DMC3JCE::cheaton)
+		return;
+	auto vergil = *(uintptr_t*)(fsmStartJce + 0x40);
+	if (*(int*)(vergil + 0x09B0) == 2 && !jceController->is_executing() && !jceController->is_in_jce_sdt())
+		return;
+	int jceRoutine = *(int*)(fsmStartJce + 0x68);
+	if (jceRoutine == 0 && !jceController->is_in_jce_sdt() && !jceController->is_executing())
+		jceController->request_set_jce_dt(vergil, gf::PlVergilSetDT::SDT, autoSdtType);
+	if (jceRoutine == 1 && jceController->is_in_jce_sdt() && !jceController->is_executing())
+	{
+		jceController->start_jce(*(uintptr_t*)(fsmStartJce + 0x40));
+		jceController->force_jcesdt_health_update(vergil);
 	}
+	_mod->_jceTimer += *(float*)(fsmStartJce + 0x6C);
+	if (( _mod->_jceTimer >= jceController->get_current_execution_time() && jceController->is_executing() ) || jceRoutine == 2)
+	{
+		*(float*)(fsmStartJce + 0x6C) = _mod->_jceTimer + 0.1f;
+		jceController->stop_jce(false);
+		_mod->_jceTimer = 0;
+	}
+	else
+		*(float*)(fsmStartJce + 0x6C) = 0;
+}
+
+void DMC3JCE::on_pl_add_dt(uintptr_t threadCtxt, uintptr_t pl, float* val, int dtAddType, bool fixedValue)
+{
+	if (!cheaton || *(uintptr_t*)(pl + 0xE64) != 4 || !jceController->is_executing())
+		return;
+	*val = 0;
 }
 
 std::optional<std::string> DMC3JCE::on_initialize()
@@ -468,13 +289,9 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilTrick;
 	m_full_name_string = "DMC3 Judgement Cut End (+)";
-	m_author_string = "VPZadov";
-	m_description_string = "Replaces Vergil's Judgment Cut End in human form with his Judgement Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.\nWARNING: This mod can crash the game.";
+	m_author_string = "V.P.Zadov";
+	m_description_string = "When not in Devil Trigger, replaces Vergil's Judgment Cut End with his Judgment Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.";
 	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
-
-	jceTimerStaticBase = dmc5Base + 0x45F0390;//0x45F0360;
-	jceTimerStaticBase = *(uintptr_t*)jceTimerStaticBase;
-	rayCastAddr = dmc5Base + 0x7E53744;
 
 	auto canExeJceAddr = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
 	if (!canExeJceAddr)
@@ -500,12 +317,6 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Unable to find DMC3JCE.jcePrefab2Addr pattern.";
 	}
 
-	auto jceTimerAddr = m_patterns_cache->find_addr(base, "F3 0F 10 05 96 67 1E 04 0F 2F C1");//DevilMayCry5.exe+409BF2
-	if (!jceTimerAddr)
-	{
-		return "Unable to find DMC3JCE.jceTimerAddr pattern.";
-	}
-
 	auto crashPointAddr = m_patterns_cache->find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
 	if (!crashPointAddr)
 	{
@@ -518,24 +329,31 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Unable to find DMC3JCE.finishPfbAddr pattern.";
 	}
 
-	auto endTeleportAddr = m_patterns_cache->find_addr(base, "48 8B 43 50 48 83 78 18 00 75 5A 48 8B 57 60 48 8B");//DevilMayCry5.exe+409E57
-	if (!endTeleportAddr)
+	auto cancelJceAddr = m_patterns_cache->find_addr(base, "48 8B 82 E0 1B 00 00");//DevilMayCry5.app_PlayerVergilPL__JudgementCutEndCancel114060
+	if (!cancelJceAddr)
 	{
-		return "Unable to find DMC3JCE.endTeleportAddr pattern.";
+		return "Unable to find DMC3JCE.cancelJceAddr pattern.";
 	}
 
-	auto vergilSetActiveActionAddr = m_patterns_cache->find_addr(base, "45 33 C9 41 8D 40 F9");//DevilMayCry5.exe+546D10
-	if (!vergilSetActiveActionAddr)
+	auto jceStartUpdateAddr = m_patterns_cache->find_addr(base, "30 5F C3 CC CC CC CC CC 48 89 5C 24 18 48 89 74 24 20 57 48 83 EC 20");
+	//DevilMayCry5.app_fsm2_player_pl0800_StartJudgementCutEnd__update312745 (-0x8)
+	if (!jceStartUpdateAddr)
 	{
-		return "Unable to find DMC3JCE.vergilSetActiveActionAddr pattern.";
+		return "Unable to find DMC3JCE.jceStartUpdateAddr pattern.";
 	}
 
-	stopJceTimerRet = jceTimerAddr.value() + 0x12;
-	jceTimerContinue = jceTimerAddr.value() + 0x2A;
-	crashPointJeJmp = crashPointAddr.value() + 0xB;
-	jceController = std::make_unique<JCEController>();
+	try
+	{
+		jceController = std::make_unique<JCEController>();
+	}
+	catch(const std::exception &e)
+	{
+		spdlog::error("[{}] failed to initialize JCEController", get_name());
+		return "DMC3JCE; can't init 3JCEController: " + std::string(e.what());
+	}
 	jcePfbJneJmp = jcePrefab2Addr.value() + 0x18D2;
-	sdtBurstEffect = std::make_shared<func::GameModelRequestSetEffect::EffectID>(3, 6);
+
+	_mod = this;
 
 	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
 	{
@@ -561,68 +379,41 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Failed to initialize DMC3JCE.jcePrefab2";
 	}
 
-	if (!install_hook_absolute(jceTimerAddr.value(), m_jce_timer_hook, &jce_exetime_detour, &jceTimerRet, 0x8))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.jceTimer";
-	}
-
-	if (!install_hook_absolute(crashPointAddr.value(), m_jce_crashpoint_hook, &crashpoint_detour, &crashPointRet, 0x6))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.crashPoint";
-	}
-
 	if (!install_hook_absolute(finishPfbAddr.value(), m_jce_finishpfb_hook, &finish_pfb_detour, &jceFinishPfbRet, 0x8))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.finishPfb";
 	}
 
-	if (!install_hook_absolute(endTeleportAddr.value(), m_end_teleport_hook, &end_teleport_detour, &endTeleportRet, 0x9))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.endTeleport";
-	}
+	m_jce_cancel_hook = std::make_unique<FunctionHook>(cancelJceAddr.value(), &DMC3JCE::jce_cancel_hook);
+	m_jce_cancel_hook->create();
+	m_update_jce_hook = std::make_unique<FunctionHook>(jceStartUpdateAddr.value() + 0x8, &DMC3JCE::pl0800_start_jce_update);
+	m_update_jce_hook->create();
 
-	if (!install_hook_absolute(vergilSetActiveActionAddr.value(), m_set_active_action_hook, &vergil_action_detour, &vergilActionRet, 0x7))
-	{
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize DMC3JCE.vergilSetActiveAction";
-	}
-
-	//cheaton = true;
 	return Mod::on_initialize();
 }
 
-
 void DMC3JCE::on_config_load(const utility::Config& cfg)
 {
-	jceController->set_rndspawn_delay( cfg.get<int>("DMC3JCE.rndDelayTime").value_or(jceController->defaultRndDelay));
+	jceController->set_rndspawn_delay( cfg.get<int>("DMC3JCE._rndDelayTime").value_or(jceController->defaultRndDelay));
 	rndDelay = jceController->get_rndspawn_delay();
-	jceController->set_trackspawn_delay(cfg.get<int>("DMC3JCE.trackDelayTime").value_or(jceController->defaultTrackDelay));
+	jceController->set_trackspawn_delay(cfg.get<int>("DMC3JCE._trackDelayTime").value_or(jceController->defaultTrackDelay));
 	trackDelay = jceController->get_trackspawn_delay();
-	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Random) );
+	jceController->set_jce_type( (JCEController::Type)cfg.get<int>("DMC3JCE.jceType").value_or(JCEController::Dynamic) );
 	jcTypeUi = jceController->get_jce_type();
-	isUsingDefaultJce = cfg.get<bool>("DMC3JCE.isUsingDefaultJce").value_or(false);
 	jceController->rndEmTrackInterval = cfg.get<int>("DMC3JCE.rndEmTrackInterval").value_or(22);
 	humanJCECost = cfg.get<float>("DMC3JCE.humanJCECost").value_or(3000.0f);
 	minSdt = cfg.get<float>("DMC3JCE.minSdt").value_or(3000.0f);
 	isCrashFixEnabled = true;
-	rndExeDuration = cfg.get<float>("DMC3JCE.rndExeDuration").value_or(jceController->rndExeTimeModDefault);
-	trackExeDuration = cfg.get<float>("DMC3JCE.trackExeDuration").value_or(jceController->trackExeTimeModDefault);
-
-	if(jceController->get_jce_type() == JCEController::Random)
-		jceController->executionTimeAsm = rndExeDuration;
-	else
-		jceController->executionTimeAsm = trackExeDuration;
+	rndExeDuration = jceController->rndExeTime = cfg.get<float>("DMC3JCE.rndExeDuration").value_or(jceController->rndExeTimeModDefault);
+	trackExeDuration = jceController->trackExeTime = cfg.get<float>("DMC3JCE.trackExeDuration").value_or(jceController->trackExeTimeModDefault);
 	autoSdtType = (AutoSDTType)cfg.get<int>("DMC3JCE.autoSdtType").value_or(AutoSDTType::LessEfx);
 }
 
 void DMC3JCE::on_config_save(utility::Config& cfg)
 {
-	cfg.set<int>("DMC3JCE.rndDelayTime", jceController->get_rndspawn_delay());
-	cfg.set<int>("DMC3JCE.trackDelayTime", jceController->get_trackspawn_delay());
+	cfg.set<int>("DMC3JCE._rndDelayTime", jceController->get_rndspawn_delay());
+	cfg.set<int>("DMC3JCE._trackDelayTime", jceController->get_trackspawn_delay());
 	cfg.set<int>("DMC3JCE.jceType", jceController->get_jce_type());
 	cfg.set<int>("DMC3JCE.rndEmTrackInterval", jceController->rndEmTrackInterval);
 	cfg.set<float>("DMC3JCE.humanJCECost", humanJCECost);
@@ -634,100 +425,69 @@ void DMC3JCE::on_config_save(utility::Config& cfg)
 
 void DMC3JCE::on_draw_ui()
 {
-	ImGui::TextWrapped("If after Vergil disappears, JdC's do not start spawning and cheat has been disabled, the pointer to the JdC shell wasn't loaded correctly. Restart the mission.");
-	ImGui::Separator();
-	ImGui::Spacing();
-	ImGui::Checkbox("Use default JCE in human form (no DMC3 JCE).", &isUsingDefaultJce); //what is the point of this??
-	ImGui::Separator();
-	ImGui::TextWrapped("Random mode uses Just Judgement Cut projectile and increased damage. Tracking mode uses default Judgement Cut projectile and damage. The modes also use different execution times.");
-	ImGui::Separator();
-	ImGui::TextWrapped("SDT cost to perform JCE in human form:");
-	ImGui::ShowHelpMarker("Doesn't work if \"Auto SDT\" enabled.");
-	UI::SliderFloat("##subSdtSlider", &humanJCECost, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-	ImGui::Spacing();
-	ImGui::TextWrapped("Minimum SDT to perform JCE in human form:");
+	
+	//ImGui::TextWrapped("Random mode uses Just Judgement Cut projectile and 2x increased damage. Tracking mode uses default Judgement Cut projectile and 1.2x damage. The modes also use different execution times.");
+	//ImGui::Separator();
+	ImGui::TextWrapped("SDT Requirement:");
 	UI::SliderFloat("##minSdtSlider", &minSdt, 0, 10000.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 
-	//--------------This should be removed----------------//
-	/*ImGui::Separator();
-	if(ImGui::Button("Set 64 capacity"))
-		jceController->set_capacity(64);
-	ImGui::Separator();*/
+	ImGui::Separator();
 
-	/*ImGui::Separator();
-	ImGui::Checkbox("Set cutom capacity", &isSetCustomCapacity);
-	ImGui::SliderInt("Custom capacity:", &newCapacity, 64, 256);
-	ImGui::Separator();*/
-	//----------------------------------------------------//
+	ImGui::TextWrapped("Automatically enter SDT:");
+	ImGui::ShowHelpMarker("Vergil will automatically enter SDT when performing the Judgment Cut Barrage input. After re-appearing or being interrupted, Vergil will automatically exit SDT.");
+	ImGui::RadioButton("Disable SDT explosion efx", (int*)&autoSdtType, 1);
+	ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+	ImGui::RadioButton("Enable SDT explosion efx", (int*)&autoSdtType, 2);
+	ImGui::Separator();
+	ImGui::TextWrapped("Select Tracking Mode:");
 
-	if (!isUsingDefaultJce)
-	{
-		ImGui::Separator();
-		ImGui::TextWrapped("Auto SDT type:");
-		ImGui::ShowHelpMarker("Vergil will automatically enter to SDT form if jce was started in human form. After appearing Vergil will automatically go to the human form. JCE interruption also force "
-			"Vergil to go to the human form.");
-		//ImGui::Checkbox("Auto SDT", &isAutoSdt);
-		ImGui::RadioButton("Off", (int*)&autoSdtType, 0);
-		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("Without SDT explosion efx", (int*)&autoSdtType, 1);
-		ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-		ImGui::RadioButton("With SDT explosion efx", (int*)&autoSdtType, 2);
-		ImGui::Separator();
-		ImGui::TextWrapped("Select DMC3 JCE type:");
+	if (ImGui::RadioButton("Dynamic", (int*)&jcTypeUi, 2))
+		jceController->set_jce_type(jcTypeUi);
+	ImGui::ShowHelpMarker("Hold the attack button when Vergil starts the Judgment Cut Barrage to perform a JCE that tracks the enemy. Otherwise, the barrage will spread out in a circle around the starting point.");
 
-		if (ImGui::RadioButton("Random", (int*)&jcTypeUi, 0))
-			jceController->set_jce_type(jcTypeUi);
-		ImGui::SameLine(); ImGui::Spacing();
-		if (ImGui::RadioButton("Tracking", (int*)&jcTypeUi, 1))
-			jceController->set_jce_type(jcTypeUi);
-
-		switch (jceController->get_jce_type())
-		{
-			case JCEController::Type::Random:
-			{
-				ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
-				UI::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-				if (ImGui::Button("Apply delay settings ##0"))
-					jceController->set_rndspawn_delay(rndDelay);
-				ImGui::TextWrapped("Interval between spawning a Judgement Cut on the lock-on target:");
-				UI::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-				ImGui::TextWrapped("Execution duration:");
-				UI::SliderFloat("##rndExeTime", &rndExeDuration, 2.8f, 8.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-				jceController->executionTimeAsm = rndExeDuration;
-				break;
-			}
-			case JCEController::Type::Track:
-			{
-				ImGui::TextWrapped("Delay between each JdC spawn (ms). Low values can crash the game:");
-				UI::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-				if (ImGui::Button("Apply delay settings ##1"))
-					jceController->set_trackspawn_delay(trackDelay);
-				ImGui::TextWrapped("Execution duration:");
-				UI::SliderFloat("##trackExeTime", &trackExeDuration, 3.0f, 8.5f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
-				jceController->executionTimeAsm = trackExeDuration;
-				break;
-			}
-			default:
-				break;
-		}
-		ImGui::Separator();
-		//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);
-
-		ImGui::TextWrapped("If something goes wrong(TM) and JCE execution doesn't stop after Vergil appears, press this:");
-		if (ImGui::Button("Stop JCE"))
-		{
-			isJceRunning = false;
-			jceController->stop_jce();
-
-		}
-	}
+	if (ImGui::RadioButton("Random", (int*)&jcTypeUi, 0))
+		jceController->set_jce_type(jcTypeUi);
+	ImGui::SameLine(); ImGui::Spacing();
+	if (ImGui::RadioButton("Target", (int*)&jcTypeUi, 1))
+		jceController->set_jce_type(jcTypeUi);
 	
-	//ImGui::Separator();
-	//ImGui::TextWrapped("Start spawning jce. Keep this here only for fun.");
-	//if (ImGui::Button("Start 3 jce"))
-	//{
-		//jceController->start_jce();
-	//}
+	
+
+	switch (jceController->get_jce_type())
+	{
+		case JCEController::Type::Random:
+		{
+			ImGui::TextWrapped("Delay between each JdC spawn. Low values can crash the game:");
+			if(UI::SliderInt("##DelayRand", &rndDelay, 78, 450, "%d", 1.0F, ImGuiSliderFlags_None))
+				jceController->set_rndspawn_delay(rndDelay);
+			ImGui::TextWrapped("Interval between spawning a Judgement Cut on the lock-on target:");
+			UI::SliderInt("##rndInterval", &jceController->rndEmTrackInterval, 12, 32, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
+			ImGui::TextWrapped("Execution duration:");
+			UI::SliderFloat("##rndExeTime", &jceController->rndExeTime, 2.8f, 8.0f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
+			break;
+		}
+		case JCEController::Type::Track:
+		{
+			ImGui::TextWrapped("Delay between each JdC spawn. Low values can crash the game:");
+			if(UI::SliderInt("##DelayTrack", &trackDelay, 115, 450, "%d", 1.0F, ImGuiSliderFlags_None))
+				jceController->set_trackspawn_delay(trackDelay);
+			ImGui::TextWrapped("Execution duration:");
+			UI::SliderFloat("##trackExeTime", &jceController->trackExeTime, 3.0f, 8.5f, "%.1f", 1.0F, ImGuiSliderFlags_AlwaysClamp);
+			break;
+		}
+		default:
+			break;
+	}
+	ImGui::Separator();
+	//ImGui::InputInt("RayCastQuerySize", &curRayCastSize);
+
+	ImGui::TextWrapped("If something goes wrong and Judgment Cuts continue to spawn after Vergil appears, press this:");
+	if (ImGui::Button("Stop JCE Barrage."))
+	{
+		isJceRunning = false;
+		jceController->stop_jce();
+
+	}
 }
 
 void DMC3JCE::init_check_box_info()

@@ -108,21 +108,25 @@ namespace GameFunctions
 		Quaternion rot;
 		int lvl = 0;
 		int id = 0;
+		int contextRequestUnk = -1;
 
 		DelayParam *delay;
 
-	public:
-		
+		bool isIgnoringThreadContext;
 
-		CreateShell()
+	public:
+
+		CreateShell(bool ignoreThreadContext = false, uintptr_t threadContext = 0)
 		{
 			fAddr +=  0x1B0A400;
 			create_shell = (f_CreateShell)fAddr;
 			delay = nullptr;
 			threadContext = get_thread_context();
+			isIgnoringThreadContext = ignoreThreadContext;
+			this->threadContext = threadContext;
 		}
 
-		CreateShell(uintptr_t prefab) : CreateShell()
+		CreateShell(uintptr_t prefab, bool ignoreThreadContext = false, uintptr_t threadContext = 0) : CreateShell(ignoreThreadContext, threadContext)
 		{
 			pfb = prefab;
 		}
@@ -159,14 +163,15 @@ namespace GameFunctions
 			if (pfb != 0 && fAddr != NULL)
 			{
 				uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-				if(shellMng == 0 || IsBadReadPtr((void*)shellMng, 8))
+				if(shellMng == 0)
 					return 0;
-				threadContext = get_thread_context();
+				if(!isIgnoringThreadContext)
+					threadContext = get_thread_context(/*contextRequestUnk++*/);
 				if (threadContext == 0)
-				{
 					return 0;
-				}
 				res = create_shell((void*)threadContext, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
+				if(contextRequestUnk >= 3)
+					contextRequestUnk = -1;
 			}
 			return res;
 		}

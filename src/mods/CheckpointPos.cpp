@@ -28,8 +28,9 @@ void load_boss_checkpoint() {
     CheckpointPos::newRestartPos = CheckpointPos::customPos;
     return;
   }
+  int mNum = *(int*)((uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.GameManager") + 0x80);
   for (int i = 0; i < CheckpointPos::mPosData.size(); i++) {
-      if (CheckpointPos::mPosData[i].mNumber == MissionManager::missionNumber) {
+      if (CheckpointPos::mPosData[i].mNumber == mNum) {
       CheckpointPos::isNoBoss = false;
         CheckpointPos::newRestartPos = CheckpointPos::mPosData[i].pos;
       return;
@@ -69,8 +70,8 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   m_is_enabled        = &cheaton;
   m_on_page           = Page_GameMode;
   m_full_name_string = "Custom Checkpoints (+)";
-  m_author_string    = "VPZadov";
-  m_description_string = "Create a custom checkpoint to reset to. Uses boss checkpoints by default.";
+  m_author_string    = "V.P.Zadov";
+  m_description_string = "Create a custom checkpoint position. Uses boss checkpoints by default.";
 
   plCoordBase = g_framework->get_module().as<uintptr_t>() + 0x07E625D0;
 
@@ -104,16 +105,16 @@ void CheckpointPos::on_config_save(utility::Config& cfg) {
 // void CheckpointPos::on_frame() {}
 
 void CheckpointPos::on_draw_ui() {
-  ImGui::TextWrapped("Select \"Checkpoint\" in mission menu (or press \"Continue\" from main menu) to load at the coordinates below.");
+  ImGui::TextWrapped("Select \"Checkpoint\" in the mission menu (or press \"Continue\" from main menu) to load at the coordinates below.");
   ImGui::Separator();
-  ImGui::Checkbox("Use custom checkpoint position", &isCustomPos);
-  ImGui::ShowHelpMarker("If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
+  ImGui::Checkbox("Use a custom checkpoint position", &isCustomPos);
+  ImGui::ShowHelpMarker("Check this to use a custom checkpoint. If you leave this box unchecked, you'll spawn near the boss in your selected stage.");
   if (isCustomPos) {
     ImGui::InputFloat("X coord", &customPos.x, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Y coord", &customPos.y, 0.0f, 0.0f, "%.3f");
     ImGui::InputFloat("Z coord", &customPos.z, 0.0f, 0.0f, "%.3f");
-    if (ImGui::Button("Get current player position (don't click it if you are not in a mission)")) {
-      if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+    if (ImGui::Button("Get the current player position (don't click it if you are not in a mission)")) {
+      if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
         playerPos = get_player_coords();
       }
     ImGui::TextWrapped("X: %.3f", playerPos.x);
@@ -127,23 +128,23 @@ void CheckpointPos::on_draw_ui() {
   ImGui::TextWrapped("Set player's position:");
   ImGui::DragFloat3("##TeleportPos", (float*)&newPlPos);
   ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-  if (ImGui::Button("Get current player's position"))
+  if (ImGui::Button("Get the player's position"))
   {
-      if (EnemySwapper::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+      if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
           newPlPos = get_player_coords();
   }
   ImGui::Spacing();
-  if (ImGui::Button("Get boss pos"))
+  if (ImGui::Button("Get boss position"))
       newPlPos = get_boss_pos();
   ImGui::Spacing();
   
-  if (ImGui::Button("Set position"))
+  if (ImGui::Button("Teleport to position"))
       {
-          if(PlayerTracker::playerentity == 0 || EnemySwapper::nowFlow != 22)
+          if(PlayerTracker::playerentity == 0 || GameplayStateTracker::nowFlow != 22)
               return;
           GameFunctions::Transform_SetPosition::set_character_pos(PlayerTracker::playerentity, newPlPos);
       }
-  ImGui::ShowHelpMarker("It's actually instant teleport to a selected pos, so it can throw character in out of bounds.");
+  ImGui::ShowHelpMarker("Instantly teleport to a selected position. Can teleport the player out-of-bounds.");
   }
 
 // void CheckpointPos::on_draw_debug_ui() {}
@@ -157,46 +158,21 @@ Vector3f CheckpointPos::get_boss_pos()
 {
     for (int i = 0; i < CheckpointPos::mPosData.size(); i++)
     {
-        if (CheckpointPos::mPosData[i].mNumber == MissionManager::missionNumber)
+        if (CheckpointPos::mPosData[i].mNumber == *(int*)((uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.GameManager") + 0x80))
             return CheckpointPos::mPosData[i].pos;
     }
 }
 
-uintptr_t CheckpointPos::get_player_coords_ptr(uintptr_t addr) {
-  auto offs = *(uintptr_t*)(addr + coordsOffsets[0]);
-  if (offs == 0) // It's actually doesn't help)
-    return 0;
-  for (int i = 1; i < coordsOffsets.size() - 1; i++) {
-    offs = *(uintptr_t*)(offs + coordsOffsets[i]);
-  }
-  return offs;
-}
-
-bool CheckpointPos::is_null_ptr(uintptr_t ptr) {
-  if (ptr == 0) {
-    playerPos.x = 0.0f;
-    playerPos.y = 0.0f;
-    playerPos.z = 0.0f;
-    return true;
-  }
-    return false;
-}
-
 Vector3f CheckpointPos::get_player_coords() {
-    uintptr_t lastOffset;
-  uintptr_t offs = coordsOffsets[coordsOffsets.size() - 1];
-   uintptr_t resHex;
-   Vector3f res{0,0,0};
-   auto address = *(uintptr_t*)plCoordBase;
-   lastOffset = get_player_coords_ptr(address);
-   if (is_null_ptr(lastOffset))
-     return res;
-   resHex = *(uintptr_t*)(lastOffset + offs);
-   res.x  = *((float*)&resHex);
-   resHex = *(uintptr_t*)(lastOffset + offs + 0x4);
-   res.z  = *((float*)&resHex);
-   resHex = *(uintptr_t*)(lastOffset + offs + 0x8);
-   res.y  = *((float*)&resHex);
-   return res;
+    auto plManager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
+    if(plManager == 0)
+        return Vector3f{0,0,0};
+    auto pl = *(uintptr_t*)((uintptr_t)plManager + 0x60);
+    if (pl == 0)
+        return Vector3f { 0,0,0 };
+    auto gameObj = *(uintptr_t*)(pl + 0x10);
+    auto transform = *(uintptr_t*)(gameObj + 0x18);
+    gf::Vec3 pos = *(gf::Vec3*)(transform + 0x30);
+    return pos.to_vector3f();
 }
 //clang-format on

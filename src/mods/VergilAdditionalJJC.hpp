@@ -19,7 +19,7 @@ public:
     m_is_enabled        = &cheaton;
     m_on_page           = Page_VergilCheat;
     m_full_name_string = "Additional JJC in SDT";
-    m_author_string    = "VPZadov";
+    m_author_string    = "V.P.Zadov";
     m_description_string = "Allow Vergil to perform an extra JJC while in SDT.";
     if (cheaton)
       VergilSetMaxJJC::cheaton = true;

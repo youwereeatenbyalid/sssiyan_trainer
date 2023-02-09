@@ -1,4 +1,5 @@
 #include "AirMoves.hpp"
+#include "PlSetActionData.hpp"
 
 bool AirMoves::is_movecheat_enabled_asm(Moves move)
 {
@@ -39,16 +40,23 @@ bool AirMoves::is_movecheat_enabled_asm(Moves move)
 	return false;
 }
 
-void AirMoves::str_cur_action_asm(uintptr_t dotNetString)
+void AirMoves::str_cur_action_asm(uintptr_t curPl)
 {
 	if (AirMoves::curMoveHook != nullptr)
 	{
-		if (AirMoves::curMoveHook->cheatOn && gf::StringController::str_cmp(dotNetString, AirMoves::curMoveHook->get_ingame_name()))
-			AirMoves::isAirProcess = true;
-		else if (!gf::StringController::str_cmp(dotNetString, "None") && !gf::StringController::str_cmp(dotNetString, "PutOut"))
+		if (*(int*)(curPl + 0xE64) == 4 && *(bool*)(curPl + 0x17F0))
 		{
-			AirMoves::isAirProcess = false;
-			AirMoves::curMoveHook = nullptr;
+			return;
+		}
+		else
+		{
+			if (AirMoves::curMoveHook->cheatOn && PlSetActionData::cmp_real_cur_action(AirMoves::curMoveHook->get_ingame_name()))
+				AirMoves::isAirProcess = true;
+			else if ( !PlSetActionData::cmp_cur_action("None") && !PlSetActionData::cmp_cur_action("PutOut"))
+			{
+				AirMoves::isAirProcess = false;
+				AirMoves::curMoveHook = nullptr;
+			}
 		}
 	}
 }
@@ -391,7 +399,8 @@ static naked void check_ground_hit_detour()
 
 		cheat:
 		cmp qword ptr [PlayerTracker::playerentity], rdx
-		jne originalcode
+		jne doppelcheck
+		aircheck:
 		cmp byte ptr [AirMoves::isAirProcess], 0
 		je originalcode
 		jmp qword ptr [AirMoves::checkGroundHitCallRet]
@@ -399,6 +408,11 @@ static naked void check_ground_hit_detour()
 		originalcode:
 		call qword ptr [r8+0x000005A0]
 		jmp qword ptr [AirMoves::checkGroundHitCallRet]
+
+		doppelcheck:
+		cmp qword ptr [PlayerTracker::doppelentity], rdx
+		jne originalcode
+		jmp aircheck
 	}
 }
 
@@ -421,6 +435,105 @@ static naked void trickdodge_air_crash_detour()
 	}
 }
 
+static naked void sparda_rt_air_detour()
+{
+	__asm {
+		cmp byte ptr [AirMoves::cheaton], 0 
+		je originalcode
+
+		cmp al, 1
+		je setnull
+		push rax
+		push rcx
+		mov ecx, AirMoves::Moves::SpardaRT
+		sub rsp, 32
+		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		add rsp, 32
+		cmp al, 0
+		pop rcx
+		pop rax
+		je originalcode
+
+		cheat:
+		mov al, 1
+
+		originalcode:
+		movzx ecx,al
+		mov rax, [rbx + 0x50]
+		jmp qword ptr [AirMoves::_spardaRTAirRet]
+
+		setnull:
+		mov AirMoves::curMoveHook, 0
+		jmp originalcode
+	}
+}
+
+static naked void rebellion_rt_air_detour()
+{
+	__asm {
+		cmp byte ptr [AirMoves::cheaton], 0 
+		je originalcode
+
+		cmp al, 1
+		je setnull
+		push rax
+		push rcx
+		mov ecx, AirMoves::Moves::RebellionRT
+		sub rsp, 32
+		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		add rsp, 32
+		cmp al, 0
+		pop rcx
+		pop rax
+		je originalcode
+
+		cheat:
+		mov al, 1
+
+		originalcode:
+		movzx ecx,al
+		mov rax, [rbx + 0x50]
+		jmp qword ptr [AirMoves::_rbRTAirRet]
+
+		setnull:
+		mov AirMoves::curMoveHook, 0
+		jmp originalcode
+	}
+}
+
+//static naked void jce_air_detour()
+//{
+//	__asm {
+//		cmp byte ptr [AirMoves::cheaton], 0 
+//		je originalcode
+//
+//		cmp al, 1
+//		je setnull
+//		push rax
+//		push rcx
+//		mov ecx, AirMoves::Moves::JCE
+//		sub rsp, 32
+//		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+//		add rsp, 32
+//		cmp al, 0
+//		pop rcx
+//		pop rax
+//		je originalcode
+//
+//		cheat:
+//		mov al, 1
+//
+//		originalcode:
+//		movzx ecx,al
+//		mov rax, [rbx + 0x50]
+//		jmp qword ptr [AirMoves::_jceAirRet]
+//
+//		setnull:
+//		mov AirMoves::curMoveHook, 0
+//		jmp originalcode
+//	}
+//}
+
 
 std::optional<std::string> AirMoves::on_initialize()
 {
@@ -430,8 +543,8 @@ std::optional<std::string> AirMoves::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_Mechanics;
 	m_full_name_string = "Air Moves";
-	m_author_string = "VPZadov";
-	m_description_string = "Allow perform some ground moves in the air.";
+	m_author_string = "V.P.Zadov";
+	m_description_string = "Allow characters to perform certain ground moves in the air.";
 
 	set_up_hotkey();
 
@@ -499,6 +612,9 @@ std::optional<std::string> AirMoves::on_initialize()
 	uintptr_t spStingerAirAddr = p64Base + 0x16E3058;
 	uintptr_t dsStingerAirAddr = p64Base + 0x1CCE4E7;
 	airTrickDodgeCrashJne = airDodgeCrashAddr.value() + 0x7 + 0xBF;
+	uintptr_t spRtAirAddr = p64Base + 0x16E3988;
+	uintptr_t rbRtAirAddr = p64Base + 0x12617F8;
+	//uintptr_t jceAirAddr = p64Base + 0x1C0A4E0;
 
 	if (!install_hook_absolute(rapidSlashIsAirAddr.value(), m_rapidslash_air_hook, &rapidslash_aircheck_detour, &rapidSlashIsAirRet, 0x7))
 	{
@@ -566,11 +682,23 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Failed to initialize AirMoves.iceAgeAir";
 	}
 
-	if (!install_hook_absolute(blitzAddr.value(), m_cerberus_blitz_air_hook, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
+	if (!install_hook_absolute(spRtAirAddr, _spRtAirHook, &sparda_rt_air_detour, &_spardaRTAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize AirMoves.blitz";
+		return "Failed to initialize AirMoves.spRtAir";
 	}
+
+	if (!install_hook_absolute(rbRtAirAddr, _rbRtAirHook, &rebellion_rt_air_detour, &_rbRTAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.rbRtAir";
+	}
+
+	/*if (!install_hook_absolute(jceAirAddr, _jceAirHook, &jce_air_detour, &_jceAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.jceAir";
+	}*/
 
 	return Mod::on_initialize();
 }
@@ -593,7 +721,7 @@ void AirMoves::on_config_save(utility::Config& cfg)
 	{
 		cfg.set<bool>(std::string( "AirMoves." + std::string(vergilMoves->operator[](i).get_name())), vergilMoves->operator[](i).cheatOn);
 	}
-	for (int i = 0; i < vergilMoves->size(); i++)
+	for (int i = 0; i < danteMoves->size(); i++)
 	{
 		cfg.set<bool>(std::string("AirMoves." + std::string(danteMoves->operator[](i).get_name())), danteMoves->operator[](i).cheatOn);
 	}

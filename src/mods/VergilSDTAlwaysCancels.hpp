@@ -58,9 +58,9 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilSDT;
-		m_full_name_string = "SDT always cancels";
-		m_author_string = "VPZadov";
-		m_description_string = "Force cancel SDT activation animation even when some buttons is pressed.";
+		m_full_name_string = "Force SDT activation animation";
+		m_author_string = "V.P.Zadov";
+		m_description_string = "Forces the SDT activation animation to play even if Vergil is mid-move.";
 
 		set_up_hotkey();
 

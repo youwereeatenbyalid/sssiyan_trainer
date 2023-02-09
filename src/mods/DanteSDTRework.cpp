@@ -189,7 +189,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     m_on_page = Page_DanteSDT;
 
     m_full_name_string = "SDT Rework";
-    m_author_string = "SSSiyan, VPZadov";
+    m_author_string = "SSSiyan, V.P.Zadov";
     m_description_string = "DT and SDT are a shared resource. Tap to DT, Hold to SDT. At least 3 bars of DT are required to enter SDT.";
 
     set_up_hotkey();

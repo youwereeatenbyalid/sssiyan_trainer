@@ -1,82 +1,21 @@
-//#pragma once
+#pragma once
 #include "Mod.hpp"
 #include "GameFunctions/PlVergilDoppel.hpp"
-#include "PlayerTracker.hpp"
+#include "VergilDoppelInitSetup.hpp"
+
 //clang-format off
-namespace f = GameFunctions;
+namespace gf = GameFunctions;
 class InstantDoppel : public Mod
 {
 public:
 	InstantDoppel() = default;
 
-	enum DoppelSpeed
+	~InstantDoppel()
 	{
-		None,
-		Fast,
-		Default,
-		Slow
-	};
-
-	static inline DoppelSpeed delay = DoppelSpeed::Fast;
+		VergilDoppelInitSetup::on_doppel_summon_unsub(std::make_shared<Events::EventHandler<InstantDoppel, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>(this, &InstantDoppel::on_doppel_summon));
+	}
 
 	static inline bool cheaton = true;
-	static inline bool isControlledBySpeedState = false;
-
-	static inline uintptr_t ret = 0;
-	static inline uintptr_t fVergilSetActionAddr = 0;
-
-	static bool setup_doppel_asm()
-	{
-		auto vergil = PlayerTracker::vergilentity;
-		if (isControlledBySpeedState)
-		{
-			if(*(DoppelSpeed*)(vergil + 0x18CC) != delay)
-				return false;
-		}
-		f::SetDoppelMode setDoppel{vergil};
-		setDoppel(true);
-		f::GenerateDoppel genDoppel{vergil};
-		genDoppel(f::Vec3(0, 1.2f, 0), false);
-		return true;
-	}
-
-	static naked void detour()
-	{
-		__asm {
-			cmp byte ptr [InstantDoppel::cheaton], 1
-			je cheat
-
-			originalcode:
-			call qword ptr [InstantDoppel::fVergilSetActionAddr]
-			jmp qword ptr[InstantDoppel::ret]
-
-			cheat:
-			cmp r8d, 1
-			jne originalcode
-			push rax
-			push rdx
-			push rcx
-			push rsi
-			push r8
-			push r9
-			push r10
-			push r12
-			sub rsp, 32
-			call qword ptr [InstantDoppel::setup_doppel_asm]
-			add rsp, 32
-			cmp al, 0
-			pop r12
-			pop r10
-			pop r9
-			pop r8
-			pop rsi
-			pop rcx
-			pop rdx
-			pop rax
-			je originalcode
-			jmp qword ptr[InstantDoppel::ret]
-		}
-	}
 
 	std::string_view get_name() const override
 	{
@@ -98,25 +37,12 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilDoppel;
 		m_full_name_string = "Summon doppelganger instantly (+)";
-		m_author_string = "VPZadov";
+		m_author_string = "V.P.Zadov";
 		m_description_string = "Remove Vergil's i-frame DT activation motion and summon doppelganger instantly (doppel himself still have appears motion)";
 
 		set_up_hotkey();
 
-
-		auto setActionDoppelAddr = m_patterns_cache->find_addr(base, "E8 33 18 01 00");//DevilMayCry5.exe+533E68
-		if (!setActionDoppelAddr)
-		{
-			return "Unable to find InstantDoppel.setActionDoppelAddr pattern.";
-		}
-
-		fVergilSetActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 56 57 41 57 48 83 EC 60").value_or(g_framework->get_module().as<uintptr_t>() + 0x5456A0); //DevilMayCry5.exe+5456A0
-
-		if (!install_hook_absolute(setActionDoppelAddr.value(), m_doppel_hook, &detour, &ret, 0x5))
-		{
-			spdlog::error("[{}] failed to initialize", get_name());
-			return "Failed to initialize InstantDoppel.setActionDoppel";
-		}
+		VergilDoppelInitSetup::on_doppel_summon_sub(std::make_shared<Events::EventHandler<InstantDoppel, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>(this, &InstantDoppel::on_doppel_summon));
 
 		return Mod::on_initialize();
 	}
@@ -125,7 +51,7 @@ public:
 	void on_config_load(const utility::Config& cfg) override 
 	{
 		isControlledBySpeedState = cfg.get<bool>("InstantDoppel.isControlledBySpeedState").value_or(false);
-		delay = (DoppelSpeed)cfg.get<int>("InstantDoppel.Delay").value_or(1);
+		delay = (VergilDoppelInitSetup::DoppelDelayState)cfg.get<int>("InstantDoppel.Delay").value_or(1);
 	}
 	void on_config_save(utility::Config& cfg) override 
 	{
@@ -144,9 +70,9 @@ public:
 		{
 			for (int i = 1; i <= delayNames.size(); i++)
 			{
-				isSelected = (delay == (DoppelSpeed)i);
+				isSelected = (delay == (VergilDoppelInitSetup::DoppelDelayState)i);
 				if(ImGui::Selectable(delayNames[i-1], isSelected))
-					delay = (DoppelSpeed)i;
+					delay = (VergilDoppelInitSetup::DoppelDelayState)i;
 				if (isSelected)
 					ImGui::SetItemDefaultFocus();
 			}
@@ -160,9 +86,33 @@ private:
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
-	std::unique_ptr<FunctionHook> m_doppel_hook;
 
 	const std::array<char*, 3> delayNames {"Fast mode", "Default mode", "Slow mode"};
+
+	static inline VergilDoppelInitSetup::DoppelDelayState delay = VergilDoppelInitSetup::DoppelDelayState::Fast;
+
+	static inline bool isControlledBySpeedState = false;
+
+	void on_doppel_summon(uintptr_t vergil, VergilDoppelInitSetup::DoppelDelayState doppelSpeed, bool *skipSummon)
+	{
+		if (!cheaton || *(bool*)(vergil + 0x18A8) || *(float*)(vergil + 0x1110) < 3000.0f)
+			return;
+		if (isControlledBySpeedState)
+		{
+			if (doppelSpeed != InstantDoppel::delay)
+			{
+				*skipSummon = false;
+				return;
+			}
+		}
+		*(int*)(vergil + 0x18C8) = *(int*)(vergil + 0x18CC) = VergilDoppelInitSetup::DoppelDelayState::Fast;
+		//*(bool*)(vergil + 0x18A8) = true;
+		gf::SetDoppelMode setDoppel{ vergil };
+		gf::GenerateDoppel genDoppel{ vergil };
+		setDoppel(true);
+		genDoppel(gf::Vec3(0, 1.2f, 0), false);
+		*skipSummon = true;
+	}
 
 };
 //clang-format on

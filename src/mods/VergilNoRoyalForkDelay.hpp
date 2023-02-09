@@ -45,7 +45,7 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilCheat;
 		m_full_name_string = "No delay after V's royal fork";
-		m_author_string = "VPZadov";
+		m_author_string = "V.P.Zadov";
 		m_description_string = "Remove the delay between royal fork and returning to normal state while performing \"World of V\".";
 
 		set_up_hotkey();

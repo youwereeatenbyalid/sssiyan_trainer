@@ -55,7 +55,7 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilVFXSettings;
 	m_full_name_string = "SDT Tricks EFX";
-	m_author_string = "VPZadov";
+	m_author_string = "V.P.Zadov";
 	m_description_string = "Always use SDT Tricks EFX and SDT yamato sheath flash EFX.";
 
   set_up_hotkey();

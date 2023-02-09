@@ -5,12 +5,16 @@
 
 #include <sdk/SDK.hpp>
 
+#include <shellapi.h>
+
 // ours
 #include "fw-imgui/imgui_impl_win32.h"
 #include "fw-imgui/imgui_impl_dx11.h"
 #include "fw-imgui/imgui_impl_dx12.h"
 
 #include "fw-imgui/font_robotomedium.hpp"
+
+#include "ImGuiExtensions/ImGuiExtensions.h"
 //#include "dmc5font.hpp"
 #include "logo.hpp"
 #include "icons.hpp"
@@ -1003,6 +1007,7 @@ bool ModFramework::initialize() {
 
     // just do this instead of rehooking because there's no point.
     if (m_first_frame) {
+        //std::lock_guard<std::mutex> lck(m_controllerhook_mtx);
         m_dinput_hook = std::make_unique<DInputHook>(m_wnd);
         m_controller_hook = std::make_unique<ControllerHook>();
     }
@@ -1271,6 +1276,7 @@ void ModFramework::draw_ui() {
     const auto load_label_size = ImGui::CalcTextSize(load_label);
     const auto save_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, save_label_size.x + style.FramePadding.x * 2.0f, save_label_size.y + style.FramePadding.y * 2.0f);
     const auto load_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, load_label_size.x + style.FramePadding.x * 2.0f, load_label_size.y + style.FramePadding.y * 2.0f);
+    const auto tr_version_size = ImGui::CalcTextSize(TRAINER_VERSION_STR);
 
     ImGui::SetCursorPosX(trainer_width / 2 - (save_button_size.x + load_button_size.x) / 2);
 
@@ -1286,6 +1292,11 @@ void ModFramework::draw_ui() {
     if (ImGui::Button(load_label)) {
         load_config();
     }
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(trainer_width - tr_version_size.x);
+    ImGui::TextWrapped(TRAINER_VERSION_STR);
+
     ImGui::PopStyleColor(4);
 
     ImGui::PopStyleVar();
@@ -1416,14 +1427,22 @@ void ModFramework::draw_panels() const
     ImGui::PopStyleColor();
     {
         if (m_error.empty() && m_game_data_initialized) {
-            ImGui::Text("Game Balance");
-            m_mods->on_pagelist_ui(Mod::Page_Balance, modListIndent);
 
-            ImGui::Separator();
             ImGui::Text("Game Modes");
             m_mods->on_pagelist_ui(Mod::Page_GameMode, modListIndent);
 
             ImGui::Separator();
+            
+            ImGui::Text("Encounter Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Encounters, modListIndent);
+
+            ImGui::Separator();
+
+            ImGui::Text("Enemy Settings");
+            m_mods->on_pagelist_ui(Mod::Page_Enemies, modListIndent);
+
+            ImGui::Separator();
+            
             ImGui::Text("Bloody Palace");
             m_mods->on_pagelist_ui(Mod::Page_BloodyPalace, modListIndent);
         }
@@ -1569,28 +1588,30 @@ void ModFramework::draw_options() const
 
     ImGui::Begin("Options", nullptr, panel_flags);
     {
-        const auto current_mod = m_mods->get_mod(m_mods->get_focused_mod());
+        if (m_game_data_initialized) {
+			const auto& current_mod = m_mods->get_mod(m_mods->get_focused_mod());
 
-        if (current_mod != nullptr) {
-            ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-            ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-            ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+            if (current_mod != nullptr) {
+                ImGui::TextWrapped("Selected Mod: %s", current_mod->m_full_name_string.c_str());
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+                ImGui::TextWrapped("Description: %s", current_mod->m_description_string.c_str());
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+                ImGui::TextWrapped("Author: %s", current_mod->m_author_string.c_str());
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
 
-            ImGui::Separator();
+                ImGui::Separator();
 
-            current_mod->on_draw_ui();
+                current_mod->on_draw_ui();
+            }
+            else {
+				if (m_error.empty()) {
+					ImGui::TextWrapped("Welcome to SSSiyan's collaborative cheat trainer!\n"
+						"Click any cheat marked with (+) to view additional options.");
+				}
+            }
         } else
         {
-            if (m_error.empty() && m_game_data_initialized) {
-                ImGui::TextWrapped("Welcome to SSSiyan's collaborative cheat trainer!\n"
-                    "Click any cheat marked with (+) to view additional options.");
-            }
-            else if (!m_game_data_initialized) {
-                ImGui::TextWrapped("Trainer is currently initializing...");
-            }
+            ImGui::TextWrapped("Trainer is currently initializing...");
         }
     }
     ImGui::End();
@@ -1632,28 +1653,91 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
+        //ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilver\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
+         //   "all this delays with turbo mod speed when it enabled.");
 
         ImGui::Spacing();
         if (ImGui::TreeNodeEx("About")) {
             if (ImGui::TreeNodeEx("Credits"))
             {
-                { // NOBODY TOUCHES THIS OR I SWEAR...
+                const ImVec4 defaultColor{ 0.46f, 0.46f, 0.92f, 1.0f };
+                { // NOBODY TOUCHES THIS OR I SWEAR... 
+                  //sorry Dark, it was for greater goods....
                     static float r, g, b;
                     ImGui::ColorConvertHSVtoRGB(static_cast<float>(std::abs(std::sin(static_cast<double>(GetTickCount64() % (20LL * 360LL)) / (20.0 * 360.0)))), 1.0f, 1.0f, r, g, b);
                     ImGui::PushStyleColor(ImGuiCol_Text, { r, g, b, 1.0f });
-                    ImGui::TextWrapped("Darkness\n");
+
+                    if (ImGui::TreeNode("Darkness"))
+                    {
+                        ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/70013978?tab=about+me", defaultColor);
+                        ImGui::TextHyperlink("Github", "https://github.com/amir-120", defaultColor);
+                        ImGui::TreePop();
+                    }
+
                     ImGui::Dummy({ 0.0f, 1.0f * m_scale });
                     ImGui::PopStyleColor();
                 }
 
-                ImGui::TextWrapped(//"Darkness\n\n"
-                    "The Hitchhiker\n\n"
-                    "Siyan\n\n"
-                    "VPZadov\n\n"
-                    "Deepdarkkapustka\n\n"
-                    "Lidemi\n\n"
-                    "Dr. Penguin\n\n"
-                    "Special thanks to Praydog and Cursey for their awesome work on REFramework which inspired this project!");
+                if (ImGui::TreeNode("The Hitchhiker"))
+                {
+                    ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/49242683", defaultColor);
+                    ImGui::TextHyperlink("Youtube", "https://www.youtube.com/c/TheHitchhiker", defaultColor);
+                    ImGui::TextHyperlink("Twitch", "https://www.twitch.tv/hitchhikingthrough", defaultColor);
+                    ImGui::TextHyperlink("Twitter", "https://twitter.com/Hitchhikingthr2", defaultColor);
+                    ImGui::TextHyperlink("Patreon", "https://www.patreon.com/HitchhikingThrough", defaultColor);
+                    ImGui::TextHyperlink("Discord server", "https://discord.com/invite/fyrKPURnGW", defaultColor);
+                    ImGui::TextHyperlink("Github", "https://github.com/youwereeatenbyalid", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Siyan"))
+                {
+                    ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/68550442", defaultColor);
+                    ImGui::TextHyperlink("Twitch", "https://www.twitch.tv/sssiyan", defaultColor);
+                    ImGui::TextHyperlink("Twitter", "https://twitter.com/SSSiyan", defaultColor);
+                    ImGui::TextHyperlink("Github", "https://github.com/SSSiyan", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("V.P.Zadov"))
+                {
+                    ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/58891706", defaultColor);
+                    ImGui::TextHyperlink("Youtube", "https://www.youtube.com/@missingname9779", defaultColor);
+                    ImGui::TextHyperlink("Boosty", "https://boosty.to/iregretnothing", defaultColor);
+                    ImGui::TextHyperlink("Github", "https://github.com/NewRussianPirate", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Deepdarkkapustka"))
+                {
+                    ImGui::TextHyperlink("Youtube", "https://www.youtube.com/@mstislavcapusta7573", defaultColor);
+                    ImGui::TextHyperlink("Github", "https://github.com/muhopensores", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Lidemi"))
+                {
+                    ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/3813819", defaultColor);
+                    ImGui::TextHyperlink("Twitter", "https://twitter.com/Phelfar", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Dr. Penguin"))
+                {
+                    ImGui::TextHyperlink("Nexus", "https://www.nexusmods.com/devilmaycry5/users/28156995", defaultColor);
+                    //ImGui::TextHyperlink("Twitter", "???", defaultColor);
+                    ImGui::TreePop();
+                }
+                ImGui::TextWrapped("Special thanks to Praydog and Cursey for their awesome work on REFramework which inspired this project!");
+                if (ImGui::TreeNode("Praydog"))
+                {
+                    ImGui::TextHyperlink("Github", "https://github.com/praydog", defaultColor);
+                    ImGui::TextHyperlink("Patreon", "https://www.patreon.com/praydog", defaultColor);
+                    ImGui::TextHyperlink("Personal site", "https://praydog.com/", defaultColor);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Cursey"))
+                {
+                    ImGui::TextHyperlink("Github", "https://github.com/cursey", defaultColor);
+                    ImGui::TextHyperlink("Twitter", "https://twitter.com/cursey_dev", defaultColor);
+                    ImGui::TextHyperlink("Personal site", "https://cursey.dev/", defaultColor);
+                    ImGui::TreePop();
+                }
                 ImGui::TreePop();
             }
 

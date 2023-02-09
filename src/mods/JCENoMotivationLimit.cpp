@@ -1,4 +1,5 @@
 #include "JCENoMotivationLimit.hpp"
+#include "BossTrickUp.hpp"
 //clang-format off
 
 static naked void no_motivation_detour()
@@ -31,10 +32,33 @@ static naked void no_motivation1_detour()
 	}
 }
 
+bool JCENoMotivationLimit::check_mods_settnigs_asm(uintptr_t vergil)
+{
+	if (BossTrickUp::cheaton)
+		return true;
+	if (*(int*)(vergil + 0x1978) == 1 && BossVergilMoves::cheaton && _mod->_bossMovesMod->is_air_raid_enabled())
+		return true;
+	return false;
+}
+
 static naked void no_motivation2_detour()
 {
 	__asm {
 		cmp byte ptr [JCENoMotivationLimit::cheaton], 1
+		je cheat
+
+		//check for other mods conditions:
+		push rax
+		push rbx
+		push rcx
+		mov rcx, rbx
+		sub rsp, 32
+		call qword ptr [JCENoMotivationLimit::check_mods_settnigs_asm]
+		add rsp, 32
+		cmp al, 1
+		pop rcx
+		pop rbx
+		pop rax
 		je cheat
 
 		originalcode:
@@ -59,6 +83,11 @@ static naked void no_motivation3_detour()
 		cheat:
 		jmp qword ptr [JCENoMotivationLimit::yamatoSdtConcSkip]
 	}
+}
+
+void JCENoMotivationLimit::after_all_inits()
+{
+	_bossMovesMod = static_cast<BossVergilMoves*>(g_framework->get_mods()->get_mod("BossVergilMoves"));
 }
 
 std::optional<std::string> JCENoMotivationLimit::on_initialize()
@@ -124,7 +153,6 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.yamatoSdtConcetration";
 	}
-
 
 	return Mod::on_initialize();
 }

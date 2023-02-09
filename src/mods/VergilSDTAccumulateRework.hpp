@@ -4,22 +4,27 @@
 #include "VergilInfSDT.hpp"
 #include "InfDT.hpp"
 #include "DMC3JCE.hpp"
+#include "PlayerTracker.hpp"
+#include "VergilQuickSilver.hpp"
+#include "DanteQuickSilver.hpp"
+
 class VergilSDTAccumulateRework : public Mod {
 public:
-  static bool cheaton;
+  static inline bool cheaton = false;
   //camelCase go brrr
-  static float sdtPointsToAdd;
-  static float curDtValue;
-  static float prevDtValue;
+  float sdtPointsToAdd = 55.0f;
   static constexpr float maxSdt = 10000.0;
 
-  static bool isNeedToAddStdPoints;
-  static inline bool isConstInc = false; 
-
-  static uintptr_t dtchange_jmp_ret;
-  static uintptr_t sdtchange_jmp_ret;
+  bool isConstInc = false; 
 
   VergilSDTAccumulateRework() = default;
+
+  ~VergilSDTAccumulateRework()
+  {
+	  _vergilQSMod = static_cast<VergilQuickSilver*>(g_framework->get_mods()->get_mod("VergilQuickSilver"));
+	  PlayerTracker::pl_add_dt_gauge_unsub(std::make_shared<Events::EventHandler<VergilSDTAccumulateRework, uintptr_t, uintptr_t, float*, int, bool>>
+		  (this, &VergilSDTAccumulateRework::on_pl_add_dt));
+  }
   std::string_view get_name() const override { return "VergilSDTAccumulateRework"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
@@ -41,6 +46,17 @@ public:
 private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
+	void on_pl_add_dt(uintptr_t threadCtxt, uintptr_t pl, float *val, int dtAddType, bool fixedValue);
+
+	VergilQuickSilver* _vergilQSMod = nullptr;
+
+	void after_all_inits() override
+	{
+		_vergilQSMod = static_cast<VergilQuickSilver*>(g_framework->get_mods()->get_mod("VergilQuickSilver"));
+		PlayerTracker::pl_add_dt_gauge_sub(std::make_shared<Events::EventHandler<VergilSDTAccumulateRework, uintptr_t, uintptr_t, float*, int, bool>>
+			(this, &VergilSDTAccumulateRework::on_pl_add_dt));
+	}
+
   void init_check_box_info() override;
-  std::unique_ptr<FunctionHook> m_dtchange_hook;
+ // std::unique_ptr<FunctionHook> m_dtchange_hook;
 };

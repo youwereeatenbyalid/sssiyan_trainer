@@ -307,6 +307,8 @@ public:
         Page_GameMode,
         Page_BloodyPalace,
         Page_Balance,
+        Page_Enemies,
+        Page_Encounters,
         Page_Camera,
         Page_QOL,
         Page_Mechanics,
@@ -399,6 +401,9 @@ public:
 		}
 		return true;
 	}
+
+    //Calls after all mods has been initialized; Should be pure virtual but then i need to override this in all mods.............
+    virtual void after_all_inits() {};
 
     // Called when ModFramework::initialize finishes in the first render frame
     // Returns an error string if it fails

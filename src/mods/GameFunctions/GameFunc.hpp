@@ -172,17 +172,6 @@ namespace GameFunctions
 				res = inverseQ * r2 * r1;
 			return Vec3(res.x, res.y, res.z);
 		}
-
-		/*friend Vec3 operator *(const Quaternion& r1, const Vec3& v1)
-		{
-			auto inverseQ = Quaternion::conjugate(r1);
-			Quaternion r2(v1.x, v1.y, v1.z, 0);
-			auto res = r1 * r2;
-			res = res * inverseQ;
-			return Vec3(res.x, res.y, res.z);
-
-		}*/
-
 	};
 
 	class PtrController
@@ -194,6 +183,16 @@ namespace GameFunctions
 		static bool is_bad_ptr(uintptr_t ptr) noexcept
 		{
 			return !utility::isGoodReadPtr(ptr, sizeof(ptr));
+		}
+
+		static bool is_bad_ptr(volatile void *ptr) noexcept
+		{
+			return !utility::isGoodReadPtr((uintptr_t)ptr, sizeof(ptr));
+		}
+
+		static bool is_bad_ptr(void* ptr) noexcept
+		{
+			return !utility::isGoodReadPtr((uintptr_t)ptr, sizeof(ptr));
 		}
 
 		/// <summary>
@@ -284,21 +283,34 @@ namespace GameFunctions
 	{
 	public:
 
-		static std::string get_str(uintptr_t dotNetString) noexcept
+		static std::string get_str(uintptr_t dotNetString, bool isNoOffs = false) noexcept
 		{
-			if (PtrController::is_bad_ptr(dotNetString))
-				return nullptr;
 			auto length = *(int32_t*)(dotNetString + 0x10);
 			std::string res;
-			res.reserve(length);
+			res.reserve(length + 1);
 			res.resize(length);
+			int startOffs = isNoOffs ? 0 : 0x14;
 			for (int i = 0, j = 0; i < length; i++, j += 2)
-				res[i] = *(byte*)(dotNetString + 0x14 + j);
+				res[i] = *(byte*)(dotNetString + startOffs + j);
 			return std::move(res);
 		}
 
+		static std::wstring get_str(uintptr_t dotNetString) noexcept
+		{
+			if (dotNetString == 0)
+				return std::wstring();
+			return std::move(std::wstring((const wchar_t*)(dotNetString + 0x14)));
+		}
+
+		static const wchar_t const* get_raw_wstr(uintptr_t dotNetString) noexcept
+		{
+			if (dotNetString == 0)
+				return nullptr;
+			return (const wchar_t*)(dotNetString + 0x14);
+		}
+
 		template<size_t size>
-		static void get_str(uintptr_t dotNetString, std::array<char, size>* strOut, unsigned int &dotNetStrLengthOut) noexcept
+		static void get_str(uintptr_t dotNetString, std::array<char, size>* strOut, unsigned int &dotNetStrLengthOut, bool isNoOffs = false) noexcept
 		{
 			if (strOut == nullptr /*|| PtrController::is_bad_ptr(dotNetString)*/)
 				return;
@@ -306,8 +318,9 @@ namespace GameFunctions
 			dotNetStrLengthOut = *(unsigned int*)(dotNetString + 0x10);
 			if (endCounter > dotNetStrLengthOut)
 				endCounter = dotNetStrLengthOut;
+			int startOffs = isNoOffs ? 0 : 0x14;
 			for (int i = 0, j = 0; i < endCounter; i++, j += 2)
-				(*strOut)[i] = *(byte*)(dotNetString + 0x14 + j);
+				(*strOut)[i] = *(byte*)(dotNetString + startOffs + j);
 			*(strOut->data() + dotNetStrLengthOut) = 0;
 		}
 
@@ -332,6 +345,84 @@ namespace GameFunctions
 			}
 			return true;
 		}
+
+		static bool str_cmp(uintptr_t dotNetString, const wchar_t* str) noexcept
+		{
+			if (PtrController::is_bad_ptr(dotNetString))
+				return false;
+			const wchar_t* newStrRaw = (const wchar_t*)(dotNetString + 0x14);
+			int res = wcscmp(str, newStrRaw);
+			return res == 0;
+		}
+	};
+
+	//Represents System.String with same static mng offs for all strings
+	class SysString
+	{
+	private:
+		void* _data = nullptr;
+		wchar_t* _str = nullptr;
+		int _length = 0;
+
+		static inline REManagedObject* _mngString = nullptr;
+
+		void realloc(const wchar_t* newStr)
+		{
+			_length = wcslen(newStr);
+			int size = _length * sizeof(wchar_t);
+			if(_data != nullptr)
+				_data = std::realloc(_data, 0x14 + size);
+			else
+				_data = std::malloc(0x14 + size);
+			if (_mngString == nullptr)
+			{
+				_mngString = sdk::create_instance("System.String");
+				typedef void(__cdecl* f_add_ref)(REManagedObject*);
+				auto base = g_framework->get_module().as<uintptr_t>();
+				((f_add_ref)(base + 0x2526820))(_mngString);
+			}
+			*(REObjectInfo**)(((uintptr_t)_data + 0)) = _mngString->info;
+			*(int*)((uintptr_t)_data + 0x10) = _length;
+			_str = (wchar_t*)((uintptr_t)_data + 0x14);
+			wcsncpy(_str, newStr, _length);
+			_str[_length] = '\0';
+		}
+
+	public:
+		SysString(const wchar_t* str)
+		{
+			if (str == nullptr)
+				throw std::exception("str is nullptr");
+			realloc(str);
+		}
+
+		SysString(const SysString& other)
+		{
+			_data = other._data;
+			_str = other._str;
+			_length = other._length;
+		}
+
+		~SysString()
+		{
+			std::free(_data);
+			_str = nullptr;
+			_data = nullptr;
+			_length = 0;
+		}
+
+		void* get_net_str() const noexcept { return _data; }
+
+		wchar_t* get_str() const noexcept { return _str; }
+
+		int get_length() const noexcept { return _length; }
+
+		wchar_t& operator[](int indx)
+		{
+			if (indx < 0 || indx >= _length)
+				throw std::out_of_range("Index out of range.");
+			return _str[indx];
+		}
 	};
 
 	class ListController
@@ -343,10 +434,10 @@ namespace GameFunctions
 		/// </summary>
 		/// <typeparam name="T">Use * for ref types</typeparam>
 		/// <param name="listPtr"></param>
-		/// <param name="listCapacity">Out param, return .net List<T>.Capacity.</param>
+		/// <param name="listCapacityOut">Out param, return .net List<T>.Capacity.</param>
 		/// <returns>Returns std::nullopt if IsBadReadPtr() happens.</returns>
 		template <typename T>
-		std::optional<std::vector<T>> get_dotnet_list(uintptr_t listPtr, size_t& listCapacity) noexcept
+		static std::optional<std::vector<T>> get_dotnet_list(uintptr_t listPtr, size_t& listCapacityOut) noexcept
 		{
 			if (listPtr == 0)
 				return std::nullopt;
@@ -355,28 +446,39 @@ namespace GameFunctions
 			size_t count = *(size_t*)(listPtr + 0x18);
 			std::vector<T> res;
 			uintptr_t items = *(uintptr_t*)(listPtr + 0x10);
-			if (listCapacity = (*(size_t*)(items + 0x1C)); listCapacity == 0)
-				return res;
+			listCapacityOut = (*(size_t*)(items + 0x1C));
+			if (listCapacityOut == 0)
+				return std::make_optional<std::vector<T>>(res);
 			size_t itemSize = sizeof(T);
-			size_t itemsSize = itemSize * count;
-			for (size_t i = 0x20; i < itemsSize; i += itemSize)
+			size_t itemsCount = 0x20 + itemSize * count;
+			for (size_t i = 0x20; i < itemsCount; i += itemSize)
 			{
 				res.emplace_back(*(T*)(items + i));
 			}
 			return std::make_optional<std::vector<T>>(res);
 		}
 
-		int get_list_count(uintptr_t dotNetList) noexcept
+		template<typename T>
+		static T& get_item(uintptr_t listPtr, int indx)
 		{
-			if(PtrController::is_bad_ptr(dotNetList))
-				return 0;
-			else return *(int*)(dotNetList + 0x18);
+			if(indx < 0 || indx >= *(int*)(listPtr + 0x18))
+				throw std::exception("Index out of range.");
+			uintptr_t items = *(uintptr_t*)(listPtr + 0x10);
+			return *(T*)(items + 0x20 + sizeof(T) * indx);
 		}
 
-		int get_list_capacity(uintptr_t dotNetList) noexcept
+		template<typename T>
+		static T& get_array_item(uintptr_t arrayPtr, int indx)
 		{
-			if (PtrController::is_bad_ptr(dotNetList) || PtrController::is_bad_ptr(dotNetList+0x10))
-				return 0;
+			return *(T*)(arrayPtr + 0x20 + sizeof(T) * indx);
+		}
+
+		static int get_list_count(uintptr_t dotNetList) noexcept
+		{ return *(int*)(dotNetList + 0x18);
+		}
+
+		static int get_list_capacity(uintptr_t dotNetList) noexcept
+		{
 			auto items = *(uintptr_t*)(dotNetList + 0x10);
 			return *(int*)(items + 0x1C);
 		}
@@ -407,7 +509,7 @@ namespace GameFunctions
 			return fAddr;
 		}
 
-		virtual uintptr_t get_thread_context(uint32_t unk = -1)
+		virtual inline uintptr_t get_thread_context(uint32_t unk = -1)
 		{
 			return (uintptr_t)((void*)sdk::get_thread_context(unk));
 		}

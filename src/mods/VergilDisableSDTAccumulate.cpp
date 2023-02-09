@@ -33,7 +33,7 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   m_is_enabled          = &VergilDisableSDTAccumulate::cheaton;
   m_on_page             = Page_VergilSDT;
   m_full_name_string   = "Disable SDT Accumulate";
-  m_author_string      = "VPZadov";
+  m_author_string      = "V.P.Zadov";
   m_description_string = "Disable the \"accumulate\" skill. Works best with the "
                        "accumulate system rework.";
 

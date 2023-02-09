@@ -43,7 +43,7 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
   m_on_page = Page_VergilTrick;
 
   m_full_name_string = "Disable Embedded Swords";
-  m_author_string        = "VPZadov";
+  m_author_string        = "V.P.Zadov";
   m_description_string   = "Allows you to trick to enemies without using an embedded sword.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE

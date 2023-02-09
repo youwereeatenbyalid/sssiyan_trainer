@@ -3,60 +3,176 @@
 #include <random>
 #include "CheckpointPos.hpp"
 #include "mods/GameFunctions/CreateShell.hpp"
-#include "EnemySwapper.hpp"
-#include <atomic>
 #include <condition_variable>
 #include "VergilSDTFormTracker.hpp"
 #include "PlayerTracker.hpp"
-#include "EnemyWaveEditor.hpp"
-#include "DeepTurbo.hpp"
 #include "mods/GameFunctions/PlayerSetDT.hpp"
 #include "VergilInstantSDT.hpp"
 #include "mods/GameFunctions/GameModelRequestSetEffect.hpp"
+#include "GameplayStateTracker.hpp"
+#include "EndLvlHooks.hpp"
+#include "PlSetActionData.hpp"
+#include "InputSystem.hpp"
+#include "Mods.hpp"
+#include "events/EventHandler.hpp"
+#include "mods/Coroutine/Coroutines.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
 
 
-class DMC3JCE : public Mod
+class DMC3JCE : public Mod, private EndLvlHooks::IEndLvl
 {
 public:
-	class JCEController
+	enum AutoSDTType
 	{
+		None,
+		LessEfx,
+		SDTBurst
+	};
+
+	class JCEController : private EndLvlHooks::IEndLvl
+	{
+
+	public:
+		enum Type
+		{
+			Random,
+			Track,
+			Dynamic
+		};
+
 	private:
+		void execute_3jce(Type jceType, uintptr_t workRateSys)
+		{
+			if (!can_execute())
+			{
+				return;
+			}
+			if (_jcPfb == 0)
+			{
+				stop_jce(true);
+				return;
+			}
+			uintptr_t jcShell = (uintptr_t)_jcSpawn(_curJcPos, _defaultJcRot);
+			switch (jceType)
+			{
+				case DMC3JCE::JCEController::Random:
+				{
+					if (jcShell == 0)
+					{
+						stop_jce(true);
+						return;
+					}
+					*(bool*)((uintptr_t)jcShell + 0x440) = _isRndJust; //isJust
+					*(float*)((uintptr_t)jcShell + 0x444) = _rndAttackRate; //attackRate
+					rndjc_pos_update();
+					break;
+				}
+				case DMC3JCE::JCEController::Track:
+				{
+					if (jcShell == 0)
+					{
+						stop_jce(true);
+						return;
+					}
+					*(bool*)((uintptr_t)jcShell + 0x440) = _isTrackJust; //isJust
+					*(float*)((uintptr_t)jcShell + 0x444) = _trackAttackRate; //attackRate
+					track_pos_update();
+					break;
+				}
+				default:
+				{
+					stop_jce(true);
+					break;
+				}
+			}
+			_3jceCoroutine->set_delay(update_delay(workRateSys));
+		}
+
+		using ActionType = decltype(&JCEController::execute_3jce);
+
+		std::string_view _errorData;
+
+		InputSystem *_inputSystem;
+
+		Type jceType;
+
+		std::unique_ptr<Coroutines::Coroutine<ActionType, JCEController*, Type, uintptr_t>> _3jceCoroutine = nullptr;
+
 		func::Vec3 maxOffset;
 		func::Vec3 minOffset;
 		func::Vec3 moveTrackStepOffs;
+		gf::Vec3 _prevJcPos;
+		gf::Vec3 _curJcPos;
+		gf::Vec3 _pl0800Pos;
 
-		std::mt19937 rndGen;
+		std::uniform_real_distribution<float> _xDist;
+		std::uniform_real_distribution<float> _yDist;
+		std::uniform_real_distribution<float> _zDist;
+		std::uniform_real_distribution<float> _trackZDist{ -0.95f, 0.95f };
 
-		func::CreateShell jcSpawn;
+		gf::Quaternion _defaultJcRot;
 
-		int rndDelayTime = defaultRndDelay;//ms
-		int trackDelayTime = defaultTrackDelay;//ms
+		std::mt19937 _rndGen;
+
+		func::CreateShell _jcSpawn;
+
+		uintptr_t _jcPfb = 0;
+		uintptr_t _pl0800 = 0;
+
+		int _rndDelayTime = defaultRndDelay; //fancy coroutine time
+		int _trackDelayTime = defaultTrackDelay; //fancy coroutine time
+		int _rndJcSpawnCount = 0;
+		int _tmpDelay = 0;
+
+		float _curExecutionTime;
 
 		const float zTrackOffs = 0.94f;
-		const float rndEmMaxDist = 34.5f;
-		const float rndAttackRate = 2.5f;
-		const float trackAttackRate = 1.2f;
+		const float _rndZTrackOffs = 0.82f;
+		const float _rndEmMaxDist = 34.5f;
+		const float _rndAttackRate = 2.5f;
+		const float _trackAttackRate = 1.2f;
 
-		const std::array<uintptr_t, 4> isPauseOffst { 0x100, 0x288, 0xC8, 0x5C4 };
-		//const std::array<uintptr_t, 7> jcPrefabOffsets {0x80, 0x88, 0x70, 0xC8, 0x300, 0x38, 0x10};//{0x140, 0x90, 0x10, 0xC8, 0x300, 0x38, 0x10};//{ 0x70, 0x170, 0x10, 0x88, 0x300, 0x38, 0x10 }; //{0x80, 0x90, 0x10, 0x108, 0x300, 0x38, 0x10};
-		const std::array<uintptr_t, 2> jcPfbYamatoParam {0x38, 0x10}; //Via PlTraker::yamatocommonparam
+		bool _isInJceSdt = false;
+		bool _isStartJCE = false;
+		const bool _isRndJust = true;
+		const bool _isTrackJust = false;
 
-		uintptr_t isPauseBase;
-		//uintptr_t jcPrefabBase;
+		static inline std::shared_ptr<func::GameModelRequestSetEffect::EffectID> _sdtBurstEffect = nullptr;
 
-		std::atomic_bool isExecuting;
-
-		bool isPtrBaseInit;
-		const bool isRndJust = true;
-		const bool isTrackJust = false;
-
-		func::Vec3 get_lockon_pos(bool& isNullPtr)
+		void reset(EndLvlHooks::EndType end) override
 		{
-			uintptr_t lockOnObj = *(uintptr_t*)(PlayerTracker::vergilentity + 0x428);
-			if (IsBadReadPtr((void*)lockOnObj, 0x8))
+			stop_jce(true);
+			_isInJceSdt = false;
+			_jcPfb = 0;
+			_pl0800 = 0;
+		}
+
+		void set_sdt(GameFunctions::PlVergilSetDT::DevilTrigger dtState)
+		{
+			GameFunctions::PlVergilSetDT setDt{ _pl0800 };
+			std::array<uintptr_t, 1> offs { 0x1B20 };
+			auto curSdtOp = func::PtrController::get_ptr_val<float>(_pl0800, offs, true);
+			if(!curSdtOp)
+				return;
+			float curSdt = curSdtOp.value();
+			func::PtrController::try_to_write(_pl0800, offs, 10000.0f, true);
+			bool isInstantSdtOn = VergilInstantSDT::cheaton;
+			VergilInstantSDT::cheaton = true;
+			setDt(dtState, false);
+			func::PtrController::try_to_write<float>(_pl0800, offs, curSdt, true);
+			VergilInstantSDT::cheaton = isInstantSdtOn;
+			if (dtState == gf::PlVergilSetDT::DevilTrigger::SDT)
+				_isInJceSdt = true;
+			else
+				_isInJceSdt = false;
+		}
+
+		func::Vec3 get_lockon_pos(bool& isNullPtr, func::Quaternion &rot)
+		{
+			uintptr_t lockOnObj = *(uintptr_t*)(_pl0800 + 0x428);
+			if (lockOnObj == 0 /*IsBadReadPtr((void*)lockOnObj, 0x8)*/)
 			{
 				isNullPtr = true;
 				return func::Vec3(0, 0, 0);
@@ -64,7 +180,7 @@ public:
 			func::Vec3 lockOnPos;
 			lockOnObj = *(uintptr_t*)(lockOnObj + 0x10);//LockOnTargetWork target
 			auto transform = *(uintptr_t*)(lockOnObj + 0x50);//cachedTransform
-			//auto lockOnOffset = *(uintptr_t*)(lockOnObj + 0x20);
+			rot = *(func::Quaternion*)(transform + 0x40);
 			lockOnPos.x = *(float*)(transform + 0x30) + (*(float*)(lockOnObj + 0x20));
 			lockOnPos.z = *(float*)(transform + 0x34) + (*(float*)(lockOnObj + 0x24));
 			lockOnPos.y = *(float*)(transform + 0x38) + (*(float*)(lockOnObj + 0x28));
@@ -72,104 +188,166 @@ public:
 			return lockOnPos;
 		}
 
-		void track_pos_update(func::Vec3 &currentJcPos)
+		inline void set_pl0800(uintptr_t pl0800)
+		{
+			_pl0800 = pl0800;
+			auto gameObj = *(uintptr_t*)(_pl0800 + 0x10);
+			auto transform = *(uintptr_t*)(gameObj + 0x18);
+			_pl0800Pos = *(gf::Vec3*)(transform + 0x30);
+			_jcPfb = get_jc_pfb(_pl0800);
+		}
+
+		void track_pos_update()
 		{
 			func::Vec3 lockOnPos;
 			bool isNoLockOn = false;
-			lockOnPos = get_lockon_pos(isNoLockOn);
+			lockOnPos = get_lockon_pos(isNoLockOn, _defaultJcRot);
 			if(isNoLockOn)
 				return;
 			lockOnPos.z += zTrackOffs;
-			float length = func::Vec3::vec_length(currentJcPos, lockOnPos);
+			float length = func::Vec3::vec_length(_curJcPos, lockOnPos);
 			float acc = 0.0f;
-			if(length >= 11.4f)
+			if(length >= 10.4f)
 				acc = 2.3f;
-			if(abs(lockOnPos.x - currentJcPos.x) >= 2.3f)
-				currentJcPos.x = lockOnPos.x >= currentJcPos.x ? currentJcPos.x + moveTrackStepOffs.x + acc : currentJcPos.x - moveTrackStepOffs.x - acc;
+			if(abs(lockOnPos.x - _curJcPos.x) >= 2.3f)
+				_curJcPos.x = lockOnPos.x >= _curJcPos.x ? _curJcPos.x + moveTrackStepOffs.x + acc : _curJcPos.x - moveTrackStepOffs.x - acc;
 			else
-				currentJcPos.x = lockOnPos.x;
-			if (abs(lockOnPos.y - currentJcPos.y) >= 2.3f)
-				currentJcPos.y = lockOnPos.y >= currentJcPos.y ? currentJcPos.y + moveTrackStepOffs.y + acc : currentJcPos.y - moveTrackStepOffs.y - acc;
+				_curJcPos.x = lockOnPos.x + _trackZDist(_rndGen);
+			if (abs(lockOnPos.y - _curJcPos.y) >= 2.3f)
+				_curJcPos.y = lockOnPos.y >= _curJcPos.y ? _curJcPos.y + moveTrackStepOffs.y + acc : _curJcPos.y - moveTrackStepOffs.y - acc;
 			else
-				currentJcPos.y = lockOnPos.y;
-			if (abs(lockOnPos.z - currentJcPos.z) >= 2.1f)
-				currentJcPos.z = lockOnPos.z >= currentJcPos.z ? currentJcPos.z + moveTrackStepOffs.z : currentJcPos.z - moveTrackStepOffs.z;
+				_curJcPos.y = lockOnPos.y + +_trackZDist(_rndGen);
+			if (abs(lockOnPos.z - _curJcPos.z) >= 2.1f)
+				_curJcPos.z = lockOnPos.z >= _curJcPos.z ? _curJcPos.z + moveTrackStepOffs.z : _curJcPos.z - moveTrackStepOffs.z;
 			else
-				currentJcPos.z = lockOnPos.z;
+				_curJcPos.z = lockOnPos.z + +_trackZDist(_rndGen);
 		}
 
-		void rndjc_pos_update(func::Vec3 &pos, const func::Vec3 &pPos, std::uniform_real_distribution<float> &xDist, std::uniform_real_distribution<float> &yDist, std::uniform_real_distribution<float> &zDist)
+		void rndjc_pos_update()
 		{
-			pos.x = pPos.x + xDist(rndGen);
-			pos.y = pPos.y + yDist(rndGen);
-			pos.z = pPos.z + zDist(rndGen);
-		}
-
-		void rndjc_pos_update(func::Vec3& pos, const func::Vec3 &pPos, std::uniform_int_distribution<int> &xDist, std::uniform_int_distribution<int>& yDist, std::uniform_real_distribution<float>& zDist)
-		{
-			pos.x = pPos.x + xDist(rndGen);
-			pos.y = pPos.y + yDist(rndGen);
-			pos.z = pPos.z + zDist(rndGen);
-		}
-
-		bool can_execute(bool isBadPtr)
-		{
-			if (EnemySwapper::nowFlow == 0x16 && isExecuting.load() && !isBadPtr && !DeepTurbo::isCutscene && PlayerTracker::vergilentity != 0)
+			bool isNull = false;
+			auto lockOnPos = get_lockon_pos(isNull, _defaultJcRot);
+			if (_rndJcSpawnCount >= rndEmTrackInterval)
 			{
-				if (EnemySwapper::gameMode == 3)
+				_curJcPos = isNull ? _pl0800Pos : lockOnPos;
+				_curJcPos.z += _rndZTrackOffs;
+				_rndJcSpawnCount = 0;
+			}
+			else
+			{
+				if (isNull)
 				{
-					if(WaveEditorMod::EnemyWaveEditor::bpFlowId != 0x16)
-						return false;
+					_curJcPos.x = _pl0800Pos.x + _xDist(_rndGen);
+					_curJcPos.y = _pl0800Pos.y + _yDist(_rndGen);
+					_curJcPos.z = _pl0800Pos.z + _zDist(_rndGen);
 				}
+				else
+				{
+					_curJcPos.x = lockOnPos.x + _xDist(_rndGen);
+					_curJcPos.y = lockOnPos.y + _yDist(_rndGen);
+					_curJcPos.z = lockOnPos.z + _zDist(_rndGen);
+				}
+			}
+			_rndJcSpawnCount++;
+		}
+
+		bool can_execute()
+		{
+			if (GameplayStateTracker::nowFlow == 0x16 && !GameplayStateTracker::isCutscene && !GameplayStateTracker::isExecutePause)
+			{
 				return true;
 			}
 			else return false;
 		}
 
-		void update_status(bool run)
-		{
-			if (run)
-			{
-				isJceRunning = true;
-				isExecuting.store(true);
-				//*(int*)rayCastAddr = curRayCastSize;
-			}
-			else
-			{
-				isExecuting.store(false);
-				isJceRunning = false;
-				isSdtRequestedAsm = false;
-				//*(int*)rayCastAddr = prevRayCastSize;
-			}
-		}
-
 		void bad_ptr_stop()
 		{
-			stop_jce();
+			stop_jce(true);
 			//cheaton = false;
 		}
 
-	public:
-		enum Type
+		int update_delay(uintptr_t workRateSys)
 		{
-			Random,
-			Track
-		};
+			if(workRateSys == 0 || *(uintptr_t*)(workRateSys + 0x58) == 0)
+				return _tmpDelay;
+			uintptr_t workRateData = *(uintptr_t*)(workRateSys + 0x58);
+			float rate = *(float*)(workRateData + 0x18);
+			if(rate == 0)
+				return _tmpDelay;
+			return (float)_tmpDelay / rate;
+		}
 
-	private:
-		Type jceType;
+		uintptr_t get_jc_pfb(uintptr_t pl0800) const noexcept
+		{
+			auto weaponContainer = *(uintptr_t*)(pl0800 + 0x1970);
+			if (weaponContainer == 0)
+				return 0;
+			auto dictionaryContainer = *(uintptr_t*)(weaponContainer + 0x18);
+			auto weaponData = *(uintptr_t*)(dictionaryContainer + 0x30);
+			if (weaponData == 0)
+				return 0;
+			auto weaponYamato = *(uintptr_t*)(weaponData + 0x10);
+			if (weaponYamato == 0)
+				return 0;
+			auto yamatoCommonParam = *(uintptr_t*)(weaponYamato + 0x300);
+			if (yamatoCommonParam == 0)
+				return 0;
+			auto yamatoPlShellData = *(uintptr_t*)(yamatoCommonParam + 0x38);
+			if (yamatoPlShellData == 0)
+				return 0;
+			return *(uintptr_t*)(yamatoPlShellData + 0x10);
+		}
+
+		bool setup_to_start(uintptr_t pl0800, Type jcType) noexcept
+		{
+			_rndJcSpawnCount = 0;
+			if (_pl0800 == 0)
+				return false;
+			set_pl0800(pl0800);
+			if (_jcPfb == 0)
+			{
+				stop_jce(true);
+				return false;
+			}
+
+			switch (jcType)
+			{
+				case Track:
+				{
+					bool lockOnNull;
+					gf::Quaternion emRot;
+					auto emPos = get_lockon_pos(lockOnNull, emRot);
+					if (!lockOnNull)
+					{
+						_curJcPos.x = _prevJcPos.x = (emPos.x + _pl0800Pos.x) / 2.0f;
+						_curJcPos.y = _prevJcPos.y = (emPos.y + _pl0800Pos.y) / 2.0f;
+					}
+					else
+						_curJcPos = _pl0800Pos;
+					break;
+				}
+				case Random:
+				{
+					rndjc_pos_update();
+					break;
+				}
+			}
+
+			_jcSpawn.set_params(_jcPfb, _prevJcPos, _defaultJcRot, _pl0800, 0, 0); //1, 105
+			return true;
+		}
 
 	public:
 		const int defaultRndDelay = 120;
 		const int defaultTrackDelay = 187;
 
-		static inline float executionTimeAsm;
 		int rndEmTrackInterval = 22;
 
 		const float rndExeTimeModDefault = 6.8f;
 		const float trackExeTimeModDefault = 5.95f;
 
-		static inline bool isSdtRequestedAsm = false;
+		float rndExeTime = rndExeTimeModDefault;
+		float trackExeTime = trackExeTimeModDefault;
 
 		JCEController()
 		{
@@ -184,233 +362,113 @@ public:
 			moveTrackStepOffs.y = 1.18F;
 			moveTrackStepOffs.z = 0.98;
 
-			isExecuting = false;
-			//jcPrefabBase = 0x07E61B90;//0x07E60490;//0x07E53650;
-			isPauseBase = 0x07E55910;
-			JCEController::executionTimeAsm = rndExeTimeModDefault;
+			_xDist = std::uniform_real_distribution<float>(minOffset.x, maxOffset.x);
+			_yDist = std::uniform_real_distribution<float>(minOffset.y, maxOffset.y);
+			_zDist = std::uniform_real_distribution<float>(minOffset.z, maxOffset.z);
+			_curExecutionTime = rndExeTimeModDefault;
 			auto base = g_framework->get_module().as<uintptr_t>();
-			//jcPrefabBase += base;
-			isPauseBase += base;
-			isPtrBaseInit = true;
+			_inputSystem = (InputSystem*)g_framework->get_mods()->get_mod("InputSystem");
+			_sdtBurstEffect = std::make_shared<func::GameModelRequestSetEffect::EffectID>(3, 6);
+			_3jceCoroutine = std::make_unique<Coroutines::Coroutine<ActionType, JCEController*, Type, uintptr_t>>
+				(&JCEController::execute_3jce, true);
+			_3jceCoroutine->ignoring_update_on_pause(true);
 		}
 
-		bool set_capacity(int newCap){ return jcSpawn.set_list_shell_capacity(newCap); }
-
-		volatile void start_jce()
+		~JCEController()
 		{
-			if(isExecuting.load())
-				return;
-			if(!isPtrBaseInit)
-				return;
-			update_status(true);
-			int id = 105;
-			int lvl = 1;
-			bool isBadPtr = false;
-			std::optional<bool> isPause;
-			auto jcPrefab = func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true); 
-			func::Quaternion defaultRot = *(func::Quaternion*)(PlayerTracker::vergiltransform + 0x40);
-			switch (jceType)
+			//PlSetActionData::new_action_event_unsub(new Events::EventHandler<JCEController, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>&, uintptr_t>(this, &JCEController::on_action_update));
+		}
+
+		bool request_set_jce_dt(uintptr_t plVergil, GameFunctions::PlVergilSetDT::DevilTrigger dtState, DMC3JCE::AutoSDTType efxType = LessEfx)
+		{
+			set_pl0800(plVergil);
+			if (dtState == GameFunctions::PlVergilSetDT::DevilTrigger::Devil)
+				return false;
+			if (dtState == GameFunctions::PlVergilSetDT::DevilTrigger::SDT && _isInJceSdt)
+				return false;
+			if (dtState == GameFunctions::PlVergilSetDT::DevilTrigger::Human && !_isInJceSdt)
+				return false;
+			set_sdt(dtState);
+			if (autoSdtType == SDTBurst && dtState == GameFunctions::PlVergilSetDT::DevilTrigger::SDT)
 			{
-				case JCEController::Random:
-				{
-					std::thread([this, id, lvl, isBadPtr, isPause, jcPrefab, defaultRot]() mutable
-					{
-						func::Vec3 pPos = CheckpointPos::get_player_coords();
-						if (!jcPrefab.has_value() || jcPrefab.value() == 0)
-						{
-							bad_ptr_stop();
-							return;
-						}
-						if(jcSpawn.get_thread_context() == 0)
-						{
-							bad_ptr_stop();
-							return;
-						}
-						func::Vec3 curPos;
-						func::Vec3 prevPos;
-						isBadPtr = false;
-						volatile void* jcShell = 0;
-
-						std::uniform_real_distribution<float> xDist(minOffset.x, maxOffset.x);
-						std::uniform_real_distribution<float> yDist(minOffset.y, maxOffset.y);
-						std::uniform_real_distribution<float> zDist(minOffset.z, maxOffset.z);
-
-						bool nullLockOn = false;
-						func::Vec3 lockOnPos = get_lockon_pos(nullLockOn);
-						if(nullLockOn)
-							lockOnPos = pPos;
-						rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-						int jcNum = 0;
-						int tryIter = 0;
-						jcSpawn.set_params(jcPrefab.value_or(0), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
-						/*if (isSetCustomCapacity)
-						{
-							if (jcSpawn.get_list_shell_capacity() < newCapacity)
-							{
-								__try
-								{
-									jcSpawn.set_list_shell_capacity(newCapacity);
-								}
-								__except (EXCEPTION_EXECUTE_HANDLER)
-								{
-									isBadPtr = true;
-									bad_ptr_stop();
-									return;
-								}
-							}
-						}*/
-						while (can_execute(isBadPtr))
-						{
-							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
-							if (!isPause.has_value())
-							{
-								isBadPtr = true;
-								break;
-							}
-							if (isPause.value())
-								continue;
-							if(!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
-								break;
-							__try
-							{
-								jcShell = (volatile void*)jcSpawn(curPos, defaultRot);
-							}
-							__except (EXCEPTION_EXECUTE_HANDLER)
-							{
-								isBadPtr = true;
-								bad_ptr_stop();
-								break;
-							}
-							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
-							{
-								*(volatile bool*)((uintptr_t)jcShell + 0x440) = isRndJust; //isJust
-								*(volatile float*)((uintptr_t)jcShell + 0x444) = rndAttackRate; //attackRate
-							}
-							else
-								continue;
-							jcShell = 0;
-							jcNum++;
-							std::this_thread::sleep_for(std::chrono::milliseconds(rndDelayTime));//Try to use winH Sleep()
-							prevPos = curPos;
-
-							lockOnPos = get_lockon_pos(nullLockOn);
-							if (nullLockOn || func::Vec3::vec_length(pPos, lockOnPos) > rndEmMaxDist)
-								lockOnPos = pPos;
-							if (jcNum >= rndEmTrackInterval)
-							{
-								jcNum = 0;
-								lockOnPos.z += zTrackOffs;
-								curPos = lockOnPos;
-							}
-							else
-							{
-								tryIter = 0;
-								do
-								{
-									tryIter++;
-									rndjc_pos_update(curPos, lockOnPos, xDist, yDist, zDist);
-								} while (func::Vec3::vec_length(curPos, prevPos) < 4.65f && tryIter <= 60);
-							}
-						}
-						update_status(false);
-					}).detach();
-
-					break;
-				}
-				case JCEController::Track:
-				{
-					std::thread([&, id, lvl, isBadPtr, isPause, jcPrefab, defaultRot]() mutable
-					{
-						auto pPos = CheckpointPos::get_player_coords();
-						func::Vec3 prevPos;
-						func::Vec3 curPos = CheckpointPos::get_player_coords();
-						curPos.z += zTrackOffs;
-						func::Vec3 emPos;
-						if (!jcPrefab.has_value())
-						{
-							isBadPtr = true;
-							bad_ptr_stop();
-							return;
-						}
-						if (jcSpawn.get_thread_context() == 0)
-						{
-							isBadPtr = true;
-							bad_ptr_stop();
-							return;
-						}
-						jcSpawn.set_params(jcPrefab.value(), curPos, defaultRot, PlayerTracker::vergilentity, lvl, id);
-						isBadPtr = false;
-						volatile void* jcShell;
-						while (can_execute(isBadPtr))
-						{
-							isPause = func::PtrController::get_ptr_val<bool>(isPauseBase, isPauseOffst);
-							if (!isPause.has_value())
-							{
-								isBadPtr = true;
-								break;
-							}
-							if (isPause.value())
-								continue;
-							if (!func::PtrController::get_ptr_val<uintptr_t>(PlayerTracker::yamatocommonparameter, jcPfbYamatoParam, true))
-								break;
-							__try
-							{
-								jcShell = jcSpawn(curPos, defaultRot);
-							}
-							__except (EXCEPTION_EXECUTE_HANDLER)
-							{
-								isBadPtr = true;
-								bad_ptr_stop();
-								break;
-							}
-							if (utility::isGoodReadPtr((uintptr_t)jcShell, 8))
-							{
-								*(volatile bool*)((uintptr_t)jcShell + 0x440) = isTrackJust; //isJust
-								*(volatile float*)((uintptr_t)jcShell + 0x444) = trackAttackRate; //attackRate
-							}
-							else
-								continue;
-							jcShell = 0;
-							std::this_thread::sleep_for(std::chrono::milliseconds(trackDelayTime));
-							track_pos_update(curPos);
-						}
-						update_status(false);
-					}).detach();
-					
-					break;
-				}
-
-				default:
-					break;
+				func::GameModelRequestSetEffect setBurst{ plVergil, _sdtBurstEffect };
+				auto transform = *(uintptr_t*)(plVergil + 0x10);
+				transform = *(uintptr_t*)(transform + 0x18);
+				setBurst(*(func::Vec3*)(transform + 0x30), *(func::Quaternion*)(transform + 0x40));
 			}
+			return true;
 		}
 
-		void __cdecl stop_jce()
+		void force_jcesdt_health_update(uintptr_t vergil)
 		{
-			update_status(false);
+			if (!_isInJceSdt)
+				return;
+			*(float*)(vergil + 0x1B28) = -0.1f;
 		}
 
-		bool is_executing() const
+		volatile void start_jce(uintptr_t pl0800)
 		{
-			return isExecuting.load();
+			if (is_executing())
+				return;
+			Type tmp = get_jce_type();
+			if (tmp == Dynamic)
+			{
+				if (_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS))
+					tmp = Track;
+				else
+					tmp = Random;
+			}
+			if (!setup_to_start(pl0800, tmp))
+			{
+				stop_jce(true);
+				return;
+			}
+			uintptr_t workRateSys = (uintptr_t)reframework::get_globals()->get("app.WorkRateSystem");
+			switch (tmp)
+			{
+				case Random:
+				{
+					_curExecutionTime = rndExeTime;
+					_3jceCoroutine->set_delay(rndDelay);
+					break;
+				}
+				case Track:
+				{
+					_curExecutionTime = trackExeTime;
+					_3jceCoroutine->set_delay(trackDelay);
+					break;
+				}
+			}
+			_tmpDelay = _3jceCoroutine->get_delay();
+			isJceRunning = true;
+			_3jceCoroutine->start(this, tmp, workRateSys);
 		}
 
-		void init_ptrs_base(uintptr_t dmc5base)
+		void stop_jce(bool endSdt = true)
 		{
-			//jcPrefabBase += dmc5base;
-			isPauseBase += dmc5base;
-			isPtrBaseInit = true;
+			if (endSdt && _isInJceSdt)
+				set_sdt(GameFunctions::PlVergilSetDT::Human);
+			if (!is_executing())
+				return;
+			_3jceCoroutine->stop();
+			isJceRunning = false;
+			_rndJcSpawnCount = 0;
 		}
 
-		bool is_ptr_init() const {return isPtrBaseInit; }
+		bool is_executing() const noexcept
+		{
+			return _3jceCoroutine->is_started();
+		}
 
-		void set_rndspawn_delay(int delay) {rndDelayTime = delay; }
+		inline void set_rndspawn_delay(int delay) noexcept { _rndDelayTime = delay; }
 
-		void set_trackspawn_delay(int delay) {trackDelayTime = delay; }
+		inline void set_trackspawn_delay(int delay) noexcept { _trackDelayTime = delay; }
 
-		int get_rndspawn_delay() const noexcept {return rndDelayTime; }
+		inline int get_rndspawn_delay() const noexcept { return _rndDelayTime; }
 
-		int get_trackspawn_delay() const noexcept {return trackDelayTime; }
+		inline int get_trackspawn_delay() const noexcept { return _trackDelayTime; }
+
+		inline bool is_in_jce_sdt() const noexcept { return _isInJceSdt; }
 
 		void set_jce_type(Type type, bool isDefaultTime = true, float time = 0) 
 		{
@@ -421,13 +479,13 @@ public:
 				{
 					case DMC3JCE::JCEController::Random:
 					{
-						JCEController::executionTimeAsm = rndExeTimeModDefault;
+						JCEController::_curExecutionTime = rndExeTime;
 						break;
 					}
 
 					case DMC3JCE::JCEController::Track:
 					{
-						JCEController::executionTimeAsm = trackExeTimeModDefault;
+						JCEController::_curExecutionTime = trackExeTime;
 						break;
 					}
 					default:
@@ -435,29 +493,23 @@ public:
 				}
 			}
 			else
-				JCEController::executionTimeAsm = time;
+				_curExecutionTime = time;
 		}
 
-		Type get_jce_type() const {return jceType; }
+		inline Type get_jce_type() const noexcept {return jceType; }
 
-	};
+		inline std::string_view get_error() noexcept { return _errorData; }
 
-	enum AutoSDTType
-	{
-		None,
-		LessEfx,
-		SDTBurst
-	};
+		inline float get_current_execution_time() const noexcept { return _curExecutionTime; }
+};
+
 	static inline AutoSDTType autoSdtType = LessEfx;
 
     static inline std::unique_ptr<JCEController> jceController{nullptr};
 	static inline bool cheaton = true;
-	static inline bool isJceRunning = false;
+	static inline bool isJceRunning = false;//For tracking this shit in __naked__ without calling funcs
 	static inline bool isCrashFixEnabled = true;
-	static inline bool isUsingDefaultJce = false;
 	static inline bool isSetCustomCapacity = false;
-	static inline bool isAutoSdt = true;
-	static inline bool isDisableSdtRequest = false;
 
 	static inline uintptr_t canExeJceRet = 0;
 	static inline uintptr_t canExeJceRet1 = 0;
@@ -468,18 +520,12 @@ public:
 	static inline uintptr_t jcePfbJneJmp = 0;
 	static inline uintptr_t jcePfb2Ret = 0;
 	static inline uintptr_t jceTimerRet = 0;
-	static inline uintptr_t jceTimerStaticBase = 0;
-	static inline uintptr_t stopJceTimerRet = 0;
-	static inline uintptr_t jceTimerContinue = 0;
-	static inline uintptr_t crashPointRet = 0;
-	static inline uintptr_t crashPointJeJmp = 0;
+	static inline float jceTimerStaticBase = 0;
 	static inline uintptr_t jceFinishPfbRet = 0;
-	static inline uintptr_t rayCastAddr = 0;
-	static inline uintptr_t endTeleportRet = 0;
-	static inline uintptr_t vergilActionRet = 0;
 
 	static inline float humanJCECost = 3000.0f;
 	static inline float minSdt = 3000.0f;
+	static inline float curJceTimerAsm = 0;
 
 	static inline int rndDelay = 0;
 	static inline int trackDelay = 0;
@@ -488,12 +534,9 @@ public:
 	static inline int newCapacity = 256;
 
 	static inline JCEController::Type jcTypeUi{};
-
-	static void __cdecl start_jce_asm();
-	static void __cdecl stop_jce_asm();
-	static void set_sdt_asm(GameFunctions::PlVergilSetDT::DevilTrigger dtState);
-	static void setup_sdt_asm(int vergilActionId);
 	static bool use_default_behaviour_asm();
+	static bool can_execute_asm();
+	static void end_jcesdt_asm(uintptr_t vergil);
 
 	//PlVergil +1978 - curWeapon;
 
@@ -529,8 +572,28 @@ public:
 private:
 	float rndExeDuration = 0;
 	float trackExeDuration = 0;
+	float _jceTimer = 0;
 
-	static inline std::shared_ptr<func::GameModelRequestSetEffect::EffectID> sdtBurstEffect = nullptr;
+	std::string _jceControllerErrorStr;
+
+	static inline DMC3JCE *_mod = nullptr;
+
+	static void jce_cancel_hook(uintptr_t threadCtxt, uintptr_t vergil);
+
+	static void pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJce, uintptr_t actionArg);
+
+	void reset(EndLvlHooks::EndType type) override
+	{
+		_jceTimer = 0;
+	}
+
+	void after_all_inits() override
+	{
+		PlayerTracker::pl_add_dt_gauge_sub(std::make_shared<Events::EventHandler<DMC3JCE, uintptr_t, uintptr_t, float*, int, bool>>
+			(this, &DMC3JCE::on_pl_add_dt));
+	}
+
+	void on_pl_add_dt(uintptr_t threadCtxt, uintptr_t pl, float* val, int dtAddType, bool fixedValue);
 
 	void init_check_box_info() override;
 
@@ -541,8 +604,9 @@ private:
 	std::unique_ptr<FunctionHook> m_jce_crashpoint_hook;
 	std::unique_ptr<FunctionHook> m_jce_finishpfb_hook;
 	std::unique_ptr<FunctionHook> m_jce_prefab2_hook;
-	std::unique_ptr<FunctionHook> m_end_teleport_hook;
-	std::unique_ptr<FunctionHook> m_set_active_action_hook;
+	std::unique_ptr<FunctionHook> m_jce_cancel_hook;
+
+	std::unique_ptr<FunctionHook> m_update_jce_hook;
 };
 //clang-format on
 

@@ -81,7 +81,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
   m_is_enabled        = &VergilNoAfterimages::cheaton;
   m_on_page           = Page_VergilVFXSettings;
   m_full_name_string = "Disable Afterimages (+)";
-  m_author_string    = "VPZadov";
+  m_author_string    = "V.P.Zadov";
   m_description_string = "Disable the afterimages Vergil leaves.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
@@ -115,7 +115,7 @@ void VergilNoAfterimages::on_draw_ui() {
 
   ImGui::Combo("Disable Type", (int*)&vergilafterimage_state, "Default afterimages\0Only in Human Form\0Only in SDT\0All Forms\0");
   ImGui::Separator();
-  ImGui::TextWrapped("Disable afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself");
+  ImGui::TextWrapped("Disable looped afterimages during tricks, dodges, jce etc. Use with \"Default afterimages\" if you want this by itself");
   ImGui::Checkbox("Disable trick/dodge afterimages", &isNoDrawIfObjHidden);
 }
 

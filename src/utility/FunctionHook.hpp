@@ -11,7 +11,7 @@ public:
     FunctionHook() = delete;
     FunctionHook(const FunctionHook& other) = delete;
     FunctionHook(FunctionHook&& other) = delete;
-    FunctionHook(Address target, Address destination);
+    FunctionHook(Address target, Address destination, bool useLog = true);
     virtual ~FunctionHook();
 
     bool create();
@@ -57,6 +57,8 @@ private:
     uintptr_t m_target{ 0 };
     uintptr_t m_destination{ 0 };
     uintptr_t m_original{ 0 };
+
+    bool _useLog = true;
 
     // Thread synchronization
 

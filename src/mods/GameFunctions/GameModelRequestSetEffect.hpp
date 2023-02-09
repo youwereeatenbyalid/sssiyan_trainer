@@ -9,7 +9,7 @@ namespace GameFunctions
 		class EffectID
 		{
 		private:
-			char mng[0xF];
+			char mng[0x10];
 
 		public:
 
@@ -28,7 +28,7 @@ namespace GameFunctions
 			EffectID()
 			{
 				auto id = g_framework->get_module().as<uintptr_t>() + 0x7E60C88;
-				memcpy(mng, (const void*)(*(uintptr_t*)id), 0xF);
+				memcpy(mng, (const void*)(*(uintptr_t*)id), 0x10);
 			}
 
 			EffectID(int dataContainerIndx, int containerID, int elementID, bool isDataContainerIndxOnly, bool isContainerIDOnly, bool isElementIDOnly) : EffectID()
@@ -61,7 +61,7 @@ namespace GameFunctions
 		Quaternion rot;
 
 	public:
-		GameModelRequestSetEffect(uintptr_t gameModel, std::shared_ptr<EffectID>& staticEffectID) : model(gameModel), effectID(staticEffectID)
+		GameModelRequestSetEffect(uintptr_t gameModel, std::shared_ptr<EffectID> staticEffectID) : model(gameModel), effectID(staticEffectID)
 		{
 			if (staticEffectID == nullptr)
 				throw std::runtime_error("staticEffectID can't be NULL");

@@ -1,6 +1,8 @@
 
 #include "DoppelWeaponSwitcher.hpp"
 #include "mods/PlayerTracker.hpp"
+#include "mods/DoppelNoComeBack.hpp"
+
 uintptr_t DoppelWeaponSwitcher::updateweapon_jmp_ret{NULL};
 uintptr_t DoppelWeaponSwitcher::resetweapon_jmp_ret{NULL};
 uintptr_t DoppelWeaponSwitcher::fixparameter_jmp_ret{NULL};
@@ -281,13 +283,13 @@ static naked void doppelonlyjjdc_detour() {
 static naked void doppelonlyjjdcteleport_detour() {
     __asm {
     validation:
+        mov rdx, rdi
         cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
-        jne code
+        jne jmp_call
         cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
         je cheatcode
-        jmp code
-    code:
-        mov rdx, rdi
+        cmp byte ptr [DoppelNoComeBack::cheaton], 1
+        je no_cum_back_check
         jmp jmp_call
     cheatcode:
         mov rdx, rdi
@@ -298,6 +300,10 @@ static naked void doppelonlyjjdcteleport_detour() {
         call qword ptr[DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_call]
     jmp_ret:
         jmp qword ptr[DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_ret]
+    no_cum_back_check:
+        cmp byte ptr [DoppelNoComeBack::byJC], 1
+        je jmp_ret
+        jmp jmp_call
     }
 }
 

@@ -55,7 +55,6 @@ bool LDK::hitvfx_fix_on{false};
 bool LDK::waitTimeEnabled{false};
 bool LDK::nohitlines_enabled{false};
 
-bool is_spawn_paused = false;
 bool swap_hitvfx_settings = false;
 
 bool canhitkill = true;
@@ -64,27 +63,23 @@ float LDK::hpoflasthitobj = 0.0f;
 static glm::vec3 coordinate1{-34.0,-6.6,-34.0};
 static glm::vec3 coordinate2{ -9.0,7.6,-35.0 };
 
-//LDK::RegAddrBackup LDK::redorbdrop_backup;
 LDK::RegAddrBackup LDK::hitvfx_backup;
 
-std::mutex LDKmtx;
-
-void pause_spawn()
+void LDK::pause_spawn_asm()
 {
-	if (!is_spawn_paused)
-	{
-		if (LDK::number <= 8) {
-			return;
-		}
-		is_spawn_paused = true;
-		LDK::hardlimit_temp = LDK::hardlimit;
-		LDK::hardlimit = 0;
-		std::thread ([&]{
-		Sleep(LDK::SPAWN_PAUSE_TIME*1000);
-		LDK::hardlimit = LDK::hardlimit_temp;
-		is_spawn_paused = false;
-		}).detach();
-	}
+	std::lock_guard<std::mutex> lck(_mod->_pauseSpawnMtx);
+	if (_mod->_spawnPauseCoroutine.is_started() || LDK::number <= 8)
+		return;
+	_mod->_emLimitTmp = hardlimit;
+	hardlimit = 0;
+	_mod->_spawnPauseCoroutine.start(_mod);
+}
+
+
+void LDK::update_em_limit()
+{
+	hardlimit = _emLimitTmp;
+	_spawnPauseCoroutine.stop();
 }
 
 static naked void enemynumber_detour() {
@@ -181,8 +176,6 @@ static naked void nopfunction_detour1() {
 		jmp qword ptr[LDK::nopfunction_jmp_ret1]
 
 		pausespawn:
-		cmp byte ptr [is_spawn_paused], 1
-		je originalcode
         push rax
 		push rbx
 		push rcx
@@ -192,7 +185,7 @@ static naked void nopfunction_detour1() {
 		push r10
 		push r11
 		sub rsp, 32
-		call qword ptr [pause_spawn]
+		call qword ptr [LDK::pause_spawn_asm]
 		add rsp, 32
 		pop r11
 		pop r10
@@ -526,7 +519,7 @@ std::optional<std::string> LDK::on_initialize() {
   m_on_page               = Page_GameMode;
 
   m_full_name_string     = "Legendary Dark Knights (+)";
-  m_author_string        = "The HitchHiker, Dr. Penguin, deepdarkkapustka, VPZadov";
+  m_author_string        = "The HitchHiker, Dr. Penguin, deepdarkkapustka, V.P.Zadov";
   m_description_string   = "Enables the Legendary Dark Knights Gamemode.";
 
   set_up_hotkey();
@@ -708,7 +701,6 @@ void LDK::set_container_limit_blood_only(uint32_t num) {
   else
     LDK::container_limit_damage_only = num;
 }
-
 
 // during load
 void LDK::on_config_load(const utility::Config &cfg) {
