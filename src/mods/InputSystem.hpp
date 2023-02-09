@@ -367,7 +367,7 @@ public:
 			auto tmp = *(uintptr_t*)((uintptr_t)PadManager + 0x58);
 			if(tmp != 0)
 				_assignList = (REManagedObject*)(*(uintptr_t*)(tmp + 0x30));
-			_padInputIsKeyboardDownMethod = sdk::find_method_definition("app.PadInput", "isKeyboardDown(app.PadInput.GameAction)");
+			_padInputIsKeyboardDownMethod = sdk::get_object_method(_padInput, "isKeyboardDown(app.PadInput.GameAction)");
 			_isBackInputMethod = sdk::get_object_method(_padInput, "isBackInput(System.Single)");
 			_isFrontInputMethod = sdk::get_object_method(_padInput, "isFrontInput(System.Single)");
 			_isLeftInputMethod = sdk::get_object_method(_padInput, "isLeftInput(System.Single)");

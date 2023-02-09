@@ -196,17 +196,17 @@
        #include "mods/InstantDoppel.hpp"
        #include "mods/AirMoves.hpp"
        #include "mods/VergilTrickTrailsEfx.hpp"
-       #include "mods/BossTrickUp.hpp"
+       //#include "mods/BossTrickUp.hpp"
        #include "mods/VergilSDTAlwaysCancels.hpp"
        #include "mods/DoppelNoComeBack.hpp"
        #include "mods/EnemySpawner.hpp"
-       #include "mods/BossVergilMoves.hpp"
+      // #include "mods/BossVergilMoves.hpp"
        #include "mods/Pl0300ControllerManager.hpp"
        #include "mods/VergilGuardSlowMotion.hpp"
        #include "mods/BossVergilSettings.hpp"
        #include "mods/Pl0000SlowWorldStop.hpp"
        #include "mods/VergilQuickSilver.hpp"
-       #include "mods/ParryWithFinesse.hpp"
+       //#include "mods/ParryWithFinesse.hpp"
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 
@@ -416,14 +416,14 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
         m_mods.emplace_back(std::make_unique<InstantDoppel>());
         m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
-        m_mods.emplace_back(std::make_unique<BossTrickUp>());
+        //m_mods.emplace_back(std::make_unique<BossTrickUp>());
         m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>());
         m_mods.emplace_back(std::make_unique<DoppelNoComeBack>());
         m_mods.emplace_back(std::make_unique<ActionStartHooks::FsmPlPosCtrActionStartHooks>());
-        m_mods.emplace_back(std::make_unique<BossVergilMoves>());
+        //m_mods.emplace_back(std::make_unique<BossVergilMoves>());
         //m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>());
         m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
-        m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
+        //m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
 
 #ifdef DEVELOPER
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());
