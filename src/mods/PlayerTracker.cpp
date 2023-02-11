@@ -583,10 +583,16 @@ void PlayerTracker::pl_just_escape_hook(uintptr_t threadCtxt, uintptr_t pl, uint
 	_mod->m_pl_just_escape_hook->get_original<decltype(pl_just_escape_hook)>()(threadCtxt, pl, hitInfo);
 }
 
-bool PlayerTracker::fsm2_pl_pos_cntrl_action_update_hook(uintptr_t threadCtxt, uintptr_t fsm2PosCntrAction)
+bool PlayerTracker::fsm2_pl_pos_cntrl_action_update_speed_hook(uintptr_t threadCtxt, uintptr_t fsm2PosCntrAction)
 {
-	_mod->_onPlPosCntrActionUpdate.invoke(threadCtxt, fsm2PosCntrAction);
-	return _mod->m_fsm2_pl_pos_cntr_update_hook->get_original<decltype(fsm2_pl_pos_cntrl_action_update_hook)>()(threadCtxt, fsm2PosCntrAction);
+	_mod->_onPlPosCntrActionUpdateSpeed.invoke(threadCtxt, fsm2PosCntrAction);
+	return _mod->m_fsm2_pl_pos_cntr_update_speed_hook->get_original<decltype(fsm2_pl_pos_cntrl_action_update_speed_hook)>()(threadCtxt, fsm2PosCntrAction);
+}
+
+void PlayerTracker::fsm2_pl_pos_cntrl_action_start_hook(uintptr_t threadCntxt, uintptr_t fsm2PosCntrAction, uintptr_t behavtreeActionArg)
+{
+	_mod->_onPlPosCntrActionStart.invoke(threadCntxt, fsm2PosCntrAction, behavtreeActionArg);
+	_mod->m_fsm2_pl_pos_cntr_start_action_hook->get_original<decltype(fsm2_pl_pos_cntrl_action_start_hook)>()(threadCntxt, fsm2PosCntrAction, behavtreeActionArg);
 }
 
 void PlayerTracker::pl_manager_pl_remove_hook(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl, bool isUnload)
@@ -726,10 +732,15 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!plManagerRemovePlAddr)
 		return "Unable to find PlayerTracker.plManagerRemovePlAddr pattern.";
 
-	auto fsmPosControllerUpdateAddr = m_patterns_cache->find_addr(base, "30 5F C3 40 55 53 56 57");
+	auto fsmPosControllerUpdateSpeedAddr = m_patterns_cache->find_addr(base, "30 5F C3 40 55 53 56 57");
 	//DevilMayCry5.app_fsm2_player_PositionControllerAction__updatePosition311792 (-0x3)
-	if (!fsmPosControllerUpdateAddr)
-		return "Unable to find PlayerTracker.fsmPosControllerUpdateAddr pattern.";
+	if (!fsmPosControllerUpdateSpeedAddr)
+		return "Unable to find PlayerTracker.fsmPosControllerUpdateSpeedAddr pattern.";
+
+	auto fsmPosControllerActionStartAddr = m_patterns_cache->find_addr(base, "40 55 56 57 48 83 EC 60 49");
+	//DevilMayCry5.app_fsm2_player_PositionControllerAction__start311797
+	if (!fsmPosControllerActionStartAddr)
+		return "Unable to find PlayerTracker.fsmPosControllerActionStartAddr pattern.";
 
 	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 7B");
 	//DevilMayCry5.app_PlayerVergilPL__setAirTrickAction114006
@@ -838,9 +849,13 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!m_pl_remove_hook->create())
 		return "Faild to install PlayerTracker.m_pl_remove_hook;";
 
-	m_fsm2_pl_pos_cntr_update_hook = std::make_unique<FunctionHook>(fsmPosControllerUpdateAddr.value() + 0x3, &fsm2_pl_pos_cntrl_action_update_hook);
-	if (!m_fsm2_pl_pos_cntr_update_hook->create())
-		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_update_hook;";
+	m_fsm2_pl_pos_cntr_update_speed_hook = std::make_unique<FunctionHook>(fsmPosControllerUpdateSpeedAddr.value() + 0x3, &fsm2_pl_pos_cntrl_action_update_speed_hook);
+	if (!m_fsm2_pl_pos_cntr_update_speed_hook->create())
+		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_update_speed_hook;";
+
+	m_fsm2_pl_pos_cntr_start_action_hook = std::make_unique<FunctionHook>(fsmPosControllerActionStartAddr.value(), &fsm2_pl_pos_cntrl_action_start_hook);
+	if (!m_fsm2_pl_pos_cntr_start_action_hook->create())
+		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_start_action_hook;";
 
 	m_pl0800_set_air_trick_action_hook = std::make_unique<FunctionHook>(setAirTrickActionAddr.value(), &pl0800_set_air_trick_action_hook);
 	if (!m_pl0800_set_air_trick_action_hook->create())

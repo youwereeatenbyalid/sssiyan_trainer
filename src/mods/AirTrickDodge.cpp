@@ -25,7 +25,8 @@ void AirTrickDodge::on_fsm_pos_cntr_update(uintptr_t threadCntx, uintptr_t fsm2P
 	{
 		if (gf::StringController::str_cmp(*(uintptr_t*)(pl + 0x190), str))
 		{
-			*(bool*)(fsm2PlPosCntrAction + 0x64) = isNoInertia;
+			if (isNoInertia)
+				*(float*)(pl + 0x290) = *(float*)(pl + 0x294) = 0;
 			*(bool*)(fsm2PlPosCntrAction + 0x7D) = isOverwriteGroundFitLength;
 			break;
 		}

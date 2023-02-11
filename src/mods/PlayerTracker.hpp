@@ -291,17 +291,32 @@ public:
 
 	// uintptr_t threadCtxt, uintptr_t fsm2PlPosCntrAction
 	template<typename T>
-	static void pl_on_fsm2_pos_cntr_action_update_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t/*fsm2PlPosCntrAction*/>> handler)
+	static void pl_on_fsm2_pos_cntr_action_update_speed_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t/*fsm2PlPosCntrAction*/>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
-			_mod->_onPlPosCntrActionUpdate.subscribe(handler);
+			_mod->_onPlPosCntrActionUpdateSpeed.subscribe(handler);
 	}
 
 	template<typename T>
-	static void pl_on_fsm2_pos_cntr_action_update_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t/*fsm2PlPosCntrAction*/>> handler)
+	static void pl_on_fsm2_pos_cntr_action_update_speed_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t/*fsm2PlPosCntrAction*/>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
-			_mod->_onPlPosCntrActionUpdate.unsubscribe(handler);
+			_mod->_onPlPosCntrActionUpdateSpeed.unsubscribe(handler);
+	}
+
+	// uintptr_t threadCtxt, uintptr_t fsm2PlPosCntrAction, uintptr_t behavTreeActionArg
+	template<typename T>
+	static void pl_on_fsm2_pos_cntr_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*fsm2PlPosCntrAction*/ uintptr_t /*behavTreeActionArg*/>> handler)
+	{
+		if (handler != nullptr && _mod != nullptr)
+			_mod->_onPlPosCntrActionStart.subscribe(handler);
+	}
+
+	template<typename T>
+	static void pl_on_fsm2_pos_cntr_action_start_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*fsm2PlPosCntrAction*/ uintptr_t /*behavTreeActionArg*/>> handler)
+	{
+		if (handler != nullptr && _mod != nullptr)
+			_mod->_onPlPosCntrActionStart.unsubscribe(handler);
 	}
 
 	// uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl, bool isUnload
@@ -337,7 +352,7 @@ public:
 
 	// uintptr_t threadCtxt, uintptr_t fsm2.Player.PlayerAction, uintptr_t via.BehaviourTree.ActionArg, bool isNotifyOnly
 	template<typename T>
-	static void on_fsm2_player_player_action_notify_action_end_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*fsm2.Player.PlayerAction*/ uintptr_t, 
+	static void on_fsm2_player_player_action_notify_action_end_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*fsm2.Player.PlayerAction*/ uintptr_t,
 		/*via.BehaviourTree.ActionArg*/ bool /*isNotifyOnly*/>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
@@ -368,7 +383,8 @@ private:
 	Events::Event<uintptr_t,/*Dante*/ PlDanteStyleType /*style*/> _plDanteSetStyleRequest;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ float* /*val*/, int/*dtAddType*/, bool/*fixedValue*/> _onPlAddDtGauge;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ uintptr_t /*hitCntrl*/> _onPlJustEscape;
-	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2PlPosCntrAction*/> _onPlPosCntrActionUpdate;
+	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2PlPosCntrAction*/> _onPlPosCntrActionUpdateSpeed;
+	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2PlPosCntrAction*/, uintptr_t /*behavTreeActionArg*/> _onPlPosCntrActionStart;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*plManager*/ uintptr_t /*pl*/, bool /*isUnload*/> _onPlManagerPlRemove;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*pl*/, uintptr_t /*gameObjectTarget*/, bool* /*skipOrig*/> _pl0800SetAirTrickAction;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2.Player.PlayerAction*/, uintptr_t /*via.BehaviourTree.ActionArg*/, bool /*isNotifyOnly*/> _onFsmPlActionNotifyActionEnd;
@@ -409,7 +425,9 @@ private:
 	//6 - GuardBreak;
 	static int pl0800_on_guard_hook(uintptr_t threadCtxt, uintptr_t vergil, uintptr_t hitCtrlDamageInfo);
 
-	static bool fsm2_pl_pos_cntrl_action_update_hook(uintptr_t threadCntxt, uintptr_t fsm2PosCntrAction);
+	static void fsm2_pl_pos_cntrl_action_start_hook(uintptr_t threadCntxt, uintptr_t fsm2PosCntrAction, uintptr_t behavtreeActionArg);
+
+	static bool fsm2_pl_pos_cntrl_action_update_speed_hook(uintptr_t threadCntxt, uintptr_t fsm2PosCntrAction);
 
 	static void pl_manager_pl_remove_hook(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl, bool isUnload);
 
@@ -439,8 +457,9 @@ private:
 	std::unique_ptr<FunctionHook> m_set_royal_style_hook;
 	std::unique_ptr<FunctionHook> m_pl_add_dt_gauge_hook;
 	std::unique_ptr<FunctionHook> m_pl_just_escape_hook;
-	std::unique_ptr<FunctionHook> m_fsm2_pl_pos_cntr_update_hook;
+	std::unique_ptr<FunctionHook> m_fsm2_pl_pos_cntr_update_speed_hook;
+	std::unique_ptr<FunctionHook> m_fsm2_pl_pos_cntr_start_action_hook;
 	std::unique_ptr<FunctionHook> m_pl_remove_hook;
 	std::unique_ptr<FunctionHook> m_pl0800_set_air_trick_action_hook;
 	std::unique_ptr<FunctionHook> m_fsm2_player_player_action_notify_action_end_hook;
-	};
+};

@@ -15,12 +15,12 @@ public:
 
 	AirTrickDodge()
 	{
-		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_sub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_speed_sub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
 	}
 
 	~AirTrickDodge()
 	{
-		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_unsub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_speed_unsub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
 	}
 
 	std::string_view get_name() const override
