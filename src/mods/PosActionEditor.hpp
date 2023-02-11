@@ -276,8 +276,9 @@ public:
 				if (_isActionStarted)
 				{
 					_isActionStarted = false;
-					curSpeed = _prevSpeed = copy_speed_axis(curSpeed, _settings->get_init_speed());
+					curSpeed = copy_speed_axis(curSpeed, _settings->get_init_speed());
 					update_direction(curSpeed);
+					_prevSpeed = curSpeed;
 				}
 				else
 				{
@@ -297,7 +298,7 @@ public:
 									if (_prevSpeed.x != 0)
 									{
 										curSpeed.x = abs(_prevSpeed.x) - abs(accel.x);
-										if (get_sign(curSpeed.x) != xSign)
+										if (get_sign(curSpeed.x) <= 0)
 											curSpeed.x = _prevSpeed.x = 0;
 										else
 										{
@@ -314,7 +315,7 @@ public:
 									if (_prevSpeed.y != 0)
 									{
 										curSpeed.y = abs(_prevSpeed.y) - abs(accel.y);
-										if (get_sign(curSpeed.y) != ySign)
+										if (get_sign(curSpeed.y) <= 0)
 											curSpeed.y = _prevSpeed.y = 0;
 										else
 										{
@@ -331,7 +332,7 @@ public:
 									if (_prevSpeed.z != 0)
 									{
 										curSpeed.z = abs(_prevSpeed.z) - abs(accel.z);
-										if (get_sign(curSpeed.z) != zSign)
+										if (get_sign(curSpeed.z) <= 0)
 											curSpeed.z = _prevSpeed.z = 0;
 										else
 										{
@@ -394,8 +395,8 @@ private:
 	{
 		{"Trick Dodge Forward", std::vector{L"TrickAction.TrickEscape.TrickEscape_Front"}, true, SpeedController::Y, gf::Vec3(0, 1, 0)},
 		{"Trick Dodge Back", std::vector{L"TrickAction.TrickEscape.TrickEscape_Back"}, true, SpeedController::Y, gf::Vec3(0, -1, 0)},
-		{"Trick Dodge Left", std::vector{L"TrickAction.TrickEscape.TrickEscape_Left"}, true, SpeedController::X, gf::Vec3(-1, 0, 0)},
-		{"Trick Dodge Right", std::vector{L"TrickAction.TrickEscape.TrickEscape_Right"}, true, SpeedController::X, gf::Vec3(1, 0, 0)},
+		{"Trick Dodge Left", std::vector{L"TrickAction.TrickEscape.TrickEscape_Left"}, true, SpeedController::X, gf::Vec3(1, 0, 0)},
+		{"Trick Dodge Right", std::vector{L"TrickAction.TrickEscape.TrickEscape_Right"}, true, SpeedController::X, gf::Vec3(-1, 0, 0)},
 		{"Left Side Dodge", std::vector{L"Avoid.AvoidLeft.Trick_L_start", L"Avoid.AvoidLeft.Trick_L_Landing"}, true, SpeedController::X | SpeedController::Y, gf::Vec3(1, 1, 0)},
 		{"Right Side Dodge", std::vector{L"Avoid.AvoidRight.Trick_R_Start", L"Avoid.AvoidRight.Trick_R_Landing"}, true, SpeedController::X | SpeedController::Y, gf::Vec3(- 1, -1, 0)},
 		{"Trick Down (only on the ground)", std::vector{L"TrickAction.TrickDown.Trick_Down"}, false, SpeedController::Y, gf::Vec3(1, -1, 1)},
