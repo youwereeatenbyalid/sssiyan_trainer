@@ -450,7 +450,7 @@ namespace WaveEditorMod
 
 		EnemyWaveEditor()
 		{
-			_txtHelperSize = ImGui::CalcTextSize(_txtHelper).x;
+			
 		}
 
 		std::string_view get_name() const override

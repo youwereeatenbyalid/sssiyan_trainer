@@ -462,6 +462,8 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize EnemyWaveEditor.bpFadeIn";
   }
+  _txtHelperSize = ImGui::CalcTextSize(_txtHelper).x;
+
   mimListManager = std::make_unique<MimicListManager>();
   mode = Mode::Mod;
   curCustomEmData.set_default();
