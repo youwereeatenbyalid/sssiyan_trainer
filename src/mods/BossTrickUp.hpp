@@ -10,6 +10,7 @@
 #include "mods/EndLvlHooks.hpp"
 #include "EnemySpawner.hpp"
 #include "PlayerTracker.hpp"
+#include "InfiniteTrickUp.hpp"
 
 //clang-format off
 namespace gf = GameFunctions;
@@ -30,6 +31,7 @@ private:
 	static inline BossTrickUp *_mod = nullptr;
 
 	sdk::REMethodDefinition *_doppelComeBackMethod = nullptr;
+	sdk::REMethodDefinition* _pl0800SetActionMethod = nullptr;
 
 
 	void init_check_box_info() override
@@ -40,10 +42,41 @@ private:
 
 	std::unique_ptr<FunctionHook> m_trickup_action_hook;
 
+	void on_pl0800_set_air_trick_action(uintptr_t threadCntxt, uintptr_t pl0800, uintptr_t targetGameObj, bool* skipCall)
+	{
+		if (!cheaton || *(bool*)(pl0800 + 0x17F0))
+			return;
+		bool isTrickUpAllowed = InfiniteTrickUp::cheaton ? true : *(bool*)(pl0800 + 0x19BC);//isTrickUp;
+		if (!isTrickUpAllowed || !check_angle(pl0800))
+		{
+			isPadInputTrickUp = false;
+			return;
+		}
+		else
+		{
+			isPadInputTrickUp = true;
+			_pl0800SetActionMethod->call(threadCntxt, pl0800, 0x7D5, 0, 0, 0, 0, 0, true, false);
+			*(bool*)(pl0800 + 0x19BC) = false;
+			*skipCall = true;
+		}
+	}
+
+	void on_sdk_init() override
+	{
+		_doppelComeBackMethod = sdk::find_method_definition("app.PlayerVergilPL", "comeBackDoppelGanger()");
+		_pl0800SetActionMethod = sdk::find_method_definition("app.PlayerVergilPL", "setAction(app.PlayerVergilPL.Actions, System.UInt32, System.Single, System.Single, "
+			"via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean)");
+	}
+
 public:
 	BossTrickUp()
 	{
 		_mod = this;
+	}
+
+	~BossTrickUp()
+	{
+		PlayerTracker::on_pl0800_set_air_trick_action_unsub(std::make_shared<Events::EventHandler<BossTrickUp, uintptr_t, uintptr_t, uintptr_t, bool*>>(this, &BossTrickUp::on_pl0800_set_air_trick_action));
 	}
 
 	static inline bool cheaton = true;
@@ -53,10 +86,6 @@ public:
 
 	static bool check_angle(uintptr_t vergil)
 	{
-		if (vergil == 0 || *(int*)(vergil + 0x108) == 1 || *(int*)(vergil + 0xE64) != 4)
-			return false;
-		if (*(bool*)(vergil + 0xED0) == false /*isManualLockOn*/ || _mod->_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS) && *(int*)(vergil + 0x1978) != 0)
-			return false;
 		auto padInput = *(uintptr_t*)(vergil + 0xEF0);
 		if (cheaton && !VergilTrickUpLockedOn::cheaton)
 			return _mod->_inputSys->is_front_input((REManagedObject*)padInput, _mod->angleForwardThreshold);
@@ -72,9 +101,9 @@ public:
 
 	static bool check_input(uintptr_t vergil)
 	{
-		if (vergil == 0 || *(bool*)(vergil + 0xED0) == false /*isManualLockOn*/ || _mod->_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS) && *(int*)(vergil + 0x1978) != 0)
+		if (vergil == 0 || *(bool*)(vergil + 0xED0) == false /*isManualLockOn*/ /*|| _mod->_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS) && *(int*)(vergil + 0x1978) != 0*/)
 		{
-			_mod->isPadInputTrickUp = false;
+			//_mod->isPadInputTrickUp = false;
 			return true;
 		}
 		bool res = true;
@@ -149,6 +178,7 @@ public:
 			if (*(bool*)(vergil + 0x18A8))
 				_mod->_doppelComeBackMethod->call(threadCtxt, vergil);
 		}
+		_mod->isPadInputTrickUp = false;
 	}
 
 	static naked void detour()
@@ -215,7 +245,8 @@ public:
 		m_on_page = Page_VergilTrick;
 		m_full_name_string = "Boss's Trick Up (+)";
 		m_author_string = "V.P.Zadov, SSSiyan";
-		m_description_string = "Lock on + forward + trick will instantly teleport Vergil directly above the enemies head, similarly to how Boss Vergil teleports. Trick-up without lock on works as normal.";
+		m_description_string = "Lock on + forward + trick will instantly teleport Vergil directly above the enemies head, similarly to how Boss Vergil teleports. Can interrupt any move what air trick can also. "
+			"Trick - up without lock on works as normal.";
 
 		set_up_hotkey();
 
@@ -234,7 +265,7 @@ public:
 			return "Failed to initialize BossTrickUp.trickUpSetAction";
 		}
 
-		_doppelComeBackMethod = sdk::find_method_definition("app.PlayerVergilPL", "comeBackDoppelGanger()");
+		PlayerTracker::on_pl0800_set_air_trick_action_sub(std::make_shared<Events::EventHandler<BossTrickUp, uintptr_t, uintptr_t, uintptr_t, bool*>>(this, &BossTrickUp::on_pl0800_set_air_trick_action));
 
 		return Mod::on_initialize();
 	}

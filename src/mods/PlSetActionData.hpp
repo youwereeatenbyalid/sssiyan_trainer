@@ -177,7 +177,8 @@ public:
 				gf::StringController::get_str(dotNetString, &doppelActionStr, PlSetActionData::doppelActualLength);
 			}
 
-			if (strcmp(actionStr.data(), "None") != 0 && strcmp(actionStr.data(), "Wait") != 0 && strcmp(actionStr.data(), "LongWait") != 0 && strcmp(actionStr.data(), "PutOut") != 0)
+			if (strcmp(actionStr.data(), "None") != 0 && strcmp(actionStr.data(), "Wait") != 0 && strcmp(actionStr.data(), "LongWait") != 0 && strcmp(actionStr.data(), "PutOut") != 0
+				&& strcmp(actionStr.data(), "PutAwayYamato") && strcmp(actionStr.data(), "PutAwayForceedge"))
 			{
 				_strset(realActionStr.data(), 0);
 				strcpy(realActionStr.data(), actionStr.data());

@@ -583,6 +583,32 @@ void PlayerTracker::pl_just_escape_hook(uintptr_t threadCtxt, uintptr_t pl, uint
 	_mod->m_pl_just_escape_hook->get_original<decltype(pl_just_escape_hook)>()(threadCtxt, pl, hitInfo);
 }
 
+bool PlayerTracker::fsm2_pl_pos_cntrl_action_update_hook(uintptr_t threadCtxt, uintptr_t fsm2PosCntrAction)
+{
+	_mod->_onPlPosCntrActionUpdate.invoke(threadCtxt, fsm2PosCntrAction);
+	return _mod->m_fsm2_pl_pos_cntr_update_hook->get_original<decltype(fsm2_pl_pos_cntrl_action_update_hook)>()(threadCtxt, fsm2PosCntrAction);
+}
+
+void PlayerTracker::pl_manager_pl_remove_hook(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl, bool isUnload)
+{
+	_mod->_onPlManagerPlRemove.invoke(threadCntx, plManager, pl, isUnload);
+	_mod->m_pl_remove_hook->get_original<decltype(pl_manager_pl_remove_hook)>()(threadCntx, plManager, pl, isUnload);
+}
+
+void PlayerTracker::pl0800_set_air_trick_action_hook(uintptr_t threadCntx, uintptr_t pl0800, uintptr_t gameObjTarget)
+{
+	bool skipCall = false;
+	_mod->_pl0800SetAirTrickAction.invoke(threadCntx, pl0800, gameObjTarget, &skipCall);
+	if (!skipCall)
+		_mod->m_pl0800_set_air_trick_action_hook->get_original<decltype(pl0800_set_air_trick_action_hook)>()(threadCntx, pl0800, gameObjTarget);
+}
+
+void PlayerTracker::fsm2_player_player_action_notify_action_end_hook(uintptr_t threadCntx, uintptr_t fsm2PlayerPlayerAction, uintptr_t behaviourTreeActionArg, bool isNotifyOnly)
+{
+	_mod->_onFsmPlActionNotifyActionEnd.invoke(threadCntx, fsm2PlayerPlayerAction, behaviourTreeActionArg, isNotifyOnly);
+	_mod->m_fsm2_player_player_action_notify_action_end_hook->get_original<decltype(fsm2_player_player_action_notify_action_end_hook)>()(threadCntx, fsm2PlayerPlayerAction, behaviourTreeActionArg, isNotifyOnly);
+}
+
 // clang-format on
 
 void PlayerTracker::init_check_box_info() {
@@ -695,6 +721,26 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		return "Unable to find PlayerTracker.plAddDtGaugeAddr pattern.";
 	}
 
+	auto plManagerRemovePlAddr = m_patterns_cache->find_addr(base, "40 55 56 57 41 56 41 57 48 83 EC 30 49");
+	//DevilMayCry5.app_PlayerManager__removePlayer272230
+	if (!plManagerRemovePlAddr)
+		return "Unable to find PlayerTracker.plManagerRemovePlAddr pattern.";
+
+	auto fsmPosControllerUpdateAddr = m_patterns_cache->find_addr(base, "30 5F C3 40 55 53 56 57");
+	//DevilMayCry5.app_fsm2_player_PositionControllerAction__updatePosition311792 (-0x3)
+	if (!fsmPosControllerUpdateAddr)
+		return "Unable to find PlayerTracker.fsmPosControllerUpdateAddr pattern.";
+
+	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 7B");
+	//DevilMayCry5.app_PlayerVergilPL__setAirTrickAction114006
+	if (!setAirTrickActionAddr)
+		return "Unable to find PlayerTracker.setAirTrickActionAddr pattern.";
+
+	auto fsm2PlPlActionNotifyActionEndAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 20 45 84 C9 49");
+	//DevilMayCry5.app_fsm2_player_PlayerAction__notifyActionEnd219004
+	if (!fsm2PlPlActionNotifyActionEndAddr)
+		return "Unable to find PlayerTracker.fsm2PlPlActionNotifyActionEndAddr pattern.";
+
 	auto setSwordStyleAddr = setTrickStyleAddr.value() - 0x22;
 	auto setGunStyleAddr = setSwordStyleAddr - 0x22;
 	auto setRoyalStyleAddr = setGunStyleAddr - 0x22;
@@ -788,6 +834,21 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!m_pl_just_escape_hook->create())
 		return "Faild to install PlayerTracker.m_pl_just_escape_hook;";
 
+	m_pl_remove_hook = std::make_unique<FunctionHook>(plManagerRemovePlAddr.value(), &pl_manager_pl_remove_hook);
+	if (!m_pl_remove_hook->create())
+		return "Faild to install PlayerTracker.m_pl_remove_hook;";
+
+	m_fsm2_pl_pos_cntr_update_hook = std::make_unique<FunctionHook>(fsmPosControllerUpdateAddr.value() + 0x3, &fsm2_pl_pos_cntrl_action_update_hook);
+	if (!m_fsm2_pl_pos_cntr_update_hook->create())
+		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_update_hook;";
+
+	m_pl0800_set_air_trick_action_hook = std::make_unique<FunctionHook>(setAirTrickActionAddr.value(), &pl0800_set_air_trick_action_hook);
+	if (!m_pl0800_set_air_trick_action_hook->create())
+		return "Faild to install PlayerTracker.m_pl0800_set_air_trick_action_hook;";
+
+	m_fsm2_player_player_action_notify_action_end_hook = std::make_unique<FunctionHook>(fsm2PlPlActionNotifyActionEndAddr.value(), &fsm2_player_player_action_notify_action_end_hook);
+	if (!m_fsm2_player_player_action_notify_action_end_hook->create())
+		return "Faild to install PlayerTracker.m_fsm2_player_player_action_notify_action_end_hook;";
 
 	return Mod::on_initialize();
 }

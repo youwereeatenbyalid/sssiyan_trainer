@@ -2,6 +2,7 @@
 #include "Mod.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
 #include "PlSetActionData.hpp"
+#include "PlayerTracker.hpp"
 
 class AirTrickDodge :  public Mod
 {
@@ -11,11 +12,16 @@ public:
 	static inline bool isNoInertia = false;
 
 	static inline uintptr_t ret = 0;
-	//static inline uintptr_t isAirRet = 0;
 
-	AirTrickDodge() = default;
+	AirTrickDodge()
+	{
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_sub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
+	}
 
-	static bool move_check_asm(uintptr_t charPtr, bool& groundFitCheat); //called in FsmPlPosCtrActionStartHooks::is_air_detour(...), ...
+	~AirTrickDodge()
+	{
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_unsub(std::make_shared<Events::EventHandler<AirTrickDodge, uintptr_t, uintptr_t>>(this, &AirTrickDodge::on_fsm_pos_cntr_update));
+	}
 
 	std::string_view get_name() const override
 	{
@@ -45,13 +51,15 @@ public:
 	// void on_draw_debug_ui() override;
 
 private:
-	static inline std::array<const char*, 4> trickNames
+	static inline constexpr std::array<const char*, 4> _trickNames
 	{
 		"TrickEscape_Front",
 		"TrickEscape_Back",
 		"TrickEscape_Left",
 		"TrickEscape_Right"
 	};
+
+	void on_fsm_pos_cntr_update(uintptr_t threadCntx, uintptr_t fsm2PlPosCntrAction);
 
 	void init_check_box_info() override;
 	std::unique_ptr<FunctionHook> m_aircheck_hook;

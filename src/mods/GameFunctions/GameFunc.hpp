@@ -333,7 +333,9 @@ namespace GameFunctions
 
 		static bool str_cmp(uintptr_t dotNetString, const char* str) noexcept
 		{
-			if (PtrController::is_bad_ptr(dotNetString))
+			/*if (PtrController::is_bad_ptr(dotNetString))
+				return false;*/
+			if (dotNetString == 0)
 				return false;
 			auto strLength = *(unsigned int*)(dotNetString + 0x10);
 			if (strLength != strlen(str))
@@ -348,7 +350,9 @@ namespace GameFunctions
 
 		static bool str_cmp(uintptr_t dotNetString, const wchar_t* str) noexcept
 		{
-			if (PtrController::is_bad_ptr(dotNetString))
+			/*if (PtrController::is_bad_ptr(dotNetString))
+				return false;*/
+			if (dotNetString == 0)
 				return false;
 			const wchar_t* newStrRaw = (const wchar_t*)(dotNetString + 0x14);
 			int res = wcscmp(str, newStrRaw);

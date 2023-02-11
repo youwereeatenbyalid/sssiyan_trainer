@@ -12,20 +12,20 @@ static naked void draw_off_detour()
 		jmp qword ptr [TrickDodgeNoDisappear::ret]
 
 		cheat:
-		cmp byte ptr [TrickDodgeNoDisappear::isAuto], 1
-		je spec_check
+		/*cmp byte ptr [TrickDodgeNoDisappear::isAuto], 1
+		je spec_check*/
 		movss xmm0, [TrickDodgeNoDisappear::endDrawOffMod]
 		jmp qword ptr [TrickDodgeNoDisappear::ret]
 
-		spec_check:
-		cmp byte ptr [TrickDodgeNoDisappear::isTrickStopped], 1
+		/*spec_check:
+		cmp byte ptr [TrickDodgeNoDisappear::_isTrickStopped], 1
 		je zero_frame
 		movss xmm0, [TrickDodgeNoDisappear::specDrawOff]
 		jmp qword ptr [TrickDodgeNoDisappear::ret]
 
 		zero_frame:
 		movss xmm0, [TrickDodgeNoDisappear::zeroDrawOff]
-		jmp qword ptr [TrickDodgeNoDisappear::ret]
+		jmp qword ptr [TrickDodgeNoDisappear::ret]*/
 	}
 }
 
@@ -51,22 +51,18 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 		return "Failed to initialize TrickDodgeNoDisappear.getEndDrawOff";
 	}
 
-	auto posActionEditor = static_cast<PosActionEditor*>(g_framework->get_mods()->get_mod("PosActionEditor"));
-	if (posActionEditor != nullptr)
-		posActionEditor->speed_sign_changed_sub((std::make_shared<Events::EventHandler<TrickDodgeNoDisappear, const PosActionEditor::MoveSpeedData*>>(this, &TrickDodgeNoDisappear::on_trick_dodge_end)));
-
 	return Mod::on_initialize();
 }
 
  void TrickDodgeNoDisappear::on_config_load(const utility::Config& cfg)
  {
-	 isAuto = cfg.get<bool>("TrickDodgeNoDisappear.isAuto").value_or(false);
+	 //isAuto = cfg.get<bool>("TrickDodgeNoDisappear.isAuto").value_or(false);
 	 endDrawOffMod = cfg.get<float>("TrickDodgeNoDisappear.endDrawOffMod").value_or(0);
  }
 
  void TrickDodgeNoDisappear::on_config_save(utility::Config& cfg)
  {
-	 cfg.set<bool>("TrickDodgeNoDisappear.isAuto", isAuto);
+	 //cfg.set<bool>("TrickDodgeNoDisappear.isAuto", isAuto);
 	 cfg.set<float>("TrickDodgeNoDisappear.endDrawOffMod", endDrawOffMod);
  }
 
@@ -74,14 +70,13 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 
  void TrickDodgeNoDisappear::on_draw_ui()
  {
-	 ImGui::Checkbox("Automatically set duration based on trick move duration", &isAuto);
-	 ImGui::ShowHelpMarker("This option works correctly only when Position Action Editor mod enabled and trick dodge speed changed.");
-	 if (!isAuto)
-	 {
-		 ImGui::TextWrapped("Frames after Vergil's model will be visible:");
-		 UI::SliderFloat("##frameDrawOff", &endDrawOffMod, 0, 360.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-	 }
-	
+	 //ImGui::Checkbox("Automatically set duration based on trick move duration", &isAuto);
+	 //ImGui::ShowHelpMarker("This option works correctly only when Position Action Editor mod enabled and trick dodge speed changed.");
+	 //if (!isAuto)
+	 //{
+	ImGui::TextWrapped("Frames after Vergil's model will be visible:");
+	UI::SliderFloat("##frameDrawOff", &endDrawOffMod, 0, 360.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+	 //}	
  }
 
 // void TrickDodgeNoDisappear::on_draw_debug_ui(){}

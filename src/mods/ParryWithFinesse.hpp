@@ -405,6 +405,17 @@ private:
 		_plSetActionFullMethod->call(threadCntx, pl, action->get_net_str(), layerNo, startFrame, interpolationFrame, mode, curve, isImmediate, passSelect, isPuppetTransition, priority);
 	}
 
+	void on_sdk_init() override
+	{
+		_emSetActionMethod = sdk::find_method_definition("app.Enemy",
+			"setAction(app.Enemy.ActionEnum, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean)");
+		_plSetActionMethod = sdk::find_method_definition("app.Player", "setAction(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, "
+			"System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
+		_pl0800ChangeWeaponSMethod = sdk::find_method_definition("app.PlayerVergilPL", "changeWeaponS(app.PlayerVergilPL.WeaponS, System.Int32)");
+		_plSetActionFullMethod = sdk::find_method_definition("app.Player", "setActionFullName(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, "
+			"via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
+	}
+
 public:
 	ParryWithFinesse() = default;
 
@@ -439,14 +450,6 @@ public:
 		m_description_string = "Change Capcom's \"pArRy WiTh fINesSe\" with Motivation LVL 2 to a better version imao.";
 
 		set_up_hotkey();
-
-		_emSetActionMethod = sdk::find_method_definition("app.Enemy",
-			"setAction(app.Enemy.ActionEnum, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean)");
-		_plSetActionMethod = sdk::find_method_definition("app.Player", "setAction(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, "
-			"System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
-		_pl0800ChangeWeaponSMethod = sdk::find_method_definition("app.PlayerVergilPL", "changeWeaponS(app.PlayerVergilPL.WeaponS, System.Int32)");
-		_plSetActionFullMethod = sdk::find_method_definition("app.Player", "setActionFullName(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, "
-			"via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
 
 		PlayerTracker::after_pl0800_guard_check_sub(std::make_shared<Events::EventHandler<ParryWithFinesse, uintptr_t, uintptr_t, uintptr_t, int*>>(this, &ParryWithFinesse::on_pl0800_block));
 

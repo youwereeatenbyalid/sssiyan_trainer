@@ -275,7 +275,6 @@ set(MODS_SRC
     mods/GameplayStateTracker.cpp
     mods/DoppelNoComeBack.hpp
     mods/DanteSDTRegen.hpp
-    mods/FsmPlPosCtrActionStartHooks.hpp
     mods/PosActionEditor.hpp
     mods/InputSystem.hpp
     mods/DanteSelectReleaseType.hpp

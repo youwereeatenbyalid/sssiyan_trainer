@@ -1,16 +1,438 @@
-#pragma once
+﻿#pragma once
 #include "Mod.hpp"
 #include "GameFunctions/GameFunc.hpp"
 #include "events/Events.hpp"
-#include "PlSetActionData.hpp"
-#include "FsmPlPosCtrActionStartHooks.hpp"
+#include "PlayerTracker.hpp"
+#include "EndLvlHooks.hpp"
 
 //clang-format off
 namespace gf = GameFunctions;
 
-class PosActionEditor : public Mod
+class PosActionEditor : public Mod, private EndLvlHooks::IEndLvl
 {
+public:
+
+	class SpeedController
+	{
+		using sign = signed char;
+	public:
+		enum Axis : uint32_t
+		{
+			X = 1,
+			Y = 2,
+			Z = 4,
+		};
+
+		static inline constexpr int _flagsMax = 4;// capcom also had nx, ny, nz 
+
+		inline friend Axis operator |(Axis a, Axis b)
+		{
+			return static_cast<Axis>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+		}
+
+		inline friend Axis operator &(Axis a, Axis b)
+		{
+			return static_cast<Axis>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+		}
+
+		class SharedSettings
+		{
+		private:
+			std::string _saveKey = "PosActionEditor.SpeedController.SharedSettings.";
+			std::string _speedLabels[3];//x,y,z
+			std::string _accelLabels[3];
+
+			const char* _dispalyMoveName;
+			std::vector<const wchar_t*> _gameMoveNames;
+
+			const Axis _moveAxis;
+
+			gf::Vec3 _accel;
+			gf::Vec3 _initSpeed;
+			gf::Vec3 _dir;
+
+			const bool _isAccel = false;
+			bool _isEnabled = false;
+
+		public:
+			SharedSettings(const char* displayMoveName, std::vector<const wchar_t*> gameMoveNames, bool isAccel, Axis moveAxis, gf::Vec3 direction) : _dispalyMoveName(displayMoveName), 
+				_gameMoveNames(std::move(gameMoveNames)), _isAccel(isAccel), _moveAxis(moveAxis), _dir(direction)
+			{
+				_saveKey += std::string(displayMoveName + std::string("."));
+
+				_speedLabels[0] = "##" + std::string(displayMoveName) + "XSpeed";
+				_speedLabels[1] = "##" + std::string(displayMoveName) + "YSpeed";
+				_speedLabels[2] = "##" + std::string(displayMoveName) + "ZSpeed";
+
+				_accelLabels[0] = "##" + std::string(displayMoveName) + "XAccel";
+				_accelLabels[1] = "##" + std::string(displayMoveName) + "YAccel";
+				_accelLabels[2] = "##" + std::string(displayMoveName) + "ZAccel";
+			}
+
+			void on_cfg_save(utility::Config& cfg) const
+			{
+				cfg.set<float>(_saveKey + "_initSpeedX", _initSpeed.x);
+				cfg.set<float>(_saveKey + "_initSpeedY", _initSpeed.y);
+				cfg.set<float>(_saveKey + "_initSpeedZ", _initSpeed.z);
+				cfg.set<float>(_saveKey + "_accelX", _accel.x);
+				cfg.set<float>(_saveKey + "_accelY", _accel.y);
+				cfg.set<float>(_saveKey + "_accelZ", _accel.z);
+				cfg.set<bool>(_saveKey + "_isEnabled", _isEnabled);
+			}
+
+			void on_cfg_load(const utility::Config& cfg)
+			{
+				_initSpeed.x = cfg.get<float>(_saveKey + "_initSpeedX").value_or(0);
+				_initSpeed.y = cfg.get<float>(_saveKey + "_initSpeedY").value_or(0);
+				_initSpeed.z = cfg.get<float>(_saveKey + "_initSpeedZ").value_or(0);
+				_accel.x = cfg.get<float>(_saveKey + "_accelX").value_or(0);
+				_accel.y = cfg.get<float>(_saveKey + "_accelY").value_or(0);
+				_accel.z = cfg.get<float>(_saveKey + "_accelZ").value_or(0);
+				_isEnabled = cfg.get<bool>(_saveKey + "_isEnabled").value_or(false);
+			}
+
+			inline void input_float(const char* label, float* v, float step = 0.5F, float step_fast = 1.0F, const char* format = "%.3f", ImGuiInputTextFlags flags = 0)
+			{
+				ImGui::InputFloat(label, v, step, step_fast, format, flags);
+				if (*v < 0)
+					*v = 0;
+			}
+
+			void print_settings()
+			{
+				ImGui::Checkbox(_dispalyMoveName, &_isEnabled);
+				ImGui::Spacing();
+				for (uint32_t i = 1; i <= _flagsMax; i += i)
+				{
+					if (((Axis)i & _moveAxis) == (Axis)i)
+					{
+						switch ((Axis)i)
+						{
+							case X:
+							{
+								ImGui::TextWrapped("X Speed:");
+								input_float(_speedLabels[0].c_str(), &(_initSpeed.x));
+								if (_isAccel)
+								{
+									ImGui::TextWrapped("X negative acceleration:");
+									input_float(_accelLabels[0].c_str(), &(_accel.x));
+								}
+								break;
+							}
+							case Y:
+							{
+								ImGui::TextWrapped("Y Speed:");
+								input_float(_speedLabels[1].c_str(), &(_initSpeed.y));
+								if (_isAccel)
+								{
+									ImGui::TextWrapped("Y negative acceleration:");
+									input_float(_accelLabels[1].c_str(), &(_accel.y));
+								}
+								break;
+							}
+							case Z:
+							{
+								ImGui::TextWrapped("Z Speed:");
+								input_float(_speedLabels[2].c_str(), &(_initSpeed.z));
+								if (_isAccel)
+								{
+									ImGui::TextWrapped("Z negative acceleration:");
+									input_float(_accelLabels[2].c_str(), &(_accel.z));
+								}
+								break;
+							}
+							default:
+								break;
+						}
+					}
+				}
+				ImGui::Separator();
+			}
+
+			std::vector<const wchar_t*> const* get_game_moves() const noexcept { return &_gameMoveNames; }
+
+			inline bool is_enabled() const noexcept { return _isEnabled; }
+
+			inline bool is_accel() const noexcept { return _isAccel; }
+
+			inline Axis get_move_axis() const noexcept { return _moveAxis; }
+
+			inline gf::Vec3 get_init_speed() const noexcept { return _initSpeed; }
+
+			inline gf::Vec3 get_accel() const noexcept { return _accel; }
+
+			inline gf::Vec3 get_dir()const noexcept { return _dir; }
+		};
+
+	private:
+
+		const SharedSettings* _settings;
+
+		gf::Vec3 _prevSpeed;
+
+		uintptr_t _pl;
+
+		bool _isActionStarted = true;
+
+		int _lastMoveStateIndx = -1;
+
+		inline bool check_action()
+		{
+			auto names = _settings->get_game_moves();
+			for (int i = 0; i < names->size(); i++)
+			{
+				if (gf::StringController::str_cmp(*(uintptr_t*)(_pl + 0x198), (*names)[i]))
+				{
+					_lastMoveStateIndx = i;
+					return true;
+				}
+			}
+			_lastMoveStateIndx = -1;
+			return false;
+		}
+
+		void on_action_end(uintptr_t threadCntx, uintptr_t fsm2PlayerPlayerAction, uintptr_t behaviourTreeActionArg, bool isNotifyOnly)
+		{
+			if (!cheaton || !_settings->is_enabled() || *(uintptr_t*)(fsm2PlayerPlayerAction + 0x28) != _pl)
+				return;
+			int prevIndx = _lastMoveStateIndx;
+			bool onAction = check_action();
+			if (!onAction)
+			{
+				_isActionStarted = true;
+				return;
+			}
+			if (onAction && _settings->get_game_moves()->size() > 1)
+			{
+				if (prevIndx > _lastMoveStateIndx)
+				{
+					_isActionStarted = true;
+					return;
+				}
+			}
+			else//Should i do extra check with prev move state?..
+			{
+				_isActionStarted = true;
+			}
+		}
+
+		sign get_sign(float curSpeed)
+		{
+			if(curSpeed < 0)
+				return -1;
+			if(curSpeed > 0)
+				return 1;
+			return 0;
+		}
+
+		void update_direction(gf::Vec3& speed)
+		{
+			auto dir = _settings->get_dir();
+			speed.x *= dir.x;
+			speed.y *= dir.y;
+			speed.z *= dir.z;
+		}
+
+		gf::Vec3 copy_speed_axis(gf::Vec3 curSpeed, gf::Vec3 speedFrom)
+		{
+			for (uint32_t i = 1; i <= _flagsMax; i += i)
+			{
+				if (((Axis)i & _settings->get_move_axis()) == (Axis)i)
+				{
+					switch ((Axis)i)
+					{
+						case X:
+						{
+							curSpeed.x = speedFrom.x;
+							break;
+						}
+						case Y:
+						{
+							curSpeed.y = speedFrom.y;
+							break;
+						}
+						case Z:
+						{
+							curSpeed.z = speedFrom.z;
+							break;
+						}
+						default:
+							break;
+					}
+				}
+			}
+			return curSpeed;
+		}
+
+		void update_speed(gf::Vec3 &curSpeed, uintptr_t pl)
+		{
+			if (!_settings->is_accel())
+			{
+				curSpeed = copy_speed_axis(curSpeed, _settings->get_init_speed());
+				update_direction(curSpeed);
+			}
+			else
+			{
+				if (_isActionStarted)
+				{
+					_isActionStarted = false;
+					curSpeed = _prevSpeed = copy_speed_axis(curSpeed, _settings->get_init_speed());
+					update_direction(curSpeed);
+				}
+				else
+				{
+					auto accel = _settings->get_accel();
+					sign xSign = get_sign(_prevSpeed.x);
+					sign ySign = get_sign(_prevSpeed.y);
+					sign zSign = get_sign(_prevSpeed.z);
+
+					for (uint32_t i = 1; i <= _flagsMax; i += i)
+					{
+						if (((Axis)i & _settings->get_move_axis()) == (Axis)i)
+						{
+							switch ((Axis)i)
+							{
+								case X:
+								{
+									if (_prevSpeed.x != 0)
+									{
+										curSpeed.x = abs(_prevSpeed.x) - abs(accel.x);
+										if (get_sign(curSpeed.x) != xSign)
+											curSpeed.x = _prevSpeed.x = 0;
+										else
+										{
+											curSpeed.x *= xSign;
+											_prevSpeed.x = curSpeed.x;
+										}
+									}
+									else
+										curSpeed.x = 0;
+									break;
+								}
+								case Y:
+								{
+									if (_prevSpeed.y != 0)
+									{
+										curSpeed.y = abs(_prevSpeed.y) - abs(accel.y);
+										if (get_sign(curSpeed.y) != ySign)
+											curSpeed.y = _prevSpeed.y = 0;
+										else
+										{
+											curSpeed.y *= ySign;
+											_prevSpeed.y = curSpeed.y;
+										}
+									}
+									else
+										curSpeed.y = 0;
+									break;
+								}
+								case Z:
+								{
+									if (_prevSpeed.z != 0)
+									{
+										curSpeed.z = abs(_prevSpeed.z) - abs(accel.z);
+										if (get_sign(curSpeed.z) != zSign)
+											curSpeed.z = _prevSpeed.z = 0;
+										else
+										{
+											curSpeed.z *= zSign;
+											_prevSpeed.z = curSpeed.z;
+										}
+									}
+									else
+										curSpeed.z = 0;
+									break;
+								}
+								default:
+									break;
+								}
+						}
+					}
+				}
+			}
+		}
+
+	public:
+		SpeedController(SharedSettings *sharedSettings, uintptr_t pl) : _pl(pl), _settings(sharedSettings) 
+		{
+			PlayerTracker::on_fsm2_player_player_action_notify_action_end_sub(std::make_shared<Events::EventHandler<SpeedController, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &SpeedController::on_action_end));
+		}
+
+		SpeedController(const SpeedController& other)
+		{
+			_pl = other._pl;
+			_settings = other._settings;
+			PlayerTracker::on_fsm2_player_player_action_notify_action_end_sub(std::make_shared<Events::EventHandler<SpeedController, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &SpeedController::on_action_end));
+		}
+
+		~SpeedController()
+		{
+			PlayerTracker::on_fsm2_player_player_action_notify_action_end_unsub(std::make_shared<Events::EventHandler<SpeedController, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &SpeedController::on_action_end));
+		}
+
+		bool update_speed(uintptr_t fsmPosCntr)
+		{
+			if (!_settings->is_enabled() || !check_action())
+				return false;
+			auto posControlTrack = *(uintptr_t*)(fsmPosCntr + 0xA0);
+			if (posControlTrack == 0)
+				return false;
+			auto pMoveSpeed = (gf::Vec3*)(posControlTrack + 0x20);
+			auto pl = *(uintptr_t*)(fsmPosCntr + 0x28);
+			if (pl == 0)
+				return true;
+			update_speed(*pMoveSpeed, pl /*isActionEnd*/);
+			return true;
+		}
+
+		uintptr_t get_pl() const noexcept { return _pl; }
+	};
+
 private:
+
+	static inline std::vector<SpeedController::SharedSettings> _settingsListVergil
+	{
+		{"Trick Dodge Forward", std::vector{L"TrickAction.TrickEscape.TrickEscape_Front"}, true, SpeedController::Y, gf::Vec3(0, 1, 0)},
+		{"Trick Dodge Back", std::vector{L"TrickAction.TrickEscape.TrickEscape_Back"}, true, SpeedController::Y, gf::Vec3(0, -1, 0)},
+		{"Trick Dodge Left", std::vector{L"TrickAction.TrickEscape.TrickEscape_Left"}, true, SpeedController::X, gf::Vec3(-1, 0, 0)},
+		{"Trick Dodge Right", std::vector{L"TrickAction.TrickEscape.TrickEscape_Right"}, true, SpeedController::X, gf::Vec3(1, 0, 0)},
+		{"Left Side Dodge", std::vector{L"Avoid.AvoidLeft.Trick_L_start", L"Avoid.AvoidLeft.Trick_L_Landing"}, true, SpeedController::X | SpeedController::Y, gf::Vec3(1, 1, 0)},
+		{"Right Side Dodge", std::vector{L"Avoid.AvoidRight.Trick_R_Start", L"Avoid.AvoidRight.Trick_R_Landing"}, true, SpeedController::X | SpeedController::Y, gf::Vec3(- 1, -1, 0)},
+		{"Trick Down (only on the ground)", std::vector{L"TrickAction.TrickDown.Trick_Down"}, false, SpeedController::Y, gf::Vec3(1, -1, 1)},
+		{"Areal Cleave", std::vector{L"Yamato.YM_HelmBreaker.YMT_Divingslash_Start", L"Yamato.YM_HelmBreaker.YMT_Divingslash_Loop"}, true, SpeedController::Y, gf::Vec3(0, 1, 0)},
+		{"FE Aerial Stinger", std::vector{L"Forceedge.FE_StingerAerial.FE_Stinger_Start Level2", L"Forceedge.FE_StingerAerial.FE_Stinger_Loop Level2"}, true, SpeedController::Y, gf::Vec3(0, 1, 0)},
+		{"FE Aerial Stinger SDT", std::vector{L"Forceedge.FE_StingerAerial.FE_Stinger_Start Level2  Majin", L"Forceedge.FE_StingerAerial.FE_Stinger_Loop Level2  Majin"},
+			true, SpeedController::Y, gf::Vec3(0, 1, 0)},
+		{"Rapid Slash", std::vector{L"Yamato.YM_RapidSlash.YMT_Rapidslash_Start", L"Yamato.YM_RapidSlash.YMT_Rapidslash_Loop"}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		{"Deep Stinger", std::vector{L"Forceedge.FE_Deadly.FE_Stinger_Start_DT", L"Forceedge.FE_Deadly.FE_Stinger_Loop_DT", L"Forceedge.FE_Deadly.FE_Stinger_Finish_DT"}, false, SpeedController::Y, gf::Vec3(0, 1, 0)}
+		/*{"Starfall", std::vector{L"Beowulf.BW_StarFall.BW_Starfall", L"Beowulf.BW_StarFall.BW_Starfall2"}, false, SpeedController::Y | SpeedController::Z, gf::Vec3(0, 1, -1)},
+		{"Starfall SDT", std::vector{L"Beowulf.BW_StarFall.BW_Starfall - コピー (1)"}, false, SpeedController::Y | SpeedController::Z, gf::Vec3(0, 1, 1)},
+		{"Starfall Reflection", std::vector{L"Beowulf.BW_StarFall.BW_Starfall_Reflection_Start", L"Beowulf.BW_StarFall.BW_Starfall_Reflection_End"}, false, SpeedController::Y | SpeedController::Z, gf::Vec3(0, 1, 1)}*/
+	};
+
+	static inline std::vector<SpeedController::SharedSettings> _settingsListDante
+	{
+		{"Rebellion Stinger", std::vector{L"Rebellion.RB_Stinger.Step_Lv2.DT_Start", L"Rebellion.RB_Stinger.Step_Lv2.DT_Loop", L"Rebellion.RB_Stinger.Finish"}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		//{"Rebellion stinger DT", std::vector{L"Rebellion.RB_Stinger.DT_Finish"}, false, SpeedController::Y, 1, 1, 1},//no:,)
+		{"Sparda Stinger", std::vector{L"Spada.SP_Stinger.Step_Lv2.DT_Start", L"Spada.SP_Stinger.Step_Lv2.DT_Loop", L"Spada.SP_Stinger.Finish"}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		//{"Sparda stinger DT", std::vector{L"Spada.SP_Stinger.DT"}, false, SpeedController::Y, 1, 1, 1},//no:,)
+		{"DSD Stinger", std::vector{L"DevilSword.DS_Stinger.Step_Lv2.DT_Start", L"DevilSword.DS_Stinger.Step_Lv2.DT_loop", L"DevilSword.DS_Stinger.Finish_Lvl2"}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		//{"DSD stinger DT", std::vector{L"DevilSword.DS_Stinger.DT"}, false, SpeedController::Y, 1, 1, 1},//no:,)
+		{"Gun Stinger", std::vector{L"Coyote.CA_GunStinger.Start", L"Coyote.CA_GunStinger.Loop", L"Coyote.CA_GunStinger.Finish"}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		{"Balrog Heavy Jolt", std::vector{L"Balrog.BRP_FrontHook.Start"/*, L"Balrog.BRP_FrontHook.Hook"*/}, false, SpeedController::Y, gf::Vec3(1, 1, 1)},
+		{"Killer Bee", std::vector{L"Balrog.BRK_KillerBee.Start", L"Balrog.BRK_KillerBee.Loop"}, false, SpeedController::Y | SpeedController::Z, gf::Vec3(0, 1, -1)},
+	};
+
+	std::vector<SpeedController> _plMovesList;
+
+	SpeedController* _last;
+
+	std::mutex _mtx;
+
+	void reset(EndLvlHooks::EndType type) override
+	{
+		_plMovesList.clear();
+	}
 
 	void init_check_box_info() override
 	{
@@ -18,355 +440,71 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	void on_move_speed_changed(std::shared_ptr<ActionStartHooks::PosCtrlSpeedEventArgs> args)
+	void on_fsm2_pos_cntr_action_update(uintptr_t threadCntxt, uintptr_t fsm2PosCntrAction)
 	{
-		edit_speed_asm(args->get_pos_ctrl());
+		std::lock_guard<std::mutex> lck(_mtx);
+		if (!cheaton)
+			return;
+		auto pl = *(uintptr_t*)(fsm2PosCntrAction + 0x28);
+		if (pl == 0)
+			return;
+		for (auto& i : _plMovesList)
+		{
+			if (i.get_pl() == pl)
+			{
+				if(i.update_speed(fsm2PosCntrAction))
+					return;
+			}
+		}
 	}
 
-public:
-
-	class MoveSpeedData
+	void on_pl_added(uintptr_t threadCntx, uintptr_t pl)
 	{
-		using sign = signed char;
-	public:
-		enum Axis
+		int plId = *(int*)(pl + 0xE64);
+		switch (plId)
 		{
-			X,
-			Y,
-			Z,
-			Any
-		};
-
-	protected:
-		std::string SAVE_KEY = "PosActionEditor.MoveSpeedData.";
-		const char* _dispalyMoveName;
-		const char* _gameMoveName;
-
-		const Axis _moveAxis;
-
-		gf::Vec3 _accel;
-		gf::Vec3 _initSpeed;
-		gf::Vec3 _prevSpeed;
-		gf::Vec3 _prevDoppelSpeed;
-
-		bool _isAccel = false;
-		bool _isEnabled = false;
-		bool _isActionStart = false;
-		bool _isDoppelActionStart = false;
-		bool _isCustomSignFirst;
-
-		sign _customFirst[3];
-
-	private:
-
-		std::mutex _updateSpeedMtx;
-		std::mutex _actionStartMtx;
-
-		Events::Event<const MoveSpeedData*> speedSignChanged;
-
-		sign get_sign(float curSpeed)
-		{
-			if(curSpeed < 0)
-				return -1;
-			else if(curSpeed != 0)
-				return 1;
-			else return 0;
-		}
-
-		void on_action_start(const std::array<char, 65>* actionStr, uintptr_t threadCntxt, uintptr_t str, uintptr_t pl)
-		{
-			std::lock_guard<std::mutex> lck(_actionStartMtx);
-			if(pl == 0 || *(int*)(pl + 0xE64) == 3 || *(int*)(pl + 0x108) == 1)
-				return;
-			else if(*(int*)(pl + 0xE64) == 4 && *(bool*)(pl + 0x17F0))
+			case 1:
 			{
-				_isDoppelActionStart = true;
-				_prevDoppelSpeed = gf::Vec3(0, 0, 0);
+				for (int i = 0; i < _settingsListDante.size(); i++)
+					_plMovesList.emplace_back(&_settingsListDante[i], pl);
+				break;
 			}
-			else
+
+			case 4:
 			{
-				_isActionStart = true;
-				_prevSpeed = gf::Vec3(0,0,0);
+				for(int i = 0; i < _settingsListVergil.size(); i++)
+				{
+					_plMovesList.emplace_back(&_settingsListVergil[i], pl);
+					_plMovesList.emplace_back(&_settingsListVergil[i], *(uintptr_t*)(pl + 0x18B0));
+				}
+				break;
 			}
+			default:
+				break;
 		}
+	}
 
-		void set_sign(float& n, sign s)
-		{
-			if (s == -1)
-				n = -abs(n);
-			else
-				n = abs(n);
-		}
-
-		gf::Vec3 correct_sign(gf::Vec3 init, gf::Vec3 signFrom)
-		{
-			gf::Vec3 res = init;
-			set_sign(res.x, get_sign(signFrom.x));
-			set_sign(res.y, get_sign(signFrom.y));
-			set_sign(res.z, get_sign(signFrom.z));
-			return res;
-		}
-
-		gf::Vec3 copy_speed_axis(gf::Vec3 curSpeed, gf::Vec3 speedFrom)
-		{
-			gf::Vec3 res = curSpeed;
-			switch (_moveAxis)
+	void on_pl_remove(uintptr_t threadCntxt, uintptr_t plManager, uintptr_t pl, bool isUnload)
+	{
+		_plMovesList.erase(std::remove_if(_plMovesList.begin(), _plMovesList.end(), [=](const SpeedController& obj)
 			{
-				case X:
-				{
-					res.x = speedFrom.x;
-					break;
-				}
-				case Y:
-				{
-					res.y = speedFrom.y;
-					break;
-				}
-				case Z:
-				{
-					res.z = speedFrom.z;
-					break;
-				}
-				case Any:
-				{
-					res = speedFrom;
-					break;
-				}
-			}
-			return res;
-		}
-
-		bool update_speed(gf::Vec3 &prevSpeed, gf::Vec3 &curSpeed, bool isActStart)
-		{
-			std::lock_guard lck(_updateSpeedMtx);
-			if (!isActStart)
-			{
-				if (prevSpeed.x != prevSpeed.y != prevSpeed.z != 0)
-				{
-					sign cX = get_sign(curSpeed.x);
-					sign cY = get_sign(curSpeed.y);
-					sign cZ = get_sign(curSpeed.z);
-					sign pX = get_sign(prevSpeed.x);
-					sign pY = get_sign(prevSpeed.y);
-					sign pZ = get_sign(prevSpeed.z);
-					if (cX != pX || cY != pY || cZ != pZ)
-					{
-						curSpeed = copy_speed_axis(curSpeed, gf::Vec3(0, 0, 0));
-						speedSignChanged.invoke(this);
-						return true;
-					}
-				}
-				else
-					speedSignChanged.invoke(this);
-			}
-			
-			if (_isAccel)
-			{
-				gf::Vec3 speedTmp;
-				if (isActStart)
-				{
-					if (!_isCustomSignFirst)
-					{
-						speedTmp = correct_sign(copy_speed_axis(curSpeed, _initSpeed), curSpeed);
-						curSpeed = prevSpeed = speedTmp;
-					}
-					else
-					{
-						curSpeed = _initSpeed;
-						set_sign(curSpeed.x, _customFirst[0]);
-						set_sign(curSpeed.y, _customFirst[1]);
-						set_sign(curSpeed.z, _customFirst[2]);
-						prevSpeed = curSpeed;
-					}
-				}
-				else
-				{
-					speedTmp = correct_sign(copy_speed_axis(prevSpeed, _accel), prevSpeed);
-					curSpeed = prevSpeed - speedTmp;
-					prevSpeed = curSpeed;
-				}
-			}
-			else
-			{
-				if (isActStart)
-				{
-					if (!_isCustomSignFirst)
-						curSpeed = prevSpeed = correct_sign(copy_speed_axis(curSpeed, _initSpeed), curSpeed);
-					else
-					{
-						curSpeed = _initSpeed;
-						set_sign(curSpeed.x, _customFirst[0]);
-						set_sign(curSpeed.y, _customFirst[1]);
-						set_sign(curSpeed.z, _customFirst[2]);
-						prevSpeed = curSpeed;
-					}
-				}
-				else
-					curSpeed = prevSpeed = correct_sign(copy_speed_axis(curSpeed, _initSpeed), curSpeed);				
-			}
-			return true;
-		}
-
-	public:
-
-		MoveSpeedData(const char* displayMoveName, const char* gameMoveName, bool isAccel, Axis moveAxis, bool isCustomFirstSign = false, sign signFirstX = 1, sign signFirstY = 1, sign signFirstZ = 1 ) : _dispalyMoveName(displayMoveName),
-		_gameMoveName(gameMoveName), _isAccel(isAccel), _moveAxis(moveAxis), _isCustomSignFirst(isCustomFirstSign)
-		{
-			PlSetActionData::new_action_event_sub(std::make_shared<Events::EventHandler<MoveSpeedData, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>*, uintptr_t, 
-				uintptr_t, uintptr_t>>(this, &MoveSpeedData::on_action_start));
-			SAVE_KEY += displayMoveName;
-			_customFirst[0] = signFirstX;
-			_customFirst[1] = signFirstY;
-			_customFirst[2] = signFirstZ;
-		}
-
-		~MoveSpeedData()
-		{
-			PlSetActionData::new_action_event_unsub(std::make_shared<Events::EventHandler<MoveSpeedData, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>*, uintptr_t, 
-				uintptr_t, uintptr_t>>(this, &MoveSpeedData::on_action_start));
-		}
-
-		void on_cfg_save(utility::Config& cfg) const
-		{
-			cfg.set<float>(SAVE_KEY + "_initSpeedX", _initSpeed.x);
-			cfg.set<float>(SAVE_KEY + "_initSpeedY", _initSpeed.y);
-			cfg.set<float>(SAVE_KEY + "_initSpeedZ", _initSpeed.z);
-			cfg.set<float>(SAVE_KEY + "_accelX", _accel.x);
-			cfg.set<float>(SAVE_KEY + "_accelY", _accel.y);
-			cfg.set<float>(SAVE_KEY + "_accelZ", _accel.z);
-			cfg.set<bool>(SAVE_KEY + "_isEnabled", _isEnabled);
-		}
-
-		void on_cfg_load(const utility::Config& cfg)
-		{
-			_initSpeed.x = cfg.get<float>(SAVE_KEY + "_initSpeedX").value_or(0);
-			_initSpeed.y = cfg.get<float>(SAVE_KEY + "_initSpeedY").value_or(0);
-			_initSpeed.z = cfg.get<float>(SAVE_KEY + "_initSpeedZ").value_or(0);
-			_accel.x = cfg.get<float>(SAVE_KEY + "_accelX").value_or(0);
-			_accel.y = cfg.get<float>(SAVE_KEY + "_accelY").value_or(0);
-			_accel.z = cfg.get<float>(SAVE_KEY + "_accelZ").value_or(0);
-			_isEnabled = cfg.get<bool>(SAVE_KEY + "_isEnabled").value_or(false);
-		}
-
-		void print_settings()
-		{
-			ImGui::Checkbox(_dispalyMoveName, &_isEnabled);
-			ImGui::Spacing();
-			float *pInitSpeed;
-			float *pAccel;
-			std::string axisName;
-			if (_isEnabled)
-			{
-				switch (_moveAxis)
-				{
-					case X:
-					{
-						pInitSpeed = &_initSpeed.x;
-						pAccel = &_accel.x;
-						axisName += "(X axis)";
-						break;
-					}
-					case Y:
-					{
-						pInitSpeed = &_initSpeed.y;
-						pAccel = &_accel.y;
-						axisName += "(Y axis)";
-						break;
-					}
-					case Z:
-					{
-						pInitSpeed = &_initSpeed.z;
-						pAccel = &_accel.z;
-						axisName += "(Z axis)";
-						break;
-					}
-					case Any:
-					{
-						pInitSpeed = (float*)&_initSpeed;
-						pAccel = (float*)&_accel;
-						axisName += "(x,z,y)";
-						break;
-					}
-				}
-
-				if (_isAccel)
-				{
-					ImGui::TextWrapped(("Player's init speed " + axisName + ":").c_str());
-					if (_moveAxis != Any)
-					{
-						UI::SliderFloat((std::string("##_initSpeed ") + _dispalyMoveName).c_str() , pInitSpeed, 0, 20.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-						ImGui::TextWrapped("Player's negative acceleration");
-						UI::SliderFloat((std::string("##_accel ") + _dispalyMoveName).c_str(), pAccel, 0, 20.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-					}
-					else
-					{
-						ImGui::InputFloat3((std::string("##_initSpeed ") + _dispalyMoveName).c_str(), pInitSpeed, "%.2f");
-						ImGui::TextWrapped("Player's negative acceleration");
-						ImGui::InputFloat3((std::string("##_accel ") + _dispalyMoveName).c_str(), pAccel, "%.2f");
-					}
-				}
-				else
-				{
-					ImGui::TextWrapped(("Player's speed " + axisName + ":").c_str());
-					if (_moveAxis != Any)
-						UI::SliderFloat((std::string("##_initSpeed") + _dispalyMoveName).c_str(), pInitSpeed, 0, 20.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-					else
-						ImGui::InputFloat3((std::string("##_initSpeed") + _dispalyMoveName).c_str(), pInitSpeed, "%.2f");
-				}
-			}
-			ImGui::Separator();
-		}
-
-		bool edit_speed(uintptr_t pl, gf::Vec3& speed) 
-		{
-			if (!_isEnabled || !PlSetActionData::cmp_real_cur_action(_gameMoveName))
-				return false;
-			bool isDoppel = *(int*)(pl + 0xE64) == 4 && *(bool*)(pl + 0x17F0);
-			bool res;
-			if (isDoppel)
-			{
-				res = update_speed(_prevDoppelSpeed, speed, _isDoppelActionStart);
-				_isDoppelActionStart = false;
-			}
-			else
-			{
-				res = update_speed(_prevSpeed, speed, _isActionStart);
-				_isActionStart = false;
-			}
-			return true;
-		}
-
-		const char* const get_display_name() const noexcept { return _dispalyMoveName; }
-		const char* const get_game_move_name() const noexcept {return _gameMoveName; }
-
-		template<typename T>
-		void speed_sign_changed_sub(std::shared_ptr<Events::EventHandler<T, const PosActionEditor::MoveSpeedData*>> handler)
-		{
-			speedSignChanged.subscribe(handler);
-		}
-
-		template<typename T>
-		void speed_sign_changed_unsub(std::shared_ptr<Events::EventHandler<T, const PosActionEditor::MoveSpeedData*>> handler)
-		{
-			speedSignChanged.unsubscribe(handler);
-		}
-	};
-
-private:
-
-	static inline std::vector<std::unique_ptr<MoveSpeedData>> movesSpeedDataVergil;
-	static inline std::vector<std::unique_ptr<MoveSpeedData>> movesSpeedDataDante;
-	static inline std::vector<std::unique_ptr<MoveSpeedData>> movesSpeedDataNero;
+				return obj.get_pl() == pl;
+			}), _plMovesList.end());
+	}
 
 public:
 	PosActionEditor()
 	{
-		ActionStartHooks::FsmPlPosCtrActionStartHooks::move_speed_change_sub(std::make_shared<Events::EventHandler<PosActionEditor, std::shared_ptr<ActionStartHooks::PosCtrlSpeedEventArgs>>>(this, &PosActionEditor::on_move_speed_changed));
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_fsm2_pos_cntr_action_update));
+		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
+		PlayerTracker::on_pl_manager_pl_unload_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &PosActionEditor::on_pl_remove));
 	}
 
 	~PosActionEditor()
 	{
-		ActionStartHooks::FsmPlPosCtrActionStartHooks::move_speed_change_unsub(std::make_shared<Events::EventHandler<PosActionEditor, std::shared_ptr<ActionStartHooks::PosCtrlSpeedEventArgs>>>(this, &PosActionEditor::on_move_speed_changed));
+		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_fsm2_pos_cntr_action_update));
+		PlayerTracker::pl_added_event_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
+		PlayerTracker::on_pl_manager_pl_unload_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &PosActionEditor::on_pl_remove));
 	}
 
 	static inline bool cheaton = true;
@@ -384,54 +522,6 @@ public:
 		return m_hot_key_name;
 	};
 
-	template<typename T>
-	void speed_sign_changed_sub(std::shared_ptr<Events::EventHandler<T, const PosActionEditor::MoveSpeedData*>> handler)
-	{
-		for(auto &i : movesSpeedDataVergil)
-			i->speed_sign_changed_sub(handler);
-		for (auto &i : movesSpeedDataDante)
-			i->speed_sign_changed_sub(handler);
-		for (auto &i : movesSpeedDataNero)
-			i->speed_sign_changed_sub(handler);
-	}
-
-	template<typename T>
-	void speed_sign_changed_unsub(std::shared_ptr<Events::EventHandler<T, const PosActionEditor::MoveSpeedData*>> handler)
-	{
-		for (auto &i : movesSpeedDataVergil)
-			i->speed_sign_changed_unsub(handler);
-		for (auto &i : movesSpeedDataDante)
-			i->speed_sign_changed_unsub(handler);
-		for (auto &i : movesSpeedDataNero)
-			i->speed_sign_changed_unsub(handler);
-	}
-
-	static void edit_speed_asm(uintptr_t posControllerAction)
-	{
-		if(!cheaton || posControllerAction == 0)
-			return;
-		auto character = *(uintptr_t*)(posControllerAction + 0x28);
-		auto posCtrlTrack = *(uintptr_t*)(posControllerAction + 0xA0);
-		if (posCtrlTrack == 0 || character == 0 || *(int*)(character + 0xE64) == 3 || *(int*)(character + 0x108) == 1)
-			return;
-		gf::Vec3* speed = (gf::Vec3*)(posCtrlTrack + 0x20);
-		for (auto& moveEdit : movesSpeedDataVergil)
-		{
-			if(moveEdit->edit_speed(character, *speed))
-				return;
-		}
-		for (auto& moveEdit : movesSpeedDataDante)
-		{
-			if (moveEdit->edit_speed(character, *speed))
-				return;
-		}
-		for (auto& moveEdit : movesSpeedDataNero)
-		{
-			if (moveEdit->edit_speed(character, *speed))
-				return;
-		}
-	}
-
 	std::optional<std::string> on_initialize() override
 	{
 		init_check_box_info();
@@ -443,24 +533,6 @@ public:
 		m_description_string = "Change speed of some actions that changes player's position (like stinger(s), trick dodge (yea now you can make boss's trick dodge in the trainer), ets).";
 
 		set_up_hotkey();
-
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Trick Dodge Forward", "TrickEscape_Front", true, MoveSpeedData::Y));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Trick Dodge Back", "TrickEscape_Back", true, MoveSpeedData::Y, true, 1, -1));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Trick Dodge Left", "TrickEscape_Left", true, MoveSpeedData::X));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Trick Dodge Right", "TrickEscape_Right", true, MoveSpeedData::X, true, -1));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Left side dodge", "AvoidLeft", true, MoveSpeedData::Any));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Right side dodge", "AvoidRight", true, MoveSpeedData::Any, true, -1, -1));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Trick down (only on the ground)", "TrickDown", false, MoveSpeedData::Y, true, 1, -1));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Areal Cleave", "YM_HelmBreaker", false, MoveSpeedData::Y));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("FE aerial stinger", "FE_StingerAerial", true, MoveSpeedData::Y));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Rapid slash", "YM_RapidSlash", false, MoveSpeedData::Y));
-		movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("Deep stinger", "FE_Deadly", false, MoveSpeedData::Y));
-		//movesSpeedDataVergil.emplace_back(std::make_unique<MoveSpeedData>("FE stinger", "FE_Stinger", true, MoveSpeedData::Y));//No
-
-		movesSpeedDataDante.emplace_back(std::make_unique<MoveSpeedData>("Rebellion stinger", "RB_Stinger", false, MoveSpeedData::Y));
-		movesSpeedDataDante.emplace_back(std::make_unique<MoveSpeedData>("Sparda stinger", "SP_Stinger", false, MoveSpeedData::Y));
-		movesSpeedDataDante.emplace_back(std::make_unique<MoveSpeedData>("DSD stinger", "DS_Stinger", false, MoveSpeedData::Y));
-		movesSpeedDataDante.emplace_back(std::make_unique<MoveSpeedData>("Gun stinger", "CA_GunStinger", false, MoveSpeedData::Y));
 
 		//movesSpeedDataNero.emplace_back(std::make_unique<MoveSpeedData>("Streak", "StreakLv0", true, MoveSpeedData::Y));//Doesn't work
 		//movesSpeedDataNero.emplace_back(std::make_unique<MoveSpeedData>("Ex Streak", "ExStreak", true, MoveSpeedData::Y));//Doesn't work
@@ -475,21 +547,17 @@ public:
 	// Override this things if you want to store values in the config file
 	void on_config_load(const utility::Config& cfg) override
 	{
-		for (const auto &move : movesSpeedDataVergil)
-			move->on_cfg_load(cfg);
-		for (const auto& move : movesSpeedDataDante)
-			move->on_cfg_load(cfg);
-		for (const auto& move : movesSpeedDataNero)
-			move->on_cfg_load(cfg);
+		for (auto& move : _settingsListVergil)
+			move.on_cfg_load(cfg);
+		for (auto& move : _settingsListDante)
+			move.on_cfg_load(cfg);
 	}
 	void on_config_save(utility::Config& cfg) override
 	{
-		for (auto& move : movesSpeedDataVergil)
-			move->on_cfg_save(cfg);
-		for (auto& move : movesSpeedDataDante)
-			move->on_cfg_save(cfg);
-		for (auto& move : movesSpeedDataNero)
-			move->on_cfg_save(cfg);
+		for (const auto& move : _settingsListVergil)
+			move.on_cfg_save(cfg);
+		for (const auto& move : _settingsListDante)
+			move.on_cfg_save(cfg);
 	}
 
 	// on_draw_ui() is called only when the gui shows up
@@ -497,18 +565,13 @@ public:
 	void on_draw_ui() override 
 	{
 		ImGui::TextWrapped("Vergil");
-		for (auto& move : movesSpeedDataVergil)
-			move->print_settings();
+		for (auto& move : _settingsListVergil)
+			move.print_settings();
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::TextWrapped("Dante");
-		for (auto& move : movesSpeedDataDante)
-			move->print_settings();
-		ImGui::Spacing();
-		ImGui::Separator();
-		/*ImGui::TextWrapped("Nero");
-		for (auto& move : movesSpeedDataNero)
-			move->print_settings();*/
+		for (auto& move : _settingsListDante)
+			move.print_settings();
 	}
 };
 //clang-format on

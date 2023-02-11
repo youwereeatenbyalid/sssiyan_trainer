@@ -103,7 +103,6 @@ private:
 	REManagedObject *_assignList = nullptr;
 	REManagedObject *_keyAssignArray = nullptr;
 
-	sdk::REMethodDefinition* _padInputIsKeyboardDownMethod = nullptr;
 	sdk::REMethodDefinition* _isBackInputMethod = nullptr;
 	sdk::REMethodDefinition* _isFrontInputMethod = nullptr;
 	sdk::REMethodDefinition* _isLeftInputMethod = nullptr;
@@ -142,6 +141,29 @@ private:
 		if (keyAssignArrayOut == 0)
 			return false;
 		return true;
+	}
+
+	void on_sdk_init() override
+	{
+		HIDManager = reframework::get_globals()->get("app.HIDManager");
+		PadManager = reframework::get_globals()->get("app.PadManager");
+		if (HIDManager != nullptr && PadManager != nullptr)
+		{
+			_padInput = (REManagedObject*)(*(uintptr_t*)((uintptr_t)PadManager + 0x60));
+			_padButton = (GamePadButton*)((uintptr_t)_padInput + 0x98);
+			_padButtonDown = (GamePadButton*)((uintptr_t)_padInput + 0x90);
+			_padButtonUp = (GamePadButton*)((uintptr_t)_padInput + 0x94);
+			_keyAssignArray = (REManagedObject*)(*(uintptr_t*)((uintptr_t)_padInput + 0x88));
+			_inputMode = (InputMode*)((uintptr_t)HIDManager + 0x54);
+			auto tmp = *(uintptr_t*)((uintptr_t)PadManager + 0x58);
+			if (tmp != 0)
+				_assignList = (REManagedObject*)(*(uintptr_t*)(tmp + 0x30));
+			//_padInputIsKeyboardDownMethod = sdk::get_object_method(_padInput, "isKeyboardDown(app.PadInput.GameAction)");//reframework::get_types()->get_type_db()->find_type("app.PadInput")->get_method("isKeyboardDown(app.PadInput.GameAction)");
+			_isBackInputMethod = sdk::get_object_method(_padInput, "isBackInput(System.Single)");
+			_isFrontInputMethod = sdk::get_object_method(_padInput, "isFrontInput(System.Single)");
+			_isLeftInputMethod = sdk::get_object_method(_padInput, "isLeftInput(System.Single)");
+			_isRightInputMethod = sdk::get_object_method(_padInput, "isRightInput(System.Single)");
+		}
 	}
 	
 public:
@@ -220,15 +242,11 @@ public:
 	//Set this to "true" to ignore special action binding treatment.
 	bool is_action_button_pressed(PadInputGameAction gameAction, bool ignoreCharKeyBind = false) const
 	{
-		if (*_inputMode == MouseAndKey && _padInputIsKeyboardDownMethod != nullptr)
-			return _padInputIsKeyboardDownMethod->call<bool>(sdk::get_thread_context(), _padInput, gameAction);
 		return is_action_button_pressed(gameAction, *_padButton, (uintptr_t)_keyAssignArray, ignoreCharKeyBind);
 	}
 
 	bool is_action_button_pressed(uintptr_t padInput, PadInputGameAction gameAction, bool ignoreCharKeyBind = false) const
 	{
-		if (*_inputMode == MouseAndKey && _padInputIsKeyboardDownMethod != nullptr)
-			return _padInputIsKeyboardDownMethod->call<bool>(sdk::get_thread_context(), padInput, gameAction);
 		uintptr_t keyAssignArray = 0;
 		if (!get_assign_data(padInput, keyAssignArray))
 			return false;
@@ -353,27 +371,7 @@ public:
 		//m_full_name_string = "";
 		m_author_string = "V.P.Zadov";
 		//m_description_string = "";
-
-		HIDManager = reframework::get_globals()->get("app.HIDManager");
-		PadManager = reframework::get_globals()->get("app.PadManager");
-		if (HIDManager != nullptr && PadManager != nullptr)
-		{
-			_padInput = (REManagedObject*)(*(uintptr_t*)((uintptr_t)PadManager + 0x60));
-			_padButton = (GamePadButton*)((uintptr_t)_padInput + 0x98);
-			_padButtonDown = (GamePadButton*)((uintptr_t)_padInput + 0x90);
-			_padButtonUp = (GamePadButton*)((uintptr_t)_padInput + 0x94);
-			_keyAssignArray = (REManagedObject*)(*(uintptr_t*)((uintptr_t)_padInput + 0x88));
-			_inputMode = (InputMode*)((uintptr_t)HIDManager + 0x54);
-			auto tmp = *(uintptr_t*)((uintptr_t)PadManager + 0x58);
-			if(tmp != 0)
-				_assignList = (REManagedObject*)(*(uintptr_t*)(tmp + 0x30));
-			_padInputIsKeyboardDownMethod = sdk::get_object_method(_padInput, "isKeyboardDown(app.PadInput.GameAction)");
-			_isBackInputMethod = sdk::get_object_method(_padInput, "isBackInput(System.Single)");
-			_isFrontInputMethod = sdk::get_object_method(_padInput, "isFrontInput(System.Single)");
-			_isLeftInputMethod = sdk::get_object_method(_padInput, "isLeftInput(System.Single)");
-			_isRightInputMethod = sdk::get_object_method(_padInput, "isRightInput(System.Single)");
-		}
-
+		
 		return Mod::on_initialize();
 	}
 };

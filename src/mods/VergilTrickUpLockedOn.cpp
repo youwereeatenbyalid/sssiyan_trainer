@@ -25,8 +25,6 @@ static naked void detour1() { // Disable Trick To
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
-        cmp byte ptr [BossTrickUp::cheaton], 1
-        je cheatcode
         jmp code
 
     cheatcode:
@@ -79,8 +77,6 @@ static naked void detour2() { // Enable Trick Up While Locked On
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
         je cheatcode
-        cmp byte ptr [BossTrickUp::cheaton], 1
-        je cheatcode
         jmp code
 
     cheatcode:
@@ -108,8 +104,6 @@ static naked void detour3() { // Disable Directional Dodges
         cmp [PlayerTracker::playerid], 4
         jne code
         cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
-        je cheatcode
-        cmp byte ptr [BossTrickUp::cheaton], 1
         je cheatcode
         jmp code
 

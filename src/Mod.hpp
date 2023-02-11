@@ -405,6 +405,9 @@ public:
     //Calls after all mods has been initialized; Should be pure virtual but then i need to override this in all mods.............
     virtual void after_all_inits() {};
 
+    //Do all sdk::get_smth here
+    virtual void on_sdk_init() {};
+
     // Called when ModFramework::initialize finishes in the first render frame
     // Returns an error string if it fails
     virtual std::optional<std::string> on_initialize() { return std::nullopt; }

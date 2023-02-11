@@ -74,7 +74,7 @@ namespace Coroutines
 
 			static inline void create_hook()
 			{
-				_sub_1425A9B00_hook = std::make_unique<FunctionHook>(_sub_1425A9B00Addr, &CoroutineBase::_sub_1425A9B00_detour, false);
+				_sub_1425A9B00_hook = std::make_unique<FunctionHook>(_sub_1425A9B00Addr, &CoroutineBase::_sub_1425A9B00_detour, true);
 				_sub_1425A9B00_hook->create();
 				_subOriginal = _sub_1425A9B00_hook->get_original();
 			}
@@ -99,7 +99,7 @@ namespace Coroutines
 
 			float _timer = 0;
 			float _delay = 0;
-			
+
 			static inline bool is_hook_created() noexcept { return _sub_1425A9B00_hook != nullptr; }
 
 			static inline uintptr_t get_sub_f_addr() noexcept { return _sub_1425A9B00Addr; }
@@ -108,8 +108,6 @@ namespace Coroutines
 			{
 				_coroutines.erase(std::remove(_coroutines.begin(), _coroutines.end(), obj), _coroutines.end());
 				_runningCoroutinesCount--;
-				if (_runningCoroutinesCount == 0)
-					remove_hook();
 			}
 
 			void register_coroutine(CoroutineBase* obj) noexcept
@@ -154,11 +152,12 @@ namespace Coroutines
 				if (_sub_1425A9B00Addr != 0)
 					return;
 				_sub_1425A9B00Addr = manager->find_addr(base, "48 8B C4 48 89 48 08 53 48 81 EC B0").value_or(0);
+				create_hook();
 			}
 
 			CoroutineBase(bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) : _isInstantStartFirst(isInstantStartFirst), _isIgnoringGlobalTurboSpeedSetting(isIgnoringGlobalTurboSpeedSetting) {}
 
-			CoroutineBase(std::shared_ptr<Impl::IDelayedAction> action, bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) : 
+			CoroutineBase(std::shared_ptr<Impl::IDelayedAction> action, bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) :
 				CoroutineBase(isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting)
 			{
 				_action = action;
@@ -231,7 +230,7 @@ namespace Coroutines
 
 		void invoke() override
 		{
-			if(_action != nullptr)
+			if (_action != nullptr)
 				std::apply(_action, _args);//Ty cpp 17
 		}
 	};
@@ -248,13 +247,13 @@ namespace Coroutines
 		//Action - coroutine's action
 		//isInstantStartFirst - start action immediately on sub_f executing after start(...) was called;
 		//isIgnoringGlobalTurboSpeedSetting - always execute curoutine with setted delay independing of current turbo speed;
-		Coroutine(std::shared_ptr<DelayedAction<TAction, Args...>> action, bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) : 
+		Coroutine(std::shared_ptr<DelayedAction<TAction, Args...>> action, bool isInstantStartFirst = true, bool isIgnoringGlobalTurboSpeedSetting = false) :
 			CoroutineBase(action, isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting) {}
 
 		//Action - pointer to action method/function for coroutine;
 		//isInstantStartFirst - start action immediately on sub_f executing after start(...) was called;
 		//isIgnoringGlobalTurboSpeedSetting - always execute curoutine with setted delay independing of current turbo speed;
-		Coroutine(TAction action, bool isInstantStartFirst = false, bool isIgnoringGlobalTurboSpeedSetting = false) : 
+		Coroutine(TAction action, bool isInstantStartFirst = false, bool isIgnoringGlobalTurboSpeedSetting = false) :
 			CoroutineBase(std::make_shared<DelayedAction<TAction, Args...>>(action), isInstantStartFirst, isIgnoringGlobalTurboSpeedSetting) {}
 
 		Coroutine(const Coroutine<TAction, Args...>& other) = delete;
@@ -280,7 +279,7 @@ namespace Coroutines
 				reset_timer();
 				_isFirstExe = true;
 				auto downcasted = std::static_pointer_cast<DelayedAction<TAction, Args...>>(_action);
-				downcasted->set_args(std::forward<Args>( args)...);
+				downcasted->set_args(std::forward<Args>(args)...);
 				_isStarted = true;
 			}
 		}

@@ -14,18 +14,22 @@ static naked void detour()
 	}
 }
 
-bool AirTrickDodge::move_check_asm(uintptr_t charPtr, bool &groundFitCheat)
+void AirTrickDodge::on_fsm_pos_cntr_update(uintptr_t threadCntx, uintptr_t fsm2PlPosCntrAction)
 {
-	if (!cheaton || !groundFitCheat)
-		return false;
-	if (charPtr == 0 || (*(int*)(charPtr + 0x108) != 0) || (*(int*)(charPtr + 0xE64) != 4))
-		return false;
-	for (const auto &str : trickNames)
+	if (!cheaton)
+		return;
+	auto pl = *(uintptr_t*)(fsm2PlPosCntrAction + 0x28);
+	if (pl == 0 || *(int*)(pl + 0xE64) != 4)
+		return;
+	for (const auto& str : _trickNames)
 	{
-		if(PlSetActionData::cmp_real_cur_action(str))
-			return true;
+		if (gf::StringController::str_cmp(*(uintptr_t*)(pl + 0x190), str))
+		{
+			*(bool*)(fsm2PlPosCntrAction + 0x64) = isNoInertia;
+			*(bool*)(fsm2PlPosCntrAction + 0x7D) = isOverwriteGroundFitLength;
+			break;
+		}
 	}
-	return false;
 }
 
 std::optional<std::string> AirTrickDodge::on_initialize()

@@ -51,6 +51,8 @@ private:
 		void destroy_doppel() noexcept
 		{
 			_doppelDestroyCoroutine.stop();
+			_doppelUpdateCoroutine.stop();
+
 			if(auto pl0300 = _pl0300.lock(); pl0300 != nullptr && pl0300->get_doppel() != 0)
 				pl0300->destroy_doppel();
 		}
@@ -147,6 +149,12 @@ private:
 		static inline void pl_cam_cntrl_set_pl_hook(uintptr_t threadCntx, uintptr_t obj, uintptr_t plAcessor)
 		{
 			//Disallow cam set while pl0300 is active
+		}
+
+		void update_doppel()
+		{
+			if (GameplayStateTracker::isCutscene)
+				destroy_doppel();
 		}
 
 		inline void stop_air_raid_coroutine()
@@ -362,6 +370,7 @@ private:
 		}
 
 		Coroutines::Coroutine<decltype(&PlPair::destroy_doppel), PlPair*> _doppelDestroyCoroutine{ &PlPair::destroy_doppel, false };
+		Coroutines::Coroutine<decltype(&PlPair::update_doppel), PlPair*> _doppelUpdateCoroutine{ &PlPair::update_doppel, false, true };
 		Coroutines::Coroutine<decltype(&PlPair::update_pl0300_behavior), PlPair*, Pl0300Actions> _pl0300ActionUpdateCoroutine{ &PlPair::update_pl0300_behavior, true, true };
 
 	public:
@@ -384,6 +393,9 @@ private:
 
 			_pl0300ActionUpdateCoroutine.set_delay(0);
 			_pl0300ActionUpdateCoroutine.ignoring_update_on_pause(true);
+
+			_doppelUpdateCoroutine.set_delay(0.2f);
+			_doppelUpdateCoroutine.ignoring_update_on_pause(true);
 
 			if (_isStaticInitRequested)
 			{
@@ -512,7 +524,7 @@ private:
 					_doppelDestroyCoroutine.set_delay(lifeTime);
 					_doppelDestroyCoroutine.start(this);
 				}
-				
+				_doppelUpdateCoroutine.start(this);
 			}
 			pl0300->set_draw_self(false);
 			pl0300->set_enable(false);
@@ -1177,6 +1189,11 @@ private:
 			_mod->_plSetOrbEfxHook->get_original<decltype(pl_set_orb_efx_hook)>()(threadCtxt, pl, orbTypeEnum);
 	}
 
+	void on_sdk_init() override
+	{
+		_waitStr = std::make_unique<gf::SysString>(L"Wait");
+	}
+
 public:
 	BossVergilMoves()
 	{
@@ -1277,8 +1294,6 @@ public:
 
 		GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<BossVergilMoves>>(this, &BossVergilMoves::on_pfb_manager_inited));
 		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
-
-		_waitStr = std::make_unique<gf::SysString>(L"Wait");
 
 		_FE_doCommandSpecHook = std::make_unique<FunctionHook>(doCommSpecAddr.value() + 0x6, &BossVergilMoves::force_edge_do_command_spec_ds_hook);
 		if (!_FE_doCommandSpecHook->create())
