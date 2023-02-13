@@ -16,6 +16,7 @@
 #include "Mods.hpp"
 #include "events/EventHandler.hpp"
 #include "mods/Coroutine/Coroutines.hpp"
+#include "EnemyData.hpp"
 
 //clang-format off
 namespace func = GameFunctions;
@@ -128,7 +129,6 @@ public:
 
 		float _curExecutionTime;
 
-		const float zTrackOffs = 0.94f;
 		const float _rndZTrackOffs = 0.82f;
 		const float _rndEmMaxDist = 34.5f;
 		const float _rndAttackRate = 2.5f;
@@ -177,15 +177,14 @@ public:
 				isNullPtr = true;
 				return func::Vec3(0, 0, 0);
 			}
-			func::Vec3 lockOnPos;
-			lockOnObj = *(uintptr_t*)(lockOnObj + 0x10);//LockOnTargetWork target
-			auto transform = *(uintptr_t*)(lockOnObj + 0x50);//cachedTransform
-			rot = *(func::Quaternion*)(transform + 0x40);
-			lockOnPos.x = *(float*)(transform + 0x30) + (*(float*)(lockOnObj + 0x20));
-			lockOnPos.z = *(float*)(transform + 0x34) + (*(float*)(lockOnObj + 0x24));
-			lockOnPos.y = *(float*)(transform + 0x38) + (*(float*)(lockOnObj + 0x28));
 			isNullPtr = false;
-			return lockOnPos;
+			auto lockOnTarget = *(uintptr_t*)(lockOnObj + 0x10);//LockOnTargetWork target
+			auto transform = *(uintptr_t*)(lockOnTarget + 0x50);//cachedTransform
+			rot = *(func::Quaternion*)(transform + 0x40);
+			auto cachedCharacter = *(uintptr_t*)(lockOnTarget + 0x58);
+			if (cachedCharacter != 0 && EnemyData::get_em_id(cachedCharacter) == EnemyData::Behemoth && gf::StringController::str_cmp(*(uintptr_t*)(cachedCharacter + 0x190), L"HideChase"))
+				return *(gf::Vec3*)(transform + 0x30);
+			return _getLockOnPosMethod->call<gf::Vec3>(sdk::get_thread_context(), lockOnObj);
 		}
 
 		inline void set_pl0800(uintptr_t pl0800)
@@ -204,7 +203,6 @@ public:
 			lockOnPos = get_lockon_pos(isNoLockOn, _defaultJcRot);
 			if(isNoLockOn)
 				return;
-			lockOnPos.z += zTrackOffs;
 			float length = func::Vec3::vec_length(_curJcPos, lockOnPos);
 			float acc = 0.0f;
 			if(length >= 10.4f)
@@ -230,7 +228,6 @@ public:
 			if (_rndJcSpawnCount >= rndEmTrackInterval)
 			{
 				_curJcPos = isNull ? _pl0800Pos : lockOnPos;
-				_curJcPos.z += _rndZTrackOffs;
 				_rndJcSpawnCount = 0;
 			}
 			else
@@ -258,12 +255,6 @@ public:
 				return true;
 			}
 			else return false;
-		}
-
-		void bad_ptr_stop()
-		{
-			stop_jce(true);
-			//cheaton = false;
 		}
 
 		int update_delay(uintptr_t workRateSys)
@@ -356,7 +347,7 @@ public:
 			maxOffset.z = 4.21f;
 			minOffset.x = -10.7f;
 			minOffset.y = -10.6f;
-			minOffset.z = 0.96f;
+			minOffset.z = -0.85f;
 
 			moveTrackStepOffs.x = 1.18f;
 			moveTrackStepOffs.y = 1.18F;
@@ -569,6 +560,8 @@ public:
 	// on_draw_debug_ui() is called when debug window shows up
 	// void on_draw_debug_ui() override;
 
+	static sdk::REMethodDefinition const* get_lock_on_pos_method() noexcept { return _getLockOnPosMethod; }
+
 private:
 	float rndExeDuration = 0;
 	float trackExeDuration = 0;
@@ -582,9 +575,16 @@ private:
 
 	static void pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJce, uintptr_t actionArg);
 
+	static inline const sdk::REMethodDefinition* _getLockOnPosMethod = nullptr;
+
 	void reset(EndLvlHooks::EndType type) override
 	{
 		_jceTimer = 0;
+	}
+
+	void on_sdk_init() override
+	{
+		_getLockOnPosMethod = sdk::find_method_definition("app.LockOnObject", "get_lockOnPosition()");
 	}
 
 	void after_all_inits() override

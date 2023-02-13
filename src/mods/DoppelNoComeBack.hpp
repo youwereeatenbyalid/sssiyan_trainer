@@ -162,7 +162,6 @@ public:
 	{
 		cfg.set<bool>("DoppelNoComeBack.byDistance", byDistance);
 		cfg.set<bool>("DoppelNoComeBack.byJC", byJC);
-		ImGui::ShowHelpMarker("This screw up doppel's prefect jc after FE helm breaker if doppel was in air :(");
 	}
 
 	// on_draw_ui() is called only when the gui shows up

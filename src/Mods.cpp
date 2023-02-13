@@ -426,10 +426,11 @@ Mods::Mods()
 #ifdef DEVELOPER
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
+    Coroutines::Impl::CoroutineBase::init_sub_f_addr(Mod::m_patterns_cache.get(), g_framework->get_module().as<HMODULE>());
+    _initSdkCoroutine->start(this);
 }
 
 std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
-    Coroutines::Impl::CoroutineBase::init_sub_f_addr(Mod::m_patterns_cache.get(), g_framework->get_module().as<HMODULE>());
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_initialize()", mod->get_name().data());
 
@@ -441,8 +442,6 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
 
     for (auto& i : m_mods)
         i->after_all_inits();
-
-    _initSdkCoroutine->start(this);
 
     if (load_configs)
     {

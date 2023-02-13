@@ -1,6 +1,5 @@
 #include "VergilTrickUpLockedOn.hpp"
 #include "PlayerTracker.hpp"
-#include "BossTrickUp.hpp"
 
 uintptr_t VergilTrickUpLockedOn::jmp_ret1{NULL};
 uintptr_t VergilTrickUpLockedOn::jmp_jne1{NULL};
@@ -28,35 +27,12 @@ static naked void detour1() { // Disable Trick To
         jmp code
 
     cheatcode:
-       /* movss [xmm0backup1], xmm0
+        movss [xmm0backup1], xmm0
         movss xmm0, [rdx+00000FF4h]
         comiss xmm0, [leftstickthreshold]
         movss xmm0, [xmm0backup1]
-        ja cheatcode2*/
-        //jmp cheatcode2
-
-        push rax
-        push rcx
-        push rdx
-        push rsp
-        push r8
-        push r9
-        push r10
-        push r11
-        mov rcx, rdx
-        sub rsp, 32
-        call qword ptr [BossTrickUp::check_angle]
-        add rsp, 32
-        cmp al, 1
-        pop r11
-        pop r10
-        pop r9
-        pop r8
-        pop rsp
-        pop rdx
-        pop rcx
-        pop rax
-        je cheatcode2
+        ja cheatcode2
+        jmp cheatcode2
 
     code:
         cmp [rdx+00000ED0h], sil
@@ -141,7 +117,7 @@ void VergilTrickUpLockedOn::on_config_save(utility::Config& cfg)
 void VergilTrickUpLockedOn::on_draw_ui()
 {
     ImGui::TextWrapped("Left stick forward angle threshold:");
-    UI::SliderFloat("##angleForwardThreshold", &leftStickAngle, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+    UI::SliderFloat("##_angleForwardThreshold", &leftStickAngle, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 }
 
 void VergilTrickUpLockedOn::init_check_box_info() {

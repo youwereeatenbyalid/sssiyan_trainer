@@ -426,8 +426,6 @@ private:
 
 	std::vector<SpeedController> _plMovesList;
 
-	SpeedController* _last;
-
 	std::mutex _mtx;
 
 	void reset(EndLvlHooks::EndType type) override

@@ -238,7 +238,7 @@ private:
 						action = ParryLose;
 						break;
 					}
-					case EnemyData::DeathScrissors:
+					case EnemyData::DeathScissors:
 					{
 						action = (EnemyAction)0x1A1FD;//BreakWeaponFull
 						break;

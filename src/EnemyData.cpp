@@ -76,7 +76,7 @@ EnemyData::EnemyId EnemyData::get_em_id(uintptr_t enemy)
 			return ProtoAngelo; //Proto Angelo, app.Em0601
 
 		case 0x92896EE3:
-			return DeathScrissors; //Death Scrissors, app.Em0700
+			return DeathScissors; //Death Scissors, app.Em0700
 
 		case 0xF87AA53F:
 			return Hellbat; //Hellbat, app.Em0800
@@ -107,7 +107,7 @@ EnemyData::EnemyId EnemyData::get_em_id(uintptr_t enemy)
 		case 0xE9FBCFA9:
 		{
 			auto owner = *(uintptr_t*)(enemy + 0x10);
-			if (owner != 0 && wcscmp((const wchar_t*)((uintptr_t)(owner + 0x28)), L"em5000_goliath_M14") == 0)
+			if (owner != 0 && wcscmp((const wchar_t*)((uintptr_t)(owner + 0x28)), L"em5300_artemis_M14") == 0)
 				return PhantomArtemis;
 			return Artemis; //Artemis, app.Em5300, also for phantom
 		}

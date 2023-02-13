@@ -33,6 +33,9 @@ void EnemyWaveEditor::set_em_data_asm(const std::shared_ptr<MimicListData> &curH
 {
     if(curHandleObj->isSwapped)
         return;
+    EnemyFixes::cheaton = true;
+    EnemyFixes::isCustomSpawnPos = true;
+    EnemyFixes::isSpawnOffsForFlyingEnemiesOnly = true;
     curHandleObj->mimicList.set_list_data(lstAddr);
     uintptr_t emItem;
     int count = curHandleObj->mimicList.get_net_list_count() - 1;

@@ -24,7 +24,7 @@ namespace EnemyData
 		Nobody = 13,
 		ScudoAngelo = 14,
 		ProtoAngelo = 15,
-		DeathScrissors = 16,
+		DeathScissors = 16,
 		Hellbat = 17,
 		Pyrobat = 18,
 		QliphotsTentacle = 19,

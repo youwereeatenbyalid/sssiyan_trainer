@@ -164,7 +164,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 			_mod->_isDefaultFinishRangeRequested = true;
 			return;
 		}
-		if (emId == EnemyData::DeathScrissors)
+		if (emId == EnemyData::DeathScissors)
 		{
 			auto terrainChecker = *(uintptr_t*)(enemyToTrick + 0xD80);
 			if (terrainChecker == 0 || *(bool*)(terrainChecker + 0x50))//isOutOfArea
@@ -269,7 +269,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 			{
 				auto adjustTerrain = *(uintptr_t*)(enemyToTrick + 0x310);
 				if (emId == EnemyData::Urizen1 || (adjustTerrain != 0 && !(*(bool*)(adjustTerrain + 0x82)) && emId != EnemyData::GreenEmpusa && emId != EnemyData::Lusachia && 
-					emId != EnemyData::DeathScrissors && emId != EnemyData::Hellbat && emId != EnemyData::Pyrobat && emId != EnemyData::Artemis && emId != EnemyData::Griffon && 
+					emId != EnemyData::DeathScissors && emId != EnemyData::Hellbat && emId != EnemyData::Pyrobat && emId != EnemyData::Artemis && emId != EnemyData::Griffon && 
 					emId != EnemyData::PhantomArtemis && emId != EnemyData::QliphotsTentacle && emId != EnemyData::Malphas && emId != EnemyData::Dante && emId != EnemyData::Vergil && emId != 42 && emId != 56))
 					targetPos.z = (*(gf::Vec3*)(enemyToTrick + 0x3E0)).z - 0.6f;
 			}

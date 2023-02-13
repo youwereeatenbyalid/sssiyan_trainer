@@ -25,9 +25,8 @@ namespace Coroutines
 			//Main engine loop method probably. Calls all coroutines. TC is always valid.
 			static void* _sub_1425A9B00_detour(uintptr_t rcx, uintptr_t behaviorGroup)
 			{
-				void* res = ((_subOrig)_subOriginal)(rcx, behaviorGroup);
 				run();
-				return res;
+				return _sub_1425A9B00_hook->get_original<decltype(_sub_1425A9B00_detour)>()(rcx, behaviorGroup);
 			}
 
 			using _subOrig = decltype(&CoroutineBase::_sub_1425A9B00_detour);
@@ -40,12 +39,9 @@ namespace Coroutines
 			static inline const float _timeStep = 0.1f;
 
 			static inline uintptr_t _sub_1425A9B00Addr;
-			static inline uintptr_t _subOriginal = 0;
 
 			static inline bool _isHookCreated = false;
 			bool _isIgnoringGlobalTurboSpeedSetting = false;
-
-			static inline int _runningCoroutinesCount = 0;
 
 			//Run all coroutines in _sub_1425A9B00(...)
 			static void run()
@@ -76,13 +72,6 @@ namespace Coroutines
 			{
 				_sub_1425A9B00_hook = std::make_unique<FunctionHook>(_sub_1425A9B00Addr, &CoroutineBase::_sub_1425A9B00_detour, true);
 				_sub_1425A9B00_hook->create();
-				_subOriginal = _sub_1425A9B00_hook->get_original();
-			}
-
-			static inline void remove_hook()
-			{
-				_sub_1425A9B00_hook = nullptr;
-				_subOriginal = _sub_1425A9B00Addr;
 			}
 
 		protected:
@@ -107,12 +96,10 @@ namespace Coroutines
 			void unregister_coroutine(const CoroutineBase* obj) noexcept
 			{
 				_coroutines.erase(std::remove(_coroutines.begin(), _coroutines.end(), obj), _coroutines.end());
-				_runningCoroutinesCount--;
 			}
 
 			void register_coroutine(CoroutineBase* obj) noexcept
 			{
-				_runningCoroutinesCount++;
 				_coroutines.push_back(obj);
 				if (!is_hook_created())
 					create_hook();
@@ -183,7 +170,7 @@ namespace Coroutines
 			inline void set_delay(float delay) noexcept { _delay = delay; }
 
 			//How much coroutines are currently running
-			static inline int get_running_count() noexcept { return _runningCoroutinesCount; }
+			static inline int get_running_count() noexcept { return _coroutines.size(); }
 
 			//Do not run action when pause menu is opened
 			inline void ignoring_update_on_pause(bool val) { _isIgnoringUpdateOnPause = val; }

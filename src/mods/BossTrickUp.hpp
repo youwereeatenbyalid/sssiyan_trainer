@@ -8,7 +8,7 @@
 #include "InputSystem.hpp"
 #include "Mods.hpp"
 #include "mods/EndLvlHooks.hpp"
-#include "EnemySpawner.hpp"
+#include "EnemyData.hpp"
 #include "PlayerTracker.hpp"
 #include "InfiniteTrickUp.hpp"
 
@@ -18,20 +18,20 @@ namespace gf = GameFunctions;
 class BossTrickUp : public Mod
 {
 private:
-	float zOffs = 5.0f;
-	float distanceOffs = 1.8f;
-	float angleForwardThreshold = 8.0f;
+	float _zOffs = 5.0f;
+	float _distanceOffs = 1.8f;
+	float _angleForwardThreshold = 8.0f;
 
-	bool isPadInputTrickUp = false;
-	bool is2ndAppear = false;
-	bool isDoppelComeBack = false;
+	bool _isPadInputTrickUp = false;
+	bool _isDoppelComeBack = false;
 
 	InputSystem *_inputSys = nullptr;
 
 	static inline BossTrickUp *_mod = nullptr;
 
-	sdk::REMethodDefinition *_doppelComeBackMethod = nullptr;
-	sdk::REMethodDefinition* _pl0800SetActionMethod = nullptr;
+	const sdk::REMethodDefinition *_doppelComeBackMethod = nullptr;
+	const sdk::REMethodDefinition* _pl0800SetActionMethod = nullptr;
+	const sdk::REMethodDefinition* _getLockOnPosMethod;
 
 
 	void init_check_box_info() override
@@ -47,15 +47,16 @@ private:
 		if (!cheaton || *(bool*)(pl0800 + 0x17F0))
 			return;
 		bool isTrickUpAllowed = InfiniteTrickUp::cheaton ? true : *(bool*)(pl0800 + 0x19BC);//isTrickUp;
-		if (!isTrickUpAllowed || !check_angle(pl0800))
+		auto padInput = *(uintptr_t*)(pl0800 + 0xEF0);
+		if (!isTrickUpAllowed || !_mod->_inputSys->is_front_input((REManagedObject*)padInput, _mod->_angleForwardThreshold))
 		{
-			isPadInputTrickUp = false;
+			_isPadInputTrickUp = false;
 			return;
 		}
 		else
 		{
-			isPadInputTrickUp = true;
-			_pl0800SetActionMethod->call(threadCntxt, pl0800, 0x7D5, 0, 0, 0, 0, 0, true, false);
+			_isPadInputTrickUp = true;
+			_pl0800SetActionMethod->call(threadCntxt, pl0800, 0x7D5, 0, 0, 0, 0, 0, false, false);
 			*(bool*)(pl0800 + 0x19BC) = false;
 			*skipCall = true;
 		}
@@ -66,6 +67,7 @@ private:
 		_doppelComeBackMethod = sdk::find_method_definition("app.PlayerVergilPL", "comeBackDoppelGanger()");
 		_pl0800SetActionMethod = sdk::find_method_definition("app.PlayerVergilPL", "setAction(app.PlayerVergilPL.Actions, System.UInt32, System.Single, System.Single, "
 			"via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean)");
+		_getLockOnPosMethod = sdk::find_method_definition("app.LockOnObject", "get_lockOnPosition()");
 	}
 
 public:
@@ -84,144 +86,85 @@ public:
 	static inline uintptr_t ret = 0;
 	static inline uintptr_t skipTrickUpRet = 0;
 
-	static bool check_angle(uintptr_t vergil)
-	{
-		auto padInput = *(uintptr_t*)(vergil + 0xEF0);
-		if (cheaton && !VergilTrickUpLockedOn::cheaton)
-			return _mod->_inputSys->is_front_input((REManagedObject*)padInput, _mod->angleForwardThreshold);
-		else if (!cheaton && VergilTrickUpLockedOn::cheaton)
-			return _mod->_inputSys->is_front_input((REManagedObject*)padInput, VergilTrickUpLockedOn::leftStickAngle);
-		else
-		{
-			auto max = std::max(_mod->angleForwardThreshold, VergilTrickUpLockedOn::leftStickAngle);
-			return _mod->_inputSys->is_front_input((REManagedObject*)padInput,max);
-		}
-		return false;
-	}
-
-	static bool check_input(uintptr_t vergil)
-	{
-		if (vergil == 0 || *(bool*)(vergil + 0xED0) == false /*isManualLockOn*/ /*|| _mod->_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS) && *(int*)(vergil + 0x1978) != 0*/)
-		{
-			//_mod->isPadInputTrickUp = false;
-			return true;
-		}
-		bool res = true;
-		auto padInput = *(uintptr_t*)(vergil + 0xEF0);
-		if (padInput != 0)
-		{
-			if(cheaton)
-				res = _mod->isPadInputTrickUp = _mod->_inputSys->is_front_input((REManagedObject*)padInput, _mod->angleForwardThreshold);
-			if (VergilTrickUpLockedOn::cheaton && cheaton)
-			{
-				auto max = std::max(_mod->angleForwardThreshold, VergilTrickUpLockedOn::leftStickAngle);
-				res = _mod->_inputSys->is_front_input((REManagedObject*)padInput, max);
-			}
-			else if(VergilTrickUpLockedOn::cheaton)
-				res = _mod->_inputSys->is_front_input((REManagedObject*)padInput, VergilTrickUpLockedOn::leftStickAngle);
-		}
-		return res;
-	}
-
 	static void set_appear_pos(uintptr_t threadCtxt, uintptr_t vergil)//Calling this in trickTrails mod cause hook already there.
 	{
-		if (!cheaton || !_mod->isPadInputTrickUp)
-			return;
-		if (!_mod->is2ndAppear)
-		{
-			_mod->is2ndAppear = true;
-			return;
-		}
-		if (!PlSetActionData::cmp_real_cur_action("TrickUp"))
+		if (!cheaton || !_mod->_isPadInputTrickUp)
 			return;
 		if (vergil == 0 || *(int*)(vergil + 0x108) == 1 || *(int*)(vergil + 0xE64) != 4)
 			return;
+		if ( !gf::StringController::str_cmp(*(uintptr_t*)(vergil + 0x1A0), L"Trick_Up_Start") || !gf::StringController::str_cmp(*(uintptr_t*)(vergil + 0x190), L"Trick_Up_DrawOff"))
+			return;
 		uintptr_t lockOnObj = *(uintptr_t*)(vergil + 0x428);
 		if (lockOnObj == 0)
+		{
+			_mod->_isPadInputTrickUp = false;
 			return;
-		lockOnObj = *(uintptr_t*)(lockOnObj + 0x10);
-		if (lockOnObj == 0)
+		}
+		auto lockOnTarget = *(uintptr_t*)(lockOnObj + 0x10);
+		if (lockOnTarget == 0)
+		{
+			_mod->_isPadInputTrickUp = false;
 			return;
-		auto cachedCharacter = *(uintptr_t*)(lockOnObj + 0x58);
-		if (auto cachedShell = *(uintptr_t*)(lockOnObj + 0x68); cachedShell != 0 || cachedCharacter == 0)
+		}
+		auto cachedCharacter = *(uintptr_t*)(lockOnTarget + 0x58);
+		bool isSafeWarpRequested = false;
+		if (auto cachedShell = *(uintptr_t*)(lockOnTarget + 0x68); cachedShell != 0)
+			isSafeWarpRequested = true;
+		auto emId = EnemyData::get_em_id(cachedCharacter);
+		if (emId == EnemyData::Nidhogg)
+		{
+			_mod->_isPadInputTrickUp = false;
 			return;
-		auto emId = 0;
-		auto genIdInfo = *(uintptr_t*)((uintptr_t)cachedCharacter + 0x4C8);
-		if (genIdInfo != 0)
-			emId = *(int*)(genIdInfo + 0x10);
-		else
-			emId = *(int*)((uintptr_t)cachedCharacter + 0xB18); //this will suck if dealing with pl characters 'cause it's emId from enemy class
-		if (emId == 25)
+		}
+		float len = sqrt(*(float*)(lockOnTarget + 0x78));//sqLength
+		gf::Vec3 targetPos = _mod->_getLockOnPosMethod->call<gf::Vec3>(threadCtxt, lockOnObj);
+		auto cachedTargetTransform = *(uintptr_t*)(lockOnObj + 0x50);
+		if (cachedTargetTransform == 0)
+		{
+			_mod->_isPadInputTrickUp = false;
 			return;
-		float len = sqrt(*(float*)(lockOnObj + 0x78));//sqLength
-		gf::Vec3 emPos;
-		if (auto cachedTransform = *(uintptr_t*)(lockOnObj + 0x50); cachedTransform != 0)
-			emPos = *(gf::Vec3*)(cachedTransform + 0x30);
-		else
-			return;
-		gf::Vec3 newPlPos = emPos;
-		auto lockOnOffs = *(gf::Vec3*)(lockOnObj + 0x20);
+		}
+
+		if (emId == EnemyData::None)
+		{
+			isSafeWarpRequested = true;
+			targetPos = *(gf::Vec3*)(cachedTargetTransform + 0x30);
+		}
+		else if (emId == EnemyData::Urizen1)
+			isSafeWarpRequested = true;
+		else if (emId == EnemyData::Behemoth && gf::StringController::str_cmp(*(uintptr_t*)(cachedCharacter + 0x1A0), L"Em0400HideInGround") &&
+			gf::StringController::str_cmp(*(uintptr_t*)(cachedCharacter + 0x190), "HideChase"))
+				isSafeWarpRequested = true;
+		else if (emId == EnemyData::Vergil)
+		{
+			auto airRaidCtrl = *(uintptr_t*)(cachedCharacter + 0x1C90);
+			if (airRaidCtrl == 0 || *(bool*)(airRaidCtrl + 0x30))//isOutOfArea
+				isSafeWarpRequested = true;
+		}
+		else if (emId == EnemyData::DeathScissors)
+		{
+			auto terrainChecker = *(uintptr_t*)(cachedCharacter + 0xD80);
+			if (terrainChecker == 0 || *(bool*)(terrainChecker + 0x50))//isOutOfArea
+				isSafeWarpRequested = true;
+		}
+		gf::Vec3 newPlPos = targetPos;
 		auto vergilTransform = *(uintptr_t*)((*(uintptr_t*)(vergil + 0x10)) + 0x18);
 		auto pPos = *(gf::Vec3*)(vergilTransform + 0x30);
-		//newPlPos.z += 1.5f;
-		if (emId != 35)
+
+		if (!isSafeWarpRequested)
 			gf::Transform_SetPosition::set_character_pos(vergil, newPlPos, true);
-		newPlPos.x = pPos.x + (len - _mod->distanceOffs) * (emPos.x - pPos.x) / (float)len;
-		newPlPos.y = pPos.y + (len - _mod->distanceOffs) * (emPos.y - pPos.y) / (float)len;
-		newPlPos += lockOnOffs;
+		newPlPos.x = pPos.x + (len - _mod->_distanceOffs) * (targetPos.x - pPos.x) / (float)len;
+		newPlPos.y = pPos.y + (len - _mod->_distanceOffs) * (targetPos.y - pPos.y) / (float)len;
 		gf::Transform_SetPosition setPos{ (void*)vergilTransform };
-		newPlPos.z += _mod->zOffs;
+		newPlPos.z += _mod->_zOffs;
 		setPos(newPlPos);
 		//posCorrector.set_position(newPlPos);
-		if (_mod->isDoppelComeBack && _mod->_doppelComeBackMethod != nullptr)
+		if (_mod->_isDoppelComeBack && _mod->_doppelComeBackMethod != nullptr)
 		{
 			if (*(bool*)(vergil + 0x18A8))
 				_mod->_doppelComeBackMethod->call(threadCtxt, vergil);
 		}
-		_mod->isPadInputTrickUp = false;
-	}
-
-	static naked void detour()
-	{
-		__asm {
-			cmp byte ptr [BossTrickUp::cheaton], 1
-			je cheat
-			cmp byte ptr [VergilTrickUpLockedOn::cheaton], 1
-			je cheat
-
-			originalcode:
-			mov r8d, 0x7D5
-			jmp qword ptr [BossTrickUp::ret]
-
-			cheat:
-			push rax
-			push rcx
-			push rdx
-			push rsp
-			push r8
-			push r9
-			push r10
-			push r11
-			mov rcx, rsi
-			sub rsp, 32
-			call qword ptr [BossTrickUp::check_input]
-			add rsp, 32
-			cmp al, 0
-			pop r11
-			pop r10
-			pop r9
-			pop r8
-			pop rsp
-			pop rdx
-			pop rcx
-			pop rax
-			je skip
-			jmp originalcode
-
-			skip:
-			mov r8d, 0
-			jmp qword ptr [BossTrickUp::ret]
-		}
+		_mod->_isPadInputTrickUp = false;
 	}
 
 	std::string_view get_name() const override
@@ -250,20 +193,7 @@ public:
 
 		set_up_hotkey();
 
-		auto trickUpSetActionAddr = m_patterns_cache->find_addr(base, "41 B8 D5 07 00 00 C7 44 24 38 00 00 00 00 48");//DevilMayCry5.exe+550BE2
-		if (!trickUpSetActionAddr)
-		{
-			return "Unable to find BossTrickUp.trickUpSetActionAddr pattern.";
-		}
-
-		skipTrickUpRet += trickUpSetActionAddr.value();
 		_inputSys = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
-
-		if (!install_hook_absolute(trickUpSetActionAddr.value(), m_trickup_action_hook, &detour, &ret, 0x6))
-		{
-			spdlog::error("[{}] failed to initialize", get_name());
-			return "Failed to initialize BossTrickUp.trickUpSetAction";
-		}
 
 		PlayerTracker::on_pl0800_set_air_trick_action_sub(std::make_shared<Events::EventHandler<BossTrickUp, uintptr_t, uintptr_t, uintptr_t, bool*>>(this, &BossTrickUp::on_pl0800_set_air_trick_action));
 
@@ -273,17 +203,17 @@ public:
 	// Override this things if you want to store values in the config file
 	void on_config_load(const utility::Config& cfg) override 
 	{
-		zOffs = cfg.get<float>("BossTrickUp.zOffs").value_or(4.3F);
-		distanceOffs = cfg.get<float>("BossTrickUp.distanceOffs").value_or(2.0f);
-		angleForwardThreshold = cfg.get<float>("BossTrickUp.angleForwardThreshold").value_or(22.5f);
-		isDoppelComeBack = cfg.get<bool>("BossTrickUp.isDoppelComeBack").value_or(true);
+		_zOffs = cfg.get<float>("BossTrickUp._zOffs").value_or(4.3F);
+		_distanceOffs = cfg.get<float>("BossTrickUp._distanceOffs").value_or(2.0f);
+		_angleForwardThreshold = cfg.get<float>("BossTrickUp._angleForwardThreshold").value_or(22.5f);
+		_isDoppelComeBack = cfg.get<bool>("BossTrickUp._isDoppelComeBack").value_or(true);
 	}
 	void on_config_save(utility::Config& cfg) override 
 	{
-		cfg.set<float>("BossTrickUp.zOffs", zOffs);
-		cfg.set<float>("BossTrickUp.distanceOffs", distanceOffs);
-		cfg.set<float>("BossTrickUp.angleForwardThreshold", angleForwardThreshold);
-		cfg.set<bool>("BossTrickUp.isDoppelComeBack", isDoppelComeBack);
+		cfg.set<float>("BossTrickUp._zOffs", _zOffs);
+		cfg.set<float>("BossTrickUp._distanceOffs", _distanceOffs);
+		cfg.set<float>("BossTrickUp._angleForwardThreshold", _angleForwardThreshold);
+		cfg.set<bool>("BossTrickUp._isDoppelComeBack", _isDoppelComeBack);
 	}
 
 	// on_draw_ui() is called only when the gui shows up
@@ -294,12 +224,12 @@ public:
 			ImGui::TextWrapped("This mod can send you out of bounds.\n Sometimes the trick up sound doesn't play after teleporting.\nDoesn't work vs Nidhogg.");
 		};
 		ImGui::TextWrapped("Height offset:");
-		UI::SliderFloat("##zOffs", &zOffs, 3.0f, 8.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+		UI::SliderFloat("##_zOffs", &_zOffs, 3.0f, 8.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::TextWrapped("Horizontal offset:");
-		UI::SliderFloat("##distOffs", &distanceOffs, 0.2f, 4.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+		UI::SliderFloat("##distOffs", &_distanceOffs, 0.2f, 4.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::TextWrapped("Left stick forward angle threshold:");
-		UI::SliderFloat("##angleForwardThreshold", &angleForwardThreshold, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Doppelganger auto-return after boss trick", &isDoppelComeBack);
+		UI::SliderFloat("##_angleForwardThreshold", &_angleForwardThreshold, 3.5f, 60.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::Checkbox("Doppelganger auto-return after boss trick", &_isDoppelComeBack);
 	}
 };
 //clang-format on

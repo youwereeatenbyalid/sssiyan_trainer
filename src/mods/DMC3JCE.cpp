@@ -486,7 +486,6 @@ void DMC3JCE::on_draw_ui()
 	{
 		isJceRunning = false;
 		jceController->stop_jce();
-
 	}
 }
 
