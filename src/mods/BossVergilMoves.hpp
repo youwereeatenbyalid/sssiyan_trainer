@@ -1162,9 +1162,9 @@ private:
 		if (!cheaton || !_mod->_isEm6000PfbFound || !_mod->_isPl0300Loaded || !_mod->_isTrickStabEnebled)
 			return _mod->_pl0800CheckCommandHook->get_original<decltype(pl0800_check_command_hook)>()(threadCtxt, pl0800);
 		if( *(int*)(pl0800 + 0x1B5C) == 2 && *(int*)(pl0800 + 0x1978) == 0 &&//concentrationLvl & weaponYamato
-			_mod->_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS) && 
+			_mod->_inputSystem->is_action_button_pressed(*(uintptr_t*)(pl0800 + 0xEF0), InputSystem::PadInputGameAction::AttackS) &&
 			*(bool*)(pl0800 + 0xED0) && //isManualLockOn
-			_mod->_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::Special0) &&
+			_mod->_inputSystem->is_action_button_pressed(*(uintptr_t*)(pl0800 + 0xEF0), InputSystem::PadInputGameAction::Special0) &&
 			_mod->_inputSystem->is_back_input(threadCtxt, (REManagedObject*)(*(uintptr_t*)(pl0800 + 0xEF0)), 55.5f)
 			&& *(UINT64*)(pl0800 + 0x1348) == 2
 			)

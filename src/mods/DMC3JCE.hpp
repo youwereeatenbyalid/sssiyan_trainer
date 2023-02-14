@@ -404,7 +404,7 @@ public:
 			Type tmp = get_jce_type();
 			if (tmp == Dynamic)
 			{
-				if (_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::AttackS))
+				if (_inputSystem->is_action_button_pressed(*(uintptr_t*)(pl0800 + 0xEF0), InputSystem::PadInputGameAction::AttackS))
 					tmp = Track;
 				else
 					tmp = Random;

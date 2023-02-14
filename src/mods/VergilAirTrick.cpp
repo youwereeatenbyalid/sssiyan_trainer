@@ -213,7 +213,7 @@ void VergilAirTrick::change_pos_asm(uintptr_t trickAction)
 		{
 			try
 			{
-				const bool isTrickPressed = _mod->_inputSystem->is_action_button_pressed(InputSystem::PadInputGameAction::Special0);
+				const bool isTrickPressed = _mod->_inputSystem->is_action_button_pressed(*(uintptr_t*)(vergil + 0xEF0), InputSystem::PadInputGameAction::Special0);
 				if (isDoppel && isDoppelOppositeTeleport)
 				{
 					if (isTrickPressed)
