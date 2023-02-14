@@ -215,6 +215,8 @@ namespace Coroutines
 			_args = std::forward_as_tuple(args...);
 		}
 
+		inline std::tuple<Args...> get_args() const noexcept { return _args; }
+
 		void invoke() override
 		{
 			if (_action != nullptr)
@@ -278,5 +280,7 @@ namespace Coroutines
 				throw std::exception("_action is nullptr");
 			_action->invoke();
 		}
+
+		inline std::shared_ptr<DelayedAction<TAction, Args...>> get_action() const noexcept { return std::static_pointer_cast<DelayedAction<TAction, Args...>>(_action); }
 	};
 }

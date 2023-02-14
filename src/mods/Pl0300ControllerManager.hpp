@@ -44,6 +44,11 @@ namespace PlCntr
 
 			uintptr_t requestAddEmFuncAddr = 0;
 
+			std::mutex _pl0300ListChangeMtx;
+			std::mutex _doppelRemoveRoutineMtx;
+
+			std::vector<std::unique_ptr<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>> _doppelRemoveCoroutinesList;
+
 			void init_check_box_info() override
 			{
 				m_check_box_name = m_prefix_check_box_name + std::string(get_name());
@@ -53,6 +58,8 @@ namespace PlCntr
 			void after_all_inits() override;
 
 			void reset(EndLvlHooks::EndType resetType);
+
+			void remove_doppel_routine(const Pl0300Controller* controller);
 
 			//---------------------------------------------Hooks for make pl0300 playable-----------------------------------------//
 

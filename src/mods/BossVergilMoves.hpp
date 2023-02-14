@@ -1004,7 +1004,9 @@ private:
 		if (!cheaton)
 			return;
 		if (_vergilsList.size() > 0/* && !_vergilsList[_vergilsList.size() - 1].is_init()*/)
+		{
 			_vergilsList[_vergilsList.size() - 1]._pl0300.lock()->update_pl_manager();
+		}
 		if (_isEm6000PfbFound && *(int*)(player + 0xE64) == 4)
 		{
 			if (_pl0300Manager != nullptr)
@@ -1023,6 +1025,19 @@ private:
 					pl0300->set_is_control(false);
 					_vergilsList[0].on_pl_reload_reset();
 				}
+			}
+		}
+	}
+
+	void on_pl_remove(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl, bool isUnload)
+	{
+		if (!cheaton)
+			return;
+		for (auto& i : _vergilsList)
+		{
+			if (pl == i._pl0800)
+			{
+				i.destroy_doppel();
 			}
 		}
 	}
@@ -1075,7 +1090,6 @@ private:
 								doppel->set_hitcontroller_settings(_pl0300doppelsHCS);
 							*(float*)(pl0800 + 0x1110) -= 3000.0f;
 							doppel->set_dt(_doppelsDtState);
-
 						}
 					}
 					else
@@ -1211,6 +1225,7 @@ public:
 	{
 		GameplayStateTracker::after_pfb_manager_init_unsub(std::make_shared<Events::EventHandler<BossVergilMoves>>(this, &BossVergilMoves::on_pfb_manager_inited));
 		PlayerTracker::pl_added_event_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
+		PlayerTracker::on_pl_manager_pl_unload_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &BossVergilMoves::on_pl_remove));
 	}
 
 	bool is_boss_doppel_enabled() const noexcept { return _isBossDoppelEnabled; }
@@ -1294,6 +1309,7 @@ public:
 
 		GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<BossVergilMoves>>(this, &BossVergilMoves::on_pfb_manager_inited));
 		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
+		PlayerTracker::on_pl_manager_pl_unload_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &BossVergilMoves::on_pl_remove));
 
 		_FE_doCommandSpecHook = std::make_unique<FunctionHook>(doCommSpecAddr.value() + 0x6, &BossVergilMoves::force_edge_do_command_spec_ds_hook);
 		if (!_FE_doCommandSpecHook->create())

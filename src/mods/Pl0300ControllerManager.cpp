@@ -83,6 +83,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::after_all_inits()
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType resetType)
 {
+    _doppelRemoveCoroutinesList.clear();
     if (resetType == EndLvlHooks::EndType::ResetTraining)
     {
         _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [](const std::shared_ptr<Pl0300Controller> &obj)
@@ -317,6 +318,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::we
     {
         if (_pl0300List[i] == elevated)
         {
+            std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
             _pl0300List.erase(_pl0300List.begin() + i);
             return true;
         }
@@ -334,6 +336,7 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
     auto pl0300 = (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pl0300GameObj, "getComponent(System.Type)", bossType);//Get pl0300 script from GameObj
     try
     {
+        std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
         _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
     }
     catch (const std::exception& e)
@@ -370,20 +373,37 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
         if (_pl0300List[i].get() == controllerOwner)
             indx = i;
     }
+    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
     auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly));
     _pl0300List.push_back(doppel);
     doppel->_owner = std::weak_ptr<Pl0300Controller>(_pl0300List[indx]);
     return std::weak_ptr<Pl0300Controller>(doppel);
 }
 
-void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppelganger(const Pl0300Controller* doppelController)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppel_routine(const Pl0300Controller* doppelController)
 {
-    if (doppelController == nullptr || !doppelController->is_doppel())
-        return;
+    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj)
         {
             return obj->get_pl() == doppelController->get_pl();
         }), _pl0300List.end());
+    
+    _doppelRemoveCoroutinesList.erase(std::remove_if(_doppelRemoveCoroutinesList.begin(), _doppelRemoveCoroutinesList.end(),
+        [&](const std::unique_ptr<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>& coroutine)
+        {
+            return std::get<1>(coroutine->get_action()->get_args()) == doppelController;
+        }), _doppelRemoveCoroutinesList.end());
+}
+
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppelganger(const Pl0300Controller* doppelController)
+{
+    if (doppelController == nullptr || !doppelController->is_doppel())
+        return;
+    _doppelRemoveCoroutinesList.emplace_back(std::make_unique<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>
+        (&Pl0300ControllerManager::remove_doppel_routine, false));
+    _doppelRemoveCoroutinesList[_doppelRemoveCoroutinesList.size() - 1]->set_delay(10000.0f);
+    _doppelRemoveCoroutinesList[_doppelRemoveCoroutinesList.size() - 1]->ignoring_update_on_pause(true);
+    _doppelRemoveCoroutinesList[_doppelRemoveCoroutinesList.size() - 1]->start(this, doppelController);
 }
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, Pl0300Type type)
@@ -397,6 +417,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, P
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::kill_all_friendly_em6000()
 {
+    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj) {return obj->get_pl0300_type() == Pl0300Type::Em6000Friendly; }), _pl0300List.end());
 }
 
