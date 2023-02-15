@@ -465,7 +465,6 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize EnemyWaveEditor.bpFadeIn";
   }
-  _txtHelperSize = ImGui::CalcTextSize(_txtHelper).x;
 
   mimListManager = std::make_unique<MimicListManager>();
   mode = Mode::Mod;
@@ -496,6 +495,7 @@ void EnemyWaveEditor::on_frame()
 
 void EnemyWaveEditor::on_draw_ui() {
   ImGui::Combo("Mode", (int*)&mode, modeNames.data(), modeNames.size());
+  _txtHelperSize = ImGui::CalcTextSize(_txtHelper).x;
   switch (mode) {
   case EnemyWaveEditor::Mod: 
   {
