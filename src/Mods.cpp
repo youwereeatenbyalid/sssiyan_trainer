@@ -427,7 +427,7 @@ Mods::Mods()
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
     Coroutines::Impl::CoroutineBase::init_sub_f_addr(Mod::m_patterns_cache.get(), g_framework->get_module().as<HMODULE>());
-    _initSdkCoroutine->start(this);
+    m_init_sdk_coroutine->start(this);
 }
 
 std::optional<std::string> Mods::on_initialize(const bool& load_configs) {

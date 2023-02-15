@@ -38,13 +38,13 @@ private:
     std::vector<std::unique_ptr<Mod>> m_mods;
     utility::Config m_config;
 
-    std::unique_ptr<Coroutines::Coroutine<void(Mods::*)(), Mods*>> _initSdkCoroutine = std::make_unique<Coroutines::Coroutine<void(Mods::*)(), Mods*>>(&Mods::init_sdk, true, true);
+    std::unique_ptr<Coroutines::Coroutine<void(Mods::*)(), Mods*>> m_init_sdk_coroutine = std::make_unique<Coroutines::Coroutine<void(Mods::*)(), Mods*>>(&Mods::init_sdk, true, true);
 
     void init_sdk()
     {
         for (const auto& i : m_mods)
             i->on_sdk_init();
-        _initSdkCoroutine->stop();
-        _initSdkCoroutine = nullptr;
+        m_init_sdk_coroutine->stop();
+        m_init_sdk_coroutine = nullptr;
     }
 };
