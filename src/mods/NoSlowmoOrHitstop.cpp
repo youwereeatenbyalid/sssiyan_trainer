@@ -1,32 +1,49 @@
 #include "NoSlowmoOrHitstop.hpp"
 #include "PlayerTracker.hpp"
+#include <ImGuiExtensions/ImGuiExtensions.h>
 
 uintptr_t NoSlowmoOrHitstop::jmp_ret{NULL};
 uintptr_t NoSlowmoOrHitstop::jmp_ret2{NULL};
-bool NoSlowmoOrHitstop::cheaton{NULL};
+bool NoSlowmoOrHitstop::cheaton{ FALSE };
+bool NoSlowmoOrHitstop::disableHitstop{ FALSE };
+bool NoSlowmoOrHitstop::realHitstop{ FALSE };
+bool NoSlowmoOrHitstop::disableSlowmo{ FALSE };
 
 float noHitstopSpeed = 1.0f;
+float realHitstopSpeed = 0.0f;
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 // hitstop
-static naked void detour() { // AttackUserData->? accessed from DevilMayCry5.app_WorkRate__setHitStop74027 (DevilMayCry5.exe+CCD9B2 copyright)
+// AttackUserData->? accessed from DevilMayCry5.app_WorkRate__setHitStop74027 (DevilMayCry5.exe+CCD9B2 copyright)
+static naked void detour() {
 	__asm {
-        cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
-        je cheatcode
-    code:
-        movss [rdx+0x64], xmm2
-		jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
+            cmp byte ptr [NoSlowmoOrHitstop::cheaton], 0
+            je code
+            cmp byte ptr [NoSlowmoOrHitstop::disableHitstop], 1
+            je cheatcode
+            cmp byte ptr [NoSlowmoOrHitstop::realHitstop], 1
+            je cheatcode2
 
-    cheatcode:
-        movss xmm2, [noHitstopSpeed]
-        movss [rdx+0x64], xmm2
-		jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
+        code: // originalcode
+            movss [rdx+0x64], xmm2
+		    jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
+
+        cheatcode: // no hitstop
+            movss xmm2, [noHitstopSpeed]
+            movss [rdx+0x64], xmm2
+		    jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
+
+        cheatcode2: // real hitstop
+            movss xmm2, [realHitstopSpeed]
+            movss [rdx+0x64], xmm2
+            jmp qword ptr [NoSlowmoOrHitstop::jmp_ret]
 	}
 }
 /*
-static naked void detour2() { // DamageUserData->SlowTime (+B0) accessed from DevilMayCry5.app_HitController__checkJustEscape158532 (DevilMayCry5.exe+24CE8C3 copyright)
+// DamageUserData->SlowTime (+B0) accessed from DevilMayCry5.app_HitController__checkJustEscape158532 (DevilMayCry5.exe+24CE8C3 copyright)
+static naked void detour2() {
 	__asm {
         cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
         je cheatcode
@@ -42,9 +59,12 @@ static naked void detour2() { // DamageUserData->SlowTime (+B0) accessed from De
 */
 
 // other
-static naked void detour2() { // DevilMayCry5.app_WorkRateSystem__setWorkRate96344 (DevilMayCry5.exe+77EFE0 copyright)
+// DevilMayCry5.app_WorkRateSystem__setWorkRate96344 (DevilMayCry5.exe+77EFE0 copyright)
+static naked void detour2() {
 	__asm {
-        cmp byte ptr [NoSlowmoOrHitstop::cheaton], 1
+        cmp byte ptr [NoSlowmoOrHitstop::cheaton], 0
+        je code
+        cmp byte ptr [NoSlowmoOrHitstop::disableSlowmo], 1
         je cheatcode
     code:
         mov [rsp+0x20],rbp
@@ -67,9 +87,9 @@ std::optional<std::string> NoSlowmoOrHitstop::on_initialize() {
 
   m_is_enabled          = &NoSlowmoOrHitstop::cheaton;
   m_on_page             = Page_Animation;
-  m_full_name_string   = "No Slowmo Or Hitstop";
+  m_full_name_string   = "Slowmo And Hitstop Settings (+)";
   m_author_string      = "SSSiyan";
-  m_description_string = "Disables slowdown and hitstop.";
+  m_description_string = "Adjust Slowmo and Hitstop Settings.";
 
   set_up_hotkey();
 
@@ -104,4 +124,27 @@ std::optional<std::string> NoSlowmoOrHitstop::on_initialize() {
       return "Failed to initialize NoSlowmoOrHitstop2";
   }
   return Mod::on_initialize();
+}
+
+void NoSlowmoOrHitstop::on_draw_ui() {
+    if (ImGui::Checkbox("Disable Hitstop", &disableHitstop)) {
+        NoSlowmoOrHitstop::realHitstop = false;
+    }
+    if (ImGui::Checkbox("Real Hitstop", &realHitstop)) {
+        NoSlowmoOrHitstop::disableHitstop = false;
+    }
+    ImGui::ShowHelpMarker("DMC5 by default sets entity speeds to 0.2 during a hit. This will replace that with 0.0.");
+    ImGui::Checkbox("Disable Slowmo", &disableSlowmo);
+}
+
+void NoSlowmoOrHitstop::on_config_load(const utility::Config& cfg) {
+    disableHitstop = cfg.get<bool>("disable_hitstop").value_or(false);
+    realHitstop	= cfg.get<bool>("real_hitstop").value_or(false);
+    disableSlowmo = cfg.get<bool>("disable_slowmo").value_or(false);
+}
+
+void NoSlowmoOrHitstop::on_config_save(utility::Config& cfg) {
+    cfg.set<bool>("disable_hitstop", disableHitstop);
+    cfg.set<bool>("real_hitstop", realHitstop);
+    cfg.set<bool>("disable_slowmo", disableSlowmo);
 }
