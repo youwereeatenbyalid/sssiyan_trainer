@@ -1,28 +1,30 @@
 #pragma once
 #include "Mod.hpp"
 #include "sdk/ReClass.hpp"
+#include <random>
+
 class BpStageJump : public Mod {
 public:
   BpStageJump() = default;
   // mod name string for config
 
-  
+
   static bool randombosses;
   static bool bossrush;
   static bool endless;
   static bool altfloor;
   static enum palace_type_enum { BALANCED, PARTIAL, RANDOM };
   int static palace_type;
-  int static random_generator(int low, int high);
+  int static random_generator(int low, int high, std::optional<uint32_t> seed = {});
   // random_generator(1,7), case switch to return a boss floor
   int static return_boss_floor();
   // return non-boss bp floor
-  int static return_normal_floor();
+  int static return_normal_floor(std::optional<uint32_t> seed = {});
   // Reset counter, palacearray,bossarray
   void static reset_palace();
   // randomize values in an array via swapping
-  void static randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high);
-  void static randomize_array(int* array_param, int range_low, int range_high);
+  void static randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high, std::optional<uint32_t> seed = {});
+  void static randomize_array(int* array_param, int range_low, int range_high, std::optional<uint32_t> seed = {});
   // Generate a new palace scenario
   void static generate_palace(int seed);
   // get the next floor
@@ -57,4 +59,5 @@ private:
   static int bossarray[8];
   static int counter;
   std::unique_ptr<FunctionHook> m_function_hook;
+  inline static std::mt19937 s_rng_engine{};
 };

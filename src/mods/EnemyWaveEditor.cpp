@@ -495,7 +495,6 @@ void EnemyWaveEditor::on_frame()
 
 void EnemyWaveEditor::on_draw_ui() {
   ImGui::Combo("Mode", (int*)&mode, modeNames.data(), modeNames.size());
-  _txtHelperSize = ImGui::CalcTextSize(_txtHelper).x;
   switch (mode) {
   case EnemyWaveEditor::Mod: 
   {
@@ -514,7 +513,7 @@ void EnemyWaveEditor::on_draw_ui() {
         print_spacing("Enable \"Bp alloc mode\", create 1 enemy list and setup set up it;");
         ImGui::Separator();
         ImGui::BulletText("Custom gamemodes");
-        ImGui::TextWrapped(_txtHelper); ImGui::SameLine(0, ImGui::GetCursorPosX() - _txtHelperSize);
+        ImGui::TextWrapped(_txtHelper); ImGui::SameLine(0, ImGui::GetCursorPosX() - ImGui::CalcTextSize(_txtHelper).x);
         ImGui::TextHyperlink("enemy list exporter shit from nexus", "https://www.nexusmods.com/devilmaycry5/mods/2181", ImVec4{ 0.46f, 0.46f, 0.92f, 1.0f });
         ImGui::SameLine(0, 0);
         ImGui::TextWrapped(" to serialize custom enemy data to .json and load it here;");

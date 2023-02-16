@@ -527,7 +527,6 @@ namespace WaveEditorMod
 		int selectedEmDataItem = 0;
 
 		static inline constexpr char* _txtHelper = "You need";
-		static inline float _txtHelperSize = 0;
 
 		void reset(EndLvlHooks::EndType end) override
 		{

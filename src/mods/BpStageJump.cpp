@@ -27,9 +27,12 @@ int BpStageJump::palace_type = BpStageJump::RANDOM;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-int BpStageJump::random_generator(int low, int high)
+int BpStageJump::random_generator(int low, int high, std::optional<uint32_t> seed)
 {
-	return low + (std::rand() % (high - low + 1));
+	if (seed)
+		s_rng_engine.seed(*seed);
+
+	return low + (s_rng_engine() % (high - low + 1));
 }
 
 // random_generator(1,8), case switch to return a boss floor
@@ -58,12 +61,12 @@ int BpStageJump::return_boss_floor()
 }
 
 // return non-boss bp floor
-int BpStageJump::return_normal_floor()
+int BpStageJump::return_normal_floor(std::optional<uint32_t> seed)
 {
 	int return_floor;
 	do
 	{
-		return_floor = random_generator(1, 97);
+		return_floor = random_generator(1, 97, seed);
 	} while (return_floor == 20
 		|| return_floor == 40
 		|| return_floor == 60
@@ -91,22 +94,22 @@ void BpStageJump::reset_palace()
 }
 
 // randomize values in an array via swapping
-void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high)
+void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high, std::optional<uint32_t> seed)
 {
 	// TODO: Add your implementation code here.
 	for (int i = range_low; i < range_high; i++) {
 		int temp = array_param[i];
-		int rand = random_generator(rand_low, rand_high);
+		int rand = random_generator(rand_low, rand_high, seed);
 		array_param[i] = array_param[rand];
 		array_param[rand] = temp;
 	}
 }
 
-void BpStageJump::randomize_array(int* array_param, int range_low, int range_high)
+void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, std::optional<uint32_t> seed)
 {
 	for (int i = range_low; i < range_high; i++) {
 		int temp = array_param[i];
-		int rand = return_normal_floor();
+		int rand = return_normal_floor(seed);
 		array_param[i] = array_param[rand - 1];
 		array_param[rand - 1] = temp;
 	}
@@ -119,29 +122,29 @@ void BpStageJump::generate_palace(int seed)
 
 	switch (BpStageJump::palace_type) {
 	case palace_type_enum::PARTIAL:
-		randomize_array(palacearray, 0, 19);
-		randomize_array(palacearray, 20, 39);
-		randomize_array(palacearray, 40, 59);
-		randomize_array(palacearray, 60, 79);
-		randomize_array(palacearray, 80, 89);
-		randomize_array(palacearray, 90, 97);
+		randomize_array(palacearray, 0, 19, seed);
+		randomize_array(palacearray, 20, 39, seed);
+		randomize_array(palacearray, 40, 59, seed);
+		randomize_array(palacearray, 60, 79, seed);
+		randomize_array(palacearray, 80, 89, seed);
+		randomize_array(palacearray, 90, 97, seed);
 		break;
 	case palace_type_enum::BALANCED:
-		randomize_array(palacearray, 0, 19, 0, 18);
-		randomize_array(palacearray, 20, 39, 20, 38);
-		randomize_array(palacearray, 40, 59, 40, 58);
-		randomize_array(palacearray, 60, 79, 60, 78);
-		randomize_array(palacearray, 80, 89, 80, 88);
-		randomize_array(palacearray, 90, 97, 90, 96);
+		randomize_array(palacearray, 0, 19, 0, 18, seed);
+		randomize_array(palacearray, 20, 39, 20, 38, seed);
+		randomize_array(palacearray, 40, 59, 40, 58, seed);
+		randomize_array(palacearray, 60, 79, 60, 78, seed);
+		randomize_array(palacearray, 80, 89, 80, 88, seed);
+		randomize_array(palacearray, 90, 97, 90, 96, seed);
 		break;
 	case palace_type_enum::RANDOM:
 	default:
-		randomize_array(palacearray, 0, 99, 1, 100);
+		randomize_array(palacearray, 0, 99, 1, 100, seed);
 		break;
 	}
 	if (BpStageJump::palace_type == palace_type_enum::PARTIAL || BpStageJump::palace_type == palace_type_enum::BALANCED) {
 		if (randombosses)
-			randomize_array(bossarray, 0, 7, 0, 7);
+			randomize_array(bossarray, 0, 7, 0, 7, seed);
 		palacearray[19] = bossarray[0];
 		palacearray[39] = bossarray[1];
 		palacearray[59] = bossarray[2];
@@ -222,7 +225,9 @@ static naked void detour() {
 
     randomstagestart:
         push rax
+		sub rsp, 0x20 // Shadow space
         call BpStageJump::next_floor
+		Add rsp, 0x20
         mov [rbx+68h], al
         pop rax
         jmp retcode
@@ -271,8 +276,8 @@ std::optional<std::string> BpStageJump::on_initialize() {
   BpStageJump::jmp_jne = addr.value() + 8;
 
   // might as well randomize seed on boot
-  std::srand(std::time(0));
-  seed = std::rand();
+  seed = std::random_device{}(); // Get a random seed from the OS
+  s_rng_engine.seed(seed);
   generate_palace(seed);
 
   return Mod::on_initialize();
@@ -339,7 +344,7 @@ void BpStageJump::on_draw_ui() {
 
 		if (ImGui::Button("Randomize Palace")){
 			if (!useseed)
-				seed = std::rand();
+				seed = std::random_device{}();
 			generate_palace(seed);
 		}
 		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
@@ -347,7 +352,7 @@ void BpStageJump::on_draw_ui() {
 		"To use the seed, enter your seed into the \Palace Seed\" field, check the \"Use Custom Seed\" checkbox, then press \"Randomize Palace\" before starting.\n"
 		"Ensure everyone follows these instructions in the correct order before you start or your co-op session will NOT work.");
 		ImGui::Checkbox("Use Custom Seed", &useseed);
-		ImGui::InputInt("Palace Seed",&seed);
+		ImGui::InputInt("Palace Seed", &seed, 1, 100, ImGuiInputTextFlags_CharsHexadecimal);
     }
 	else {
 		ImGui::Spacing();
