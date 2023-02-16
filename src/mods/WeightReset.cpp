@@ -7,6 +7,7 @@ bool WeightReset::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
+// DevilMayCry5.exe+51824C
 static naked void detour() {
 	__asm {
         // cmp [PlayerTracker::playerid], 1 //change this to the char number obviously

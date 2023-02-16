@@ -110,6 +110,78 @@ inertiaredirect:
 	}
 }
 
+// siy stuff
+/*
+uintptr_t Inertia::reduce_rate_jmp_ret{NULL};
+float reduceRate_FullPercent = 1.0f;
+float reduceRate_SeventyPercent = 0.7f;
+float reduceRate_FiftyPercent = 0.5f;
+float reduceRate_ThirtyPercent = 0.3f;
+bool Inertia::custom_inertia = false;
+// inertiaReduceRate takes existing inertia and multiplies it by x
+// dmc4 clamps the first move you do (other than guard), which this should also ideally do if we have air attack count
+// "DevilMayCry5.exe"+51821D
+naked void Inertia::inertia_reduce_rate_detour() {
+    __asm {
+        cmp byte ptr [Inertia::custom_inertia], 0
+        je code
+
+        cmp dword ptr [rdi+0xE64], 1
+        je playerDante
+        jmp code
+
+    playerDante:
+        cmp dword ptr [rdi+0x2C4], 0 // weight, see if this is first attack
+        je code // clamps first attack to intended value
+
+        // cmp dword ptr [rdi+18B0], 0 // sword id
+        // je rebellionAttacks
+        // 2 seems to be used for freefall too :(
+        cmp r8d, 0x3 // rave 2
+        je fullInertia
+        cmp r8d, 0x4 // rave 3
+        je fullInertia
+        // cmp dword ptr [rdi+18D4], 0 // gun id
+        // je ebonyIvoryAttacks
+        cmp r8d, 0x18 // normal shot
+        je fiftyInertia
+        cmp r8d, 0x19 // gunslinger shot
+        je fiftyInertia
+        // cmp dword ptr [rdi+18D4], 1 // gun id
+        // je shotgunAttacks
+        cmp r8d, 0x1C // shotty shot
+        je fiftyInertia
+        // cmp dword ptr [rdi+18D4], 5 // gun id
+        // je hatAttacks
+        cmp r8d, 0x22 // hatGatling1
+        je fiftyInertia
+        jmp code
+
+    fullInertia:
+        mov eax, [reduceRate_FullPercent]
+        jmp code
+
+    seventyInertia:
+        mov eax, [reduceRate_SeventyPercent]
+        jmp code
+
+    fiftyInertia:
+        mov eax, [reduceRate_FiftyPercent]
+        jmp code
+
+    thirtyInertia:
+        mov eax, [reduceRate_ThirtyPercent]
+        jmp code
+
+    code:
+        mov [rbx+0x18],eax
+        mov eax,[rdx+0x30]
+        jmp qword ptr [Inertia::reduce_rate_jmp_ret]
+    }
+}
+*/
+// siy stuff over
+
 // clang-format on
 
 void Inertia::init_check_box_info() {
@@ -139,13 +211,23 @@ std::optional<std::string> Inertia::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Inertia";
   }
+
+  // siy stuff
+  /*
+  auto addrReduceRate = m_patterns_cache->find_addr(base, "89 43 18 8B 42 30");
+  if (!addrReduceRate) {
+      return "Unable to find Inertia Reduce Rate pattern.";
+  }
+  if (!install_hook_absolute(addrReduceRate.value(), m_function_hook_2, &inertia_reduce_rate_detour, &reduce_rate_jmp_ret, 6)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize Inertia Reduce Rate";
+  }*/
+  // siy stuff over
+
   return Mod::on_initialize();
 }
 
-// during load
-// void Inertia::on_config_load(const utility::Config &cfg) {}
-// during save
-// void Inertia::on_config_save(utility::Config &cfg) {}
 // do something every frame
 void Inertia::on_frame() { 
   if (airhiketimer > 1) {
@@ -164,5 +246,21 @@ void Inertia::on_draw_debug_ui() {
     ImGui::Text("[Inertia] Composite inertia: %.2f", &backupinertia);
     ImGui::Text("[Inertia] Air Hike Timer: %d", (int*)&Inertia::airhiketimer);
 }
+
+// siy stuff
 // will show up in main window, dump ImGui widgets you want here
-// void Inertia::on_draw_ui() {}
+void Inertia::on_draw_ui() {
+    // ImGui::Text("This checkbox changes how much inertia is taken by different moves. Work In Progress.");
+    // ImGui::Checkbox("Edited Inertia Values", &Inertia::custom_inertia);
+}
+
+// during load
+void Inertia::on_config_load(const utility::Config &cfg) {
+    // Inertia::custom_inertia = cfg.get<bool>("custom_inertia").value_or(false);
+}
+
+// during save
+void Inertia::on_config_save(utility::Config &cfg) {
+    // cfg.set<bool>("custom_inertia", Inertia::custom_inertia);
+}
+// siy stuff over
