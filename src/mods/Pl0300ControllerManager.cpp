@@ -234,7 +234,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uin
 {
     for (auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl() == pl0300)
+        if (i->get_pl() == pl0300 && !i->is_doppel())
         {
             bool skipCall = false;
             _mod->_pl0300UpdateLockOnEvent.invoke(threadCtxt, i, &skipCall);
@@ -243,23 +243,6 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uin
             return;
         }
     }
-   /* for (const auto& i : _mod->_pl0300List)
-    {
-        if (i->get_pl() == pl0300 && i->get_pl0300_type() == Pl0300Type::PlHelper && i->get_char_group() == CharGroup::Enemy)
-        {
-            if (i->is_using_custom_lock_on_update() && i->_lock_on_update != nullptr)
-            {
-                bool skipOrig = false;
-                i->_lock_on_update(threadCtxt, i, &skipOrig);
-                if (skipOrig)
-                    return;
-            }
-            i->change_character_group(CharGroup::Player);
-            _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
-            i->change_character_group(CharGroup::Enemy);
-            return;
-        }
-    }*/
     _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
 }
 
@@ -267,7 +250,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_target_o
 {
     for (auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl() == pl0300)
+        if (i->get_pl() == pl0300 && !i->is_doppel())
         {
             bool skipCall = false;
             _mod->_pl0300UpdateLockOnTargetEvent.invoke(threadCtxt, i, &skipCall);
@@ -284,7 +267,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook
     auto pl0300 = *(uintptr_t*)(fsmPl0300Teleport + 0x60);
     for (auto& i : _mod->_pl0300List)
     {
-        if (i->get_pl() == pl0300)
+        if (i->get_pl() == pl0300 && !i->is_doppel())
         {
             bool skipCall = false;
             _mod->_pl0300OnTeleportCalcDestinationEvent.invoke(threadCtxt, fsmPl0300Teleport, i, &skipCall);
@@ -293,48 +276,8 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook
             return;
         }
     }
-   /* for (const auto& i : _mod->_pl0300List)
-    {
-        if (i->get_pl() == pl0300 && i->is_using_custom_trick_update() && i->get_pl0300_type() == Pl0300Type::PlHelper && 
-            i->get_char_group() == CharGroup::Enemy)
-        {
-            bool skipOrig = false;
-            i->_trick_update(fsmPl0300Teleport, i, &skipOrig);
-            if (skipOrig)
-                return;
-            else
-            {
-                auto groupTmp = i->get_char_group();
-                i->change_character_group(CharGroup::Enemy);
-                _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
-                i->change_character_group(groupTmp);
-                return;
-            }
-            break;
-        }
-    }*/
     _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
 }
-
-//void PlController::Pl0300Controller::Pl0300ControllerManager::pl0300_on_change_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
-//{
-//    for (const auto& i : _mod->_pl0300List)
-//    {
-//        if (pl0300 == i->get_pl() && i->get_char_group() == CharGroup::Enemy)
-//            return;
-//    }
-//    _mod->_pl0300OnChangePlayerActionFromThinkHook->get_original<decltype(pl0300_on_change_pl_action_from_think)>()(threadCtxt, pl0300);
-//}
-
-//void PlController::Pl0300Controller::Pl0300ControllerManager::pl0300_on_prepare_pl_action_from_think(uintptr_t threadCtxt, uintptr_t pl0300)
-//{
-//    for (const auto& i : _mod->_pl0300List)
-//    {
-//        if (pl0300 == i->get_pl() && i->get_char_group() == CharGroup::Enemy)
-//            return;
-//    }
-//    _mod->_pl0300OnPreparePlayerActionFromThinkHook->get_original<decltype(pl0300_on_prepare_pl_action_from_think)>()(threadCtxt, pl0300);
-//}
 
 PlCntr::Pl0300Cntr::Pl0300ControllerManager::Pl0300ControllerManager()
 {
@@ -557,20 +500,6 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     {
         return "Unable to find Pl0300ControllerManager.pl0300CheckDamageAddr pattern.";
     }
-
-    //auto pl0300OnChangePlActionFromThinkAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 40 4C 8B 82");
-    ////DevilMayCry5.app_player_pl0300_PlayerVergil__onChangePlayerActionFromThink218634
-    //if (!pl0300OnChangePlActionFromThinkAddr)
-    //{
-    //    return "Unable to find Pl0300ControllerManager.pl0300OnChangePlActionFromThinkAddr pattern.";
-    //}
-
-    //auto pl0300OnPreparePlActionFromThinkAddr = m_patterns_cache->find_addr(base, "48 8B 41 50 48 83 78 18 00 75 26 48 8B 82 D8");
-    ////DevilMayCry5.app_player_pl0300_PlayerVergil__onPreparePlayerThink218633
-    //if (!pl0300OnChangePlActionFromThinkAddr)
-    //{
-    //    return "Unable to find Pl0300ControllerManager.pl0300OnPreparePlActionFromThinkAddr pattern.";
-    //}
 
     if (!install_hook_absolute(requestAddEmAddr.value(), _requestAddEmObjHook, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
     {

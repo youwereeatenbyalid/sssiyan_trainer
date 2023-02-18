@@ -210,6 +210,11 @@ private:
 			else
 			{
 				*skipOrigCall = true;
+				auto uPl0300 = _pl0300.lock()->get_pl();
+				auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
+				auto character = *(uintptr_t*)(pl0300LockOnTargetWork + 0x58);
+				_targetCntrSetTargetMethod->call(threadCntxt, pl0300TargetCntrl, 5, character);
+				_targetCntrUpdateMethod->call(threadCntxt, pl0300TargetCntrl);
 			}
 		}
 
@@ -530,8 +535,6 @@ private:
 		{
 			destroy_doppel();
 			stop_air_raid_coroutine();
-			if (_pl0300Accessor != nullptr)
-				PfbFactory::PrefabFactory::release(_pl0300Accessor);
 			_pl0300Accessor = nullptr;
 			_plCamCntrSetPlHook = nullptr;
 			_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
@@ -540,9 +543,11 @@ private:
 				(this, &PlPair::on_pl0300_lockon_update));
 			_pl0300Manager->on_pl0300_update_lock_on_target_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_lockon_target_update));
-			/*if(_pl0300LockOnObj != nullptr)
+			if(_pl0300LockOnObj != nullptr)
 				PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
-			_pl0300LockOnObj = nullptr;*/
+			if (_pl0300Accessor != nullptr)
+				PfbFactory::PrefabFactory::release(_pl0300Accessor);
+			_pl0300LockOnObj = _pl0300Accessor = nullptr;
 		}
 
 		void on_pl_reload_reset()
