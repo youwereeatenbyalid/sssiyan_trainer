@@ -30,6 +30,7 @@ namespace PlCntr
 			std::unique_ptr<FunctionHook> _pl0300CheckDtCancelHook;
 			std::unique_ptr<FunctionHook> _checkEmThinkOffHook;
 			std::unique_ptr<FunctionHook> _pl0300UpdateLockOnHook;
+			std::unique_ptr<FunctionHook> _pl0300UpdateLockOnTargetOnEnemyHook;
 			std::unique_ptr<FunctionHook> _pl0300TeleportCalcDestHook;
 			std::unique_ptr<FunctionHook> _pl0300CheckDamageHook;
 			std::unique_ptr<FunctionHook> _pl0300OnChangePlayerActionFromThinkHook;
@@ -46,6 +47,10 @@ namespace PlCntr
 
 			std::mutex _pl0300ListChangeMtx;
 			std::mutex _doppelRemoveRoutineMtx;
+
+			Events::Event<uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/> _pl0300UpdateLockOnEvent;
+			Events::Event<uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/> _pl0300UpdateLockOnTargetEvent;
+			Events::Event<uintptr_t /*threadCntxt*/, uintptr_t /*fsmPl0300Teleport*/, std::shared_ptr<Pl0300Controller>, bool* /*skipOrigCall*/> _pl0300OnTeleportCalcDestinationEvent;
 
 			std::vector<std::unique_ptr<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>> _doppelRemoveCoroutinesList;
 
@@ -76,6 +81,8 @@ namespace PlCntr
 
 			static void pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300);
 
+			static void pl0300_update_lock_on_target_on_enemy_hook(uintptr_t threadCtxt, uintptr_t pl0300);
+
 			//Hook for trick moves
 			static void pl0300_teleport_calc_dest_hook(uintptr_t threadCtxt, uintptr_t fsmPl0300Teleport);
 
@@ -101,6 +108,50 @@ namespace PlCntr
 				PlayerTracker::before_reset_pad_input_unsub<Pl0300ControllerManager>(std::make_shared<Events::EventHandler<Pl0300ControllerManager, uintptr_t, bool, bool*>>(this, &Pl0300ControllerManager::on_pl_pad_input_reset));
 			}
 
+			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_update_lock_on_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300UpdateLockOnEvent.subscribe(handler);
+			}
+
+			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_update_lock_on_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300UpdateLockOnEvent.unsubscribe(handler);
+			}
+
+			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_update_lock_on_target_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300UpdateLockOnTargetEvent.subscribe(handler);
+			}
+
+			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_update_lock_on_target_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300UpdateLockOnTargetEvent.unsubscribe(handler);
+			}
+
+			//uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_teleport_calc_destination_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, uintptr_t /*fsmPl0300Teleport*/, std::shared_ptr<Pl0300Controller>,
+				bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300OnTeleportCalcDestinationEvent.subscribe(handler);
+			}
+
+			//uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, bool* skipOrigCall
+			template<class T>
+			void on_pl0300_teleport_calc_destination_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, uintptr_t /*fsmPl0300Teleport*/, std::shared_ptr<Pl0300Controller>,
+				bool* /*skipOrigCall*/>> handler)
+			{
+				_pl0300OnTeleportCalcDestinationEvent.unsubscribe(handler);
+			}
+
 			//Calls automatically by Pl0300Controller.
 			std::weak_ptr<Pl0300Controller> register_doppelganger(const Pl0300Controller* controller);
 
@@ -118,6 +169,9 @@ namespace PlCntr
 			//isKeepingOrigPadInput - do not set original player's pad input to pl0300 if Pl0300Type == PlHelper.
 			//Returns empty weak ptr if em prefab isn't valid (but create update request to em prefab manager if possible).
 			std::weak_ptr<Pl0300Controller> create_em6000(Pl0300Type controllerType, gf::Vec3 pos, volatile int*& loadStepOut, bool isKeepingOrigPadInput = false);
+
+			//Get pl0300 controller if it's exists;
+			std::weak_ptr<Pl0300Controller> get_pl0300_controller(uintptr_t pl0300);
 
 			//Destroy all pl0300 wich spawned as Pl0300Controller::Pl0300Type::Em6000Friendly
 			void kill_all_friendly_em6000();

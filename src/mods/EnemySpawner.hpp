@@ -65,6 +65,8 @@ private:
 		_isPlSpawned = true;
 	}
 
+	void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool* skipOrig);
+
 	inline int indx_to_id(int indx)
 	{
 		if (indx == 39)
@@ -85,8 +87,9 @@ public:
 	{
 		_mod = this;
 		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t>>(this, &EnemySpawner::on_pl_added));
-
 	}
+
+	~EnemySpawner();
 
 	static inline bool cheaton = true;
 

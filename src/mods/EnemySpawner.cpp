@@ -4,6 +4,8 @@ void EnemySpawner::after_all_inits()
 {
 	_pl0300Manager = (PlCntr::Pl0300Cntr::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
 	_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
+	_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
+		(this, &EnemySpawner::on_pl0300_trick_update));
 	//GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<EnemySpawner>>(this, &EnemySpawner::on_pfb_inits));
 }
 
@@ -12,6 +14,12 @@ void EnemySpawner::reset(EndLvlHooks::EndType endType)
 	_em6000FriendlyList.clear();
 	_em6000PlHelpersList.clear();
 	_isPlSpawned = false;
+}
+
+EnemySpawner::~EnemySpawner()
+{
+	_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
+		(this, &EnemySpawner::on_pl0300_trick_update));
 }
 
 std::optional<std::string> EnemySpawner::on_initialize()
@@ -51,6 +59,34 @@ gf::Vec3 EnemySpawner::get_pl_pos(const REManagedObject* plManager)
 	return *(gf::Vec3*)(transform + 0x30);
 }
 
+void EnemySpawner::on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrig)
+{
+	for (const auto& i : _em6000PlHelpersList)
+	{
+		if (i.lock()->get_pl() == pl0300->get_pl())
+		{
+			*skipOrig = true;
+			auto upl0300 = pl0300->get_pl();
+			if (_mod->_inputSystemMod != nullptr && _mod->_inputSystemMod->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset))
+			{
+				*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+				*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
+			}
+			else
+			{
+				auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
+				if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
+					*(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(ccc + 0x60) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+				else
+					*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+			}
+			*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
+			*(int*)(upl0300 + 0x2008) = 29;//teleportActionThink, teleport2NearTarget
+			return;
+		}
+	}
+}
+
 void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType loadType)
 {
 	if (!GameplayStateTracker::isInMission)
@@ -84,29 +120,7 @@ void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType lo
 				auto pl0300 = _em6000PlHelpersList[_em6000PlHelpersList.size() - 1].lock();
 				pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
 				pl0300->set_em_step_enabled(_bobEmStep);
-				//pl0300->set_network_base_active(true);
 				pl0300->set_jcut_num(_bobJcNum);
-				pl0300->use_custom_trick_update(true);
-				pl0300->set_trick_update_f([](uintptr_t fsmPl0300Teleport, const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300, bool *skipOrig)
-					{
-						*skipOrig = true;
-						auto upl0300 = pl0300->get_pl();
-						if (_mod->_inputSystemMod != nullptr && _mod->_inputSystemMod->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset))
-						{
-							*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-							*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
-						}
-						else
-						{
-							auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
-							if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
-							    *(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(ccc + 0x60) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-							else
-							    *(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-						}
-						*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
-						*(int*)(upl0300 + 0x2008) = 29;//teleportActionThink, teleport2NearTarget
-					});
 				break;
 			}
 			default:

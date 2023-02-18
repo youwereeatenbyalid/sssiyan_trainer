@@ -75,8 +75,9 @@ namespace PlCntr
 			bool _isAddToPlListRequested = false;
 			bool _isSetTeleportTimingParamsRequested = false;
 			bool _isKeepingOriginalPadInput = false;
-			bool _useCustomTrickUpdate = false;
+			/*bool _useCustomTrickUpdate = false;
 			bool _useCustomLockOnUpdate = false;
+			bool _useCustomLockOnTargetOnEnemyUpdate = false;*/
 			bool _isIgnoringReleaseOnTrainingReset = false;
 
 			int _requestedJcNum = 1;
@@ -111,15 +112,6 @@ namespace PlCntr
 			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput = false);
 
 			void check_doppel_ref_correct();
-
-			typedef void(*f_trick_pos_update)(uintptr_t/*fsmPl0300Teleport*/, const std::shared_ptr<Pl0300Controller>&, bool*/*ignore custom and run default*/);
-
-			typedef void(*f_pl0300_lock_on_update)(uintptr_t threadCntxt, const std::shared_ptr<Pl0300Controller>&, bool*/*skip default function call*/);
-
-			f_trick_pos_update _trick_update = nullptr;
-
-			f_pl0300_lock_on_update _lock_on_update = nullptr;
-
 		public:
 
 			Pl0300Controller() = delete;
@@ -143,10 +135,6 @@ namespace PlCntr
 					return;
 				*(gf::Vec3*)(emParam + 0xA0) = pos;
 			}
-
-			//Function: f(uintptr_t fsmPl0300Teleport, const std::shared_ptr& pl0300, bool* isSkipPl0300_teleport_calc_f), called every physics frame when pl0300 teleporting
-			template<typename F>
-			inline void set_trick_update_f(F&& func) noexcept { _trick_update = func; }
 
 			inline bool set_dt(DT dt, bool isNotProduction = false) override
 			{
@@ -279,17 +267,6 @@ namespace PlCntr
 			}
 
 			bool is_doppel() const noexcept { return *(bool*)(get_pl() + 0x1F60); }
-
-			//Use custom function for fsm.pl0300TrickUpdate
-			void use_custom_trick_update(bool val) noexcept { _useCustomTrickUpdate = val; }
-
-			inline bool is_using_custom_trick_update() const noexcept { return _useCustomTrickUpdate; }
-
-			void use_custom_lock_on_update(bool val) noexcept { _useCustomLockOnUpdate = val; }
-
-			inline bool is_using_custom_lock_on_update() const noexcept { return _useCustomLockOnUpdate; }
-
-			inline void set_lock_on_update_f(f_pl0300_lock_on_update&& func) noexcept { _lock_on_update = func; }
 
 			void set_action(const wchar_t* actionStr, int layerNo = 0, float startFrame = 0.0f, float interpolationFrame = 0.0f, InterpolationMode mode = InterpolationMode::SyncCrossFade,
 				InterpolationCurve curve = InterpolationCurve::Smooth, bool isImmediate = false, bool passSelect = true, bool isPuppetTransition = false,
