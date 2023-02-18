@@ -117,8 +117,10 @@ static naked void enemy_swap_detour1() {
 
         push rax
 		push rbx
+        push rdx
 		push rcx
         push rsi
+        push rsp
 		push r8
 		push r9
 		push r10
@@ -132,8 +134,10 @@ static naked void enemy_swap_detour1() {
 		pop r10
 	    pop r9
 		pop r8
+        pop rsp
         pop rsi
 		pop rcx
+        pop rdx
 		pop rbx
 		pop rax
 
@@ -177,9 +181,10 @@ static naked void enemy_swap_detour2() {
         mov [curSetDataAddr], rcx
 
         push rax
-		push rbx
 		push rcx
+        push rdx
         push rsi
+        push rsp
 		push r8
 		push r9
 		push r10
@@ -195,9 +200,10 @@ static naked void enemy_swap_detour2() {
 		pop r10
 	    pop r9
 		pop r8
+        pop rsp
         pop rsi
+        pop rdx
 		pop rcx
-		pop rbx
 		pop rax
 
         mov r8d, dword ptr [EnemySwapper::newEnemyId2]
@@ -359,6 +365,7 @@ static naked void enemy_swap_detour5() {
 		push rbx
 		push rcx
         push rsi
+        push rsp
 		push r8
 		push r9
 		push r10
@@ -374,6 +381,7 @@ static naked void enemy_swap_detour5() {
 		pop r10
 	    pop r9
 		pop r8
+        pop rsp
         pop rsi
 		pop rcx
 		pop rbx
