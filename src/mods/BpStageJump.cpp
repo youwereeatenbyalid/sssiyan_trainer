@@ -30,7 +30,7 @@ int BpStageJump::palace_type = BpStageJump::RANDOM;
 int BpStageJump::random_generator(int low, int high, std::optional<uint32_t> seed)
 {
 	if (seed)
-		s_rng_engine.seed(*seed);
+		//s_rng_engine.seed(*seed);
 
 	return low + (s_rng_engine() % (high - low + 1));
 }
