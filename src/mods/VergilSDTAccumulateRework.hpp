@@ -21,7 +21,6 @@ public:
 
   ~VergilSDTAccumulateRework()
   {
-	  _vergilQSMod = static_cast<VergilQuickSilver*>(g_framework->get_mods()->get_mod("VergilQuickSilver"));
 	  PlayerTracker::pl_add_dt_gauge_unsub(std::make_shared<Events::EventHandler<VergilSDTAccumulateRework, uintptr_t, uintptr_t, float*, int, bool>>
 		  (this, &VergilSDTAccumulateRework::on_pl_add_dt));
   }

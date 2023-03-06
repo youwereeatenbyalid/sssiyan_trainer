@@ -42,9 +42,6 @@ public:
 
 private:
 
-	using ReleaseRoutineType = Coroutines::Coroutine<void(BossVergilMoves::*)(std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>), BossVergilMoves*,
-		std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>>;
-
 	Pl0300TrickType _pl0300TrickType = Pl0300TrickType::ToEnemy;
 
 	class PlPair
