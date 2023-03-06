@@ -2,7 +2,7 @@
 #include <mutex>
 #include <thread>
 #include <windows.h>
-
+#include "reframework/API.hpp"
 #include "ModFramework.hpp"
 
 HMODULE g_dinput = 0;
@@ -45,6 +45,20 @@ extern "C" {
         load_dinput8();
         return ((decltype(DirectInput8Create)*)GetProcAddress(g_dinput, "DirectInput8Create"))(hinst, dw_version, riidltf, ppv_out, punk_outer);
     }
+}
+
+extern "C" __declspec(dllexport) bool reframework_plugin_initialize(const REFrameworkPluginInitializeParam * param) {
+    reframework::API::initialize(param);
+    const auto functions = param->functions; //get functions from reframework.dll
+    
+    //functions->on_message((REFOnMessageCb)on_message);
+    functions->log_error("%s %s", "Hello", "error");
+    functions->log_warn("%s %s", "Hello", "warning");
+    functions->log_info("%s %s", "Hello", "info");
+    reframework::API::get()->log_error("%s %s", "Hello", "error");
+    reframework::API::get()->log_warn("%s %s", "Hello", "warning");
+    reframework::API::get()->log_info("%s %s", "Hello", "info");
+    return true;
 }
 
 void startup_thread() {
