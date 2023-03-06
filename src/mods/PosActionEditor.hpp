@@ -457,7 +457,7 @@ private:
 		}
 	}
 
-	void on_pl_added(uintptr_t threadCntx, uintptr_t pl)
+	void on_pl_added(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl)
 	{
 		int plId = *(int*)(pl + 0xE64);
 		switch (plId)
@@ -495,14 +495,14 @@ public:
 	PosActionEditor()
 	{
 		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_speed_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_fsm2_pos_cntr_action_update));
-		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
 		PlayerTracker::on_pl_manager_pl_unload_sub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &PosActionEditor::on_pl_remove));
 	}
 
 	~PosActionEditor()
 	{
 		PlayerTracker::pl_on_fsm2_pos_cntr_action_update_speed_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_fsm2_pos_cntr_action_update));
-		PlayerTracker::pl_added_event_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t>>(this, &PosActionEditor::on_pl_added));
 		PlayerTracker::on_pl_manager_pl_unload_unsub(std::make_shared<Events::EventHandler<PosActionEditor, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &PosActionEditor::on_pl_remove));
 	}
 

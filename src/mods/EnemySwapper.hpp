@@ -3,118 +3,39 @@
 #include "sdk/ReClass.hpp"
 #include <array>
 #include <random>
-#include "EnemyWaveEditor.hpp"
-#include "CheckpointPos.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
-#include "MissionManager.hpp"
-#include "PlayerTracker.hpp"
-//#include "EnemyDataSettings.hpp"
-#include "GameplayStateTracker.hpp"
 #include "EndLvlHooks.hpp"
 #include "GameFunctions/GameFunc.hpp"
 #include "EnemyData.hpp"
 
 namespace gf = GameFunctions;
 
-class EnemySwapper : public Mod, private EndLvlHooks::IEndLvl 
+class EnemySwapper : public Mod
 {
-
 public:
 
-static const int enemyListCount = 40;
+    static inline bool cheaton = false;
 
-	struct EnemyId {
-  public:
-    uint32_t curListIndx;//indx in emNames;
-    uint32_t indxToSwap;
-    uint32_t currentId;//id of what swap;
-    uint32_t swapId;//id of to swap;
-    EnemyId() {
-	  curListIndx = 0;
-      indxToSwap  = 0;
-      currentId   = 0;
-      swapId      = 0;
-	}
-
-	  EnemyId(uint32_t selectedIndx) { 
-		  set_current_id(selectedIndx);
-	}
-
-    inline uint32_t get_current_id() const { return currentId; }
-	inline void set_current_id(uint32_t selectedIndx) {
-      set_id(selectedIndx, currentId);
-	}
-
-	inline void set_swap_id(uint32_t selectedIndx) {
-          set_id(selectedIndx, swapId);
-	}
-
-    inline uint32_t get_selectedIndx() const { return curListIndx; }
-
-	inline uint32_t get_swap_id() const { return swapId; }
-
-      private:
-
-		  inline void set_id(uint32_t curListIndx, uint32_t &id) {
-          this->curListIndx = curListIndx;
-          if (curListIndx >= 20)
-            id = curListIndx + 3;
-          else
-            id = curListIndx;
-          if (curListIndx == 39) // Dante, but his AI is disabled
-            id = 55;
-	}
-  };
-
-	struct EnemySetting {
-    EnemyId emId;
-    float waitTimeMin;
-    float waitTimeMax;
-    float odds;
-    int enemyNum;
-    bool useDefault;
-  };
-
-	static inline std::array<EnemySetting, EnemySwapper::enemyListCount> enemySettings; 
+	struct EnemyId 
+    {
+        const EnemyData::EnemyId currentId;//id of what swap;
+        EnemyData::EnemyId swapId;//id of to swap;
+    
+        EnemyId(EnemyData::EnemyId thisId, EnemyData::EnemyId swapToId) : currentId(thisId), swapId(swapToId) {}
+        
+        EnemyId(const EnemyId& other) : currentId(other.currentId), swapId(other.swapId) {}
+    };
 
 
-static uintptr_t setEnemyDataRet1;
-static uintptr_t setEnemyDataRet2;
-static uintptr_t setEnemyDataRet3;
-//static uintptr_t setEnemyDataRet4;
-static uintptr_t setEnemyDataRet5;
-//static uintptr_t setEnemyData4Jmp;
-static uintptr_t setEnemyDataRet6;
-
-
-static bool isSwapAll;
-static bool cheaton;
-static bool isCustomRandomSettings;
-static bool isCustomSeed;
-
-static uint32_t selectedToSwap[enemyListCount];
-static uint32_t selectedSwapAll;
-static uint32_t currentEnemyId;
-static uint32_t newEnemyId;
-static uint32_t newEnemyId1;
-static uint32_t newEnemyId2;
-static uint32_t newEnemyId3;
-static uint32_t newEnemyId5;
-static uint32_t newEnemyId6;
-
-static inline constexpr float shadow_warp_offs_z = 0.85f;
-
-static float waitTimeMin;
-static float waitTimeMax;
-static float odds;
-
-static int enemyNum;
-
-static std::array<EnemyId, enemyListCount> swapSettings;
-static EnemyId swapForAll;
-
-
-  EnemySwapper() = default;
+  EnemySwapper()
+  {
+      _mod = this;
+      for (int i = 0; i < _swapSettings.size(); i++)
+      {
+          _swapSettings[i] = std::make_unique<EnemyId>(EnemyData::indx_to_id(i), EnemyData::HellCaina);
+          _swapSettings[i]->swapId = EnemyData::indx_to_id(i);
+      }
+  }
 
   std::string_view get_name() const override { return "EnemySwapper"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
@@ -131,46 +52,51 @@ static EnemyId swapForAll;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
   void on_draw_ui() override;
-  // on_draw_debug_ui() is called when debug window shows up
-  void on_draw_debug_ui() override;
 
-  inline static void set_enemy_num(int num) { EnemySwapper::enemyNum = num; }
-  inline static void set_wait_time(float waitTimeMin, float waitTimeMax) {
-    EnemySwapper::waitTimeMin = waitTimeMin;
-    EnemySwapper::waitTimeMax = waitTimeMax;
-  }
-  inline static void set_odds(float odds) { EnemySwapper::odds = odds; }
-  /*inline static void set_spawn_pos_offset(float zOffset) {
-    spawnPosZOffset = zOffset;
-  }*/
+  void random_em_swap(uint32_t min, uint32_t max);
+  void seed_rnd_gen(int seed = -1);
 
-  static void random_em_swap(uint32_t min, uint32_t max);
-  static void seed_rnd_gen(int seed = -1);
-
-  static void set_swapper_settings(std::array<int, enemyListCount> &settingsList);
-
-  static void clear_swap_data_asm();
-
-  void reset(EndLvlHooks::EndType end) override
+  static void em_swap_asm(uintptr_t emDataList)//Called in WaveEditor
   {
-	  if(EnemySwapper::cheaton)
-		  clear_swap_data_asm();
+      std::lock_guard<std::mutex> lck(_swapMtx);
+      for (int i = 0; i < gf::ListController::get_list_count(emDataList); i++)
+      {
+          int *emId = (int*)(gf::ListController::get_item<uintptr_t>(emDataList, i) + 0x10);
+          if (!_mod->_isAllSwap)
+          {
+              for (const auto& i : _mod->_swapSettings)
+              {
+                  if (i->currentId == *emId)
+                  {
+                      *emId = i->swapId;
+                      break;
+                  }
+              }
+          }
+          else
+              *emId = EnemyData::indx_to_id(_mod->_swapAllIndx);
+      }
   }
-
-  static std::vector<uintptr_t> swapDataAddrs;
-  //static std::mutex mtx;
-
 
 private:
 
-	static inline bool isSpawnOffsForFlyingEnemiesOnly = false;
-	static inline bool isForceVerticalSpawnRot = false;
-	static inline bool isAlwaysSpawnOnPlPos = false;
-	
-    static inline const std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
+    bool _isAllSwap = false;
+
+    static constexpr inline int _enemyListCount = EnemyData::EnemyNames.size();
+
+    std::array<std::unique_ptr<EnemyId>, _enemyListCount> _swapSettings;
+
+    void set_swapper_settings(std::array<int, _enemyListCount>& settingsList);
+
+    int _swapAllIndx = 0;
+
+    bool _isCustomRandomSettings = false;
+    bool _isCustomSeed = false;
+
+    static inline std::mutex _swapMtx{};
 
   void restore_default_settings();
-  static void set_swapper_setting(int emListIndx, int swapToIndx);
+  void set_swapper_setting(int emListIndx, int swapToIndx);
   static inline std::random_device rd;
   static inline std::mt19937 gen;
   int seed    = 0;
@@ -179,20 +105,10 @@ private:
   int curMaxIndx = 19;
   const int minIndx = 0;
   const int maxIndx = 19;
-  size_t reservedForReswap = 4000;
-  void reserveReswapVector(size_t newSize);
 
   static inline EnemySwapper *_mod = nullptr;
 
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-  
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook1;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook2;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook3;
-  //std::unique_ptr<FunctionHook> m_enemy_swapper_hook4;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook5;
-  std::unique_ptr<FunctionHook> m_enemy_swapper_hook6;
-  //std::unique_ptr<FunctionHook> m_enemy_swapper_hook7;
 };

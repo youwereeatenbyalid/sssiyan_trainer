@@ -7,8 +7,9 @@
 #include "events/Events.hpp"
 #include "Pl0300Controller.hpp"
 #include "EndLvlHooks.hpp"
-#include "EnemySpawner.hpp"
+#include "PrefabFactory/PrefabFactory.hpp"
 #include "EnemyFixes.hpp"
+#include "GameFunctions/PrefabInstantiate.hpp"
 
 //clang-format off
 
@@ -33,22 +34,26 @@ namespace PlCntr
 			std::unique_ptr<FunctionHook> _pl0300UpdateLockOnTargetOnEnemyHook;
 			std::unique_ptr<FunctionHook> _pl0300TeleportCalcDestHook;
 			std::unique_ptr<FunctionHook> _pl0300CheckDamageHook;
-			std::unique_ptr<FunctionHook> _pl0300OnChangePlayerActionFromThinkHook;
-			std::unique_ptr<FunctionHook> _pl0300OnPreparePlayerActionFromThinkHook;
+			std::unique_ptr<FunctionHook> _pl0300DestroyDoppelRequestBossCamHook;
 
 			static inline Pl0300ControllerManager* _mod = nullptr;
 
 			std::vector<std::shared_ptr<Pl0300Controller>> _pl0300List;
 
-			//Pl0300 spawned via Spawner mod. I need change this to PFbFactory later...
-			EnemySpawner* emSpawnerMod;
+			static inline const wchar_t *_pl0300Path = L"Prefab/Character/Enemy/em6000_vergil.pfb";
+			static inline const wchar_t *_pl0300C00Path = L"Prefab/Character/Enemy/em6000_c00_vergil.pfb";//Ex costume
+
+			static inline std::unique_ptr<gf::SysString> _pl0300PathStr = nullptr;
+			static inline std::unique_ptr<gf::SysString> _pl0300C00PathStr = nullptr;
+
+			REManagedObject* _pl0300Pfb = nullptr;
+			REManagedObject* _pl0300C00Pfb = nullptr;//ExCostume
 
 			uintptr_t requestAddEmFuncAddr = 0;
 
-			std::mutex _pl0300ListChangeMtx;
-			std::mutex _doppelRemoveRoutineMtx;
+			std::recursive_mutex _pl0300ListChangeMtx;
 
-			Events::Event<uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/> _pl0300UpdateLockOnEvent;
+			Events::Event<uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/> _afterPl0300UpdateLockOnEvent;
 			Events::Event<uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/> _pl0300UpdateLockOnTargetEvent;
 			Events::Event<uintptr_t /*threadCntxt*/, uintptr_t /*fsmPl0300Teleport*/, std::shared_ptr<Pl0300Controller>, bool* /*skipOrigCall*/> _pl0300OnTeleportCalcDestinationEvent;
 
@@ -59,8 +64,6 @@ namespace PlCntr
 				m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 				m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 			}
-
-			void after_all_inits() override;
 
 			void reset(EndLvlHooks::EndType resetType);
 
@@ -96,6 +99,8 @@ namespace PlCntr
 			//Apply m21 colliders to pl0300 when charGroup = player
 			static naked void em6000_damage_check_detour();
 
+			static naked void pl0300_destroy_doppel_request_boss_camera_detour();
+
 			void on_pl_pad_input_reset(uintptr_t pl, bool isAutoPad, bool* callOrig);
 
 			//--------------------------------------------------------------------------------------------------------------------//
@@ -110,16 +115,16 @@ namespace PlCntr
 
 			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
 			template<class T>
-			void on_pl0300_update_lock_on_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			void after_pl0300_update_lock_on_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/>> handler)
 			{
-				_pl0300UpdateLockOnEvent.subscribe(handler);
+				_afterPl0300UpdateLockOnEvent.subscribe(handler);
 			}
 
 			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
 			template<class T>
-			void on_pl0300_update_lock_on_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/, bool* /*skipOrigCall*/>> handler)
+			void after_pl0300_update_lock_on_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t /*threadCntxt*/, std::shared_ptr<Pl0300Controller> /*pl0300*/>> handler)
 			{
-				_pl0300UpdateLockOnEvent.unsubscribe(handler);
+				_afterPl0300UpdateLockOnEvent.unsubscribe(handler);
 			}
 
 			//uintptr_t threadCntxt, uintptr_t pl0300, bool* skipOrigCall
@@ -163,12 +168,14 @@ namespace PlCntr
 
 			bool destroy_game_obj(const std::weak_ptr<Pl0300Controller>& obj);
 
+			//Load em6000 pfb or em6000_c00 pfb (ex costume) without creating instance;
+			void load_pfb(bool exCostume);
+
 			//Try to create, setup and spawn boss Vergil with credit AI.
 			//All pl0300 will be destroyed automatically when game will release level resources.
-			//Load step is loading async state of enemy prefab manager. Prefab can be valid a little bit earlier then loadstep will be 0 if it wasn't preload before.
 			//isKeepingOrigPadInput - do not set original player's pad input to pl0300 if Pl0300Type == PlHelper.
-			//Returns empty weak ptr if em prefab isn't valid (but create update request to em prefab manager if possible).
-			std::weak_ptr<Pl0300Controller> create_em6000(Pl0300Type controllerType, gf::Vec3 pos, volatile int*& loadStepOut, bool isKeepingOrigPadInput = false);
+			//Returns empty weak ptr if em prefab isn't valid.
+			std::weak_ptr<Pl0300Controller> create_em6000(Pl0300Type controllerType, gf::Vec3 pos, bool isKeepingOrigPadInput = false, bool exCostume = false);
 
 			//Get pl0300 controller if it's exists;
 			std::weak_ptr<Pl0300Controller> get_pl0300_controller(uintptr_t pl0300);
@@ -180,7 +187,8 @@ namespace PlCntr
 
 			static inline uintptr_t requestAddEmRet = 0;
 			static inline uintptr_t damageCheckRet = 0;
-
+			static inline uintptr_t doppelDestroyReqBossCamRet = 0;
+			static inline uintptr_t requestBossCameraFunc = 0;
 
 			std::string_view get_name() const override
 			{

@@ -156,7 +156,7 @@
        //#include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
        #include "mods/MissionManager.hpp"
-       //#include "mods/EnemyWaveEditor.hpp"
+       #include "mods/EnemyWaveEditor.hpp"
        #include "mods/SecretMissionTimer.hpp"
        #include "mods/BossDanteSetup.hpp"
        #include "mods/PosActionEditor.hpp"

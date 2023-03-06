@@ -128,22 +128,17 @@ void CheckpointPos::on_draw_ui() {
   ImGui::TextWrapped("Set player's position:");
   ImGui::DragFloat3("##TeleportPos", (float*)&newPlPos);
   ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-  if (ImGui::Button("Get the player's position"))
-  {
-      if (GameplayStateTracker::nowFlow == 22)//gameplayFlow, btw still can crash if click while loading screen after gameplay
+
+  if (ImGui::Button("Get the player's position") && _isPlLoaded)
           newPlPos = get_player_coords();
-  }
+
   ImGui::Spacing();
-  if (ImGui::Button("Get boss position"))
+  if (ImGui::Button("Get boss position") && _isPlLoaded)
       newPlPos = get_boss_pos();
   ImGui::Spacing();
   
-  if (ImGui::Button("Teleport to position"))
-      {
-          if(PlayerTracker::playerentity == 0 || GameplayStateTracker::nowFlow != 22)
-              return;
+  if (ImGui::Button("Teleport to position") && _isPlLoaded)
           GameFunctions::Transform_SetPosition::set_character_pos(PlayerTracker::playerentity, newPlPos);
-      }
   ImGui::ShowHelpMarker("Instantly teleport to a selected position. Can teleport the player out-of-bounds.");
   }
 

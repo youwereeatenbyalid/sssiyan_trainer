@@ -4,9 +4,8 @@ void EnemySpawner::after_all_inits()
 {
 	_pl0300Manager = (PlCntr::Pl0300Cntr::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
 	_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
-	_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
+	_pl0300Manager->on_pl0300_teleport_calc_destination_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 		(this, &EnemySpawner::on_pl0300_trick_update));
-	//GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<EnemySpawner>>(this, &EnemySpawner::on_pfb_inits));
 }
 
 void EnemySpawner::reset(EndLvlHooks::EndType endType)
@@ -34,6 +33,17 @@ std::optional<std::string> EnemySpawner::on_initialize()
 
 	_spawnEmCoroutine.set_delay(0.3f);
 
+	g_keyBinds.AddBind(std::string(get_name()) + "emSpawn", [this]
+		{
+			if(_isPlSpawned)
+				_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
+		}, OnState_::OnState_Press);
+	g_keyBinds.AddBind(std::string(get_name()) + "getPlPos", [this]
+		{
+			if (_isPlSpawned)
+				_spawnPos = CheckpointPos::get_player_coords();
+		}, OnState_::OnState_Press);
+
 	return Mod::on_initialize();
 }
 
@@ -41,12 +51,16 @@ void EnemySpawner::on_config_load(const utility::Config& cfg)
 {
 	_hcNextSpawnSettings.baseAttackRate = cfg.get<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate").value_or(0.5f);
 	_hcNextSpawnSettings.isAttackNoDie = cfg.get<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie").value_or(false);
+	_isFriendlyVergilEx = cfg.get<bool>("EnemySpawner._isFriendlyVergilEx").value_or(false);
+	_isBobVergilEx = cfg.get<bool>("EnemySpawner._isBobVergilEx").value_or(false);
 }
 
 void EnemySpawner::on_config_save(utility::Config& cfg)
 {
 	cfg.set<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate", _hcNextSpawnSettings.baseAttackRate);
 	cfg.set<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie", _hcNextSpawnSettings.isAttackNoDie);
+	cfg.set<bool>("EnemySpawner._isFriendlyVergilEx", _isFriendlyVergilEx);
+	cfg.set<bool>("EnemySpawner._isBobVergilEx", _isBobVergilEx);
 }
 
 gf::Vec3 EnemySpawner::get_pl_pos(const REManagedObject* plManager)
@@ -63,7 +77,7 @@ void EnemySpawner::on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl
 {
 	for (const auto& i : _em6000PlHelpersList)
 	{
-		if (i.lock()->get_pl() == pl0300->get_pl())
+		if (auto shared = i.lock(); shared != nullptr && shared->get_pl() == pl0300->get_pl())
 		{
 			*skipOrig = true;
 			auto upl0300 = pl0300->get_pl();
@@ -96,41 +110,49 @@ void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType lo
 	}
 	volatile int* loadStep = 0;
 	int id = loadType == LoadType::Enemy ? emId : 38;
-	auto pfb = update_pfb(id, loadStep);
-	if (pfb != 0 && loadStep != nullptr && *loadStep == 0)
+
+	switch (loadType)
 	{
-		switch (loadType)
+		case Enemy:
 		{
-			case Enemy:
+			auto pfb = update_pfb(id, loadStep);
+			if (pfb != 0 && loadStep != nullptr && *loadStep == 0)
 			{
 				for (int i = 0; i < emNum; i++)
 					spawn_enemy(id, pos, loadStep);
 				break;
 			}
-			case FriendlyVergil:
-			{
-				auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly, pos, loadStep);
-				em6000.lock()->set_hitcontroller_settings(_hcNextSpawnSettings);
-				_em6000FriendlyList.push_back(em6000);
-				break;
-			}
-			case BOBVergil:
-			{
-				_em6000PlHelpersList.emplace_back(_pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, pos, loadStep));
-				auto pl0300 = _em6000PlHelpersList[_em6000PlHelpersList.size() - 1].lock();
-				pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
-				pl0300->set_em_step_enabled(_bobEmStep);
-				pl0300->set_jcut_num(_bobJcNum);
-				break;
-			}
-			default:
-			{
-				_spawnEmCoroutine.stop();
-				break;
-			}
+			return;
 		}
-		_spawnEmCoroutine.stop();
+		case FriendlyVergil:
+		{
+			auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly, pos, false, _isFriendlyVergilEx);
+			auto pl0300 = em6000.lock();
+			if (pl0300 == nullptr)
+				return;
+			pl0300->set_hitcontroller_settings(_hcNextSpawnSettings);
+			_em6000FriendlyList.push_back(em6000);
+			break;
+		}
+		case BOBVergil:
+		{
+			auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, pos, false, _isBobVergilEx);
+			auto pl0300 = em6000.lock();
+			if (pl0300 == nullptr)
+				return;
+			_em6000PlHelpersList.push_back(em6000);
+			pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
+			pl0300->set_em_step_enabled(_bobEmStep);
+			pl0300->set_jcut_num(_bobJcNum);
+			break;
+		}
+		default:
+		{
+			_spawnEmCoroutine.stop();
+			break;
+		}
 	}
+	_spawnEmCoroutine.stop();
 }
 
 uintptr_t EnemySpawner::update_pfb(int emId, volatile int*& outLoadStep, unsigned int requestLoadCountAdd)
@@ -177,27 +199,47 @@ uintptr_t EnemySpawner::spawn_enemy(int emId, gf::Vec3 pos, volatile int*& outLo
 	return (uintptr_t)sdk::call_object_func_easy<void*>((REManagedObject*)pfb, "instantiate(via.vec3)", pos);
 }
 
+void EnemySpawner::kill_vergils(LoadType type)
+{
+	if (type == LoadType::FriendlyVergil)
+	{
+		_pl0300Manager->kill_all_friendly_em6000();
+		_em6000FriendlyList.clear();
+	}
+	else
+	{
+		for (const auto i : _em6000PlHelpersList)
+			_pl0300Manager->destroy_game_obj(i);
+		_em6000PlHelpersList.clear();
+	}
+	_killVergilsCoroutine.stop();
+}
+
 void EnemySpawner::on_draw_ui()
 {
-
-
 	if (ImGui::CollapsingHeader("Current issues"))
 	{
 		ImGui::TextWrapped("A Delay can occur if the enemy prefab wasn't preloaded by default mission settings. Sometimes collisions don't work on spawned enemies.");
 	}
 
 	ImGui::TextWrapped("Select enemy:");
-	ImGui::Combo("##emCombo", &selectedIndx, _emNames->data(), _emNames->size(), 25);
+	ImGui::Combo("##emCombo", &selectedIndx, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 25);
 	ImGui::TextWrapped("Enemy number: ");
 	UI::SliderInt("##EmNum", &emNum, 1, 20, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 	ImGui::TextWrapped("Spawn point:");
 	ImGui::InputFloat3("##_spawnPos", (float*)&_spawnPos, "%.1f");
-	if (_isPlSpawned && ImGui::Button("Use player's position as spawn point"))
-		_spawnPos = CheckpointPos::get_player_coords();
-	ImGui::Spacing();
-	if (_isPlSpawned && ImGui::Button("Spawn enemy"))
+	
+	if (_isPlSpawned)
 	{
-		_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
+		if (ImGui::Button("Use player's position as spawn point"))
+			_spawnPos = CheckpointPos::get_player_coords();
+		ImGui::SameLine();
+		UI::KeyBindButton("Get player's position", std::string(get_name()) + "getPlPos", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
+		ImGui::Spacing();
+		if(ImGui::Button("Spawn enemy"))
+			_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
+		ImGui::SameLine();
+		UI::KeyBindButton("Spawn enemy", std::string(get_name()) + "emSpawn", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 	}
 	ImGui::Spacing();
 	if (_isPlSpawned && ImGui::Button("Kill all enemies in current wave"))
@@ -212,6 +254,12 @@ void EnemySpawner::on_draw_ui()
 	if (ImGui::CollapsingHeader("Friendly Vergil settings"))
 	{
 
+		ImGui::TextWrapped("Damage multiplier:");
+		UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::Checkbox("Vergil attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
+		ImGui::Checkbox("Ex costume ##friendly", &_isFriendlyVergilEx);
+
+		ImGui::Separator();
 
 		if (_isPlSpawned && ImGui::Button("Spawn friendly Vergil"))
 		{
@@ -223,16 +271,6 @@ void EnemySpawner::on_draw_ui()
 		if (_isPlSpawned)
 			ImGui::ShowHelpMarker("Spawns an enemy Vergil with the credits AI.");
 
-		//Unsure what this means.
-		//This also prevent to add him to global enemy list "
-		//	" and break regular enemy spawn so \"kill all enemies\" button will not remove friendly Vergils. His \"global\" AI depends of current game difficulty.");
-
-		ImGui::Separator();
-
-		ImGui::TextWrapped("Damage multiplier:");
-		UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Vergil attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
-		ImGui::Separator();
 
 		ImGui::Spacing();
 
@@ -242,7 +280,8 @@ void EnemySpawner::on_draw_ui()
 				return;
 			for (auto &i : _em6000FriendlyList)
 			{
-				i.lock()->set_hitcontroller_settings(_hcNextSpawnSettings);
+				if(auto em6000 = i.lock(); em6000 != nullptr)
+					em6000->set_hitcontroller_settings(_hcNextSpawnSettings);
 			}
 		}
 
@@ -261,7 +300,7 @@ void EnemySpawner::on_draw_ui()
 		{
 			if (_pl0300Manager == nullptr)
 				return;
-			_pl0300Manager->kill_all_friendly_em6000();
+			_killVergilsCoroutine.start(this, FriendlyVergil);
 		}
 	}
 	
@@ -273,6 +312,8 @@ void EnemySpawner::on_draw_ui()
 		UI::SliderInt("##Em6000JcNum", &_bobJcNum, 1, 4, "%d", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::Checkbox("Attacks can't kill enemy ##1", &_manualEm6000HcSettings.isAttackNoDie);
 		ImGui::Checkbox("Enable junk boss's enemy step", &_bobEmStep);
+		ImGui::Checkbox("Ex costume ##BOB", &_isBobVergilEx);
+
 		ImGui::Separator();
 
 		if (_isPlSpawned && ImGui::Button("Try to spawn BOB Vergil"))
@@ -281,7 +322,7 @@ void EnemySpawner::on_draw_ui()
 				return;
 			_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, BOBVergil);
 		}
-
+		
 		ImGui::Spacing();
 
 		if (_isPlSpawned && ImGui::Button("Change all BOB Vergils settings"))
@@ -309,9 +350,7 @@ void EnemySpawner::on_draw_ui()
 		{
 			if (_pl0300Manager == nullptr)
 				return;
-			for (const auto i : _em6000PlHelpersList)
-				_pl0300Manager->destroy_game_obj(i);
-			_em6000PlHelpersList.clear();
+			_killVergilsCoroutine.start(this, BOBVergil);
 		}
 
 		ImGui::Spacing();

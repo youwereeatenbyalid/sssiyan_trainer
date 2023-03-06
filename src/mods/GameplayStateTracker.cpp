@@ -8,6 +8,18 @@ void GameplayStateTracker::pfb_info_add_hook(uintptr_t threadCtxt, uintptr_t pfb
         _mod->_pfbManagerInited.invoke();
 }
 
+void GameplayStateTracker::ui3500Gui_do_on_open_hook(uintptr_t threadCntx, uintptr_t ui3500Gui)
+{
+    _mod->_onUi3500GuiOpen.invoke(threadCntx, ui3500Gui);
+    _mod->_ui3500GuiDoOnOpenHook->get_original<decltype(ui3500Gui_do_on_open_hook)>()(threadCntx, ui3500Gui);
+}
+
+void GameplayStateTracker::ui3500Gui_do_on_closed_hook(uintptr_t threadCntx, uintptr_t ui3500Gui)
+{
+    _mod->_onUi3500GuiClosed.invoke(threadCntx, ui3500Gui);
+    _mod->_ui3500GuiDoOnClosedHook->get_original<decltype(ui3500Gui_do_on_closed_hook)>()(threadCntx, ui3500Gui);
+}
+
 static naked void gamemode_detour()
 {
     __asm {
@@ -116,6 +128,20 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
         return "Unable to find GameplayStateTracker.pfbManagerAddItemAddr.";
     }
 
+    auto ui3500GuiDoOnOpenAddr = m_patterns_cache->find_addr(base, "40 55 53 57 48 8D AC 24 40 FC FF FF");
+    //DevilMayCry5.app_ui3500GUI__doOnOpen289005
+    if (!ui3500GuiDoOnOpenAddr)
+    {
+        return "Unable to find GameplayStateTracker.ui3500GuiDoOnOpenAddr.";
+    }
+
+    auto ui3500GuiDoOnClosedAddr = m_patterns_cache->find_addr(base, "5D 5B C3 CC CC CC CC 48 89 5C 24 10 56");
+    //DevilMayCry5.app_ui3500GUI__doOnOpen289005 (-0x7)
+    if (!ui3500GuiDoOnClosedAddr)
+    {
+        return "Unable to find GameplayStateTracker.ui3500GuiDoOnClosedAddr.";
+    }
+
     _mod = this;
 
     if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6))
@@ -152,6 +178,14 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
 
     m_after_pfbmanager_init = std::make_unique<FunctionHook>(pfbManagerAddItemAddr.value() + 0xF, &pfb_info_add_hook);
     m_after_pfbmanager_init->create();
+
+    _ui3500GuiDoOnOpenHook = std::make_unique<FunctionHook>(ui3500GuiDoOnOpenAddr.value(), &ui3500Gui_do_on_open_hook);
+    if (!_ui3500GuiDoOnOpenHook->create())
+        return "Can't create _ui3500GuiDoOnOpenHook.";
+
+    _ui3500GuiDoOnClosedHook = std::make_unique<FunctionHook>(ui3500GuiDoOnClosedAddr.value() + 0x7, &ui3500Gui_do_on_closed_hook);
+    if (!_ui3500GuiDoOnClosedHook->create())
+        return "Can't create _ui3500GuiDoOnClosedHook.";
 
 	return Mod::on_initialize();
 }

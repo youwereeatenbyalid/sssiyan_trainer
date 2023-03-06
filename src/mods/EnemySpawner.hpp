@@ -24,8 +24,6 @@ private:
 		BOBVergil
 	};
 
-	static inline const std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
-
 	PlCntr::Pl0300Cntr::Pl0300ControllerManager* _pl0300Manager;
 	InputSystem* _inputSystemMod = nullptr;
 	static inline EnemySpawner* _mod = nullptr;
@@ -36,6 +34,8 @@ private:
 
 	bool _bobEmStep = false;
 	bool _isPlSpawned = false;
+	bool _isFriendlyVergilEx = true;
+	bool _isBobVergilEx = false;
 
 	gf::Vec3 _spawnPos{ 0,0,0 };
 
@@ -50,6 +50,7 @@ private:
 	using actionType = decltype(&EnemySpawner::load_and_spawn);
 
 	Coroutines::Coroutine<actionType, EnemySpawner*, int, gf::Vec3, int, LoadType> _spawnEmCoroutine{ &EnemySpawner::load_and_spawn };
+	Coroutines::Coroutine<void(EnemySpawner::*)(LoadType), EnemySpawner*, LoadType> _killVergilsCoroutine{ &EnemySpawner::kill_vergils, true, true };
 
 	std::array<gf::Vec3, 3> _pl0300TeleportOffsets = { gf::Vec3(1.2f, 1.2f, 0), gf::Vec3(1.45f, -1.8f, 0), gf::Vec3(-1.35f, 2.0f, 0) };
 
@@ -60,10 +61,12 @@ private:
 
 	gf::Vec3 get_pl_pos(const REManagedObject* plManager);
 
-	void on_pl_added(uintptr_t threadCntxt, uintptr_t pl)
+	void on_pl_added(uintptr_t threadCntxt, uintptr_t plManager, uintptr_t pl)
 	{
 		_isPlSpawned = true;
 	}
+
+	void kill_vergils(LoadType type);
 
 	void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool* skipOrig);
 
@@ -86,7 +89,8 @@ public:
 	EnemySpawner()
 	{
 		_mod = this;
-		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t>>(this, &EnemySpawner::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, uintptr_t>>(this, &EnemySpawner::on_pl_added));
+		_killVergilsCoroutine.ignoring_update_on_pause(false);
 	}
 
 	~EnemySpawner();

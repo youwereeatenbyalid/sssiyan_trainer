@@ -1,12 +1,13 @@
 #pragma once
 #include <cstdint>
 #include "Mod.hpp"
-#include "PlSetActionData.hpp"
 #include "GameFunctions/GameFunc.hpp"
 #include "GameFunctions/PositionController.hpp"
+#include "PrefabFactory/PrefabFactory.hpp"
 
 namespace PlCntr
 {
+	namespace gf = GameFunctions;
 	struct HitControllerSettings
 	{
 		float baseAttackRate = 1.0f;//0x188
@@ -74,6 +75,8 @@ namespace PlCntr
 		static inline sdk::REMethodDefinition* _plEndCutSceneMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plSetCommandActionMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plResetStatusMethod = nullptr;
+		static inline sdk::REMethodDefinition* _gameObjGetComponentsArrayMethod = nullptr;
+		static inline sdk::REMethodDefinition* _componentDestroyStaticMethod = nullptr;
 
 		PlController(uintptr_t pl) : _pl(pl)
 		{
@@ -81,42 +84,22 @@ namespace PlCntr
 			_playerManager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
 			if (_isStaticInitRequested)
 			{
-				if (_gameModelSetHPMethod == nullptr)
-					_gameModelSetHPMethod = sdk::find_method_definition("app.GameModel", "set_hp(System.Single)");
-
-				if (_gameModelGetHPMethod == nullptr)
-					_gameModelGetHPMethod = sdk::find_method_definition("app.GameModel", "get_hp()");
-
-				if (_plSetActionMethod == nullptr)
-					_plSetActionMethod = sdk::find_method_definition("app.Player", "setAction(System.String, System.UInt32, System.Single, System.Single, "
-						"via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
-
-				if (_gameObjDestroyMethod == nullptr)
-					_gameObjDestroyMethod = sdk::find_method_definition("via.GameObject", "destroy(via.GameObject)");
-
-				if (_gameModelSetDrawSelfMethod == nullptr)
-					_gameModelSetDrawSelfMethod = sdk::find_method_definition("app.GameModel", "set_drawSelf(System.Boolean)");
-
-				if (_gameModelSetEnableMethod == nullptr)
-					_gameModelSetEnableMethod = sdk::find_method_definition("app.GameModel", "set_Enable(System.Boolean)");
-
-				if (_networkBBUpdateMethod == nullptr)
-					_networkBBUpdateMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "update()");
-
-				if (_networkBBUpdateNetworkTypeMethod == nullptr)
-					_networkBBUpdateNetworkTypeMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "updateNetworkType()");
-
-				if (_plGotoWaitMethod == nullptr)
-					_plGotoWaitMethod = sdk::find_method_definition("app.Player", "gotoWait(System.String, System.String, System.Single, System.Boolean, System.Boolean)");
-
-				if (_plEndCutSceneMethod == nullptr)
-					_plEndCutSceneMethod = sdk::find_method_definition("app.Player", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
-
-				if (_plResetStatusMethod == nullptr)
-					_plResetStatusMethod = sdk::find_method_definition("app.Player", "resetStatus(app.GameModel.ResetType)");
-
-				if (_plSetCommandActionMethod == nullptr)
-					_plSetCommandActionMethod = sdk::find_method_definition("app.Player", "setCommandAction(System.String, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority, System.Single, via.motion.InterpolationMode)");
+				_gameModelSetHPMethod = sdk::find_method_definition("app.GameModel", "set_hp(System.Single)");				
+				_gameModelGetHPMethod = sdk::find_method_definition("app.GameModel", "get_hp()");				
+				_plSetActionMethod = sdk::find_method_definition("app.Player", "setAction(System.String, System.UInt32, System.Single, System.Single, "
+					"via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");				
+				_gameObjDestroyMethod = sdk::find_method_definition("via.GameObject", "destroy(via.GameObject)");				
+				_gameModelSetDrawSelfMethod = sdk::find_method_definition("app.GameModel", "set_drawSelf(System.Boolean)");				
+				_gameModelSetEnableMethod = sdk::find_method_definition("app.GameModel", "set_Enable(System.Boolean)");				
+				_networkBBUpdateMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "update()");				
+				_networkBBUpdateNetworkTypeMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "updateNetworkType()");				
+				_plGotoWaitMethod = sdk::find_method_definition("app.Player", "gotoWait(System.String, System.String, System.Single, System.Boolean, System.Boolean)");				
+				_plEndCutSceneMethod = sdk::find_method_definition("app.Player", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");				
+				_plResetStatusMethod = sdk::find_method_definition("app.Player", "resetStatus(app.GameModel.ResetType)");				
+				_plSetCommandActionMethod = sdk::find_method_definition("app.Player", "setCommandAction(System.String, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority, "
+					"System.Single, via.motion.InterpolationMode)");
+				_gameObjGetComponentsArrayMethod = sdk::find_method_definition("via.GameObject", "get_Components()");
+				_componentDestroyStaticMethod = sdk::find_method_definition("via.Component", "destroy(via.Component)");
 
 				_isStaticInitRequested = false;
 			}
@@ -125,7 +108,10 @@ namespace PlCntr
 		virtual void destroy_game_obj()
 		{
 			if (_gameObjDestroyMethod != nullptr)
-				_gameObjDestroyMethod->call(sdk::get_thread_context(), *(uintptr_t*)(_pl + 0x10));
+			{
+				auto gameObj = *(uintptr_t*)(_pl + 0x10);
+				_gameObjDestroyMethod->call(sdk::get_thread_context(), gameObj);
+			}
 		}
 		
 	public:
@@ -162,6 +148,10 @@ namespace PlCntr
 
 		static inline sdk::REMethodDefinition* get_pl_set_command_action_method() noexcept { return _plSetCommandActionMethod; }
 
+		static inline sdk::REMethodDefinition* get_game_obj_get_components_method() noexcept { return _gameObjGetComponentsArrayMethod; }
+
+		static inline sdk::REMethodDefinition* get_component_destroy_static_method() noexcept { return _componentDestroyStaticMethod; }
+
 		inline uintptr_t get_pl() const noexcept { return _pl; }
 
 		virtual bool set_dt(DT dt, bool isNotProduction = false) = 0;
@@ -192,8 +182,9 @@ namespace PlCntr
 			return gf::ListController::get_list_count(*(uintptr_t*)((uintptr_t)_playerManager + 0x70)) == 1;
 		}
 
-		inline bool is_in_players_list() const noexcept
+		inline bool is_in_players_list() noexcept
 		{
+			update_pl_manager();
 			if (_playerManager == 0)
 				throw std::exception("PlayerManager is null.");
 			auto list = *(uintptr_t*)((uintptr_t)_playerManager + 0x70);
@@ -317,15 +308,15 @@ namespace PlCntr
 				*networkSubTypeBit = 1;
 				*mediationType = 3;
 			}
-			//*(bool*)(_pl0300 + 0x98) = true;// need to call special func actually
+			*(bool*)(_pl + 0x98) = true;// need to call special func actually
 			enable_physics_char_controller(val);
 			if (_networkBBUpdateNetworkTypeMethod != nullptr)
 				_networkBBUpdateNetworkTypeMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl);
 		}
 
-		inline int get_cur_network_type() const noexcept { return *(uintptr_t*)(_pl + 0x54); }
+		inline int get_cur_network_type() const noexcept { return *(int*)(_pl + 0x54); }
 
-		inline int get_cur_mediation_type() const noexcept { return *(uintptr_t*)(_pl + 0xF4); }
+		inline int get_cur_mediation_type() const noexcept { return *(int*)(_pl + 0xF4); }
 
 		inline void pl_manager_request_remove(bool unloadRequest = false)
 		{

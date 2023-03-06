@@ -79,6 +79,9 @@ namespace PlCntr
 			bool _useCustomLockOnUpdate = false;
 			bool _useCustomLockOnTargetOnEnemyUpdate = false;*/
 			bool _isIgnoringReleaseOnTrainingReset = false;
+			bool _isDoppelDestroyRequested = false;
+
+			static inline bool _isStaticInitRequested = true;
 
 			int _requestedJcNum = 1;
 
@@ -112,6 +115,7 @@ namespace PlCntr
 			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput = false);
 
 			void check_doppel_ref_correct();
+
 		public:
 
 			Pl0300Controller() = delete;
@@ -163,6 +167,8 @@ namespace PlCntr
 			inline bool is_ignoring_training_reset() const noexcept { return _isIgnoringReleaseOnTrainingReset; }
 
 			void ignore_release_on_trainig_reset(bool val) noexcept { _isIgnoringReleaseOnTrainingReset = val; }
+
+			inline bool is_doppel_destroy_requested() const noexcept { return _isDoppelDestroyRequested; }
 
 			inline void set_is_no_die(bool val) noexcept override
 			{

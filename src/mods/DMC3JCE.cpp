@@ -108,54 +108,6 @@ static naked void jcehuman_sub_sdt_detour()
 	}
 }
 
-static naked void jceprefab_detour()
-{
-	__asm {
-		cmp byte ptr[DMC3JCE::cheaton], 1
-		je cheat
-
-		originalcode:
-		mov r8, [rsi+0x10]
-		lea rax, [rbp-0x4C]
-		jmp qword ptr[DMC3JCE::jcePfbRet]
-
-		cheat:
-		push rax
-		sub rsp, 32
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
-		add rsp, 32
-		cmp al, 1
-		pop rax
-		je originalcode
-		mov r8, 0
-		lea rax, [rbp-0x4C]
-		jmp qword ptr[DMC3JCE::jcePfbRet]
-	}
-}
-
-static naked void jceprefab1_detour()
-{
-	__asm {
-		cmp byte ptr [DMC3JCE::cheaton], 1
-		je cheat
-
-		originalcode:
-		lea r9, [rbp+0x20]
-		mov rdx, rbx
-		jmp qword ptr [DMC3JCE::jcePfb1Ret]
-
-		cheat:
-		push rax
-		sub rsp, 32
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
-		add rsp, 32
-		cmp al, 1
-		pop rax
-		je originalcode
-		jmp qword ptr [DMC3JCE::jcePfbJeJmp]
-	}
-}
-
 static naked void jceprefab2_detour()
 {
 	__asm {
@@ -291,7 +243,6 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	m_full_name_string = "DMC3 Judgement Cut End (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "When not in Devil Trigger, replaces Vergil's Judgment Cut End with his Judgment Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.";
-	auto dmc5Base = g_framework->get_module().as<uintptr_t>();
 
 	auto canExeJceAddr = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 74 90");//DevilMayCry5.exe+54F481
 	if (!canExeJceAddr)
@@ -315,12 +266,6 @@ std::optional<std::string> DMC3JCE::on_initialize()
 	if (!jcePrefab2Addr)
 	{
 		return "Unable to find DMC3JCE.jcePrefab2Addr pattern.";
-	}
-
-	auto crashPointAddr = m_patterns_cache->find_addr(base, "F6 40 0C 01 74 05");//DevilMayCry5.sub_142A44550+3E
-	if (!crashPointAddr)
-	{
-		return "Unable to find DMC3JCE.crashPointAddr pattern.";
 	}
 
 	auto finishPfbAddr = m_patterns_cache->find_addr(base, "4C 8B C6 4C 89 6C 24 28");//DevilMayCry5.exe+56CAD7

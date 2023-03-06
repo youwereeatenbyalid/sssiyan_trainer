@@ -36,7 +36,7 @@ private:
 			*val = 0;
 	}
 
-	void on_pl_added(uintptr_t threadCtxt, uintptr_t player)
+	void on_pl_added(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t player)
 	{
 		if (!cheaton || *(int*)(player + 0xE64) != 4 || _quickSilverCtrl != nullptr)
 			return;
@@ -114,7 +114,7 @@ public:
 
 	~VergilQuickSilver()
 	{
-		PlayerTracker::pl_added_event_unsub(std::make_shared<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t>>(this, &VergilQuickSilver::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_unsub(std::make_shared<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t, uintptr_t>>(this, &VergilQuickSilver::on_pl_added));
 	}
 
 	std::string_view get_name() const override
@@ -145,7 +145,7 @@ public:
 
 		set_up_hotkey();
 
-		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t>>(this, &VergilQuickSilver::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<VergilQuickSilver, uintptr_t, uintptr_t, uintptr_t>>(this, &VergilQuickSilver::on_pl_added));
 
 		return Mod::on_initialize();
 	}

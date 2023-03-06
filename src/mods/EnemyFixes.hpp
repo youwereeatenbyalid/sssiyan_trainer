@@ -3,6 +3,7 @@
 #include "GameFunctions/GameFunc.hpp"
 #include "PlayerTracker.hpp"
 #include "MissionManager.hpp"
+#include "CheckpointPos.hpp"
 
 //clang-format off
 

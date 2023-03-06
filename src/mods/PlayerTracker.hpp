@@ -112,13 +112,13 @@ public:
 
 	//--------------------------------------Sub methods for events that called from different hooks related to app.Player stuff somehow--------------------------------------//
 
-	//uintptr_t threadCtxt, uintptr_t pl
+	//uintptr_t threadCtxt, uintptr_t plManager uintptr_t pl
 	template<typename T>
-	static bool pl_added_event_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> handler)
+	static bool on_pl_mng_pl_add_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
 		{
-			_mod->_playerAdded.subscribe(handler);
+			_mod->_onPlMngPlAddEvent.subscribe(handler);
 			return true;
 		}
 		return false;
@@ -126,11 +126,11 @@ public:
 
 	//uintptr_t threadCtxt, uintptr_t pl
 	template<typename T>
-	static bool pl_added_event_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> handler)
+	static bool on_pl_mng_pl_add_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
 		{
-			_mod->_playerAdded.unsubscribe(handler);
+			_mod->_onPlMngPlAddEvent.unsubscribe(handler);
 			return true;
 		}
 		return false;
@@ -373,7 +373,7 @@ private:
 
 	void init_check_box_info() override;
 
-	Events::Event<uintptr_t/*threadCtxt*/, uintptr_t/*player*/> _playerAdded;
+	Events::Event<uintptr_t/*threadCtxt*/, uintptr_t/*plManager*/, uintptr_t/*player*/> _onPlMngPlAddEvent;
 	Events::Event<uintptr_t, bool, bool*/*skip base func call*/> _beforeResetPadInput;
 	Events::Event<uintptr_t, uintptr_t, /*pl0800*/ uintptr_t/*hitCtrlDamageInfo*/, int*/*return value*/ > _afterPl0800GuardCheck;
 	Events::Event<uintptr_t, uintptr_t/*player*/> _onPlSetDie;

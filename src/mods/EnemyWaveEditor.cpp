@@ -1,5 +1,6 @@
 #include "EnemyWaveEditor.hpp"
 #include "EnemyDataSettings.hpp"
+#include "EnemySwapper.hpp"
 #include "EnemyFixes.hpp"
 
 using namespace WaveEditorMod;
@@ -227,6 +228,14 @@ void EnemyWaveEditor::read_em_data_asm(uintptr_t lstAddr)
 
 void EnemyWaveEditor::handle_emlist_asm(uintptr_t lstAddr)
 {
+    if (EnemySwapper::cheaton)
+        EnemySwapper::em_swap_asm(lstAddr);
+
+    if (EnemyDataSettings::cheaton)
+        EnemyDataSettings::change_data_asm(lstAddr);
+
+    if (!cheaton)
+        return;
     switch (mode)
     {
         case Mode::Mod:
@@ -255,6 +264,10 @@ static naked void emlist_detour()
     __asm {
         cmp dword ptr [rax + 0x18], 01
         jl ret_jl
+        cmp byte ptr [EnemySwapper::cheaton], 01
+        je cheat
+        cmp byte ptr [EnemyDataSettings::cheaton], 01
+        je cheat
         cmp byte ptr [EnemyWaveEditor::cheaton], 01
         je cheat
 
@@ -391,6 +404,8 @@ static naked void bp_fadein_detour()
 {
     __asm {
         cmp byte ptr [EnemyWaveEditor::cheaton], 1
+        je cheat
+        cmp byte ptr[EnemySwapper::cheaton], 1
         je cheat
         cmp byte ptr [EnemyDataSettings::cheaton], 1
         je cheat
@@ -677,7 +692,7 @@ void EnemyWaveEditor::print_mimiclist_items(int i)
     for (int j = 0; j < mimListManager->get_mimic_list_data(i)->mimicList.get_mimic_count(); j++)
     {
         ImGui::TextWrapped("Enemy index in list: %d", j);
-        ImGui::TextWrapped("Enemy: %s", (*_emNames)[EnemyData::id_to_indx(mimListManager->get_mimic_list_data(i)->mimicList[j]->emId)]);
+        ImGui::TextWrapped("Enemy: %s", EnemyData::EnemyNames[EnemyData::id_to_indx(mimListManager->get_mimic_list_data(i)->mimicList[j]->emId)]);
         ImGui::TextWrapped("Enemy num: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->num);
         ImGui::TextWrapped("Odds: %.1f", mimListManager->get_mimic_list_data(i)->mimicList[j]->odds);
         ImGui::TextWrapped("Use boss hp bar and boss camera: %d", mimListManager->get_mimic_list_data(i)->mimicList[j]->isBoss);
@@ -692,7 +707,7 @@ void EnemyWaveEditor::print_mimiclist_items(int i)
 
 void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Enemy:");
-  ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, _emNames->data(), _emNames->size(), 20);
+  ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
   ImGui::ShowHelpMarker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
   data.emId = EnemyData::indx_to_id(data.selectedItem);
   ImGui::Spacing();
@@ -744,7 +759,7 @@ void EnemyWaveEditor::print_emlist_data()
         ImGui::Spacing();
         for (const auto &data : item.emDataInfo)
         {
-            ImGui::TextWrapped("Enemy: %s", (*_emNames)[EnemyData::id_to_indx(data.emId)]);
+            ImGui::TextWrapped("Enemy: %s", EnemyData::EnemyNames[EnemyData::id_to_indx(data.emId)]);
             ImGui::TextWrapped("Enemy num: %d", data.num);
             ImGui::Spacing();
         }
@@ -772,7 +787,7 @@ void EnemyWaveEditor::emlist_btn()
                 all += "\n\n";
                 for (const auto &data : item.emDataInfo)
                 {
-                    all += std::string("Enemy: " + std::string((*_emNames)[EnemyData::id_to_indx(data.emId)]));
+                    all += std::string("Enemy: " + std::string(EnemyData::EnemyNames[EnemyData::id_to_indx(data.emId)]));
                     all += "\n";
                     all += std::string("Enemy num: " + std::to_string(data.num));
                     all +="\n\n";
@@ -856,7 +871,7 @@ void EnemyWaveEditor::draw_emlist_combo()
     {
         for (const auto& emDt : mimListManager->get_mimic_list_data(selectedMimicListItem)->bindedEmData->emDataInfo)
         {
-            s += "Enemy: " + std::string((*_emNames)[EnemyData::id_to_indx(emDt.emId)]) + ";\n";
+            s += "Enemy: " + std::string(EnemyData::EnemyNames[EnemyData::id_to_indx(emDt.emId)]) + ";\n";
             s += "Enemy num: " + std::to_string(emDt.num) + ";\n\n";
         }
     }
@@ -893,7 +908,7 @@ void WaveEditorMod::EnemyWaveEditor::print_em_colums(int indx)
                 backgroundcolor = SELECTABLE_STYLE_HVR;
             ImGui::PushStyleColor(ImGuiCol_Header, backgroundcolor);
             ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECTABLE_STYLE_ACT_HVR);
-            auto uniqStr = (*_emNames)[mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]->selectedItem] + std::string(" x") +
+            auto uniqStr = EnemyData::EnemyNames[mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]->selectedItem] + std::string(" x") +
                 std::to_string(mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]->num);  //+ std::string("##") + std::to_string(row);
             auto addInfo = add_line_em_info(mimListManager->get_mimic_list_data(selectedMimicListItem)->mimicList[row]);
             if (!addInfo.empty())
@@ -1097,7 +1112,7 @@ void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::show_enemy_selection()
 
     if (ImGui::BeginTable("##RndTableEnemy", 3))
     {
-        for (int i = 0; i < _emNames->size(); i++)
+        for (int i = 0; i < EnemyData::EnemyNames.size(); i++)
         {
             ImGui::TableNextColumn();
             ImVec4 backgroundcolor = isSelected ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : SELECTABLE_STYLE_ACT;
@@ -1109,7 +1124,7 @@ void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::show_enemy_selection()
             
             if (!isSelected)
             {
-                if (ImGui::Selectable((*_emNames)[i], isSelected))
+                if (ImGui::Selectable(EnemyData::EnemyNames[i], isSelected))
                 {
                     availableEnemies.push_back(i);
                     sort();
@@ -1119,7 +1134,7 @@ void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::show_enemy_selection()
             }
             else
             {
-                if (ImGui::Selectable((*_emNames)[i], isSelected))
+                if (ImGui::Selectable(EnemyData::EnemyNames[i], isSelected))
                 {
                     remove_item(i);
                     sort();
@@ -1165,9 +1180,9 @@ inline void EnemyWaveEditor::WaveRandomGenerator::on_config_load(const utility::
     isRndOnRestart = false;//cfg.get<bool>("EnemyWaveEditor.WaveRandomGenerator.isRndOnRestart").value_or(false);
 
     std::string emNameParam = "EnemyWaveEditor.WaveRandomGenerator.availableEnemies.";
-    for (int i = 0; i < _emNames->size(); i++)
+    for (int i = 0; i < EnemyData::EnemyNames.size(); i++)
     {
-        if (cfg.get<bool>(emNameParam + (*_emNames)[i]).value_or(false))
+        if (cfg.get<bool>(emNameParam + EnemyData::EnemyNames[i]).value_or(false))
             availableEnemies.push_back(i);
     }
     for (auto& em : heavyEmList)
@@ -1210,7 +1225,7 @@ inline void EnemyWaveEditor::WaveRandomGenerator::on_config_save(utility::Config
     std::string emNameParam = "EnemyWaveEditor.WaveRandomGenerator.availableEnemies.";
     for (int i : availableEnemies)
     {
-        cfg.set<bool>(emNameParam + (*_emNames)[i], true);
+        cfg.set<bool>(emNameParam + EnemyData::EnemyNames[i], true);
     }
     for(const auto &em : heavyEmList)
         em.on_config_save(cfg);
@@ -1218,21 +1233,21 @@ inline void EnemyWaveEditor::WaveRandomGenerator::on_config_save(utility::Config
 
 void EnemyWaveEditor::WaveRandomGenerator::EmRestriction::print_settings()
 {
-    ImGui::Checkbox(("Special settings for " + std::string((*_emNames)[curEmId])).c_str(), &isEnabled);
+    ImGui::Checkbox(("Special settings for " + std::string(EnemyData::EnemyNames[curEmId])).c_str(), &isEnabled);
     if (isEnabled)
     {
-        ImGui::TextWrapped(("Max " + std::string((*_emNames)[curEmId]) + " in enemy list:").c_str());
-        wrg->input_int(("##MaxGenSpecEm" + std::string((*_emNames)[curEmId])).c_str(), maxGenInList);
-        ImGui::TextWrapped(("Min num for each " + std::string((*_emNames)[curEmId])).c_str());
-        wrg->input_int(("##SpecEnemyMin" + std::string((*_emNames)[curEmId])).c_str(), minNum);
-        ImGui::TextWrapped(("Max num for each " + std::string((*_emNames)[curEmId])).c_str());
-        wrg->input_int(("##SpecEnemyMax" + std::string((*_emNames)[curEmId])).c_str(), maxNum);
+        ImGui::TextWrapped(("Max " + std::string(EnemyData::EnemyNames[curEmId]) + " in enemy list:").c_str());
+        wrg->input_int(("##MaxGenSpecEm" + std::string(EnemyData::EnemyNames[curEmId])).c_str(), maxGenInList);
+        ImGui::TextWrapped(("Min num for each " + std::string(EnemyData::EnemyNames[curEmId])).c_str());
+        wrg->input_int(("##SpecEnemyMin" + std::string(EnemyData::EnemyNames[curEmId])).c_str(), minNum);
+        ImGui::TextWrapped(("Max num for each " + std::string(EnemyData::EnemyNames[curEmId])).c_str());
+        wrg->input_int(("##SpecEnemyMax" + std::string(EnemyData::EnemyNames[curEmId])).c_str(), maxNum);
     }
 }
 
 inline void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::EmRestriction::on_config_load(const utility::Config& cfg)
 {
-    auto emName = std::string((*_emNames)[curEmId]);
+    auto emName = std::string(EnemyData::EnemyNames[curEmId]);
     minNum = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.minNum_" + emName).value_or(1);
     maxNum = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxNum_" + emName).value_or(2);
     maxGenInList = cfg.get<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxGenInList_" + emName).value_or(2);
@@ -1241,7 +1256,7 @@ inline void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::EmRestriction::
 
 inline void WaveEditorMod::EnemyWaveEditor::WaveRandomGenerator::EmRestriction::on_config_save(utility::Config& cfg) const
 {
-    auto emName = std::string((*_emNames)[curEmId]);
+    auto emName = std::string(EnemyData::EnemyNames[curEmId]);
     cfg.set<bool>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.isEnabled_" + emName, isEnabled);
     cfg.set<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.maxGenInList_" + emName, maxGenInList);
     cfg.set<int>("EnemyWaveEditor.WaveRandomGenerator.EmRestriction.minNum_" + emName, minNum);

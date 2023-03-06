@@ -488,8 +488,6 @@ namespace WaveEditorMod
 		static std::mutex mtx;
 		static inline std::mutex prefab_mtx{};
 
-		static inline const std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
-
 		static std::atomic_int emReaderCounter;
 		static std::atomic_int emSetterCounter;
 		static int emListId;

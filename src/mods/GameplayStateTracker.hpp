@@ -13,10 +13,18 @@ private:
 	std::unique_ptr<FunctionHook> m_cutscene_hook;
 	std::unique_ptr<FunctionHook> m_pause_hook;
 	std::unique_ptr<FunctionHook> m_after_pfbmanager_init;
+	std::unique_ptr<FunctionHook> _ui3500GuiDoOnOpenHook;
+	std::unique_ptr<FunctionHook> _ui3500GuiDoOnClosedHook;
 
 	Events::Event<> _pfbManagerInited;
+	Events::Event<uintptr_t /*threadCntx*/, uintptr_t /*ui3500Gui*/> _onUi3500GuiOpen;//PhotoModeOpen?
+	Events::Event<uintptr_t /*threadCntx*/, uintptr_t /*ui3500Gui*/> _onUi3500GuiClosed;//PhotoModeClose?
 
 	static void pfb_info_add_hook(uintptr_t threadCtxt, uintptr_t pfbInfoList, uintptr_t pfbInfo);
+
+	static void ui3500Gui_do_on_open_hook(uintptr_t threadCntx, uintptr_t ui3500Gui);
+
+	static void ui3500Gui_do_on_closed_hook(uintptr_t threadCntx, uintptr_t ui3500Gui);
 
 	static inline GameplayStateTracker* _mod = nullptr;
 
@@ -53,6 +61,34 @@ public:
 	static inline void after_pfb_manager_init_unsub(std::shared_ptr<Events::EventHandler<T>> eh)
 	{
 		_mod->_pfbManagerInited.unsubscribe(eh);
+	}
+
+	//Probably Photo Mode open
+	//uintptr_t threadCntx, uintptr_t ui3500Gui
+	template<class T>
+	static inline void on_ui3500_gui_open_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> eh)
+	{
+		_mod->_onUi3500GuiOpen.subscribe(eh);
+	}
+
+	template<class T>
+	static inline void on_ui3500_gui_open_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> eh)
+	{
+		_mod->_onUi3500GuiOpen.unsubscribe(eh);
+	}
+
+	//Probably Photo Mode close
+	//uintptr_t threadCntx, uintptr_t ui3500Gui
+	template<class T>
+	static inline void on_ui3500_gui_closed_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> eh)
+	{
+		_mod->_onUi3500GuiClosed.subscribe(eh);
+	}
+
+	template<class T>
+	static inline void on_ui3500_gui_closed_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t>> eh)
+	{
+		_mod->_onUi3500GuiClosed.unsubscribe(eh);
 	}
 
 	std::string_view get_name() const override

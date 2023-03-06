@@ -63,7 +63,7 @@ private:
 
 	void after_all_inits() override
 	{
-		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<WitchTime, uintptr_t, uintptr_t>>(this, &WitchTime::on_pl_add));
+		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<WitchTime, uintptr_t, uintptr_t, uintptr_t>>(this, &WitchTime::on_pl_add));
 	}
 
 	void init_check_box_info() override
@@ -138,7 +138,7 @@ private:
 		_slowWorldLifeTimeCoroutine.start(this);
 	}
 
-	void on_pl_add(uintptr_t threadCtxt, uintptr_t pl)
+	void on_pl_add(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl)
 	{
 		if (!cheaton || _isInited || pl == 0 || *(int*)(pl + 0xE64) == 3)
 			return;

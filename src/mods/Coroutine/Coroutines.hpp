@@ -25,7 +25,8 @@ namespace Coroutines
 			//Main engine loop method probably. Calls all coroutines. TC is always valid.
 			static void* _sub_1425A9B00_detour(uintptr_t rcx, uintptr_t behaviorGroup)
 			{
-				run();
+				if(!_coroutines.empty())
+					run();
 				return _sub_1425A9B00_hook->get_original<decltype(_sub_1425A9B00_detour)>()(rcx, behaviorGroup);
 			}
 

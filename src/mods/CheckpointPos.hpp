@@ -3,9 +3,11 @@
 #include <map>
 #include "mods/GameFunctions/PositionController.hpp"
 #include "PlayerTracker.hpp"
+#include "EndLvlHooks.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
+#include "GameplayStateTracker.hpp"
 #include "sdk/DMC5.hpp"
-class CheckpointPos : public Mod
+class CheckpointPos : public Mod, private EndLvlHooks::IEndLvl
 {
 public:
   static bool cheaton;
@@ -14,7 +16,6 @@ public:
 
   static uintptr_t restartPos_ret;
   static uintptr_t startPos_ret;
-
 
   static uint32_t missionN;
   static Vector3f newRestartPos;
@@ -68,6 +69,13 @@ public:
   // void on_draw_debug_ui() override;
 
 private:
+
+    void reset(EndLvlHooks::EndType type) override
+    {
+        _isPlLoaded = false;
+    }
+
+  bool _isPlLoaded = false;
   glm::vec3 newPlPos;
   void init_check_box_info() override;
   Vector3f get_boss_pos();

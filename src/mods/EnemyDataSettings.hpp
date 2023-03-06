@@ -8,6 +8,17 @@
 class EnemyDataSettings : public Mod
 {
 public:
+
+	struct EnemySetting 
+	{
+		EnemyData::EnemyId emId;
+		float waitTimeMin;
+		float waitTimeMax;
+		float odds;
+		int enemyNum;
+		bool useDefault;
+	};
+
 	static inline bool cheaton = false;
 	static inline bool showReadme = false;
 	static inline bool shareSettings = true;
@@ -27,29 +38,18 @@ public:
 
 	inline std::optional<std::string> on_initialize() override {
 		init_check_box_info();
-		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_Encounters;
 		m_full_name_string = "Increased Enemy Spawns (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Increase the number of enemies that spawn and adjust the time between spawns.";
 
-		for (int i = 0; i < EnemySwapper::enemySettings.size(); i++) {
-			EnemySwapper::enemySettings[i].emId.set_current_id(i);
+		for (int i = 0; i < enemySettings.size(); i++) {
+			enemySettings[i].emId = EnemyData::indx_to_id(i);
 		}
 
 		return Mod::on_initialize();
 	}
-
-	/*struct EnemySetting {
-          int listIndx = 0;
-          float waitTimeMin = 0;
-          float waitTimeMax = 0;
-          int enemyNum = 1;
-          bool useDefault   = true;
-	};
-
-	static inline std::array<EnemySetting, EnemySwapper::enemyListCount> enemySettings; */
 
 	// Override this things if you want to store values in the config file
 	inline void on_config_load(const utility::Config& cfg) override {
@@ -62,17 +62,17 @@ public:
         emNumLd = cfg.get<int>("EnemyDataSettings_enemyNumAll").value_or(1);
         shareSettings = cfg.get<bool>("EnemyDataSettings_shareSettings").value_or(true);
         set_all_data_settings(timeMinLd, timeMaxLd, emNumLd, oddsLd);
-		for (int i = 0; i < _emNames->size(); i++) {
-			key = std::string((*_emNames)[i]) + "_" + "waitTimeMin";
-			EnemySwapper::enemySettings[i].waitTimeMin = cfg.get<float>(key).value_or(0.0f);
-			key = std::string((*_emNames)[i]) + "_" + "waitTimeMax";
-			EnemySwapper::enemySettings[i].waitTimeMax = cfg.get<float>(key).value_or(0.0f);
-			key = std::string((*_emNames)[i]) + "_" + "enemyNum";
-			EnemySwapper::enemySettings[i].enemyNum = cfg.get<int>(key).value_or(1);
-			key = std::string((*_emNames)[i]) + "_" + "useDefault";
-			EnemySwapper::enemySettings[i].useDefault = cfg.get<bool>(key).value_or(true);
-			key = std::string((*_emNames)[i]) + "_" + "odds";
-			EnemySwapper::enemySettings[i].odds = cfg.get<float>(key).value_or(100.0f);
+		for (int i = 0; i <EnemyData::EnemyNames.size(); i++) {
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "waitTimeMin";
+			enemySettings[i].waitTimeMin = cfg.get<float>(key).value_or(0.0f);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "waitTimeMax";
+			enemySettings[i].waitTimeMax = cfg.get<float>(key).value_or(0.0f);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "enemyNum";
+			enemySettings[i].enemyNum = cfg.get<int>(key).value_or(1);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "useDefault";
+			enemySettings[i].useDefault = cfg.get<bool>(key).value_or(true);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "odds";
+			enemySettings[i].odds = cfg.get<float>(key).value_or(100.0f);
 		}
 	}
 
@@ -84,19 +84,19 @@ public:
 		cfg.set<int>("EnemyDataSettings_enemyNumAll", enemyNum);
 		cfg.set<bool>("EnemyDataSettings_shareSettings", shareSettings);
 
-		for (int i = 0; i < _emNames->size(); i++) {
+		for (int i = 0; i <EnemyData::EnemyNames.size(); i++) {
 			if(i == 32 || i == 33)
 				continue;
-			key = std::string((*_emNames)[i]) + "_" + "waitTimeMin";
-			cfg.set<float>(key, EnemySwapper::enemySettings[i].waitTimeMin);
-			key = std::string((*_emNames)[i]) + "_" + "waitTimeMax";
-			cfg.set<float>(key, EnemySwapper::enemySettings[i].waitTimeMax);
-			key = std::string((*_emNames)[i]) + "_" + "enemyNum";
-			cfg.set<int>(key, EnemySwapper::enemySettings[i].enemyNum);
-			key = std::string((*_emNames)[i]) + "_" + "useDefault";
-			cfg.set<bool>(key, EnemySwapper::enemySettings[i].useDefault);
-			key = std::string((*_emNames)[i]) + "_" + "odds";
-			cfg.set<float>(key, EnemySwapper::enemySettings[i].odds);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "waitTimeMin";
+			cfg.set<float>(key, enemySettings[i].waitTimeMin);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "waitTimeMax";
+			cfg.set<float>(key, enemySettings[i].waitTimeMax);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "enemyNum";
+			cfg.set<int>(key, enemySettings[i].enemyNum);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "useDefault";
+			cfg.set<bool>(key, enemySettings[i].useDefault);
+			key = std::string(EnemyData::EnemyNames[i]) + "_" + "odds";
+			cfg.set<float>(key, enemySettings[i].odds);
 
 		}
 	}
@@ -136,11 +136,11 @@ public:
 			ImGui::Separator();*/
 			//ImGui::Text("index %d", index);
 			ImGui::Columns(4, NULL, false);
-			for (int i = 0; i < _emNames->size(); i++) {
+			for (int i = 0; i <EnemyData::EnemyNames.size(); i++) {
 				if (i == 32 || i == 33)//Urizens
 					continue;
 
-				bool state = !EnemySwapper::enemySettings[i].useDefault;
+				bool state = !enemySettings[i].useDefault;
 				ImVec4 backgroundcolor = state ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered): SELECTABLE_STYLE_ACT;
 				if (i == index)
 					backgroundcolor = SELECTABLE_STYLE_HVR;
@@ -149,15 +149,15 @@ public:
 				
 				
 					if (state) {
-						uniqStr = std::string((*_emNames)[i] + std::string(" x") + std::to_string(EnemySwapper::enemySettings[i].enemyNum));
+						uniqStr = std::string(EnemyData::EnemyNames[i] + std::string(" x") + std::to_string(enemySettings[i].enemyNum));
 					}
 					else {
-						uniqStr = (*_emNames)[i];
+						uniqStr = EnemyData::EnemyNames[i];
 					}
 
 				if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick)) {
 					if (ImGui::IsMouseDoubleClicked(0)) {
-						EnemySwapper::enemySettings[i].useDefault = !EnemySwapper::enemySettings[i].useDefault;
+						enemySettings[i].useDefault = !enemySettings[i].useDefault;
 					}
 					else {
 						index = i;
@@ -167,7 +167,7 @@ public:
 				ImGui::NextColumn();
 			}
 			if (ImGui::Button("Restore default settings")) {
-				for (int i = 0; i < _emNames->size(); i++) {
+				for (int i = 0; i <EnemyData::EnemyNames.size(); i++) {
 					set_enemy_data_settings(i, 0.0f, 0.0f, 1, true);
 				}
 			}
@@ -175,46 +175,36 @@ public:
 			ImGui::Spacing();
 			ImGui::Separator();
 			uniqStr = std::string("Use default game settings ##" + std::to_string(index));
-			ImGui::TextWrapped((*_emNames)[index]);
-			ImGui::Checkbox(uniqStr.c_str(),&EnemySwapper::enemySettings[index].useDefault);
-			if (!EnemySwapper::enemySettings[index].useDefault) {
+			ImGui::TextWrapped(EnemyData::EnemyNames[index]);
+			ImGui::Checkbox(uniqStr.c_str(),&enemySettings[index].useDefault);
+			if (!enemySettings[index].useDefault) {
 				ImGui::TextWrapped("Enemy multiplier: multiplies the number of enemies produced at each spawn point. Setting it to 0 prevents enemies from spawning.");
 				uniqStr = std::string("##EnemyNum" + std::to_string(index));
-				ImGui::InputInt(uniqStr.c_str(), &EnemySwapper::enemySettings[index].enemyNum);
+				ImGui::InputInt(uniqStr.c_str(), &enemySettings[index].enemyNum);
 				ImGui::TextWrapped("Minimum spawn & Maximum spawn times adjust in-engine settings controlling the delay between enemy spawns.");
 				ImGui::Columns(2, NULL, false);
 				ImGui::TextWrapped("Wait time min: ");
 
 				uniqStr = std::string("##WaitTimeMin" + std::to_string(index));
-				ImGui::InputFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].waitTimeMin, 0.1F);
+				ImGui::InputFloat(uniqStr.c_str(), &enemySettings[index].waitTimeMin, 0.1F);
 				ImGui::NextColumn();
 				ImGui::TextWrapped("Wait time max: ");
 				uniqStr = std::string("##WaitTimeMax" + std::to_string(index));
-				ImGui::InputFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].waitTimeMax, 0.1f);
+				ImGui::InputFloat(uniqStr.c_str(), &enemySettings[index].waitTimeMax, 0.1f);
 				ImGui::Columns(1);
 				//ImGui::TextWrapped("Spawn chance (%): Spawn chance affects the odds an enemy spawns from a spawn point.This is 100 % by default in - game, and can lead to softlocks if used.");
 				//uniqStr = std::string("##Odds" + std::to_string(index));
-				//ImGui::SliderFloat(uniqStr.c_str(), &EnemySwapper::enemySettings[index].odds, 0.1f, 100.0f, "%.01f");
-				validate_values(shareSettings, &EnemySwapper::enemySettings[index]);
+				//ImGui::SliderFloat(uniqStr.c_str(), &enemySettings[index].odds, 0.1f, 100.0f, "%.01f");
+				validate_values(shareSettings, &enemySettings[index]);
 			}
-			/*
-			for (int i = 0; i < _emNames->size(); i++) {
-				if(i == 32 || i == 33)//Urizens
-					continue;
-
-               // ImGui::Separator();
-			}
-			*/
 		}
 	}
-	// on_draw_debug_ui() is called when debug window shows up
-	inline void on_draw_debug_ui() override{}
 
 	void set_enemy_data_settings(int emIndx, float waitTimeMin, float waitTimeMax, int enemyNum, bool useDefault = false) {
-		EnemySwapper::enemySettings[emIndx].waitTimeMin = waitTimeMin;
-		EnemySwapper::enemySettings[emIndx].waitTimeMax = waitTimeMax;
-		EnemySwapper::enemySettings[emIndx].enemyNum = enemyNum;
-		EnemySwapper::enemySettings[emIndx].useDefault = useDefault;
+		enemySettings[emIndx].waitTimeMin = waitTimeMin;
+		enemySettings[emIndx].waitTimeMax = waitTimeMax;
+		enemySettings[emIndx].enemyNum = enemyNum;
+		enemySettings[emIndx].useDefault = useDefault;
 
 	}
 
@@ -223,20 +213,56 @@ public:
 		EnemyDataSettings::waitTimeMin = waitTimeMin;
 		EnemyDataSettings::waitTimeMax = waitTimeMax;
 		EnemyDataSettings::enemyNum = enemyNum;
-        EnemySwapper::set_wait_time(waitTimeMin, waitTimeMax);
-        EnemySwapper::set_odds(odds);
-        EnemySwapper::set_enemy_num(enemyNum);
 	}
 
-	private:
-	static inline const  std::array<const char*, 40> *_emNames = EnemyData::get_em_names();
+	static void change_data_asm(uintptr_t emDataList)//called in WaveEditor
+	{
+		std::lock_guard<std::mutex> lck(_setupWavesMtx);
+		for (int i = 0; i < gf::ListController::get_list_count(emDataList); i++)
+		{
+			auto item = gf::ListController::get_item<uintptr_t>(emDataList, i);
+			if (item == 0)
+				return;
+			int emId = *(int*)(item + 0x10);
+			float* waitTimeMin = (float*)(item + 0x2C);
+			float* waitTimeMax = (float*)(item + 0x30);
+			float *odds = (float*)(item + 0x24);
+			int *emNum = (int*)(item + 0x20);
+			if (!shareSettings)
+			{
+				for (const auto& i : enemySettings)
+				{
+					if (!i.useDefault && i.emId == emId)
+					{
+						*waitTimeMin = i.waitTimeMin;
+						*waitTimeMax = i.waitTimeMax;
+						*emNum = i.enemyNum;
+						*odds = i.odds;
+						break;
+					}
+				}
+			}
+			else
+			{
+				*waitTimeMin = EnemyDataSettings::waitTimeMin;
+				*waitTimeMax = EnemyDataSettings::waitTimeMax;
+				*emNum = EnemyDataSettings::enemyNum;
+				*odds = EnemyDataSettings::odds;
+			}
+		}
+	}
+
+private:
+	static inline std::mutex _setupWavesMtx{};
+
+	static inline std::array<EnemySetting, EnemyData::EnemyNames.size()> enemySettings;
 
 	inline void init_check_box_info() override {
     m_check_box_name = m_prefix_check_box_name + std::string(get_name());
     m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
   }
 	static inline std::string uniqStr = "";
-	inline void validate_values(bool isSharedSettings, EnemySwapper::EnemySetting *emSetting = nullptr) {
+	inline void validate_values(bool isSharedSettings, EnemySetting *emSetting = nullptr) {
         if (isSharedSettings) {
             if (waitTimeMin < 0.0f)
               waitTimeMin = 0.0f;

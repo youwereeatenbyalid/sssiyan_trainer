@@ -240,7 +240,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = Page_Enemies;
-	m_full_name_string = "Boss Dante settings (+)";
+	m_full_name_string = "Boss Dante Settings (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Modifies the properties of the Dante boss fight. Vergil's nightmare begins here.";
 

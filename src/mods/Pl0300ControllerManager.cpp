@@ -75,10 +75,35 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_damage_check_deto
     }
 }
 
-void PlCntr::Pl0300Cntr::Pl0300ControllerManager::after_all_inits()
+naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_destroy_doppel_request_boss_camera_detour()
 {
-    emSpawnerMod = (EnemySpawner*)g_framework->get_mods()->get_mod("EnemySpawner");
-    //_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
+    __asm
+    {
+        cmp byte ptr [EnemyFixes::cheaton], 0
+        je pl0300CntrlCheck
+        cmp byte ptr [EnemyFixes::isDoppelCameraFix], 01
+        je skip
+
+        pl0300CntrlCheck:
+        push rax
+        push rcx
+        push rsp
+        mov rcx, rbx
+        sub rsp, 32
+        call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
+        add rsp, 32
+        pop rsp
+        pop rcx
+        cmp al, 00
+        pop rax
+        je originalcode
+        skip:
+        jmp qword ptr[Pl0300ControllerManager::doppelDestroyReqBossCamRet]
+
+        originalcode:
+        call qword ptr [Pl0300ControllerManager::requestBossCameraFunc]
+        jmp qword ptr [Pl0300ControllerManager::doppelDestroyReqBossCamRet]
+    }
 }
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType resetType)
@@ -100,6 +125,22 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType res
     }
     else
         _pl0300List.clear();
+
+    if (resetType == EndLvlHooks::CheckpointMission || resetType == EndLvlHooks::RetryMission || resetType == EndLvlHooks::ResetTraining)
+        return;
+
+    if (_pl0300Pfb != nullptr)
+    {
+        PfbFactory::PrefabFactory::release(_pl0300Pfb);
+        _pl0300Pfb = nullptr;
+        _pl0300PathStr = nullptr;
+    }
+    if (_pl0300C00Pfb != nullptr)
+    {
+        PfbFactory::PrefabFactory::release(_pl0300C00Pfb);
+        _pl0300C00Pfb = nullptr;
+        _pl0300C00PathStr = nullptr;
+    }
 }
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
@@ -159,7 +200,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr
                 if (i->_isAddToPlListRequested)
                 {
                     i->pl_manager_request_add();
-                    i->_isSetIsNoDieRequested = false;
+                    i->_isAddToPlListRequested = false;
                 }
             }
             return;
@@ -221,7 +262,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintpt
         if (i->get_pl() == character)
         {
             if (i->is_doppel() && i->get_pl0300_type() == Pl0300Type::Em6000Friendly)
-                return false;
+                return i->is_doppel_destroy_requested();
             else if (i->get_pl0300_type() == Pl0300Type::PlHelper)
                 return true;
         }
@@ -232,18 +273,15 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintpt
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
+    _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
     for (auto& i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && !i->is_doppel())
         {
-            bool skipCall = false;
-            _mod->_pl0300UpdateLockOnEvent.invoke(threadCtxt, i, &skipCall);
-            if(!skipCall)
-                _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
+            _mod->_afterPl0300UpdateLockOnEvent.invoke(threadCtxt, i);
             return;
         }
     }
-    _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
 }
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_target_on_enemy_hook(uintptr_t threadCtxt, uintptr_t pl0300)
@@ -272,7 +310,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook
             bool skipCall = false;
             _mod->_pl0300OnTeleportCalcDestinationEvent.invoke(threadCtxt, fsmPl0300Teleport, i, &skipCall);
             if (!skipCall)
-                _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, pl0300);
+                _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
             return;
         }
     }
@@ -289,6 +327,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::we
     auto elevated = obj.lock();
     if (elevated == nullptr)
         return false;
+    std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
     if (elevated->is_doppel())
     {
         if (auto elevatedOwner = elevated->get_owner_ctrl().lock(); elevatedOwner != nullptr)
@@ -299,7 +338,6 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::we
     {
         if (_pl0300List[i] == elevated)
         {
-            std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
             _pl0300List.erase(_pl0300List.begin() + i);
             return true;
         }
@@ -307,17 +345,39 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::we
     return false;
 }
 
-std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300ControllerManager::create_em6000(Pl0300Type controllerType, gf::Vec3 pos, 
-    volatile int *&loadStepOut, bool isKeepingOrigPadInput)
+void PlCntr::Pl0300Cntr::Pl0300ControllerManager::load_pfb(bool exCostume)
 {
-    auto pl0300GameObj = emSpawnerMod->spawn_enemy(38, pos, loadStepOut);
+    if (exCostume)
+    {
+        if (_pl0300C00Pfb != nullptr && _pl0300C00Pfb->referenceCount > 0)
+            return;
+        _pl0300C00PathStr = std::make_unique<gf::SysString>(_pl0300C00Path);
+        _pl0300C00Pfb = PfbFactory::PrefabFactory::create_prefab(_pl0300C00PathStr.get(), (uintptr_t)sdk::get_thread_context());
+    }
+    else
+    {
+        if (_pl0300Pfb != nullptr && _pl0300Pfb->referenceCount > 0)
+            return;
+        _pl0300PathStr = std::make_unique<gf::SysString>(_pl0300Path);
+        _pl0300Pfb = PfbFactory::PrefabFactory::create_prefab(_pl0300PathStr.get(), (uintptr_t)sdk::get_thread_context());
+    }
+}
+
+std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300ControllerManager::create_em6000(Pl0300Type controllerType, gf::Vec3 pos, bool isKeepingOrigPadInput, bool exCostume)
+{
+    load_pfb(exCostume);
+    auto curPfb = exCostume ? _pl0300C00Pfb : _pl0300Pfb;
+    if(!sdk::call_object_func_easy<bool>(curPfb, "get_Valid()"))
+        return std::weak_ptr<Pl0300Controller>();
+    gf::PrefabInstantiate pfb;
+    auto pl0300GameObj = pfb((uintptr_t)curPfb, pos);
     if (pl0300GameObj == 0)
         return std::weak_ptr<Pl0300Controller>();
     auto bossType = sdk::find_type_definition("app.player.pl0300.PlayerVergil")->get_runtime_type();
     auto pl0300 = (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pl0300GameObj, "getComponent(System.Type)", bossType);//Get pl0300 script from GameObj
     try
     {
-        std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
+        std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
         _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
     }
     catch (const std::exception& e)
@@ -351,13 +411,13 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
 {
     if (controllerOwner == nullptr || controllerOwner->get_doppel() == 0)
         return std::weak_ptr<Pl0300Controller>();
-    std::shared_ptr<Pl0300Controller> owner;
     for (const auto& i : _pl0300List)
     {
         if (i->get_pl() == controllerOwner->get_doppel())//Doppel already summoned
             return std::weak_ptr<Pl0300Controller>();
         
     }
+    std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
     int indx = 0;
     for (int i = 0; i < _pl0300List.size(); i++)
     {
@@ -366,7 +426,6 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
         if (_pl0300List[i].get() == controllerOwner)
             indx = i;
     }
-    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
     auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly));
     _pl0300List.push_back(doppel);
     doppel->_owner = std::weak_ptr<Pl0300Controller>(_pl0300List[indx]);
@@ -375,12 +434,14 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppel_routine(const Pl0300Controller* doppelController)
 {
-    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
+    if (GameplayStateTracker::isCutscene)
+        return;
+    _pl0300ListChangeMtx.lock();
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj)
         {
             return obj->get_pl() == doppelController->get_pl();
         }), _pl0300List.end());
-    
+    _pl0300ListChangeMtx.unlock();
     _doppelRemoveCoroutinesList.erase(std::remove_if(_doppelRemoveCoroutinesList.begin(), _doppelRemoveCoroutinesList.end(),
         [&](const std::unique_ptr<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>& coroutine)
         {
@@ -410,7 +471,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, P
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::kill_all_friendly_em6000()
 {
-    std::lock_guard<std::mutex> lck(_pl0300ListChangeMtx);
+    std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj) {return obj->get_pl0300_type() == Pl0300Type::Em6000Friendly; }), _pl0300List.end());
 }
 
@@ -451,6 +512,10 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
 
     auto addEmFuncAddr = m_patterns_cache->find_addr(base, "B6 00 CC CC CC CC CC CC CC CC 48 89 5C 24 18");
     requestAddEmFuncAddr = addEmFuncAddr ? addEmFuncAddr.value() + 0x0A : (uintptr_t)base + 0x19DD130;
+
+    auto requestBossCam = m_patterns_cache->find_addr(base, "48 8B C4 48 89 58 10 48 89 70 18 48 89 78 20 55 48 8D 68 A1 48 81 EC F0");
+    //DevilMayCry5.app_PlayerCameraController__RequestBossCamera147662
+    requestBossCameraFunc = requestBossCam ? requestBossCam.value() : (uintptr_t)base + 0xD018E0;
 
     auto requestAddEmAddr = m_patterns_cache->find_addr(base, "E8 8A A0 00 01"); // DevilMayCry5.exe+9D30A1 
     if (!pl300MissionNo)
@@ -501,6 +566,12 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unable to find Pl0300ControllerManager.pl0300CheckDamageAddr pattern.";
     }
 
+    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 95 26 33 00");//DevilMayCry5.exe+9CF246
+    if (!pl0300DoppelDestroyReqBossCamAddr)
+    {
+        return "Unable to find Pl0300ControllerManager.pl0300DoppelDestroyReqBossCamAddr pattern.";
+    }
+
     if (!install_hook_absolute(requestAddEmAddr.value(), _requestAddEmObjHook, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
@@ -511,6 +582,12 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300CheckDamage";
+    }
+
+    if (!install_hook_absolute(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamHook, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
+    {
+        spdlog::error("[{}] failed to initialize", get_name());
+        return "Failed to initialize Pl0300ControllerManager.pl0300DoppelDestroyReqBossCam";
     }
 
     _pl0300GetMissionHook = std::make_unique<FunctionHook>(pl300MissionNo.value(), &pl0300_get_mission_n_hook);
@@ -533,12 +610,6 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
 
     _pl0300TeleportCalcDestHook = std::make_unique<FunctionHook>(pl0300TeleportDestAddr.value(), &pl0300_teleport_calc_dest_hook);
     _pl0300TeleportCalcDestHook->create();
-
-    /*_pl0300OnChangePlayerActionFromThinkHook = std::make_unique<FunctionHook>(pl0300OnChangePlActionFromThinkAddr.value(), &pl0300_on_change_pl_action_from_think);
-    _pl0300OnChangePlayerActionFromThinkHook->create();
-
-    _pl0300OnPreparePlayerActionFromThinkHook = std::make_unique<FunctionHook>(pl0300OnPreparePlActionFromThinkAddr.value(), &pl0300_on_prepare_pl_action_from_think);
-    _pl0300OnPreparePlayerActionFromThinkHook->create();*/
 
     PlayerTracker::before_reset_pad_input_sub<Pl0300ControllerManager>(std::make_shared<Events::EventHandler<Pl0300ControllerManager, uintptr_t, bool, bool*>>(this, &Pl0300ControllerManager::on_pl_pad_input_reset));
 

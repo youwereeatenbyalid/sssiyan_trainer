@@ -543,8 +543,8 @@ int PlayerTracker::pl0800_on_guard_hook(uintptr_t threadCtxt, uintptr_t vergil, 
 
 void PlayerTracker::pl_manager_add_pl_hook(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl)
 {
+	_mod->_onPlMngPlAddEvent.invoke(threadCtxt, plManager, pl);
 	_mod->m_pl_manager_add_pl_hook->get_original<decltype(pl_manager_add_pl_hook)>()(threadCtxt, plManager, pl);
-	_mod->_playerAdded.invoke(threadCtxt, pl);
 }
 
 void PlayerTracker::pl_set_die_hook(uintptr_t threadCtxt, uintptr_t pl)

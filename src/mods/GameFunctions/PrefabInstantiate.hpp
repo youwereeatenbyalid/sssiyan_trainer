@@ -42,7 +42,7 @@ namespace GameFunctions
 
 		uintptr_t invoke(uintptr_t prefab, const Vec3& pos)
 		{
-			//pfb = prefab;
+			pfb = prefab;
 			if (fAddr != NULL && pfb != 0)
 				return prefab_instantiate(NULL, (void*)pfb, pos);
 			return 0;

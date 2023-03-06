@@ -29,6 +29,7 @@ public:
 
 	enum class StabReaction
 	{
+		None = 0, 
 		Stun = 3200,
 		Dying = 3230,
 		DamageStandL = 3001,//0xBB9
@@ -40,6 +41,9 @@ public:
 	};
 
 private:
+
+	using ReleaseRoutineType = Coroutines::Coroutine<void(BossVergilMoves::*)(std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>), BossVergilMoves*,
+		std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>>;
 
 	Pl0300TrickType _pl0300TrickType = Pl0300TrickType::ToEnemy;
 
@@ -54,7 +58,15 @@ private:
 			_doppelUpdateCoroutine.stop();
 
 			if(auto pl0300 = _pl0300.lock(); pl0300 != nullptr && pl0300->get_doppel() != 0)
+			{
+				auto doppel = pl0300->get_doppel_ctrl().lock();
+				if (doppel != nullptr)
+				{
+					doppel->set_action(L"Wait");
+					doppel->pl_reset_status();
+				}
 				pl0300->destroy_doppel();
+			}
 		}
 
 	private:
@@ -113,18 +125,19 @@ private:
 
 		static inline std::uniform_real_distribution<float> _rndTeleportOffsXY{ -3.25f, 4.15f};
 
-		static inline sdk::REMethodDefinition* _transformSetLocalScaleMethod = nullptr;
-		static inline sdk::REMethodDefinition* _plDoCharUpdateMethod = nullptr;
-		static inline sdk::REMethodDefinition* _pl0800ResetStatusMethod = nullptr;
-		static inline sdk::REMethodDefinition* _pl0800EndCutSceneMethod = nullptr;
-		static inline sdk::REMethodDefinition* _plCamCntrlSetPlAccMethod = nullptr;
+		static inline sdk::REMethodDefinition* _transformSetLocalScaleMethod;
+		static inline sdk::REMethodDefinition* _plDoCharUpdateMethod;
+		static inline sdk::REMethodDefinition* _pl0800ResetStatusMethod;
+		static inline sdk::REMethodDefinition* _pl0800EndCutSceneMethod;
+		static inline sdk::REMethodDefinition* _plCamCntrlSetPlAccMethod;
 		static inline sdk::REMethodDefinition* _emSetActionMethod;
 		static inline sdk::REMethodDefinition* _charSetLockOnTargetMethod;
 		static inline sdk::REMethodDefinition* _targetCntrSetTargetMethod;
 		static inline sdk::REMethodDefinition* _targetCntrUpdateMethod;
+		static inline sdk::REMethodDefinition* _workRateSetHitStopMethod;
 
-		static inline sdk::RETypeDefinition* _lockOnObjTD = nullptr;
-		static inline sdk::RETypeDefinition* _plAccessorTD = nullptr;
+		static inline sdk::RETypeDefinition* _lockOnObjTD;
+		static inline sdk::RETypeDefinition* _plAccessorTD;
 
 		sdk::REMethodDefinition* _gameModelSetDrawSelfMethod = nullptr;
 		sdk::REMethodDefinition* _gameModelSetEnableMethod = nullptr;
@@ -132,31 +145,59 @@ private:
 		sdk::REMethodDefinition* _networkBBUpdateNetworkTypeMethod = nullptr;
 
 		REManagedObject* _pl0300Accessor = nullptr;
-		REManagedObject* _pl0300LockOnObj = nullptr;
 
 		static inline std::unique_ptr<FunctionHook> _plCamCntrSetPlHook = nullptr;
 		static inline uintptr_t _plCamCntrlSetPlAddr = 0;
 
 		static inline bool _isStaticInitRequested = true;
 		static inline bool _isBossMovePerforming = false;
+		static inline bool _isCameraSetSkipRequested = false;
+
+		static inline int _pairCount = 0;
 
 		bool _isAfterFirstAirRaidState = false;
 		bool _isAfterFirstTrickStabState = false;
 
 		bool _isTrickStabPerforming = false;
 
+		bool _isPl0300Active = false;
+
 		gf::Vec3 _airRaidStartPos;
 		gf::Vec3 _moveStartPos;
 
 		const InputSystem* _inputSys = nullptr;
 
-		uintptr_t _pl0800LastLockOnTargetWork;
+		uintptr_t _pl0800LastLockOnTargetWork = 0;
+		uintptr_t _pl0800LastPlAccessor = 0;
 
 		static inline void pl_cam_cntrl_set_pl_hook(uintptr_t threadCntx, uintptr_t obj, uintptr_t plAcessor)
 		{
-			/*if (!_isBossMovePerforming)
-				_plCamCntrSetPlHook->get_original<decltype(pl_cam_cntrl_set_pl_hook)>()(threadCntx, obj, plAcessor);*/
 			//Disallow cam set while pl0300 is active
+			if (_isCameraSetSkipRequested)
+				return;
+			_plCamCntrSetPlHook->get_original<decltype(pl_cam_cntrl_set_pl_hook)>()(threadCntx, obj, plAcessor);
+		}
+
+		void on_photo_mode_open(uintptr_t threadCntx, uintptr_t ui3500GUI)
+		{
+			if (!_isPl0300Active)
+				return;
+			auto pl0300 = _pl0300.lock();
+			if (pl0300 == nullptr)
+				return;
+			gf::Transform_SetPosition::set_character_pos(_pl0800, pl0300->get_pl_pos());
+			pl0300->get_network_base_bhvr_update_method()->call(threadCntx, _pl0800);
+		}
+
+		void on_photo_mode_closed(uintptr_t threadCntx, uintptr_t ui3500GUI)
+		{
+			if (!_isPl0300Active)
+				return;
+			auto pl0300 = _pl0300.lock();
+			if (pl0300 == nullptr)
+				return;
+			gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
+			pl0300->get_network_base_bhvr_update_method()->call(threadCntx, _pl0800);
 		}
 
 		void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrig)
@@ -182,7 +223,7 @@ private:
 			{
 				auto characterTarget = *(uintptr_t*)(ccc + 0x58);
 				gf::Vec3 targetPos = *(gf::Vec3*)(ccc + 0x60);
-				if (_stabTrickUpdateType == Pl0300TrickType::ToEnemy)
+				if (_stabTrickUpdateType == Pl0300TrickType::ToEnemy && characterTarget != 0)
 				{
 					gf::Vec3 newPos(targetPos.x + _rndTeleportOffsXY(_rndGen), targetPos.y + _rndTeleportOffsXY(_rndGen), (*(gf::Vec3*)(characterTarget + 0x3E0)).z);
 					*(gf::Vec3*)(pl0300->get_pl() + 0x1f40) = *(gf::Vec3*)(fsmPl0300Teleport + 0x80) = newPos;
@@ -193,26 +234,30 @@ private:
 			}
 		}
 
-		void on_pl0300_lockon_update(uintptr_t threadCntxt, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrigCall)
+		void after_pl0300_lockon_update(uintptr_t threadCntxt, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300)
 		{
-			if (pl0300->get_pl() != _pl0300.lock()->get_pl())
+			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !check_target_work_valid(_pl0800LastLockOnTargetWork))
 				return;
-			*skipOrigCall = true;
+			else
+			{
+				auto uPl0300 = _pl0300.lock()->get_pl();
+				auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
+				auto character = *(uintptr_t*)(_pl0800LastLockOnTargetWork + 0x58);
+				_targetCntrSetTargetMethod->call(threadCntxt, pl0300TargetCntrl, 5, character);
+				_targetCntrUpdateMethod->call(threadCntxt, pl0300TargetCntrl);
+			}
 		}
 
 		void on_pl0300_lockon_target_update(uintptr_t threadCntxt, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrigCall)
 		{
-			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || _pl0300LockOnObj == nullptr)
-				return;
-			auto pl0300LockOnTargetWork = *(uintptr_t*)((uintptr_t)_pl0300LockOnObj + 0x10);
-			if (!check_target_work_valid(pl0300LockOnTargetWork))
+			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !check_target_work_valid(_pl0800LastLockOnTargetWork))
 				return;
 			else
 			{
 				*skipOrigCall = true;
 				auto uPl0300 = _pl0300.lock()->get_pl();
 				auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
-				auto character = *(uintptr_t*)(pl0300LockOnTargetWork + 0x58);
+				auto character = *(uintptr_t*)(_pl0800LastLockOnTargetWork + 0x58);
 				_targetCntrSetTargetMethod->call(threadCntxt, pl0300TargetCntrl, 5, character);
 				_targetCntrUpdateMethod->call(threadCntxt, pl0300TargetCntrl);
 			}
@@ -263,6 +308,8 @@ private:
 
 		inline void update_stab_reaction(const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> &pl0300)
 		{
+			if (_stabEmReaction == StabReaction::None)
+				return;
 			auto pl0300HC = *(uintptr_t*)(pl0300->get_pl() + 0x1F8);
 			auto pl0300AttackList = *(uintptr_t*)(pl0300HC + 0x268);
 			if (pl0300AttackList == 0)
@@ -285,7 +332,15 @@ private:
 				if (damagedChar == 0)
 					continue;
 				if (auto emId = EnemyData::get_em_id(damagedChar); emId != EnemyData::Dante && emId != EnemyData::Vergil && emId != EnemyData::None)
+				{
 					_emSetActionMethod->call(sdk::get_thread_context(), damagedChar, (int32_t)_stabEmReaction, 0, 10.0f, 0.0f, 1, 0, true);
+					if (_isSetHitStopAfterStab)
+					{
+						auto workRate = *(uintptr_t*)(damagedChar + 0x200);
+						if (workRate != 0)
+							_workRateSetHitStopMethod->call(sdk::get_thread_context(), workRate, _hitStopRate, _hitStopTime, false);
+					}
+				}
 			}
 		}
 
@@ -400,11 +455,6 @@ private:
 
 		void set_pl0800_lock_on_to_pl0300(const std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300, uintptr_t threadCntx)
 		{
-			if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
-			{
-				PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
-				_pl0300LockOnObj = nullptr;
-			}
 			auto uPl0300 = pl0300->get_pl();
 			auto pl0300PadInput = *(uintptr_t*)(uPl0300 + 0xEF0);
 			auto pl0300EnemyPadInput = *(uintptr_t*)(uPl0300 + 0xEF8);
@@ -415,14 +465,6 @@ private:
 				*(bool*)(pl0300PadInput + 0x24) = false;
 				*(bool*)(pl0300PadInput + 0x28) = true;
 			}
-			if (pl0300EnemyPadInput != 0)
-			{
-				*(bool*)(pl0300EnemyPadInput + 0x28) = true;
-			}
-			if (pl0300TracePadInput != 0)
-			{
-				*(bool*)(pl0300TracePadInput + 0x28) = true;
-			}
 
 			auto pl0800LockOnObj = *(uintptr_t*)(_pl0800 + 0x428);
 			if (pl0800LockOnObj == 0)
@@ -431,10 +473,7 @@ private:
 			if (pl0800LockOnTargetWork == 0)
 				return;
 
-			_pl0300LockOnObj = _lockOnObjTD->create_instance_full();
-			PfbFactory::PrefabFactory::add_ref(_pl0300LockOnObj);
-			*(uintptr_t*)((uintptr_t)_pl0300LockOnObj + 0x10) = pl0800LockOnTargetWork;
-			_charSetLockOnTargetMethod->call(threadCntx, uPl0300, _pl0300LockOnObj);
+			_pl0800LastLockOnTargetWork = pl0800LockOnTargetWork;
 
 			auto ccc = *(uintptr_t*)(uPl0300 + 0x1818);
 			auto character = *(uintptr_t*)(pl0800LockOnTargetWork + 0x58);
@@ -456,7 +495,7 @@ private:
 
 	public:
 
-		uintptr_t _pl0800;
+		const uintptr_t _pl0800;
 		const std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> _pl0300;
 
 		static inline Pl0300TrickType _stabTrickUpdateType = Pl0300TrickType::ToEnemy;
@@ -464,7 +503,7 @@ private:
 		static inline StabReaction _stabEmReaction = StabReaction::DamageStandL;
 
 		PlPair() = delete;
-		PlPair(uintptr_t pl0800, std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, const InputSystem* inputSysMod) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
+		PlPair(uintptr_t pl0800, std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, const InputSystem* inputSysMod, uintptr_t threadCntx) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
 		{
 			_doppelDestroyCoroutine.ignoring_update_on_pause(true);
 			_gameModelSetDrawSelfMethod = pl0300.lock()->get_game_model_set_draw_self_method();
@@ -480,10 +519,13 @@ private:
 
 			_pl0300Manager->on_pl0300_teleport_calc_destination_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_trick_update));
-			_pl0300Manager->on_pl0300_update_lock_on_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-				(this, &PlPair::on_pl0300_lockon_update));
+			_pl0300Manager->after_pl0300_update_lock_on_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>>>
+				(this, &PlPair::after_pl0300_lockon_update));
 			_pl0300Manager->on_pl0300_update_lock_on_target_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_lockon_target_update));
+
+			GameplayStateTracker::on_ui3500_gui_open_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_open));
+			GameplayStateTracker::on_ui3500_gui_closed_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_closed));
 
 			if (_isStaticInitRequested)
 			{
@@ -497,6 +539,7 @@ private:
 				_charSetLockOnTargetMethod = sdk::find_method_definition("app.character.Character", "set_lockOnTarget(app.LockOnObject)");
 				_targetCntrSetTargetMethod = sdk::find_method_definition("app.TargetController", "setTarget(app.TargetController.TargetTypeEnum, app.character.Character)");//enum 5
 				_targetCntrUpdateMethod = sdk::find_method_definition("app.TargetController", "update()");
+				_workRateSetHitStopMethod = sdk::find_method_definition("app.WorkRate", "setHitStop(System.Single, System.Single, System.Boolean)");
 
 				_lockOnObjTD = sdk::find_type_definition("app.LockOnObject");
 				_plAccessorTD = sdk::find_type_definition("app.PlayerAccessor");
@@ -504,50 +547,50 @@ private:
 				_stabStr = std::make_unique<gf::SysString>(L"Stab");
 
 				_plCamCntrlSetPlAddr = g_framework->get_module().as<uintptr_t>() + 0xCD1920;
+
 				_isStaticInitRequested = false;
 			}
-		}
 
-		PlPair(PlPair&& other) : _pl0800(other._pl0800), _pl0300(std::move(other._pl0300)), _inputSys(other._inputSys)
-		{
-			_doppelDestroyCoroutine.ignoring_update_on_pause(true);
-			_pl0300ActionUpdateCoroutine.ignoring_update_on_pause(true);
-			_pl0300ActionUpdateCoroutine.set_delay(0);
+			if(_plCamCntrSetPlHook == nullptr)
+			{
+				_plCamCntrSetPlHook = std::make_unique<FunctionHook>(_plCamCntrlSetPlAddr, &pl_cam_cntrl_set_pl_hook, false);
+				_plCamCntrSetPlHook->create();
+			}
 
-			_gameModelSetDrawSelfMethod = other._gameModelSetDrawSelfMethod;
-			_gameModelSetEnableMethod = other._gameModelSetEnableMethod;
-			_networkBBUpdateMethod = other._networkBBUpdateMethod;
-			_networkBBUpdateNetworkTypeMethod = other._networkBBUpdateNetworkTypeMethod;
-			_transformSetLocalScaleMethod = other._transformSetLocalScaleMethod;
-			_plDoCharUpdateMethod = other._plDoCharUpdateMethod;
-			_pl0800ResetStatusMethod = other._pl0800ResetStatusMethod;
-			_stabStr = std::move(other._stabStr);
-			_pl0300Accessor = other._pl0300Accessor;
-			_pl0300Manager->on_pl0300_teleport_calc_destination_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-				(this, &PlPair::on_pl0300_trick_update));
-			_pl0300Manager->on_pl0300_update_lock_on_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-				(this, &PlPair::on_pl0300_lockon_update));
-			_pl0300Manager->on_pl0300_update_lock_on_target_sub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-				(this, &PlPair::on_pl0300_lockon_target_update));
+			auto shared = pl0300.lock();
+			if (shared == nullptr)
+				return;
+			_pl0300Accessor = _plAccessorTD->create_instance_full();
+			PfbFactory::PrefabFactory::add_ref(_pl0300Accessor);
+			auto uPlAcc = (uintptr_t)_pl0300Accessor;
+			*(uintptr_t*)(uPlAcc + 0x10) = shared->get_transform();
+			//*(uintptr_t*)(uPlAcc + 0x18) = pl0300->get_pl();
+			sdk::get_object_method(_pl0300Accessor, "set_player(app.Player)")->call(threadCntx, _pl0300Accessor, shared->get_pl());
+			_pairCount++;
 		}
 
 		~PlPair()
 		{
 			destroy_doppel();
 			stop_air_raid_coroutine();
-			_pl0300Accessor = nullptr;
+			_pl0300ActionUpdateCoroutine.stop();
 			_plCamCntrSetPlHook = nullptr;
 			_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_trick_update));
-			_pl0300Manager->on_pl0300_update_lock_on_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-				(this, &PlPair::on_pl0300_lockon_update));
+			_pl0300Manager->after_pl0300_update_lock_on_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>>>
+				(this, &PlPair::after_pl0300_lockon_update));
 			_pl0300Manager->on_pl0300_update_lock_on_target_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_lockon_target_update));
-			if(_pl0300LockOnObj != nullptr)
-				PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
+			GameplayStateTracker::on_ui3500_gui_open_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_open));
+			GameplayStateTracker::on_ui3500_gui_closed_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_closed));
 			if (_pl0300Accessor != nullptr)
 				PfbFactory::PrefabFactory::release(_pl0300Accessor);
-			_pl0300LockOnObj = _pl0300Accessor = nullptr;
+			_pl0300Accessor = nullptr;
+			_pl0300Manager->destroy_game_obj(_pl0300);
+			_isCameraSetSkipRequested = false;
+			_pairCount--;
+			if (_pairCount == 0)
+				_plCamCntrSetPlHook = nullptr;
 		}
 
 		void on_pl_reload_reset()
@@ -703,7 +746,7 @@ private:
 			pl0300->set_is_control(true);
 
 			auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
-			pl0300->update_em_teleport();
+			//pl0300->update_em_teleport();
 			if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
 			{
 				auto characterTarget = *(uintptr_t*)(ccc + 0x58);
@@ -745,6 +788,11 @@ private:
 			auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr)
 				return;
+			if (pl0300->get_cur_mediation_type() != 2)
+			{
+				pl0300->set_network_base_active(true);
+				pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, pl0300->get_pl());
+			}
 			if (*get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())) == 3 && plId == 3)
 				return;
 			auto camCntr = get_pl_camera_controller();
@@ -758,28 +806,24 @@ private:
 				*(bool*)(_pl0800 + 0x4C6) = false;
 				pl0300->set_hp(20000.0f);
 				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
-				{
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
-				}
-				change_pl0800_enable_state(false);
-				change_pl0300_enable_state(true);
-
 				if (_pl0800ResetStatusMethod != nullptr)
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
+				change_pl0800_enable_state(false);
+				change_pl0300_enable_state(true);
 				
-				if (_pl0300Accessor != nullptr)
-					PfbFactory::PrefabFactory::release(_pl0300Accessor);
-				_pl0300Accessor = _plAccessorTD->create_instance_full();
-				PfbFactory::PrefabFactory::add_ref(_pl0300Accessor);
-				auto uPlAcc = (uintptr_t)_pl0300Accessor;
-				*(uintptr_t*)(uPlAcc + 0x10) = pl0300->get_transform();
-				*(uintptr_t*)(uPlAcc + 0x18) = pl0300->get_pl();
-				_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0300Accessor);
-				_plCamCntrSetPlHook = std::make_unique<FunctionHook>(_plCamCntrlSetPlAddr, &pl_cam_cntrl_set_pl_hook, false);
-				_plCamCntrSetPlHook->create();
+				//Create camera hook only if pl0800 is current manual player
+				if(*(uintptr_t*)(((uintptr_t)pl0300->get_pl_manager()) + 0x60) == _pl0800)
+				{
+					_pl0800LastPlAccessor = *(uintptr_t*)(camCntr + 0x4D0);
+					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0300Accessor);
+					_isCameraSetSkipRequested = true;
+				}
+				_isPl0300Active = true;
 			}
 			else
 			{
+				*(uintptr_t*)(pl0300->get_pl() + 0x428) = 0;
 				*(bool*)(_pl0800 + 0x4C6) = true;
 				auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF0);
 				if (pl0300PadInput != 0)
@@ -788,10 +832,6 @@ private:
 					*(bool*)(pl0300PadInput + 0x28) = false;
 				}
 
-				auto pl0800PadInput = *(uintptr_t*)(_pl0800 + 0xEF0);
-				if (pl0800PadInput != 0)
-					*(bool*)(pl0800PadInput + 0x24) = true;
-
 				if (callPl0800EndCutscene && _pl0800EndCutSceneMethod != nullptr)
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
 
@@ -799,22 +839,20 @@ private:
 				*get_char_rot(_pl0800) = *get_char_rot(pl0300->get_pl());
 				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
 					pl0300->set_dt(PlCntr::DT::Human);
-				pl0300->end_cutscene();
+				pl0300->set_action(L"Wait");
 				pl0300->get_pl_reset_status_method()->call(threadCntxt, pl0300->get_pl());
+				pl0300->end_cutscene();
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
-				_plCamCntrSetPlHook = nullptr;
-				PfbFactory::PrefabFactory::release(_pl0300Accessor);
-				_pl0300Accessor = nullptr;
-				if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
-				{
-					PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
-					_pl0300LockOnObj = nullptr;
-				}
+				_isCameraSetSkipRequested = false;
+				_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0800LastPlAccessor);
+				_pl0800LastLockOnTargetWork = 0;
+				_pl0800LastPlAccessor = 0;
+				_isPl0300Active = false;
 			}
 			_lastPlSwap = LastPlSwap::ViaCamSwap;
-			pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, pl0300->get_pl());
-			pl0300->get_network_base_bhvr_update_method()->call(threadCntxt, _pl0800);
+			_networkBBUpdateMethod->call(threadCntxt, pl0300->get_pl());
+			_networkBBUpdateMethod->call(threadCntxt, _pl0800);
 		}
 
 		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true)
@@ -823,6 +861,11 @@ private:
 			const auto pl0300 = _pl0300.lock();
 			if (pl0300 == nullptr || plManager == 0)
 				return 0;
+			if (pl0300->get_cur_mediation_type() != 2)
+			{
+				pl0300->set_network_base_active(true);
+				pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl());
+			}
 			int* curPl = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager()));
 			if (curPl == nullptr)
 				return 0;
@@ -853,14 +896,13 @@ private:
 				pl0300->get_pl_reset_status_method()->call(sdk::get_thread_context(), pl0300->get_pl());
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
-				if (_pl0300LockOnObj != nullptr && _pl0300LockOnObj->referenceCount > 0)
-				{
-					PfbFactory::PrefabFactory::release(_pl0300LockOnObj);
-					_pl0300LockOnObj = nullptr;
-				}
+				_pl0800LastLockOnTargetWork = 0;
+				_isPl0300Active = false;
+				_isCameraSetSkipRequested = false;
 			}
 			else
 			{
+				*(uintptr_t*)(pl0300->get_pl() + 0x428) = 0;
 				pl0300->set_pos_full(*get_char_pos(_pl0800));
 				*get_char_rot(pl0300->get_pl()) = *get_char_rot(pl);
 				*(bool*)(_pl0800 + 0x4C6) = false;
@@ -874,19 +916,21 @@ private:
 				if (_pl0800ResetStatusMethod != nullptr)
 				{
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
-					pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), _pl0800);
+					_networkBBUpdateMethod->call(sdk::get_thread_context(), _pl0800);
 				}
-				
+				_isPl0300Active = true;
 			}
 			*(uintptr_t*)(plManager + 0x60) = pl;
-			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl());
-			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), _pl0800);
+			_networkBBUpdateMethod->call(sdk::get_thread_context(), pl0300->get_pl());
+			_networkBBUpdateMethod->call(sdk::get_thread_context(), _pl0800);
 			_lastPlSwap = LastPlSwap::ViaPlId;
 			return pl;
 		}
+
+		inline bool is_pl0300_active() const noexcept { return _isPl0300Active; }
 	};
 
-	std::vector<PlPair> _vergilsList;
+	std::vector<std::unique_ptr<PlPair>> _vergilsList;
 
 	static inline std::unique_ptr<gf::SysString> _waitStr = nullptr;
 
@@ -898,11 +942,12 @@ private:
 	float _airRaidHeightOfArenaSideAutoOffs = 1.5f;
 	float _airRaidHeightOnOutsideAutoOffs = 8.0f;
 	float _airRaidDistanceCheckGroundAutoOffs = 5.0f;
+	static inline float _hitStopRate;
+	static inline float _hitStopTime;
 
 	bool _isFirstDoppelUpdate = true;
 
 	bool _isPl0300Loaded = false;
-	bool _isEm6000PfbFound = false;
 	bool _isPl0800CheckCommHookInstalled = false;
 
 	bool _isBossDoppelEnabled = true;
@@ -915,7 +960,10 @@ private:
 	bool _isAirRaidEnabled = true;
 	bool _isAirRaidAutoSetup = true;
 
-	bool _isTrickStabEnebled = true;
+	bool _isTrickStabEnabled = true;
+	static inline bool _isSetHitStopAfterStab = false;
+
+	bool _isExCostume = false;
 
 	PlCntr::DT _doppelsDtState = PlCntr::DT::Human;
 
@@ -930,8 +978,6 @@ private:
 
 	InputSystem* _inputSystem = nullptr;
 
-	EnemySpawner *_spawnerMod = nullptr;
-
 	VergilQuickSilver* _vergilQSMod = nullptr;
 
 	WitchTime* _wtMod = nullptr;
@@ -940,10 +986,9 @@ private:
 
 	PlCntr::Pl0300Cntr::AirRaidSettings _airRaidSettings{};
 
-	volatile int* _loadStep = nullptr;
-
 	sdk::REMethodDefinition* _pl0800IsActionExecutableMethod = nullptr;
 	sdk::REMethodDefinition* _commandCreateLeverCommandMethod = nullptr;
+	sdk::REMethodDefinition* _plMngrRequestRemoveMethod;
 
 	uintptr_t _pl0800CheckCommandAddr = 0;
 
@@ -957,29 +1002,6 @@ private:
 
 	VergilDoppelInitSetup::DoppelDelayState _doppelSpeed = VergilDoppelInitSetup::DoppelDelayState::Slow;
 
-	void add_pl0300(uintptr_t missionSettingMngr)
-	{
-		_spawnerMod->update_pfb(38, _loadStep);
-		if (_loadStep != nullptr)
-			_isEm6000PfbFound = true;
-		if (*_loadStep == 2)
-			return;
-		auto startPos = *(gf::Vec3*)(missionSettingMngr + 0xB0);
-		auto pl0300 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, startPos, _loadStep, true);
-		if (pl0300.lock() == nullptr)
-			return;
-		VergilDoppelInitSetup::on_doppel_summon_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>
-			(this, &BossVergilMoves::on_doppel_summon));
-		_vergilsList.emplace_back(PlPair(0, pl0300, _inputSystem));
-		_isPl0300Loaded = true;
-		auto shared = pl0300.lock();
-		shared->pl_manager_request_add();
-		shared->set_is_no_die(true);
-		_addPl0300Corutine.stop();
-	}
-
-	Coroutines::Coroutine<decltype(&BossVergilMoves::add_pl0300), BossVergilMoves*, uintptr_t> _addPl0300Corutine{ &BossVergilMoves::add_pl0300, false, true };
-
 	void init_check_box_info() override
 	{
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
@@ -988,14 +1010,8 @@ private:
 
 	void reset(EndLvlHooks::EndType end) override
 	{
-		if (!_vergilsList.empty())
-		{
-			auto msm = (uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.MissionSettingManager");
-			*(_vergilsList[0].get_cur_pl_id(msm)) = 4;
-		}
-		_loadStep = nullptr;
 		_isFirstDoppelUpdate = true;
-		_isEm6000PfbFound =_isPl0300Loaded = _isDoppelsActive = _isPl0800CheckCommHookInstalled = false;
+		_isPl0300Loaded = _isDoppelsActive = _isPl0800CheckCommHookInstalled = false;
 		_pl0800CheckCommandHook = nullptr;
 		_vergilsList.clear();
 		VergilDoppelInitSetup::on_doppel_summon_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>
@@ -1006,7 +1022,6 @@ private:
 
 	void after_all_inits() override
 	{
-		_spawnerMod = static_cast<EnemySpawner*>(g_framework->get_mods()->get_mod("EnemySpawner"));
 		_inputSystem = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
 		_pl0300Manager = static_cast<PlCntr::Pl0300Cntr::Pl0300ControllerManager*>(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
 		_vergilQSMod = static_cast<VergilQuickSilver*>(g_framework->get_mods()->get_mod("VergilQuickSilver"));
@@ -1029,23 +1044,10 @@ private:
 		std::unique_lock<std::mutex> lck(_onPfbInitMtx);
 		if (!cheaton || _isPl0300Loaded)
 			return;
-		auto missionSettingMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.MissionSettingManager");
-		if (missionSettingMngr == 0)
-			return;
-		auto missionSettings = *(uintptr_t*)(missionSettingMngr + 0xA0);
-		if (missionSettings == 0)
-			return;
-		auto plInfo = *(uintptr_t*)(missionSettings + 0x10);
-		if (plInfo == 0)
-			return;
-		if (*(int*)(plInfo + 0x10) != 4)
-			return;
+		VergilDoppelInitSetup::on_doppel_summon_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, VergilDoppelInitSetup::DoppelDelayState, bool*>>
+			(this, &BossVergilMoves::on_doppel_summon));
 		if (_pl0300Manager != nullptr)
-		{
-			if (_pl0800IsActionExecutableMethod == nullptr)
-				_pl0800IsActionExecutableMethod = sdk::find_method_definition("app.PlayerVergilPL", "isActionExecutable(app.PlayerVergilPL.LevelUpAction)");
-			_addPl0300Corutine.set_delay(1.0f);
-			_addPl0300Corutine.start(this, missionSettingMngr);
+		{				
 			if (GameplayStateTracker::gameMode == 3)
 				PlayerTracker::on_pl_die_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_set_die));
 			if (_pl0800CheckCommandHook == nullptr)
@@ -1054,54 +1056,46 @@ private:
 				_isPl0800CheckCommHookInstalled = _pl0800CheckCommandHook->create();
 			}
 		}
+		_pl0300Manager->load_pfb(_isExCostume);
 	}
 
-	void on_pl_added(uintptr_t threadCtxt, uintptr_t player)
+	void on_pl_added(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t player)
 	{
-		if (!cheaton)
+		if (!cheaton || player == 0 || *(int*)(player + 0xE64) != 4)
 			return;
-		if (_vergilsList.size() > 0/* && !_vergilsList[_vergilsList.size() - 1].is_init()*/)
-		{
-			_vergilsList[_vergilsList.size() - 1]._pl0300.lock()->update_pl_manager();
-		}
-		if (_isEm6000PfbFound && *(int*)(player + 0xE64) == 4)
-		{
-			if (_pl0300Manager != nullptr)
-			{
-				if (_vergilsList.size() > 0)
-				{
-					_vergilsList[_vergilsList.size() - 1]._pl0800 = player;
-					auto pl0300 = _vergilsList[_vergilsList.size() - 1]._pl0300.lock();
-					if (pl0300 == nullptr)
-						return;
-					pl0300->update_pl_manager();
-					pl0300->set_network_base_active(true);
-					pl0300->set_enable(false);
-					pl0300->set_draw_self(false);
-					pl0300->enable_physics_char_controller(false);
-					pl0300->set_is_control(false);
-					_vergilsList[0].on_pl_reload_reset();
-				}
-			}
-		}
+		auto missionSettingMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.MissionSettingManager");
+		auto startPos = *(gf::Vec3*)(missionSettingMngr + 0xB0);
+		auto pl0300Weak = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, startPos, true, _isExCostume);
+		auto pl0300 = pl0300Weak.lock();
+		if (pl0300 == nullptr)
+			return;
+		_isPl0300Loaded = true;
+		pl0300->set_network_base_active(false);
+		pl0300->get_network_base_bhvr_update_method()->call(threadCtxt, pl0300->get_pl());
+		_vergilsList.emplace_back(std::make_unique<PlPair>(player, pl0300Weak, _inputSystem, threadCtxt));
+		pl0300->update_pl_manager();
+		sdk::get_object_method((REManagedObject*)plManager, "addPlayer(app.Player)")->call(threadCtxt, plManager, pl0300->get_pl());
+		pl0300->set_is_no_die(true);
+		pl0300->set_is_control(false);
 	}
 
 	void on_pl_remove(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl, bool isUnload)
 	{
-		if (!cheaton)
+		if (pl == 0 || *(int*)(pl + 0xE64) != 4 || _vergilsList.empty())
 			return;
-		for (auto& i : _vergilsList)
+		for (int i = 0; i < _vergilsList.size(); i++)
 		{
-			if (pl == i._pl0800)
+			if (_vergilsList[i]->_pl0800 == pl)
 			{
-				i.destroy_doppel();
+				_vergilsList.erase(_vergilsList.begin() + i);
+				break;
 			}
-		}
+		}		
 	}
 
 	void on_pl_set_die(uintptr_t threadCtxt, uintptr_t pl)
 	{
-		if (cheaton && _isEm6000PfbFound && _isPl0300Loaded && *(int*)(pl + 0xE64) == 4 && GameplayStateTracker::gameMode == 3)
+		if (cheaton && _isPl0300Loaded && *(int*)(pl + 0xE64) == 4 && GameplayStateTracker::gameMode == 3)
 		{
 			auto bpManager = (uintptr_t)sdk::get_managed_singleton<REManagedObject>("app.BloodyPalaceManager");
 			if (bpManager != 0)
@@ -1125,14 +1119,14 @@ private:
 		{
 			for (auto& i : _vergilsList)
 			{
-				if (pl0800 == i._pl0800)
+				if (pl0800 == i->_pl0800)
 				{
-					if (!i.is_doppel_mode() )
+					if (!i->is_doppel_mode() )
 					{
 						if (*(float*)(pl0800 + 0x1110) >= 3000.0f)
 						{
 							auto doppelScale = _isNeedToScaleDoppel ? gf::Vec3(1.15f, 1.15f, 1.15f) : gf::Vec3(1.0f, 1.0f, 1.0f);
-							auto doppel = i.createDoppel(_isDoppelsAutoDestroy, _doppelLifeTime * 100.0F, doppelScale, false, _doppelHp, _doppelAttackRate).lock();
+							auto doppel = i->createDoppel(_isDoppelsAutoDestroy, _doppelLifeTime * 100.0F, doppelScale, false, _doppelHp, _doppelAttackRate).lock();
 							if (_isFirstDoppelUpdate)
 							{
 								_isFirstDoppelUpdate = false;
@@ -1151,7 +1145,7 @@ private:
 					}
 					else
 					{
-						i.destroy_doppel();
+						i->destroy_doppel();
 					}
 				}
 			}
@@ -1178,34 +1172,34 @@ private:
 	static bool force_edge_do_command_spec_ds_hook(uintptr_t threadCtxt, uintptr_t weaponForceEdge, int action)
 	{
 		const auto vergil = *(uintptr_t*)(weaponForceEdge + 0x310);
-		if (!cheaton || !_mod->_isAirRaidEnabled || !_mod->_isEm6000PfbFound || !_mod->_isPl0300Loaded || *(int*)(vergil + 0x9B0) == 2 || *(float*)(vergil + 0x1B20) < 5000.0f)
+		if (!cheaton || !_mod->_isAirRaidEnabled || !_mod->_isPl0300Loaded || *(int*)(vergil + 0x9B0) == 2 || *(float*)(vergil + 0x1B20) < 5000.0f)
 			return _mod->_FE_doCommandSpecHook->get_original<decltype(force_edge_do_command_spec_ds_hook)>()(threadCtxt, weaponForceEdge, action);
 
 		gf::PlayerCheckNormalJump checkJump(vergil);
 		for (auto& i : _mod->_vergilsList)
 		{
-			if (i._pl0800 == vergil)
+			if (i->_pl0800 == vergil)
 			{
-				if (auto pl0300 = i._pl0300.lock(); pl0300 != nullptr && checkJump() && _mod->_pl0800IsActionExecutableMethod != nullptr && _mod->_pl0800IsActionExecutableMethod->call(threadCtxt, vergil, 25))
+				if (auto pl0300 = i->_pl0300.lock(); pl0300 != nullptr && checkJump() && _mod->_pl0800IsActionExecutableMethod != nullptr && _mod->_pl0800IsActionExecutableMethod->call(threadCtxt, vergil, 25))
 				{
 					if (pl0300->get_game_model_get_hp_method() != nullptr && pl0300->get_game_model_set_hp_method() != nullptr)
 					{
 						*(float*)(vergil + 0x1B50) = 300.0f;//conc gauge 
 						*(float*)(vergil + 0x1B20) -= 5000.0f;//SDT gauge
-						float pl0800CurHp = pl0300->get_game_model_get_hp_method()->call<float>(threadCtxt, i._pl0800);
+						float pl0800CurHp = pl0300->get_game_model_get_hp_method()->call<float>(threadCtxt, i->_pl0800);
 						pl0800CurHp = pl0800CurHp >= 17000.0f ? 20000.0f : pl0800CurHp + 3000.0f;
-						pl0300->get_game_model_set_hp_method()->call(threadCtxt, i._pl0800, pl0800CurHp);
-						i.change_pl_via_cam(threadCtxt, 3);
+						pl0300->get_game_model_set_hp_method()->call(threadCtxt, i->_pl0800, pl0800CurHp);
+						i->change_pl_via_cam(threadCtxt, 3);
 						if (_mod->_isAirRaidAutoSetup)
 						{
-							auto pl0800GroundPos = get_ground_char_pos(i._pl0800);
+							auto pl0800GroundPos = get_ground_char_pos(i->_pl0800);
 							_mod->_airRaidSettings.heightOfArenaSide = _mod->_airRaidHeightOfArenaSideAutoOffs + pl0800GroundPos.z;
 							_mod->_airRaidSettings.heightOnOutside = _mod->_airRaidHeightOnOutsideAutoOffs + pl0800GroundPos.z;
 							_mod->_airRaidSettings.distanceCheckGround = _mod->_airRaidDistanceCheckGroundAutoOffs + pl0800GroundPos.z;
 						}
 						_mod->_vergilQSMod->request_end_quicksilver();
 						_mod->_wtMod->request_stop_witchtime();
-						i.start_air_raid(*get_char_pos(i._pl0800), _mod->_airRaidSettings, _mod->_pl0300AirRaidHCS);
+						i->start_air_raid(*get_char_pos(i->_pl0800), _mod->_airRaidSettings, _mod->_pl0300AirRaidHCS);
 						return true;
 					}
 				}
@@ -1216,7 +1210,7 @@ private:
 
 	static bool pl0800_check_command_hook(uintptr_t threadCtxt, uintptr_t pl0800)
 	{
-		if (!cheaton || !_mod->_isEm6000PfbFound || !_mod->_isPl0300Loaded || !_mod->_isTrickStabEnebled)
+		if (!cheaton || !_mod->_isPl0300Loaded || !_mod->_isTrickStabEnabled)
 			return _mod->_pl0800CheckCommandHook->get_original<decltype(pl0800_check_command_hook)>()(threadCtxt, pl0800);
 		if( *(int*)(pl0800 + 0x1B5C) == 2 && *(int*)(pl0800 + 0x1978) == 0 &&//concentrationLvl & weaponYamato
 			_mod->_inputSystem->is_action_button_pressed(*(uintptr_t*)(pl0800 + 0xEF0), InputSystem::PadInputGameAction::AttackS) &&
@@ -1228,9 +1222,9 @@ private:
 		{
 			for (auto& i : _mod->_vergilsList)
 			{
-				if (i._pl0800 == pl0800 && !i.is_trick_stab_performing())
+				if (i->_pl0800 == pl0800 && !i->is_trick_stab_performing())
 				{
-					if (auto pl0300 = i._pl0300.lock(); pl0300 != nullptr)
+					if (auto pl0300 = i->_pl0300.lock(); pl0300 != nullptr)
 					{
 						auto missionSettingsManager = (uintptr_t)pl0300->get_mission_setting_manager();
 						auto missionSettings = *(uintptr_t*)(missionSettingsManager + 0xA0);
@@ -1244,8 +1238,9 @@ private:
 						*(float*)(pl0800 + 0x1B50) -= 85.0f;
 					_mod->_vergilQSMod->request_end_quicksilver();
 					_mod->_wtMod->request_stop_witchtime();
-					i.change_pl_via_cam(threadCtxt, 3);
-					i.start_trick_stab(*get_char_pos(pl0800), _mod->_pl0300TrickStabHCS, _mod->_pl0300TrickType);
+					//i->_pl0300.lock()->get_pl_set_action_method()->call(threadCtxt, pl0800, _waitStr->get_net_str(), 0, 0, 0, 0, 0, false, false, true, 0);
+					i->change_pl_via_cam(threadCtxt, 3);
+					i->start_trick_stab(*get_char_pos(pl0800), _mod->_pl0300TrickStabHCS, _mod->_pl0300TrickType);
 					return false;
 				}
 			}
@@ -1263,6 +1258,8 @@ private:
 	void on_sdk_init() override
 	{
 		_waitStr = std::make_unique<gf::SysString>(L"Wait");
+		_pl0800IsActionExecutableMethod = sdk::find_method_definition("app.PlayerVergilPL", "isActionExecutable(app.PlayerVergilPL.LevelUpAction)");
+		_plMngrRequestRemoveMethod = sdk::find_method_definition("app.PlayerManager", "removePlayer(app.Player, System.Boolean)");
 	}
 
 public:
@@ -1281,7 +1278,7 @@ public:
 	~BossVergilMoves()
 	{
 		GameplayStateTracker::after_pfb_manager_init_unsub(std::make_shared<Events::EventHandler<BossVergilMoves>>(this, &BossVergilMoves::on_pfb_manager_inited));
-		PlayerTracker::pl_added_event_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
 		PlayerTracker::on_pl_manager_pl_unload_unsub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &BossVergilMoves::on_pl_remove));
 	}
 
@@ -1365,7 +1362,7 @@ public:
 		_gameSyncMechFix = _fuckCumpcomAddr + 0xC;
 
 		GameplayStateTracker::after_pfb_manager_init_sub(std::make_shared<Events::EventHandler<BossVergilMoves>>(this, &BossVergilMoves::on_pfb_manager_inited));
-		PlayerTracker::pl_added_event_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
+		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
 		PlayerTracker::on_pl_manager_pl_unload_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &BossVergilMoves::on_pl_remove));
 
 		_FE_doCommandSpecHook = std::make_unique<FunctionHook>(doCommSpecAddr.value() + 0x6, &BossVergilMoves::force_edge_do_command_spec_ds_hook);
@@ -1394,8 +1391,10 @@ public:
 		_airRaidSettings.useOptionalTrick = cfg.get<bool>("BossVergilMoves._airRaidSettings.useOptionalTrick").value_or(true);
 		_airRaidSettings.useSummonedSwords = cfg.get<bool>("BossVergilMoves._airRaidSettings.useSummonedSwords").value_or(false);
 		_pl0300AirRaidHCS.isAttackNoDie = cfg.get<bool>("BossVergilMoves._pl0300AirRaidHCS.isAttackNoDie").value_or(false);
-		_isTrickStabEnebled = cfg.get<bool>("BossVergilMoves._isTrickStabEnebled").value_or(true);
+		_isTrickStabEnabled = cfg.get<bool>("BossVergilMoves._isTrickStabEnebled").value_or(true);
 		_pl0300TrickStabHCS.isAttackNoDie = cfg.get<bool>("BossVergilMoves._pl0300TrickStabHCS.isAttackNoDie").value_or(false);
+		_isSetHitStopAfterStab = cfg.get<bool>("BossVergilMoves._isSetHitStopAfterStab").value_or(false);
+		_isExCostume = cfg.get<bool>("BossVergilMoves._isExCostume").value_or(false);
 
 		_doppelLifeTime = cfg.get<float>("BossVergilMoves._doppelLifeTime").value_or(850.0F);
 		_doppelAttackRate = cfg.get<float>("BossVergilMoves._doppelAttackRate").value_or(0.5F);
@@ -1413,6 +1412,8 @@ public:
 		_airRaidHeightOfArenaSideAutoOffs = cfg.get<float>("BossVergilMoves._airRaidHeightOfArenaSideAutoOffs").value_or(0.5f);
 		_airRaidHeightOnOutsideAutoOffs = cfg.get<float>("BossVergilMoves._airRaidHeightOnOutsideAutoOffs").value_or(5.5f);
 		_airRaidDistanceCheckGroundAutoOffs = cfg.get<float>("BossVergilMoves._airRaidDistanceCheckGroundAutoOffs").value_or(2.5f);
+		_hitStopRate = cfg.get<float>("BossVergilMoves._hitStopRate").value_or(0.1f);
+		_hitStopTime = cfg.get<float>("BossVergilMoves._hitStopTime").value_or(150.0f);
 
 		_doppelsDtState = (PlCntr::DT)cfg.get<int>("BossVergilMoves._doppelsDtState").value_or((int)PlCntr::DT::Human);
 		_airRaidSettings.attackNum = cfg.get<int>("BossVergilMoves._airRaidSettings.attackNum").value_or(4);
@@ -1431,7 +1432,9 @@ public:
 		cfg.set<bool>("BossVergilMoves._pl0300TrickStabHCS.isAttackNoDie", _pl0300TrickStabHCS.isAttackNoDie);
 		cfg.set<bool>("BossVergilMoves._airRaidSettings.useOptionalTrick", _airRaidSettings.useOptionalTrick);
 		cfg.set<bool>("BossVergilMoves._airRaidSettings.useSummonedSwords", _airRaidSettings.useSummonedSwords);
-		cfg.set<bool>("BossVergilMoves._isTrickStabEnebled", _isTrickStabEnebled);
+		cfg.set<bool>("BossVergilMoves._isTrickStabEnebled", _isTrickStabEnabled);
+		cfg.set<bool>("BossVergilMoves._isSetHitStopAfterStab", _isSetHitStopAfterStab);
+		cfg.set<bool>("BossVergilMoves._isExCostume", _isExCostume);
 
 		cfg.set<float>("BossVergilMoves._doppelLifeTime", _doppelLifeTime);
 		cfg.set<float>("BossVergilMoves._doppelAttackRate", _doppelAttackRate);
@@ -1447,6 +1450,8 @@ public:
 		cfg.set<float>("BossVergilMoves._airRaidHeightOfArenaSideAutoOffs", _airRaidHeightOfArenaSideAutoOffs);
 		cfg.set<float>("BossVergilMoves._airRaidHeightOnOutsideAutoOffs", _airRaidHeightOnOutsideAutoOffs);
 		cfg.set<float>("BossVergilMoves._airRaidDistanceCheckGroundAutoOffs", _airRaidDistanceCheckGroundAutoOffs);
+		cfg.set<float>("BossVergilMoves._hitStopRate", _hitStopRate);
+		cfg.set<float>("BossVergilMoves._hitStopTime", _hitStopTime);
 
 		cfg.set<int>("BossVergilMoves._doppelsDtState", (int)_doppelsDtState);
 		cfg.set<float>("BossVergilMoves._airRaidSettings.attackNum", _airRaidSettings.attackNum);
@@ -1480,6 +1485,9 @@ public:
 				"Air Raid on LDK can break enemy hitboxes until the mission restarts."
 				);
 		}
+
+		ImGui::Checkbox("Ex costume", &_isExCostume);
+		ImGui::ShowHelpMarker("If checked, boss will have an EX color costume, if not - the default one.");
 
 		if(ImGui::CollapsingHeader("Boss's Doppelganger"))
 		{
@@ -1600,7 +1608,7 @@ public:
 
 		if (ImGui::CollapsingHeader("Trick Stab"))
 		{
-			ImGui::Checkbox("Enable##2", &_isTrickStabEnebled);
+			ImGui::Checkbox("Enable##2", &_isTrickStabEnabled);
 			ImGui::Separator();
 
 			ImGui::TextWrapped("Hit controller settings:");
@@ -1628,12 +1636,19 @@ public:
 			ImGui::RadioButton("Down", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageDownFaceUp); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 			ImGui::RadioButton("Directional blow damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageDiagonalBlown);
 			ImGui::RadioButton("Fly damage", (int*)&PlPair::_stabEmReaction, (int)StabReaction::DamageFlyL);
+
+			ImGui::Spacing();
+
+			ImGui::Checkbox("Slow down enemy which was hitted by stab", &_isSetHitStopAfterStab);
+			ImGui::TextWrapped("Enemy speed rate:");
+			UI::SliderFloat("##_hitStopRate", &_hitStopRate, 0, 0.9f, "%.3f", 1.0, ImGuiSliderFlags_AlwaysClamp);
+			ImGui::TextWrapped("Duration:");
+			ImGui::InputFloat("##_hitStopTime", &_hitStopTime, 100.0f, 500.0f, "%.1f");
 		}
 		ImGui::ShowHelpMarker("When Yamato selected, press LockOn + Back + Trick + Attack with level 2 concentration to perform a trick stab. Consumes concentration on use.");
 
 		if (ImGui::CollapsingHeader("Load info:"))
 		{
-			ImGui::TextWrapped("Is em6000 pfb found: %d", _isEm6000PfbFound);
 			ImGui::TextWrapped("Is pl0300 loaded: %d", _isPl0300Loaded);
 			ImGui::TextWrapped("Is pl0800 check command hook installed: %d", _isPl0800CheckCommHookInstalled);
 		}
@@ -1660,11 +1675,10 @@ public:
 		if (ImGui::Button("Force end boss's moves."))
 		{
 			for (auto& i : _vergilsList)
-				i.force_end_moves();
+				i->force_end_moves();
 		}
 		ImGui::ShowHelpMarker("Press this if something goes wrong during a boss move."
 			"You can also do this during gameplay by pressing \"Reset camera\" + \"Change lock on\".");
-		ImGui::Spacing();
 	}
 };
 //clang-format on

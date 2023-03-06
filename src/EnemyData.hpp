@@ -50,53 +50,49 @@ namespace EnemyData
 		Dante = 55
 	};
 
-	inline const std::array<const char*, 40> const *get_em_names() noexcept
-	{
-	   static std::array<const char*, 40> emNames = {
-	  "Hell Caina", //0
-	  "Hell Antenora",//1
-	  "Hell Judecca", //2
-	  "Empusa",//3
-	  "Green Empusa",//4
-	  "Red Empusa", //5
-	  "Empusa Queen",//6
-	  "Riot", //7
-	  "Chaos", //8
-	  "Fury", //9
-	  "Baphomet",//10 
-	  "Lusachia", //11
-	  "Behemoth", //12
-	  "Nobody", //13
-	  "Scudo Angelo",//14, 
-	  "Proto Angelo", //15
-	  "Death Scrissors",//16
-	  "Hellbat", //17
-	  "Pyrobat", //18
-	  "Qliphoth's tentacle",//19 
-	  "Goliath", //20
-	  "Malphas", //21
-	  "Nidhogg", //22
-	  "Artemis", //23
-	  "Gilgamesh", //24
-	  "Elder Geryon Knight",//25
-	  "Cavaliere", //26
-	  "Qliphoth Root Boss",//27 
-	  "King Cerberus", //28
-	  "Griffon", //29
-	  "Shadow", //30
-	  "Nightmare", //31
-	  "Urizen 1",//32
-	  "Urizen 2",//33
-	  "Urizen 3",//34
-	  "Vergil", //35
-	  "Phantom Goliath",//36
-	  "Phantom Artemis",//37
-	  "Phantom Cavaliere",//38
-	  "Dante",//39 - emids: 55 - m19/20, 56 - m21
-	  //id 42 - Vergil M20/M21 ingame only
-		};
-		return &emNames;
-	}
+	static constexpr std::array<const char*, 40> EnemyNames{
+	 "Hell Caina", //0
+	 "Hell Antenora",//1
+	 "Hell Judecca", //2
+	 "Empusa",//3
+	 "Green Empusa",//4
+	 "Red Empusa", //5
+	 "Empusa Queen",//6
+	 "Riot", //7
+	 "Chaos", //8
+	 "Fury", //9
+	 "Baphomet",//10 
+	 "Lusachia", //11
+	 "Behemoth", //12
+	 "Nobody", //13
+	 "Scudo Angelo",//14, 
+	 "Proto Angelo", //15
+	 "Death Scrissors",//16
+	 "Hellbat", //17
+	 "Pyrobat", //18
+	 "Qliphoth's tentacle",//19 
+	 "Goliath", //20
+	 "Malphas", //21
+	 "Nidhogg", //22
+	 "Artemis", //23
+	 "Gilgamesh", //24
+	 "Elder Geryon Knight",//25
+	 "Cavaliere", //26
+	 "Qliphoth Root Boss",//27 
+	 "King Cerberus", //28
+	 "Griffon", //29
+	 "Shadow", //30
+	 "Nightmare", //31
+	 "Urizen 1",//32
+	 "Urizen 2",//33
+	 "Urizen 3",//34
+	 "Vergil", //35
+	 "Phantom Goliath",//36
+	 "Phantom Artemis",//37
+	 "Phantom Cavaliere",//38
+	 "Dante",//39 - emids: 55 - m19/20, 56 - m21
+	 //id 42 - Vergil M20/M21 ingame only
+	};
 
 	EnemyId indx_to_id(int arrayIndx) noexcept;
 
