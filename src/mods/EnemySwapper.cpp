@@ -8,6 +8,7 @@ static std::string uniqStr = "";
 std::string uniqComboStr = "";//For comboboxes
 
 int index = 0;
+int _selectedCbIndex = 0;
 
 void EnemySwapper::set_swapper_setting(int emListIndx, int swapToIndx) {
     _swapSettings[emListIndx]->swapId = EnemyData::indx_to_id(swapToIndx);
@@ -99,14 +100,10 @@ void EnemySwapper::on_draw_ui() {
             uniqStr = EnemyData::EnemyNames[i];
         }
 
-        if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick)) {
-            if (ImGui::IsMouseDoubleClicked(0)) {
-                _swapSettings[i]->swapId = EnemyData::indx_to_id(i);
-            }
-            else {
-                index = i;
-            }
-        }
+        if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick))
+            _swapSettings[i]->swapId = EnemyData::indx_to_id(_selectedCbIndex);
+        else
+            index = i;
         ImGui::PopStyleColor(2);
         ImGui::NextColumn();
     }
@@ -119,9 +116,7 @@ void EnemySwapper::on_draw_ui() {
 
     ImGui::TextWrapped(EnemyData::EnemyNames[index]);
     uniqComboStr = "##SwapToCustom";
-    ImGui::Combo(uniqComboStr.c_str(), (int*)&(_swapSettings[index]->swapId), EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
-    //set_swapper_setting(i, selectedToSwap[i]);
-    _swapSettings[index]->swapId = EnemyData::indx_to_id(_swapSettings[index]->swapId);
+    ImGui::Combo(uniqComboStr.c_str(), &_selectedCbIndex, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
     ImGui::Spacing();
     ImGui::Separator();
 
