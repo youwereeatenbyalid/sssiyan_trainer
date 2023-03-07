@@ -28,10 +28,8 @@ void EnemySwapper::on_config_load(const utility::Config& cfg) {
   uint32_t swapTo = 0;
   for (int i = 0; i < EnemyData::EnemyNames.size(); i++) {
     key = std::string(EnemyData::EnemyNames[i]) + "_swapTo";
-    swapTo = cfg.get<int>(key).value_or(i);
-    auto it = std::find_if(_swapSettings.begin(), _swapSettings.end(), [&](const std::unique_ptr<EnemyId>& obj) { return obj->currentId == EnemyData::indx_to_id(i); });
-    if (it != _swapSettings.end())
-        it->get()->swapId = (EnemyData::EnemyId)swapTo;
+    swapTo = cfg.get<int>(key).value_or(EnemyData::indx_to_id(i));
+    _swapSettings[i]->swapId = (EnemyData::EnemyId)swapTo;
   }
 }
 
