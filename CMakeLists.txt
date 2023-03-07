@@ -8,6 +8,9 @@ include_directories(${CMAKE_SOURCE_DIR}/dependencies/minhook/include)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/spdlog/include)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/glm)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/JsonStthm)
+#SOL and Lua includes for lua state interaction
+include_directories(${CMAKE_SOURCE_DIR}/dependencies/lua/src)
+include_directories(${CMAKE_SOURCE_DIR}/dependencies/sol2/single/include)
 
 # set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

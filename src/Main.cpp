@@ -2,12 +2,13 @@
 #include <mutex>
 #include <thread>
 #include <windows.h>
+#include <sol/sol.hpp>
 #include "reframework/API.hpp"
 #include "ModFramework.hpp"
 
 HMODULE g_dinput = 0;
 std::mutex g_load_mutex{};
-
+extern lua_State* g_lua{nullptr};
 void failed() {
     MessageBox(0, "ModFramework: Unable to load the original dinput8.dll. Please report this to the developer.", "ModFramework", 0);
     ExitProcess(0);
@@ -47,10 +48,35 @@ extern "C" {
     }
 }
 
+void on_lua_state_created(lua_State* l) {
+    reframework::API::LuaLock _{};
+
+    g_lua = l;
+    //g_loaded_snippets.clear();
+
+    sol::state_view lua{ g_lua };
+
+    // adds a new function to call from lua!
+    lua["foobar"] = []() {
+        MessageBox(NULL, "foobar", "foobar", MB_OK);
+    };
+
+    lua["my_cool_storage"] = sol::new_table{};
+}
+
+void on_lua_state_destroyed(lua_State* l) {
+    reframework::API::LuaLock _{};
+
+    g_lua = nullptr;
+    //g_loaded_snippets.clear();
+}
+
 extern "C" __declspec(dllexport) bool reframework_plugin_initialize(const REFrameworkPluginInitializeParam * param) {
     reframework::API::initialize(param);
     const auto functions = param->functions; //get functions from reframework.dll
     
+    functions->on_lua_state_created(on_lua_state_created);
+    functions->on_lua_state_destroyed(on_lua_state_destroyed);
     //functions->on_message((REFOnMessageCb)on_message);
     functions->log_error("%s %s", "Hello", "error");
     functions->log_warn("%s %s", "Hello", "warning");

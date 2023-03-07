@@ -3,6 +3,8 @@ add_subdirectory(spdlog)
 SET(GLM_TEST_ENABLE OFF CACHE BOOL "Build unit tests" FORCE)
 add_subdirectory(glm)
 
+add_subdirectory(sol2/single)
+
 project(minhook)
 
 add_library(minhook STATIC
@@ -30,6 +32,7 @@ add_library(jsonstthm STATIC
 
 project(imgui)
 
+
 add_library(imgui STATIC
             imgui/imconfig.h
             imgui/imgui.cpp
@@ -51,6 +54,9 @@ set(REF_BUILD_FRAMEWORK OFF CACHE BOOL "" FORCE)
 set(REF_BUILD_DMC5_SDK ON CACHE BOOL "" FORCE)
 set(REF_BUILD_DEPENDENCIES OFF CACHE BOOL "" FORCE)
 
+
 add_subdirectory(reframework)
+
+
 target_include_directories(utility PRIVATE minhook/src/hde/)
 target_include_directories(DMC5SDK PRIVATE minhook/src/hde/)
