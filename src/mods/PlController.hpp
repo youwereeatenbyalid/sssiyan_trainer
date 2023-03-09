@@ -73,6 +73,7 @@ namespace PlCntr
 		static inline sdk::REMethodDefinition* _networkBBUpdateNetworkTypeMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plGotoWaitMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plEndCutSceneMethod = nullptr;
+		static inline sdk::REMethodDefinition* _characterEndCutSceneMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plSetCommandActionMethod = nullptr;
 		static inline sdk::REMethodDefinition* _plResetStatusMethod = nullptr;
 		static inline sdk::REMethodDefinition* _gameObjGetComponentsArrayMethod = nullptr;
@@ -94,7 +95,8 @@ namespace PlCntr
 				_networkBBUpdateMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "update()");				
 				_networkBBUpdateNetworkTypeMethod = sdk::find_method_definition("app.NetworkBaseBehavior", "updateNetworkType()");				
 				_plGotoWaitMethod = sdk::find_method_definition("app.Player", "gotoWait(System.String, System.String, System.Single, System.Boolean, System.Boolean)");				
-				_plEndCutSceneMethod = sdk::find_method_definition("app.Player", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");				
+				_plEndCutSceneMethod = sdk::find_method_definition("app.Player", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");	
+				_characterEndCutSceneMethod = sdk::find_method_definition("app.character.Character", "endCutScene(System.Int32, System.Single, app.character.Character.WetType, System.Single)");
 				_plResetStatusMethod = sdk::find_method_definition("app.Player", "resetStatus(app.GameModel.ResetType)");				
 				_plSetCommandActionMethod = sdk::find_method_definition("app.Player", "setCommandAction(System.String, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority, "
 					"System.Single, via.motion.InterpolationMode)");
@@ -145,6 +147,8 @@ namespace PlCntr
 		static inline sdk::REMethodDefinition* get_pl_reset_status_method() noexcept { return _plResetStatusMethod; }
 
 		static inline sdk::REMethodDefinition* get_pl_end_cutscene_method() noexcept { return _plEndCutSceneMethod; }
+
+		static inline sdk::REMethodDefinition* get_character_end_cutscene_method() noexcept { return _characterEndCutSceneMethod; }
 
 		static inline sdk::REMethodDefinition* get_pl_set_command_action_method() noexcept { return _plSetCommandActionMethod; }
 

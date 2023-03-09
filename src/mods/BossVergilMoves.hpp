@@ -147,7 +147,6 @@ private:
 		static inline uintptr_t _plCamCntrlSetPlAddr = 0;
 
 		static inline bool _isStaticInitRequested = true;
-		static inline bool _isBossMovePerforming = false;
 		static inline bool _isCameraSetSkipRequested = false;
 
 		static inline int _pairCount = 0;
@@ -158,6 +157,7 @@ private:
 		bool _isTrickStabPerforming = false;
 
 		bool _isPl0300Active = false;
+		bool _isActionResetRequested = false;
 
 		gf::Vec3 _airRaidStartPos;
 		gf::Vec3 _moveStartPos;
@@ -183,7 +183,7 @@ private:
 			if (pl0300 == nullptr)
 				return;
 			gf::Transform_SetPosition::set_character_pos(_pl0800, pl0300->get_pl_pos());
-			pl0300->get_network_base_bhvr_update_method()->call(threadCntx, _pl0800);
+			_networkBBUpdateMethod->call(threadCntx, _pl0800);
 		}
 
 		void on_photo_mode_closed(uintptr_t threadCntx, uintptr_t ui3500GUI)
@@ -194,7 +194,7 @@ private:
 			if (pl0300 == nullptr)
 				return;
 			gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
-			pl0300->get_network_base_bhvr_update_method()->call(threadCntx, _pl0800);
+			_networkBBUpdateMethod->call(threadCntx, _pl0800);
 		}
 
 		void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrig)
@@ -233,7 +233,7 @@ private:
 
 		void after_pl0300_lockon_update(uintptr_t threadCntxt, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300)
 		{
-			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !check_target_work_valid(_pl0800LastLockOnTargetWork))
+			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !_isPl0300Active || !check_target_work_valid(_pl0800LastLockOnTargetWork))
 				return;
 			else
 			{
@@ -247,7 +247,7 @@ private:
 
 		void on_pl0300_lockon_target_update(uintptr_t threadCntxt, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrigCall)
 		{
-			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !check_target_work_valid(_pl0800LastLockOnTargetWork))
+			if (pl0300->get_pl() != _pl0300.lock()->get_pl() || !_isPl0300Active || !check_target_work_valid(_pl0800LastLockOnTargetWork))
 				return;
 			else
 			{
@@ -344,15 +344,41 @@ private:
 		void update_pl0300_behavior(Pl0300Actions action)
 		{
 			auto pl0300 = _pl0300.lock();
-			if (pl0300 == nullptr || GameplayStateTracker::isCutscene)
+			if (pl0300 == nullptr)
+			{
+				_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = _isTrickStabPerforming = false;
+				_doppelDestroyCoroutine.stop();
+				_doppelUpdateCoroutine.stop();
+				_pl0300ActionUpdateCoroutine.stop();
+				_isPl0300Active = false;
+			}
+			auto actionStr = gf::StringController::get_raw_wstr(*(uintptr_t*)(pl0300->get_pl() + 0x190));
+			if (_isActionResetRequested)
+			{
+				if (wcscmp(actionStr, L"Wait") == 0)
+				{
+					_isActionResetRequested = false;
+					_pl0300ActionUpdateCoroutine.stop();
+					if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
+						pl0300->set_dt(PlCntr::DT::Human);
+					set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.0f, 1.0f, 1.0f));
+					_pl0300ActionUpdateCoroutine.stop();
+					_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = _isTrickStabPerforming = false;
+					pl0300->set_pos_full(_moveStartPos);
+					gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
+					pl0300_action_end_char_swap();
+				}
+				return;
+			}
+			if (GameplayStateTracker::isCutscene)
 			{
 				force_end_moves();
 				return;
 			}
+
 			if (_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset) && 
 				_inputSys->is_action_button_pressed(InputSystem::PadInputGameAction::ChangeLockOn))
 				force_end_moves();
-			auto actionStr = gf::StringController::get_raw_wstr(*(uintptr_t*)(pl0300->get_pl() + 0x190));
 			switch (action)
 			{
 				case BossVergilMoves::PlPair::Pl0300Actions::AirRaid:
@@ -428,6 +454,8 @@ private:
 				default:
 				{
 					stop_air_raid_coroutine();
+					stop_trick_stab_coroutine();
+					_pl0300ActionUpdateCoroutine.stop();
 					break;
 				}
 			}
@@ -460,7 +488,7 @@ private:
 			if (pl0300PadInput != 0)
 			{
 				*(bool*)(pl0300PadInput + 0x24) = false;
-				*(bool*)(pl0300PadInput + 0x28) = true;
+				//*(bool*)(pl0300PadInput + 0x28) = true;
 			}
 
 			auto pl0800LockOnObj = *(uintptr_t*)(_pl0800 + 0x428);
@@ -568,10 +596,6 @@ private:
 
 		~PlPair()
 		{
-			destroy_doppel();
-			stop_air_raid_coroutine();
-			_pl0300ActionUpdateCoroutine.stop();
-			_plCamCntrSetPlHook = nullptr;
 			_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
 				(this, &PlPair::on_pl0300_trick_update));
 			_pl0300Manager->after_pl0300_update_lock_on_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>>>
@@ -580,6 +604,11 @@ private:
 				(this, &PlPair::on_pl0300_lockon_target_update));
 			GameplayStateTracker::on_ui3500_gui_open_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_open));
 			GameplayStateTracker::on_ui3500_gui_closed_unsub(std::make_shared<Events::EventHandler<PlPair, uintptr_t, uintptr_t>>(this, &PlPair::on_photo_mode_closed));
+			destroy_doppel();
+			stop_air_raid_coroutine();
+			stop_trick_stab_coroutine();
+			_pl0300ActionUpdateCoroutine.stop();
+			force_end_moves();
 			if (_pl0300Accessor != nullptr)
 				PfbFactory::PrefabFactory::release(_pl0300Accessor);
 			_pl0300Accessor = nullptr;
@@ -626,35 +655,17 @@ private:
 				}
 				_doppelUpdateCoroutine.start(this);
 			}
-			pl0300->set_draw_self(false);
-			pl0300->set_enable(false);
-			pl0300->enable_physics_char_controller(false);
 			return pl0300Doppel;
 		}
 
 		void force_end_moves()
 		{
 			auto pl0300 = _pl0300.lock();
-			if (pl0300 == nullptr || !_pl0300ActionUpdateCoroutine.is_started())
+			if (pl0300 == nullptr)
 				return;
-			if(_lastPlSwap == LastPlSwap::ViaPlId)
-			{
-				if (int* curPlId = get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())); curPlId == nullptr || *curPlId == 4)
-					return;
-			}
-			else if(gf::StringController::str_cmp(*(uintptr_t*)(pl0300->get_pl() + 0x190), "Wait"))
-				return;
-			if(pl0300->get_cur_dt() == PlCntr::DT::SDT)
-				pl0300->set_dt(PlCntr::DT::Human);
-			set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.0f, 1.0f, 1.0f));
-			_pl0300ActionUpdateCoroutine.stop();
-			_isAfterFirstAirRaidState = _isAfterFirstTrickStabState = _isTrickStabPerforming = false;
-			pl0300->set_pos_full(_moveStartPos);
-			gf::Transform_SetPosition::set_character_pos(_pl0800, _moveStartPos);
-			if (_lastPlSwap == LastPlSwap::ViaPlId)
-				change_manual_pl(4);
-			else
-				change_pl_via_cam((uintptr_t)sdk::get_thread_context(), 4);
+			_isActionResetRequested = true;
+			pl0300->get_pl_reset_status_method()->call(sdk::get_thread_context(), pl0300->get_pl());
+			pl0300->end_cutscene();
 		}
 
 		void change_pl0300_enable_state(bool enable)
@@ -666,7 +677,7 @@ private:
 			pl0300->set_enable(enable);
 			pl0300->set_draw_self(enable);
 			pl0300->enable_physics_char_controller(enable);
-			pl0300->set_is_control(enable);
+			//pl0300->set_is_control(enable);
 		}
 
 		void change_pl0800_enable_state(bool enable)
@@ -792,11 +803,13 @@ private:
 			}
 			if (*get_cur_pl_id((uintptr_t)(pl0300->get_mission_setting_manager())) == 3 && plId == 3)
 				return;
-			auto camCntr = get_pl_camera_controller();
+			uintptr_t camManager = 0;
+			auto camCntr = get_pl_camera_controller(camManager);
 			if (camCntr == 0)
 				return;
 			if (plId == 3)
 			{
+				_isPl0300Active = true;
 				set_pl0800_lock_on_to_pl0300(pl0300, threadCntxt);
 				pl0300->set_pos_full(*get_char_pos(_pl0800));
 				*get_char_rot(pl0300->get_pl()) = *get_char_rot(_pl0800);
@@ -806,6 +819,7 @@ private:
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
 				if (_pl0800ResetStatusMethod != nullptr)
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
+
 				change_pl0800_enable_state(false);
 				change_pl0300_enable_state(true);
 				
@@ -816,10 +830,10 @@ private:
 					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0300Accessor);
 					_isCameraSetSkipRequested = true;
 				}
-				_isPl0300Active = true;
 			}
 			else
 			{
+				_isPl0300Active = false;
 				*(uintptr_t*)(pl0300->get_pl() + 0x428) = 0;
 				*(bool*)(_pl0800 + 0x4C6) = true;
 				auto pl0300PadInput = *(uintptr_t*)(pl0300->get_pl() + 0xEF0);
@@ -836,16 +850,16 @@ private:
 				*get_char_rot(_pl0800) = *get_char_rot(pl0300->get_pl());
 				if (pl0300->get_cur_dt() == PlCntr::DT::SDT)
 					pl0300->set_dt(PlCntr::DT::Human);
-				pl0300->set_action(L"Wait");
 				pl0300->get_pl_reset_status_method()->call(threadCntxt, pl0300->get_pl());
-				pl0300->end_cutscene();
+				pl0300->get_character_end_cutscene_method()->call(threadCntxt, pl0300->get_pl());
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
 				_isCameraSetSkipRequested = false;
 				_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0800LastPlAccessor);
+				//sdk::get_object_method((REManagedObject*)camManager, "doUpdate()")->call(threadCntxt, camManager);
+				sdk::get_object_method((REManagedObject*)camCntr, "update()")->call(threadCntxt, camCntr);
 				_pl0800LastLockOnTargetWork = 0;
 				_pl0800LastPlAccessor = 0;
-				_isPl0300Active = false;
 			}
 			_lastPlSwap = LastPlSwap::ViaCamSwap;
 			_networkBBUpdateMethod->call(threadCntxt, pl0300->get_pl());
@@ -896,6 +910,7 @@ private:
 				_pl0800LastLockOnTargetWork = 0;
 				_isPl0300Active = false;
 				_isCameraSetSkipRequested = false;
+				_networkBBUpdateMethod->call(sdk::get_thread_context(), pl0300->get_pl());
 			}
 			else
 			{
@@ -1025,12 +1040,12 @@ private:
 		_wtMod = static_cast<WitchTime*>(g_framework->get_mods()->get_mod("WitchTime"));
 	}
 
-	static uintptr_t get_pl_camera_controller()
+	static uintptr_t get_pl_camera_controller(uintptr_t &outCameraManager)
 	{
-		auto camMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.CameraManager");
-		if (camMngr == 0)
+		outCameraManager = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.CameraManager");
+		if (outCameraManager == 0)
 			return 0;
-		return *(uintptr_t*)(camMngr + 0x98);
+		return *(uintptr_t*)(outCameraManager + 0x98);
 	}
 
 	uintptr_t get_em_params(const std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>& pl0300) const noexcept { return *(uintptr_t*)(pl0300.lock()->get_pl() + 0x1768); }
