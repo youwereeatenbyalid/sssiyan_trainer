@@ -312,7 +312,7 @@ namespace PlCntr
 				*networkSubTypeBit = 1;
 				*mediationType = 3;
 			}
-			*(bool*)(_pl + 0x98) = true;// need to call special func actually
+			//*(bool*)(_pl + 0x98) = true;// need to call special func actually
 			enable_physics_char_controller(val);
 			if (_networkBBUpdateNetworkTypeMethod != nullptr)
 				_networkBBUpdateNetworkTypeMethod->call(sdk::get_thread_context(), (REManagedObject*)_pl);

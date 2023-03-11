@@ -158,6 +158,7 @@ private:
 
 		bool _isPl0300Active = false;
 		bool _isActionResetRequested = false;
+		bool _wasPl0300Active = false;
 
 		gf::Vec3 _airRaidStartPos;
 		gf::Vec3 _moveStartPos;
@@ -240,6 +241,8 @@ private:
 				auto uPl0300 = _pl0300.lock()->get_pl();
 				auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
 				auto character = *(uintptr_t*)(_pl0800LastLockOnTargetWork + 0x58);
+				if (character == 0)
+					return;
 				_targetCntrSetTargetMethod->call(threadCntxt, pl0300TargetCntrl, 5, character);
 				_targetCntrUpdateMethod->call(threadCntxt, pl0300TargetCntrl);
 			}
@@ -251,12 +254,15 @@ private:
 				return;
 			else
 			{
-				*skipOrigCall = true;
 				auto uPl0300 = _pl0300.lock()->get_pl();
 				auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
 				auto character = *(uintptr_t*)(_pl0800LastLockOnTargetWork + 0x58);
+				if (character == 0)
+					return;
+				*skipOrigCall = true;
 				_targetCntrSetTargetMethod->call(threadCntxt, pl0300TargetCntrl, 5, character);
 				_targetCntrUpdateMethod->call(threadCntxt, pl0300TargetCntrl);
+				//PfbFactory::PrefabFactory::release((REManagedObject*)_pl0800);
 			}
 		}
 
@@ -472,7 +478,7 @@ private:
 			for (int i = 0; i < gf::ListController::get_list_count(accessableList); i++)
 			{
 				auto item = gf::ListController::get_item<uintptr_t>(accessableList, i);
-				if (lockOnTargetWork== item)
+				if (lockOnTargetWork == item)
 					return true;
 			}
 			return false;
@@ -488,7 +494,7 @@ private:
 			if (pl0300PadInput != 0)
 			{
 				*(bool*)(pl0300PadInput + 0x24) = false;
-				//*(bool*)(pl0300PadInput + 0x28) = true;
+				*(bool*)(pl0300PadInput + 0x28) = true;
 			}
 
 			auto pl0800LockOnObj = *(uintptr_t*)(_pl0800 + 0x428);
@@ -502,12 +508,10 @@ private:
 
 			auto ccc = *(uintptr_t*)(uPl0300 + 0x1818);
 			auto character = *(uintptr_t*)(pl0800LockOnTargetWork + 0x58);
-			if (ccc != 0)
-			{
-				//*(uintptr_t*)(ccc + 0x58) = character;
-				sdk::call_object_func_easy<void*>((REManagedObject*)ccc, "set_target(app.character.Character)", character);
-				*(gf::Vec3*)(ccc + 0x60) = *get_char_pos(character);
-			}
+			if (character == 0 || ccc == 0)
+				return;
+			sdk::call_object_func_easy<void*>((REManagedObject*)ccc, "set_target(app.character.Character)", character);
+			*(gf::Vec3*)(ccc + 0x60) = *get_char_pos(character);
 
 			auto pl0300TargetCntrl = *(uintptr_t*)(uPl0300 + 0x300);
 			_targetCntrSetTargetMethod->call(threadCntx, pl0300TargetCntrl, 5, character);
@@ -608,12 +612,29 @@ private:
 			stop_air_raid_coroutine();
 			stop_trick_stab_coroutine();
 			_pl0300ActionUpdateCoroutine.stop();
-			force_end_moves();
+			if (_isPl0300Active)
+				pl0300_action_end_char_swap();
 			if (_pl0300Accessor != nullptr)
 				PfbFactory::PrefabFactory::release(_pl0300Accessor);
 			_pl0300Accessor = nullptr;
+			if (_pl0800LastPlAccessor != 0)
+			{
+				uintptr_t camManager;
+				auto camCntr = get_pl_camera_controller(camManager);
+				if (camCntr != 0)
+					_plCamCntrlSetPlAccMethod->call(sdk::get_thread_context(), camCntr, _pl0800LastPlAccessor);
+				PfbFactory::PrefabFactory::release((REManagedObject*)_pl0800LastPlAccessor);
+			}
+			if(_wasPl0300Active)
+			{
+				//TargetController.SetTarget method can fuck up pl0800 ref count while pl0300 do hooked lock on update
+				PfbFactory::PrefabFactory::release((REManagedObject*)_pl0800);
+				PfbFactory::PrefabFactory::release((REManagedObject*)_pl0800);
+			}
+			//pl0300 should be destroyed here already but anyway
 			_pl0300Manager->destroy_game_obj(_pl0300);
-			_isCameraSetSkipRequested = false;
+
+			_pl0800LastPlAccessor = 0;
 			_pairCount--;
 			if (_pairCount == 0)
 				_plCamCntrSetPlHook = nullptr;
@@ -809,6 +830,7 @@ private:
 				return;
 			if (plId == 3)
 			{
+				_wasPl0300Active = true;
 				_isPl0300Active = true;
 				set_pl0800_lock_on_to_pl0300(pl0300, threadCntxt);
 				pl0300->set_pos_full(*get_char_pos(_pl0800));
@@ -819,6 +841,7 @@ private:
 					_pl0800EndCutSceneMethod->call(sdk::get_thread_context(), _pl0800, 0, 0, 0, 0);
 				if (_pl0800ResetStatusMethod != nullptr)
 					_pl0800ResetStatusMethod->call(sdk::get_thread_context(), _pl0800, 0);
+				_networkBBUpdateMethod->call(threadCntxt, _pl0800);
 
 				change_pl0800_enable_state(false);
 				change_pl0300_enable_state(true);
@@ -827,8 +850,13 @@ private:
 				if(*(uintptr_t*)(((uintptr_t)pl0300->get_pl_manager()) + 0x60) == _pl0800)
 				{
 					_pl0800LastPlAccessor = *(uintptr_t*)(camCntr + 0x4D0);
+					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, 0);
+					_isCameraSetSkipRequested = true;
+					sdk::get_object_method((REManagedObject*)camCntr, "update()")->call(threadCntxt, camCntr);
+					_isCameraSetSkipRequested = false;
 					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0300Accessor);
 					_isCameraSetSkipRequested = true;
+					PfbFactory::PrefabFactory::add_ref((REManagedObject*)_pl0800LastPlAccessor);
 				}
 			}
 			else
@@ -852,18 +880,22 @@ private:
 					pl0300->set_dt(PlCntr::DT::Human);
 				pl0300->get_pl_reset_status_method()->call(threadCntxt, pl0300->get_pl());
 				pl0300->get_character_end_cutscene_method()->call(threadCntxt, pl0300->get_pl());
+				_networkBBUpdateMethod->call(threadCntxt, pl0300->get_pl());
+
 				change_pl0300_enable_state(false);
 				change_pl0800_enable_state(true);
-				_isCameraSetSkipRequested = false;
-				_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0800LastPlAccessor);
-				//sdk::get_object_method((REManagedObject*)camManager, "doUpdate()")->call(threadCntxt, camManager);
-				sdk::get_object_method((REManagedObject*)camCntr, "update()")->call(threadCntxt, camCntr);
+				
+				if (*(uintptr_t*)(((uintptr_t)pl0300->get_pl_manager()) + 0x60) == _pl0800)
+				{
+					_isCameraSetSkipRequested = false;
+					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, 0);
+					_plCamCntrlSetPlAccMethod->call(threadCntxt, camCntr, _pl0800LastPlAccessor);
+					PfbFactory::PrefabFactory::release((REManagedObject*)_pl0800LastPlAccessor);
+					_pl0800LastPlAccessor = 0;
+				}
 				_pl0800LastLockOnTargetWork = 0;
-				_pl0800LastPlAccessor = 0;
 			}
 			_lastPlSwap = LastPlSwap::ViaCamSwap;
-			_networkBBUpdateMethod->call(threadCntxt, pl0300->get_pl());
-			_networkBBUpdateMethod->call(threadCntxt, _pl0800);
 		}
 
 		uintptr_t change_manual_pl(int plId, bool callPl0800EndCutscene = true)
@@ -914,6 +946,7 @@ private:
 			}
 			else
 			{
+				_wasPl0300Active = true;
 				*(uintptr_t*)(pl0300->get_pl() + 0x428) = 0;
 				pl0300->set_pos_full(*get_char_pos(_pl0800));
 				*get_char_rot(pl0300->get_pl()) = *get_char_rot(pl);
@@ -947,6 +980,7 @@ private:
 	static inline std::unique_ptr<gf::SysString> _waitStr = nullptr;
 
 	std::mutex _onPfbInitMtx;
+	std::recursive_mutex _plListMtx;
 
 	static inline const float _doppelHp = 20000.0F;
 	float _doppelAttackRate = 0.35f;
@@ -1000,7 +1034,6 @@ private:
 
 	sdk::REMethodDefinition* _pl0800IsActionExecutableMethod = nullptr;
 	sdk::REMethodDefinition* _commandCreateLeverCommandMethod = nullptr;
-	sdk::REMethodDefinition* _plMngrRequestRemoveMethod;
 
 	uintptr_t _pl0800CheckCommandAddr = 0;
 
@@ -1075,6 +1108,7 @@ private:
 	{
 		if (!cheaton || player == 0 || *(int*)(player + 0xE64) != 4)
 			return;
+		std::lock_guard<std::recursive_mutex> lck(_plListMtx);
 		auto missionSettingMngr = (uintptr_t)sdk::get_managed_singleton<REManagedObject*>("app.MissionSettingManager");
 		auto startPos = *(gf::Vec3*)(missionSettingMngr + 0xB0);
 		auto pl0300Weak = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, startPos, true, _isExCostume);
@@ -1095,6 +1129,7 @@ private:
 	{
 		if (pl == 0 || *(int*)(pl + 0xE64) != 4 || _vergilsList.empty())
 			return;
+		std::lock_guard<std::recursive_mutex> lck(_plListMtx);
 		for (int i = 0; i < _vergilsList.size(); i++)
 		{
 			if (_vergilsList[i]->_pl0800 == pl)
@@ -1263,15 +1298,15 @@ private:
 	//finishing capcom's job with 1 check
 	static void pl_set_orb_efx_hook(uintptr_t threadCtxt, uintptr_t pl, int orbTypeEnum)
 	{
-		if (*(int*)(pl + 0xE64) != 3)
-			_mod->_plSetOrbEfxHook->get_original<decltype(pl_set_orb_efx_hook)>()(threadCtxt, pl, orbTypeEnum);
+		if (*(int*)(pl + 0xE64) == 3 && *(int*)(pl + 0x108) == 0)
+			return;
+		_mod->_plSetOrbEfxHook->get_original<decltype(pl_set_orb_efx_hook)>()(threadCtxt, pl, orbTypeEnum);
 	}
 
 	void on_sdk_init() override
 	{
 		_waitStr = std::make_unique<gf::SysString>(L"Wait");
 		_pl0800IsActionExecutableMethod = sdk::find_method_definition("app.PlayerVergilPL", "isActionExecutable(app.PlayerVergilPL.LevelUpAction)");
-		_plMngrRequestRemoveMethod = sdk::find_method_definition("app.PlayerManager", "removePlayer(app.Player, System.Boolean)");
 	}
 
 public:

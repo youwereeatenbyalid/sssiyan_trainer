@@ -47,8 +47,9 @@ void PlCntr::Pl0300Cntr::Pl0300Controller::generate_doppel(bool isFirst, float h
 	change_character_group(groupTmp);
 }
 
-PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr::Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput) : PlCntr::PlController(pl0300)
+PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr::Pl0300Cntr::Pl0300Type type, bool exCostume, bool isKeepingOriginalPadInput) : PlCntr::PlController(pl0300)
 {
+	_isExCostume = exCostume;
 	_isKeepingOriginalPadInput = isKeepingOriginalPadInput;
 	if (pl0300 == 0)
 		throw std::exception("pl0300 is null");

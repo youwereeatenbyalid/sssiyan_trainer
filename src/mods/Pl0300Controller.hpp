@@ -80,6 +80,7 @@ namespace PlCntr
 			bool _useCustomLockOnTargetOnEnemyUpdate = false;*/
 			bool _isIgnoringReleaseOnTrainingReset = false;
 			bool _isDoppelDestroyRequested = false;
+			bool _isExCostume;
 
 			static inline bool _isStaticInitRequested = true;
 
@@ -112,7 +113,7 @@ namespace PlCntr
 			//dctor also calls this
 			void destroy_game_obj() override;
 
-			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput = false);
+			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool exCostume, bool isKeepingOriginalPadInput = false);
 
 			void check_doppel_ref_correct();
 
@@ -169,6 +170,8 @@ namespace PlCntr
 			void ignore_release_on_trainig_reset(bool val) noexcept { _isIgnoringReleaseOnTrainingReset = val; }
 
 			inline bool is_doppel_destroy_requested() const noexcept { return _isDoppelDestroyRequested; }
+
+			inline bool is_ex_costume() const noexcept { return _isExCostume; }
 
 			inline void set_is_no_die(bool val) noexcept override
 			{

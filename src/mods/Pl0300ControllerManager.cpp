@@ -57,12 +57,18 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_damage_check_deto
         movaps [rsp + 0x110], xmm6
         push rax
         push rcx
+        push rdx
+        push r8
+        push r9
         push rsp
         mov rcx, rdi
         sub rsp, 32
         call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
         add rsp, 32
         pop rsp
+        pop r9
+        pop r8
+        pop rdx
         pop rcx
         cmp al, 01
         pop rax
@@ -87,12 +93,18 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_destroy_doppel_re
         pl0300CntrlCheck:
         push rax
         push rcx
+        push rdx
+        push r8
+        push r9
         push rsp
         mov rcx, rbx
         sub rsp, 32
         call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
         add rsp, 32
         pop rsp
+        pop r9
+        pop r8
+        pop rdx
         pop rcx
         cmp al, 00
         pop rax
@@ -207,7 +219,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr
         }
     }
     BossVergilSettings::after_pl0300_start(threadCntx, pl0300);
-    if (EnemyFixes::isDoppelCameraFix)
+    if (EnemyFixes::cheaton && EnemyFixes::isDoppelCameraFix)
     {
         auto emParam = *(uintptr_t*)(pl0300 + 0x1768);
         if (emParam != 0)
@@ -378,7 +390,7 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
     try
     {
         std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
-        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
+        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, exCostume, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
     }
     catch (const std::exception& e)
     {
@@ -426,7 +438,7 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
         if (_pl0300List[i].get() == controllerOwner)
             indx = i;
     }
-    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly));
+    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly, _pl0300List[indx]->is_ex_costume()));
     _pl0300List.push_back(doppel);
     doppel->_owner = std::weak_ptr<Pl0300Controller>(_pl0300List[indx]);
     return std::weak_ptr<Pl0300Controller>(doppel);
