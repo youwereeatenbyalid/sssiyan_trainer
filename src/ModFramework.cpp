@@ -684,7 +684,7 @@ void ModFramework::load_config()
 
     load_trainer_settings(cfg);
 
-    spdlog::info("Loaded traienr settings");
+    spdlog::info("Loaded trainer settings");
 
 	m_mods->load_mods(cfg);
 

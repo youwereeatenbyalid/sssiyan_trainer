@@ -435,7 +435,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
             ${FRAMEWORK_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC DMC5SDK imgui minhook sol2 d3d11 d3d12 glm_static shlwapi jsonstthm)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC DMC5SDK imgui minhook sol2_single lua d3d11 d3d12 glm_static shlwapi jsonstthm)
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR- -fshort-wchar)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
