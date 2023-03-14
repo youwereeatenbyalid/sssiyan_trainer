@@ -5,6 +5,7 @@
 #include "InitPatternsManager.hpp"
 #include "events/Events.hpp"
 #include "mods/Coroutine/Coroutines.hpp"
+#include <sol/sol.hpp>
 class Mods {
 public:
     Mods();
@@ -20,6 +21,8 @@ public:
     const std::string& get_focused_mod() const;
     void set_focused_mod(const std::string& modName) const;
     void on_pagelist_ui(int page, float indent = 0.f);
+    void on_lua_state_created(lua_State* l);
+    void on_lua_state_destroyed(lua_State* l);
     void save_mods();
     void load_mods(const std::optional<utility::Config>& cfg = std::nullopt) const;
     /*void static addressseek();
@@ -37,7 +40,7 @@ private:
     mutable std::string m_focused_mod;
     std::vector<std::unique_ptr<Mod>> m_mods;
     utility::Config m_config;
-
+    lua_State* global_lua_state{nullptr};
     std::unique_ptr<Coroutines::Coroutine<void(Mods::*)(), Mods*>> m_init_sdk_coroutine = std::make_unique<Coroutines::Coroutine<void(Mods::*)(), Mods*>>(&Mods::init_sdk, true, true);
 
     void init_sdk()

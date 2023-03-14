@@ -5,7 +5,7 @@
 #include <sol/sol.hpp>
 #include "reframework/API.hpp"
 #include "ModFramework.hpp"
-
+#include "Mods.hpp"
 HMODULE g_dinput = 0;
 std::mutex g_load_mutex{};
 extern lua_State* g_lua{nullptr};
@@ -50,23 +50,12 @@ extern "C" {
 
 void on_lua_state_created(lua_State* l) {
     reframework::API::LuaLock _{};
-
-    g_lua = l;
-    //g_loaded_snippets.clear();
-
-    sol::state_view lua{ g_lua };
-
-    // adds a new function to call from lua!
-    lua["foobar"] = []() {
-        MessageBox(NULL, "foobar", "foobar", MB_OK);
-    };
-
-    lua["my_cool_storage"] = sol::new_table{};
+    g_framework->on_lua_state_created(l);
 }
 
 void on_lua_state_destroyed(lua_State* l) {
     reframework::API::LuaLock _{};
-
+    g_framework->on_lua_state_destroyed(l);
     g_lua = nullptr;
     //g_loaded_snippets.clear();
 }

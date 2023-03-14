@@ -696,6 +696,16 @@ void ModFramework::load_config()
     spdlog::info("Loaded configs");
 }
 
+void ModFramework::on_lua_state_created(lua_State* l)
+{
+    m_mods->on_lua_state_created(l);
+}
+
+void ModFramework::on_lua_state_destroyed(lua_State* l)
+{
+    m_mods->on_lua_state_destroyed(l);
+}
+
 bool ModFramework::initialize() {
     if (m_initialized) {
         return true;

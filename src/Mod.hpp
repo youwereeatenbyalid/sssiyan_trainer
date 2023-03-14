@@ -416,6 +416,8 @@ public:
     virtual void on_frame() {}
     virtual void on_draw_ui() {}
 	virtual void on_draw_debug_ui() {}
+    virtual void on_lua_state_created(lua_State*l) {}
+    virtual void on_lua_state_destroyed(lua_State* l) {}
     bool* m_is_enabled{ nullptr };
     //bool& m_is_enabled = *ischecked;
     int m_on_page = Page_None;

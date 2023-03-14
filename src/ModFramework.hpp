@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include <spdlog/spdlog.h>
-
+#include <sol/sol.hpp>
 class Mods;
 
 #include "D3D11Hook.hpp"
@@ -85,6 +85,9 @@ public:
 
     void save_config() const;
     void load_config();
+
+    void on_lua_state_created(lua_State* l);
+    void on_lua_state_destroyed(lua_State* l);
 
     auto& get_hook_monitor_mutex() {
         return m_hook_monitor_mutex;

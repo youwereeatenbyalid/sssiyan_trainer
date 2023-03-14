@@ -300,6 +300,9 @@ set(MODS_SRC
     mods/DanteAirMustang.hpp
     mods/WitchTime.hpp
     mods/ParryWithFinesse.hpp
+	
+	mods/TestLuaMod.hpp
+	mods/TestLuaMod.cpp
 )
 
 set(HOOKS_SRC
@@ -347,6 +350,7 @@ set(UTILITY_SRC
 
 set(FRAMEWORK_SRC
     Mod.hpp
+	LuaMod.hpp
     Mods.hpp
     Mods.cpp
     ModFramework.hpp

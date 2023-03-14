@@ -57,6 +57,10 @@
        #include "mods/EmpoweredCane.hpp"
     // Vergil
         #include "mods/DoppelWeaponSwitcher.hpp"
+
+
+    //lua test
+        #include "mods/TestLuaMod.hpp"
 // Siyan
     // Background
         #include "mods/DamageTypeLean.hpp"
@@ -273,6 +277,8 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
+    // Lua
+        m_mods.emplace_back(std::make_unique<TestLuaMod>());
 
 //// Siyan
     // Background
@@ -586,5 +592,22 @@ void Mods::on_pagelist_ui(int page, float indent) {
     }
       //mod->modkeytoggle.draw(mod->get_name());
   }
+}
+
+void Mods::on_lua_state_created(lua_State* l)
+{
+    global_lua_state = l;
+    for (auto& mod : m_mods) {
+        mod->on_lua_state_created(global_lua_state);
+    }
+}
+
+void Mods::on_lua_state_destroyed(lua_State* l)
+{
+    for (auto& mod : m_mods) {
+        mod->on_lua_state_destroyed(l);
+    }
+    global_lua_state = nullptr;
+    
 }
 
