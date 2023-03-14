@@ -49,12 +49,12 @@ extern "C" {
 }
 
 void on_lua_state_created(lua_State* l) {
-    reframework::API::LuaLock _{};
+    //reframework::API::LuaLock _{};
     g_framework->on_lua_state_created(l);
 }
 
 void on_lua_state_destroyed(lua_State* l) {
-    reframework::API::LuaLock _{};
+    //reframework::API::LuaLock _{};
     g_framework->on_lua_state_destroyed(l);
     g_lua = nullptr;
     //g_loaded_snippets.clear();

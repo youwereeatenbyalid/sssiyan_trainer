@@ -25,6 +25,7 @@ public:
 		m_lua_loaded = true;
 	}
 	void unload_lua_mod(){
+		API::LuaLock _{};
 		on_unload_lua_mod();//should this go first in case we need to 
 		API::get()->param()->functions->delete_script_state(m_mod_state);
 		m_mod_state = nullptr;

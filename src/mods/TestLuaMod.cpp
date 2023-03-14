@@ -39,7 +39,7 @@ void TestLuaMod::on_load_lua_mod()
 
 void TestLuaMod::on_unload_lua_mod()
 {
-    API::LuaLock _{};
+   // API::LuaLock _{};
     spdlog::info("Hello from TestLuaMod::on_unload_lua_mod!");
 }
 
