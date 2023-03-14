@@ -9,6 +9,7 @@ public:
 	std::string get_checkbox_name() override { return m_check_box_name; };
 	std::string get_hotkey_name() override { return m_hot_key_name; };
 	// called by m_mods->init() you'd want to override this
+	static char filenamestring[64];
 	std::optional<std::string> on_initialize() override;
 	static bool cheaton;
 	float royalguardgauge;
