@@ -59,7 +59,9 @@ namespace PlCntr
 		REManagedObject* _missionSettingsManager = nullptr;
 		REManagedObject* _playerManager = nullptr;
 
-		static inline bool _isStaticInitRequested = true;		
+		static inline bool _isStaticInitRequested = true;
+
+		bool _isGameObjDestroyCalled = false;
 
 	protected:
 
@@ -107,12 +109,14 @@ namespace PlCntr
 			}
 		}
 
-		virtual void destroy_game_obj()
+		void destroy_pl_game_obj()
 		{
-			if (_gameObjDestroyMethod != nullptr)
+			if (_gameObjDestroyMethod != nullptr && !_isGameObjDestroyCalled)
 			{
 				auto gameObj = *(uintptr_t*)(_pl + 0x10);
-				_gameObjDestroyMethod->call(sdk::get_thread_context(), gameObj);
+				if(gameObj != 0)
+					_gameObjDestroyMethod->call(gameObj, gameObj);
+				_isGameObjDestroyCalled = true;
 			}
 		}
 		
@@ -123,7 +127,7 @@ namespace PlCntr
 
 		virtual ~PlController()
 		{
-			//destroy_game_obj();
+			//destroy_pl_game_obj();
 			_missionSettingsManager = _playerManager = nullptr;
 			_pl = 0;
 		}
@@ -155,6 +159,8 @@ namespace PlCntr
 		static inline sdk::REMethodDefinition* get_game_obj_get_components_method() noexcept { return _gameObjGetComponentsArrayMethod; }
 
 		static inline sdk::REMethodDefinition* get_component_destroy_static_method() noexcept { return _componentDestroyStaticMethod; }
+
+		static inline sdk::REMethodDefinition* get_game_object_destroy_method() noexcept { return _gameObjDestroyMethod; }
 
 		inline uintptr_t get_pl() const noexcept { return _pl; }
 
@@ -190,7 +196,7 @@ namespace PlCntr
 		{
 			update_pl_manager();
 			if (_playerManager == 0)
-				throw std::exception("PlayerManager is null.");
+				return false;
 			auto list = *(uintptr_t*)((uintptr_t)_playerManager + 0x70);
 			auto lstCount = gf::ListController::get_list_count(list);
 			for (int i = 0; i < lstCount; i++)

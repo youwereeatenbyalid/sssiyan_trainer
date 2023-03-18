@@ -1,5 +1,6 @@
 #pragma once
 #include "PlController.hpp"
+#include "events/Events.hpp"
 
 namespace gf = GameFunctions;
 
@@ -75,9 +76,6 @@ namespace PlCntr
 			bool _isAddToPlListRequested = false;
 			bool _isSetTeleportTimingParamsRequested = false;
 			bool _isKeepingOriginalPadInput = false;
-			/*bool _useCustomTrickUpdate = false;
-			bool _useCustomLockOnUpdate = false;
-			bool _useCustomLockOnTargetOnEnemyUpdate = false;*/
 			bool _isIgnoringReleaseOnTrainingReset = false;
 			bool _isDoppelDestroyRequested = false;
 			bool _isExCostume;
@@ -108,10 +106,9 @@ namespace PlCntr
 
 			HitControllerSettings _hcLastSettings;
 
-			//static inline const wchar_t* _jceStr = L"Zigenzan_Zetsu_Start";//I just want to keep this move's name here
+			Events::Event<const Pl0300Controller*> _onDestroyEvent;
 
-			//dctor also calls this
-			void destroy_game_obj() override;
+			//static inline const wchar_t* _jceStr = L"Zigenzan_Zetsu_Start";//I just want to keep this move's name here
 
 			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool exCostume, bool isKeepingOriginalPadInput = false);
 
@@ -122,9 +119,18 @@ namespace PlCntr
 			Pl0300Controller() = delete;
 			Pl0300Controller(const Pl0300Controller& other) = delete;
 
-			~Pl0300Controller() override
+			~Pl0300Controller() override;
+
+			template<class T>
+			void on_destroy_event_sub(std::shared_ptr<Events::EventHandler<T, const Pl0300Controller*>> eh)
 			{
-				destroy_game_obj();
+				_onDestroyEvent.subscribe(eh);
+			}
+
+			template<class T>
+			void on_destroy_event_unsub(std::shared_ptr<Events::EventHandler<T, const Pl0300Controller*>> eh)
+			{
+				_onDestroyEvent.unsubscribe(eh);
 			}
 
 			//get doppel's controller if exists

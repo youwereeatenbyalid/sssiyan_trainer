@@ -264,7 +264,7 @@ public:
 			return curSpeed;
 		}
 
-		void update_speed(gf::Vec3 &curSpeed, uintptr_t pl)
+		void update_speed(gf::Vec3 &curSpeed, uintptr_t pl, float plWorkRate)
 		{
 			if (!_settings->is_accel())
 			{
@@ -278,6 +278,9 @@ public:
 					_isActionStarted = false;
 					curSpeed = copy_speed_axis(curSpeed, _settings->get_init_speed());
 					update_direction(curSpeed);
+					/*curSpeed.x /= _slowSpeed;
+					curSpeed.y /= _slowSpeed;
+					curSpeed.z /= _slowSpeed;*/
 					_prevSpeed = curSpeed;
 				}
 				else
@@ -297,7 +300,7 @@ public:
 								{
 									if (_prevSpeed.x != 0)
 									{
-										curSpeed.x = abs(_prevSpeed.x) - abs(accel.x);
+										curSpeed.x = abs(_prevSpeed.x) - abs(accel.x * plWorkRate);
 										if (get_sign(curSpeed.x) <= 0)
 											curSpeed.x = _prevSpeed.x = 0;
 										else
@@ -314,7 +317,7 @@ public:
 								{
 									if (_prevSpeed.y != 0)
 									{
-										curSpeed.y = abs(_prevSpeed.y) - abs(accel.y);
+										curSpeed.y = abs(_prevSpeed.y) - abs(accel.y * plWorkRate);
 										if (get_sign(curSpeed.y) <= 0)
 											curSpeed.y = _prevSpeed.y = 0;
 										else
@@ -331,7 +334,7 @@ public:
 								{
 									if (_prevSpeed.z != 0)
 									{
-										curSpeed.z = abs(_prevSpeed.z) - abs(accel.z);
+										curSpeed.z = abs(_prevSpeed.z) - abs(accel.z * plWorkRate);
 										if (get_sign(curSpeed.z) <= 0)
 											curSpeed.z = _prevSpeed.z = 0;
 										else
@@ -371,7 +374,7 @@ public:
 			PlayerTracker::on_fsm2_player_player_action_notify_action_end_unsub(std::make_shared<Events::EventHandler<SpeedController, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &SpeedController::on_action_end));
 		}
 
-		bool update_speed(uintptr_t fsmPosCntr)
+		bool update_speed(uintptr_t threadCntxt, uintptr_t fsmPosCntr)
 		{
 			if (!_settings->is_enabled() || !check_action())
 				return false;
@@ -382,7 +385,10 @@ public:
 			auto pl = *(uintptr_t*)(fsmPosCntr + 0x28);
 			if (pl == 0)
 				return true;
-			update_speed(*pMoveSpeed, pl /*isActionEnd*/);
+			auto cachedWorkRate = *(uintptr_t*)(pl + 0x200);
+			float nextApplyRate = *(float*)(cachedWorkRate + 0xB4);
+			update_speed(*pMoveSpeed, pl, nextApplyRate);
+			
 			return true;
 		}
 
@@ -451,7 +457,7 @@ private:
 		{
 			if (i.get_pl() == pl)
 			{
-				if(i.update_speed(fsm2PosCntrAction))
+				if(i.update_speed(threadCntxt, fsm2PosCntrAction))
 					return;
 			}
 		}

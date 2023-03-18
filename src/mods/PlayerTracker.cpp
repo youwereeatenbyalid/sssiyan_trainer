@@ -543,8 +543,8 @@ int PlayerTracker::pl0800_on_guard_hook(uintptr_t threadCtxt, uintptr_t vergil, 
 
 void PlayerTracker::pl_manager_add_pl_hook(uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl)
 {
-	_mod->_onPlMngPlAddEvent.invoke(threadCtxt, plManager, pl);
 	_mod->m_pl_manager_add_pl_hook->get_original<decltype(pl_manager_add_pl_hook)>()(threadCtxt, plManager, pl);
+	_mod->_onPlMngPlAddEvent.invoke(threadCtxt, plManager, pl);
 }
 
 void PlayerTracker::pl_set_die_hook(uintptr_t threadCtxt, uintptr_t pl)
@@ -597,8 +597,8 @@ void PlayerTracker::fsm2_pl_pos_cntrl_action_start_hook(uintptr_t threadCntxt, u
 
 void PlayerTracker::pl_manager_pl_remove_hook(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl, bool isUnload)
 {
-	_mod->_onPlManagerPlRemove.invoke(threadCntx, plManager, pl, isUnload);
 	_mod->m_pl_remove_hook->get_original<decltype(pl_manager_pl_remove_hook)>()(threadCntx, plManager, pl, isUnload);
+	_mod->_onPlManagerPlRemove.invoke(threadCntx, plManager, pl, isUnload);
 }
 
 void PlayerTracker::pl0800_set_air_trick_action_hook(uintptr_t threadCntx, uintptr_t pl0800, uintptr_t gameObjTarget)
