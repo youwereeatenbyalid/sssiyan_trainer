@@ -48,10 +48,19 @@ std::optional<std::string> InfHP::on_initialize() {
         return "Unable to find InfHP pattern.";
     }
 
-    if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
-        //  return a error string in case something goes wrong
+    //if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
+    //    //  return a error string in case something goes wrong
+    //    spdlog::error("[{}] failed to initialize", get_name());
+    //    return "Failed to initialize InfHP";
+    //}
+
+    m_detour = std::make_shared<Detour_t>(*addr, &detour, 5);
+    m_detours.push_back(m_detour);
+    if (!m_detour->is_valid()) {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize InfHP";
     }
+    jmp_ret = m_detour->get_return_address();
+
     return Mod::on_initialize();
 }

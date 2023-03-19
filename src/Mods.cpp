@@ -491,6 +491,18 @@ void Mods::set_focused_mod(const std::string& modName) const
 void Mods::on_frame() const {
     for (auto& mod : m_mods) {
         mod->on_frame();
+
+        // Update the mod detours state, Should probably be done in a function that gets overriden by the mod object
+        // but for the simplisity I just put it here
+        if (mod->m_is_enabled != nullptr) { // ... man fuck this
+            if (*mod->m_is_enabled != mod->m_last_state) {
+                for (const auto& detour : mod->m_detours) {
+                    *mod->m_is_enabled = detour->toggle(*mod->m_is_enabled);
+                }
+            }
+
+            mod->m_last_state = *mod->m_is_enabled;
+        }
     }
 }
 

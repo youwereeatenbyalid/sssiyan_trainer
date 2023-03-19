@@ -42,6 +42,8 @@ public:
     const auto& get_scale() const { return m_scale; }
 
     const auto& get_icons() const { return m_icons; }
+
+    const auto& is_game_data_inited() const { return m_game_data_initialized; }
     
     Address get_module() const { return m_game_module; }
 

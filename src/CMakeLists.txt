@@ -346,6 +346,8 @@ set(UTILITY_SRC
     utility/Config.cpp
     utility/FunctionHook.hpp
     utility/FunctionHook.cpp
+	utility/Detour.hpp
+    utility/Detour.cpp
 )
 
 set(FRAMEWORK_SRC

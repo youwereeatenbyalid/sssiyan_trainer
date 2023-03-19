@@ -17,6 +17,7 @@
 
 #include <imgui/imgui.h>
 
+#include <utility/Detour.hpp>
 #include "sdk/ReClass.hpp"
 #include "sdk/Offsets.hpp"
 #include "utility/Config.hpp"
@@ -419,6 +420,8 @@ public:
     virtual void on_lua_state_created(lua_State*l) {}
     virtual void on_lua_state_destroyed(lua_State* l) {}
     bool* m_is_enabled{ nullptr };
+    bool m_last_state = false;
+    std::vector<std::shared_ptr<Detour_t>> m_detours{};
     //bool& m_is_enabled = *ischecked;
     int m_on_page = Page_None;
     //ModKey modkeytoggle = ModKey("hotkey_on");

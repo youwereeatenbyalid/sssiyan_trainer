@@ -63,7 +63,7 @@ void on_lua_state_destroyed(lua_State* l) {
 extern "C" __declspec(dllexport) bool reframework_plugin_initialize(const REFrameworkPluginInitializeParam * param) {
     reframework::API::initialize(param);
     const auto functions = param->functions; //get functions from reframework.dll
-    
+
     functions->on_lua_state_created(on_lua_state_created);
     functions->on_lua_state_destroyed(on_lua_state_destroyed);
     //functions->on_message((REFOnMessageCb)on_message);
@@ -85,7 +85,7 @@ void startup_thread() {
 #endif
 
     if (load_dinput8()) {
-        g_framework = std::make_unique<ModFramework>();
+		g_framework = std::make_unique<ModFramework>();
     }
 }
 
