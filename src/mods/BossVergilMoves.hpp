@@ -67,8 +67,8 @@ private:
 				auto doppel = pl0300->get_doppel_ctrl().lock();
 				if (doppel != nullptr)
 				{
-					doppel->set_action(L"Wait");
-					doppel->pl_reset_status();
+					doppel->pl_reset_status(0);
+					doppel->end_cutscene();
 				}
 				pl0300->destroy_doppel();
 			}

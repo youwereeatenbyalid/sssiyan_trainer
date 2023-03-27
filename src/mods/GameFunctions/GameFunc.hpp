@@ -385,7 +385,7 @@ namespace GameFunctions
 				auto base = g_framework->get_module().as<uintptr_t>();
 				((f_add_ref)(base + 0x2526820))(_mngString);
 			}
-			*(REObjectInfo**)(((uintptr_t)_data + 0)) = _mngString->info;
+			memcpy(_data, (const void*)_mngString, 0x10);//just copy all remanagedObj stuff to fake string
 			*(int*)((uintptr_t)_data + 0x10) = _length;
 			_str = (wchar_t*)((uintptr_t)_data + 0x14);
 			wcsncpy(_str, newStr, _length);

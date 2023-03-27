@@ -357,11 +357,11 @@ namespace PlCntr
 			_plEndCutSceneMethod->call(sdk::get_thread_context(), _pl, actionId, commonTimer, charWetType, startFrame);
 		}
 
-		inline void pl_reset_status()
+		inline void pl_reset_status(int resetType)
 		{
 			if (_plResetStatusMethod == nullptr)
 				return;
-			_plResetStatusMethod->call(sdk::get_thread_context(), _pl);
+			_plResetStatusMethod->call(sdk::get_thread_context(), _pl, resetType);
 		}
 
 		inline void update_pl_manager()
