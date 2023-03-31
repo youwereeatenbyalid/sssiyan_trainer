@@ -1,6 +1,7 @@
 #pragma once
 #include "Mod.hpp"
 #include "Pl0300Controller.hpp"
+#include "PlSetActionData.hpp"
 
 //clang-format off
 
@@ -30,9 +31,11 @@ private:
 	static inline bool _isDoppelInSDT = false;
 	static inline bool _useAirRaidCheats = false;
 	static inline bool _useJcCheats = false;
+	static inline bool _skipAirRaid = false;
 	//static inline bool _useJCECheats = false;
 	static inline bool _useStabCheats = false;
 	static inline bool _useDTCheats = false;
+	static inline bool _fastConcentrationStage = false;
 
 
 	static inline float _doppelAttackRate = 0.35f;//0x14
@@ -59,14 +62,37 @@ private:
 
 	static inline int  _airRaidAttackNum = 3;//0x2C
 
-
 	static inline TeleportCheatState _teleportsState = Fast;
+
+	PlCntr::Pl0300Cntr::Pl0300ControllerManager *_pl0300CntrlManager;
+
+	sdk::REMethodDefinition* _plSetActionMethod;
+
+	std::unique_ptr<gf::SysString> _waitStr = nullptr;
+
+	void on_action_set(const std::array<char, PlSetActionData::ACTION_STR_LENGTH>* lastAction, uintptr_t threadCntx, uintptr_t str, uintptr_t pl)
+	{
+		if (!cheaton || !_useAirRaidCheats || !_skipAirRaid || pl == 0 || *(int*)(pl + 0xE64) != 3 || !gf::StringController::str_cmp(str, L"Concentrate"))
+			return;
+		if (_pl0300CntrlManager->get_pl0300_controller(pl).lock() != nullptr)//FriendlyVergil/BOB/BossActions
+			return;
+		_plSetActionMethod->call(threadCntx, pl, _waitStr->get_net_str(), 0, 0, 0, 0, 0, false, false, true, 0);
+	}
+
+	void on_sdk_init() override
+	{
+		_plSetActionMethod = sdk::find_method_definition("app.Player", "setAction(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, "
+			"System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)");
+		_waitStr = std::make_unique<gf::SysString>(L"Wait");
+	}
 
 public:
 	BossVergilSettings()
 	{
 		_teleportParams[0].set_all(0.123f);
 		_teleportParams[1].set_all(0);
+		PlSetActionData::new_pl_boss_action_event_sub(std::make_shared<Events::EventHandler<BossVergilSettings, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>*, uintptr_t, 
+			uintptr_t, uintptr_t>>(this, &BossVergilSettings::on_action_set));
 	}
 
 	static inline bool cheaton = true;
@@ -115,6 +141,8 @@ public:
 
 			if (_useAirRaidCheats && airRaidParams != 0)
 			{
+				if (_fastConcentrationStage)
+					*(float*)(airRaidParams + 0x10) = *(float*)(airRaidParams + 0x14) = 0;
 				*(float*)(airRaidParams + 0x20) = _airRaidSpeedInArea;
 				*(float*)(airRaidParams + 0x24) = _airRaidSpeed;
 				*(float*)(airRaidParams + 0x48) = _airRaidHomingSpeedInArea;
@@ -170,6 +198,8 @@ public:
 
 		set_up_hotkey();
 
+		_pl0300CntrlManager = static_cast<PlCntr::Pl0300Cntr::Pl0300ControllerManager*>(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
+
 		return Mod::on_initialize();
 	}
 
@@ -185,6 +215,8 @@ public:
 		_useJcCheats = cfg.get<bool>("BossVergilSettings._useJcCheats").value_or(true);
 		_useStabCheats = cfg.get<bool>("BossVergilSettings._useStabCheats").value_or(true);
 		_useStabCheats = cfg.get<bool>("BossVergilSettings._useDTCheats").value_or(true);
+		_fastConcentrationStage = cfg.get<bool>("BossVergilSettings._fastConcentrationStage").value_or(true);
+		_skipAirRaid = cfg.get<bool>("BossVergilSettings._skipAirRaid").value_or(false);
 
 		_doppelAttackRate = cfg.get<float>("BossVergilSettings._doppelAttackRate").value_or(0.35f);
 		_doppelHP = cfg.get<float>("BossVergilSettings._doppelHP").value_or(500.0f);
@@ -227,6 +259,8 @@ public:
 		cfg.set<bool>("BossVergilSettings._useJcCheats", _useJcCheats);
 		cfg.set<bool>("BossVergilSettings._useStabCheats", _useStabCheats);
 		cfg.set<bool>("BossVergilSettings._useStabCheats", _useDTCheats);
+		cfg.set<bool>("BossVergilSettings._fastConcentrationStage", _fastConcentrationStage);
+		cfg.set<bool>("BossVergilSettings._skipAirRaid", _skipAirRaid);
 
 		cfg.set<float>("BossVergilSettings._doppelAttackRate", _doppelAttackRate);
 		cfg.set<float>("BossVergilSettings._doppelHP", _doppelHP);
@@ -314,6 +348,8 @@ public:
 		if (ImGui::CollapsingHeader("Air Raid settings"))
 		{
 			ImGui::Checkbox("Use custom Air Raid settings", &_useAirRaidCheats);
+			ImGui::Checkbox("Skip Air Raid and phase 3 combo", &_skipAirRaid);
+			ImGui::Checkbox("Faster concentration", &_fastConcentrationStage);
 			ImGui::TextWrapped("Number of attacks per air raid:");
 			UI::SliderInt("##_airRaidAttackNum", &_airRaidAttackNum, 1, 10, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 			ImGui::TextWrapped("Speed (50 - game default):");

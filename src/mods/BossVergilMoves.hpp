@@ -122,9 +122,10 @@ private:
 			//"Wait"
 		};
 
-		std::vector<uintptr_t> _stabHitInfoList;
+		static inline std::unique_ptr<gf::SysString> _stabStr;
+		static inline std::unique_ptr<gf::SysString> _airRaidStr;
 
-		static inline std::unique_ptr<gf::SysString> _stabStr = nullptr;
+		std::vector<uintptr_t> _stabHitInfoList;
 
 		static inline std::mt19937 _rndGen{};
 
@@ -656,6 +657,7 @@ private:
 				_stylishPropertyDataTD = sdk::find_type_definition("app.StylishManager.StylishPropertyData");
 				
 				_stabStr = std::make_unique<gf::SysString>(L"Stab");
+				_airRaidStr = std::make_unique<gf::SysString>(L"Concentrate");
 
 				_plCamCntrlSetPlAddr = g_framework->get_module().as<uintptr_t>() + 0xCD1920;
 
@@ -835,7 +837,7 @@ private:
 			*get_char_rot(pl0300->get_pl()) = *get_char_rot(_pl0800);
 			pl0300->set_is_control(true);
 			pl0300->set_dt(PlCntr::DT::SDT);
-			pl0300->set_action(_airRaidNames[0]);
+			pl0300->set_action(_airRaidStr.get(), 0, 0 ,0, PlCntr::InterpolationMode::None, PlCntr::InterpolationCurve::Linear, false, false, true, PlCntr::ActionPriority::Normal);
 			set_pl0300_scale(pl0300->get_pl(), gf::Vec3(1.15f, 1.15f, 1.15f));
 			auto ccc = *(uintptr_t*)(pl0300->get_pl() + 0x1818);
 			if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
@@ -900,7 +902,7 @@ private:
 			}
 			pl0300->get_network_base_bhvr_update_method()->call(sdk::get_thread_context(), pl0300->get_pl());
 			_stabHitInfoList.clear();
-			pl0300->set_action(_stabStr.get());
+			pl0300->set_action(_stabStr.get(), 0, 0, 0, PlCntr::InterpolationMode::None, PlCntr::InterpolationCurve::Linear, false, false, true, PlCntr::ActionPriority::Normal);
 			
 			//pl0300->set_action_from_think(_stabStr.get(), 0x94A9A36A);
 			auto styleManager = sdk::get_managed_singleton<REManagedObject>("app.StylishManager");

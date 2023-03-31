@@ -163,5 +163,5 @@ public:
 	void on_draw_debug_ui() override;
 
 	static bool is_movecheat_enabled_asm(Moves move);
-	static void str_cur_action_asm(uintptr_t curPl);
+	static void str_cur_action_asm(uintptr_t curPl, uintptr_t str);
 };

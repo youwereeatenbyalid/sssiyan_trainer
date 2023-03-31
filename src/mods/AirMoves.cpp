@@ -40,7 +40,7 @@ bool AirMoves::is_movecheat_enabled_asm(Moves move)
 	return false;
 }
 
-void AirMoves::str_cur_action_asm(uintptr_t curPl)
+void AirMoves::str_cur_action_asm(uintptr_t curPl, uintptr_t str)
 {
 	if (AirMoves::curMoveHook != nullptr)
 	{
@@ -50,9 +50,9 @@ void AirMoves::str_cur_action_asm(uintptr_t curPl)
 		}
 		else
 		{
-			if (AirMoves::curMoveHook->cheatOn && PlSetActionData::cmp_real_cur_action(AirMoves::curMoveHook->get_ingame_name()))
+			if (AirMoves::curMoveHook->cheatOn && gf::StringController::str_cmp(str, AirMoves::curMoveHook->get_ingame_name()))
 				AirMoves::isAirProcess = true;
-			else if ( !PlSetActionData::cmp_cur_action("None") && !PlSetActionData::cmp_cur_action("PutOut"))
+			else if ( !gf::StringController::str_cmp(str, L"None") && !gf::StringController::str_cmp(str, L"PutOut"))
 			{
 				AirMoves::isAirProcess = false;
 				AirMoves::curMoveHook = nullptr;
@@ -692,6 +692,12 @@ std::optional<std::string> AirMoves::on_initialize()
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rbRtAir";
+	}
+
+	if (!install_hook_absolute(blitzAddr.value(), m_cerberus_blitz_air_hook, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
+	{
+		spdlog::error("[{}] failed to initialize", get_name());
+		return "Failed to initialize AirMoves.blitz";
 	}
 
 	/*if (!install_hook_absolute(jceAirAddr, _jceAirHook, &jce_air_detour, &_jceAirRet, 0x7))
