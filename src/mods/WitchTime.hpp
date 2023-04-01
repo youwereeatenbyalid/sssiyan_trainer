@@ -29,6 +29,11 @@ private:
 	bool _pl0000WTTableHopperOnly = false;
 	bool _isVParrotDodgeAlso = false;
 
+	bool _isNeroEnable;
+	bool _isDanteEnable;
+	bool _isVergilEnable;
+	bool _isVEnable;
+
 	std::mutex _mtx;
 
 	void reset(EndLvlHooks::EndType type) override
@@ -94,7 +99,7 @@ private:
 
 	void on_nero_table_hopper(uintptr_t threadCntx, uintptr_t pl, bool isSecond)
 	{
-		if (!cheaton || isSecond || !_pl0000WTTableHopperOnly || _qsController->is_started() || _activationDelayCoroutine.is_started())
+		if (!cheaton || !_isNeroEnable || isSecond || !_pl0000WTTableHopperOnly || _qsController->is_started() || _activationDelayCoroutine.is_started())
 			return;
 		_slowWorldLifeTimeCoroutine.set_delay(_neroSlowShellLifeTime * 10.0f);
 		start_witch_time(pl);
@@ -105,6 +110,8 @@ private:
 		if (!cheaton || pl == 0 || *(int*)(pl + 0x108) == 1 || !_isInited || _qsController->is_started() || _activationDelayCoroutine.is_started())
 			return;
 		auto plId = *(int*)(pl + 0xE64);
+		if ((plId == 0 && !_isNeroEnable) || (plId == 1 && !_isDanteEnable) || (plId == 2 && !_isVEnable) || (plId == 4 && !_isVergilEnable))
+			return;
 		if (plId == 0 && _pl0000WTTableHopperOnly)
 			return;
 		auto curAction = *(uintptr_t*)(pl + 0x190);
@@ -244,6 +251,10 @@ public:
 		_isEfxCreate = cfg.get<bool>("WitchTime._isEfxCreate").value_or(true);
 		_pl0000WTTableHopperOnly = cfg.get<bool>("WitchTime._pl0000WTTableHopperOnly").value_or(false);
 		_isVParrotDodgeAlso = cfg.get<bool>("WitchTime._isVParrotDodgeAlso").value_or(false);
+		_isNeroEnable = cfg.get<bool>("WitchTime._isNeroEnable").value_or(true);
+		_isDanteEnable = cfg.get<bool>("WitchTime._isDanteEnable").value_or(true);
+		_isVEnable = cfg.get<bool>("WitchTime._isVEnable").value_or(true);
+		_isVergilEnable = cfg.get<bool>("WitchTime._isVergilEnable").value_or(true);
 
 		_slowWorldType = (QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType)cfg.get<int>
 			("WitchTime._slowWorldType").value_or((int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::Slow);
@@ -261,6 +272,10 @@ public:
 		cfg.set<bool>("WitchTime._isEfxCreate", _isEfxCreate);
 		cfg.set<bool>("WitchTime._pl0000WTTableHopperOnly", _pl0000WTTableHopperOnly);
 		cfg.set<bool>("WitchTime._isVParrotDodgeAlso", _isVParrotDodgeAlso);
+		cfg.set<bool>("WitchTime._isNeroEnable", _isNeroEnable);
+		cfg.set<bool>("WitchTime._isDanteEnable", _isDanteEnable);
+		cfg.set<bool>("WitchTime._isVEnable", _isVEnable);
+		cfg.set<bool>("WitchTime._isVergilEnable", _isVergilEnable);
 
 		cfg.set<int>("WitchTime._slowWorldType", (int)_slowWorldType);
 	}
@@ -280,23 +295,27 @@ public:
 		ImGui::Spacing();
 
 		ImGui::TextWrapped("Nero:");
+		ImGui::Checkbox("Enable##Nero", &_isNeroEnable);
 		UI::SliderFloat("##_neroSlowShellLifeTime", &_neroSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::Checkbox("Only activate witch time on table hopper", &_pl0000WTTableHopperOnly);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("Dante:");
+		ImGui::Checkbox("Enable##Dante", &_isDanteEnable);
 		UI::SliderFloat("##_danteSlowShellLifeTime", &_danteSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("V:");
+		ImGui::Checkbox("Enable##V", &_isVEnable);
 		UI::SliderFloat("##_vSlowShellLifeTime", &_vSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::Checkbox("Activate witch time with parrot's back dodge", &_isVParrotDodgeAlso);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("Vergil:");
+		ImGui::Checkbox("Enable##Vergil", &_isVergilEnable);
 		UI::SliderFloat("##_vergilPlSlowShellLifeTime", &_vergilPlSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
