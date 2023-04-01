@@ -367,6 +367,21 @@ public:
 			_mod->_onFsmPlActionNotifyActionEnd.unsubscribe(handler);
 	}
 
+	// uintptr_t threadCtxt, uintptr_t plNero, bool isSecond
+	template<typename T>
+	static void pl_nero_set_table_hopper_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*plNero*/ bool /*isSecond*/>> handler)
+	{
+		if (handler != nullptr && _mod != nullptr)
+			_mod->_onPLNeroSetTableHopper.subscribe(handler);
+	}
+
+	template<typename T>
+	static void pl_nero_set_table_hopper_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*plNero*/ bool /*isSecond*/>> handler)
+	{
+		if (handler != nullptr && _mod != nullptr)
+			_mod->_onPLNeroSetTableHopper.unsubscribe(handler);
+	}
+
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 private:
@@ -383,6 +398,7 @@ private:
 	Events::Event<uintptr_t,/*Dante*/ PlDanteStyleType /*style*/> _plDanteSetStyleRequest;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ float* /*val*/, int/*dtAddType*/, bool/*fixedValue*/> _onPlAddDtGauge;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ uintptr_t /*hitCntrl*/> _onPlJustEscape;
+	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ bool /*isSecond*/> _onPLNeroSetTableHopper;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2PlPosCntrAction*/> _onPlPosCntrActionUpdateSpeed;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t /*fsm2PlPosCntrAction*/, uintptr_t /*behavTreeActionArg*/> _onPlPosCntrActionStart;
 	Events::Event<uintptr_t, /*threadCtxt*/ uintptr_t,/*plManager*/ uintptr_t /*pl*/, bool /*isUnload*/> _onPlManagerPlRemove;
@@ -435,6 +451,8 @@ private:
 
 	static void fsm2_player_player_action_notify_action_end_hook(uintptr_t threadCntx, uintptr_t fsm2PlayerPlayerAction, uintptr_t behaviourTreeActionArg, bool isNotifyOnly);
 
+	static bool pl_nero_set_table_hopper_hook(uintptr_t threadCntxt, uintptr_t pl0000, bool isSecond);
+
 	static inline PlayerTracker* _mod = nullptr;
 
 	std::unique_ptr<FunctionHook> m_player_hook;
@@ -462,4 +480,5 @@ private:
 	std::unique_ptr<FunctionHook> m_pl_remove_hook;
 	std::unique_ptr<FunctionHook> m_pl0800_set_air_trick_action_hook;
 	std::unique_ptr<FunctionHook> m_fsm2_player_player_action_notify_action_end_hook;
+	std::unique_ptr<FunctionHook> m_pl_nero_set_table_hopper_hook;
 };

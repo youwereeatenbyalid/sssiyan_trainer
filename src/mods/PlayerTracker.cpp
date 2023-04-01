@@ -615,6 +615,13 @@ void PlayerTracker::fsm2_player_player_action_notify_action_end_hook(uintptr_t t
 	_mod->m_fsm2_player_player_action_notify_action_end_hook->get_original<decltype(fsm2_player_player_action_notify_action_end_hook)>()(threadCntx, fsm2PlayerPlayerAction, behaviourTreeActionArg, isNotifyOnly);
 }
 
+bool PlayerTracker::pl_nero_set_table_hopper_hook(uintptr_t threadCntxt, uintptr_t pl0000, bool isSecond)
+{
+	auto res = _mod->m_pl_nero_set_table_hopper_hook->get_original<decltype(pl_nero_set_table_hopper_hook)>()(threadCntxt, pl0000, isSecond);
+	_mod->_onPLNeroSetTableHopper.invoke(threadCntxt, pl0000, isSecond);
+	return res;
+}
+
 // clang-format on
 
 void PlayerTracker::init_check_box_info() {
@@ -752,6 +759,11 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!fsm2PlPlActionNotifyActionEndAddr)
 		return "Unable to find PlayerTracker.fsm2PlPlActionNotifyActionEndAddr pattern.";
 
+	auto plNeroSetTableHopperAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 30 48 8B D9 41 0F");
+	//DevilMayCry5.app_fsm2_player_PlayerAction__notifyActionEnd219004
+	if (!fsm2PlPlActionNotifyActionEndAddr)
+		return "Unable to find PlayerTracker.plNeroSetTableHopperAddr pattern.";
+
 	auto setSwordStyleAddr = setTrickStyleAddr.value() - 0x22;
 	auto setGunStyleAddr = setSwordStyleAddr - 0x22;
 	auto setRoyalStyleAddr = setGunStyleAddr - 0x22;
@@ -864,6 +876,10 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	m_fsm2_player_player_action_notify_action_end_hook = std::make_unique<FunctionHook>(fsm2PlPlActionNotifyActionEndAddr.value(), &fsm2_player_player_action_notify_action_end_hook);
 	if (!m_fsm2_player_player_action_notify_action_end_hook->create())
 		return "Faild to install PlayerTracker.m_fsm2_player_player_action_notify_action_end_hook;";
+
+	m_pl_nero_set_table_hopper_hook = std::make_unique<FunctionHook>(plNeroSetTableHopperAddr.value(), &pl_nero_set_table_hopper_hook);
+	if (!m_pl_nero_set_table_hopper_hook->create())
+		return "Faild to install PlayerTracker.m_pl_nero_set_table_hopper_hook;";
 
 	return Mod::on_initialize();
 }
