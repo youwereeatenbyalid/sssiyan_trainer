@@ -24,10 +24,14 @@ private:
 	float _banTime = 220.0f;
 
 	bool _isInited = false;
-	bool _useBanTime = false;
-	bool _isEfxCreate = false;
-	bool _pl0000WTTableHopperOnly = false;
-	bool _isVParrotDodgeAlso = false;
+	bool _useBanTime;
+	bool _isEfxCreate;
+	bool _pl0000WTTableHopperOnly;
+	bool _isVParrotDodgeAlso;
+	bool _isBalrogEvadeEnable;
+	bool _isDanteSdtEvadeEnable;
+	bool _isCoyoteSideEvadeEnable;
+	bool _isCoyoteFrontEvadeEnable;
 
 	bool _isNeroEnable;
 	bool _isDanteEnable;
@@ -123,6 +127,27 @@ private:
 				case 0:
 				{
 					if (!gf::StringController::str_cmp(curAction, L"TableHopperRightLv3") && !gf::StringController::str_cmp(curAction, L"TableHopperLeftLv3"))
+						return;
+					break;
+				}
+
+				case 1:
+				{
+					auto curActionFull = *(uintptr_t*)(pl + 0x198);
+					if (_isBalrogEvadeEnable && (gf::StringController::str_cmp(curActionFull, L"Balrog.BRP_Ducking.Left") || gf::StringController::str_cmp(curActionFull, L"Balrog.BRP_Ducking.Right")))
+						break;
+					if (_isDanteSdtEvadeEnable && (gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.Majin.Start") || gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.Majin.Wait") ||
+						gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.Majin.Start") || gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.Majin._Wait")))
+						break;
+					if (_isCoyoteSideEvadeEnable && (gf::StringController::str_cmp(curActionFull, L"Coyote.CA_GunStinger.Left") || gf::StringController::str_cmp(curActionFull, L"Coyote.CA_GunStinger.Right")))
+						break;
+					if (_isCoyoteFrontEvadeEnable && (gf::StringController::str_cmp(curActionFull, L"Coyote.CA_GunStinger.Front._Move.Start") || 
+						gf::StringController::str_cmp(curActionFull, L"Coyote.CA_GunStinger.Front.Finish")))
+						break;
+					if (!gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.Normal") && !gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.Normal") && 
+						!gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.PutOUt.DS") && !gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.PutOut.DS") &&
+						!gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.PutOUt.RB") && !gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.PutOut.RB") &&
+						!gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidRight.PutOUt.SP") && !gf::StringController::str_cmp(curActionFull, L"Avoid.AvoidLeft.PutOut.SP"))
 						return;
 					break;
 				}
@@ -255,6 +280,10 @@ public:
 		_isDanteEnable = cfg.get<bool>("WitchTime._isDanteEnable").value_or(true);
 		_isVEnable = cfg.get<bool>("WitchTime._isVEnable").value_or(true);
 		_isVergilEnable = cfg.get<bool>("WitchTime._isVergilEnable").value_or(true);
+		_isBalrogEvadeEnable = cfg.get<bool>("WitchTime._isBalrogEvadeEnable").value_or(false);
+		_isDanteSdtEvadeEnable = cfg.get<bool>("WitchTime._isDanteSdtEvadeEnable").value_or(false);
+		_isCoyoteSideEvadeEnable = cfg.get<bool>("WitchTime._isCoyoteSideEvadeEnable").value_or(true);
+		_isCoyoteFrontEvadeEnable = cfg.get<bool>("WitchTime._isCoyoteFrontEvadeEnable").value_or(false);
 
 		_slowWorldType = (QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType)cfg.get<int>
 			("WitchTime._slowWorldType").value_or((int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::Slow);
@@ -276,6 +305,10 @@ public:
 		cfg.set<bool>("WitchTime._isDanteEnable", _isDanteEnable);
 		cfg.set<bool>("WitchTime._isVEnable", _isVEnable);
 		cfg.set<bool>("WitchTime._isVergilEnable", _isVergilEnable);
+		cfg.set<bool>("WitchTime._isBalrogEvadeEnable", _isBalrogEvadeEnable);
+		cfg.set<bool>("WitchTime._isDanteSdtEvadeEnable", _isDanteSdtEvadeEnable);
+		cfg.set<bool>("WitchTime._isCoyoteSideEvadeEnable", _isCoyoteSideEvadeEnable);
+		cfg.set<bool>("WitchTime._isCoyoteFrontEvadeEnable", _isCoyoteFrontEvadeEnable);
 
 		cfg.set<int>("WitchTime._slowWorldType", (int)_slowWorldType);
 	}
@@ -288,34 +321,38 @@ public:
 		ImGui::RadioButton("DMC3/5", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::Slow); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
 		ImGui::RadioButton("DMC1", (int*)&_slowWorldType, (int)QuickSilverCtrl::QuickSilverSlowWorldController::SlowWorldType::StopOnSlowPfb);
 
-		ImGui::Spacing();
-
-		ImGui::TextWrapped("Duration:");
-
-		ImGui::Spacing();
+		ImGui::Separator();
 
 		ImGui::TextWrapped("Nero:");
 		ImGui::Checkbox("Enable##Nero", &_isNeroEnable);
-		UI::SliderFloat("##_neroSlowShellLifeTime", &_neroSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::Checkbox("Only activate witch time on table hopper", &_pl0000WTTableHopperOnly);
+		ImGui::TextWrapped("Duration:");
+		UI::SliderFloat("##_neroSlowShellLifeTime", &_neroSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("Dante:");
 		ImGui::Checkbox("Enable##Dante", &_isDanteEnable);
+		ImGui::Checkbox("Activate witch time on Balrog's \"Welter move\"", &_isBalrogEvadeEnable);
+		ImGui::Checkbox("Activate witch time on SDT side tricks", &_isDanteSdtEvadeEnable);
+		ImGui::Checkbox("Activate witch time on Coyote-A side dodges", &_isCoyoteSideEvadeEnable);
+		ImGui::Checkbox("Activate witch time on Coyote-A front dodge", &_isCoyoteFrontEvadeEnable);
+		ImGui::TextWrapped("Duration:");
 		UI::SliderFloat("##_danteSlowShellLifeTime", &_danteSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("V:");
 		ImGui::Checkbox("Enable##V", &_isVEnable);
-		UI::SliderFloat("##_vSlowShellLifeTime", &_vSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::Checkbox("Activate witch time with parrot's back dodge", &_isVParrotDodgeAlso);
+		ImGui::TextWrapped("Duration:");
+		UI::SliderFloat("##_vSlowShellLifeTime", &_vSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
 
 		ImGui::TextWrapped("Vergil:");
 		ImGui::Checkbox("Enable##Vergil", &_isVergilEnable);
+		ImGui::TextWrapped("Duration:");
 		UI::SliderFloat("##_vergilPlSlowShellLifeTime", &_vergilPlSlowShellLifeTime, 75.0f, 1200.0f, "%.1f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Separator();
