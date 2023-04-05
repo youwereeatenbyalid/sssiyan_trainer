@@ -254,7 +254,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_CommonCheat;
-		m_full_name_string = "Witch time";
+		m_full_name_string = "Witch time (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Successfully dodging with a side roll gives you slow world. This mod must be enabled before loading into a level.";
 

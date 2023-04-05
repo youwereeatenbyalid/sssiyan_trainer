@@ -102,7 +102,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilDoppel;
-		m_full_name_string = "Disable doppelganger auto-return";
+		m_full_name_string = "Disable doppelganger auto-return (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Disable the doppelganger automatically returning after a just JdC or when it gets too far away from Vergil.";
 
