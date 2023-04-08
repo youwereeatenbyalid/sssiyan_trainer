@@ -542,7 +542,7 @@ std::optional<std::string> AirMoves::on_initialize()
 	auto p64Base = g_framework->get_module().as<uintptr_t>();
 	m_is_enabled = &cheaton;
 	m_on_page = Page_Mechanics;
-	m_full_name_string = "Air Moves";
+	m_full_name_string = "Air Moves (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Allow characters to perform certain ground moves in the air.";
 

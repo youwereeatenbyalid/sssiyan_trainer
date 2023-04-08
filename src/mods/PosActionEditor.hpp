@@ -533,7 +533,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_Mechanics;
-		m_full_name_string = "Moves speed editor";
+		m_full_name_string = "Moves speed editor (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Change speed of some actions that changes player's position (like stinger(s), trick dodge (yea now you can make boss's trick dodge in the trainer), ets).";
 

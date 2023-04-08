@@ -98,7 +98,7 @@ std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   m_is_enabled          = &NeroDisableWiresnatch::cheaton;
   m_on_page             = Page_Wiresnatch;
 
-  m_full_name_string   = "Disable Wiresnatch";
+  m_full_name_string   = "Disable Wiresnatch (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Disables Wiresnatch to allow breaker abilities while locked on.";
 

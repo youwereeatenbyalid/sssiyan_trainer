@@ -450,6 +450,11 @@ void LandCancels::on_frame() {
 
 void LandCancels::on_draw_ui() {
     ImGui::Checkbox("Disable Land Cancels on Dante's first Rave", &disableDanteRaveOne);
+    ImGui::ShowHelpMarker("For Mustang Glitch setup");
+    ImGui::Separator();
+    ImGui::Text("Current enabled land cancels:");
+    ImGui::Text("Nero:\nRave 1,2,3\nCharge Shot\nColour Up\nBattery\nRagtime Bubble\nMega Buster Break Age");
+    ImGui::Text("Dante:\nRave 1,2,3,4\nEbony & Ivory Normal Shot\nFireworks\nMad Hatter\nHat Trick\nMan In The Red\nDouble Blaster\nKalina Normal Shots\nAir Trick End\nTurbulence");
     if (ImGui::CollapsingHeader("Debug")) {
         ImGui::TextWrapped("This will freeze your weight to your choice to make it easier to test land cancels.");
         ImGui::Checkbox("Land Cancel Weight Assist", &landCancelTestWeightToggle);
