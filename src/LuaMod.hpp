@@ -9,12 +9,10 @@ class LuaMod : public Mod {
 public:
 	 void on_lua_state_created(lua_State* l) {
 		 m_global_state = l;
-		 m_global_state_exists = true;
 		 
 	};
 	 void on_lua_state_destroyed(lua_State* l) {
 		 m_global_state = nullptr;
-		 m_global_state_exists = false;
 		 unload_lua_mod();
 	 };
 
@@ -38,7 +36,7 @@ public:
 	bool is_lua_loaded() { return m_lua_loaded; }
 
 	void on_frame() override {
-		if (m_global_state_exists && m_is_enabled != nullptr) {
+		if (ModFramework::get_ref_lua_enabled() && m_is_enabled != nullptr) {
 			if (*m_is_enabled && !m_lua_loaded) {
 				load_lua_mod();
 			}
@@ -57,7 +55,6 @@ public:
 protected:
 	lua_State* m_global_state;
 	lua_State* m_mod_state;
-	bool m_global_state_exists = false;
 	bool m_lua_loaded = false;
 };
 

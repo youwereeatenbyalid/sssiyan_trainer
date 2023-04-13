@@ -50,7 +50,6 @@ static void hook_init_end_callback(HANDLE hooking_thread)
 {
     --g_currently_hooking;
 }
-
 ModFramework::ModFramework()
     : m_game_module{ GetModuleHandle(nullptr) }
 {

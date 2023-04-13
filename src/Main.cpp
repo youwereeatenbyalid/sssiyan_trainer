@@ -9,6 +9,10 @@
 HMODULE g_dinput = 0;
 std::mutex g_load_mutex{};
 extern lua_State* g_lua{nullptr};
+
+
+bool ModFramework::m_ref_lua_enabled{ false };
+
 void failed() {
     MessageBox(0, "ModFramework: Unable to load the original dinput8.dll. Please report this to the developer.", "ModFramework", 0);
     ExitProcess(0);
@@ -49,15 +53,25 @@ extern "C" {
 }
 
 void on_lua_state_created(lua_State* l) {
-    //reframework::API::LuaLock _{};
-    g_framework->on_lua_state_created(l);
+
+    g_lua = l;
+    //update record of lua enabled
+    g_framework->set_ref_lua_enabled(true);
+    //callback if trainer initialized
+    if(g_framework->is_game_data_inited())
+        g_framework->on_lua_state_created(l);
+
 }
 
 void on_lua_state_destroyed(lua_State* l) {
-    //reframework::API::LuaLock _{};
-    g_framework->on_lua_state_destroyed(l);
+
+    //update record of lua enabled
+    g_framework->set_ref_lua_enabled(false);
+    //callback if trainer initialized
+    if (g_framework->is_game_data_inited())
+        g_framework->on_lua_state_destroyed(l);
     g_lua = nullptr;
-    //g_loaded_snippets.clear();
+
 }
 
 extern "C" __declspec(dllexport) bool reframework_plugin_initialize(const REFrameworkPluginInitializeParam * param) {

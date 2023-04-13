@@ -44,6 +44,10 @@ public:
     const auto& get_icons() const { return m_icons; }
 
     const auto& is_game_data_inited() const { return m_game_data_initialized; }
+
+    static bool get_ref_lua_enabled() { return m_ref_lua_enabled; }
+
+    static void set_ref_lua_enabled(bool enabled) { m_ref_lua_enabled = enabled; }
     
     Address get_module() const { return m_game_module; }
 
@@ -161,6 +165,7 @@ private:
     bool m_is_d3d11{ false };
     bool m_valid{ false };
     bool m_initialized{ false };
+    static bool m_ref_lua_enabled;
     ImVec2 m_window_pos{ 50, 50 };
     ImVec2 m_window_size{ 1400, 750 };
     float m_scale{ 1.0f };
