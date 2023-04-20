@@ -176,7 +176,7 @@ namespace Coroutines
 			//Do not run action when pause menu is opened
 			inline void ignoring_update_on_pause(bool val) { _isIgnoringUpdateOnPause = val; }
 
-			virtual void stop() noexcept
+			void stop() noexcept
 			{
 				std::lock_guard<std::recursive_mutex> lck(_mtx);
 				if (!_isStarted)

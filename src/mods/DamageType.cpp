@@ -54,7 +54,7 @@ std::optional<std::string> DamageType::on_initialize() {
     m_is_enabled = &DamageType::cheaton;
     m_on_page = Page_Mechanics;
 
-    m_full_name_string = "Knockback Edits";
+    m_full_name_string = "Knockback Edits (+)";
     m_author_string = "Siyan";
     m_description_string = "Add or remove knockbacks/launches etc from moves.";
 

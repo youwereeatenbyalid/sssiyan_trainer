@@ -2,6 +2,7 @@
 #include "BpStageJump.hpp"
 #include "PlayerTracker.hpp"
 #include <ctime>
+#include <array>
 
 uintptr_t BpStageJump::jmp_ret{NULL};
 uintptr_t BpStageJump::jmp_jne{NULL};
@@ -27,11 +28,8 @@ int BpStageJump::palace_type = BpStageJump::RANDOM;
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
-int BpStageJump::random_generator(int low, int high, std::optional<uint32_t> seed)
+int BpStageJump::random_generator(int low, int high)
 {
-	if (seed)
-		//s_rng_engine.seed(*seed);
-
 	return low + (s_rng_engine() % (high - low + 1));
 }
 
@@ -61,12 +59,12 @@ int BpStageJump::return_boss_floor()
 }
 
 // return non-boss bp floor
-int BpStageJump::return_normal_floor(std::optional<uint32_t> seed)
+int BpStageJump::return_normal_floor()
 {
 	int return_floor;
 	do
 	{
-		return_floor = random_generator(1, 97, seed);
+		return_floor = random_generator(1, 97);
 	} while (return_floor == 20
 		|| return_floor == 40
 		|| return_floor == 60
@@ -94,57 +92,57 @@ void BpStageJump::reset_palace()
 }
 
 // randomize values in an array via swapping
-void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high, std::optional<uint32_t> seed)
+void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high)
 {
 	// TODO: Add your implementation code here.
 	for (int i = range_low; i < range_high; i++) {
 		int temp = array_param[i];
-		int rand = random_generator(rand_low, rand_high, seed);
+		int rand = random_generator(rand_low, rand_high);
 		array_param[i] = array_param[rand];
 		array_param[rand] = temp;
 	}
 }
 
-void BpStageJump::randomize_array(int* array_param, int range_low, int range_high, std::optional<uint32_t> seed)
+void BpStageJump::randomize_array(int* array_param, int range_low, int range_high)
 {
 	for (int i = range_low; i < range_high; i++) {
 		int temp = array_param[i];
-		int rand = return_normal_floor(seed);
+		int rand = return_normal_floor();
 		array_param[i] = array_param[rand - 1];
 		array_param[rand - 1] = temp;
 	}
 }
 
 // Generate a new palace scenario
-void BpStageJump::generate_palace(int seed)
+void BpStageJump::generate_palace()
 {
 	reset_palace();
 
 	switch (BpStageJump::palace_type) {
 	case palace_type_enum::PARTIAL:
-		randomize_array(palacearray, 0, 19, seed);
-		randomize_array(palacearray, 20, 39, seed);
-		randomize_array(palacearray, 40, 59, seed);
-		randomize_array(palacearray, 60, 79, seed);
-		randomize_array(palacearray, 80, 89, seed);
-		randomize_array(palacearray, 90, 97, seed);
+		randomize_array(palacearray, 0, 19);
+		randomize_array(palacearray, 20, 39);
+		randomize_array(palacearray, 40, 59);
+		randomize_array(palacearray, 60, 79);
+		randomize_array(palacearray, 80, 89);
+		randomize_array(palacearray, 90, 97);
 		break;
 	case palace_type_enum::BALANCED:
-		randomize_array(palacearray, 0, 19, 0, 18, seed);
-		randomize_array(palacearray, 20, 39, 20, 38, seed);
-		randomize_array(palacearray, 40, 59, 40, 58, seed);
-		randomize_array(palacearray, 60, 79, 60, 78, seed);
-		randomize_array(palacearray, 80, 89, 80, 88, seed);
-		randomize_array(palacearray, 90, 97, 90, 96, seed);
+		randomize_array(palacearray, 0, 19, 0, 18);
+		randomize_array(palacearray, 20, 39, 20, 38);
+		randomize_array(palacearray, 40, 59, 40, 58);
+		randomize_array(palacearray, 60, 79, 60, 78);
+		randomize_array(palacearray, 80, 89, 80, 88);
+		randomize_array(palacearray, 90, 97, 90, 96);
 		break;
 	case palace_type_enum::RANDOM:
 	default:
-		randomize_array(palacearray, 0, 99, 1, 100, seed);
+		randomize_array(palacearray, 0, 99, 1, 100);
 		break;
 	}
 	if (BpStageJump::palace_type == palace_type_enum::PARTIAL || BpStageJump::palace_type == palace_type_enum::BALANCED) {
 		if (randombosses)
-			randomize_array(bossarray, 0, 7, 0, 7, seed);
+			randomize_array(bossarray, 0, 7, 0, 7);
 		palacearray[19] = bossarray[0];
 		palacearray[39] = bossarray[1];
 		palacearray[59] = bossarray[2];
@@ -266,7 +264,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   if (!addr) {
     return "Unable to find BpStageJump pattern.";
   }
-  generate_palace((unsigned int)time(NULL));
+
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 12)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
@@ -278,7 +276,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   // might as well randomize seed on boot
   seed = std::random_device{}(); // Get a random seed from the OS
   s_rng_engine.seed(seed);
-  generate_palace(seed);
+  generate_palace();
 
   return Mod::on_initialize();
 }
@@ -342,10 +340,12 @@ void BpStageJump::on_draw_ui() {
 
 		ImGui::TextWrapped("You must press \"Randomize Palace\" at the beginning of every run to reset the palace.");
 
-		if (ImGui::Button("Randomize Palace")){
+		if (ImGui::Button("Randomize Palace")) {
 			if (!useseed)
 				seed = std::random_device{}();
-			generate_palace(seed);
+			
+			s_rng_engine.seed(seed);
+			generate_palace();
 		}
 		ImGui::TextWrapped("Co-op Random bloody palace: In order to use the randomizer in co-op mode, you and any co-op partners must use the same seed. "
 		"This ensures you are all using the same set of random stages and will not become desynced.\n"

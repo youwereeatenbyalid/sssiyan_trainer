@@ -1,11 +1,13 @@
 #include "LandCancels.hpp"
 #include "PlayerTracker.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 
 uintptr_t LandCancels::jmp_ret{NULL};
 bool LandCancels::cheaton{NULL};
 bool landCancelTestWeightToggle{ FALSE };
 float desiredWeight{ 30.0f };
 bool landCancelTestToggle{ FALSE };
+bool disableDanteRaveOne{ FALSE };
 uint32_t landCancelTestMove{ 8008 };
 
 // clang-format off
@@ -163,7 +165,7 @@ static naked void detour() {
         je ecstasytimer
     // swords
         cmp [PlayerTracker::playermoveid], 0x157C00C9 // Air Rave 1 Reb
-        je forceland
+        je checkForRaveOne
         cmp [PlayerTracker::playermoveid], 0x158600C9 // Air Rave 2 Reb
         je forceland
         cmp [PlayerTracker::playermoveid], 0x159000C9 // Air Rave 3 Reb
@@ -171,7 +173,7 @@ static naked void detour() {
         cmp [PlayerTracker::playermoveid], 0x159A00C9 // Air Rave 4 Reb
         je forceland
         cmp [PlayerTracker::playermoveid], 0x145000FA // Air Rave 1 Sparda
-        je forceland
+        je checkForRaveOne
         cmp [PlayerTracker::playermoveid], 0x145A00FA // Air Rave 2 Sparda
         je forceland
         cmp [PlayerTracker::playermoveid], 0x146400FA // Air Rave 3 Sparda
@@ -179,7 +181,7 @@ static naked void detour() {
         cmp [PlayerTracker::playermoveid], 0x146E00FA // Air Rave 4 Sparda
         je forceland
         cmp [PlayerTracker::playermoveid], 0x157C00F1 // Air Rave 1 DSD
-        je forceland
+        je checkForRaveOne
         cmp [PlayerTracker::playermoveid], 0x158600F1 // Air Rave 2 DSD
         je forceland
         cmp [PlayerTracker::playermoveid], 0x159000F1 // Air Rave 3 DSD
@@ -218,6 +220,11 @@ static naked void detour() {
         // cmp byte ptr [rdx+0x8], 2
         // je retcode
         jmp code
+
+    checkForRaveOne: // Disable land cancels on rave 1 to allow mustang glitch setup
+        cmp byte ptr [disableDanteRaveOne], 1
+        je code
+        jmp forceland
 
     ecstasytimer:
         //get tree layer
@@ -414,7 +421,7 @@ std::optional<std::string> LandCancels::on_initialize() {
   m_is_enabled = &LandCancels::cheaton;
   m_on_page    = Page_Mechanics;
 
-  m_full_name_string = "Land Cancels";
+  m_full_name_string = "Land Cancels (+)";
   m_author_string    = "SSSiyan";
   m_description_string = "Touching the floor will cancel your current aerial attack.\n\n"
       "Only certain attacks are set to be land cancellable and this list will expand with time. Feel free to @ me with ideas!";
@@ -442,6 +449,12 @@ void LandCancels::on_frame() {
 }
 
 void LandCancels::on_draw_ui() {
+    ImGui::Checkbox("Disable Land Cancels on Dante's first Rave", &disableDanteRaveOne);
+    ImGui::ShowHelpMarker("For Mustang Glitch setup");
+    ImGui::Separator();
+    ImGui::Text("Current enabled land cancels:");
+    ImGui::Text("Nero:\nRave 1,2,3\nCharge Shot\nColour Up\nBattery\nRagtime Bubble\nMega Buster Break Age");
+    ImGui::Text("Dante:\nRave 1,2,3,4\nEbony & Ivory Normal Shot\nFireworks\nMad Hatter\nHat Trick\nMan In The Red\nDouble Blaster\nKalina Normal Shots\nAir Trick End\nTurbulence");
     if (ImGui::CollapsingHeader("Debug")) {
         ImGui::TextWrapped("This will freeze your weight to your choice to make it easier to test land cancels.");
         ImGui::Checkbox("Land Cancel Weight Assist", &landCancelTestWeightToggle);
@@ -461,6 +474,15 @@ void LandCancels::on_draw_ui() {
         }
     }
 }
+
+void LandCancels::on_config_load(const utility::Config& cfg) {
+    disableDanteRaveOne = cfg.get<bool>("land_cancels_disable_rave_one").value_or(false);
+}
+
+void LandCancels::on_config_save(utility::Config& cfg) {
+    cfg.set<bool>("land_cancels_disable_rave_one", disableDanteRaveOne);
+}
+
 
 /*
     chargeshottimer:

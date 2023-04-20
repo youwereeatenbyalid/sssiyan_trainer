@@ -1,25 +1,6 @@
 #include "Pl0300Controller.hpp"
 #include "Pl0300ControllerManager.hpp"
 
-void PlCntr::Pl0300Cntr::Pl0300Controller::destroy_game_obj()
-{
-	destroy_all_related_shells();
-	if (_isDoppelDestroyRequested)
-		return;
-	if (get_pl() != 0 && !is_doppel())
-	{
-		if (is_in_players_list())
-		{
-			sdk::call_object_func_easy<void*>(sdk::get_managed_singleton<REManagedObject>("app.PlayerManager"), "removePlayer(app.Player, System.Boolean)", get_pl(), false);
-		}
-		if (auto dp = _doppel.lock(); dp != nullptr)
-		{
-			destroy_doppel();
-		}
-		PlCntr::PlController::destroy_game_obj();
-	}
-}
-
 void PlCntr::Pl0300Cntr::Pl0300Controller::generate_doppel(bool isFirst, float hp, float attackRate)
 {
 	check_doppel_ref_correct();
@@ -47,8 +28,9 @@ void PlCntr::Pl0300Cntr::Pl0300Controller::generate_doppel(bool isFirst, float h
 	change_character_group(groupTmp);
 }
 
-PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr::Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput) : PlCntr::PlController(pl0300)
+PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr::Pl0300Cntr::Pl0300Type type, bool exCostume, bool isKeepingOriginalPadInput) : PlCntr::PlController(pl0300)
 {
+	_isExCostume = exCostume;
 	_isKeepingOriginalPadInput = isKeepingOriginalPadInput;
 	if (pl0300 == 0)
 		throw std::exception("pl0300 is null");
@@ -94,6 +76,28 @@ PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr:
 	}
 }
 
+PlCntr::Pl0300Cntr::Pl0300Controller::~Pl0300Controller()
+{
+	if (_isDoppelDestroyRequested)
+		return;
+	_onDestroyEvent.invoke(this);
+	destroy_all_related_shells();
+	if (get_pl() != 0 && !is_doppel())
+	{
+		//Called by default from app.Player.OnDestroy() or smth
+		/*if (is_in_players_list())
+			sdk::call_object_func_easy<void*>((REManagedObject*)get_pl_manager(), "removePlayer(app.Player, System.Boolean)", get_pl(), false);*/
+
+		if (auto dp = _doppel.lock(); dp != nullptr && !dp->_isDoppelDestroyRequested)
+		{
+			destroy_doppel();
+			dp->destroy_pl_game_obj();
+		}
+
+		destroy_pl_game_obj();
+	}
+}
+
 void PlCntr::Pl0300Cntr::Pl0300Controller::destroy_doppel()
 {
 	check_doppel_ref_correct();
@@ -106,6 +110,7 @@ void PlCntr::Pl0300Cntr::Pl0300Controller::destroy_doppel()
 	if (_pl0300DestroyDoppelMethod != nullptr)
 		_pl0300DestroyDoppelMethod->call(sdk::get_thread_context(), get_pl());
 	_doppel.lock()->_isDoppelDestroyRequested = true;
+	_doppel.lock()->destroy_all_related_shells();
 	_pl0300Manager->remove_doppelganger(_doppel.lock().get());
 	change_character_group(groupTmp);
 }

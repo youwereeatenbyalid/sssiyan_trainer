@@ -191,7 +191,7 @@ public:
 		//-------Place moves cheats here-------//
 
 		if (AirMoves::cheaton)
-			AirMoves::str_cur_action_asm(curPl);
+			AirMoves::str_cur_action_asm(curPl, dotNetString);
 
 		if (VergilTrickTrailsEfx::cheaton)
 			VergilTrickTrailsEfx::set_trick_efx(dotNetString, curPl);

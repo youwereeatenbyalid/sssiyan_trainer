@@ -15,18 +15,18 @@ public:
   static bool altfloor;
   static enum palace_type_enum { BALANCED, PARTIAL, RANDOM };
   int static palace_type;
-  int static random_generator(int low, int high, std::optional<uint32_t> seed = {});
+  int static random_generator(int low, int high);
   // random_generator(1,7), case switch to return a boss floor
   int static return_boss_floor();
   // return non-boss bp floor
-  int static return_normal_floor(std::optional<uint32_t> seed = {});
+  int static return_normal_floor();
   // Reset counter, palacearray,bossarray
   void static reset_palace();
   // randomize values in an array via swapping
-  void static randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high, std::optional<uint32_t> seed = {});
-  void static randomize_array(int* array_param, int range_low, int range_high, std::optional<uint32_t> seed = {});
+  void static randomize_array(int* array_param, int range_low, int range_high, int rand_low, int rand_high);
+  void static randomize_array(int* array_param, int range_low, int range_high);
   // Generate a new palace scenario
-  void static generate_palace(int seed);
+  void static generate_palace();
   // get the next floor
   int static next_floor();
 

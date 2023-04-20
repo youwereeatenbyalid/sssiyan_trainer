@@ -1611,6 +1611,14 @@ void ModFramework::draw_options() const
                 ImGui::Separator();
 
                 current_mod->on_draw_ui();
+            
+#ifndef NDEBUG
+                ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.15f, 0.15f, 0.15f, 0.94f});
+                ImGui::Begin("Debug Menu", nullptr);
+                current_mod->on_draw_debug_ui();
+                ImGui::End();
+                ImGui::PopStyleColor();
+#endif
             }
             else {
 				if (m_error.empty()) {

@@ -1,5 +1,6 @@
 #pragma once
 #include "PlController.hpp"
+#include "events/Events.hpp"
 
 namespace gf = GameFunctions;
 
@@ -75,11 +76,9 @@ namespace PlCntr
 			bool _isAddToPlListRequested = false;
 			bool _isSetTeleportTimingParamsRequested = false;
 			bool _isKeepingOriginalPadInput = false;
-			/*bool _useCustomTrickUpdate = false;
-			bool _useCustomLockOnUpdate = false;
-			bool _useCustomLockOnTargetOnEnemyUpdate = false;*/
 			bool _isIgnoringReleaseOnTrainingReset = false;
 			bool _isDoppelDestroyRequested = false;
+			bool _isExCostume;
 
 			static inline bool _isStaticInitRequested = true;
 
@@ -107,12 +106,11 @@ namespace PlCntr
 
 			HitControllerSettings _hcLastSettings;
 
+			Events::Event<const Pl0300Controller*> _onDestroyEvent;
+
 			//static inline const wchar_t* _jceStr = L"Zigenzan_Zetsu_Start";//I just want to keep this move's name here
 
-			//dctor also calls this
-			void destroy_game_obj() override;
-
-			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool isKeepingOriginalPadInput = false);
+			Pl0300Controller(uintptr_t pl0300, Pl0300Cntr::Pl0300Type type, bool exCostume, bool isKeepingOriginalPadInput = false);
 
 			void check_doppel_ref_correct();
 
@@ -121,9 +119,18 @@ namespace PlCntr
 			Pl0300Controller() = delete;
 			Pl0300Controller(const Pl0300Controller& other) = delete;
 
-			~Pl0300Controller() override
+			~Pl0300Controller() override;
+
+			template<class T>
+			void on_destroy_event_sub(std::shared_ptr<Events::EventHandler<T, const Pl0300Controller*>> eh)
 			{
-				destroy_game_obj();
+				_onDestroyEvent.subscribe(eh);
+			}
+
+			template<class T>
+			void on_destroy_event_unsub(std::shared_ptr<Events::EventHandler<T, const Pl0300Controller*>> eh)
+			{
+				_onDestroyEvent.unsubscribe(eh);
 			}
 
 			//get doppel's controller if exists
@@ -169,6 +176,8 @@ namespace PlCntr
 			void ignore_release_on_trainig_reset(bool val) noexcept { _isIgnoringReleaseOnTrainingReset = val; }
 
 			inline bool is_doppel_destroy_requested() const noexcept { return _isDoppelDestroyRequested; }
+
+			inline bool is_ex_costume() const noexcept { return _isExCostume; }
 
 			inline void set_is_no_die(bool val) noexcept override
 			{

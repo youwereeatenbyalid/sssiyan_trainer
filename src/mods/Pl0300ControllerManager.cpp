@@ -4,7 +4,7 @@
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::is_pl0300_controller_asm(uintptr_t threadCtxt, uintptr_t emManager, uintptr_t pl0300)
 {
-    for (const auto& i : _mod->_pl0300List)
+    for (const auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && (i->get_pl0300_type() == Pl0300Type::PlHelper || i->get_pl0300_type() == Pl0300Type::Em6000Friendly))
             return;
@@ -41,7 +41,7 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_request_add_em_de
 
 bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_pl0300_asm(uintptr_t pl0300)
 {
-    for (const auto& i : _mod->_pl0300List)
+    for (const auto &i : _mod->_pl0300List)//Must take shared_ptr by ref cause doppel destoy called in dctor
     {
         if (i->get_pl() == pl0300)
             return true;
@@ -57,12 +57,18 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_damage_check_deto
         movaps [rsp + 0x110], xmm6
         push rax
         push rcx
+        push rdx
+        push r8
+        push r9
         push rsp
         mov rcx, rdi
         sub rsp, 32
         call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
         add rsp, 32
         pop rsp
+        pop r9
+        pop r8
+        pop rdx
         pop rcx
         cmp al, 01
         pop rax
@@ -87,12 +93,18 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_destroy_doppel_re
         pl0300CntrlCheck:
         push rax
         push rcx
+        push rdx
+        push r8
+        push r9
         push rsp
         mov rcx, rbx
         sub rsp, 32
         call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
         add rsp, 32
         pop rsp
+        pop r9
+        pop r8
+        pop rdx
         pop rcx
         cmp al, 00
         pop rax
@@ -131,12 +143,14 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType res
 
     if (_pl0300Pfb != nullptr)
     {
+        sdk::call_object_func_easy<void*>(_pl0300Pfb, "set_Standby(System.Boolean)", false);
         PfbFactory::PrefabFactory::release(_pl0300Pfb);
         _pl0300Pfb = nullptr;
         _pl0300PathStr = nullptr;
     }
     if (_pl0300C00Pfb != nullptr)
     {
+        sdk::call_object_func_easy<void*>(_pl0300C00Pfb, "set_Standby(System.Boolean)", false);
         PfbFactory::PrefabFactory::release(_pl0300C00Pfb);
         _pl0300C00Pfb = nullptr;
         _pl0300C00PathStr = nullptr;
@@ -147,7 +161,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr
 {
     _mod->_pl0300StartHook->get_original<decltype(Pl0300ControllerManager::pl0300_start_func_hook)>()(threadCntx, pl0300);
     //pl0300.Start() setting up many fields, so i need to reset it after Start() was called for controlled pl0300.
-    for (const auto& i : _mod->_pl0300List)
+    for (const auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300)
         {
@@ -207,7 +221,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr
         }
     }
     BossVergilSettings::after_pl0300_start(threadCntx, pl0300);
-    if (EnemyFixes::isDoppelCameraFix)
+    if (EnemyFixes::cheaton && EnemyFixes::isDoppelCameraFix)
     {
         auto emParam = *(uintptr_t*)(pl0300 + 0x1768);
         if (emParam != 0)
@@ -228,7 +242,7 @@ int PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintp
     {
         return 0x3E;
     }
-    for (const auto& pl0300Ctrl : _mod->_pl0300List)
+    for (const auto pl0300Ctrl : _mod->_pl0300List)
     {
         if (pl0300 != pl0300Ctrl->get_pl())
             continue;
@@ -241,7 +255,7 @@ int PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintp
 bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
     auto charGroup = *(CharGroup*)(pl0300 + 0x108);
-    for (const auto& i : _mod->_pl0300List)
+    for (const auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && i->get_pl0300_type() == Pl0300Type::PlHelper && charGroup == CharGroup::Enemy)
         {
@@ -257,7 +271,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(ui
 bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintptr_t threadCtxt, uintptr_t character)
 {
     bool res = _mod->_checkEmThinkOffHook->get_original<decltype(check_em_think_off_hook)>()(threadCtxt, character);
-    for (const auto& i : _mod->_pl0300List)
+    for (const auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == character)
         {
@@ -274,7 +288,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintpt
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
     _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
-    for (auto& i : _mod->_pl0300List)
+    for (auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && !i->is_doppel())
         {
@@ -286,7 +300,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uin
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_target_on_enemy_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
-    for (auto& i : _mod->_pl0300List)
+    for (auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && !i->is_doppel())
         {
@@ -303,7 +317,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_target_o
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(uintptr_t threadCtxt, uintptr_t fsmPl0300Teleport)
 {
     auto pl0300 = *(uintptr_t*)(fsmPl0300Teleport + 0x60);
-    for (auto& i : _mod->_pl0300List)
+    for (auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && !i->is_doppel())
         {
@@ -378,7 +392,7 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
     try
     {
         std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
-        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
+        _pl0300List.emplace_back(std::shared_ptr<Pl0300Controller>(new Pl0300Controller(pl0300, controllerType, exCostume, isKeepingOrigPadInput)));//I cant use make_shared for friend class ctor :(
     }
     catch (const std::exception& e)
     {
@@ -411,13 +425,7 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
 {
     if (controllerOwner == nullptr || controllerOwner->get_doppel() == 0)
         return std::weak_ptr<Pl0300Controller>();
-    for (const auto& i : _pl0300List)
-    {
-        if (i->get_pl() == controllerOwner->get_doppel())//Doppel already summoned
-            return std::weak_ptr<Pl0300Controller>();
-        
-    }
-    std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
+    std::unique_lock<std::recursive_mutex> lck(_pl0300ListChangeMtx);
     int indx = 0;
     for (int i = 0; i < _pl0300List.size(); i++)
     {
@@ -426,8 +434,9 @@ std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> PlCntr::Pl0300Cntr::Pl0300Co
         if (_pl0300List[i].get() == controllerOwner)
             indx = i;
     }
-    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly));
+    auto doppel = std::shared_ptr<Pl0300Controller>(new Pl0300Controller(controllerOwner->get_doppel(), Pl0300Type::Em6000Friendly, _pl0300List[indx]->is_ex_costume()));
     _pl0300List.push_back(doppel);
+    lck.unlock();
     doppel->_owner = std::weak_ptr<Pl0300Controller>(_pl0300List[indx]);
     return std::weak_ptr<Pl0300Controller>(doppel);
 }
@@ -436,12 +445,11 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppel_routine(const Pl
 {
     if (GameplayStateTracker::isCutscene)
         return;
-    _pl0300ListChangeMtx.lock();
+    std::lock_guard<std::recursive_mutex> lck(_pl0300ListChangeMtx);
     _pl0300List.erase(std::remove_if(_pl0300List.begin(), _pl0300List.end(), [&](const std::shared_ptr<Pl0300Controller>& obj)
         {
             return obj->get_pl() == doppelController->get_pl();
         }), _pl0300List.end());
-    _pl0300ListChangeMtx.unlock();
     _doppelRemoveCoroutinesList.erase(std::remove_if(_doppelRemoveCoroutinesList.begin(), _doppelRemoveCoroutinesList.end(),
         [&](const std::unique_ptr<Coroutines::Coroutine<void(Pl0300ControllerManager::*)(const Pl0300Controller*), Pl0300ControllerManager*, const Pl0300Controller*>>& coroutine)
         {
@@ -462,7 +470,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::remove_doppelganger(const Pl03
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::set_pos_to_all(gf::Vec3 pos, Pl0300Type type)
 {
-    for (const auto& i : _pl0300List)
+    for (const auto i : _pl0300List)
     {
         if (i->get_pl0300_type() == type)
             i->set_pos_full(pos);
@@ -477,7 +485,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::kill_all_friendly_em6000()
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_pl_pad_input_reset(uintptr_t pl, bool isAutoPad, bool* callOrig)
 {
-    for (const auto& i : _pl0300List)
+    for (const auto i : _pl0300List)
     {
         if (!i->is_keeping_original_pad_input() && i->get_pl0300_type() == Pl0300Type::PlHelper && pl == i->get_pl())
         {

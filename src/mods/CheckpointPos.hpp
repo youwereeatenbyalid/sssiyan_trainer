@@ -75,6 +75,11 @@ private:
         _isPlLoaded = false;
     }
 
+    void on_pl_loaded(uintptr_t threadCntx, uintptr_t plManager, uintptr_t pl)
+    {
+        _isPlLoaded = true;
+    }
+
   bool _isPlLoaded = false;
   glm::vec3 newPlPos;
   void init_check_box_info() override;

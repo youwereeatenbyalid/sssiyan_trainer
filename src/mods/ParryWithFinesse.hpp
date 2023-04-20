@@ -447,7 +447,7 @@ public:
 		m_on_page = Page_VergilTrick;
 		m_full_name_string = "Parry With Finesse (+)";
 		m_author_string = "V.P.Zadov";
-		m_description_string = "Change Capcom's \"pArRy WiTh fINesSe\" with Motivation LVL 2 to a better version imao.";
+		m_description_string = "Modifies Vergil's level 2 motivation block to a full counter.";
 
 		set_up_hotkey();
 
