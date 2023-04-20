@@ -403,6 +403,24 @@ public:
 		return true;
 	}
 
+    inline bool install_new_detour(uintptr_t location, std::shared_ptr<Detour_t>& detour_type, void* detour, uintptr_t* ret, ptrdiff_t next_instruction_offset = 0) {
+#ifdef _DEBUG
+        if (detour_type) {
+            throw std::runtime_error("Install new detour type called multiple times with same instance\n");
+        }
+        printf("Installing absolute hook at location: %p\n", location.value());
+#endif
+        detour_type = std::make_shared<Detour_t>(location, detour, next_instruction_offset);
+        m_detours.push_back(detour_type);
+
+        if (!detour_type->is_valid()) {
+            spdlog::error("Failed to create New Detour Type!");
+            return false;
+        }
+        //prety sure this is handled and set up by the detour class, let's see how it goes.
+        *ret = detour_type->get_return_address();
+        return true;
+    }
     //Calls after all mods has been initialized; Should be pure virtual but then i need to override this in all mods.............
     virtual void after_all_inits() {};
 

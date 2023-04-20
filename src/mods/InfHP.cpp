@@ -54,13 +54,18 @@ std::optional<std::string> InfHP::on_initialize() {
     //    return "Failed to initialize InfHP";
     //}
 
-    m_detour = std::make_shared<Detour_t>(*addr, &detour, 5);
-    m_detours.push_back(m_detour);
-    if (!m_detour->is_valid()) {
+    //m_detour = std::make_shared<Detour_t>(*addr, &detour, 5);
+    //m_detours.push_back(m_detour);
+    //if (!m_detour->is_valid()) {
+    //    spdlog::error("[{}] failed to initialize", get_name());
+    //    return "Failed to initialize InfHP";
+    //}
+    //jmp_ret = m_detour->get_return_address();
+
+    if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize InfHP";
     }
-    jmp_ret = m_detour->get_return_address();
 
     return Mod::on_initialize();
 }
