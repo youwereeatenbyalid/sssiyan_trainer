@@ -54,5 +54,6 @@ void TestLuaMod::on_draw_ui()
 {
     ImGui::InputText("Filename", filenamestring, IM_ARRAYSIZE(filenamestring));
     ImGui::DragFloat("Royalguardvalue", &royalguardgauge, 1.0f, 0.0f, 30000.0f);
+    draw_lua_ui();
 }
 

@@ -405,6 +405,8 @@ set(IMGUI_SRC
     fw-imgui/imgui_impl_dx12.h
     fw-imgui/imgui_impl_dx12.cpp
     fw-imgui/imgui_notify.h
+	fw-imgui/ImGuiLua.h
+	fw-imgui/ImGuiLua.cpp
     fw-imgui/ui.cpp
     fw-imgui/ui.hpp
 )
