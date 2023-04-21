@@ -48,19 +48,19 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_enemystep_hook;
-  std::unique_ptr<FunctionHook> m_lockon_hook;
-  std::unique_ptr<FunctionHook> m_targetswitch_hook;
-  std::unique_ptr<FunctionHook> m_damageall_hook;
-  std::unique_ptr<FunctionHook> m_pvp1_hook;
-  std::unique_ptr<FunctionHook> m_pvp2_hook;
-  std::unique_ptr<FunctionHook> m_danteclientside_hook;
-  std::unique_ptr<FunctionHook> m_dtenable_hook;
-  std::unique_ptr<FunctionHook> m_rgenable_hook;
-  std::unique_ptr<FunctionHook> m_rgmod_hook;
-  std::unique_ptr<FunctionHook> m_combatmode_hook;
-  std::unique_ptr<FunctionHook> m_dantefix_hook;
+  std::shared_ptr<Detour_t> m_enemystep_detour;
+  std::shared_ptr<Detour_t> m_lockon_detour;
+  std::shared_ptr<Detour_t> m_targetswitch_detour;
+  std::shared_ptr<Detour_t> m_damageall_detour;
+  std::shared_ptr<Detour_t> m_pvp1_detour;
+  std::shared_ptr<Detour_t> m_pvp2_detour;
+  std::shared_ptr<Detour_t> m_danteclientside_detour;
+  std::shared_ptr<Detour_t> m_dtenable_detour;
+  std::shared_ptr<Detour_t> m_rgenable_detour;
+  std::shared_ptr<Detour_t> m_rgmod_detour;
+  std::shared_ptr<Detour_t> m_combatmode_detour;
+  std::shared_ptr<Detour_t> m_dantefix_detour;
 
-  std::unique_ptr<FunctionHook> m_styleenable1_hook;
-  std::unique_ptr<FunctionHook> m_styleenable2_hook;
+  std::shared_ptr<Detour_t> m_styleenable1_detour;
+  std::shared_ptr<Detour_t> m_styleenable2_detour;
 };

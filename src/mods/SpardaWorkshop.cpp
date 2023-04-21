@@ -140,12 +140,12 @@ std::optional<std::string> SpardaWorkshop::on_initialize() {
   if (!enemyplacer_addr) {
       return "Unable to find enemyplacer pattern.";
   }
-  if (!install_hook_absolute(sceneplacer_addr.value(), m_sceneplacer_hook, &sceneplacer_detour, &sceneplacer_jmp_ret, 6)) {
+  if (!install_new_detour(sceneplacer_addr.value(), m_sceneplacer_detour, &sceneplacer_detour, &sceneplacer_jmp_ret, 6)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize scene placer";
   }
-  if (!install_hook_absolute(enemyplacer_addr.value()+3, m_enemyplacer_hook, &enemyplacer_detour, &enemyplacer_jmp_ret, 24)) {
+  if (!install_new_detour(enemyplacer_addr.value()+3, m_enemyplacer_detour, &enemyplacer_detour, &enemyplacer_jmp_ret, 24)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize enemy placer";

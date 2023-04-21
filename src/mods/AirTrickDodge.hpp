@@ -62,7 +62,7 @@ private:
 	void on_fsm_pos_cntr_update(uintptr_t threadCntx, uintptr_t fsm2PlPosCntrAction);
 
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_aircheck_hook;
-	std::unique_ptr<FunctionHook> m_is_air_hook;
+	std::shared_ptr<Detour_t> m_aircheck_detour;
+	std::shared_ptr<Detour_t> m_is_air_detour; // unused?
 };
 

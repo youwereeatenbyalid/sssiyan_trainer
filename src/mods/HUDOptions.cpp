@@ -147,7 +147,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   if (!addr) {
     return "Unable to find HUDOptions pattern1.";
   }
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize HUDOptions1";
@@ -158,7 +158,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   if (!addr2) {
     return "Unable to find donthideweaponandgun pattern.";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &newmem_detour, &jmp_ret2, 5)) {
+  if (!install_new_detour(addr2.value(), m_detour2, &newmem_detour, &jmp_ret2, 5)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize donthideweaponandgun";
@@ -168,7 +168,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   if (!addr3) {
       return "Unable to find donthideweaponandgun pattern_vergil.";
   }
-  if (!install_hook_absolute(addr3.value(), m_function_hook3, &newmem_detour_vergil, &jmp_ret3, 8)) {
+  if (!install_new_detour(addr3.value(), m_detour3, &newmem_detour_vergil, &jmp_ret3, 8)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize donthideweaponandgun_vergil";
@@ -178,7 +178,7 @@ std::optional<std::string> HUDOptions::on_initialize() {
   if (!addr4) {
       return "Unable to find donthideweaponandgun hidetimer.";
   }
-  if (!install_hook_absolute(addr4.value(), m_function_hook4, &newmem_detour_timer, &jmp_ret4, 16)) {
+  if (!install_new_detour(addr4.value(), m_detour4, &newmem_detour_timer, &jmp_ret4, 16)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize hidetimer";

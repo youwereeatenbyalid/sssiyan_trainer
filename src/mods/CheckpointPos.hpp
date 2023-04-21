@@ -84,7 +84,6 @@ private:
   glm::vec3 newPlPos;
   void init_check_box_info() override;
   Vector3f get_boss_pos();
-  std::unique_ptr<FunctionHook> m_checkpointpos_hook;
-  std::unique_ptr<FunctionHook> m_startpos_hook;
+  std::shared_ptr<Detour_t> m_checkpointpos_detour;
+  std::shared_ptr<Detour_t> m_startpos_detour; // unused?
 };
-

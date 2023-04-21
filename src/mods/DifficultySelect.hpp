@@ -35,6 +35,6 @@ private:
   void init_check_box_info() override;
 
   //function hooks
-  std::unique_ptr<FunctionHook> m_missionenemydifficulty_hook;
-  std::unique_ptr<FunctionHook> m_bpenemydifficulty_hook;
+  std::shared_ptr<Detour_t> m_missionenemydifficulty_detour;
+  std::shared_ptr<Detour_t> m_bpenemydifficulty_detour;
 };

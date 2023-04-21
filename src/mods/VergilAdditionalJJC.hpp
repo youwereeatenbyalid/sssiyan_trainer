@@ -53,5 +53,5 @@ private:
     m_check_box_name = m_prefix_check_box_name + std::string(get_name());
     m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
   }
-  std::unique_ptr<FunctionHook> m_addjjc_insdt_hook;
+  std::shared_ptr<Detour_t> m_addjjc_insdt_detour;
 };

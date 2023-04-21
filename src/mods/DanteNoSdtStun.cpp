@@ -41,7 +41,7 @@ std::optional<std::string> DanteNoSdtStun::on_initialize()
 		return "Unanable to find DanteNoSdtStun.sdtCancellableAddr pattern.";
 	}
 
-	if (!install_hook_absolute(sdtCancellableAddr.value() + 0x3, m_is_cancellable_hook, &detour, &ret, 0x7))
+	if (!install_new_detour(sdtCancellableAddr.value() + 0x3, m_is_cancellable_detour, &detour, &ret, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DanteNoSdtStun.sdtCancellable";

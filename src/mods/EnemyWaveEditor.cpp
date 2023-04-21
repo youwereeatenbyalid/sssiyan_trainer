@@ -459,23 +459,23 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   bossDanteCrashSkip = bossDanteCrashAddr.value() + 0x3E;
   updateBpFadeInJlRet = bpFadeInFix.value() + 0x1A8;
 
-  if (!install_hook_absolute(emDataLstAddr.value(), m_emwave_hook, &emlist_detour, &retJmp, 0xA)) {
+  if (!install_new_detour(emDataLstAddr.value(), m_emwave_detour, &emlist_detour, &retJmp, 0xA)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemyWaveEditor.emDataLst"; 
   }
 
-  if (!install_hook_absolute(emPrefabLoad.value(), m_loadall_hook, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
+  if (!install_new_detour(emPrefabLoad.value(), m_loadall_detour, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemyWaveEditor.emPrefabLoad"; 
   }
 
-  if (!install_hook_absolute(bossDanteCrashAddr.value(), m_bossdante_crash_hook, &boss_dante_crash_detour, &bossDanteCrashRet, 0xB))
+  if (!install_new_detour(bossDanteCrashAddr.value(), m_bossdante_crash_detour, &boss_dante_crash_detour, &bossDanteCrashRet, 0xB))
   {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize EnemyWaveEditor.bossDanteCrash";
   }
 
-  if (!install_hook_absolute(bpFadeInFix.value(), m_bp_fadein_hook, &bp_fadein_detour, &updateBpFadeInRet, 0x9))
+  if (!install_new_detour(bpFadeInFix.value(), m_bp_fadein_detour, &bp_fadein_detour, &updateBpFadeInRet, 0x9))
   {
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize EnemyWaveEditor.bpFadeIn";

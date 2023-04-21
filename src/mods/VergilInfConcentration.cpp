@@ -70,7 +70,7 @@ std::optional<std::string> VergilInfConcentration::on_initialize() {
     return "Unable to find VergilInfConcentration pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 8)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilInfConcentration";

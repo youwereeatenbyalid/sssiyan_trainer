@@ -13,9 +13,9 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> m_vergil_rt_hook;
-	std::unique_ptr<FunctionHook> m_dante_rb_rt_hook;
-	std::unique_ptr<FunctionHook> m_dante_sd_rt_hook;
+	std::shared_ptr<Detour_t> m_vergil_rt_detour;
+	std::shared_ptr<Detour_t> m_dante_rb_rt_detour;
+	std::shared_ptr<Detour_t> m_dante_sd_rt_detour;
 
 public:
 	NoRoundtripCallback() = default;
@@ -124,19 +124,19 @@ public:
 		SdSkip = SdBackAddr.value() + 0xB;
 
 
-		if (!install_hook_absolute(FEBackAddr.value(), m_vergil_rt_hook, &fe_back_detour, &FeRet, 0x6))
+		if (!install_new_detour(FEBackAddr.value(), m_vergil_rt_detour, &fe_back_detour, &FeRet, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize NoRoundtripCallback.FEBack";
 		}
 
-		if (!install_hook_absolute(RbBackAddr.value(), m_dante_rb_rt_hook, &rb_back_detour, &RbRet, 0x6))
+		if (!install_new_detour(RbBackAddr.value(), m_dante_rb_rt_detour, &rb_back_detour, &RbRet, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize NoRoundtripCallback.RbBack";
 		}
 
-		if (!install_hook_absolute(SdBackAddr.value(), m_dante_sd_rt_hook, &sd_back_detour, &SdRet, 0x6))
+		if (!install_new_detour(SdBackAddr.value(), m_dante_sd_rt_detour, &sd_back_detour, &SdRet, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize NoRoundtripCallback.SdBack";

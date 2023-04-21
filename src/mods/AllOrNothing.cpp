@@ -111,7 +111,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   if (!addr) {
     return "Unable to find AllOrNothing pattern.";
   }
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize AllOrNothing";
@@ -135,7 +135,6 @@ void AllOrNothing::on_draw_ui() {
   //ImGui::Checkbox("One hit kill", &onehitkill);
   ImGui::Text("Style Rank to beat (1:D, 7:SSS)");
   UI::SliderInt("##StlyeRankRequirement", (int*)&AllOrNothing::stylebar, 1, 7);
-  
 }
 
 #if 0 // version before siyan attacked; cheats work even without AllOrNothing cheaton bool

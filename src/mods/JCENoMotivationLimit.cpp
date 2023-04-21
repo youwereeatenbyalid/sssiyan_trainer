@@ -130,25 +130,25 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	yamatoHumanConcSkip = yamatoConcetrationAddr.value() + 0x9;
 	yamatoSdtConcSkip = yamatoSdtConcetrationAddr.value() + 0xD;
 
-	if (!install_hook_absolute(humanConcetrationAddr.value(), m_humnan_motivation_hook, &no_motivation_detour, &humanConcRet, 0x7))
+	if (!install_new_detour(humanConcetrationAddr.value(), m_humnan_motivation_detour, &no_motivation_detour, &humanConcRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.humanConcetration";
 	}
 
-	if (!install_hook_absolute(devilConcetrationAddr/*.value() + 0x2*/, m_devil_motivation_hook, &no_motivation1_detour, &devilConcRet, 0x7))
+	if (!install_new_detour(devilConcetrationAddr/*.value() + 0x2*/, m_devil_motivation_detour, &no_motivation1_detour, &devilConcRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.devilConcetration";
 	}
 
-	if (!install_hook_absolute(yamatoConcetrationAddr.value(), m_yamato_motivation_hook, &no_motivation2_detour, &yamatoHumanConcRet, 0x7))
+	if (!install_new_detour(yamatoConcetrationAddr.value(), m_yamato_motivation_detour, &no_motivation2_detour, &yamatoHumanConcRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.yamatoConcetration";
 	}
 
-	if (!install_hook_absolute(yamatoSdtConcetrationAddr.value(), m_sdtyamato_motivation_hook, &no_motivation3_detour, &yamatoSdtConcRet, 0x7))
+	if (!install_new_detour(yamatoSdtConcetrationAddr.value(), m_sdtyamato_motivation_detour, &no_motivation3_detour, &yamatoSdtConcRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize JCENoMotivationLimit.yamatoSdtConcetration";

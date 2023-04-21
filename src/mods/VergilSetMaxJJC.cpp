@@ -64,7 +64,7 @@ std::optional<std::string> VergilSetMaxJJC::on_initialize() {
   if (!init_addr)
     return "Unable to find VergilSetMaxJJC pattern.";
 
-  if (!install_hook_absolute(init_addr.value(), m_setmaxjjc_hook, &max_jjc_detour, &jmp_ret, 9)) {
+  if (!install_new_detour(init_addr.value(), m_setmaxjjc_detour, &max_jjc_detour, &jmp_ret, 9)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilSetMaxJJC";
   }

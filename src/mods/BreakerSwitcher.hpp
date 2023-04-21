@@ -56,9 +56,9 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_breakersize_hook;
-  std::unique_ptr<FunctionHook> m_nextbreaker_hook;
-  std::unique_ptr<FunctionHook> m_breakerinputcontrol_hook;
-  std::unique_ptr<FunctionHook> m_NeroUIOverride_hook;
-  std::unique_ptr<FunctionHook> m_bringerinputcontroller_hook;
+  std::shared_ptr<Detour_t> m_breakersize_detour;
+  std::shared_ptr<Detour_t> m_nextbreaker_detour;
+  std::shared_ptr<Detour_t> m_breakerinputcontrol_detour;
+  std::shared_ptr<Detour_t> m_NeroUIOverride_detour;
+  std::shared_ptr<Detour_t> m_bringerinputcontroller_detour;
 };

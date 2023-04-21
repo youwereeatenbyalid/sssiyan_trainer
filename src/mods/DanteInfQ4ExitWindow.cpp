@@ -55,7 +55,7 @@ std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   }
   DanteInfQ4ExitWindow::jmp_jne = addr.value() + 55;
 
-  if (!install_hook_absolute(addr.value()+2, m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_new_detour(addr.value()+2, m_detour, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteInfQ4ExitWindow";

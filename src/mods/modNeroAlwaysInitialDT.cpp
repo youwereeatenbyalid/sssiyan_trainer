@@ -56,7 +56,7 @@ std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   NeroAlwaysInitialDT::jmp_jne = addr.value() + 321;
   NeroAlwaysInitialDT::jmp_away = addr.value() + 26;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NeroAlwaysInitialDT";

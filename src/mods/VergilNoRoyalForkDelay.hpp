@@ -57,7 +57,7 @@ public:
 			return "Failed to initialize VergilNoRoyalForkDelay.frameTimerAddr";
 		}
 
-		if (!install_hook_absolute(frameTimerAddr.value(), m_frame_timer_hook, &detour, &ret, 0x5))
+		if (!install_new_detour(frameTimerAddr.value(), m_frame_timer_detour, &detour, &ret, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize VergilNoRoyalForkDelay.frameTimer";
@@ -72,6 +72,6 @@ private:
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	};
-	std::unique_ptr<FunctionHook> m_frame_timer_hook;
+	std::shared_ptr<Detour_t> m_frame_timer_detour;
 
 };

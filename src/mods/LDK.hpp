@@ -128,34 +128,34 @@ public:
 
   static void pause_spawn_asm();
 
-  std::unique_ptr<FunctionHook> m_enemynumber_hook;
-  std::unique_ptr<FunctionHook> m_capbypass_hook1;
-  std::unique_ptr<FunctionHook> m_capbypass_hook2;
+  std::shared_ptr<Detour_t> m_enemynumber_detour;
+  std::shared_ptr<Detour_t> m_capbypass_detour1;
+  std::shared_ptr<Detour_t> m_capbypass_detour2;
 
   /// <summary>
   /// Optimize
   /// </summary>
-  std::unique_ptr<FunctionHook> m_gethpoflasthitobject_hook;
-  std::unique_ptr<FunctionHook> m_multipledeathoptimize_hook;
-  std::unique_ptr<FunctionHook> m_canlasthitkill_hook;
-  std::unique_ptr<FunctionHook> m_nopfunction_hook1;
-  std::unique_ptr<FunctionHook> m_nopfunction_hook2;
+  std::shared_ptr<Detour_t> m_gethpoflasthitobject_detour;
+  std::shared_ptr<Detour_t> m_multipledeathoptimize_detour;
+  std::shared_ptr<Detour_t> m_canlasthitkill_detour;
+  std::shared_ptr<Detour_t> m_nopfunction_detour1;
+  std::shared_ptr<Detour_t> m_nopfunction_detour2;
   /// <summary>
   /// Vergil miniboss
   /// </summary>
-  std::unique_ptr<FunctionHook> m_vergildivebomb_hook;
+  std::shared_ptr<Detour_t> m_vergildivebomb_detour;
   /// <summary>
   /// Cavaliere miniboss
   /// </summary>
-  std::unique_ptr<FunctionHook> m_cavforcevalid_hook;
-  std::unique_ptr<FunctionHook> m_cavforcelightning1_hook;
-  std::unique_ptr<FunctionHook> m_cavforcelightning2_hook;
-  std::unique_ptr<FunctionHook> m_cavcoordinatechange_hook;
+  std::shared_ptr<Detour_t> m_cavforcevalid_detour;
+  std::shared_ptr<Detour_t> m_cavforcelightning1_detour;
+  std::shared_ptr<Detour_t> m_cavforcelightning2_detour;
+  std::shared_ptr<Detour_t> m_cavcoordinatechange_detour;
 
-  std::unique_ptr<FunctionHook> m_hitvfxskip_hook;
-  std::unique_ptr<FunctionHook> m_ssowrds_restriction_hook;
-  std::unique_ptr<FunctionHook> m_wait_spawn_time_hook;
-  std::unique_ptr<FunctionHook> m_hitvfx_dontdraw_hitlines_hook;
+  std::shared_ptr<Detour_t> m_hitvfxskip_detour;
+  std::shared_ptr<Detour_t> m_ssowrds_restriction_detour;
+  std::shared_ptr<Detour_t> m_wait_spawn_time_detour;
+  std::shared_ptr<Detour_t> m_hitvfx_dontdraw_hitlines_detour;
 
   static RegAddrBackup hitvfx_backup;
 };

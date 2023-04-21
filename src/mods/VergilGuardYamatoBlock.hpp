@@ -35,7 +35,7 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_action_hook;
-	std::unique_ptr<FunctionHook> m_efx_hook;
+	std::shared_ptr<Detour_t> m_action_detour;
+	std::shared_ptr<Detour_t> m_efx_detour;
 };
 

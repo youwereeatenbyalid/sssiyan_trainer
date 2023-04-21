@@ -788,27 +788,27 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   }
 
 
-  if (!install_hook_absolute(breakersize_addr.value(), m_breakersize_hook, &breakersize_detour, &breakersize_jmp_ret, 6)) {
+  if (!install_new_detour(breakersize_addr.value(), m_breakersize_detour, &breakersize_detour, &breakersize_jmp_ret, 6)) {
     //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize breakersize";
   }
-  if (!install_hook_absolute(nextbreaker_addr.value(), m_nextbreaker_hook, &nextbreaker_detour, &nextbreaker_jmp_ret, 7)) {
+  if (!install_new_detour(nextbreaker_addr.value(), m_nextbreaker_detour, &nextbreaker_detour, &nextbreaker_jmp_ret, 7)) {
     //return a error string in case something goes wrong 
       spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize nextbreaker";
   }
-  if (!install_hook_absolute(NeroUIOverride_addr.value(), m_NeroUIOverride_hook, &breakerui_detour, &jmp_uireturn, 6)) {
+  if (!install_new_detour(NeroUIOverride_addr.value(), m_NeroUIOverride_detour, &breakerui_detour, &jmp_uireturn, 6)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize NeroUIOverride";
   }
-  if (!install_hook_absolute(breakerinputcontrol_addr.value(), m_breakerinputcontrol_hook, &breakercontrol_detour, &breakercontrol_jmp_ret, 7)) {
+  if (!install_new_detour(breakerinputcontrol_addr.value(), m_breakerinputcontrol_detour, &breakercontrol_detour, &breakercontrol_jmp_ret, 7)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize breakerinputcontrol";
   }
-  if (!install_hook_absolute(bringerinputcontroller_addr.value(), m_bringerinputcontroller_hook, &bringercontrol_detour, &jmp_bringer_ret, 9)) {
+  if (!install_new_detour(bringerinputcontroller_addr.value(), m_bringerinputcontroller_detour, &bringercontrol_detour, &jmp_bringer_ret, 9)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize bringerinputcontroller";

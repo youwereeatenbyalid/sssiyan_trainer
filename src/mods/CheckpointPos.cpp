@@ -80,7 +80,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
     return "Unanable to find CheckpointPos.restartPosAddr pattern.";
   }
 
-  if (!install_hook_absolute(restartPosAddr.value(), m_checkpointpos_hook, &restart_pos_detour, &restartPos_ret, 0x6)) {
+  if (!install_new_detour(restartPosAddr.value(), m_checkpointpos_detour, &restart_pos_detour, &restartPos_ret, 0x6)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CheckpointPos.restartPos"; 
   }

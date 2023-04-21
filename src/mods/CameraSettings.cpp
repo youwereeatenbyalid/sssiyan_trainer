@@ -261,52 +261,52 @@ std::optional<std::string> CameraSettings::on_initialize() {
       return "Unable to find CameraNoVignette pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hookFoV, &detourFoV, &jmp_retFoV, 5)) {
+  if (!install_new_detour(addr1.value(), m_detour_FoV, &detourFoV, &jmp_retFoV, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings1";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hookHorizontalSensClockwise, &detourHorizontalSensClockwise, &jmp_retHorizontalSensClockwise, 8)) {
+  if (!install_new_detour(addr2.value(), m_detour_HorizontalSensClockwise, &detourHorizontalSensClockwise, &jmp_retHorizontalSensClockwise, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings2";
   }
-  if (!install_hook_absolute(addr3.value(), m_function_hookHorizontalSensAntiClockwise, &detourHorizontalSensAntiClockwise, &jmp_retHorizontalSensAntiClockwise, 8)) {
+  if (!install_new_detour(addr3.value(), m_detour_HorizontalSensAntiClockwise, &detourHorizontalSensAntiClockwise, &jmp_retHorizontalSensAntiClockwise, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings3";
   }
-  if (!install_hook_absolute(addr4.value(), m_function_hookKeyboardHorizontalEnable, &detourKeyboardHorizontalEnable, &jmp_retKeyboardHorizontalEnable, 8)) {
+  if (!install_new_detour(addr4.value(), m_detour_KeyboardHorizontalEnable, &detourKeyboardHorizontalEnable, &jmp_retKeyboardHorizontalEnable, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings4";
   }
-  if (!install_hook_absolute(addr5.value(), m_function_hookSiyansCamFix1, &detourSiyansCamFix1, &jmp_retSiyansCamFix1, 11)) {
+  if (!install_new_detour(addr5.value(), m_detour_SiyansCamFix1, &detourSiyansCamFix1, &jmp_retSiyansCamFix1, 11)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings5";
   }
-  if (!install_hook_absolute(addr6.value(), m_function_hookCloseAutoCorrect, &detourCloseAutoCorrect, &jmp_retCloseAutoCorrect, 13)) {
+  if (!install_new_detour(addr6.value(), m_detour_CloseAutoCorrect, &detourCloseAutoCorrect, &jmp_retCloseAutoCorrect, 13)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings6";
   }
-  if (!install_hook_absolute(addr7.value(), m_function_hookDistantAutoCorrect, &detourDistantAutoCorrect, &jmp_retDistantAutoCorrect, 6)) {
+  if (!install_new_detour(addr7.value(), m_detour_DistantAutoCorrect, &detourDistantAutoCorrect, &jmp_retDistantAutoCorrect, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings7";
   }
-  if (!install_hook_absolute(addr8.value(), m_function_hookHeightAutoCorrect, &detourHeightAutoCorrect, &jmp_retHeightAutoCorrect, 8)) {
+  if (!install_new_detour(addr8.value(), m_detour_HeightAutoCorrect, &detourHeightAutoCorrect, &jmp_retHeightAutoCorrect, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings8";
   }
-  if (!install_hook_absolute(addr9.value(), m_function_hookMovementAutoCorrect, &detourMovementAutoCorrect, &jmp_retMovementAutoCorrect, 8)) {
+  if (!install_new_detour(addr9.value(), m_detour_MovementAutoCorrect, &detourMovementAutoCorrect, &jmp_retMovementAutoCorrect, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CameraSettings9";
   }
-  if (!install_hook_absolute(addr10.value(), m_function_hookNoVignette, &detourNoVignette, &jmp_retNoVignette, 6)) {
+  if (!install_new_detour(addr10.value(), m_detour_NoVignette, &detourNoVignette, &jmp_retNoVignette, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize CameraSettingsNoVignette";

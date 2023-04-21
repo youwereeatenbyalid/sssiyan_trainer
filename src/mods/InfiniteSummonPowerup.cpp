@@ -47,7 +47,7 @@ std::optional<std::string> InfiniteSummonPowerup::on_initialize() {
   if (!infinitesummonpowerupduration_addr) {
     return "Unable to find infinitesummonpowerupduration pattern.";
   }
-  if (!install_hook_absolute(infinitesummonpowerupduration_addr.value(), m_infinitesummonpowerupduration_hook, &newmem_detour, &jmp_return, 8)) {
+  if (!install_new_detour(infinitesummonpowerupduration_addr.value(), m_infinitesummonpowerupduration_detour, &newmem_detour, &jmp_return, 8)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize infinitesummonpowerupduration";

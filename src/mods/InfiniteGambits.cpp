@@ -47,7 +47,7 @@ std::optional<std::string> InfiniteGambits::on_initialize() {
   if (!infinitegambit_addr) {
     return "Unable to find infinitegambit pattern.";
   }
-  if (!install_hook_absolute(infinitegambit_addr.value(), m_infinitegambit_hook, &newmem_detour, &jmp_return, 6)) {
+  if (!install_new_detour(infinitegambit_addr.value(), m_infinitegambit_detour, &newmem_detour, &jmp_return, 6)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize infinitegambit";

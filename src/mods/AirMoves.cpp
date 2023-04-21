@@ -616,91 +616,91 @@ std::optional<std::string> AirMoves::on_initialize()
 	uintptr_t rbRtAirAddr = p64Base + 0x12617F8;
 	//uintptr_t jceAirAddr = p64Base + 0x1C0A4E0;
 
-	if (!install_hook_absolute(rapidSlashIsAirAddr.value(), m_rapidslash_air_hook, &rapidslash_aircheck_detour, &rapidSlashIsAirRet, 0x7))
+	if (!install_new_detour(rapidSlashIsAirAddr.value(), m_rapidslash_air_detour, &rapidslash_aircheck_detour, &rapidSlashIsAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rapidSlashIsAir";
 	}
 
-	if (!install_hook_absolute(checkGroundHitAddr.value(), m_check_ground_hit_hook, &check_ground_hit_detour, &checkGroundHitCallRet, 0x7))
+	if (!install_new_detour(checkGroundHitAddr.value(), m_check_ground_hit_detour, &check_ground_hit_detour, &checkGroundHitCallRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.checkGroundHit";
 	}
 
-	if (!install_hook_absolute(feDriveAirAddr.value(), m_fe_drive_air_hook, &fedrive_aircheck_detour, &feDriveIsAirRet, 0x7))
+	if (!install_new_detour(feDriveAirAddr.value(), m_fe_drive_air_detour, &fedrive_aircheck_detour, &feDriveIsAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.feDriveAir";
 	}
 
-	if (!install_hook_absolute(voidSlashAirAddr, m_void_slash_air_hook, &void_slash_air_detour, &voidSlashIsAirRet, 0x7))
+	if (!install_new_detour(voidSlashAirAddr, m_void_slash_air_detour, &void_slash_air_detour, &voidSlashIsAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.voidSlashAir";
 	}
 
-	if (!install_hook_absolute(rbStingerAirAddr.value() + 0x23, m_rb_stinger_air_hook, &rb_stinger_air_detour, &rbStingerAirRet, 0x7))
+	if (!install_new_detour(rbStingerAirAddr.value() + 0x23, m_rb_stinger_air_detour, &rb_stinger_air_detour, &rbStingerAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rbStingerAir";
 	}
 
-	if (!install_hook_absolute(spStingerAirAddr, m_sp_stinger_air_hook, &sp_stinger_air_detour, &spStingerAirRet, 0x7))
+	if (!install_new_detour(spStingerAirAddr, m_sp_stinger_air_detour, &sp_stinger_air_detour, &spStingerAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.spStingerAir";
 	}
 
-	if (!install_hook_absolute(dsStingerAirAddr, m_ds_stinger_air_hook, &ds_stinger_air_detour, &dsStingerAirRet, 0x7))
+	if (!install_new_detour(dsStingerAirAddr, m_ds_stinger_air_detour, &ds_stinger_air_detour, &dsStingerAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.dsStingerAir";
 	}
 
-	if (!install_hook_absolute(balrogUpdraftAirAddr.value() + 0x4, m_brk_updraft_air_hook, &balrog_updraft_air_detour, &balrogUpdraftAirRet, 0x7))
+	if (!install_new_detour(balrogUpdraftAirAddr.value() + 0x4, m_brk_updraft_air_detour, &balrog_updraft_air_detour, &balrogUpdraftAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.balrogUpdraftAir";
 	}
 
-	if (!install_hook_absolute(kick13AirAddr.value(), m_kick_air_hook, &beo_kick13_air_detour, &kick13AirRet, 0x7))
+	if (!install_new_detour(kick13AirAddr.value(), m_kick_air_detour, &beo_kick13_air_detour, &kick13AirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.kick13Air";
 	}
 
-	if (!install_hook_absolute(airDodgeCrashAddr.value() + 0x7, m_air_dodge_crash_hook, &trickdodge_air_crash_detour, &airTrickDodgeCrashRet, 0x5))
+	if (!install_new_detour(airDodgeCrashAddr.value() + 0x7, m_air_dodge_crash_detour, &trickdodge_air_crash_detour, &airTrickDodgeCrashRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.airDodgeCrash";
 	}
 
-	if (!install_hook_absolute(iceAgeAirAddr.value() + 0x3, m_cerberus_ice_edge_air_hook, &cerberus_ice_age_air_detour, &cerberusIceAgeAirRet, 0x7))
+	if (!install_new_detour(iceAgeAirAddr.value() + 0x3, m_cerberus_ice_edge_air_detour, &cerberus_ice_age_air_detour, &cerberusIceAgeAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.iceAgeAir";
 	}
 
-	if (!install_hook_absolute(spRtAirAddr, _spRtAirHook, &sparda_rt_air_detour, &_spardaRTAirRet, 0x7))
+	if (!install_new_detour(spRtAirAddr, m_spRtAir_detour, &sparda_rt_air_detour, &_spardaRTAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.spRtAir";
 	}
 
-	if (!install_hook_absolute(rbRtAirAddr, _rbRtAirHook, &rebellion_rt_air_detour, &_rbRTAirRet, 0x7))
+	if (!install_new_detour(rbRtAirAddr, m_rbRtAir_detour, &rebellion_rt_air_detour, &_rbRTAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rbRtAir";
 	}
 
-	if (!install_hook_absolute(blitzAddr.value(), m_cerberus_blitz_air_hook, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
+	if (!install_new_detour(blitzAddr.value(), m_cerberus_blitz_air_detour, &cerberus_blitz_air_detour, &cerberusBlitzAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.blitz";
 	}
 
-	/*if (!install_hook_absolute(jceAirAddr, _jceAirHook, &jce_air_detour, &_jceAirRet, 0x7))
+	/*if (!install_new_detour(jceAirAddr, m_jceAir_detour, &jce_air_detour, &_jceAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.jceAir";

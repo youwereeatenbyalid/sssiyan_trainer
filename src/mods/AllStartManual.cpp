@@ -129,14 +129,14 @@ std::optional<std::string> AllStartManual::on_initialize() {
 
   set_up_hotkey();
 
-  // auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  // uintptr_t base = g_framework->get_module().as<uintptr_t>();
   constexpr ptrdiff_t addr = 0x2C723DF;
-  //auto addr = base + 0x2C723DF;
+  // auto addr = base + 0x2C723DF;
   // auto addr      = patterns->find_addr(base, "66 C7 47 5E 00 00");
   // if (!addr) {
   //   return "Unable to find AllStartManual pattern.";
   // }
-  if (!install_hook_offset(addr, m_function_hook, &detour, &jmp_ret, 5)) { // Couldn't find unique AoB, used offset
+  if (!install_new_detour_offset(addr, m_detour, &detour, &jmp_ret, 5)) { // Couldn't find unique AoB, used offset
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize AllStartManual";

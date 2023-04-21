@@ -56,7 +56,7 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
   if (!bettercane_addr) {
     return "Unable to find bettercane pattern.";
   }
-  if (!install_hook_absolute(bettercane_addr.value(), m_bettercane_hook, &newmem_detour, &jmp_return, 5)) {
+  if (!install_new_detour(bettercane_addr.value(), m_bettercane_detour, &newmem_detour, &jmp_return, 5)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize bettercane";

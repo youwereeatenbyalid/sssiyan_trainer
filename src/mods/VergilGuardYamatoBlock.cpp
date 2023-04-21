@@ -49,13 +49,13 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 		return "Unanable to find VergilGuardYamatoBlock.efxAddr pattern.";
 	}
 
-	if (!install_hook_absolute(setActionAddr.value(), m_action_hook, detour, &ret, 0x6))
+	if (!install_new_detour(setActionAddr.value(), m_action_detour, detour, &ret, 0x6))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilGuardYamatoBlock.setAction";
 	}
 
-	if (!install_hook_absolute(efxAddr.value() + 0x1, m_efx_hook, efx_detour, &efxRet, 0x6))
+	if (!install_new_detour(efxAddr.value() + 0x1, m_efx_detour, efx_detour, &efxRet, 0x6))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilGuardYamatoBlock.efx";

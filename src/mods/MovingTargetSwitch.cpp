@@ -55,7 +55,7 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
 
   MovingTargetSwitch::jmp_jae = m_patterns_cache->find_addr(base, "3E 00 00 48 85 C9 75 12").value()+3;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize MovingTargetSwitch";

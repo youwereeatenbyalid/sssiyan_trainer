@@ -45,7 +45,7 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 		return "Unanable to find TrickDodgeNoDisappear.getEndDrawOffAddr pattern.";
 	}
 
-	if (!install_hook_absolute(getEndDrawOffAddr.value() + 0x1, m_disappear_hook, &draw_off_detour, &ret, 0x5))
+	if (!install_new_detour(getEndDrawOffAddr.value() + 0x1, m_disappear_detour, &draw_off_detour, &ret, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize TrickDodgeNoDisappear.getEndDrawOff";

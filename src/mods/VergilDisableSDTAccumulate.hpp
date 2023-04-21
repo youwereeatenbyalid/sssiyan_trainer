@@ -31,5 +31,5 @@ private:
   // function hook instance for our detour, convinient wrapper
   // around minhook
   void init_check_box_info() override;
-  std::unique_ptr<FunctionHook> m_accumulatefunc_hook;
+  std::shared_ptr<Detour_t> m_accumulatefunc_detour;
 };

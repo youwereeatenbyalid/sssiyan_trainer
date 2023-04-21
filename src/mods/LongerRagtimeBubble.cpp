@@ -55,7 +55,7 @@ std::optional<std::string> LongerRagtimeBubble::on_initialize() {
   if (!ragtimebreakeradjust_addr) {
     return "Unable to find ragtimebreakeradjust pattern.";
   }
-  if (!install_hook_absolute(ragtimebreakeradjust_addr.value(), m_ragtimebreakeradjust_hook, &newmem_detour, &jmp_ragtimebreakeradjust_return, 6)) {
+  if (!install_new_detour(ragtimebreakeradjust_addr.value(), m_ragtimebreakeradjust_detour, &newmem_detour, &jmp_ragtimebreakeradjust_return, 6)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize ragtimebreakeradjust";

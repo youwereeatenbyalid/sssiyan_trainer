@@ -44,7 +44,7 @@ std::optional<std::string> DisableAutoAssist::on_initialize() {
   if (!addr) {
     return "Unable to find DisableAutoAssist pattern.";
   }
-  if (!install_hook_absolute(addr.value()+1, m_function_hook, &detour, &jmp_ret, 8)) {
+  if (!install_new_detour(addr.value()+1, m_detour, &detour, &jmp_ret, 8)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DisableAutoAssist";

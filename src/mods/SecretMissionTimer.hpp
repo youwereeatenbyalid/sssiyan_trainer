@@ -43,7 +43,7 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_timer_hook;
-	std::unique_ptr<FunctionHook> m_m9_hook;
+	std::shared_ptr<Detour_t> m_timer_detour;
+	std::shared_ptr<Detour_t> m_m9_detour;
 
 };

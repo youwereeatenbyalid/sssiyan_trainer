@@ -40,6 +40,6 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_is_pad_input_hook;
+	std::shared_ptr<Detour_t> m_is_pad_input_detour;
 };
 

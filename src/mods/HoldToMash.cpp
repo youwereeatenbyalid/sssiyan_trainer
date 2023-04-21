@@ -50,7 +50,7 @@ std::optional<std::string> HoldToMash::on_initialize() {
   if (!holdtomash_addr) {
     return "Unable to find holdtomash pattern.";
   }
-  if (!install_hook_absolute(holdtomash_addr.value(), m_holdtomash_hook, &newmem_detour, &jmp_return, 7)) {
+  if (!install_new_detour(holdtomash_addr.value(), m_holdtomash_detour, &newmem_detour, &jmp_return, 7)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize holdtomash";

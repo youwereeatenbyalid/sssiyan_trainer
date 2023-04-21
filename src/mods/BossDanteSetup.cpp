@@ -312,55 +312,55 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	sdtRegenJmp = sdtRegenAddr.value() + 0xD;
 	setGuardReactionEmDante = m_patterns_cache->find_addr(base, "40 53 56 57 48 83 EC 70 48 8B D9").value_or((uintptr_t)base + 0x19C97C0);
 
-	if (!install_hook_absolute(dtAddr.value(), m_dtregen_hook, &dtregen_detour, &dtRegenRet, 0xA))
+	if (!install_new_detour(dtAddr.value(), m_dtregen_detour, &dtregen_detour, &dtRegenRet, 0xA))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.dt";
 	}
 
-	if (!install_hook_absolute(sdtTransformAddr.value(), m_sdttransform_hook, &sdt_transform_detour, &sdtTransformRet, 0x5))
+	if (!install_new_detour(sdtTransformAddr.value(), m_sdttransform_detour, &sdt_transform_detour, &sdtTransformRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.sdtTransform";
 	}
 
-	if (!install_hook_absolute(dtTimerAddr.value(), m_dttimer_hook, &dt_sdt_timer_detour, &dtTimerRet, 0x5))
+	if (!install_new_detour(dtTimerAddr.value(), m_dttimer_detour, &dt_sdt_timer_detour, &dtTimerRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.dtTimer";
 	}
 
-	if (!install_hook_absolute(dtDurationAddr.value(), m_dtduration_hook, &dt_duration_detour, &dtDurationRet, 0x5))
+	if (!install_new_detour(dtDurationAddr.value(), m_dtduration_detour, &dt_duration_detour, &dtDurationRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.dtDuration";
 	}
 
-	if (!install_hook_absolute(charUpdateDelayAddr.value()+ 0x1, m_emdante_delay_hook, &motion_delay_detour, &emDanteDelayRet, 0x5))
+	if (!install_new_detour(charUpdateDelayAddr.value()+ 0x1, m_emdante_delay_detour, &motion_delay_detour, &emDanteDelayRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.charUpdateDelay";
 	}
 
-	if (!install_hook_absolute(royalRevengeDelayAddr.value(), m_royal_revenge_delay_hook, &revenge_delay_detour, &workRateRoyalRevengeRet, 0x5))
+	if (!install_new_detour(royalRevengeDelayAddr.value(), m_royal_revenge_delay_detour, &revenge_delay_detour, &workRateRoyalRevengeRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.royalRevengeDelay";
 	}
 
-	if (!install_hook_absolute(sdtRegenAddr.value(), m_sdt_regen_hook, &sdt_regen_detour, &sdtRegenRet, 0x7))
+	if (!install_new_detour(sdtRegenAddr.value(), m_sdt_regen_detour, &sdt_regen_detour, &sdtRegenRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.sdtRegen";
 	}
 
-	if (!install_hook_absolute(setReleaseTypeAddr.value(), m_set_royal_release_hook, &set_release_detour, &setRoyalReleaseRet, 0x8))
+	if (!install_new_detour(setReleaseTypeAddr.value(), m_set_royal_release_detour, &set_release_detour, &setRoyalReleaseRet, 0x8))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.setReleaseType";
 	}
 
-	if (!install_hook_absolute(setGuardReactAddr.value(), m_set_guard_ract_hook, &set_damage_react_detour, &damageReactRet, 0x5))
+	if (!install_new_detour(setGuardReactAddr.value(), m_set_guard_ract_detour, &set_damage_react_detour, &damageReactRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.setGuardReact";

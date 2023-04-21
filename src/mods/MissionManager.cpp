@@ -22,7 +22,7 @@ std::optional<std::string> MissionManager::on_initialize() {
     return "Unanable to find missionNumAddr pattern.";
   }
 
-  if (!install_hook_absolute(missionNumAddr.value(), m_mission_number_hook, mission_num_detour, &missionNumRet, 0x8)){
+  if (!install_new_detour(missionNumAddr.value(), m_mission_number_detour, mission_num_detour, &missionNumRet, 0x8)){
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize missionNum";  
   }

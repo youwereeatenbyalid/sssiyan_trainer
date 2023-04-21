@@ -48,7 +48,7 @@ std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
     return "Unable to find VergilNoTrickRestriction pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilNoTrickRestriction";

@@ -57,23 +57,23 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_updateweapon_hook;
-  std::unique_ptr<FunctionHook> m_resetweapon_hook;
-  std::unique_ptr<FunctionHook> m_fixparameter_hook;
-  std::unique_ptr<FunctionHook> m_fixjdc_hook;
+  std::shared_ptr<Detour_t> m_updateweapon_detour;
+  std::shared_ptr<Detour_t> m_resetweapon_detour;
+  std::shared_ptr<Detour_t> m_fixparameter_detour;
+  std::shared_ptr<Detour_t> m_fixjdc_detour;
 
-  std::unique_ptr<FunctionHook> m_jjdcaltcheck_hook;
-  std::unique_ptr<FunctionHook> m_doppeljjdc_hook;
-  std::unique_ptr<FunctionHook> m_doppelonlyjjdc_hook;
-  std::unique_ptr<FunctionHook> m_doppelonlyjjdcteleport_hook;
+  std::shared_ptr<Detour_t> m_jjdcaltcheck_detour;
+  std::shared_ptr<Detour_t> m_doppeljjdc_detour;
+  std::shared_ptr<Detour_t> m_doppelonlyjjdc_detour;
+  std::shared_ptr<Detour_t> m_doppelonlyjjdcteleport_detour;
 
-  std::unique_ptr<FunctionHook> m_doppelidle1_hook;
-  std::unique_ptr<FunctionHook> m_doppelidle2_hook;
-  std::unique_ptr<FunctionHook> m_doppelidle3_hook;
+  std::shared_ptr<Detour_t> m_doppelidle1_detour;
+  std::shared_ptr<Detour_t> m_doppelidle2_detour;
+  std::shared_ptr<Detour_t> m_doppelidle3_detour;
 
-  std::unique_ptr<FunctionHook> m_doppelbeowulfcharge_hook;
-  std::unique_ptr<FunctionHook> m_soundchargestart_hook;
-  std::unique_ptr<FunctionHook> m_soundchargeend_hook;
-  std::unique_ptr<FunctionHook> m_soundchargelevel1_hook;
-  std::unique_ptr<FunctionHook> m_soundchargelevel2_hook;
+  std::shared_ptr<Detour_t> m_doppelbeowulfcharge_detour;
+  std::shared_ptr<Detour_t> m_soundchargestart_detour;
+  std::shared_ptr<Detour_t> m_soundchargeend_detour;
+  std::shared_ptr<Detour_t> m_soundchargelevel1_detour;
+  std::shared_ptr<Detour_t> m_soundchargelevel2_detour;
 };

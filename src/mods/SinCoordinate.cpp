@@ -37,7 +37,7 @@ std::optional<std::string> SinCoordinate::on_initialize() {
 
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
 
-  if (!install_hook_offset(offsets::SIN_COORDINATE, m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_new_detour(offsets::SIN_COORDINATE, m_detour, &detour, &jmp_ret, 7)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize SinCoordinate";

@@ -193,38 +193,38 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     return "Unable to find VergilDoppelBanishCall pattern.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 9)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 9)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish";
   }
   VergilDoppelBanish::jmp_je = addr.value() + 38;
 
-  if (!install_hook_absolute(addrYamatoBanish.value(), m_function_hookYamatoBanish, &DetourYamatoBanish, &jmp_ret_yamato_banish, 5)) {
+  if (!install_new_detour(addrYamatoBanish.value(), m_detourYamatoBanish, &DetourYamatoBanish, &jmp_ret_yamato_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_yamatobanish";
   }
 
-  if (!install_hook_absolute(addrBeowulfBanish.value(), m_function_hookBeowulfBanish, &DetourBeowulfBanish, &jmp_ret_beowulf_banish, 5)) {
+  if (!install_new_detour(addrBeowulfBanish.value(), m_detourBeowulfBanish, &DetourBeowulfBanish, &jmp_ret_beowulf_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_beowulfbanish";
   }
 
-  if (!install_hook_absolute(addrForceEdgeBanish.value(), m_function_hookForceEdgeBanish, &DetourForceEdgeBanish, &jmp_ret_forceedge_banish, 5)) {
+  if (!install_new_detour(addrForceEdgeBanish.value(), m_detourForceEdgeBanish, &DetourForceEdgeBanish, &jmp_ret_forceedge_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_forceedgebanish";
   }
 
-  if (!install_hook_absolute(addrSDTYamatoBanish.value(), m_function_hookSDTYamatoBanish, &DetourSDTYamatoBanish, &jmp_ret_sdt_yamato_banish, 5)) {
+  if (!install_new_detour(addrSDTYamatoBanish.value(), m_detourSDTYamatoBanish, &DetourSDTYamatoBanish, &jmp_ret_sdt_yamato_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_sdtyamatobanish";
   }
 
-  if (!install_hook_absolute(addrSDTBeowulfBanish.value(), m_function_hookSDTBeowulfBanish, &DetourSDTBeowulfBanish, &jmp_ret_sdt_beowulf_banish, 5)) {
+  if (!install_new_detour(addrSDTBeowulfBanish.value(), m_detourSDTBeowulfBanish, &DetourSDTBeowulfBanish, &jmp_ret_sdt_beowulf_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_sdtbeowulfbanish";

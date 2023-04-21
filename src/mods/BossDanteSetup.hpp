@@ -88,15 +88,15 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_dtregen_hook;
-	std::unique_ptr<FunctionHook> m_sdttransform_hook;
-	std::unique_ptr<FunctionHook> m_dttimer_hook;
-	std::unique_ptr<FunctionHook> m_dtduration_hook;
-	std::unique_ptr<FunctionHook> m_emdante_delay_hook;
-	std::unique_ptr<FunctionHook> m_royal_revenge_delay_hook;
-	std::unique_ptr<FunctionHook> m_sdt_regen_hook;
-	std::unique_ptr<FunctionHook> m_set_royal_release_hook;
-	std::unique_ptr<FunctionHook> m_set_guard_ract_hook;
+	std::shared_ptr<Detour_t> m_dtregen_detour;
+	std::shared_ptr<Detour_t> m_sdttransform_detour;
+	std::shared_ptr<Detour_t> m_dttimer_detour;
+	std::shared_ptr<Detour_t> m_dtduration_detour;
+	std::shared_ptr<Detour_t> m_emdante_delay_detour;
+	std::shared_ptr<Detour_t> m_royal_revenge_delay_detour;
+	std::shared_ptr<Detour_t> m_sdt_regen_detour;
+	std::shared_ptr<Detour_t> m_set_royal_release_detour;
+	std::shared_ptr<Detour_t> m_set_guard_ract_detour;
 
 	static gf::Vec3 get_char_pos(uintptr_t character);
 

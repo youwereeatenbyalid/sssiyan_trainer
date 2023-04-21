@@ -23,7 +23,7 @@ private:
 
 	static inline DanteAirMustang* _mod = nullptr;
 
-	std::unique_ptr<FunctionHook> _mustangAirActionHook;
+	std::shared_ptr<Detour_t> m_mustangAirActionDetour;
 
 	float _backDeg = 45.0f;
 	float _frontDeg = 45.0f;
@@ -146,7 +146,7 @@ public:
 			return "Unable to find DanteAirMustang.airMustangAirSetActionCodeAddr pattern.";
 		}
 
-		if (!install_hook_absolute(airMustangAirSetActionCodeAddr.value(), _mustangAirActionHook, &detour, &ret, 0x6))
+		if (!install_new_detour(airMustangAirSetActionCodeAddr.value(), m_mustangAirActionDetour, &detour, &ret, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteAirMustang.airMustangSetActionCode";

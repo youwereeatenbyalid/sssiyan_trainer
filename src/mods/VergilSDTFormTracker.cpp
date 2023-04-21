@@ -32,7 +32,7 @@ std::optional<std::string> VergilSDTFormTracker::on_initialize() {
     return "Unanable to find VergilSDTFormTracker pattern.";
   }
 
-  if (!install_hook_absolute(init_addr.value(), m_vergilsdtformtracker_hook, getvergilform_detour, &vergilform_ret, 0xE)){
+  if (!install_new_detour(init_addr.value(), m_vergilsdtformtracker_detour, getvergilform_detour, &vergilform_ret, 0xE)){
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilSDTFormTracker";  
   }

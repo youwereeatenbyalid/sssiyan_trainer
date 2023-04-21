@@ -32,6 +32,6 @@ private:
   void init_check_box_info() override;
 
   //function hooks
-  std::unique_ptr<FunctionHook> m_INJECT_hook;
+  std::shared_ptr<Detour_t> m_INJECT_detour;
 
 };

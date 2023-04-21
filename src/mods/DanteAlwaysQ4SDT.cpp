@@ -59,7 +59,7 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
 
   DanteAlwaysQ4SDT::jmp_jne = m_patterns_cache->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysQ4SDT";

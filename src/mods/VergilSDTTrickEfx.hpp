@@ -32,7 +32,7 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_forcesdttrickefx_hook;
-	std::unique_ptr<FunctionHook> m_yamatobehavior_hook;
+	std::shared_ptr<Detour_t> m_forcesdttrickefx_detour;
+	std::shared_ptr<Detour_t> m_yamatobehavior_detour;
 };
 

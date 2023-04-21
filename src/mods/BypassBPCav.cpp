@@ -88,7 +88,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   if (!cavrfix1_addr) {
     return "Unable to find cavrfix1 pattern.";
   }
-  if (!install_hook_absolute(cavrfix1_addr.value()+0x06, m_cavrfix1_hook, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
+  if (!install_new_detour(cavrfix1_addr.value()+0x06, m_cavrfix1_detour, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix1";
@@ -100,7 +100,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   if (!cavrfix2_addr) {
     return "Unable to find cavrfix2 pattern.";
   }
-  if (!install_hook_absolute(cavrfix2_addr.value()+0x06, m_cavrfix2_hook, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
+  if (!install_new_detour(cavrfix2_addr.value()+0x06, m_cavrfix2_detour, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix2";
@@ -111,7 +111,7 @@ std::optional<std::string> BypassBPCav::on_initialize() {
       return "Unable to find cavrfix3 pattern.";
   }
 
-  if (!install_hook_absolute(cavrfix3_addr.value() + 0x06, m_cavrfix3_hook, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
+  if (!install_new_detour(cavrfix3_addr.value() + 0x06, m_cavrfix3_detour, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize cavrfix3";

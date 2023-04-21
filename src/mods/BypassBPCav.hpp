@@ -34,7 +34,7 @@ private:
   void init_check_box_info() override;
 
   //function hooks
-  std::unique_ptr<FunctionHook> m_cavrfix1_hook;
-  std::unique_ptr<FunctionHook> m_cavrfix2_hook;
-  std::unique_ptr<FunctionHook> m_cavrfix3_hook;
+  std::shared_ptr<Detour_t> m_cavrfix1_detour;
+  std::shared_ptr<Detour_t> m_cavrfix2_detour;
+  std::shared_ptr<Detour_t> m_cavrfix3_detour;
 };

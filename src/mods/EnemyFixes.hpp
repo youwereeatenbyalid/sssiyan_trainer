@@ -12,26 +12,26 @@ namespace gf = GameFunctions;
 class EnemyFixes : public Mod
 {
 private:
-	std::unique_ptr<FunctionHook> m_spawn_pos_hook;
-	std::unique_ptr<FunctionHook> m_m19check_hook;
-	std::unique_ptr<FunctionHook> m_griffon_hook;
-	std::unique_ptr<FunctionHook> m_shadow_hook;
-	std::unique_ptr<FunctionHook> m_nightmire_starting_hook;
-	std::unique_ptr<FunctionHook> m_nightmire_arrival_hook;
-	std::unique_ptr<FunctionHook> m_cavfix_hook;
-	std::unique_ptr<FunctionHook> m_vergilcenterfloor_hook;
-	std::unique_ptr<FunctionHook> m_airraid_controller_hook;
-	std::unique_ptr<FunctionHook> m_goliath_suctionjmp_hook;
-	std::unique_ptr<FunctionHook> m_goliath_leavejmp_hook;
-	std::unique_ptr<FunctionHook> m_artemis_centerfloor_hook;
-	std::unique_ptr<FunctionHook> m_urizen3_tp_hook;
-	std::unique_ptr<FunctionHook> m_malphas_tp_hook;
-	std::unique_ptr<FunctionHook> m_cerberus_pos_hook;
-	std::unique_ptr<FunctionHook> m_cerberus_thunderwave_hook;
-	std::unique_ptr<FunctionHook> m_cerberus_thunderball_hook;
-	std::unique_ptr<FunctionHook> m_shadow_warp_func_hook;
-	std::unique_ptr<FunctionHook> m_nightmirepos_ext_far_hook;
-	std::unique_ptr<FunctionHook> m_timehorse_center_hook;
+	std::shared_ptr<Detour_t> m_spawn_pos_detour;
+	std::shared_ptr<Detour_t> m_m19check_detour;
+	std::shared_ptr<Detour_t> m_griffon_detour;
+	std::shared_ptr<Detour_t> m_shadow_detour;
+	std::shared_ptr<Detour_t> m_nightmire_starting_detour;
+	std::shared_ptr<Detour_t> m_nightmire_arrival_detour;
+	std::shared_ptr<Detour_t> m_cavfix_detour;
+	std::shared_ptr<Detour_t> m_vergilcenterfloor_detour;
+	std::shared_ptr<Detour_t> m_airraid_controller_detour;
+	std::shared_ptr<Detour_t> m_goliath_suctionjmp_detour;
+	std::shared_ptr<Detour_t> m_goliath_leavejmp_detour;
+	std::shared_ptr<Detour_t> m_artemis_centerfloor_detour;
+	std::shared_ptr<Detour_t> m_urizen3_tp_detour;
+	std::shared_ptr<Detour_t> m_malphas_tp_detour;
+	std::shared_ptr<Detour_t> m_cerberus_pos_detour;
+	std::shared_ptr<Detour_t> m_cerberus_thunderwave_detour;
+	std::shared_ptr<Detour_t> m_cerberus_thunderball_detour;
+	std::shared_ptr<Detour_t> m_shadow_warp_func_detour;
+	std::shared_ptr<Detour_t> m_nightmirepos_ext_far_detour;
+	std::shared_ptr<Detour_t> m_timehorse_center_detour;
 
 	void init_check_box_info() override
 	{
@@ -1231,122 +1231,122 @@ public:
 
         //--------------------------------------------------------------------//
 
-        if (!install_hook_absolute(customSpawnAddr.value() + customSpawnOffs, m_spawn_pos_hook, &spawn_pos_detour, &posSpawnRet, 0x5))
+        if (!install_new_detour(customSpawnAddr.value() + customSpawnOffs, m_spawn_pos_detour, &spawn_pos_detour, &posSpawnRet, 0x5))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.customSpawnAddr";
         }
 
-        if (!install_hook_absolute(m19CheckAddr.value(), m_m19check_hook, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
+        if (!install_new_detour(m19CheckAddr.value(), m_m19check_detour, &load_Dante_ai_detour, &bossDanteAiRet, 0x6)) {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.m19CheckAddr";
         }
 
-        if (!install_hook_absolute(griffonKillAddr.value(), m_griffon_hook, &kill_griffon_detour, &killGriffonRet, 0x7)) {
+        if (!install_new_detour(griffonKillAddr.value(), m_griffon_detour, &kill_griffon_detour, &killGriffonRet, 0x7)) {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.griffonKill";
         }
 
-        if (!install_hook_absolute(shadowKillAddr.value(), m_shadow_hook, &kill_shadow_detour, &killShadowRet, 0x7)) {
+        if (!install_new_detour(shadowKillAddr.value(), m_shadow_detour, &kill_shadow_detour, &killShadowRet, 0x7)) {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.griffonKill";
         }
 
-        if (!install_hook_absolute(nightmireStartingAddr.value(), m_nightmire_starting_hook, &nightmire_starting_detour, &nightmareStartingPosRet, 0x8)) {
+        if (!install_new_detour(nightmireStartingAddr.value(), m_nightmire_starting_detour, &nightmire_starting_detour, &nightmareStartingPosRet, 0x8)) {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.nightmireStartingMeteorPos";
         }
 
-        if (!install_hook_absolute(nightmireArrivalAddr.value() + 0x1, m_nightmire_arrival_hook, &nightmire_arrival_detour, &nightmareArrivalPosRet, 0x6)) {
+        if (!install_new_detour(nightmireArrivalAddr.value() + 0x1, m_nightmire_arrival_detour, &nightmire_arrival_detour, &nightmareArrivalPosRet, 0x6)) {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.nightmireArrivalMeteorPos";
         }
 
-        /*if (!install_hook_absolute(cavTeleportPosAddr.value(), m_cavfix_hook, &cavtele_detour, &cavFixRet, 0x9))
+        /*if (!install_new_detour(cavTeleportPosAddr.value(), m_cavfix_detour, &cavtele_detour, &cavFixRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.cavTeleportPos";
         }*/
 
-        if (!install_hook_absolute(cavTeleportPosAddr.value() + 0x4, m_cavfix_hook, &cavtele_detour, &cavFixRet, 0x5))
+        if (!install_new_detour(cavTeleportPosAddr.value() + 0x4, m_cavfix_detour, &cavtele_detour, &cavFixRet, 0x5))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.cavTeleportPos";
         }
 
-        if (!install_hook_absolute(vergilCenterFloorAddr.value() + 0x3, m_vergilcenterfloor_hook, &vergil_centerfloor_detour, &vergilFixRet, 0x8))
+        if (!install_new_detour(vergilCenterFloorAddr.value() + 0x3, m_vergilcenterfloor_detour, &vergil_centerfloor_detour, &vergilFixRet, 0x8))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.vergilCenterFloor";
         }
 
-        if (!install_hook_absolute(vergilAirRaidControllerAddr.value(), m_airraid_controller_hook, &airraid_detour, &airRaidControllerRet, 0x8))
+        if (!install_new_detour(vergilAirRaidControllerAddr.value(), m_airraid_controller_detour, &airraid_detour, &airRaidControllerRet, 0x8))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.vergilAirRaidController";
         }
 
-        if (!install_hook_absolute(goliathSuckJmpAddr.value() + 0x1, m_goliath_suctionjmp_hook, &goliath_jmpsuck_detour, &goliathSuckJmpRet, 0x8))
+        if (!install_new_detour(goliathSuckJmpAddr.value() + 0x1, m_goliath_suctionjmp_detour, &goliath_jmpsuck_detour, &goliathSuckJmpRet, 0x8))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.goliathSuckJmp";
         }
 
-        if (!install_hook_absolute(goliathLeaveJmpAddr.value(), m_goliath_leavejmp_hook, &goliath_jmpleave_detour, &goliathLeaveJmpRet, 0x9))
+        if (!install_new_detour(goliathLeaveJmpAddr.value(), m_goliath_leavejmp_detour, &goliath_jmpleave_detour, &goliathLeaveJmpRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.goliathLeaveJmp";
         }
 
-        if (!install_hook_absolute(artemisCenterOfFloorAddr.value() + 0x1, m_artemis_centerfloor_hook, &artemis_centerfloor_fix, &artemisFixRet, 0x5))
+        if (!install_new_detour(artemisCenterOfFloorAddr.value() + 0x1, m_artemis_centerfloor_detour, &artemis_centerfloor_fix, &artemisFixRet, 0x5))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.artemisCenterOfFloor";
         }
 
-        if (!install_hook_absolute(urizen3TpAddr.value(), m_urizen3_tp_hook, &urizen3tp_detour, &urizen3TpRet, 0x7))
+        if (!install_new_detour(urizen3TpAddr.value(), m_urizen3_tp_detour, &urizen3tp_detour, &urizen3TpRet, 0x7))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.urizen3Tp";
         }
 
-        if (!install_hook_absolute(malphasAddr.value(), m_malphas_tp_hook, &malphas_tp_detour, &malphasRet, 0x8))
+        if (!install_new_detour(malphasAddr.value(), m_malphas_tp_detour, &malphas_tp_detour, &malphasRet, 0x8))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.malphas";
         }
 
-        if (!install_hook_absolute(cerberusAddr.value(), m_cerberus_pos_hook, &cerberus_pos_detour, &cerberusFixRet, 0x6))
+        if (!install_new_detour(cerberusAddr.value(), m_cerberus_pos_detour, &cerberus_pos_detour, &cerberusFixRet, 0x6))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.cerberus";
         }
 
-        if (!install_hook_absolute(cerberusThunderWaveAddr.value(), m_cerberus_thunderwave_hook, &cerberus_thunderwave_detour, &cerberusThunderWaveRet, 0x5))
+        if (!install_new_detour(cerberusThunderWaveAddr.value(), m_cerberus_thunderwave_detour, &cerberus_thunderwave_detour, &cerberusThunderWaveRet, 0x5))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.cerberusThunderWave";
         }
 
-        if (!install_hook_absolute(cerberusThunderBallAddr.value(), m_cerberus_thunderball_hook, &cerberus_thunderball_detour, &cerberusThunderBallRet, 0x7))
+        if (!install_new_detour(cerberusThunderBallAddr.value(), m_cerberus_thunderball_detour, &cerberus_thunderball_detour, &cerberusThunderBallRet, 0x7))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.cerberusThunderWave";
         }
 
-        if (!install_hook_absolute(shadowFsmToCenterAddr.value() + 0x3, m_shadow_warp_func_hook, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
+        if (!install_new_detour(shadowFsmToCenterAddr.value() + 0x3, m_shadow_warp_func_detour, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.shadowFsmToCenter";
         }
 
-        if (!install_hook_absolute(nightmireTeleExtFarAddr.value(), m_nightmirepos_ext_far_hook, &nightmire_teleport_ext_far_detour, &nightmireExtFarPosRet, 0x8))
+        if (!install_new_detour(nightmireTeleExtFarAddr.value(), m_nightmirepos_ext_far_detour, &nightmire_teleport_ext_far_detour, &nightmireExtFarPosRet, 0x8))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.shadowFsmToCenter";
         }
 
-        if (!install_hook_absolute(timeHorseCenterAddr.value(), m_timehorse_center_hook, &time_horse_detour, &timeHorseRet, 0x9))
+        if (!install_new_detour(timeHorseCenterAddr.value(), m_timehorse_center_detour, &time_horse_detour, &timeHorseRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.timeHorseCenter";

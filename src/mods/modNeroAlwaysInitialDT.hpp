@@ -36,5 +36,5 @@ private:
   void init_check_box_info() override;
   // std::unique_ptr<Patch> m_patch01;
   // std::unique_ptr<Patch> m_patch02;
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::shared_ptr<Detour_t> m_detour;
 };

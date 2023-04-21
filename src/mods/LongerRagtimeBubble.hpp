@@ -33,6 +33,6 @@ private:
   void init_check_box_info() override;
 
   //function hooks
-  std::unique_ptr<FunctionHook> m_ragtimebreakeradjust_hook;
+  std::shared_ptr<Detour_t> m_ragtimebreakeradjust_detour;
 
 };

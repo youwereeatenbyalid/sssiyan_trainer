@@ -58,6 +58,6 @@ private:
   static int palacearray[100];
   static int bossarray[8];
   static int counter;
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::shared_ptr<Detour_t> m_detour;
   inline static std::mt19937 s_rng_engine{};
 };

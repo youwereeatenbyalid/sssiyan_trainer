@@ -283,6 +283,6 @@ private:
             emSetting->odds = 1.0f;
         }
 	}
-    std::unique_ptr<FunctionHook> m_enemy_data_settings_hook;
+	std::shared_ptr<Detour_t> m_enemy_data_settings_detour;
 };
 

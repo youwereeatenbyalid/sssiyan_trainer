@@ -132,22 +132,22 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
 
   VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "02 02 48 8B 5C 24 30 32").value()+2;
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 6)) {
+  if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilInstantSDT1";
   }
-  if (!install_hook_absolute(addr2.value()+3, m_function_hook2, &detour2, &jmp_ret2, 5)) {
+  if (!install_new_detour(addr2.value()+3, m_detour2, &detour2, &jmp_ret2, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilInstantSDT2";
   }
-  if (!install_hook_absolute(addr3.value(), m_function_hook3, &detour3, &jmp_ret3, 6)) {
+  if (!install_new_detour(addr3.value(), m_detour3, &detour3, &jmp_ret3, 6)) {
   //  return a error string in case something goes wrong
   spdlog::error("[{}] failed to initialize", get_name());
   return "Failed to initialize VergilInstantSDT3";
   }
-  if (!install_hook_absolute(addr4.value(), m_function_hook4, &detour4, &jmp_ret4, 6)) {
+  if (!install_new_detour(addr4.value(), m_detour4, &detour4, &jmp_ret4, 6)) {
   //  return a error string in case something goes wrong
   spdlog::error("[{}] failed to initialize", get_name());
   return "Failed to initialize VergilInstantSDT4";

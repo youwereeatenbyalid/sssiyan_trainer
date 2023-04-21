@@ -200,7 +200,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr1) {
         return "Unable to find DanteSDTRework pattern1.";
     }
-    if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 5)) {
+    if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 5)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework1";
@@ -211,7 +211,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr2) {
         return "Unable to find DanteSDTRework pattern2.";
     }
-    if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 6)) {
+    if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 6)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework2";
@@ -222,7 +222,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr3) {
         return "Unable to find DanteSDTRework pattern3.";
     }
-    if (!install_hook_absolute(addr3.value() + 1, m_function_hook3, &detour3, &jmp_ret3, 16)) {
+    if (!install_new_detour(addr3.value() + 1, m_detour3, &detour3, &jmp_ret3, 16)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework3";
@@ -232,7 +232,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr4) {
         return "Unable to find DanteSDTRework pattern4.";
     }
-    if (!install_hook_absolute(addr4.value(), m_function_hook4, &detour4, &jmp_ret4, 8)) {
+    if (!install_new_detour(addr4.value(), m_detour4, &detour4, &jmp_ret4, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework4";
@@ -242,7 +242,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr5) {
         return "Unable to find DanteSDTRework pattern5.";
     }
-    if (!install_hook_absolute(addr5.value() + 1, m_function_hook5, &detour5, &jmp_ret5, 16)) {
+    if (!install_new_detour(addr5.value() + 1, m_detour5, &detour5, &jmp_ret5, 16)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework5";
@@ -252,7 +252,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr6) {
         return "Unable to find DanteSDTRework pattern6.";
     }
-    if (!install_hook_absolute(addr6.value() + 12, m_function_hook6, &detour6, &jmp_ret6, 8)) {
+    if (!install_new_detour(addr6.value() + 12, m_detour6, &detour6, &jmp_ret6, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework6";
@@ -262,7 +262,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr7) {
         return "Unable to find DanteSDTRework pattern7.";
     }
-    if (!install_hook_absolute(addr7.value(), m_function_hook7, &detour7, &jmp_ret7, 8)) {
+    if (!install_new_detour(addr7.value(), m_detour7, &detour7, &jmp_ret7, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework7";
@@ -273,7 +273,7 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     if (!addr8) {
         return "Unable to find DanteSDTRework pattern8.";
     }
-    if (!install_hook_absolute(addr8.value(), m_function_hook8, &detour8, &jmp_ret8, 8)) {
+    if (!install_new_detour(addr8.value(), m_detour8, &detour8, &jmp_ret8, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework8";

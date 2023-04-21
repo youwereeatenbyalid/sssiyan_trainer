@@ -50,7 +50,7 @@ std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   if (!infsummonvitality_addr) {
     return "Unable to find infsummonvitality pattern.";
   }
-  if (!install_hook_absolute(infsummonvitality_addr.value()+0x08, m_infsummonvitality_hook, &newmem_detour, &jmp_return, 5)) {
+  if (!install_new_detour(infsummonvitality_addr.value()+0x08, m_infsummonvitality_detour, &newmem_detour, &jmp_return, 5)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize infsummonvitality";

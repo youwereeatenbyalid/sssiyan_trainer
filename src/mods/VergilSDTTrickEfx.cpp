@@ -73,12 +73,12 @@ std::optional<std::string> VergilSDTTrickEfx::on_initialize()
 	yamatoBehaviorJne = yamatoBehaviorAddr.value() + 0x1F;
     retJe             = sdtEfxAddr.value() + 0xB;
 
-	if (!install_hook_absolute(sdtEfxAddr.value(), m_forcesdttrickefx_hook, &trickefx_detour, &retJmp, 0x5)) {
+	if (!install_new_detour(sdtEfxAddr.value(), m_forcesdttrickefx_detour, &trickefx_detour, &retJmp, 0x5)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilSDTTrickEfx.sdtEfx";
 	}
 
-	if (!install_hook_absolute(yamatoBehaviorAddr.value(), m_yamatobehavior_hook, &yamato_behavior_detour, &yamatoBehaviorRet, 0x7)) {
+	if (!install_new_detour(yamatoBehaviorAddr.value(), m_yamatobehavior_detour, &yamato_behavior_detour, &yamatoBehaviorRet, 0x7)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilSDTTrickEfx.yamatoBehavior";
 	}

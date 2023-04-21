@@ -374,54 +374,53 @@ std::optional<std::string> GameInput::on_initialize() {
   if (!clearrelease_addr)
     return "Unable to find Clear release pattern.";
 
-  if (!install_hook_absolute(validcontrol_addr.value() + 0xB,
-                             m_validcontrol_hook, &validcontrol_detour,
+  if (!install_new_detour(validcontrol_addr.value() + 0xB, m_validcontrol_detour, &validcontrol_detour,
                              &validcontrol_jmp_ret, 6)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize valid control";
   }
-  if (!install_hook_absolute(hold_addr.value(),
-                             m_hold_hook, &hold_detour,
+  if (!install_new_detour(hold_addr.value(),
+                             m_hold_detour, &hold_detour,
                              &hold_jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize hold";
   }
-  if (!install_hook_absolute(clearhold_addr.value(),
-                             m_clearhold_hook, &clearhold_detour,
+  if (!install_new_detour(clearhold_addr.value(),
+                             m_clearhold_detour, &clearhold_detour,
                              &clearhold_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize clear hold";
   }
-  if (!install_hook_absolute(press_addr.value(), m_press_hook,
+  if (!install_new_detour(press_addr.value(), m_press_detour,
                              &press_detour, &press_jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize press";
   }
-  if (!install_hook_absolute(clearpress_addr.value(), m_clearpress_hook,
+  if (!install_new_detour(clearpress_addr.value(), m_clearpress_detour,
                              &clearpress_detour, &clearpress_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize clear press";
   }
 
-    if (!install_hook_absolute(release_addr.value(), m_release_hook, &release_detour,
+    if (!install_new_detour(release_addr.value(), m_release_detour, &release_detour,
                              &release_jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize release";
   }
-    if (!install_hook_absolute(releasewhenheld_addr.value(), m_releasewhenheld_hook,
+    if (!install_new_detour(releasewhenheld_addr.value(), m_releasewhenheld_detour,
                                &releasewhenheld_detour, &releasewhenheld_jmp_ret, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize release when held";
     }
 
-  if (!install_hook_absolute(clearrelease_addr.value(), m_clearrelease_hook,
+  if (!install_new_detour(clearrelease_addr.value(), m_clearrelease_detour,
                              &clearrelease_detour, &clearrelease_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());

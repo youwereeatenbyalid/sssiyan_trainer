@@ -60,12 +60,12 @@ std::optional<std::string> GroundTrickNoDistanceRestriction::on_initialize()
 		return "Unanable to find GroundTrickNoDistanceRestriction.distanceAddr1 pattern.";
 	}
 
-	if (!install_hook_absolute(distanceAddr0.value(), m_groundtrick0_hook, &distance0_detour, &distanceRet0, 0x5)) {
+	if (!install_new_detour(distanceAddr0.value(), m_groundtrick0_detour, &distance0_detour, &distanceRet0, 0x5)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize GroundTrickNoDistanceRestriction.distance0";
 	}
 
-	if (!install_hook_absolute(distanceAddr1.value()+0x2, m_groundtrick1_hook, &distance1_detour, &distanceRet1, 0x5)) {
+	if (!install_new_detour(distanceAddr1.value()+0x2, m_groundtrick1_detour, &distance1_detour, &distanceRet1, 0x5)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize GroundTrickNoDistanceRestriction.distance1";
 	}

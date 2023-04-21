@@ -773,88 +773,88 @@ std::optional<std::string> HeavyDay::on_initialize() {
   if(!styleenableend_addr){
       return "Unable to find style end pattern";
   }
-    if (!install_hook_absolute(enemystep_addr.value(), m_enemystep_hook,
+    if (!install_new_detour(enemystep_addr.value(), m_enemystep_detour,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize enemystep";
     }
-    if (!install_hook_absolute(lockon_addr.value(), m_lockon_hook,
+    if (!install_new_detour(lockon_addr.value(), m_lockon_detour,
                                &lockon_detour, &lockon_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize lockon";
     }
-    if (!install_hook_absolute(targetswitch_addr.value(), m_targetswitch_hook,
+    if (!install_new_detour(targetswitch_addr.value(), m_targetswitch_detour,
                                &targetswitch_detour, &targetswitch_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize targetswitch";
     }
-    if (!install_hook_absolute(damageall_addr.value(), m_damageall_hook,
+    if (!install_new_detour(damageall_addr.value(), m_damageall_detour,
                                &damageall_detour, &damageall_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize damageall";
     }
-    if (!install_hook_absolute(pvp1_addr.value(), m_pvp1_hook,
+    if (!install_new_detour(pvp1_addr.value(), m_pvp1_detour,
                                &pvp1_detour, &pvp1_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize pvp1";
     }
-    if (!install_hook_absolute(pvp2_addr.value(), m_pvp2_hook,
+    if (!install_new_detour(pvp2_addr.value(), m_pvp2_detour,
                                &pvp2_detour, &pvp2_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize pvp2";
     }
-    if (!install_hook_absolute(danteclientside_addr.value(), m_danteclientside_hook,
+    if (!install_new_detour(danteclientside_addr.value(), m_danteclientside_detour,
                                &danteclientside_detour, &danteclientside_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize danteclientside";
     }
-    if (!install_hook_absolute(dtenable_addr.value(), m_dtenable_hook,
+    if (!install_new_detour(dtenable_addr.value(), m_dtenable_detour,
                                &dtenable_detour, &dtenable_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize dtenable";
     }
-    if (!install_hook_absolute(rgenable_addr.value(), m_rgenable_hook,
+    if (!install_new_detour(rgenable_addr.value(), m_rgenable_detour,
                                &rgenable_detour, &rgenable_jmp_ret, 8)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize rgenable";
     }
-    if (!install_hook_absolute(rgmod_addr.value()+1, m_rgmod_hook,
+    if (!install_new_detour(rgmod_addr.value()+1, m_rgmod_detour,
                                &rgmod_detour, &rgmod_jmp_ret, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize rgmod";
     }
-    if (!install_hook_absolute(combatmode_addr.value(), m_combatmode_hook,
+    if (!install_new_detour(combatmode_addr.value(), m_combatmode_detour,
         &combatmode_detour, &combatmode_jmp_ret, 7)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize combatmode";
     }
     
-    if (!install_hook_absolute(dantefix_addr.value()+0x55, m_dantefix_hook,
+    if (!install_new_detour(dantefix_addr.value()+0x55, m_dantefix_detour,
         &dantefix_detour, &dantefix_jmp_ret, 6)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize dantefix";
     }
 
-    if (!install_hook_absolute(styleenable1_addr.value(), m_styleenable1_hook,
+    if (!install_new_detour(styleenable1_addr.value(), m_styleenable1_detour,
         &styleenable1_detour, &styleenable1_jmp_ret, 9)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize styleenable1";
     }
 
-    if (!install_hook_absolute(styleenable2_addr.value(), m_styleenable2_hook,
+    if (!install_new_detour(styleenable2_addr.value(), m_styleenable2_detour,
         &styleenable2_detour, &styleenable2_jmp_ret, 6)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());

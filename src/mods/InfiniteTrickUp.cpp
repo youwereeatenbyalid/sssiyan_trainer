@@ -38,7 +38,7 @@ std::optional<std::string> InfiniteTrickUp::on_initialize()
 
 	trickupJneRet = trickUpAddr.value() + 0xD;
 
-	if (!install_hook_absolute(trickUpAddr.value(), m_trickup_hook, &trickup_detour, &trickupRet, 0x7)) {
+	if (!install_new_detour(trickUpAddr.value(), m_trickup_detour, &trickup_detour, &trickupRet, 0x7)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize InfiniteTrickUp.trickUp";
 	}

@@ -93,7 +93,7 @@ std::optional<std::string> VergilNoAfterimages::on_initialize() {
 
   VergilNoAfterimages::afterimages_jne = init_addr.value() + 0x30D;
 
-  if (!install_hook_absolute(init_addr.value(), m_vergilafterimages_hook, &afterimages_detour, &afterimages_jmp_ret, 0xD)) {
+  if (!install_new_detour(init_addr.value(), m_vergilafterimages_detour, &afterimages_detour, &afterimages_jmp_ret, 0xD)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilNoAfterimages"; 
   }

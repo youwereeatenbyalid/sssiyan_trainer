@@ -33,7 +33,7 @@ std::optional<std::string> CosCoordinate::on_initialize() {
 
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
 
-  if (!install_hook_offset(offsets::COS_COORDINATE, m_function_hook, &detour, &jmp_ret, 8)) {
+  if (!install_new_detour(offsets::COS_COORDINATE, m_detour, &detour, &jmp_ret, 8)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize CosCoordinate";

@@ -95,17 +95,17 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
     return "Unable to find DanteAlwaysOvertop pattern3.";
   }
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysOvertop1";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 6)) {
+  if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysOvertop2";
   }
-  if (!install_hook_absolute(addr3.value()+19, m_function_hook3, &detour3, &jmp_ret3, 6)) {
+  if (!install_new_detour(addr3.value()+19, m_detour3, &detour3, &jmp_ret3, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysOvertop3";

@@ -31,7 +31,7 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_function_hook;
+  std::shared_ptr<Detour_t> m_detour;
 };
 
 /*{

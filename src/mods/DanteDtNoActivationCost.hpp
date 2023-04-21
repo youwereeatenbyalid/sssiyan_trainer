@@ -52,7 +52,7 @@ public:
 
 		jmpJe = activationCostAddr.value() + 0x11C;
 
-		if (!install_hook_absolute(activationCostAddr.value(), m_activation_cost_hook, &detour, &ret, 0x8))
+		if (!install_new_detour(activationCostAddr.value(), m_activation_cost_detour, &detour, &ret, 0x8))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteDtNoActivationCost.activationCost";
@@ -67,6 +67,6 @@ private:
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	};
-	std::unique_ptr<FunctionHook> m_activation_cost_hook;
+	std::shared_ptr<Detour_t> m_activation_cost_detour;
 
 };

@@ -52,7 +52,7 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   }
   VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x4;
 
-  if (!install_hook_absolute(init_addr.value(), m_accumulatefunc_hook, &accumfunc_detour, &jmp_ret, 5)) {
+  if (!install_new_detour(init_addr.value(), m_accumulatefunc_detour, &accumfunc_detour, &jmp_ret, 5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDisableSDTAccumulate"; 
   }

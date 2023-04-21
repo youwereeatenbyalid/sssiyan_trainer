@@ -50,7 +50,7 @@ public:
 			return "Failed to initialize JudgementCustomCost.judgementCostAddr";
 		}
 
-		if (!install_hook_absolute(judgementCostAddr.value() + 0x3, m_cost_hook, &detour, &ret, 0x5))
+		if (!install_new_detour(judgementCostAddr.value() + 0x3, m_cost_detour, &detour, &ret, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize JudgementCustomCost.judgementCost";
@@ -83,6 +83,6 @@ private:
 		m_check_box_name = m_prefix_check_box_name + std::string(get_name());
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	};
-	std::unique_ptr<FunctionHook> m_cost_hook;
+	std::shared_ptr<Detour_t> m_cost_detour;
 
 };

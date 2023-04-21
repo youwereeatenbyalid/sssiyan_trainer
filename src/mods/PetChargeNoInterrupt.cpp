@@ -53,7 +53,7 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
   if (!INJECT_addr) {
     return "Unable to find INJECT pattern.";
   }
-  if (!install_hook_absolute(INJECT_addr.value(), m_INJECT_hook, &newmem_detour, &jmp_return, 5)) {
+  if (!install_new_detour(INJECT_addr.value(), m_INJECT_detour, &newmem_detour, &jmp_return, 5)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize INJECT";

@@ -18,7 +18,7 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> m_release_hook;
+	std::shared_ptr<Detour_t> m_release_hook;
 
 public:
 	DanteSelectReleaseType() = default;
@@ -81,7 +81,7 @@ public:
 			return "Unable to find DanteSelectReleaseType.releaseAddr pattern.";
 		}
 
-		if (!install_hook_absolute(releaseAddr.value(), m_release_hook, &release_detour, &ret, 0x7))
+		if (!install_new_detour(releaseAddr.value(), m_release_hook, &release_detour, &ret, 0x7))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteSelectReleaseType.release";

@@ -42,12 +42,12 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_validcontrol_hook;
-  std::unique_ptr<FunctionHook> m_hold_hook;
-  std::unique_ptr<FunctionHook> m_clearhold_hook;
-  std::unique_ptr<FunctionHook> m_press_hook;
-  std::unique_ptr<FunctionHook> m_clearpress_hook;
-  std::unique_ptr<FunctionHook> m_release_hook;
-  std::unique_ptr<FunctionHook> m_releasewhenheld_hook;
-  std::unique_ptr<FunctionHook> m_clearrelease_hook;
+  std::shared_ptr<Detour_t> m_validcontrol_detour;
+  std::shared_ptr<Detour_t> m_hold_detour;
+  std::shared_ptr<Detour_t> m_clearhold_detour;
+  std::shared_ptr<Detour_t> m_press_detour;
+  std::shared_ptr<Detour_t> m_clearpress_detour;
+  std::shared_ptr<Detour_t> m_release_detour;
+  std::shared_ptr<Detour_t> m_releasewhenheld_detour;
+  std::shared_ptr<Detour_t> m_clearrelease_detour;
 };

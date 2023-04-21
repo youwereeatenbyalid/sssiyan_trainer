@@ -50,7 +50,7 @@ std::optional<std::string> AirTrickDodge::on_initialize()
 		return "Unanable to find AirTrickDodge.isInAirAddr pattern.";
 	}
 
-	if (!install_hook_absolute(isInAirAddr.value(), m_aircheck_hook, &detour, &ret, 0x7))
+	if (!install_new_detour(isInAirAddr.value(), m_aircheck_detour, &detour, &ret, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirTrickDodge.isInAir";

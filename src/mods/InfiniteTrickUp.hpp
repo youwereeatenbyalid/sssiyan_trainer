@@ -29,6 +29,6 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_trickup_hook;
+	std::shared_ptr<Detour_t> m_trickup_detour;
 };
 

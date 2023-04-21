@@ -13,8 +13,8 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> m_dante_dt_update;
-	std::unique_ptr<FunctionHook> m_pl_update_dt_hp_rec;
+	std::shared_ptr<Detour_t> m_dante_dt_update;
+	std::shared_ptr<Detour_t> m_pl_update_dt_hp_rec;
 
 public:
 	DanteSDTRegen() = default;
@@ -102,13 +102,13 @@ public:
 
 		//updateJne = updateDtHpAddr.value() + 0xF;
 
-		if (!install_hook_absolute(updateDtHpAddr.value(), m_dante_dt_update, &update_detour, &updateRet, 0x5))
+		if (!install_new_detour(updateDtHpAddr.value(), m_dante_dt_update, &update_detour, &updateRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteSDTRegen.updateDtHp";
 		}
 
-		if (!install_hook_absolute(plUpdateDtHpAddr.value() + 0x1, m_pl_update_dt_hp_rec, &update_pl_detour, &plUpdateRet, 0x7))
+		if (!install_new_detour(plUpdateDtHpAddr.value() + 0x1, m_pl_update_dt_hp_rec, &update_pl_detour, &plUpdateRet, 0x7))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteSDTRegen.plUpdateDtHp";

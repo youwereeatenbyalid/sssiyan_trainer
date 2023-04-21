@@ -557,11 +557,11 @@ namespace WaveEditorMod
 		int prevGameDataCount = 0;
 		int gameDataIndx = 0;
 		ViewUserDataState viewUserDataState = ViewUserDataState::ByLoadId;
-		std::unique_ptr<FunctionHook> m_emwave_hook;
-		std::unique_ptr<FunctionHook> m_loadall_hook;
-		std::unique_ptr<FunctionHook> m_bploadflow_hook;
-		std::unique_ptr<FunctionHook> m_bossdante_crash_hook;
-		std::unique_ptr<FunctionHook> m_bp_fadein_hook;
+		std::shared_ptr<Detour_t>  m_emwave_detour;
+		std::shared_ptr<Detour_t>  m_loadall_detour;
+		std::shared_ptr<Detour_t>  m_bploadflow_detour;
+		std::shared_ptr<Detour_t>  m_bossdante_crash_detour;
+		std::shared_ptr<Detour_t>  m_bp_fadein_detour;
 
 		class ProfileManager : EndLvlHooks::IEndLvl
 		{

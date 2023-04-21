@@ -1,10 +1,8 @@
 #include "AprilFools.hpp"
-
 uintptr_t AprilFools::jmp_ret{NULL};
 uintptr_t AprilFools::jmp_ret2{ NULL };
 uintptr_t AprilFools::jmp_ret3{ NULL };
 bool AprilFools::cheaton{NULL};
-
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -92,7 +90,7 @@ std::optional<std::string> AprilFools::on_initialize() {
   if (!addr) {
     return "Unable to find APFcode pattern.";
   }
-  if (!install_hook_absolute(addr, m_function_hook, &detour, &jmp_ret, 6)) {
+  if (!install_new_detour(addr, m_detour, &detour, &jmp_ret, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize APFcode";
@@ -103,7 +101,7 @@ std::optional<std::string> AprilFools::on_initialize() {
     return "Unable to find APFcode vergil pattern.";
   }
  
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
+  if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize APFcode vergil";
@@ -115,7 +113,7 @@ std::optional<std::string> AprilFools::on_initialize() {
     return "Unable to find APFcode mission pattern.";
   }
 
-  if (!install_hook_absolute(addr3.value(), m_function_hook3, &detour3, &jmp_ret3, 7)) {
+  if (!install_new_detour(addr3.value(), m_detour3, &detour3, &jmp_ret3, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize  APFcode mission";
@@ -135,4 +133,3 @@ void AprilFools::on_frame()
 		}
 	}
 }
-

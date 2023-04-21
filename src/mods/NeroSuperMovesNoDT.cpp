@@ -67,7 +67,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
   if (!maxbetnodt_addr) {
     return "Unable to find maxbetnodt pattern.";
   }
-  if (!install_hook_absolute(maxbetnodt_addr.value(), m_maxbetnodt_hook, &newmem_detour, &jmp_return, 7)) {
+  if (!install_new_detour(maxbetnodt_addr.value(), m_maxbetnodt_detour, &newmem_detour, &jmp_return, 7)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize maxbetnodt";
@@ -77,7 +77,7 @@ std::optional<std::string> NeroSuperMovesNoDT::on_initialize() {
   if (!showdownnodt_addr) {
     return "Unable to find showdownnodt pattern.";
   }
-  if (!install_hook_absolute(showdownnodt_addr.value(), m_showdownnodt_hook, &newmem2_detour, &jmp_return2, 7)) {
+  if (!install_new_detour(showdownnodt_addr.value(), m_showdownnodt_detour, &newmem2_detour, &jmp_return2, 7)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize showdownnodt";

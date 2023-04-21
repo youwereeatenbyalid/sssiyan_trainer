@@ -12,9 +12,9 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> m_distance_doppel_hook;
-	std::unique_ptr<FunctionHook> m_bwjust_doppel_hook;
-	std::unique_ptr<FunctionHook> m_fejust_doppel_hook;
+	std::shared_ptr<Detour_t> m_distance_doppel_detour;
+	std::shared_ptr<Detour_t> m_bwjust_doppel_detour;
+	std::shared_ptr<Detour_t> m_fejust_doppel_detour;
 
 public:
 	DoppelNoComeBack() = default;
@@ -129,19 +129,19 @@ public:
 		jaJmp = doppelDistanceCumBackAddr.value() + 0x22;
 		doppelComeBackFunc = m_patterns_cache->find_addr(base, "48 89 5C 24 18 57 48 81 EC 90 00 00 00 48 8B 41 50 48").value_or(g_framework->get_module().as<uintptr_t>() + 0x54DE30);
 
-		if (!install_hook_absolute(doppelDistanceCumBackAddr.value(), m_distance_doppel_hook, &distance_detour, &distanceRet, 0x6))
+		if (!install_new_detour(doppelDistanceCumBackAddr.value(), m_distance_doppel_detour, &distance_detour, &distanceRet, 0x6))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DoppelNoComeBack.doppelDistanceComeBack";
 		}
 
-		if (!install_hook_absolute(doppeBwJustCumBackAddr.value(), m_bwjust_doppel_hook, &bw_just_detour, &bwJustRet, 0x5))
+		if (!install_new_detour(doppeBwJustCumBackAddr.value(), m_bwjust_doppel_detour, &bw_just_detour, &bwJustRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DoppelNoComeBack.doppeBwJustComemBack";
 		}
 
-		if (!install_hook_absolute(doppeFeJustCumBackAddr.value(), m_fejust_doppel_hook, &fe_just_detour, &feJustRet, 0x5))
+		if (!install_new_detour(doppeFeJustCumBackAddr.value(), m_fejust_doppel_detour, &fe_just_detour, &feJustRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DoppelNoComeBack.doppeFeJustComemBack";

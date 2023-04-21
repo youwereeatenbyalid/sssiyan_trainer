@@ -47,7 +47,7 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 		return "Unanable to find VergilWalkingGuard.isPadInputAddr pattern.";
 	}
 
-	if (!install_hook_absolute(isPadInputAddr.value() + 0x3, m_is_pad_input_hook, &is_pad_input_detuor, &ret, 0x7))
+	if (!install_new_detour(isPadInputAddr.value() + 0x3, m_is_pad_input_detour, &is_pad_input_detuor, &ret, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilWalkingGuard.isPadInput";

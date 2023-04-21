@@ -57,7 +57,7 @@ std::optional<std::string> DanteGuardflyWip::on_initialize() {
   }
   DanteGuardflyWip::jmp_jae = addr.value() + 138;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 9)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteGuardflyWip";

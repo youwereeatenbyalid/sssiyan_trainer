@@ -33,6 +33,6 @@ private:
   void init_check_box_info() override;
 
   //function hooks
-  std::unique_ptr<FunctionHook> m_maxbetnodt_hook;
-  std::unique_ptr<FunctionHook> m_showdownnodt_hook;
+  std::shared_ptr<Detour_t> m_maxbetnodt_detour;
+  std::shared_ptr<Detour_t> m_showdownnodt_detour;
 };

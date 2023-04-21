@@ -69,7 +69,7 @@ std::optional<std::string> EnemyWaveSettings::on_initialize()
 		return "Unanable to find EnemyWaveSettings pattern.";
 	}
 
-	if (!install_hook_absolute(initAddr1.value(), m_wave_settings_hook, &wave_data_detour, &enemyWaveRet, 0x6)) {
+	if (!install_new_detour(initAddr1.value(), m_wave_settings_detour, &wave_data_detour, &enemyWaveRet, 0x6)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize EnemyWaveSettings.initAddr1";
 	}

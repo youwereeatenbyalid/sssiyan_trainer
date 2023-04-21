@@ -97,12 +97,12 @@ std::optional<std::string> AerialPushback::on_initialize() {
     return "Unable to find AerialPushback pattern2.";
   }
   /*
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize AerialPushback";
   }*/
-   if (!install_hook_absolute(addr2, m_function_hook2, &detour2, &jmp_ret2, 6)) {
+   if (!install_new_detour(addr2, m_detour2, &detour2, &jmp_ret2, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize AerialPushback2";

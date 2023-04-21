@@ -70,7 +70,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   if (!missionenemydifficulty_addr) {
     return "Unable to find missionenemydifficulty pattern.";
   }
-  if (!install_hook_absolute(missionenemydifficulty_addr.value(), m_missionenemydifficulty_hook, &newmem1_detour, &jmp_return1, 6)) {
+  if (!install_new_detour(missionenemydifficulty_addr.value(), m_missionenemydifficulty_detour, &newmem1_detour, &jmp_return1, 6)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize missionenemydifficulty";
@@ -80,7 +80,7 @@ std::optional<std::string> DifficultySelect::on_initialize() {
   if (!bpenemydifficulty_addr) {
     return "Unable to find bpenemydifficulty pattern.";
   }
-  if (!install_hook_absolute(bpenemydifficulty_addr.value(), m_bpenemydifficulty_hook, &newmem2_detour, &jmp_return2, 6)) {
+  if (!install_new_detour(bpenemydifficulty_addr.value(), m_bpenemydifficulty_detour, &newmem2_detour, &jmp_return2, 6)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize bpenemydifficulty";

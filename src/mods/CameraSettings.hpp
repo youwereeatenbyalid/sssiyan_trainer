@@ -51,14 +51,14 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_function_hookFoV;
-  std::unique_ptr<FunctionHook> m_function_hookHorizontalSensClockwise;
-  std::unique_ptr<FunctionHook> m_function_hookHorizontalSensAntiClockwise;
-  std::unique_ptr<FunctionHook> m_function_hookKeyboardHorizontalEnable;
-  std::unique_ptr<FunctionHook> m_function_hookSiyansCamFix1;
-  std::unique_ptr<FunctionHook> m_function_hookCloseAutoCorrect;
-  std::unique_ptr<FunctionHook> m_function_hookDistantAutoCorrect;
-  std::unique_ptr<FunctionHook> m_function_hookMovementAutoCorrect;
-  std::unique_ptr<FunctionHook> m_function_hookHeightAutoCorrect;
-  std::unique_ptr<FunctionHook> m_function_hookNoVignette;
+  std::shared_ptr<Detour_t>m_detour_FoV;
+  std::shared_ptr<Detour_t>m_detour_HorizontalSensClockwise;
+  std::shared_ptr<Detour_t>m_detour_HorizontalSensAntiClockwise;
+  std::shared_ptr<Detour_t>m_detour_KeyboardHorizontalEnable;
+  std::shared_ptr<Detour_t>m_detour_SiyansCamFix1;
+  std::shared_ptr<Detour_t>m_detour_CloseAutoCorrect;
+  std::shared_ptr<Detour_t>m_detour_DistantAutoCorrect;
+  std::shared_ptr<Detour_t>m_detour_MovementAutoCorrect;
+  std::shared_ptr<Detour_t>m_detour_HeightAutoCorrect;
+  std::shared_ptr<Detour_t>m_detour_NoVignette;
 };

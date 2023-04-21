@@ -42,7 +42,7 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 	}
 	uintptr_t correctInitAddr = initAddr1.value() + 0x4;
 
-	if (!install_hook_absolute(correctInitAddr, m_sub_concentration_damage_hook, &subdamage_detour, &subDamageRet, 0x8)) {
+	if (!install_new_detour(correctInitAddr, m_sub_concentration_damage_detour, &subdamage_detour, &subDamageRet, 0x8)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilSDTNoConcentrationLose.initAddr1";
 	}

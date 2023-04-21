@@ -36,10 +36,10 @@ private:
   // around minhook
   void init_check_box_info() override;
 
-  std::unique_ptr<FunctionHook> m_function_hook;
-  std::unique_ptr<FunctionHook> m_function_hookYamatoBanish;
-  std::unique_ptr<FunctionHook> m_function_hookBeowulfBanish;
-  std::unique_ptr<FunctionHook> m_function_hookForceEdgeBanish;
-  std::unique_ptr<FunctionHook> m_function_hookSDTYamatoBanish;
-  std::unique_ptr<FunctionHook> m_function_hookSDTBeowulfBanish;
+  std::shared_ptr<Detour_t> m_detour;
+  std::shared_ptr<Detour_t> m_detourYamatoBanish;
+  std::shared_ptr<Detour_t> m_detourBeowulfBanish;
+  std::shared_ptr<Detour_t> m_detourForceEdgeBanish;
+  std::shared_ptr<Detour_t> m_detourSDTYamatoBanish;
+  std::shared_ptr<Detour_t> m_detourSDTBeowulfBanish;
 };

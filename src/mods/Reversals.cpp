@@ -75,7 +75,7 @@ std::optional<std::string> Reversals::on_initialize() {
   if (!addr) {
     return "Unable to find Reversals pattern.";
   }
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Reversals";
@@ -86,7 +86,7 @@ std::optional<std::string> Reversals::on_initialize() {
     return "Unable to find BufferedReversals pattern.";
   }
 
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
+  if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize BufferedReversals";

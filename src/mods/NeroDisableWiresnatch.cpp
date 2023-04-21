@@ -114,12 +114,12 @@ std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
     return "Unable to find NeroDisableWiresnatch2 pattern.";
   }
 
-  if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 9)) {
+  if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NeroDisableWiresnatch1";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 9)) {
+  if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NeroDisableWiresnatch2";

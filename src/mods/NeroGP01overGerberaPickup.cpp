@@ -52,7 +52,7 @@ std::optional<std::string> NeroGP01overGerberaPickup::on_initialize() {
    if (!addr) {
     return "Unable to find NeroGP01overGerberaPickup pattern.";
   }
-   if (!install_hook_absolute(addr.value(), m_function_hook, &detour,&jmp_ret, 10)) {
+   if (!install_new_detour(addr.value(), m_detour, &detour,&jmp_ret, 10)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NeroGP01overGerberaPickup";

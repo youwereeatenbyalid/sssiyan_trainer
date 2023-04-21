@@ -73,13 +73,13 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 
 	m9Jne = m9Addr.value() + 0x8 + 0x20;
 
-	if (!install_hook_absolute(timerAddr.value(), m_timer_hook, &timer_detour, &timerRet, 0x5))
+	if (!install_new_detour(timerAddr.value(), m_timer_detour, &timer_detour, &timerRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize SecretMissionTimer.timer";
 	}
 
-	if (!install_hook_absolute(m9Addr.value()+0x8, m_m9_hook, &m9_groundtimer_detour, &m9Ret, 0x5))
+	if (!install_new_detour(m9Addr.value()+0x8, m_m9_detour, &m9_groundtimer_detour, &m9Ret, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize SecretMissionTimer.timer";

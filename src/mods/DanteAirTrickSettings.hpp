@@ -36,9 +36,9 @@ public:
 
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_airtrick_distance0_hook;
-	std::unique_ptr<FunctionHook> m_airtrick_distance1_hook;
-	std::unique_ptr<FunctionHook> m_airtrick_offset_hook;
+	std::shared_ptr<Detour_t> m_airtrick_distance0_detour;
+	std::shared_ptr<Detour_t> m_airtrick_distance1_detour;
+	std::shared_ptr<Detour_t> m_airtrick_offset_detour;
 
 };
 

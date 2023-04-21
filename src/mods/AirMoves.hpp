@@ -72,21 +72,21 @@ private:
 	};
 
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_rapidslash_air_hook;
-	std::unique_ptr<FunctionHook> m_fe_drive_air_hook;
-	std::unique_ptr<FunctionHook> m_void_slash_air_hook;
-	std::unique_ptr<FunctionHook> m_rb_stinger_air_hook;
-	std::unique_ptr<FunctionHook> m_sp_stinger_air_hook;
-	std::unique_ptr<FunctionHook> m_ds_stinger_air_hook;
-	std::unique_ptr<FunctionHook> m_brk_updraft_air_hook;
-	std::unique_ptr<FunctionHook> m_kick_air_hook;
-	std::unique_ptr<FunctionHook> m_cerberus_ice_edge_air_hook;
-	std::unique_ptr<FunctionHook> m_cerberus_blitz_air_hook;
-	std::unique_ptr<FunctionHook> _spRtAirHook;
-	std::unique_ptr<FunctionHook> _rbRtAirHook;
-	std::unique_ptr<FunctionHook> _jceAirHook;
-	std::unique_ptr<FunctionHook> m_check_ground_hit_hook;
-	std::unique_ptr<FunctionHook> m_air_dodge_crash_hook;
+	std::shared_ptr<Detour_t> m_rapidslash_air_detour;
+	std::shared_ptr<Detour_t> m_fe_drive_air_detour;
+	std::shared_ptr<Detour_t> m_void_slash_air_detour;
+	std::shared_ptr<Detour_t> m_rb_stinger_air_detour;
+	std::shared_ptr<Detour_t> m_sp_stinger_air_detour;
+	std::shared_ptr<Detour_t> m_ds_stinger_air_detour;
+	std::shared_ptr<Detour_t> m_brk_updraft_air_detour;
+	std::shared_ptr<Detour_t> m_kick_air_detour;
+	std::shared_ptr<Detour_t> m_cerberus_ice_edge_air_detour;
+	std::shared_ptr<Detour_t> m_cerberus_blitz_air_detour;
+	std::shared_ptr<Detour_t> m_spRtAir_detour;
+	std::shared_ptr<Detour_t> m_rbRtAir_detour;
+	std::shared_ptr<Detour_t> m_jceAir_detour;
+	std::shared_ptr<Detour_t> m_check_ground_hit_detour;
+	std::shared_ptr<Detour_t> m_air_dodge_crash_detour;
 
 public:
 	

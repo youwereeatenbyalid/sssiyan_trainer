@@ -595,75 +595,75 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
   nohitlns_ret_je                  = dontdrawhitlines_addr.value() + 0xA + 0x1;
 
-  if (!install_hook_absolute(enemynumber_addr.value(), m_enemynumber_hook, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
+  if (!install_new_detour(enemynumber_addr.value(), m_enemynumber_detour, &enemynumber_detour, &enemynumber_jmp_ret, 9)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Enemy Number";
   }
-  if (!install_hook_absolute(capbypass_addr1.value(), m_capbypass_hook1, &capbypass_detour1, &capbypass_jmp_ret1, 5)) {
+  if (!install_new_detour(capbypass_addr1.value(), m_capbypass_detour1, &capbypass_detour1, &capbypass_jmp_ret1, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cap bypass 1";
   }
-  if (!install_hook_absolute(capbypass_addr2.value(), m_capbypass_hook2, &capbypass_detour2, &capbypass_jmp_ret2, 5)) {
+  if (!install_new_detour(capbypass_addr2.value(), m_capbypass_detour2, &capbypass_detour2, &capbypass_jmp_ret2, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize Cap bypass 2";
   }
-  if (!install_hook_absolute(nopfunction_addr1.value(), m_nopfunction_hook1, &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
+  if (!install_new_detour(nopfunction_addr1.value(), m_nopfunction_detour1, &nopfunction_detour1, &nopfunction_jmp_ret1, 5)) {
 	//  return a error string in case something goes wrong
 	spdlog::error("[{}] failed to initialize", get_name());
 	return "Failed to initialize nopfunction 1";
   }
 
-  if (!install_hook_absolute(vergildivebomb_addr.value(), m_vergildivebomb_hook, &vergildivebomb_detour,
+  if (!install_new_detour(vergildivebomb_addr.value(), m_vergildivebomb_detour, &vergildivebomb_detour,
 	  &vergildivebomb_jmp_ret, 7)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Vergil Dive bomb";
   }
 
-  if (!install_hook_absolute(cavforcevalid_addr.value(), m_cavforcevalid_hook, &cavforcevalid_detour,
+  if (!install_new_detour(cavforcevalid_addr.value(), m_cavforcevalid_detour, &cavforcevalid_detour,
 	  &cavforcevalid_jmp_ret, 6)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cav force valid";
   }
 
-  if (!install_hook_absolute(cavforcelightning_addr.value() + 0x11, m_cavforcelightning1_hook, &cavforcelightning1_detour,
+  if (!install_new_detour(cavforcelightning_addr.value() + 0x11, m_cavforcelightning1_detour, &cavforcelightning1_detour,
 	  &cavforcelightning1_jmp_ret, 7)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cav force lightning 1";
   }
 
-  if (!install_hook_absolute(cavforcelightning_addr.value(), m_cavforcelightning2_hook, &cavforcelightning2_detour,
+  if (!install_new_detour(cavforcelightning_addr.value(), m_cavforcelightning2_detour, &cavforcelightning2_detour,
 	  &cavforcelightning2_jmp_ret, 7)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Cav force lightning 2";
   }
 
-  if (!install_hook_absolute(cavcoordinatechange_addr.value(), m_cavcoordinatechange_hook, &cavcoordinatechange_detour,
+  if (!install_new_detour(cavcoordinatechange_addr.value(), m_cavcoordinatechange_detour, &cavcoordinatechange_detour,
 	  &cavcoordinatechange_jmp_ret, 9)) {
 	  //  return a error string in case something goes wrong
 	  spdlog::error("[{}] failed to initialize", get_name());
 	  return "Failed to initialize Vergil Dive bomb";
   }
 
-  if (!install_hook_absolute(hitvfxskip_addr.value(), m_hitvfxskip_hook, &hitvfxskip_detour, &hitvfxskip_ret, 7)) {
+  if (!install_new_detour(hitvfxskip_addr.value(), m_hitvfxskip_detour, &hitvfxskip_detour, &hitvfxskip_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize hitvfxskip_addr";
   }
 
-  if (!install_hook_absolute(waittime_addr.value(), m_wait_spawn_time_hook, &wait_time_spawn_detour, &waitTimeJmpRet, 0x9)) {
+  if (!install_new_detour(waittime_addr.value(), m_wait_spawn_time_detour, &wait_time_spawn_detour, &waitTimeJmpRet, 0x9)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize hitvfxskip_addr";
   }
 
-  if (!install_hook_absolute(dontdrawhitlines_addr.value()+0x1, m_hitvfx_dontdraw_hitlines_hook, &hitvfx_nohitlines_detour, &nohitlns_ret, 0x6)) {
+  if (!install_new_detour(dontdrawhitlines_addr.value()+0x1, m_hitvfx_dontdraw_hitlines_detour, &hitvfx_nohitlines_detour, &nohitlns_ret, 0x6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize LDK.dontdrawhitlines_addr";

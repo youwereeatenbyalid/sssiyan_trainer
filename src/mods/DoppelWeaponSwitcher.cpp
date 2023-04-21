@@ -499,7 +499,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!updateweapon_addr) {
     return "Unable to find updateweapon pattern.";
   }
-  if (!install_hook_absolute(updateweapon_addr.value(), m_updateweapon_hook, &updateweapon_detour, &updateweapon_jmp_ret, 6)) {
+  if (!install_new_detour(updateweapon_addr.value(), m_updateweapon_detour, &updateweapon_detour, &updateweapon_jmp_ret, 6)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize updateweapon";
@@ -512,7 +512,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!resetweapon_addr) {
       return "Unable to find resetweapon pattern.";
   }
-  if (!install_hook_absolute(resetweapon_addr.value(), m_resetweapon_hook, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
+  if (!install_new_detour(resetweapon_addr.value(), m_resetweapon_detour, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize resetweapon";
@@ -522,7 +522,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!fixparameter_addr) {
       return "Unable to find fixparameter pattern.";
   }
-  if (!install_hook_absolute(fixparameter_addr.value(), m_fixparameter_hook, &fixparameter_detour, &fixparameter_jmp_ret, 7)) {
+  if (!install_new_detour(fixparameter_addr.value(), m_fixparameter_detour, &fixparameter_detour, &fixparameter_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize fixparameter";
@@ -535,7 +535,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!fixjdc_addr) {
       return "Unable to find fixjdc pattern.";
   }
-  if (!install_hook_absolute(fixjdc_addr.value(), m_fixjdc_hook, &fixjdc_detour, &fixjdc_jmp_ret, 7)) {
+  if (!install_new_detour(fixjdc_addr.value(), m_fixjdc_detour, &fixjdc_detour, &fixjdc_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize fixjdc";
@@ -548,7 +548,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!jjdcaltcheck_addr) {
       return "Unable to find jjdcaltcheck pattern.";
   }
-  if (!install_hook_absolute(jjdcaltcheck_addr.value()+3, m_jjdcaltcheck_hook, &jjdcaltcheck_detour, &jjdcaltcheck_jmp_ret, 7)) {
+  if (!install_new_detour(jjdcaltcheck_addr.value()+3, m_jjdcaltcheck_detour, &jjdcaltcheck_detour, &jjdcaltcheck_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize jjdcaltcheck";
@@ -558,7 +558,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppeljjdc_addr) {
       return "Unable to find doppeljjdc pattern.";
   }
-  if (!install_hook_absolute(doppeljjdc_addr.value(), m_doppeljjdc_hook, &doppeljjdc_detour, &doppeljjdc_jmp_ret, 9)) {
+  if (!install_new_detour(doppeljjdc_addr.value(), m_doppeljjdc_detour, &doppeljjdc_detour, &doppeljjdc_jmp_ret, 9)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppeljjdc";
@@ -568,7 +568,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppelonlyjjdc_addr) {
       return "Unable to find doppelonlyjjdc pattern.";
   }
-  if (!install_hook_absolute(doppelonlyjjdc_addr.value(), m_doppelonlyjjdc_hook, &doppelonlyjjdc_detour, &doppelonlyjjdc_jmp_ret, 5)) {
+  if (!install_new_detour(doppelonlyjjdc_addr.value(), m_doppelonlyjjdc_detour, &doppelonlyjjdc_detour, &doppelonlyjjdc_jmp_ret, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelonlyjjdc";
@@ -578,7 +578,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppelonlyjjdcteleport_addr) {
       return "Unable to find doppelonlyjjdcteleport pattern.";
   }
-  if (!install_hook_absolute(doppelonlyjjdcteleport_addr.value(), m_doppelonlyjjdcteleport_hook, &doppelonlyjjdcteleport_detour, &doppelonlyjjdcteleport_jmp_ret, 8)) {
+  if (!install_new_detour(doppelonlyjjdcteleport_addr.value(), m_doppelonlyjjdcteleport_detour, &doppelonlyjjdcteleport_detour, &doppelonlyjjdcteleport_jmp_ret, 8)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelonlyjjdcteleport";
@@ -595,13 +595,13 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppelidle1_addr) {
       return "Unable to find doppelidle1 pattern.";
   }
-  if (!install_hook_absolute(doppelidle1_addr.value(), m_doppelidle1_hook, &doppelidle1_detour, &doppelidle1_jmp_ret, 6)) {
+  if (!install_new_detour(doppelidle1_addr.value(), m_doppelidle1_detour, &doppelidle1_detour, &doppelidle1_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelidle1";
   }
 
-  if (!install_hook_absolute(doppelidle1_addr.value()+0x1F, m_doppelidle2_hook, &doppelidle2_detour, &doppelidle2_jmp_ret, 5)) {
+  if (!install_new_detour(doppelidle1_addr.value()+0x1F, m_doppelidle2_detour, &doppelidle2_detour, &doppelidle2_jmp_ret, 5)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelidle2";
@@ -611,7 +611,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppelidle3_addr) {
       return "Unable to find doppelidle3 pattern.";
   }
-  if (!install_hook_absolute(doppelidle3_addr.value(), m_doppelidle3_hook, &doppelidle3_detour, &doppelidle3_jmp_ret, 6)) {
+  if (!install_new_detour(doppelidle3_addr.value(), m_doppelidle3_detour, &doppelidle3_detour, &doppelidle3_jmp_ret, 6)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelidle3";
@@ -624,7 +624,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!doppelbeowulfcharge_addr) {
       return "Unable to find doppelbeowulfcharge pattern.";
   }
-  if (!install_hook_absolute(doppelbeowulfcharge_addr.value(), m_doppelbeowulfcharge_hook, &doppelbeowulfcharge_detour, &doppelbeowulfcharge_jmp_ret, 7)) {
+  if (!install_new_detour(doppelbeowulfcharge_addr.value(), m_doppelbeowulfcharge_detour, &doppelbeowulfcharge_detour, &doppelbeowulfcharge_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize doppelbeowulfcharge";
@@ -634,7 +634,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!soundchargestart_addr) {
       return "Unable to find soundchargestart pattern.";
   }
-  if (!install_hook_absolute(soundchargestart_addr.value(), m_soundchargestart_hook, &soundchargestart_detour, &soundchargestart_jmp_ret, 7)) {
+  if (!install_new_detour(soundchargestart_addr.value(), m_soundchargestart_detour, &soundchargestart_detour, &soundchargestart_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize soundchargestart";
@@ -644,7 +644,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!soundchargeend_addr) {
       return "Unable to find soundchargeend pattern.";
   }
-  if (!install_hook_absolute(soundchargeend_addr.value()+1, m_soundchargeend_hook, &soundchargeend_detour, &soundchargeend_jmp_ret, 7)) {
+  if (!install_new_detour(soundchargeend_addr.value()+1, m_soundchargeend_detour, &soundchargeend_detour, &soundchargeend_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize soundchargeend";
@@ -654,7 +654,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!soundchargelevel1_addr) {
       return "Unable to find soundchargelevel1 pattern.";
   }
-  if (!install_hook_absolute(soundchargelevel1_addr.value(), m_soundchargelevel1_hook, &soundchargelevel1_detour, &soundchargelevel1_jmp_ret, 7)) {
+  if (!install_new_detour(soundchargelevel1_addr.value(), m_soundchargelevel1_detour, &soundchargelevel1_detour, &soundchargelevel1_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize soundchargelevel1";
@@ -664,7 +664,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   if (!soundchargelevel2_addr) {
       return "Unable to find soundchargelevel2 pattern.";
   }
-  if (!install_hook_absolute(soundchargelevel2_addr.value(), m_soundchargelevel2_hook, &soundchargelevel2_detour, &soundchargelevel2_jmp_ret, 7)) {
+  if (!install_new_detour(soundchargelevel2_addr.value(), m_soundchargelevel2_detour, &soundchargelevel2_detour, &soundchargelevel2_jmp_ret, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize soundchargelevel2";

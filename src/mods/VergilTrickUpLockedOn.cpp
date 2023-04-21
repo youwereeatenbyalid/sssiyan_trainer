@@ -139,17 +139,17 @@ std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
     }
     VergilTrickUpLockedOn::jmp_je3 = addr3.value() + 751;
 
-    if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 9)) {
+    if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 9)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize VergilTrickUpLockedOn1";
     }
-    if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 13)) {
+    if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 13)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize VergilTrickUpLockedOn2";
     }
-    if (!install_hook_absolute(addr3.value(), m_function_hook3, &detour3, &jmp_ret3, 8)) {
+    if (!install_new_detour(addr3.value(), m_detour3, &detour3, &jmp_ret3, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize VergilTrickUpLockedOn3";
