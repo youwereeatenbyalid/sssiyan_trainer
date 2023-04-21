@@ -299,6 +299,7 @@ public:
         Page_Nero,
         Page_DanteSDT,
         Page_DanteCheat,
+        Page_DanteStrive,
         Page_CommonCheat,
         Page_VergilSDT,
         Page_VergilTrick,
@@ -319,6 +320,7 @@ public:
         Page_Gilver,
 		Page_SecretMission,
         Page_Count
+        
     };
 
     enum Input {

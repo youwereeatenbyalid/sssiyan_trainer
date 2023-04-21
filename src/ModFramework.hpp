@@ -150,6 +150,7 @@ private:
         PanelID_Dante,
         PanelID_Gilver,
         PanelID_Vergil,
+        PanelID_Strive,
         PanelID_Trainer
     };
 

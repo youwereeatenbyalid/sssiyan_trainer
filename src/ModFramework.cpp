@@ -63,7 +63,8 @@ ModFramework::ModFramework()
     ::CreateDirectory(path(CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(KEYBIND_CONFIG_FILENAME).parent_path().string().c_str(), nullptr);
     ::CreateDirectory(path(AOB_LIST_FILENAME).parent_path().string().c_str(), nullptr);
-
+    //don't mind me just requesting that the script folder for lua scripts exists
+    ::CreateDirectory(path(SCRIPT_FOLDER).string().c_str(), nullptr);
     m_logger = spdlog::basic_logger_mt("Collab Trainer", LOG_FILENAME, true);
 
     spdlog::set_default_logger(m_logger);
@@ -100,6 +101,7 @@ ModFramework::ModFramework()
     m_mods_panels_map["Dante"] = PanelID_Dante;
     m_mods_panels_map["V"] = PanelID_Gilver;
     m_mods_panels_map["Vergil"] = PanelID_Vergil;
+    m_mods_panels_map["StriVe"] = PanelID_Strive;
     m_mods_panels_map["Trainer"] = PanelID_Trainer;
 }
 
@@ -1332,6 +1334,7 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderDockWindow("Dante", left);
         ImGui::DockBuilderDockWindow("V", left);
         ImGui::DockBuilderDockWindow("Vergil", left);
+        ImGui::DockBuilderDockWindow("StriVe", left);
 
         // Settings
         ImGui::DockBuilderDockWindow("Options", right);
@@ -1571,6 +1574,21 @@ void ModFramework::draw_panels() const
             ImGui::Separator();
             ImGui::Text("VFX Settings");
             m_mods->on_pagelist_ui(Mod::Page_VergilVFXSettings, modListIndent);
+        }
+        else if (!m_game_data_initialized) {
+            ImGui::TextWrapped("Trainer is currently initializing...");
+        }
+        else if (!m_error.empty()) {
+            ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+        }
+    }
+    ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Strive ? activeTabText : inactiveTabText);
+    ImGui::Begin("StriVe", nullptr, panel_flags);
+    ImGui::PopStyleColor();
+    {
+        if (m_error.empty() && m_game_data_initialized) {
+            ImGui::Text("Dante");
+            m_mods->on_pagelist_ui(Mod::Page_DanteStrive, modListIndent);
         }
         else if (!m_game_data_initialized) {
             ImGui::TextWrapped("Trainer is currently initializing...");

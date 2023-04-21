@@ -303,6 +303,9 @@ set(MODS_SRC
 	
 	mods/TestLuaMod.hpp
 	mods/TestLuaMod.cpp
+	
+	mods/NeoBalrog.hpp
+	mods/NeoBalrog.cpp
 )
 
 set(HOOKS_SRC

@@ -24,22 +24,13 @@ std::optional<std::string> TestLuaMod::on_initialize() {
 void TestLuaMod::on_load_lua_mod()
 {
     API::LuaLock _{};
-    sol::state_view mod_state_view{m_mod_state};
-    try {
-        mod_state_view.safe_script_file(filenamestring);
-    }
-    catch (const std::exception& e) {
-        spdlog::error(e.what());
-    }
-    catch (...) {
-        spdlog::error((std::stringstream{} << "Unknown error when running script " << filenamestring).str().c_str());
-    }
+    load_script(filenamestring);
     spdlog::info("Hello from TestLuaMod::on_load_lua_mod!");
 }
 
 void TestLuaMod::on_unload_lua_mod()
 {
-   // API::LuaLock _{};
+    API::LuaLock _{};
     spdlog::info("Hello from TestLuaMod::on_unload_lua_mod!");
 }
 

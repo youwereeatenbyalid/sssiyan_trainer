@@ -58,9 +58,12 @@
     // Vergil
         #include "mods/DoppelWeaponSwitcher.hpp"
 
-
+    //Strive
+        #include "mods/NeoBalrog.hpp"
     //lua test
-        #include "mods/TestLuaMod.hpp"
+        //#include "mods/TestLuaMod.hpp"
+
+        
 // Siyan
     // Background
         #include "mods/DamageTypeLean.hpp"
@@ -277,8 +280,11 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>());
+    // Strive
+        m_mods.emplace_back(std::make_unique<NeoBalrog>());
     // Lua
-        m_mods.emplace_back(std::make_unique<TestLuaMod>());
+        //m_mods.emplace_back(std::make_unique<TestLuaMod>());
+        
 
 //// Siyan
     // Background
