@@ -461,6 +461,7 @@ public:
 	virtual void on_draw_debug_ui() {}
     virtual void on_lua_state_created(lua_State*l) {}
     virtual void on_lua_state_destroyed(lua_State* l) {}
+    bool user_enabled{ false };
     bool* m_is_enabled{ nullptr };
     std::vector<std::string> m_in_use_by{}; // Name of mods depending on this mod that are currently enabled
     std::vector<std::string> m_depends_on{}; // Name of mods this mod depends on

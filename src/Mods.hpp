@@ -39,6 +39,8 @@ public:
     }
 
 private:
+    bool update_mod_state(Mod* mod) const;
+
     mutable std::string m_focused_mod;
     std::vector<std::unique_ptr<Mod>> m_mods;
     utility::Config m_config;

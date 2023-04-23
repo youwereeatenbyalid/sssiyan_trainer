@@ -492,50 +492,8 @@ void Mods::set_focused_mod(const std::string& modName) const
 
 void Mods::on_frame() const {
     for (auto& mod : m_mods) {
-        mod->on_frame();
-
-        // Update the mod detours state, Should probably be done in a function that gets overriden by the mod object
-        // but for the simplisity I just put it here
-        if (mod->m_is_enabled != nullptr) { // ... man fuck this
-            if (*mod->m_is_enabled != mod->m_last_state) {
-                for (const auto& detour : mod->m_detours) {
-                    if (*mod->m_is_enabled) { // Enable the mod and the mods that this mod depends on
-                        for (const auto& m : mod->m_depends_on) {
-                            Mod* dependency = get_mod(m);
-                            if (dependency->m_is_enabled != nullptr) {
-                                dependency->m_in_use_by.push_back(std::string(mod->get_name()));
-                                *dependency->m_is_enabled = true;
-                            }
-                        }
-
-                        *mod->m_is_enabled = detour->toggle(true); // Enable the current mod itself
-                    }
-                    
-					if (!*mod->m_is_enabled && mod->m_in_use_by.size() == 0) { // If the mod is not in by any other mod disable the mod and mods that this mod depends on if they aren't in use by any other mod
-                        *mod->m_is_enabled = detour->toggle(false); // Disable the current mod itslef
-                        
-                        for (const auto& m : mod->m_depends_on) {
-							Mod* dependency = get_mod(m);
-							if (dependency->m_is_enabled != nullptr) {
-                                dependency->m_in_use_by.erase(
-                                    std::remove(dependency->m_in_use_by.begin(), dependency->m_in_use_by.end(),
-                                        std::string(mod->get_name())),
-                                    dependency->m_in_use_by.end());
-
-                                if (dependency->m_in_use_by.size() == 0) { // Disable the dependency if it is not currently in use
-                                    *dependency->m_is_enabled = false;
-                                }
-							}
-						}
-                    }
-                    else if (!*mod->m_is_enabled && mod->m_in_use_by.size() != 0) { // Don't let it to be turned off if it's in use
-                        *mod->m_is_enabled = true;
-                    }
-                }
-            }
-
-            mod->m_last_state = *mod->m_is_enabled;
-        }
+		mod->on_frame();
+        update_mod_state(mod.get());
     }
 }
 
@@ -578,6 +536,50 @@ void Mods::load_mods(const std::optional<utility::Config>& cfg) const {
     }
 }
 
+bool Mods::update_mod_state(Mod* mod) const
+{
+    *mod->m_is_enabled = (mod->m_in_use_by.size() != 0) || mod->user_enabled;
+
+	// Update the mod detours state, Should probably be done in a function that gets overriden by the mod object
+	// but for the simplicity I just put it here
+	if (*mod->m_is_enabled != mod->m_last_state) {
+
+		if (*mod->m_is_enabled) { // Enable the mod and the mods that this mod depends on
+			for (const auto& m : mod->m_depends_on) {
+				Mod* dependency = get_mod(m);
+				dependency->m_in_use_by.push_back(std::string(mod->get_name()));
+				update_mod_state(dependency);
+			}
+		}
+
+        bool enabled = true;
+		for (const auto& detour : mod->m_detours) {
+			enabled &= detour->toggle(*mod->m_is_enabled);
+		}
+        *mod->m_is_enabled = enabled;
+
+        if (*mod->m_is_enabled == mod->m_last_state) { // If we failed to toggle every detour to the state we want, we just revert to the last state and cry
+			for (const auto& detour : mod->m_detours) {
+			    detour->toggle(mod->m_last_state);
+			}
+        }
+
+		if (!*mod->m_is_enabled) { // Disable the mod and mods that this mod depends on if they aren't in use by any other mod
+			for (const auto& m : mod->m_depends_on) {
+				Mod* dependency = get_mod(m);
+				dependency->m_in_use_by.erase(
+					std::remove(dependency->m_in_use_by.begin(), dependency->m_in_use_by.end(),
+						std::string(mod->get_name())),
+					dependency->m_in_use_by.end());
+				update_mod_state(dependency);
+			}
+		}
+	}
+
+	mod->m_last_state = *mod->m_is_enabled;
+    return *mod->m_is_enabled;
+}
+
 void Mods::on_draw_debug_ui() const {
 	for (auto& mod : m_mods) {
 		mod->on_draw_debug_ui();
@@ -599,7 +601,8 @@ void Mods::draw_entry(Mod* mod){
 
     const auto window = ImGui::GetCurrentWindow();
 
-    ImGui::Checkbox(mod->get_checkbox_name().c_str(), mod->m_is_enabled);
+    UI::ModCheckBox(mod->get_checkbox_name().c_str(), mod->m_in_use_by.size(), &mod->user_enabled);
+
     ImGui::SameLine();
 
     if (ImGui::Selectable(mod->m_full_name_string.c_str(), m_focused_mod == mod->get_name(), 0, ImGui::CalcTextSize(mod->m_full_name_string.c_str()))) {

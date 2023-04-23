@@ -216,6 +216,8 @@ namespace UI {
 	bool SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", float thickness = 1.0f, ImGuiSliderFlags flags = 0);
 	bool SliderInt(const char* label, int* v, int v_min, int v_max, const char* format = "%d", float thickness = 1.0f, ImGuiSliderFlags flags = 0);
 
+	bool ModCheckBox(const char* label, bool vDependency, bool* vUser);
+
 	BtnIndex_ REGPKeyToBtnIndex(const REGPK_Flag& key);
 
 	void KeyCaptureWindow(struct KCWBuffers& kcwBuffers, bool closeBtn = false);
