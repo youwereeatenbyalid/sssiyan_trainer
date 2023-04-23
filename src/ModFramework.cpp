@@ -1054,10 +1054,10 @@ bool ModFramework::initialize() {
 
             KeyBinder::LoadAllBinds(true);
 
-            m_game_data_initialized = true;
+			m_game_data_initialized = true;
             });
 
-        init_thread.detach();
+		init_thread.detach();
     }
 
     return true;

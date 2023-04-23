@@ -6,6 +6,8 @@
 #include "events/Events.hpp"
 #include "mods/Coroutine/Coroutines.hpp"
 #include <sol/sol.hpp>
+#include <unordered_map>
+
 class Mods {
 public:
     Mods();
@@ -42,6 +44,7 @@ private:
     utility::Config m_config;
     lua_State* global_lua_state{nullptr};
     std::unique_ptr<Coroutines::Coroutine<void(Mods::*)(), Mods*>> m_init_sdk_coroutine = std::make_unique<Coroutines::Coroutine<void(Mods::*)(), Mods*>>(&Mods::init_sdk, true, true);
+	std::unordered_map<std::string, Mod*> m_name_to_mod_map{};
 
     void init_sdk()
     {

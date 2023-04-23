@@ -504,7 +504,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
 {
     init_check_box_info();
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-    //m_is_enabled = &cheaton;
+    m_is_enabled = &enabled;
     m_on_page = Page_None;
     m_full_name_string = "";
     m_author_string = "V.P. Zadov";

@@ -78,7 +78,7 @@ void DamageMultiplier::init_check_box_info() {
 std::optional<std::string> DamageMultiplier::on_initialize() {
   init_check_box_info();
 
-  // ischecked             = &DamageMultiplier::cheaton;
+  m_is_enabled             = &DamageMultiplier::cheaton;
   // onpage                = gamemode;
 
   m_full_name_string      = "This address is only used for backing up enemy HP";

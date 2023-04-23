@@ -363,8 +363,11 @@ public:
 
 	//----------------------------------------------------------------------------------------------------------------------------------//
 
+	inline static bool enabled{ false };
+
 	std::optional<std::string> on_initialize() override
 	{
+		m_is_enabled = &enabled;
 		//init_check_box_info();
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_on_page = Page_None;

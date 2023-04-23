@@ -30,6 +30,7 @@ void StyleRank::init_check_box_info() {
 }
 
 std::optional<std::string> StyleRank::on_initialize() {
+	m_is_enabled = &enabled;
   init_check_box_info();
 
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();

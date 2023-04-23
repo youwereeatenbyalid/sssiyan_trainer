@@ -462,6 +462,8 @@ public:
     virtual void on_lua_state_created(lua_State*l) {}
     virtual void on_lua_state_destroyed(lua_State* l) {}
     bool* m_is_enabled{ nullptr };
+    std::vector<std::string> m_in_use_by{}; // Name of mods depending on this mod that are currently enabled
+    std::vector<std::string> m_depends_on{}; // Name of mods this mod depends on
     bool m_last_state = false;
     std::vector<std::shared_ptr<Detour_t>> m_detours{};
     //bool& m_is_enabled = *ischecked;

@@ -12,6 +12,7 @@ void SimpleMod::init_check_box_info() {
 std::optional<std::string> SimpleMod::on_initialize() {
   init_check_box_info();
 
+  m_is_enabled = &enabled;
   m_full_name_string   = "";
   m_author_string      = "";
   m_description_string = "";

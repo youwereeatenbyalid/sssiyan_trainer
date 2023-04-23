@@ -6,6 +6,8 @@
 namespace gf = GameFunctions;
 class PlayerTracker : public Mod {
 public:
+	inline static bool cheaton{ false };
+
 	enum class PlDanteStyleType
 	{
 		None = -1,

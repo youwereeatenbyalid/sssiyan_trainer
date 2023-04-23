@@ -12,6 +12,8 @@ public:
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
 
+  inline static bool enabled{ false };
+
   std::optional<std::string> on_initialize() override;
 
   // Override this things if you want to store values in the config file

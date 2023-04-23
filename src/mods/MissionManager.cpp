@@ -14,6 +14,7 @@ static naked void mission_num_detour() {
 }
 
 std::optional<std::string> MissionManager::on_initialize() {
+	m_is_enabled = &enabled;
   init_check_box_info();
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 

@@ -43,6 +43,7 @@ void DamageTypeLean::init_check_box_info() {
 }
 
 std::optional<std::string> DamageTypeLean::on_initialize() {
+    m_is_enabled = &enabled;
   // init_check_box_info();
 
   // m_is_enabled = &DamageTypeLean::cheaton;

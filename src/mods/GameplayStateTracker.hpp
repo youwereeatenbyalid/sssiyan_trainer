@@ -29,6 +29,7 @@ private:
 	static inline GameplayStateTracker* _mod = nullptr;
 
 public:
+	inline static bool enabled{ false };
 	static inline uintptr_t nowFlowRet = 0;
 	static inline uintptr_t gameModeRet = 0;
 	static inline uintptr_t pfbMngrAddEmRet = 0;

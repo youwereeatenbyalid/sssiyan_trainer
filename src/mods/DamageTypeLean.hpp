@@ -10,6 +10,7 @@ public:
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
+  static inline bool enabled{ false };
   static uintptr_t jmp_ret;
   static uint32_t playermoveid;
   // static bool cheaton;

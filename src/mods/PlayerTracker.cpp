@@ -632,6 +632,8 @@ void PlayerTracker::init_check_box_info() {
 std::optional<std::string> PlayerTracker::on_initialize() {
 	init_check_box_info();
 
+	m_is_enabled = &PlayerTracker::cheaton;
+
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
 	PlayerTracker::playermanager = staticbase + 0x7E571A0;

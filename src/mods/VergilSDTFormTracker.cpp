@@ -25,6 +25,7 @@ void VergilSDTFormTracker::init_check_box_info() {
 }
 
 std::optional<std::string> VergilSDTFormTracker::on_initialize() {
+	m_is_enabled = &enabled;
   init_check_box_info();
   auto base      = g_framework->get_module().as<HMODULE>(); // note HMODULE
   auto init_addr = m_patterns_cache->find_addr(base, "44 89 82 B0 09 00 00 48");

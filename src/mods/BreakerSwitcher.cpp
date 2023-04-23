@@ -903,6 +903,4 @@ UI::KeyBindButton(std::string(get_name()) + "SLOT8", std::string(get_name()) + "
 ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT7", std::string(get_name()) + "SLOT7", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-
-
 }

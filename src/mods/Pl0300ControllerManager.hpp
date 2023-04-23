@@ -202,7 +202,7 @@ namespace PlCntr
 			{
 				return m_hot_key_name;
 			};
-
+			inline static bool enabled{ false };
 			std::optional<std::string> on_initialize() override;
 
 			// Override this things if you want to store values in the config file

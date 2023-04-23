@@ -206,7 +206,7 @@
        #include "mods/VergilSDTAlwaysCancels.hpp"
        #include "mods/DoppelNoComeBack.hpp"
        #include "mods/EnemySpawner.hpp"
-      #include "mods/BossVergilMoves.hpp"
+       #include "mods/BossVergilMoves.hpp"
        #include "mods/Pl0300ControllerManager.hpp"
        #include "mods/VergilGuardSlowMotion.hpp"
        #include "mods/BossVergilSettings.hpp"
@@ -435,6 +435,10 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
         m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
 
+		for (const auto& mod : m_mods) {
+			m_name_to_mod_map.insert({ std::string(mod->get_name()), mod.get() });
+		}
+
 #ifdef DEVELOPER
     //m_mods.emplace_back(std::make_unique<DeveloperTools>());
 #endif
@@ -470,19 +474,11 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
 
 
 Mod* Mods::get_mod(const std::string& modName) const {
-  if(modName == "None")
-  {
-      return nullptr;
-  }
-
-
-  for (auto& mod : m_mods) {
-    if (modName == mod->get_name()) {
-      return mod.get();
+	if (m_name_to_mod_map.find(modName) == m_name_to_mod_map.end()) {
+		return nullptr;
     }
-  }
 
-  return nullptr;
+    return m_name_to_mod_map.at(modName);
 }
 
 const std::string& Mods::get_focused_mod() const {
@@ -503,7 +499,38 @@ void Mods::on_frame() const {
         if (mod->m_is_enabled != nullptr) { // ... man fuck this
             if (*mod->m_is_enabled != mod->m_last_state) {
                 for (const auto& detour : mod->m_detours) {
-                    *mod->m_is_enabled = detour->toggle(*mod->m_is_enabled);
+                    if (*mod->m_is_enabled) { // Enable the mod and the mods that this mod depends on
+                        for (const auto& m : mod->m_depends_on) {
+                            Mod* dependency = get_mod(m);
+                            if (dependency->m_is_enabled != nullptr) {
+                                dependency->m_in_use_by.push_back(std::string(mod->get_name()));
+                                *dependency->m_is_enabled = true;
+                            }
+                        }
+
+                        *mod->m_is_enabled = detour->toggle(true); // Enable the current mod itself
+                    }
+                    
+					if (!*mod->m_is_enabled && mod->m_in_use_by.size() == 0) { // If the mod is not in by any other mod disable the mod and mods that this mod depends on if they aren't in use by any other mod
+                        *mod->m_is_enabled = detour->toggle(false); // Disable the current mod itslef
+                        
+                        for (const auto& m : mod->m_depends_on) {
+							Mod* dependency = get_mod(m);
+							if (dependency->m_is_enabled != nullptr) {
+                                dependency->m_in_use_by.erase(
+                                    std::remove(dependency->m_in_use_by.begin(), dependency->m_in_use_by.end(),
+                                        std::string(mod->get_name())),
+                                    dependency->m_in_use_by.end());
+
+                                if (dependency->m_in_use_by.size() == 0) { // Disable the dependency if it is not currently in use
+                                    *dependency->m_is_enabled = false;
+                                }
+							}
+						}
+                    }
+                    else if (!*mod->m_is_enabled && mod->m_in_use_by.size() != 0) { // Don't let it to be turned off if it's in use
+                        *mod->m_is_enabled = true;
+                    }
                 }
             }
 
