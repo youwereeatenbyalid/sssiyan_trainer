@@ -508,7 +508,7 @@ void Mods::save_mods() {
         togglename.append("_on");
 
         if(mod->m_is_enabled){
-            m_config.set<bool>(togglename, *mod->m_is_enabled);
+            m_config.set<bool>(togglename, mod->user_enabled);
         }else{
             m_config.set<bool>(togglename, false);
         }
@@ -530,7 +530,7 @@ void Mods::load_mods(const std::optional<utility::Config>& cfg) const {
         togglename.append("_on");
 
 	    if (mod->m_is_enabled) {
-	    	*mod->m_is_enabled = m_config.get<bool>(togglename).value_or(false);
+	    	mod->user_enabled = m_config.get<bool>(togglename).value_or(false);
 	    	mod->on_config_load(m_config);
 	    }
     }
