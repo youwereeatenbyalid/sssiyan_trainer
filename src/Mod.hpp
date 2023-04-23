@@ -509,15 +509,14 @@ public:
             }
         }
 
-		g_keyBinds.Get()->AddBind(std::string(get_name()),
-			[this]() {
-
-				if(m_is_enabled != nullptr) *m_is_enabled = !*m_is_enabled;
+        g_keyBinds.Get()->AddBind(std::string(get_name()),
+            [this]() {
+                user_enabled = !user_enabled;
 
                 {
-                    ImGuiToast toast(*m_is_enabled ? ImGuiToastType_Success : ImGuiToastType_Error, 500);
+                    ImGuiToast toast(user_enabled ? ImGuiToastType_Success : ImGuiToastType_Error, 500);
 
-                    toast.set_title("%s: %s", m_raw_full_name.c_str(), *m_is_enabled ? "Activated!" : "Deactivated!");
+                    toast.set_title("%s: %s", m_raw_full_name.c_str(), user_enabled ? "Activated!" : "Deactivated!");
 
                     g_framework->queue_notification(toast);
                 }
