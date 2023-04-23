@@ -39,9 +39,9 @@ void DanteMaxSDT::init_check_box_info() {
 std::optional<std::string> DanteMaxSDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DanteMaxSDT::cheaton;
-  m_on_page               = Page_DanteSDT;
-
+  m_is_enabled           = &DanteMaxSDT::cheaton;
+  m_on_page              = Page_DanteSDT;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite SDT";
   m_author_string        = "SSSiyan";
   m_description_string   = "Freezes the SDT Bar at maximum.";

@@ -42,8 +42,9 @@ std::optional<std::string> EmpoweredCane::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  m_is_enabled = &EmpoweredCane::cheaton;
-  m_on_page    = Page_Gilver;
+  m_is_enabled           = &EmpoweredCane::cheaton;
+  m_on_page              = Page_Gilver;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite Empowered Cane";
   m_author_string        = "SSSiyan";
   m_description_string   = "V's BP Taunt buffed cane will last forever.";

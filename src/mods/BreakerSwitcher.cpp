@@ -673,10 +673,10 @@ void BreakerSwitcher::init_check_box_info() {
 std::optional<std::string> BreakerSwitcher::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &BreakerSwitcher::cheaton;
-  m_on_page    = Page_Breaker;
-
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &BreakerSwitcher::cheaton;
+  m_on_page              = Page_Breaker;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Breaker Switcher (+)";
   m_author_string        = "The HitchHiker (original version by Nino)\n Disable Breakaway made with assistance from Lidemi";
   m_description_string   = "Make sure your d-pad is bound to breakaway, then "

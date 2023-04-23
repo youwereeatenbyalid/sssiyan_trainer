@@ -5,7 +5,6 @@ uintptr_t DanteAlwaysQ4SDT::jmp_ret{NULL};
 uintptr_t DanteAlwaysQ4SDT::jmp_jne{NULL};
 bool DanteAlwaysQ4SDT::cheaton{NULL};
 
-
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
@@ -42,9 +41,9 @@ void DanteAlwaysQ4SDT::init_check_box_info() {
 std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &DanteAlwaysQ4SDT::cheaton;
-  m_on_page             = Page_DanteSDT;
-
+  m_is_enabled         = &DanteAlwaysQ4SDT::cheaton;
+  m_on_page            = Page_DanteSDT;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Always Quadruple S";
   m_author_string      = "SSSiyan";
   m_description_string = "Removes the style requirement for Quadruple S.";

@@ -46,10 +46,10 @@ void DisableBreakaway::init_check_box_info() {
 std::optional<std::string> DisableBreakaway::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &DisableBreakaway::cheaton;
-  //m_on_page    = breaker;
-
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &DisableBreakaway::cheaton;
+  //m_on_page            = breaker;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Disable Breakaway (+)";
   m_author_string        = "Lidemi & The HitchHiker";
   m_description_string   = "Disables the Breakaway animation."

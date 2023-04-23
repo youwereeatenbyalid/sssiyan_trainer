@@ -58,8 +58,9 @@ std::optional<std::string> DifficultySelect::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  m_is_enabled = &DifficultySelect::cheaton;
-  m_on_page    = Page_Enemies;
+  m_is_enabled           = &DifficultySelect::cheaton;
+  m_on_page              = Page_Enemies;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Select Enemy Difficulty (+)";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Set the difficulty of enemies in combat.";

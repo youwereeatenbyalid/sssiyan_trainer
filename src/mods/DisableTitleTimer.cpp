@@ -1,4 +1,3 @@
-
 #include "DisableTitleTimer.hpp"
 #include "mods/PlayerTracker.hpp"
 uintptr_t DisableTitleTimer::jmp_ret{NULL};
@@ -35,9 +34,10 @@ void DisableTitleTimer::init_check_box_info() {
 std::optional<std::string> DisableTitleTimer::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &DisableTitleTimer::cheaton;
-  m_on_page    = Page_QOL;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &DisableTitleTimer::cheaton;
+  m_on_page              = Page_QOL;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Disable Titlescreen Timer";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Prevent the titlescreen from playing the mission 1 cutscene when left idling.";

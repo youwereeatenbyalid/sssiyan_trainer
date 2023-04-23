@@ -59,9 +59,10 @@ void DTWingsOnly::init_check_box_info() {
 std::optional<std::string> DTWingsOnly::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &DTWingsOnly::cheaton;
-  m_on_page               = Page_Nero;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &DTWingsOnly::cheaton;
+  m_on_page              = Page_Nero;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Nero Wings (+)";
   m_author_string        = "Siyan";
   m_description_string   = "Set when wings appear.";

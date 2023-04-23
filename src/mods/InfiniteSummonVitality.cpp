@@ -37,9 +37,10 @@ void InfiniteSummonVitality::init_check_box_info() {
 std::optional<std::string> InfiniteSummonVitality::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &InfiniteSummonVitality::cheaton;
-  m_on_page    = Page_Gilver;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &InfiniteSummonVitality::cheaton;
+  m_on_page              = Page_Gilver;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite Summon Vitality";
   m_author_string        = "Jessie Kazama";
   m_description_string   = "Pet health is locked to max.";

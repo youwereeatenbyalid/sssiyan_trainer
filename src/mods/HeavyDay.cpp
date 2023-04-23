@@ -700,11 +700,10 @@ void HeavyDay::init_check_box_info() {
 std::optional<std::string> HeavyDay::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &HeavyDay::cheaton;
-  m_on_page    = Page_GameMode;
-  m_depends_on = { "PlayerTracker" };
-
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &HeavyDay::cheaton;
+  m_on_page              = Page_GameMode;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "PVP";
   m_author_string        = "The HitchHiker, SSSiyan, Dr. Penguin";
   m_description_string   = "Enables PVP Combat between players."

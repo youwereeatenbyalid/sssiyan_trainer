@@ -515,9 +515,9 @@ static naked void hitvfx_nohitlines_detour() {
 std::optional<std::string> LDK::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &LDK::cheaton;
-  m_on_page               = Page_GameMode;
-
+  m_is_enabled           = &LDK::cheaton;
+  m_on_page              = Page_GameMode;
+  m_depends_on			 = { "PlayerTracker" };
   m_full_name_string     = "Legendary Dark Knights (+)";
   m_author_string        = "The HitchHiker, Dr. Penguin, deepdarkkapustka, V.P.Zadov";
   m_description_string   = "Enables the Legendary Dark Knights Gamemode.";

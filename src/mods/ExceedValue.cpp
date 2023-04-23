@@ -38,9 +38,10 @@ void ExceedValue::init_check_box_info() {
 std::optional<std::string> ExceedValue::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &ExceedValue::cheaton;
-  m_on_page = Page_Nero;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &ExceedValue::cheaton;
+  m_on_page              = Page_Nero;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Set Exceed Level (+)";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Set/Lock Nero's Exceed.";

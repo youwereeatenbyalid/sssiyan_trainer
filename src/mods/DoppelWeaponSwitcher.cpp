@@ -470,10 +470,11 @@ void DoppelWeaponSwitcher::init_check_box_info() {
 std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
-  m_is_enabled = &DoppelWeaponSwitcher::cheaton;
-  m_on_page    = Page_VergilDoppel;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  uintptr_t staticbase   = g_framework->get_module().as<uintptr_t>();
+  m_is_enabled           = &DoppelWeaponSwitcher::cheaton;
+  m_on_page              = Page_VergilDoppel;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Doppelganger Weapon Switcher";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Assign different weapons to the Doppelganger.\n"

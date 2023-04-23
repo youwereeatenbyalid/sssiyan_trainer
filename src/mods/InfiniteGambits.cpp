@@ -34,9 +34,10 @@ void InfiniteGambits::init_check_box_info() {
 std::optional<std::string> InfiniteGambits::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &InfiniteGambits::cheaton;
-  m_on_page    = Page_Gilver;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &InfiniteGambits::cheaton;
+  m_on_page              = Page_Gilver;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite Gambits";
   m_author_string        = "SSSiyan";
   m_description_string   = "Infinite number of aerial gambits.";

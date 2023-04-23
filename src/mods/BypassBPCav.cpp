@@ -74,13 +74,13 @@ void BypassBPCav::init_check_box_info() {
 std::optional<std::string> BypassBPCav::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &BypassBPCav::cheaton;
-  m_on_page    = Page_BloodyPalace;
-  m_full_name_string = "Bypass BP Cavaliere Restriction";
-  m_author_string = "SSSiyan";
-  m_description_string = "Allows you to take Cavaliere R into Bloody Palace.";
-
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &BypassBPCav::cheaton;
+  m_on_page              = Page_BloodyPalace;
+  m_depends_on           = { "PlayerTracker" };
+  m_full_name_string     = "Bypass BP Cavaliere Restriction";
+  m_author_string        = "SSSiyan";
+  m_description_string   = "Allows you to take Cavaliere R into Bloody Palace.";
   set_up_hotkey();
 
   auto cavrfix1_addr = m_patterns_cache->find_addr(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");

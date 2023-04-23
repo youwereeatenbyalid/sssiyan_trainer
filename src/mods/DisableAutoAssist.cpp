@@ -31,9 +31,10 @@ void DisableAutoAssist::init_check_box_info() {
 std::optional<std::string> DisableAutoAssist::on_initialize() {
   init_check_box_info();
 
-  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &DisableAutoAssist::cheaton;
-  m_on_page    = Page_QOL;
+  auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  m_is_enabled           = &DisableAutoAssist::cheaton;
+  m_on_page              = Page_QOL;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Disable Auto Assist";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Prevents Auto Assist from being activated.";
