@@ -764,8 +764,8 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto nextbreaker_addr = m_patterns_cache->find_addr(base, "4C 63 60 20 48 85 D2");
   auto NeroUIOverride_addr = m_patterns_cache->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
   auto breakerinputcontrol_addr = m_patterns_cache->find_addr(base, "41 8D 41 FF 48 8B FA");
-  auto call_nero_creategauntlet_addr = m_patterns_cache->find_addr(base, "C3 CC CC 40 53 56 41 55");
-  auto bringerinputcontroller_addr = m_patterns_cache->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
+  auto call_nero_creategauntlet_addr = m_patterns_cache->find_addr(base, "C3 CC CC CC 40 53 56 41 55 48");//DevilMayCry5.exe+20F38DC
+  auto bringerinputcontroller_addr = m_patterns_cache->find_addr(base, "75 4E 80 BA C2 18 00 00 00 B8");
 
 
   BreakerSwitcher::call_nero_creategauntlet = call_nero_creategauntlet_addr.value()+0x3;

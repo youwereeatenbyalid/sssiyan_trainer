@@ -41,12 +41,12 @@ std::optional<std::string> NoScreenShake::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr      = m_patterns_cache->find_addr(base, "00 CC CC CC CC CC CC CC 48 89 5C 24 18 56 57");
+  auto addr      = m_patterns_cache->find_addr(base, "CD CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 56 57 41 57 48 83 EC 60");//DevilMayCry5.exe+CCEAF0 (-0xA)
   if (!addr) {
     return "Unable to find NoScreenShake pattern.";
   }
 
-  if (!install_hook_absolute(addr.value()+8, m_function_hook, &detour, &jmp_ret, 5)) {
+  if (!install_hook_absolute(addr.value()+0xA, m_function_hook, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize NoScreenShake";

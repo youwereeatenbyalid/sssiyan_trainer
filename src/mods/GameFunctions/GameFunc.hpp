@@ -383,7 +383,7 @@ namespace GameFunctions
 				_mngString = sdk::create_instance("System.String");
 				typedef void(__cdecl* f_add_ref)(REManagedObject*);
 				auto base = g_framework->get_module().as<uintptr_t>();
-				((f_add_ref)(base + 0x2526820))(_mngString);
+				((f_add_ref)(base + 0x252A9D0))(_mngString);
 			}
 			memcpy(_data, (const void*)_mngString, 0x10);//just copy all remanagedObj stuff to fake string
 			*(int*)((uintptr_t)_data + 0x10) = _length;

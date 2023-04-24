@@ -44,7 +44,7 @@ std::optional<std::string> DisableTitleTimer::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 05 CF FF 45 06");
+  auto addr = m_patterns_cache->find_addr(base, "F3 0F 10 05 EF D5 44 06");//DevilMayCry5.exe+1A1D22D
   if (!addr) {
     return "Unable to find DisableTitleTimer pattern.";
   }

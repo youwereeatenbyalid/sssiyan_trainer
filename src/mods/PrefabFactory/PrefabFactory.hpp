@@ -37,13 +37,13 @@ namespace PfbFactory
 		{
 			if (obj == nullptr)
 				return;
-			static f_add_ref addRef = (f_add_ref)(g_framework->get_module().as<uintptr_t>() + 0x2526820);
+			static f_add_ref addRef = (f_add_ref)(g_framework->get_module().as<uintptr_t>() + 0x252A9D0);
 			addRef(obj);
 		}
 
 		static inline void release(REManagedObject* obj)
 		{
-			static f_release release = (f_release)(g_framework->get_module().as<uintptr_t>() + 0x2526FA0);
+			static f_release release = (f_release)(g_framework->get_module().as<uintptr_t>() + 0x252B150);
 			release(obj);
 		}
 	};

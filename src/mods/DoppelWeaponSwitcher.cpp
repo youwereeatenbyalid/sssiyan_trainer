@@ -508,7 +508,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Crash Prevention
   /// </summary>
   /// <returns></returns>
-  auto resetweapon_addr = m_patterns_cache->find_addr(base, "48 8B 03 48 8B 15 69 CF A5 07");
+  auto resetweapon_addr = m_patterns_cache->find_addr(base, "48 8B 03 48 8B 15 69 63 35 07");
   if (!resetweapon_addr) {
       return "Unable to find resetweapon pattern.";
   }
@@ -544,7 +544,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Ensures the doppelganger only just judgement cuts when using a non-yamato weapon
   /// </summary>
   /// <returns></returns>
-  auto jjdcaltcheck_addr = m_patterns_cache->find_addr(base, "78 B9 01 0F B6 C8 48 8B 43 50");
+  auto jjdcaltcheck_addr = m_patterns_cache->find_addr(base, "14 A7 01 0F B6 C8 48 8B 43 50");//DevilMayCry5.exe+525F22 (-0x3)
   if (!jjdcaltcheck_addr) {
       return "Unable to find jjdcaltcheck pattern.";
   }
@@ -574,7 +574,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
       return "Failed to initialize doppelonlyjjdc";
   }
   
-  auto doppelonlyjjdcteleport_addr = m_patterns_cache->find_addr(base, "48 8B D7 E8 07 71 FE FF");
+  auto doppelonlyjjdcteleport_addr = m_patterns_cache->find_addr(base, "48 8B D7 E8 87 75 FE FF"); //DevilMayCry5.exe+564BB1
   if (!doppelonlyjjdcteleport_addr) {
       return "Unable to find doppelonlyjjdcteleport pattern.";
   }

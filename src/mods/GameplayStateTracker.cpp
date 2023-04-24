@@ -91,7 +91,7 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
 	init_check_box_info();
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-    auto nowFlowAddr = m_patterns_cache->find_addr(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+89429E 
+    auto nowFlowAddr = m_patterns_cache->find_addr(base, "48 8B DA 48 8B F9 83 F8 1A"); // DevilMayCry5.exe+8A6B1E
     if (!nowFlowAddr)
     {
         return "Unanable to find GameplayStateTracker.nowFlowAddr pattern.";
@@ -135,8 +135,8 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
         return "Unable to find GameplayStateTracker.ui3500GuiDoOnOpenAddr.";
     }
 
-    auto ui3500GuiDoOnClosedAddr = m_patterns_cache->find_addr(base, "5D 5B C3 CC CC CC CC 48 89 5C 24 10 56");
-    //DevilMayCry5.app_ui3500GUI__doOnOpen289005 (-0x7)
+    auto ui3500GuiDoOnClosedAddr = m_patterns_cache->find_addr(base, "5B 5D C3 CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 10 56");
+    //DevilMayCry5.app_ui3500GUI__doOnOpen289005 (-0xE)
     if (!ui3500GuiDoOnClosedAddr)
     {
         return "Unable to find GameplayStateTracker.ui3500GuiDoOnClosedAddr.";
@@ -183,7 +183,7 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
     if (!_ui3500GuiDoOnOpenHook->create())
         return "Can't create _ui3500GuiDoOnOpenHook.";
 
-    _ui3500GuiDoOnClosedHook = std::make_unique<FunctionHook>(ui3500GuiDoOnClosedAddr.value() + 0x7, &ui3500Gui_do_on_closed_hook);
+    _ui3500GuiDoOnClosedHook = std::make_unique<FunctionHook>(ui3500GuiDoOnClosedAddr.value() + 0xE, &ui3500Gui_do_on_closed_hook);
     if (!_ui3500GuiDoOnClosedHook->create())
         return "Can't create _ui3500GuiDoOnClosedHook.";
 

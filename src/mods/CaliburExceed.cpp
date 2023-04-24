@@ -44,7 +44,7 @@ std::optional<std::string> CaliburExceed::on_initialize() {
 
   set_up_hotkey();
 
-  auto addr = m_patterns_cache->find_addr(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  auto addr = m_patterns_cache->find_addr(base, "92 40 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18"); //DevilMayCry5.exe+213C680 (-0xA)
   if (!addr) {
     return "Unable to find CaliburExceed pattern.";
   }

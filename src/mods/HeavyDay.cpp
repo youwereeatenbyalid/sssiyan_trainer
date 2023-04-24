@@ -722,11 +722,11 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto rgenable_addr = m_patterns_cache->find_addr(base, "41 80 B8 CA 0E 00 00 00 74 58");
   auto rgmod_addr = m_patterns_cache->find_addr(base, "4D F3 0F 10 4A 28");
   auto combatmode_addr = m_patterns_cache->find_addr(base, "41 88 86 93 00 00 00");
-  auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01");
+  //auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01");//Broken by cumpcom
 
   auto styleenable1_addr = m_patterns_cache->find_addr(base, "83 F8 39 0F 84 95 08 00 00");
   auto styleenable2_addr = m_patterns_cache->find_addr(base, "0F 87 4C 0D 00 00");
-  auto styleenableend_addr = m_patterns_cache->find_addr(base,"23 00 00 44 0F 28 4C 24 70");
+  //auto styleenableend_addr = m_patterns_cache->find_addr(base,"23 00 00 44 0F 28 4C 24 70"); //Broken by cumpcom
   
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
@@ -761,18 +761,18 @@ std::optional<std::string> HeavyDay::on_initialize() {
   if (!combatmode_addr) {
       return "Unable to find combat mode pattern.";
   }
-  if (!dantefix_addr){
+  /*if (!dantefix_addr){
       return "Unable to find dante fix pattern";
-  }
+  }*///Broken by cumpcom
   if (!styleenable1_addr) {
       return "Unable to find style enable 1 pattern";
   }
   if (!styleenable2_addr) {
       return "Unable to find style enable 2 pattern";
   }
-  if(!styleenableend_addr){
+  /*if(!styleenableend_addr){
       return "Unable to find style end pattern";
-  }
+  }*///Broken by cumpcom
     if (!install_hook_absolute(enemystep_addr.value(), m_enemystep_hook,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
@@ -840,12 +840,12 @@ std::optional<std::string> HeavyDay::on_initialize() {
         return "Failed to initialize combatmode";
     }
     
-    if (!install_hook_absolute(dantefix_addr.value()+0x55, m_dantefix_hook,
-        &dantefix_detour, &dantefix_jmp_ret, 6)) {
-        //  return a error string in case something goes wrong
-        spdlog::error("[{}] failed to initialize", get_name());
-        return "Failed to initialize dantefix";
-    }
+    //if (!install_hook_absolute(dantefix_addr.value()+0x55, m_dantefix_hook,
+    //    &dantefix_detour, &dantefix_jmp_ret, 6)) {
+    //    //  return a error string in case something goes wrong
+    //    spdlog::error("[{}] failed to initialize", get_name());
+    //    return "Failed to initialize dantefix";
+    //}//Broken by cumpcom
 
     if (!install_hook_absolute(styleenable1_addr.value(), m_styleenable1_hook,
         &styleenable1_detour, &styleenable1_jmp_ret, 9)) {
@@ -863,8 +863,8 @@ std::optional<std::string> HeavyDay::on_initialize() {
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
     HeavyDay::dtenable_ja_ret  = dtenable_addr.value() + 0x166;
     
-    HeavyDay::styleenable1_jmp_je = styleenableend_addr.value()+0x3;
-    HeavyDay::styleenable2_jmp_ja = styleenableend_addr.value()+0x3;
+    //HeavyDay::styleenable1_jmp_je = styleenableend_addr.value()+0x3;//Broken by cumpcom
+    //HeavyDay::styleenable2_jmp_ja = styleenableend_addr.value()+0x3;//Broken by cumpcom
   return Mod::on_initialize();
 }
 

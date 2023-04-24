@@ -650,10 +650,10 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!incombat_addr) {
 		return "Unable to find In Combat pattern.";
 	}
-	auto sin_addr = m_patterns_cache->find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
+	/*auto sin_addr = m_patterns_cache->find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
 	if (!sin_addr) {
 		return "Unable to find Sin pattern.";
-	}
+	}*///Broken by cumpcom
 
 	auto cos_addr = m_patterns_cache->find_addr(base, "F3 0F 59 87 88 0F 00 00");
 	if (!cos_addr) {
@@ -686,36 +686,36 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		return "Unable to find PlayerTracker.pl0800GuardCheckAddr pattern.";
 	}
 
-	auto plSetDieAddr = m_patterns_cache->find_addr(base, "02 03 00 00 C3 CC 48 89 5C 24 08");
-	//DevilMayCry5.app_Player__setDie171231 (-0x6)
+	auto plSetDieAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 20 48 8B FA 48 8B D9 E8 EB 1E");
+	//DevilMayCry5.app_Player__setDie171231  //DevilMayCry5.exe+166CAD0
 	if (!pl0800GuardCheckAddr)
 	{
 		return "Unable to find PlayerTracker.plSetDieAddr pattern.";
 	}
 
-	auto plLockOnUpdateAddr = m_patterns_cache->find_addr(base, "30 48 83 C4 20 5F C3 CC CC CC CC 48 89 5C 24 18 57 48 83 EC 20 48 8B 41");
-	//DevilMayCry5.app_Player__updateLockOn171422 (-0xB)
+	auto plLockOnUpdateAddr = m_patterns_cache->find_addr(base, "28 C3 CC CC CC CC CC CC 48 89 5C 24 18 57 48 83 EC 20 48");
+	//DevilMayCry5.app_Player__updateLockOn171422 (-0xB) // DevilMayCry5.exe+168B9B0 (-0x8)
 	if (!plLockOnUpdateAddr)
 	{
 		return "Unable to find PlayerTracker.plLockOnUpdateAddr pattern.";
 	}
 
-	auto pl0000QuickSilverWorldStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 CB D2");
-	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldSlowAction__start315768
+	auto pl0000QuickSilverWorldStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 8B 46");
+	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldSlowAction__start315768 // DevilMayCry5.exe+E5FBB0
 	if (!pl0000QuickSilverWorldStartAddr)
 	{
 		return "Unable to find PlayerTracker.pl0000QuickSilverWorldStartAddr pattern.";
 	}
 
-	auto pl0000QuickSilverWorldStopStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 30 48 8B FA 48 8B D9 E8 2B BA");
-	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldStopAction__start315771
+	auto pl0000QuickSilverWorldStopStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 30 48 8B FA 48 8B D9 E8 5B 77");
+	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldStopAction__start315771 // DevilMayCry5.exe+FBCAE0
 	if (!pl0000QuickSilverWorldStopStartAddr)
 	{
 		return "Unable to find PlayerTracker.pl0000QuickSilverWorldStopStartAddr pattern.";
 	}
 
-	auto plOnJustEscapeAddr = m_patterns_cache->find_addr(base, "CD CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 57 48 83 EC 40");
-	//DevilMayCry5.app_Player__onJustEscape171220 (-0xA)
+	auto plOnJustEscapeAddr = m_patterns_cache->find_addr(base, "CC CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 57 48 83 EC 40 48");
+	//DevilMayCry5.app_Player__onJustEscape171220 (-0xA) // DevilMayCry5.exe+1669160 (-0xD)
 	if (!plOnJustEscapeAddr)
 	{
 		return "Unable to find PlayerTracker.plOnJustEscapeAddr pattern.";
@@ -749,8 +749,8 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!fsmPosControllerActionStartAddr)
 		return "Unable to find PlayerTracker.fsmPosControllerActionStartAddr pattern.";
 
-	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 7B");
-	//DevilMayCry5.app_PlayerVergilPL__setAirTrickAction114006
+	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 9B");
+	//DevilMayCry5.app_PlayerVergilPL__setAirTrickAction114006 // DevilMayCry5.exe+552C60
 	if (!setAirTrickActionAddr)
 		return "Unable to find PlayerTracker.setAirTrickActionAddr pattern.";
 
@@ -784,11 +784,11 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize In Combat";
 	}
-	if (!install_hook_absolute(sin_addr.value(), m_sin_hook, &sin_detour, &sin_jmp_ret, 7)) {
-		//  return a error string in case something goes wrong
-		spdlog::error("[{}] failed to initialize", get_name());
-		return "Failed to initialize Sin coordinate";
-	}
+	//if (!install_hook_absolute(sin_addr.value(), m_sin_hook, &sin_detour, &sin_jmp_ret, 7)) {
+	//	//  return a error string in case something goes wrong
+	//	spdlog::error("[{}] failed to initialize", get_name());
+	//	return "Failed to initialize Sin coordinate";
+	//}//Broken by cumpcom
 
 	if (!install_hook_absolute(cos_addr.value(), m_cos_hook, &cos_detour, &cos_jmp_ret, 8)) {
 		//  return a error string in case something goes wrong
@@ -833,11 +833,11 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	m_pl0800_on_guard_hook = std::make_unique<FunctionHook>(pl0800GuardCheckAddr.value(), &pl0800_on_guard_hook);
 	m_pl0800_on_guard_hook->create();
 
-	m_pl_set_die_hook = std::make_unique<FunctionHook>(plSetDieAddr.value() + 0x6, &pl_set_die_hook);
+	m_pl_set_die_hook = std::make_unique<FunctionHook>(plSetDieAddr.value(), &pl_set_die_hook);
 	if (!m_pl_set_die_hook->create())
 		return "Faild to install PlayerTracker.m_pl_set_die_hook;";
 
-	m_pl_lock_on_update_hook = std::make_unique<FunctionHook>(plLockOnUpdateAddr.value() + 0xB, &pl_update_lock_on_hook);
+	m_pl_lock_on_update_hook = std::make_unique<FunctionHook>(plLockOnUpdateAddr.value() + 0x8, &pl_update_lock_on_hook);
 	if (!m_pl_lock_on_update_hook->create())
 		return "Faild to install PlayerTracker.m_pl_lock_on_update_hook;";
 
@@ -853,7 +853,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!m_pl_add_dt_gauge_hook->create())
 		return "Faild to install PlayerTracker.m_pl_add_dt_gauge_hook;";
 
-	m_pl_just_escape_hook = std::make_unique<FunctionHook>(plOnJustEscapeAddr.value() + 0xA, &pl_just_escape_hook);
+	m_pl_just_escape_hook = std::make_unique<FunctionHook>(plOnJustEscapeAddr.value() + 0xD, &pl_just_escape_hook);
 	if (!m_pl_just_escape_hook->create())
 		return "Faild to install PlayerTracker.m_pl_just_escape_hook;";
 

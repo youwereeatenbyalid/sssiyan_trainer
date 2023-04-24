@@ -48,7 +48,7 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
 
   set_up_hotkey();
   
-  auto INJECT_addr = m_patterns_cache->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
+  auto INJECT_addr = m_patterns_cache->find_addr(base, "74 10 48 8B D7 48 8B CB E8 73");//DevilMayCry5.exe+1F952A0
   PetChargeNoInterrupt::je_return = INJECT_addr.value()+0x12;
   if (!INJECT_addr) {
     return "Unable to find INJECT pattern.";

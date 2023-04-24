@@ -48,14 +48,14 @@ std::optional<std::string> MovingTargetSwitch::on_initialize() {
   m_description_string   = "Allows you to switch targets while moving the left stick.";
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr = m_patterns_cache->find_addr(base, "0F 2F 05 B1 DF F6 02");
+  auto addr = m_patterns_cache->find_addr(base, "48 85 C9 74 CF F3 0F 10 41 30"); //DevilMayCry5.exe+168D0B8 (-0xA)
   if (!addr) {
     return "Unable to find MovingTargetSwitch pattern.";
   }
 
-  MovingTargetSwitch::jmp_jae = m_patterns_cache->find_addr(base, "3E 00 00 48 85 C9 75 12").value()+3;
+  MovingTargetSwitch::jmp_jae = m_patterns_cache->find_addr(base, "41 B1 01 45 33 C0 48 8B D7 48 8B CB 48 8B 5C 24 70").value()+0x20;
 
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 7)) {
+  if (!install_hook_absolute(addr.value() + 0xA, m_function_hook, &detour, &jmp_ret, 7)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize MovingTargetSwitch";

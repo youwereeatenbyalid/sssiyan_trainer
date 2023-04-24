@@ -541,7 +541,7 @@ std::optional<std::string> LDK::on_initialize() {
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
   }
-  auto nopfunction_addr1 = m_patterns_cache->find_addr(base, "E8 D7 0C 07 FF");
+  auto nopfunction_addr1 = m_patterns_cache->find_addr(base, "E8 07 90 06 FF"); //DevilMayCry5.exe+1536D94
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }
