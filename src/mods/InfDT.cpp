@@ -1,5 +1,5 @@
 #include "InfDT.hpp"
-#include "PlayerTracker.hpp"
+
 uintptr_t InfDT::jmp_ret{NULL};
 bool InfDT::cheaton{NULL};
 
@@ -36,7 +36,7 @@ std::optional<std::string> InfDT::on_initialize() {
 
   m_is_enabled          = &InfDT::cheaton;
   m_on_page             = Page_CommonCheat;
-
+  // m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Infinite DT";
   m_author_string      = "SSSiyan";
   m_description_string = "Freeze Player DT to max.";

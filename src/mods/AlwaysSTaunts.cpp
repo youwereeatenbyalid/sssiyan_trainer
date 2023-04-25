@@ -90,10 +90,10 @@ std::optional<std::string> AlwaysSTaunts::on_initialize() {
 
   m_is_enabled          = &AlwaysSTaunts::cheaton;
   m_on_page             = Page_Taunt;
-
-  m_full_name_string   = "Always S+ Taunts (+)";
-  m_author_string      = "SSSiyan";
-  m_description_string = "Restricts your taunts to those that play when at S rank or above.";
+  m_depends_on          = { "PlayerTracker" };
+  m_full_name_string    = "Always S+ Taunts (+)";
+  m_author_string       = "SSSiyan";
+  m_description_string  = "Restricts your taunts to those that play when at S rank or above.";
 
   set_up_hotkey();
 

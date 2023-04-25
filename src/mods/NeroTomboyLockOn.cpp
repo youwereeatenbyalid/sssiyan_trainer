@@ -41,12 +41,12 @@ void NeroTomboyLockOn::init_check_box_info() {
 std::optional<std::string> NeroTomboyLockOn::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &NeroTomboyLockOn::cheaton;
-  m_on_page             = Page_Nero;
-
+  m_is_enabled         = &NeroTomboyLockOn::cheaton;
+  m_on_page            = Page_Nero;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Lock On With Tomboy";
   m_author_string      = "SSSiyan";
-  m_description_string        = "Allows you to lock on while using Tomboy.";
+  m_description_string = "Allows you to lock on while using Tomboy.";
 
   set_up_hotkey();
 

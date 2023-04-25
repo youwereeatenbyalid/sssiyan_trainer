@@ -48,8 +48,9 @@ void DanteQuickSDT::init_check_box_info() {
 std::optional<std::string> DanteQuickSDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DanteQuickSDT::cheaton;
-  m_on_page               = Page_DanteSDT;
+  m_is_enabled           = &DanteQuickSDT::cheaton;
+  m_on_page              = Page_DanteSDT;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Quick SDT (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Reduces the time you have to hold DT to enter SDT.";

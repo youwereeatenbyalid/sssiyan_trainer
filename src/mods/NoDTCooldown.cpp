@@ -69,9 +69,9 @@ void NoDTCooldown::init_check_box_info() {
 std::optional<std::string> NoDTCooldown::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &NoDTCooldown::cheaton;
-  m_on_page               = Page_Mechanics;
-
+  m_is_enabled           = &NoDTCooldown::cheaton;
+  m_on_page              = Page_Mechanics;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "No DT Cooldown";
   m_author_string        = "SSSiyan";
   m_description_string   = "Removes the cooldown on exiting DT after entering.";
@@ -100,7 +100,7 @@ std::optional<std::string> NoDTCooldown::on_initialize() {
   }
   NoDTCooldown::jmp_ja2 = addr2.value() + 0xAF;
   
-  auto addr3 = m_patterns_cache->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48");
+  auto addr3 = m_patterns_cache->find_addr(base, "89 87 1C 11 00 00 48 8B 43 50 48 8B");
   if (!addr3) {
       return "Unable to find NoDTCooldownDante pattern.";
   }

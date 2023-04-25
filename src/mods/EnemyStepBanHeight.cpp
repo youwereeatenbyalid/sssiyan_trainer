@@ -36,8 +36,9 @@ void EnemyStepBanHeight::init_check_box_info() {
 std::optional<std::string> EnemyStepBanHeight::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &EnemyStepBanHeight::cheaton;
-  m_on_page               = Page_EnemyStep;
+  m_is_enabled           = &EnemyStepBanHeight::cheaton;
+  m_on_page              = Page_EnemyStep;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Remove Enemy Step Height Restriction";
   m_author_string        = "SSSiyan";
   m_description_string   = "Allows you to enemy step as close to the floor as possible.";

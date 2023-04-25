@@ -1,6 +1,6 @@
 
 #include "NoJCCooldown.hpp"
-#include "PlayerTracker.hpp"
+
 uintptr_t NoJCCooldown::jmp_ret{NULL};
 bool NoJCCooldown::cheaton{NULL};
 
@@ -34,9 +34,9 @@ void NoJCCooldown::init_check_box_info() {
 std::optional<std::string> NoJCCooldown::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &NoJCCooldown::cheaton;
-  m_on_page             = Page_EnemyStep;
-
+  m_is_enabled         = &NoJCCooldown::cheaton;
+  m_on_page            = Page_EnemyStep;
+  // m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "No Enemy Step Cooldown";
   m_author_string      = "SSSiyan";
   m_description_string = "Removes the cooldown that starts when you enemy step, "

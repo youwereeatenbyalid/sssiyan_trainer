@@ -98,9 +98,9 @@ void VergilInstantSDT::init_check_box_info() {
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &VergilInstantSDT::cheaton;
-  m_on_page               = Page_VergilSDT;
-
+  m_is_enabled           = &VergilInstantSDT::cheaton;
+  m_on_page              = Page_VergilSDT;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Instant SDT";
   m_author_string        = "SSSiyan";
   m_description_string   = "Removes the need to hold the DT button to enter SDT.";

@@ -1,4 +1,3 @@
-
 #include "InfHP.hpp"
 #include "PlayerTracker.hpp"
 uintptr_t InfHP::jmp_ret{ NULL };
@@ -33,11 +32,11 @@ void InfHP::init_check_box_info() {
 std::optional<std::string> InfHP::on_initialize() {
     init_check_box_info();
 
-    m_is_enabled = &InfHP::cheaton;
-    m_on_page = Page_CommonCheat;
-
-    m_full_name_string = "Infinite HP";
-    m_author_string = "SSSiyan";
+    m_is_enabled         = &InfHP::cheaton;
+    m_on_page            = Page_CommonCheat;
+    m_depends_on         = { "PlayerTracker" };
+    m_full_name_string   = "Infinite HP";
+    m_author_string      = "SSSiyan";
     m_description_string = "Freeze Player HP to max.";
 
     set_up_hotkey();

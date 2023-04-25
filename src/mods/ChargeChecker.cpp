@@ -105,9 +105,9 @@ void ChargeChecker::init_check_box_info() {
 std::optional<std::string> ChargeChecker::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &ChargeChecker::cheaton;
-  m_on_page             = Page_Mechanics;
-
+  m_is_enabled         = &ChargeChecker::cheaton;
+  m_on_page            = Page_Mechanics;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Faster Charges (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Speed up or slow down charges bound to hold inputs.";

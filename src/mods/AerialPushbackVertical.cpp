@@ -58,9 +58,9 @@ void AerialPushbackVertical::init_check_box_info() {
 std::optional<std::string> AerialPushbackVertical::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled = &AerialPushbackVertical::cheaton;
-  m_on_page    = Page_DanteCheat;
-
+  m_is_enabled         = &AerialPushbackVertical::cheaton;
+  m_on_page            = Page_DanteCheat;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Move Height Edits (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Your character will rise more when performing certain moves.";

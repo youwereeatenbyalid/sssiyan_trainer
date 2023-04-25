@@ -91,7 +91,7 @@ std::optional<std::string> NeroInfBreakers::on_initialize() {
 
   m_is_enabled          = &NeroInfBreakers::cheaton;
   //m_on_page             = breaker;
-
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Infinite Devil Breakers";
   m_author_string      = "deepdarkkapustka";
   m_description_string = "When using 8 Devil Breakers, this will function like the Void option.\n"

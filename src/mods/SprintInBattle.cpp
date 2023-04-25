@@ -1,6 +1,6 @@
 
 #include "SprintInBattle.hpp"
-#include "PlayerTracker.hpp"
+
 uintptr_t SprintInBattle::jmp_ret{NULL};
 uintptr_t SprintInBattle::jmp_jne{NULL};
 bool SprintInBattle::cheaton{NULL};
@@ -40,9 +40,9 @@ void SprintInBattle::init_check_box_info() {
 std::optional<std::string> SprintInBattle::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &SprintInBattle::cheaton;
-  m_on_page             = Page_Mechanics;
-
+  m_is_enabled         = &SprintInBattle::cheaton;
+  m_on_page            = Page_Mechanics;
+  // m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Sprint In Battle";
   m_author_string      = "SSSiyan";
   m_description_string = "Allows you to Sprint in battle.";

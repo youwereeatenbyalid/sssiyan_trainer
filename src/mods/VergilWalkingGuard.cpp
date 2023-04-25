@@ -34,11 +34,12 @@ static naked void is_pad_input_detuor()
 std::optional<std::string> VergilWalkingGuard::on_initialize()
 {
 	init_check_box_info();
-	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-	m_is_enabled = &cheaton;
-	m_on_page = Page_VergilTrick;
-	m_full_name_string = "Walking Guard (+)";
-	m_author_string = "V.P.Zadov";
+	auto base			 = g_framework->get_module().as<HMODULE>(); // note HMODULE
+	m_is_enabled		 = &cheaton;
+	m_on_page			 = Page_VergilTrick;
+	m_depends_on         = { "PlayerTracker" };
+	m_full_name_string	 = "Walking Guard (+)";
+	m_author_string		 = "V.P.Zadov";
 	m_description_string = "Vergil can block while walking.";
 
 	auto isPadInputAddr = m_patterns_cache->find_addr(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)

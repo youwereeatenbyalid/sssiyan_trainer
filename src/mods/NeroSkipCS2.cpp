@@ -39,9 +39,9 @@ void NeroSkipCS2::init_check_box_info() {
 std::optional<std::string> NeroSkipCS2::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &NeroSkipCS2::cheaton;
-  m_on_page               = Page_Nero;
-
+  m_is_enabled           = &NeroSkipCS2::cheaton;
+  m_on_page              = Page_Nero;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Skip Charge Shot 2";
   m_author_string        = "SSSiyan";
   m_description_string   = "Bypasses Charge Shot 2 when charging Blue Rose.";

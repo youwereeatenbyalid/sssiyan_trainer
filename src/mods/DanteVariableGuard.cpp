@@ -40,9 +40,9 @@ void DanteVariableGuard::init_check_box_info() {
 std::optional<std::string> DanteVariableGuard::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DanteVariableGuard::cheaton;
-  m_on_page               = Page_DanteCheat;
-
+  m_is_enabled           = &DanteVariableGuard::cheaton;
+  m_on_page              = Page_DanteCheat;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Set Royal Guard Level (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Lock Guard meter to whatever level you want.";

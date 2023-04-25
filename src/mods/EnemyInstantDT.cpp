@@ -1,6 +1,5 @@
 
 #include "EnemyInstantDT.hpp"
-#include "PlayerTracker.hpp"
 
 uintptr_t EnemyInstantDT::jmp_ret{NULL};
 bool EnemyInstantDT::cheaton{NULL};
@@ -35,9 +34,9 @@ void EnemyInstantDT::init_check_box_info() {
 std::optional<std::string> EnemyInstantDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled               = &EnemyInstantDT::cheaton;
-  m_on_page                  = Page_Enemies;
-
+  m_is_enabled              = &EnemyInstantDT::cheaton;
+  m_on_page                 = Page_Enemies;
+  // m_depends_on              = { "PlayerTracker" };
   m_full_name_string        = "Instant Enemy DT";
   m_author_string           = "SSSiyan";
   m_description_string      = "Forces enemies to enter DT immediately when on DMD.";

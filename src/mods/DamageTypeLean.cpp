@@ -44,11 +44,11 @@ void DamageTypeLean::init_check_box_info() {
 
 std::optional<std::string> DamageTypeLean::on_initialize() {
     m_is_enabled = &enabled;
-  // init_check_box_info();
+  // init_check_box_info(); // This is currently all commented out because it is only used for the nero devil/angel snatch cheat
 
   // m_is_enabled = &DamageTypeLean::cheaton;
   // m_on_page = mechanics;
-
+    m_depends_on         = { "PlayerTracker" };
   // m_full_name_string = "Knockback Edits";
   // m_author_string = "Siyan";
   // m_description_string = "Add or remove knockbacks/launches etc from moves.";

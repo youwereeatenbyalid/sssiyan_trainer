@@ -79,8 +79,9 @@ void AerialPushback::init_check_box_info() {
 std::optional<std::string> AerialPushback::on_initialize() {
     init_check_box_info();
 
-  m_is_enabled = &AerialPushback::cheaton;
-  m_on_page    = Page_DanteCheat;
+  m_is_enabled         = &AerialPushback::cheaton;
+  m_on_page            = Page_DanteCheat;
+  m_depends_on         = { "PlayerTracker, AerialPushbackVertical" };
   m_full_name_string   = "Move Knockback Edits (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Your character will be pushed back more than usual when performing certain moves.";

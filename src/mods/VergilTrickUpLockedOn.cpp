@@ -111,11 +111,11 @@ void VergilTrickUpLockedOn::init_check_box_info() {
 std::optional<std::string> VergilTrickUpLockedOn::on_initialize() {
     init_check_box_info();
 
-    m_is_enabled = &VergilTrickUpLockedOn::cheaton;
-    m_on_page = Page_VergilTrick;
-
-    m_full_name_string = "Trick Up On Forward + Trick";
-    m_author_string = "SSSiyan";
+    m_is_enabled         = &VergilTrickUpLockedOn::cheaton;
+    m_on_page            = Page_VergilTrick;
+    m_depends_on         = { "PlayerTracker" };
+    m_full_name_string   = "Trick Up On Forward + Trick";
+    m_author_string      = "SSSiyan";
     m_description_string = "Trick Up without letting go of Lock On.";
 
     set_up_hotkey();

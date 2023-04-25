@@ -33,9 +33,9 @@ void VergilNoTrickRestriction::init_check_box_info() {
 std::optional<std::string> VergilNoTrickRestriction::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &VergilNoTrickRestriction::cheaton;
-  m_on_page             = Page_VergilTrick;
-
+  m_is_enabled         = &VergilNoTrickRestriction::cheaton;
+  m_on_page            = Page_VergilTrick;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "No Trick Restriction";
   m_author_string      = "SSSiyan";
   m_description_string = "Allows you to trick during things like World of V startup.";

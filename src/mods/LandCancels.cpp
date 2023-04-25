@@ -418,11 +418,11 @@ void LandCancels::init_check_box_info() {
 std::optional<std::string> LandCancels::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled = &LandCancels::cheaton;
-  m_on_page    = Page_Mechanics;
-
-  m_full_name_string = "Land Cancels (+)";
-  m_author_string    = "SSSiyan";
+  m_is_enabled         = &LandCancels::cheaton;
+  m_on_page            = Page_Mechanics;
+  m_depends_on         = { "PlayerTracker" };
+  m_full_name_string   = "Land Cancels (+)";
+  m_author_string      = "SSSiyan";
   m_description_string = "Touching the floor will cancel your current aerial attack.\n\n"
       "Only certain attacks are set to be land cancellable and this list will expand with time. Feel free to @ me with ideas!";
 

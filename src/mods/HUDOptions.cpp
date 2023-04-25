@@ -133,9 +133,9 @@ void HUDOptions::init_check_box_info() {
 std::optional<std::string> HUDOptions::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled               = &HUDOptions::cheaton  ;
-  m_on_page                  = Page_Camera;
-
+  m_is_enabled              = &HUDOptions::cheaton  ;
+  m_on_page                 = Page_Camera;
+  m_depends_on              = { "PlayerTracker" };
   m_full_name_string        = "HUD Options (+)";
   m_author_string           = "SSSiyan";
   m_description_string      = "Disable / Enable elements of the Heads Up Display.";

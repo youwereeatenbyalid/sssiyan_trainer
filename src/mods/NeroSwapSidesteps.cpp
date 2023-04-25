@@ -56,9 +56,9 @@ void NeroSwapSidesteps::init_check_box_info() {
 std::optional<std::string> NeroSwapSidesteps::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &NeroSwapSidesteps::cheaton;
-  m_on_page               = Page_Nero;
-
+  m_is_enabled           = &NeroSwapSidesteps::cheaton;
+  m_on_page              = Page_Nero;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Swap Sidesteps with Table Hopper";
   m_author_string        = "SSSiyan";
   m_description_string   = "Swaps Nero's Sidesteps with Table Hopper dodges.";

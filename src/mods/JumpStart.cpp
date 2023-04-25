@@ -88,9 +88,9 @@ void JumpStart::init_check_box_info() {
 std::optional<std::string> JumpStart::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &JumpStart::cheaton ;
-  m_on_page             = Page_Animation;
-
+  m_is_enabled         = &JumpStart::cheaton ;
+  m_on_page            = Page_Animation;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Selective Cancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with jump, dodge or guard.";

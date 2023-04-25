@@ -137,12 +137,12 @@ void WeightReset::init_check_box_info() {
 std::optional<std::string> WeightReset::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &WeightReset::cheaton;
-  m_on_page               = Page_Mechanics;
-
-  m_full_name_string     = "Reset Weight";
-  m_author_string        = "SSSiyan";
-  m_description_string   = "Air Hike and Friction will reset your weight.";
+  m_is_enabled         = &WeightReset::cheaton;
+  m_on_page            = Page_Mechanics;
+  m_depends_on         = { "PlayerTracker" };
+  m_full_name_string   = "Reset Weight";
+  m_author_string      = "SSSiyan";
+  m_description_string = "Air Hike and Friction will reset your weight.";
 
   set_up_hotkey();
 

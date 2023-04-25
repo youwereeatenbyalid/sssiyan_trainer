@@ -154,7 +154,7 @@ std::optional<std::string> AllStart::on_initialize() {
 
   m_is_enabled          = &AllStart::cheaton;
   m_on_page             = Page_Animation;
-
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Selective Omnicancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with any action.";

@@ -29,11 +29,11 @@ void NeroInfCalibur::init_check_box_info() {
 std::optional<std::string> NeroInfCalibur::on_initialize() {
     init_check_box_info();
 
-    m_is_enabled = &NeroInfCalibur::cheaton;
-    m_on_page = Page_Nero;
-
-    m_full_name_string = "Infinite Caliburs";
-    m_author_string = "SSSiyan";
+    m_is_enabled         = &NeroInfCalibur::cheaton;
+    m_on_page            = Page_Nero;
+    m_depends_on         = { "PlayerTracker" };
+    m_full_name_string   = "Infinite Caliburs";
+    m_author_string      = "SSSiyan";
     m_description_string = "Allows Nero to perform multiple Caliburs.";
 
     set_up_hotkey();

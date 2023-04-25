@@ -121,8 +121,9 @@ void EntitySpeeds::init_check_box_info() {
 std::optional<std::string> EntitySpeeds::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &EntitySpeeds::cheaton;
-  m_on_page             = Page_Animation;
+  m_is_enabled         = &EntitySpeeds::cheaton;
+  m_on_page            = Page_Animation;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Faster Moves (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Adjust the speed of various moves.";

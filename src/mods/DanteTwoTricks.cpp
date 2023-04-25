@@ -41,9 +41,9 @@ void DanteTwoTricks::init_check_box_info() {
 std::optional<std::string> DanteTwoTricks::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &DanteTwoTricks::cheaton;
-  m_on_page             = Page_DanteCheat;
-
+  m_is_enabled         = &DanteTwoTricks::cheaton;
+  m_on_page            = Page_DanteCheat;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "DMC4 Trick Count";
   m_author_string      = "SSSiyan";
   m_description_string = "Using Trick while grounded won't use up an aerial trick.";

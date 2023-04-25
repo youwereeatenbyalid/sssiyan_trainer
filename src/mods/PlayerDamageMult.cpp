@@ -1,6 +1,6 @@
 
 #include "PlayerDamageMult.hpp"
-#include "PlayerTracker.hpp"
+
 uintptr_t PlayerDamageMult::jmp_ret{NULL};
 uintptr_t PlayerDamageMult::jmp_ret2{NULL};
 bool PlayerDamageMult::cheaton{NULL};

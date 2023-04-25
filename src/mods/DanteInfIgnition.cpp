@@ -54,9 +54,9 @@ void DanteInfIgnition::init_check_box_info() {
 std::optional<std::string> DanteInfIgnition::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DanteInfIgnition::cheaton;
-  m_on_page               = Page_DanteCheat;
-
+  m_is_enabled           = &DanteInfIgnition::cheaton;
+  m_on_page              = Page_DanteCheat;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite Ignition";
   m_author_string        = "SSSiyan";
   m_description_string   = "Forces Balrog's Ignition.";

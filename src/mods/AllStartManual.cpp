@@ -122,7 +122,7 @@ std::optional<std::string> AllStartManual::on_initialize() {
   auto base             = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled          = &AllStartManual::cheaton;
   m_on_page             = Page_EnemyStep;
-
+  m_depends_on          = { "PlayerTracker" };
   m_full_name_string    = "Instant Enemy Step Cancels";
   m_author_string       = "SSSiyan";
   m_description_string  = "The vanilla game prevents you from cancelling enemy step for a small startup window. This mod removes that restriction.";
@@ -130,17 +130,19 @@ std::optional<std::string> AllStartManual::on_initialize() {
   set_up_hotkey();
 
   // uintptr_t base = g_framework->get_module().as<uintptr_t>();
-  // constexpr ptrdiff_t addr = 0x2C723DF;
+  constexpr ptrdiff_t addr = 0x2C723DF;
   // auto addr = base + 0x2C723DF;
-  auto addr      = m_patterns_cache->find_addr(base, "66 C7 47 5E 00 00"); // seems to work on this exe
+
+  //auto addr = m_patterns_cache->find_addr(base, ""); // Could not find unique AOB, tried code "F3 0F 10 42 04"
   // if (!addr) {
-  //   return "Unable to find AllStartManual pattern.";
+  //     return "Unable to find AllStartManual pattern.";
   // }
-  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) { // Couldn't find unique AoB, used offset (old)
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize AllStartManual";
+  if (!install_new_detour_offset(addr, m_detour, &detour, &jmp_ret, 5)) {
+      //return a error string in case something goes wrong
+      spdlog::error("[{}] failed to initialize", get_name());
+      return "Failed to initialize AllStartManual";
   }
+
   return Mod::on_initialize();
 }
 

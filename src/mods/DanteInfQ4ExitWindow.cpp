@@ -39,9 +39,9 @@ void DanteInfQ4ExitWindow::init_check_box_info() {
 std::optional<std::string> DanteInfQ4ExitWindow::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DanteInfQ4ExitWindow::cheaton;
-  m_on_page               = Page_DanteSDT;
-
+  m_is_enabled           = &DanteInfQ4ExitWindow::cheaton;
+  m_on_page              = Page_DanteSDT;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite Sin Devil Trigger Exit Window";
   m_author_string        = "SSSiyan";
   m_description_string   = "Removes the time limit on the Quadruple S Exit window.";

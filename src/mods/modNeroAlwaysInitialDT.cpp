@@ -38,9 +38,9 @@ void NeroAlwaysInitialDT::init_check_box_info() {
 std::optional<std::string> NeroAlwaysInitialDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled = &NeroAlwaysInitialDT::cheaton;
-  m_on_page    = Page_Nero;
-
+  m_is_enabled         = &NeroAlwaysInitialDT::cheaton;
+  m_on_page            = Page_Nero;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Force Initial DT Animation";
   m_author_string      = "SSSiyan";
   m_description_string = "Note: the voice line will only play the first time you use this each run of M20.";

@@ -75,9 +75,9 @@ void NeroSwapWiresnatch::init_check_box_info() {
 std::optional<std::string> NeroSwapWiresnatch::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &NeroSwapWiresnatch::cheaton;
-  m_on_page             = Page_Wiresnatch;
-
+  m_is_enabled         = &NeroSwapWiresnatch::cheaton;
+  m_on_page            = Page_Wiresnatch;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Angel And Devil Snatch (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Replaces Wiresnatch with a move that pulls nero towards the enemy and adds knockback.";

@@ -62,11 +62,12 @@ public:
 	std::optional<std::string> on_initialize() override
 	{
 		init_check_box_info();
-		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-		m_is_enabled = &cheaton;
-		m_on_page = Page_QOL;
-		m_full_name_string = "Toggle Lock On";
-		m_author_string = "V.P.Zadov";
+		auto base			 = g_framework->get_module().as<HMODULE>(); // note HMODULE
+		m_is_enabled		 = &cheaton;
+		m_on_page			 = Page_QOL;
+		m_depends_on         = { "PlayerTracker" };
+		m_full_name_string	 = "Toggle Lock On";
+		m_author_string		 = "V.P.Zadov";
 		m_description_string = "Allows you to toggle the lock-on state by pressing the lock on button without holding it.";
 
 		set_up_hotkey();

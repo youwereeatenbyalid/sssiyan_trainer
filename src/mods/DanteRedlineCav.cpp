@@ -35,11 +35,11 @@ void DanteRedlineCav::init_check_box_info() {
 std::optional<std::string> DanteRedlineCav::on_initialize() {
     init_check_box_info();
 
-    m_is_enabled = &DanteRedlineCav::cheaton;
-    m_on_page = Page_DanteCheat;
-
-    m_full_name_string = "Redline On Cavaliere";
-    m_author_string = "The HitchHiker";
+    m_is_enabled         = &DanteRedlineCav::cheaton;
+    m_on_page            = Page_DanteCheat;
+    m_depends_on         = { "PlayerTracker" };
+    m_full_name_string   = "Redline On Cavaliere";
+    m_author_string      = "The HitchHiker";
     m_description_string = "Allows you to use the Cavaliere R exclusive move on regular Cavaliere.";
 
     set_up_hotkey();

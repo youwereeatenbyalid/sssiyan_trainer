@@ -102,9 +102,9 @@ void FileFrameCuts::init_check_box_info() {
 std::optional<std::string> FileFrameCuts::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &FileFrameCuts::cheaton;
-  m_on_page               = Page_Animation;
-
+  m_is_enabled           = &FileFrameCuts::cheaton;
+  m_on_page              = Page_Animation;
+  m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Faster Move Startups (+)";
   m_author_string        = "SSSiyan";
   m_description_string   = "Cuts frames from various moves.";

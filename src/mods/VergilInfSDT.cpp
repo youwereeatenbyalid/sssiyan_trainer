@@ -1,5 +1,4 @@
 #include "VergilInfSDT.hpp"
-#include "PlayerTracker.hpp"
 
 void VergilInfSDT::dt_update_hook(uintptr_t threadCntx, uintptr_t pl0800)
 {
@@ -18,9 +17,9 @@ void VergilInfSDT::init_check_box_info() {
 std::optional<std::string> VergilInfSDT::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &VergilInfSDT::cheaton;
-  m_on_page               = Page_VergilSDT;
-
+  m_is_enabled           = &VergilInfSDT::cheaton;
+  m_on_page              = Page_VergilSDT;
+  // m_depends_on           = { "PlayerTracker" };
   m_full_name_string     = "Infinite SDT";
   m_author_string        = "SSSiyan, V.P.Zadov";
   m_description_string   = "Freeze Vergil SDT to max.";

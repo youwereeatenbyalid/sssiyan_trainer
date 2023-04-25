@@ -95,9 +95,9 @@ void NeroDisableWiresnatch::init_check_box_info() {
 std::optional<std::string> NeroDisableWiresnatch::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &NeroDisableWiresnatch::cheaton;
-  m_on_page             = Page_Wiresnatch;
-
+  m_is_enabled         = &NeroDisableWiresnatch::cheaton;
+  m_on_page            = Page_Wiresnatch;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Disable Wiresnatch (+)";
   m_author_string      = "SSSiyan";
   m_description_string = "Disables Wiresnatch to allow breaker abilities while locked on.";

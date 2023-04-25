@@ -31,9 +31,9 @@ void DisableGauntletStages::init_check_box_info() {
 std::optional<std::string> DisableGauntletStages::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &DisableGauntletStages::cheaton;
-  m_on_page             = Page_BloodyPalace;
-
+  m_is_enabled         = &DisableGauntletStages::cheaton;
+  m_on_page            = Page_BloodyPalace;
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Skip Nero's BP Gauntlet Stages";
   m_author_string      = "Dante";
   m_description_string = "Recommended for use with Breaker Switcher or Infinite Breakers.";

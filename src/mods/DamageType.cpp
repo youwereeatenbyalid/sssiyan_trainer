@@ -51,11 +51,11 @@ void DamageType::init_check_box_info() {
 std::optional<std::string> DamageType::on_initialize() {
     init_check_box_info();
 
-    m_is_enabled = &DamageType::cheaton;
-    m_on_page = Page_Mechanics;
-
-    m_full_name_string = "Knockback Edits (+)";
-    m_author_string = "Siyan";
+    m_is_enabled         = &DamageType::cheaton;
+    m_on_page            = Page_Mechanics;
+    m_depends_on         = { "PlayerTracker" };
+    m_full_name_string   = "Knockback Edits (+)";
+    m_author_string      = "Siyan";
     m_description_string = "Add or remove knockbacks/launches etc from moves.";
 
     set_up_hotkey();
