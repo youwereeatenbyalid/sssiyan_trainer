@@ -144,7 +144,7 @@ namespace EndLvlHooks
                 return "Unanable to find checkpointMissionAddr pattern.";
             }
 
-            auto exitBpMissionAddr = m_patterns_cache->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
+            auto exitBpMissionAddr = m_patterns_cache->find_addr(base, "70 41 C3 CC 48 89 5C 24 10");// DevilMayCry5.exe+24A6560 (-0x4)
             if (!exitBpMissionAddr)
             {
                 return "Unanable to find exitBpMissionAddr pattern.";
