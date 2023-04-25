@@ -525,8 +525,8 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     //DevilMayCry5.app_PlayerCameraController__RequestBossCamera147662
     requestBossCameraFunc = requestBossCam ? requestBossCam.value() : (uintptr_t)base + 0xD018E0;
 
-    auto requestAddEmAddr = m_patterns_cache->find_addr(base, "E8 8A A0 00 01"); // DevilMayCry5.exe+9D30A1 
-    if (!pl300MissionNo)
+    auto requestAddEmAddr = m_patterns_cache->find_addr(base, "48 8B 46 50 48 83 78 18 00 0F 85 4F 52 00 00"); // DevilMayCry5.exe+9DD291 
+    if (!requestAddEmAddr)
     {
         return "Unanable to find Pl0300ControllerManager.requestAddEmAddr pattern.";
     }
@@ -550,13 +550,13 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unable to find Pl0300ControllerManager.checkEmThinkOffAddr pattern.";
     }
 
-    auto pl0300UpdateLockOnAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 7B 35");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOn218720
-    if (!checkEmThinkOffAddr)
+    auto pl0300UpdateLockOnAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 8B 39");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOn218720 //fuck this aob it contains static
+    if (!pl0300UpdateLockOnAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300UpdateLockOnAddr pattern.";
     }
 
-    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "B8 01 EB 8F CC CC CC CC CC 48 89 5C 24 08");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668(-0x9)
+    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B 41 50 48 8B FA 48 8B B2 00 03 00 00");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668
     if (!pl0300UpdateLockOnTargetAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300UpdateLockOnTargetAddr pattern.";
@@ -574,7 +574,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unable to find Pl0300ControllerManager.pl0300CheckDamageAddr pattern.";
     }
 
-    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 95 26 33 00");//DevilMayCry5.exe+9CF246
+    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "48 8B ? ? ? ? ? 41 B0 01 F3 0F 10 4E 24");//DevilMayCry5.exe+9D95D6 (-0x28)
     if (!pl0300DoppelDestroyReqBossCamAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300DoppelDestroyReqBossCamAddr pattern.";
@@ -592,7 +592,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Failed to initialize Pl0300ControllerManager.pl0300CheckDamage";
     }
 
-    if (!install_hook_absolute(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamHook, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
+    if (!install_hook_absolute(pl0300DoppelDestroyReqBossCamAddr.value() + 0x28, _pl0300DestroyDoppelRequestBossCamHook, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300DoppelDestroyReqBossCam";
@@ -613,7 +613,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     _pl0300UpdateLockOnHook = std::make_unique<FunctionHook>(pl0300UpdateLockOnAddr.value(), &pl0300_update_lock_on_hook);
     _pl0300UpdateLockOnHook->create();
 
-    _pl0300UpdateLockOnTargetOnEnemyHook = std::make_unique<FunctionHook>(pl0300UpdateLockOnTargetAddr.value() + 0x9, &pl0300_update_lock_on_target_on_enemy_hook);
+    _pl0300UpdateLockOnTargetOnEnemyHook = std::make_unique<FunctionHook>(pl0300UpdateLockOnTargetAddr.value(), &pl0300_update_lock_on_target_on_enemy_hook);
     _pl0300UpdateLockOnTargetOnEnemyHook->create();
 
     _pl0300TeleportCalcDestHook = std::make_unique<FunctionHook>(pl0300TeleportDestAddr.value(), &pl0300_teleport_calc_dest_hook);

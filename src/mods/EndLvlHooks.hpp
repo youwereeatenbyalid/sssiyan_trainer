@@ -55,7 +55,6 @@ namespace EndLvlHooks
 
     public:
 
-
         EndLvlHooks() = default;
 
         static inline void retry_mission_detour(uintptr_t threadCtxt, uintptr_t obj)
