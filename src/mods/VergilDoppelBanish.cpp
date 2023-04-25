@@ -163,7 +163,8 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     return "Unable to find VergilDoppelBanish pattern.";
   }
 
-  auto addrYamatoBanish = m_patterns_cache->find_addr(base, "E8 76 9F 92 FE"); // No Banish on Yamato Super // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
+  auto addrYamatoBanish = m_patterns_cache->find_addr(base, "48 8B 97 10 03 00 00 45 33 C0 48 8B CB 48 85 D2 74 7E E8 ? ? ? FE"); // No Banish on Yamato Super // THIS MIGHT BE WRONG PLEASE DOUBLECHECK
+  //DevilMayCry5.exe+1C12395 (-0x9)
   if (!addrYamatoBanish) {
     return "Unable to find YamatoBanish pattern.";
   }
@@ -200,7 +201,7 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
   }
   VergilDoppelBanish::jmp_je = addr.value() + 38;
 
-  if (!install_hook_absolute(addrYamatoBanish.value(), m_function_hookYamatoBanish, &DetourYamatoBanish, &jmp_ret_yamato_banish, 5)) {
+  if (!install_hook_absolute(addrYamatoBanish.value() + 0x9, m_function_hookYamatoBanish, &DetourYamatoBanish, &jmp_ret_yamato_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_yamatobanish";

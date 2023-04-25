@@ -269,11 +269,11 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     }
     DanteSDTRework::jmp_jne7 = addr7.value() + 146; // DevilMayCry5.exe+16A212B copyright update
 
-    auto addr8 = m_patterns_cache->find_addr(base, "F3 0F 10 15 39 0F 10 06");
+    auto addr8 = m_patterns_cache->find_addr(base, "40 88 AF 48 02 00 00 48 8B 97 20 01 00 00 48 85 D2"); //DevilMayCry5.exe+1D69F52  (-0x30)
     if (!addr8) {
         return "Unable to find DanteSDTRework pattern8.";
     }
-    if (!install_hook_absolute(addr8.value(), m_function_hook8, &detour8, &jmp_ret8, 8)) {
+    if (!install_hook_absolute(addr8.value()+0x30, m_function_hook8, &detour8, &jmp_ret8, 8)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize DanteSDTRework8";

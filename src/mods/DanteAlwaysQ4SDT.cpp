@@ -57,7 +57,7 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
     return "Unable to find DanteAlwaysQ4SDT pattern.";
   }
 
-  DanteAlwaysQ4SDT::jmp_jne = m_patterns_cache->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
+  DanteAlwaysQ4SDT::jmp_jne = m_patterns_cache->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 ? ? ? 00 48 8B 4B 50 48 8B 51 18").value();//DevilMayCry5.exe+1979668
 
   if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

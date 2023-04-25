@@ -83,35 +83,37 @@ std::optional<std::string> BypassBPCav::on_initialize() {
 
   set_up_hotkey();
 
-  auto cavrfix1_addr = m_patterns_cache->find_addr(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix1_addr = m_patterns_cache->find_addr(base, "0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 74 ? 32 C0 EB ? 85 D2 0F 95 C0 48 85 C9 0F 85 ? 0B 00 00 84 C0 74 ? C7 87 C0 00 00 00 05 00 00 00"); //DevilMayCry5.exe+12A27DB
 
   if (!cavrfix1_addr) {
     return "Unable to find cavrfix1 pattern.";
   }
-  if (!install_hook_absolute(cavrfix1_addr.value()+0x06, m_cavrfix1_hook, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
+  if (!install_hook_absolute(cavrfix1_addr.value(), m_cavrfix1_hook, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix1";
   }
   
   
-  auto cavrfix2_addr = m_patterns_cache->find_addr(base, "96 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix2_addr = m_patterns_cache->find_addr(base, "48 8B 43 50 48 8B 48 18 48 85 C9 74 ? 32 C0 EB ? 85 D2 0F 95 C0 48 85 C9 0F 85 ? 00 00 00 84 C0 74 ? C7 87 C0 00 00 00 05 00 00 00");
 
   if (!cavrfix2_addr) {
     return "Unable to find cavrfix2 pattern.";
   }
-  if (!install_hook_absolute(cavrfix2_addr.value()+0x06, m_cavrfix2_hook, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
+  if (!install_hook_absolute(cavrfix2_addr.value(), m_cavrfix2_hook, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize cavrfix2";
   }
-  auto cavrfix3_addr = m_patterns_cache->find_addr(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  auto cavrfix3_addr = m_patterns_cache->find_addr(base, "48 8B 43 50 48 8B 48 18 48 85 C9 74 ? 32 C0 EB ? 85 D2 0F 95 C0 48 85 C9 0F 85 ? ? 00 00" 
+      "84 C0 75 ? 48 C7 87 C0 00 00 00 03 00 00 00");
+  //DevilMayCry5.exe+12BF0A0
 
   if (!cavrfix3_addr) {
       return "Unable to find cavrfix3 pattern.";
   }
 
-  if (!install_hook_absolute(cavrfix3_addr.value() + 0x06, m_cavrfix3_hook, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
+  if (!install_hook_absolute(cavrfix3_addr.value(), m_cavrfix3_hook, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize cavrfix3";

@@ -130,7 +130,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   }
   VergilInstantSDT::jmp_out4 = addr4.value() + 43;
 
-  VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "02 02 48 8B 5C 24 30 32").value()+2;
+  VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "0F 5A D0 66 0F 2F CA 77 ? F3 0F 10 8F 20 1B 00 00").value()-0x1E;//DevilMayCry5.exe+512740 
 
   if (!install_hook_absolute(addr1.value(), m_function_hook1, &detour1, &jmp_ret1, 6)) {
     //  return a error string in case something goes wrong
