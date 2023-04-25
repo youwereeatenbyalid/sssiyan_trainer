@@ -1582,6 +1582,7 @@ void ModFramework::draw_panels() const
             ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
         }
     }
+    ImGui::End();
     ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Strive ? activeTabText : inactiveTabText);
     ImGui::Begin("StriVe", nullptr, panel_flags);
     ImGui::PopStyleColor();
