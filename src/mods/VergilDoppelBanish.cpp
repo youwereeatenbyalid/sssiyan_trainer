@@ -169,22 +169,22 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     return "Unable to find YamatoBanish pattern.";
   }
 
-  auto addrBeowulfBanish = m_patterns_cache->find_addr(base, "E8 C4 91 35 FF"); // No Banish on Beowulf Super // NEEDS AOB
+  auto addrBeowulfBanish = m_patterns_cache->find_addr(base, "45 33 C0 BA 38 00 00 00 EB ? 0F 57 DB 41 B8 1A 00 00 00"); // No Banish on Beowulf Super // NEEDS AOB //DevilMayCry5.exe+11EC052 (+0x9D)
   if (!addrBeowulfBanish) {
     return "Unable to find BeowulfBanish pattern.";
   }
 
-  auto addrForceEdgeBanish = m_patterns_cache->find_addr(base, "E8 1A E8 8A FF"); // No Banish on Force Edge Super // NEEDS AOB
+  auto addrForceEdgeBanish = m_patterns_cache->find_addr(base, "0F 57 DB 41 B8 25 00 00 00"); // No Banish on Force Edge Super // NEEDS AOB //DevilMayCry5.exe+C9A08A (+0x29)
   if (!addrForceEdgeBanish) {
     return "Unable to find ForceEdgeBanish pattern.";
   }
 
-  auto addrSDTYamatoBanish = m_patterns_cache->find_addr(base, "E8 1A 9F 92 FE"); // No Banish on SDT Yamato Super // NEEDS AOB
+  auto addrSDTYamatoBanish = m_patterns_cache->find_addr(base, "45 33 C0  BA 38 00 00 00 EB ? 0F 57 DB 41 B8 10 00 00 00"); // No Banish on SDT Yamato Super // NEEDS AOB //DevilMayCry5.exe+1C123F1 (+0x1F)
   if (!addrSDTYamatoBanish) {
     return "Unable to find SDTYamatoBanish pattern.";
   }
 
-  auto addrSDTBeowulfBanish = m_patterns_cache->find_addr(base, "E8 68 91 35 FF"); // No Banish on SDT Beowulf Super // NEEDS AOB
+  auto addrSDTBeowulfBanish = m_patterns_cache->find_addr(base, "0F 57 DB 41 B8 1A 00 00 00 E8"); // No Banish on SDT Beowulf Super // NEEDS AOB //DevilMayCry5.exe+11EC033 (+0x29)
   if (!addrSDTBeowulfBanish) {
     return "Unable to find SDTBeowulfBanish pattern.";
   }
@@ -207,25 +207,25 @@ std::optional<std::string> VergilDoppelBanish::on_initialize() {
     return "Failed to initialize VergilDoppelBanish_yamatobanish";
   }
 
-  if (!install_hook_absolute(addrBeowulfBanish.value(), m_function_hookBeowulfBanish, &DetourBeowulfBanish, &jmp_ret_beowulf_banish, 5)) {
+  if (!install_hook_absolute(addrBeowulfBanish.value() - 0x9D, m_function_hookBeowulfBanish, &DetourBeowulfBanish, &jmp_ret_beowulf_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_beowulfbanish";
   }
 
-  if (!install_hook_absolute(addrForceEdgeBanish.value(), m_function_hookForceEdgeBanish, &DetourForceEdgeBanish, &jmp_ret_forceedge_banish, 5)) {
+  if (!install_hook_absolute(addrForceEdgeBanish.value() - 0x29, m_function_hookForceEdgeBanish, &DetourForceEdgeBanish, &jmp_ret_forceedge_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_forceedgebanish";
   }
 
-  if (!install_hook_absolute(addrSDTYamatoBanish.value(), m_function_hookSDTYamatoBanish, &DetourSDTYamatoBanish, &jmp_ret_sdt_yamato_banish, 5)) {
+  if (!install_hook_absolute(addrSDTYamatoBanish.value() - 0x1F, m_function_hookSDTYamatoBanish, &DetourSDTYamatoBanish, &jmp_ret_sdt_yamato_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_sdtyamatobanish";
   }
 
-  if (!install_hook_absolute(addrSDTBeowulfBanish.value(), m_function_hookSDTBeowulfBanish, &DetourSDTBeowulfBanish, &jmp_ret_sdt_beowulf_banish, 5)) {
+  if (!install_hook_absolute(addrSDTBeowulfBanish.value() - 0x29, m_function_hookSDTBeowulfBanish, &DetourSDTBeowulfBanish, &jmp_ret_sdt_beowulf_banish, 5)) {
     // return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize VergilDoppelBanish_sdtbeowulfbanish";

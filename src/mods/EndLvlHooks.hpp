@@ -126,13 +126,13 @@ namespace EndLvlHooks
 
             _mod = this;
 
-            auto retryMissionAddr = m_patterns_cache->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
+            auto retryMissionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 18 56 48 83 EC 20 48 8B F2 48 8B D9 E8 ? ? ? ? 44 0F B6 C0");// DevilMayCry5.exe+24A3080 (-0x6)
             if (!retryMissionAddr)
             {
                 return "Unanable to find retryMissionAddr pattern.";
             }
 
-            auto exitMissionAddr = m_patterns_cache->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
+            auto exitMissionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41 0F B6 E9 45 0F B6 F0");// DevilMayCry5.exe+24A2E70
             if (!retryMissionAddr)
             {
                 return "Unanable to find exitMissionAddr pattern.";
@@ -150,9 +150,9 @@ namespace EndLvlHooks
                 return "Unanable to find exitBpMissionAddr pattern.";
             }
 
-            auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
+            auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x24A4F40; //Bad AOB shit
 
-            auto requestResultAddr = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
+            auto requestResultAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45 33 FF 45");// DevilMayCry5.exe+8A0500
             if (!exitBpMissionAddr)
             {
                 return "Unanable to find requestResultAddr pattern.";
@@ -164,29 +164,44 @@ namespace EndLvlHooks
                 return "Unanable to find requestResultStaffRollAddr pattern.";
             }
 
-            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 0B 69");
+            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 ? ? ? ? 0F B6 C8 48 8B 43 50 48 83 78 18 00 0F 85 ? ? ? ? 85 C9 0F 84 ? ? ? ?");
             //DevilMayCry5.app_MissionSettingManager__restartTraining115258
             if (!restartTrainingAddr)
             {
                 return "Unanable to find restartTraining pattern.";
             }
 
-            m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
-            m_retry_mission_hook->create();
-            m_exit_mission_hook = std::make_unique<FunctionHook>(exitMissionAddr.value() + 0x9, &EndLvlHooks::exit_mission_detour);
-            m_exit_mission_hook->create();
+            m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value(), &EndLvlHooks::retry_mission_detour);
+            if (!m_retry_mission_hook->create())
+                return "Can't install m_retry_mission_hook";
+
+            m_exit_mission_hook = std::make_unique<FunctionHook>(exitMissionAddr.value(), &EndLvlHooks::exit_mission_detour);
+            if (!m_exit_mission_hook->create())
+                return "Can't install m_exit_mission_hook";
+
             m_checkpoint_mission_hook = std::make_unique<FunctionHook>(checkpointMissionAddr.value(), &EndLvlHooks::checkpoint_mission_detour);
-            m_checkpoint_mission_hook->create();
+            if (!m_checkpoint_mission_hook->create())
+                return "Can't install m_checkpoint_mission_hook.";
+
             m_secret_mission_hook = std::make_unique<FunctionHook>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
-            m_secret_mission_hook->create();
-            m_exit_bp_mission_hook = std::make_unique<FunctionHook>(exitBpMissionAddr.value() + 0x2, &EndLvlHooks::exit_bp_mission_detour);
-            m_exit_bp_mission_hook->create();
-            m_request_result_hook = std::make_unique<FunctionHook>(requestResultAddr.value() + 0x4, &EndLvlHooks::request_result_detour);
-            m_request_result_hook->create();
+            if (!m_secret_mission_hook->create())
+                return "Can't install m_secret_mission_hook";
+
+            m_exit_bp_mission_hook = std::make_unique<FunctionHook>(exitBpMissionAddr.value() + 0x4, &EndLvlHooks::exit_bp_mission_detour);
+            if (!m_exit_bp_mission_hook->create())
+                return "Can't install m_exit_bp_mission_hook";
+
+            m_request_result_hook = std::make_unique<FunctionHook>(requestResultAddr.value(), &EndLvlHooks::request_result_detour);
+            if (!m_request_result_hook->create())
+                return "Can't install m_request_result_hook.";
+
             m_request_result_staffroll_hook = std::make_unique<FunctionHook>(requestResultStaffRollAddr.value() + 0x10, &EndLvlHooks::request_staffresult_detour);
-            m_request_result_staffroll_hook->create();
+            if (!m_request_result_staffroll_hook->create())
+                return "Can't install m_request_result_staffroll_hook.";
+
             m_restart_training_hook = std::make_unique<FunctionHook>(restartTrainingAddr.value(), &EndLvlHooks::restart_training_hook);
-            m_restart_training_hook->create();
+            if(!m_restart_training_hook->create())
+                return "Can't install m_restart_training_hook.";
 
             return Mod::on_initialize();
         };

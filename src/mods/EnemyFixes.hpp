@@ -1203,7 +1203,7 @@ public:
         //    return "Unanable to find EnemyFixes.shadowWarpAddr pattern.";
         //}
 
-        auto shadowFsmToCenterAddr = m_patterns_cache->find_addr(base, "4A F1 FE 48 8B 43 50 48 83 78 18 00"); // DevilMayCry5.exe+21B0114 (-0x3)
+        auto shadowFsmToCenterAddr = m_patterns_cache->find_addr(base, "40 55 53 41 54 41 55 48 8D AC 24 58"); // DevilMayCry5.exe+21C13A4 (-0x24)
         if (!shadowFsmToCenterAddr)
         {
             return "Unanable to find EnemyFixes.shadowFsmToCenterAddr pattern.";
@@ -1334,7 +1334,7 @@ public:
             return "Failed to initialize EnemyFixes.cerberusThunderWave";
         }
 
-        if (!install_hook_absolute(shadowFsmToCenterAddr.value() + 0x3, m_shadow_warp_func_hook, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
+        if (!install_hook_absolute(shadowFsmToCenterAddr.value() + 0x24, m_shadow_warp_func_hook, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.shadowFsmToCenter";
