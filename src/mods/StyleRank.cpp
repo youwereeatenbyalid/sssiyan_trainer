@@ -33,9 +33,12 @@ std::optional<std::string> StyleRank::on_initialize() {
 	m_is_enabled = &enabled;
   init_check_box_info();
 
-  // uintptr_t base = g_framework->get_module().as<uintptr_t>();
-
- if (!install_hook_offset(offsets::STYLE_RANK, m_function_hook, &detour, &jmp_ret, 6)) {
+  auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+  auto addr = m_patterns_cache->find_addr(base, "8B 88 B0 00 00 00 83 F9");
+  if (!addr) {
+	  return "Unable to find AllOrNothing pattern.";
+  }
+ if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 6)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize StyleRank";
