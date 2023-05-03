@@ -2,6 +2,9 @@
 #include "GameFunc.hpp"
 namespace GameFunctions
 {
+	/// <summary>
+	/// Gemnerate Boss Doppelganger
+	/// </summary>
 	class GenerateDoppel : public GameFunc<void>
 	{
 	private:
@@ -29,6 +32,9 @@ namespace GameFunctions
 		void operator()(Vec3 createOffs, bool isProvoke) { invoke(createOffs, isProvoke); }
 	};
 
+	/// <summary>
+	/// Set Playable Vergil Doppelganger mode
+	/// </summary>
 	class SetDoppelMode : public GameFunc<void>
 	{
 	private:
@@ -46,7 +52,10 @@ namespace GameFunctions
 			fAddr += 0x534500;
 			gen_doppel = (f_gen_doppel)fAddr;
 		}
-
+		/// <summary>
+		/// Set PL Vergil Doppel State
+		/// </summary>
+		/// <param name="flag">activate or deactivate(?)</param>
 		void invoke(bool flag)
 		{
 			if (!utility::isGoodReadPtr(pl, 8))

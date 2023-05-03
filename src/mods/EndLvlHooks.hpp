@@ -16,6 +16,9 @@ namespace EndLvlHooks
         RequestResultStaffRoll, //cool, capcom, cool, this calles after Dante credit fight if fight skipped/ losed to Vergil(?)
         ResetTraining
     };
+    /// <summary>
+    /// Sets up events for On Level Exit/reset
+    /// </summary>
     class EndLvlHooks : public Mod
     {
     private:

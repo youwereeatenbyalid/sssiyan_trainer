@@ -167,8 +167,11 @@ namespace PlCntr
 			void set_pos_to_all(gf::Vec3 pos, Pl0300Type type);
 
 			bool destroy_game_obj(const std::weak_ptr<Pl0300Controller>& obj);
-
-			//Load em6000 pfb or em6000_c00 pfb (ex costume) without creating instance;
+			
+			/// <summary>
+			/// Create an em6000 prefab for instatiating a boss vergil instance.
+			/// </summary>
+			/// <param name="exCostume">if the prefab should be the EX variant</param>
 			void load_pfb(bool exCostume);
 
 			//Try to create, setup and spawn boss Vergil with credit AI.

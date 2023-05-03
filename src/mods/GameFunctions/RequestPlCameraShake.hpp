@@ -2,6 +2,9 @@
 #include <mods/GameFunctions/GameFunc.hpp>
 namespace GameFunctions
 {
+	/// <summary>
+	/// Function for shaking screen
+	/// </summary>
 	class RequestPlCameraShake : GameFunc<void>
 	{
 	private:
@@ -21,11 +24,21 @@ namespace GameFunctions
 			fAddr += 0xCBE390;
 			func = (f_request_camera_shake)fAddr;
 		}
-
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="plCamera">player camera to shake</param>
 		RequestPlCameraShake(uintptr_t plCamera) : RequestPlCameraShake() { this->plCamera = (void*)plCamera; }
 
 		void set_pl_camera(uintptr_t plCamera) { this->plCamera = (void*)plCamera; }
 
+		/// <summary>
+		/// set parameters for screenshake
+		/// </summary>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <param name="hypocenter"></param>
+		/// <param name="priority"></param>
 		void set_params(Vec3 pos, Quaternion rot, Vec3 hypocenter, int priority)
 		{
 			this->pos = pos;

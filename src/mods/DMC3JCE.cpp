@@ -202,9 +202,11 @@ void DMC3JCE::jce_cancel_hook(uintptr_t threadCtxt, uintptr_t vergil)
 void DMC3JCE::pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJce, uintptr_t actionArg)
 {
 	_mod->m_update_jce_hook->get_original<decltype(DMC3JCE::pl0800_start_jce_update)>()(threadCtxt, fsmStartJce, actionArg);
+	//if cheat not on, end
 	if (!DMC3JCE::cheaton)
 		return;
 	auto vergil = *(uintptr_t*)(fsmStartJce + 0x40);
+	//if in SDT && Not Executing already doing DMC3 JCE and not already going SDT JCE (that's the normal one right?) then return
 	if (*(int*)(vergil + 0x09B0) == 2 && !jceController->is_executing() && !jceController->is_in_jce_sdt())
 		return;
 	int jceRoutine = *(int*)(fsmStartJce + 0x68);
@@ -225,7 +227,14 @@ void DMC3JCE::pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJc
 	else
 		*(float*)(fsmStartJce + 0x6C) = 0;
 }
-
+/// <summary>
+/// Override DT gain to 0 for DMC3 JCE?
+/// </summary>
+/// <param name="threadCtxt"></param>
+/// <param name="pl"></param>
+/// <param name="val"></param>
+/// <param name="dtAddType"></param>
+/// <param name="fixedValue"></param>
 void DMC3JCE::on_pl_add_dt(uintptr_t threadCtxt, uintptr_t pl, float* val, int dtAddType, bool fixedValue)
 {
 	if (!cheaton || *(uintptr_t*)(pl + 0xE64) != 4 || !jceController->is_executing())

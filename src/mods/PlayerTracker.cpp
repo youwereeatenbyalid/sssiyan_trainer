@@ -61,7 +61,7 @@ uintptr_t PlayerTracker::playermanager{ NULL };
 const std::array<uintptr_t, 1> updatetime_array{ 0x68 };
 // clang-format off
 // only in clang/icl mode on x64, sorry
-
+///Cringe Hitch Function, replace with REframework stuff. Stores player fields as static addresses.
 static naked void player_detour() {
 	__asm {
 		//playerentity
@@ -271,6 +271,7 @@ static naked void incombat_detour() {
 		jmp qword ptr[PlayerTracker::incombat_jmp_ret]
 	}
 }
+//Track player Sin Value for inertia redirect
 static naked void sin_detour() {
 	__asm {
 	sincoordinatenewmem:
@@ -287,6 +288,7 @@ static naked void sin_detour() {
 		jmp qword ptr[PlayerTracker::sin_jmp_ret]
 	}
 }
+//Track player Cos Value for inertia redirect
 static naked void cos_detour() {
 	__asm {
 	newmem:
@@ -302,6 +304,8 @@ static naked void cos_detour() {
 			jmp qword ptr[PlayerTracker::cos_jmp_ret]
 	}
 }
+
+//Left stick threshhold to see if stick is pushed far enough to enable inertia redirect (might be worth replacing in the future)
 static naked void threshhold_detour() {
 	__asm {
 	newmem:
@@ -314,6 +318,8 @@ static naked void threshhold_detour() {
 			jmp qword ptr[PlayerTracker::threshhold_jmp_jb]
 	}
 }
+
+//Tracking Vergil Data for doppelweapon swapper (to be replaced  when redoing 
 static naked void vergildata_detour() {
 	__asm {
 	newmem:
@@ -385,6 +391,7 @@ static naked void vergildata_detour() {
 
 //clang-format off
 
+///ASM detours to trigger VP's Style Set Event
 naked void PlayerTracker::trickster_cmp_detour()
 {
 	__asm

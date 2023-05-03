@@ -44,6 +44,11 @@ public:
 		};
 
 	private:
+		/// <summary>
+		/// coroutine that handles the spawning of the judgement cuts
+		/// </summary>
+		/// <param name="jceType">Type of Judgement Cut</param>
+		/// <param name="workRateSys">Used to keep the time interval consistent with the in-game speed</param>
 		void execute_3jce(Type jceType, uintptr_t workRateSys)
 		{
 			if (!can_execute())
@@ -149,8 +154,13 @@ public:
 			_pl0800 = 0;
 		}
 
+		/// <summary>
+		/// Set Vergil SDT State
+		/// </summary>
+		/// <param name="dtState">Human - 0, DT - 1, SDT - 2</param>
 		void set_sdt(GameFunctions::PlVergilSetDT::DevilTrigger dtState)
 		{
+			//Create Function helper
 			GameFunctions::PlVergilSetDT setDt{ _pl0800 };
 			std::array<uintptr_t, 1> offs { 0x1B20 };
 			auto curSdtOp = func::PtrController::get_ptr_val<float>(_pl0800, offs, true);
@@ -160,6 +170,7 @@ public:
 			func::PtrController::try_to_write(_pl0800, offs, 10000.0f, true);
 			bool isInstantSdtOn = VergilInstantSDT::cheaton;
 			VergilInstantSDT::cheaton = true;
+			//set vergil DtState
 			setDt(dtState, false);
 			func::PtrController::try_to_write<float>(_pl0800, offs, curSdt, true);
 			VergilInstantSDT::cheaton = isInstantSdtOn;
@@ -168,7 +179,12 @@ public:
 			else
 				_isInJceSdt = false;
 		}
-
+		/// <summary>
+		/// Retrieve position of lock-on Target
+		/// </summary>
+		/// <param name="isNullPtr"></param>
+		/// <param name="rot"></param>
+		/// <returns></returns>
 		func::Vec3 get_lockon_pos(bool& isNullPtr, func::Quaternion &rot)
 		{
 			uintptr_t lockOnObj = *(uintptr_t*)(_pl0800 + 0x428);
@@ -186,7 +202,10 @@ public:
 				return *(gf::Vec3*)(transform + 0x30);
 			return _getLockOnPosMethod->call<gf::Vec3>(sdk::get_thread_context(), lockOnObj);
 		}
-
+		/// <summary>
+		/// Get Player Vergil data + judgement cut prefab
+		/// </summary>
+		/// <param name="pl0800">PlayerVergil</param>
 		inline void set_pl0800(uintptr_t pl0800)
 		{
 			_pl0800 = pl0800;
@@ -196,6 +215,9 @@ public:
 			_jcPfb = get_jc_pfb(_pl0800);
 		}
 
+		/// <summary>
+		/// Update current Judgement cut position to follow the position of the lock-on target
+		/// </summary>
 		void track_pos_update()
 		{
 			func::Vec3 lockOnPos;
@@ -220,7 +242,9 @@ public:
 			else
 				_curJcPos.z = lockOnPos.z + +_trackZDist(_rndGen);
 		}
-
+		/// <summary>
+		/// Randomly set the position of the next judgement cut
+		/// </summary>
 		void rndjc_pos_update()
 		{
 			bool isNull = false;
@@ -247,7 +271,10 @@ public:
 			}
 			_rndJcSpawnCount++;
 		}
-
+		/// <summary>
+		/// Checks whether the game is in active gameplay and unpaused (we should really come up with a general purpose function for this)
+		/// </summary>
+		/// <returns>true if in unpaused gameplay</returns>
 		bool can_execute()
 		{
 			if (GameplayStateTracker::nowFlow == 0x16 && !GameplayStateTracker::isCutscene && !GameplayStateTracker::isExecutePause)
@@ -256,7 +283,11 @@ public:
 			}
 			else return false;
 		}
-
+		/// <summary>
+		/// update the time delay to match the ingame workrate
+		/// </summary>
+		/// <param name="workRateSys"></param>
+		/// <returns>the delay for the next judgement cut</returns>
 		int update_delay(uintptr_t workRateSys)
 		{
 			if(workRateSys == 0 || *(uintptr_t*)(workRateSys + 0x58) == 0)
@@ -267,7 +298,11 @@ public:
 				return _tmpDelay;
 			return (float)_tmpDelay / rate;
 		}
-
+		/// <summary>
+		/// Get the Judgement Cut Prefab from Vergil
+		/// </summary>
+		/// <param name="pl0800"></param>
+		/// <returns>address of judgement cut prefab</returns>
 		uintptr_t get_jc_pfb(uintptr_t pl0800) const noexcept
 		{
 			auto weaponContainer = *(uintptr_t*)(pl0800 + 0x1970);
@@ -288,7 +323,13 @@ public:
 				return 0;
 			return *(uintptr_t*)(yamatoPlShellData + 0x10);
 		}
-
+		/// <summary>
+		/// Startup routine for judgement cut.
+		/// Acquires player data, stops any ongoing Judgement Cut Attacks, sets up the judgement cut position to the lock-on target.
+		/// </summary>
+		/// <param name="pl0800"></param>
+		/// <param name="jcType"></param>
+		/// <returns></returns>
 		bool setup_to_start(uintptr_t pl0800, Type jcType) noexcept
 		{
 			_rndJcSpawnCount = 0;
@@ -370,6 +411,13 @@ public:
 			//PlSetActionData::new_action_event_unsub(new Events::EventHandler<JCEController, const std::array<char, PlSetActionData::ACTION_STR_LENGTH>&, uintptr_t>(this, &JCEController::on_action_update));
 		}
 
+		/// <summary>
+		/// Set Vergil SDT state
+		/// </summary>
+		/// <param name="plVergil">player vergil</param>
+		/// <param name="dtState">Human - 0, DT - 1, SDT - 2</param>
+		/// <param name="efxType"></param>
+		/// <returns></returns>
 		bool request_set_jce_dt(uintptr_t plVergil, GameFunctions::PlVergilSetDT::DevilTrigger dtState, DMC3JCE::AutoSDTType efxType = LessEfx)
 		{
 			set_pl0800(plVergil);
@@ -396,7 +444,12 @@ public:
 				return;
 			*(float*)(vergil + 0x1B28) = -0.1f;
 		}
-
+		/// <summary>
+		/// Starts the Judgement Cut End Coroutine
+		/// Also determines Track vs Random state if auto type is set.
+		/// </summary>
+		/// <param name="pl0800"></param>
+		/// <returns></returns>
 		volatile void start_jce(uintptr_t pl0800)
 		{
 			if (is_executing())
@@ -434,7 +487,10 @@ public:
 			isJceRunning = true;
 			_3jceCoroutine->start(this, tmp, workRateSys);
 		}
-
+		/// <summary>
+		/// Ends the Judgement Cut End Coroutine
+		/// </summary>
+		/// <param name="endSdt">If set to true, Reverts Vergil to human form</param>
 		void stop_jce(bool endSdt = true)
 		{
 			if (endSdt && _isInJceSdt)
@@ -460,7 +516,12 @@ public:
 		inline int get_trackspawn_delay() const noexcept { return _trackDelayTime; }
 
 		inline bool is_in_jce_sdt() const noexcept { return _isInJceSdt; }
-
+		/// <summary>
+		/// set the execution time of the jce to reflect the type being used.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="isDefaultTime"></param>
+		/// <param name="time"></param>
 		void set_jce_type(Type type, bool isDefaultTime = true, float time = 0) 
 		{
 			jceType = type;

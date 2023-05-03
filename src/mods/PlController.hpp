@@ -51,6 +51,9 @@ namespace PlCntr
 		Enemy
 	};
 
+	/// <summary>
+	/// Class for quickly calling Player Methods, override for character specific controls. 
+	/// </summary>
 	class PlController
 	{
 	private:
@@ -80,7 +83,10 @@ namespace PlCntr
 		static inline sdk::REMethodDefinition* _plResetStatusMethod = nullptr;
 		static inline sdk::REMethodDefinition* _gameObjGetComponentsArrayMethod = nullptr;
 		static inline sdk::REMethodDefinition* _componentDestroyStaticMethod = nullptr;
-
+		/// <summary>
+		/// Constructor function
+		/// </summary>
+		/// <param name="pl">player to control</param>
 		PlController(uintptr_t pl) : _pl(pl)
 		{
 			_missionSettingsManager = sdk::get_managed_singleton<REManagedObject>("app.MissionSettingManager");
@@ -108,7 +114,9 @@ namespace PlCntr
 				_isStaticInitRequested = false;
 			}
 		}
-
+		/// <summary>
+		/// Destroy the player game object controlled by this Controller.
+		/// </summary>
 		void destroy_pl_game_obj()
 		{
 			if (_gameObjDestroyMethod != nullptr && !_isGameObjDestroyCalled)
@@ -170,6 +178,7 @@ namespace PlCntr
 
 		inline DT get_cur_dt() { return *(DT*)(_pl + 0x9B0); }
 
+		//change if character is classified as player or enemy
 		inline void change_character_group(CharGroup group) { *(int*)(_pl + 0x108) = (int)group; }
 
 		inline void set_hp(float val)
@@ -191,7 +200,10 @@ namespace PlCntr
 				throw std::exception("PlayerManager is null.");
 			return gf::ListController::get_list_count(*(uintptr_t*)((uintptr_t)_playerManager + 0x70)) == 1;
 		}
-
+		/// <summary>
+		/// check if player exists in the PlayerManager 
+		/// </summary>
+		/// <returns></returns>
 		inline bool is_in_players_list() noexcept
 		{
 			update_pl_manager();
@@ -206,7 +218,20 @@ namespace PlCntr
 			}
 			return false;
 		}
-
+		/// <summary>
+		/// Player Set Action function
+		/// </summary>
+		/// <param name="actionStr">Name of the action</param>
+		/// <param name="layerNo">animation layer to apply action to</param>
+		/// <param name="startFrame">start frame of animation</param>
+		/// <param name="interpolationFrame">what frame the animation can be interpolated (from or to, not sure which)</param>
+		/// <param name="mode">Type of interpolation used</param>
+		/// <param name="curve">Interpolation curve</param>
+		/// <param name="isImmediate">Whether to immediately transition to new action(?)</param>
+		/// <param name="passSelect"></param>
+		/// <param name="isPuppetTransition">if the gamemodel is a network puppet(?)</param>
+		/// <param name="actionPriority"></param>
+		/// <returns></returns>
 		virtual void set_action(const wchar_t* actionStr, int layerNo = 0, float startFrame = 0.0f, float interpolationFrame = 0.0f, InterpolationMode mode = InterpolationMode::SyncCrossFade,
 			InterpolationCurve curve = InterpolationCurve::Smooth, bool isImmediate = false, bool passSelect = true, bool isPuppetTransition = false,
 			ActionPriority actionPriority = ActionPriority::Normal) const noexcept
@@ -225,12 +250,19 @@ namespace PlCntr
 
 		gf::Quaternion get_rot() const noexcept { return *(gf::Quaternion*)(get_transform() + 0x40); }
 
+		/// <summary>
+		/// get player transform
+		/// </summary>
+		/// <returns></returns>
 		inline uintptr_t get_transform() const noexcept
 		{
 			auto gameObj = *(uintptr_t*)(_pl + 0x10);
 			return *(uintptr_t*)(gameObj + 0x18);
 		}
 
+		/// <summary>
+		/// destroy all shells owned by player
+		/// </summary>
 		virtual void destroy_all_related_shells()
 		{
 			auto shellMgr = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
@@ -328,6 +360,10 @@ namespace PlCntr
 
 		inline int get_cur_mediation_type() const noexcept { return *(int*)(_pl + 0xF4); }
 
+		/// <summary>
+		/// Request player to be removed from playermanager
+		/// </summary>
+		/// <param name="unloadRequest"></param>
 		inline void pl_manager_request_remove(bool unloadRequest = false)
 		{
 			if (_playerManager != nullptr)
@@ -363,7 +399,9 @@ namespace PlCntr
 				return;
 			_plResetStatusMethod->call(sdk::get_thread_context(), _pl, resetType);
 		}
-
+		/// <summary>
+		/// stores a reference to the playermanager 
+		/// </summary>
 		inline void update_pl_manager()
 		{
 			_playerManager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");

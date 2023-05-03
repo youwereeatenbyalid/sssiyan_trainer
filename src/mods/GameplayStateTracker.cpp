@@ -1,5 +1,5 @@
 #include "GameplayStateTracker.hpp"
-#include "EnemyWaveEditor.hpp"
+//#include "EnemyWaveEditor.hpp"
 
 void GameplayStateTracker::pfb_info_add_hook(uintptr_t threadCtxt, uintptr_t pfbInfoList, uintptr_t pfbInfo)
 {

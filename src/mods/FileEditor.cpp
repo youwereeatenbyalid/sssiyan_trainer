@@ -328,14 +328,14 @@ std::optional<std::string> FileEditor::on_initialize() {
   }
 
   // This adds to the slots available in the costume selection menu
-  if (!install_hook_absolute(scroll_list_addr.value(), m_scroll_list_hook, &scroll_list_detour, &m_scroll_list_jmp_ret, 6)) {
+  if (!install_new_detour(scroll_list_addr.value(), m_scroll_list_hook, &scroll_list_detour, &m_scroll_list_jmp_ret, 6)) {
       //return an error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize m_scroll_list_hook";
   }
 
   // This constrols the information of each costume slot in the selection menu
-  if (!install_hook_absolute(costume_list_addr.value(), m_costume_list_hook, &costume_list_detour, &m_costume_list_jmp_ret, 12)) {
+  if (!install_new_detour(costume_list_addr.value(), m_costume_list_hook, &costume_list_detour, &m_costume_list_jmp_ret, 12)) {
       //return an error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize m_costume_list_hook";

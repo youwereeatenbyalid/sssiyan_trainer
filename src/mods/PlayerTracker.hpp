@@ -168,13 +168,21 @@ public:
 	//4 - AttackFailL;
 	//5 - BothFail;
 	//6 - GuardBreak;
-	//uintptr_t tc, uintptr_t pl, uintptr_t hc.DamageInfo, int *origFuncRes
+	//
+	
+	/// <summary>
+	/// Post-PL Vergil Guard Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadccontex, uintptr_t pl, uintptr_t hc.DamageInfo, int *origFuncRes</param>
+	/// <returns>enum: 0 - NoGuard, 1 - Guard, 2 - DefendFail, 3 - AttackFail, 4 - AttackFailL, 5 - BothFail, 6 - GuardBreak</returns>
 	template<typename T>
 	static void after_pl0800_guard_check_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*pl*/, uintptr_t/*hc.DamageInfo*/, int*/*origFuncRes*/>> handler)
 	{
 		if (handler != nullptr && _mod != nullptr)
 			_mod->_afterPl0800GuardCheck.subscribe(handler);
 	}
+
 
 	template<typename T>
 	static void after_pl0800_guard_check_unsub(std::shared_ptr<Events::EventHandler<T, uintptr_t, uintptr_t, uintptr_t, int*>> handler)
@@ -184,6 +192,12 @@ public:
 	}
 
 	//uintptr_t tc, uintptr_t player
+
+	/// <summary>
+	/// Player Die Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadccontex, uintptr_t player</param>
 	template<typename T>
 	static void on_pl_die_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*player*/>> handler)
 	{
@@ -198,7 +212,11 @@ public:
 			_mod->_onPlSetDie.unsubscribe(handler);
 	}
 
-	//uintptr_t tc, uintptr_t player
+	/// <summary>
+	/// Player Update Lock-On event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadccontex, uintptr_t player</param>
 	template<typename T>
 	static void on_pl_lock_on_update_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/, uintptr_t/*player*/>> handler)
 	{
@@ -214,6 +232,12 @@ public:
 	}
 
 	//uintptr_t tc, uintptr_t pl0000.shell.QuicksilverWorldSlowAction, uintptr_t behaviortree.ActionArg
+
+	/// <summary>
+	/// Quicksilver Slow World Shell Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadccontex, uintptr_t pl0000.shell.QuicksilverWorldSlowAction uintptr_t behaviortree.ActionArg</param>
 	template<typename T>
 	static void after_pl0000_quicksilver_slow_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/,
 		uintptr_t/*pl0000.shell.QuicksilverWorldSlowAction*/, uintptr_t/*behaviortree.ActionArg*/>> handler)
@@ -229,7 +253,11 @@ public:
 			_mod->_afterPl0000QuickSilverWorldSlowActionStart.unsubscribe(handler);
 	}
 
-	//uintptr_t tc, uintptr_t pl0000.shell.QuicksilverWorldStopAction, uintptr_t behaviortree.ActionArg
+	/// <summary>
+	/// Quicksilver Slow World Shell Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadccontex, uintptr_t pl0000.shell.QuicksilverWorldStopAction uintptr_t behaviortree.ActionArg</param>
 	template<typename T>
 	static void after_pl0000_quicksilver_stop_world_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*tc*/,
 		uintptr_t/*pl0000.shell.QuicksilverWorldStopAction*/, uintptr_t/*behaviortree.ActionArg*/>> handler)
@@ -247,6 +275,13 @@ public:
 
 	//Hook installed before game checks is this style already setted and calls setStyle func
 	//uintptr_t plDante, PlDanteStyleType style
+
+	/// <summary>
+	/// Player Dante On Change Style event
+	/// Occurs before the style is actually set.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">pointer PlayerDante, enum PLDanteStyleType</param>
 	template<typename T>
 	static void pl0100_style_set_request_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t/*Dante*/, PlDanteStyleType /*style*/>> handler)
 	{
@@ -262,6 +297,12 @@ public:
 	}
 
 	//uintptr_t threadCtxt uintptr_t pl, float* val, int dtAddType, bool fixedValue
+
+	/// <summary>
+	/// On Add DT to Gauge Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadCtxt uintptr_t player, float* val, int dtAddType, bool fixedValue</param>
 	template<typename T>
 	static void pl_add_dt_gauge_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ float* /*val*/, int/*dtAddType*/, bool/*fixedValue*/>> handler)
 	{
@@ -277,6 +318,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t pl, uintptr_t HitInfo
+
+	/// <summary>
+	/// On Just Escape Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">pointer ThreadContext, pointer player, pointer HitInfo</param>
 	template<typename T>
 	static void pl_on_just_escape_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*pl*/ uintptr_t /*HitInfo*/>> handler)
 	{
@@ -292,6 +339,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t fsm2PlPosCntrAction
+
+	/// <summary>
+	/// Fsm2.PlayerPositionControllerAction On Update Speed Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">threadCtxt, uintptr_t fsm2PlPosCntrAction</param>
 	template<typename T>
 	static void pl_on_fsm2_pos_cntr_action_update_speed_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t/*fsm2PlPosCntrAction*/>> handler)
 	{
@@ -307,6 +360,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t fsm2PlPosCntrAction, uintptr_t behavTreeActionArg
+
+	/// <summary>
+	/// Fsm2.PlayerPositionControllerAction On Start Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadCtxt, uintptr_t fsm2PlPosCntrAction, uintptr_t behavTreeActionArg</param>
 	template<typename T>
 	static void pl_on_fsm2_pos_cntr_action_start_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*fsm2PlPosCntrAction*/ uintptr_t /*behavTreeActionArg*/>> handler)
 	{
@@ -322,6 +381,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl, bool isUnload
+
+	/// <summary>
+	/// PlayerManager Player Unload Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">uintptr_t threadCtxt, uintptr_t plManager, uintptr_t pl, bool isUnload</param>
 	template<typename T>
 	static void on_pl_manager_pl_unload_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t,/*plManager*/ uintptr_t /*pl*/, bool /*isUnload*/>> handler)
 	{
@@ -337,6 +402,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t pl0800, uintptr_t gameObjTarget, bool *skipOrigFuncCall
+	
+	/// <summary>
+	/// Player Vergil Set Air Trick Action Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">pointer threadCtxt, pointer vergil, pointer Target GameObject, bool skipOrigFuncCall</param>
 	template<typename T>
 	static void on_pl0800_set_air_trick_action_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*pl*/ uintptr_t, /*gameObjTarget*/ bool* /*skipOrigFuncCall*/>> handler)
 	{
@@ -353,6 +424,12 @@ public:
 
 
 	// uintptr_t threadCtxt, uintptr_t fsm2.Player.PlayerAction, uintptr_t via.BehaviourTree.ActionArg, bool isNotifyOnly
+
+	/// <summary>
+	/// Fsm2 Player Action Notify Action End Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">pointer threadcontex, pointer fsm2.Player.PlayerAction, pointer via.BehaviourTree.ActionArg, bool isNotifyOnly</param>
 	template<typename T>
 	static void on_fsm2_player_player_action_notify_action_end_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*fsm2.Player.PlayerAction*/ uintptr_t,
 		/*via.BehaviourTree.ActionArg*/ bool /*isNotifyOnly*/>> handler)
@@ -370,6 +447,12 @@ public:
 	}
 
 	// uintptr_t threadCtxt, uintptr_t plNero, bool isSecond
+	
+	/// <summary>
+	/// Table Hopper Event
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="handler">pointer ThreadContext, pointer Nero, bool isSecond</param>
 	template<typename T>
 	static void pl_nero_set_table_hopper_sub(std::shared_ptr<Events::EventHandler<T, uintptr_t, /*threadCtxt*/ uintptr_t, /*plNero*/ bool /*isSecond*/>> handler)
 	{

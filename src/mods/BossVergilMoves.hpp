@@ -51,12 +51,17 @@ public:
 private:
 
 	Pl0300TrickType _pl0300TrickType = Pl0300TrickType::ToEnemy;
-
+	/// <summary>
+	/// Class for tie-ing Vergil to a boss vergil counterpart?
+	/// </summary>
 	class PlPair
 	{
 
 	public:
-
+		/// <summary>
+		/// Destroy the Doppelganger
+		/// </summary>
+		/// <returns></returns>
 		void destroy_doppel() noexcept
 		{
 			_doppelDestroyCoroutine.stop();
@@ -612,6 +617,7 @@ private:
 		static inline StabReaction _stabEmReaction = StabReaction::DamageStandL;
 
 		PlPair() = delete;
+
 		PlPair(uintptr_t pl0800, std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, const InputSystem* inputSysMod, uintptr_t threadCntx) : _pl0800(pl0800), _pl0300(pl0300), _inputSys(inputSysMod)
 		{
 			_doppelDestroyCoroutine.ignoring_update_on_pause(true);
@@ -735,7 +741,12 @@ private:
 			if (_pairCount == 0)
 				_plCamCntrSetPlHook = nullptr;
 		}
-
+		/// <summary>
+		/// Reset to player vergil control if reset 
+		/// </summary>
+		/// <param name="threadCntxt"></param>
+		/// <param name="plId"></param>
+		/// <param name="callPl0800EndCutscene"></param>
 		void on_pl_reload_reset()
 		{
 			force_end_moves();
@@ -785,6 +796,7 @@ private:
 			pl0300->end_cutscene();
 			pl0300->destroy_all_related_shells();
 		}
+		
 
 		void change_pl0300_enable_state(bool enable)
 		{

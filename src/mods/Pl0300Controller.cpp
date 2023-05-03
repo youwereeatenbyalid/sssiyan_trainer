@@ -1,6 +1,12 @@
 #include "Pl0300Controller.hpp"
 #include "Pl0300ControllerManager.hpp"
 
+/// <summary>
+/// Generate Boss Doppelganger
+/// </summary>
+/// <param name="isFirst"></param>
+/// <param name="hp"></param>
+/// <param name="attackRate"></param>
 void PlCntr::Pl0300Cntr::Pl0300Controller::generate_doppel(bool isFirst, float hp, float attackRate)
 {
 	check_doppel_ref_correct();
@@ -75,7 +81,9 @@ PlCntr::Pl0300Cntr::Pl0300Controller::Pl0300Controller(uintptr_t pl0300, PlCntr:
 		_isStaticInitRequested = false;
 	}
 }
-
+/// <summary>
+/// Destructor function, destroys all shells, doppelganger, and finally the player object
+/// </summary>
 PlCntr::Pl0300Cntr::Pl0300Controller::~Pl0300Controller()
 {
 	if (_isDoppelDestroyRequested)

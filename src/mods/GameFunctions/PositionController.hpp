@@ -2,6 +2,9 @@
 #include <mods/GameFunctions/GameFunc.hpp>
 namespace GameFunctions
 {
+	/// <summary>
+	/// Set the transform 
+	/// </summary>
 	class Transform_SetPosition : public GameFunc<void>
 	{
 	private:
@@ -22,18 +25,29 @@ namespace GameFunctions
 			fAddr += 0x258BC0;
 			set_pos = (f_set_pos)fAddr;
 		}
-
+		/// <summary>
+		/// Constructor function
+		/// </summary>
+		/// <param name="transformObj">transform to write to</param>
 		Transform_SetPosition(void *transformObj) : Transform_SetPosition() 
 		{ 
 			transform = transformObj;
 		}
-
+		/// <summary>
+		/// Set position of new transform.
+		/// </summary>
+		/// <param name="transformObj"></param>
+		/// <param name="newPos"></param>
 		void invoke(void *transformObj, Vec3 newPos)
 		{
 			transform = transformObj;
 			invoke(newPos);
 		}
 
+		/// <summary>
+		/// Set position of previously specified transform
+		/// </summary>
+		/// <param name="newPos"></param>
 		void invoke(Vec3 newPos)
 		{
 			if(!IsBadReadPtr(transform, 8))
@@ -47,8 +61,13 @@ namespace GameFunctions
 		void set_transform(void *obj) {transform = obj; }
 
 		void *get_transform() const { return transform; }
-
-		//Change character pos and colliders pos. Only for character obj.
+		
+		/// <summary>
+		/// Change character position and colliders position. Only for character obj.
+		/// </summary>
+		/// <param name="character">character to write to</param>
+		/// <param name="newPos">new position</param>
+		/// <param name="moveCollidersOnly"></param>
 		static void set_character_pos(uintptr_t character, Vec3 newPos, bool moveCollidersOnly = false)
 		{
 			if(character == 0)
@@ -81,7 +100,9 @@ namespace GameFunctions
 		}
 
 	};
-
+	/// <summary>
+	/// 
+	/// </summary>
 	class PositionErrorCorrector : public GameFunc<void>
 	{
 	private:
@@ -189,7 +210,9 @@ namespace GameFunctions
 			restart();
 		}
 	};
-
+	/// <summary>
+	/// Wrapper for set SafePosition (I believe this is last "safe" location of player for rubberbanding back to if something weird happens out of bounds?
+	/// </summary>
 	class SetSafePosition : public GameFunc<void>
 	{
 	private:

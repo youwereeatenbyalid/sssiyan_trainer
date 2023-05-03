@@ -3,6 +3,9 @@
 //clang-format off
 namespace GameFunctions
 {
+	/// <summary>
+	/// Function for instatiating gameobject from prefab
+	/// </summary>
 	class PrefabInstantiate : public GameFunc<uintptr_t>
 	{
 	private:
@@ -18,6 +21,11 @@ namespace GameFunctions
 			fAddr += 0x252100;
 			prefab_instantiate = (prefabInstantiate)fAddr;
 		}
+		/// <summary>
+		/// Constructor function
+		/// </summary>
+		/// <param name="prefab">prefab to instatiate</param>
+		/// <param name="pos">position to instantiate to</param>
 		PrefabInstantiate(uintptr_t prefab, Vec3 pos) : PrefabInstantiate()
 		{
 			this->pos = pos;
@@ -32,7 +40,10 @@ namespace GameFunctions
 		{
 			pfb = prefab;
 		}
-
+		/// <summary>
+		/// Instantiate object prefab at object position
+		/// </summary>
+		/// <returns></returns>
 		uintptr_t invoke() override
 		{
 			if (fAddr != NULL && pfb != 0)
@@ -47,13 +58,20 @@ namespace GameFunctions
 				return prefab_instantiate(NULL, (void*)pfb, pos);
 			return 0;
 		}
-
+		/// <summary>
+		/// Operator call. Instatiate prefab at position
+		/// </summary>
+		/// <param name="prefab">prefab to instatiate</param>
+		/// <param name="pos">position to instantiate to</param>
+		/// <returns></returns>
 		uintptr_t operator()(uintptr_t prefab, const Vec3& pos)
 		{
 			return invoke(prefab, pos);
 		}
 	};
-
+	/// <summary>
+	/// Function for instatiating gameobject from prefab. Takes scale and rotation parameters
+	/// </summary>
 	class PrefabInstantiateScale : public GameFunc<uintptr_t>
 	{
 	private:
@@ -105,12 +123,26 @@ namespace GameFunctions
 				return prefab_instantiate_scale(NULL, (void*)prefab, position, rotation, scale);
 			return 0;*/
 		}
-
+		/// <summary>
+		/// Instatiate prefab at position
+		/// </summary>
+		/// <param name="prefab">prefab to instatiate</param>
+		/// <param name="position">position to instantiate to</param>
+		/// <param name="rotation">quaternion to specify gameobject rotation</param>
+		/// <param name="scale">size of gameobject</param>
+		/// <returns></returns>
 		uintptr_t operator()(uintptr_t prefab, const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		{
 			return invoke(prefab, position, rotation, scale);
 		}
 
+		/// <summary>
+		/// Instatiate previously specified prefab at position
+		/// </summary>
+		/// <param name="position">position to instantiate to</param>
+		/// <param name="rotation">quaternion to specify gameobject rotation</param>
+		/// <param name="scale">size of gameobject</param>
+		/// <returns></returns>
 		uintptr_t invoke(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		{
 			pos = position;
@@ -121,7 +153,13 @@ namespace GameFunctions
 				return prefab_instantiate_scale(NULL, (void*)pfb, position, rotation, scale);
 			return 0;*/
 		}
-
+		/// <summary>
+		/// Operator call. Instatiate previously specified prefab at position
+		/// </summary>
+		/// <param name="position">position to instantiate to</param>
+		/// <param name="rotation">quaternion to specify gameobject rotation</param>
+		/// <param name="scale">size of gameobject</param>
+		/// <returns></returns>
 		uintptr_t operator()(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		{
 			return invoke(position, rotation, scale);

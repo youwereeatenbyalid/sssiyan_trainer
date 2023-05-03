@@ -4,10 +4,15 @@
 //clang-format off
 namespace GameFunctions
 {
+	/// <summary>
+	///
+	/// </summary>
 	class CreateShell : public GameFunc<volatile void*>
 	{
 		private:
-			//helper
+			/// <summary>
+			/// Helper Class
+			/// </summary>
 			class ShellListSetCapacity : private GameFunc<bool>
 			{
 			private:
@@ -30,17 +35,26 @@ namespace GameFunctions
 				ShellListSetCapacity(){ }
 
 			public:
-				
+				/// <summary>
+				/// 
+				/// </summary>
+				/// <param name="capacity"></param>
+				/// <param name="threadContext"></param>
+				/// <returns></returns>
 				static bool invoke(int capacity, uintptr_t threadContext)
 				{
 					bool res = false;
 					set_capacity = (f_set_Capacity)(g_framework->get_module().as<uintptr_t>() + fAddr);
 					if (threadContext != 0)
 					{
+						//Retrieve ShellManager singleton from offset
 						uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+						//if ShellManager exists
 						if (shellMng != 0)
 						{
+							//get shell list from ShellManager
 							uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
+							//if ShellManager gameobject exists
 							uintptr_t mngObj = *(uintptr_t*)(lst+0x10);
 							if (mngObj != 0)
 							{
@@ -53,7 +67,10 @@ namespace GameFunctions
 					}
 					return res;
 				}
-
+				/// <summary>
+				/// retrieve the capacity of the shell manager? Is this how many shells are left?
+				/// </summary>
+				/// <returns></returns>
 				static int get_capacity()
 				{
 					int capacity = -1;
@@ -71,7 +88,9 @@ namespace GameFunctions
 				}
 				
 			};
-
+			/// <summary>
+			/// helper struct for creating JdC sound effects?
+			/// </summary>
 			struct SoundData
 			{
 				byte mngOffs[0xF] = "";

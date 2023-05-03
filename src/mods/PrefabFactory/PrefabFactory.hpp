@@ -5,6 +5,9 @@
 
 namespace PfbFactory
 {
+	/// <summary>
+	/// class for creating prefabs to instatiate
+	/// </summary>
 	class PrefabFactory
 	{
 	private:

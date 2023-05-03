@@ -1,14 +1,17 @@
 #pragma once
 #include "Mod.hpp"
 #include "Coroutine/Coroutines.hpp"
-#include "PrefabFactory/PrefabFactory.hpp"
+//#include "PrefabFactory/PrefabFactory.hpp"
 #include "EndLvlHooks.hpp"
 #include "PlayerTracker.hpp"
 #include "QuickSilverController.hpp"
-#include "PlSetActionData.hpp"
+//#include "PlSetActionData.hpp"
 
 //clang-format off
 
+/// <summary>
+/// Allows players to use witch time. Depends on PlayerTracker, QuicksilverController, and EndLvlHooks
+/// </summary>
 class WitchTime : public Mod, private EndLvlHooks::IEndLvl
 {
 private:

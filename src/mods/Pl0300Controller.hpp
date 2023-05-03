@@ -54,7 +54,9 @@ namespace PlCntr
 			float distanceCheckGround = 5.0f;//0x80
 			float radiusFinishAttack = 5.0f;//0x50
 		};
-
+		/// <summary>
+		/// Controller class for Boss Vergil. Inherits from playercontroller class.
+		/// </summary>
 		class Pl0300Controller : public PlController
 		{
 		private:
@@ -146,7 +148,12 @@ namespace PlCntr
 					return;
 				*(gf::Vec3*)(emParam + 0xA0) = pos;
 			}
-
+			/// <summary>
+			/// Sets DT when possible.
+			/// </summary>
+			/// <param name="dt"></param>
+			/// <param name="isNotProduction"></param>
+			/// <returns></returns>
 			inline bool set_dt(DT dt, bool isNotProduction = false) override
 			{
 				if (!_isStarted)
@@ -376,7 +383,9 @@ namespace PlCntr
 				if (workRate != 0)
 					*(float*)(workRate + 0x18) = workRateOnHit;
 			}
-
+			/// <summary>
+			/// Add boss vergil to playermanager singleton
+			/// </summary>
 			inline void pl_manager_request_add()
 			{
 				if (!_isStarted)

@@ -154,8 +154,8 @@ private:
     std::unique_ptr<FunctionHook> m_ui_costume_name_hook{};
     
     // asm detours
-    std::unique_ptr<FunctionHook> m_scroll_list_hook{};
-    std::unique_ptr<FunctionHook> m_costume_list_hook{};
+    std::shared_ptr<Detour_t> m_scroll_list_hook{};
+    std::shared_ptr<Detour_t> m_costume_list_hook{};
 
     //Real men's hooks
     static void* __fastcall file_loader_internal(uintptr_t this_p, uintptr_t RDX, const wchar_t* file_path);

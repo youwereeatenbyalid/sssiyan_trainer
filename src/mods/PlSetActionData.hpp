@@ -12,7 +12,9 @@ class ActionEventArgs : Events::EventArgs
 {
 	const char* currentAction;
 };
-
+/// <summary>
+/// Create On Player Action Events for other mods to use.
+/// </summary>
 class PlSetActionData : public Mod
 {
 public:
@@ -31,6 +33,7 @@ private:
 	static inline std::array<char, ACTION_STR_LENGTH> realActionStr;
 	static inline std::array<char, ACTION_STR_LENGTH> doppelActionStr;
 	static inline std::array<char, ACTION_STR_LENGTH> doppelRealActionStr;
+	//store boss vergil action name
 	static inline std::array<char, ACTION_STR_LENGTH> plBossActionStr;
 	static inline std::array<char, ACTION_STR_LENGTH> realPlBossActionStr;
 
@@ -147,15 +150,32 @@ public:
 		return cmp_action_str(doppelRealActionStr, doppelRealActionLength, str);
 	}
 
+	/// <summary>
+	/// Hook for Player.SetAction
+	/// </summary>
+	/// <param name="vm">thread context</param>
+	/// <param name="curPl">player having action set</param>
+	/// <param name="dotNetString">name of action </param>
+	/// <param name="layerNo"></param>
+	/// <param name="startFrame"></param>
+	/// <param name="interpolationFrame"></param>
+	/// <param name="interpolationMode"></param>
+	/// <param name="interpolationCurve"></param>
+	/// <param name="isImmediate"></param>
+	/// <param name="passSelect"></param>
+	/// <param name="isPuppetTransition"></param>
+	/// <param name="actionPriority"></param>
 	static void set_action_hook(uintptr_t vm, uintptr_t curPl, uintptr_t dotNetString, uint32_t layerNo, float startFrame, float interpolationFrame, int interpolationMode, int interpolationCurve,
 		bool isImmediate, bool passSelect, bool isPuppetTransition, int actionPriority)
 	{
 		_mod->cur_action_hook->get_original<decltype(set_action_hook)>()(vm, curPl, dotNetString, layerNo, startFrame, interpolationFrame, interpolationMode, interpolationCurve, isImmediate,
 			passSelect, isPuppetTransition, actionPriority);
+		//If Boss Vergil & Enemy
 		if (*(int*)(curPl + 0xE64) == 3 || *(int*)(curPl + 0x108) == 1)
 		{
 			_strset(plBossActionStr.data(), 0);
 			gf::StringController::get_str(dotNetString, &plBossActionStr, PlSetActionData::plBossActualLength);
+			//If not taking an wait action, invoke newPlBossAction event
 			if (strcmp(plBossActionStr.data(), "None") != 0 && strcmp(plBossActionStr.data(), "Wait") != 0 && strcmp(plBossActionStr.data(), "LongWait") != 0 && strcmp(plBossActionStr.data(), "PutOut") != 0)
 			{
 				_strset(realPlBossActionStr.data(), 0);
@@ -165,18 +185,21 @@ public:
 		}
 		else
 		{
+			//if not pl vergil doppelganger
 			bool isPl800Doppel = *(int*)(curPl + 0xE64) == 4 && *(bool*)(curPl + 0x17F0);
 			if (!isPl800Doppel)
 			{
+				//store pl vergil action
 				_strset(actionStr.data(), 0);
 				gf::StringController::get_str(dotNetString, &actionStr, PlSetActionData::actualLength);
 			}
 			else
 			{
+				//store pl doppelganger action
 				_strset(doppelActionStr.data(), 0);
 				gf::StringController::get_str(dotNetString, &doppelActionStr, PlSetActionData::doppelActualLength);
 			}
-
+			//if not taking wait action, invoke new newAction event
 			if (strcmp(actionStr.data(), "None") != 0 && strcmp(actionStr.data(), "Wait") != 0 && strcmp(actionStr.data(), "LongWait") != 0 && strcmp(actionStr.data(), "PutOut") != 0
 				&& strcmp(actionStr.data(), "PutAwayYamato") && strcmp(actionStr.data(), "PutAwayForceedge"))
 			{

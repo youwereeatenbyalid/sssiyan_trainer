@@ -65,7 +65,9 @@ namespace QuickSilverCtrl
 		//Set shell's character owner
 		inline void set_owner(uintptr_t owner) noexcept { _owner = owner; }
 	};
-
+	/// <summary>
+	/// Controller for Slow World Shell. Relies on Events from PlayerTracker to function correctly, any mod using this must add PlayerTracker as a dependency.
+	/// </summary>
 	class QuickSilverSlowWorldController : public virtual QuickSilverControllerBase
 	{
 	public:

@@ -358,7 +358,10 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::destroy_game_obj(const std::we
     }
     return false;
 }
-
+/// <summary>
+/// Create a prefab for instatiating a boss vergil instance.
+/// </summary>
+/// <param name="exCostume">if the prefab should be the EX variant</param>
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::load_pfb(bool exCostume)
 {
     if (exCostume)

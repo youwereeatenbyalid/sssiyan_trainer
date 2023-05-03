@@ -196,14 +196,13 @@ namespace GameFunctions
 		}
 
 		/// <summary>
-		/// Return nullopt if win.h isBadReadPtr() happened.
+		/// safely retrieves an address using a pointer chain.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
-		/// <param name="offsets">Other offsets.</param>
-		/// <param name="get_addr">Set true if u don't want to get ptr value.</param>
-		/// <param name="isDerefedBase">Is dereference base passed.</param>
-		/// <returns></returns>
+		/// <param name="offsets">Array of offsets in pointer chain.</param>
+		/// <param name="isDerefedBase">Set true if a dereferenced base is passed.</param>
+		/// <returns>the address at the end of a pointer chain, or nullopt if win.h isBadReadPtr() happened. </returns>
 		template <size_t offsCount>
 		static std::optional<uintptr_t> get_ptr(uintptr_t base, const std::array<uintptr_t, offsCount> &offsets, bool isDerefedBase = false) noexcept
 		{
@@ -229,6 +228,14 @@ namespace GameFunctions
 			return std::nullopt;
 		}
 
+		/// <summary>
+		/// safely retrieves a value using a pointer chain.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
+		/// <param name="offsets">Array of offsets in pointer chain.</param>
+		/// <param name="isDerefedBase">Set true if a dereferenced base is passed.</param>
+		/// <returns>the value at the end of a pointer chain, or nullopt if win.h isBadReadPtr() happened. </returns>
 		template<typename T, size_t offsCount>
 		static std::optional<T> get_ptr_val(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, bool isDerefedBase = false) noexcept
 		{
@@ -241,12 +248,12 @@ namespace GameFunctions
 		}
 
 		/// <summary>
-		/// Try to get volatile pointer to data via offsets.
+		/// unsafe retrieval of an address using a pointer chain.
 		/// </summary>
 		/// <typeparam name="T">Pointer type</typeparam>
-		/// <param name="offsets">Other offsets</param>
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
-		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <param name="offsets">Array of offsets in pointer chain</param>
+		/// <param name="isDerefedBase">Set true if a dereferenced base is passed</param>
 		/// <returns>Returns pointer if it's valid, otherwise nullptr.</returns>
 		template <typename T, size_t offsCount>
 		static volatile T* get_ptr(const std::array<uintptr_t, offsCount>& offsets, uintptr_t base, bool isDerefedBase = false) noexcept
@@ -258,13 +265,13 @@ namespace GameFunctions
 		}
 
 		/// <summary>
-		/// Try to write to pointer
+		/// safely writes a value to to an address using a pointer chain.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="base">DevilMayCry5.exe + baseOffset.</param>
-		/// <param name="offsets">Other offsets.</param>
+		/// <param name="offsets">Array of offsets in pointer chain.</param>
 		/// <param name="val">New *ptr value</param>
-		/// <param name="isDerefedBase">Is dereference base passed</param>
+		/// <param name="isDerefedBase">Set true if a dereferenced base is passed</param>
 		/// <returns>Return true if success, false if ptr isn't valid</returns>
 		template <typename T, size_t offsCount>
 		static bool try_to_write(uintptr_t base, const std::array<uintptr_t, offsCount>& offsets, T val, bool isDerefedBase = false) noexcept
@@ -278,11 +285,19 @@ namespace GameFunctions
 			return false;
 		}
 	};
-
+	/// <summary>
+	/// Helper class for reading RE strings as different string types.
+	/// </summary>
 	class StringController
 	{
 	public:
 
+		/// <summary>
+		/// converts from RE string to std::string.
+		/// </summary>
+		/// <param name="dotNetString">input string</param>
+		/// <param name="isNoOffs"></param>
+		/// <returns>dotNetString as std::string</returns>
 		static std::string get_str(uintptr_t dotNetString, bool isNoOffs = false) noexcept
 		{
 			auto length = *(int32_t*)(dotNetString + 0x10);
@@ -294,21 +309,38 @@ namespace GameFunctions
 				res[i] = *(byte*)(dotNetString + startOffs + j);
 			return std::move(res);
 		}
-
+		/// <summary>
+		/// converts from RE string to std::wstring.
+		/// </summary>
+		/// <param name="dotNetString">input string</param>
+		/// <param name="isNoOffs"></param>
+		/// <returns>dotNetString as std::wstring</returns>
 		static std::wstring get_str(uintptr_t dotNetString) noexcept
 		{
 			if (dotNetString == 0)
 				return std::wstring();
 			return std::move(std::wstring((const wchar_t*)(dotNetString + 0x14)));
 		}
-
+		/// <summary>
+		/// converts from RE string to a raw wstring.
+		/// </summary>
+		/// <param name="dotNetString">input string</param>
+		/// <param name="isNoOffs"></param>
+		/// <returns>dotNetString as a wstr </returns>
 		static const wchar_t const* get_raw_wstr(uintptr_t dotNetString) noexcept
 		{
 			if (dotNetString == 0)
 				return nullptr;
 			return (const wchar_t*)(dotNetString + 0x14);
 		}
-
+		/// <summary>
+		/// Write .Net string to passed char array
+		/// </summary>
+		/// <param name="dotNetString">.Net string to read</param>
+		/// <param name="strOut">output array to write to</param>
+		/// <param name="dotNetStrLengthOut">size of .Net string</param>
+		/// <param name="isNoOffs"></param>
+		/// <returns></returns>
 		template<size_t size>
 		static void get_str(uintptr_t dotNetString, std::array<char, size>* strOut, unsigned int &dotNetStrLengthOut, bool isNoOffs = false) noexcept
 		{
@@ -323,7 +355,12 @@ namespace GameFunctions
 				(*strOut)[i] = *(byte*)(dotNetString + startOffs + j);
 			*(strOut->data() + dotNetStrLengthOut) = 0;
 		}
-
+		/// <summary>
+		/// gets the length of an RE string.
+		/// </summary>
+		/// <param name="dotNetString">input string</param>
+		/// <param name="isNoOffs"></param>
+		/// <returns>dotNetString as a wstr </returns>
 		static unsigned int get_str_length(uintptr_t dotNetString)
 		{
 			if (PtrController::is_bad_ptr(dotNetString))
@@ -331,6 +368,12 @@ namespace GameFunctions
 			return *(unsigned int*)(dotNetString + 0x10);
 		}
 
+		/// <summary>
+		/// String comparison between RE string and char sequence.
+		/// </summary>
+		/// <param name="dotNetString"></param>
+		/// <param name="str"></param>
+		/// <returns></returns>
 		static bool str_cmp(uintptr_t dotNetString, const char* str) noexcept
 		{
 			/*if (PtrController::is_bad_ptr(dotNetString))
@@ -347,7 +390,12 @@ namespace GameFunctions
 			}
 			return true;
 		}
-
+		/// <summary>
+		/// String comparison between RE string and wchar sequence.
+		/// </summary>
+		/// <param name="dotNetString"></param>
+		/// <param name="str"></param>
+		/// <returns></returns>
 		static bool str_cmp(uintptr_t dotNetString, const wchar_t* str) noexcept
 		{
 			/*if (PtrController::is_bad_ptr(dotNetString))
@@ -360,7 +408,9 @@ namespace GameFunctions
 		}
 	};
 
-	//Represents System.String with same static mng offs for all strings
+	/// <summary>
+	/// Represents System.String with same static mng offsets for all strings
+	/// </summary>
 	class SysString
 	{
 	private:
@@ -369,7 +419,10 @@ namespace GameFunctions
 		int _length = 0;
 
 		static inline REManagedObject* _mngString = nullptr;
-
+		/// <summary>
+		/// reallocates the system string to hold the new value
+		/// </summary>
+		/// <param name="newStr"></param>
 		void realloc(const wchar_t* newStr)
 		{
 			_length = wcslen(newStr);
@@ -383,6 +436,8 @@ namespace GameFunctions
 				_mngString = sdk::create_instance("System.String");
 				typedef void(__cdecl* f_add_ref)(REManagedObject*);
 				auto base = g_framework->get_module().as<uintptr_t>();
+				//this needs to be changed to not be a static offset
+				//calls a function that adds a reference to the RE string so garbage collection doesn't immediately eat it. 
 				((f_add_ref)(base + 0x2526820))(_mngString);
 			}
 			memcpy(_data, (const void*)_mngString, 0x10);//just copy all remanagedObj stuff to fake string
@@ -428,18 +483,20 @@ namespace GameFunctions
 			return _str[indx];
 		}
 	};
-
+	/// <summary>
+	/// Helper class for reading from REFramework lists.
+	/// </summary>
 	class ListController
 	{
 	public:
 
 		/// <summary>
-		/// Convert .Net List<T> to std::vector<T>.
+		/// safely Convert .Net List<T> to std::vector<T>.
 		/// </summary>
 		/// <typeparam name="T">Use * for ref types</typeparam>
-		/// <param name="listPtr"></param>
-		/// <param name="listCapacityOut">Out param, return .net List<T>.Capacity.</param>
-		/// <returns>Returns std::nullopt if IsBadReadPtr() happens.</returns>
+		/// <param name="listPtr">address of list</param>
+		/// <param name="listCapacityOut">Out param, returns the .net List<T>.Capacity.</param>
+		/// <returns>Returns std::nullopt if IsBadReadPtr() happens, or a vector representation of the RE list.</returns>
 		template <typename T>
 		static std::optional<std::vector<T>> get_dotnet_list(uintptr_t listPtr, size_t& listCapacityOut) noexcept
 		{
@@ -461,7 +518,13 @@ namespace GameFunctions
 			}
 			return std::make_optional<std::vector<T>>(res);
 		}
-
+		/// <summary>
+		/// Retrieves an item from an RE list
+		/// </summary>
+		/// <typeparam name="T">Type of item being retrieved</typeparam>
+		/// <param name="listPtr">pointer to list</param>
+		/// <param name="indx">index of item to retrieve</param>
+		/// <returns>the item from the list at the specified index</returns>
 		template<typename T>
 		static T& get_item(uintptr_t listPtr, int indx)
 		{
@@ -470,7 +533,13 @@ namespace GameFunctions
 			uintptr_t items = *(uintptr_t*)(listPtr + 0x10);
 			return *(T*)(items + 0x20 + sizeof(T) * indx);
 		}
-
+		/// <summary>
+		/// Retrieves an item from an RE array
+		/// </summary>
+		/// <typeparam name="T">Type of item being retrieved</typeparam>
+		/// <param name="arrayPtr">pointer to array</param>
+		/// <param name="indx">index of item to retrieve</param>
+		/// <returns>the item from the array at the specified index</returns>
 		template<typename T>
 		static T& get_array_item(uintptr_t arrayPtr, int indx)
 		{
@@ -480,7 +549,11 @@ namespace GameFunctions
 		static int get_list_count(uintptr_t dotNetList) noexcept
 		{ return *(int*)(dotNetList + 0x18);
 		}
-
+		/// <summary>
+		/// return how many items can fit in the list passed.
+		/// </summary>
+		/// <param name="dotNetList">The .Net List<T> being queried</param>
+		/// <returns>returns the .net List<T>.Capacity</returns>
 		static int get_list_capacity(uintptr_t dotNetList) noexcept
 		{
 			auto items = *(uintptr_t*)(dotNetList + 0x10);
@@ -507,12 +580,19 @@ namespace GameFunctions
 		{
 			fAddr = g_framework->get_module().as<uintptr_t>();//it's not good relative to "static" behavior
 		}
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>address of game function</returns>
 		uintptr_t get_address() const
 		{
 			return fAddr;
 		}
-
+		/// <summary>
+		/// SDK call to get_thread_context.
+		/// </summary>
+		/// <param name="unk"></param>
+		/// <returns></returns>
 		virtual inline uintptr_t get_thread_context(uint32_t unk = -1)
 		{
 			return (uintptr_t)((void*)sdk::get_thread_context(unk));

@@ -61,6 +61,11 @@ namespace GameFunctions
 		Quaternion rot;
 
 	public:
+		/// <summary>
+		/// Setup to apply effect to a model
+		/// </summary>
+		/// <param name="gameModel">model to apply effect to</param>
+		/// <param name="staticEffectID">ID of effect</param>
 		GameModelRequestSetEffect(uintptr_t gameModel, std::shared_ptr<EffectID> staticEffectID) : model(gameModel), effectID(staticEffectID)
 		{
 			if (staticEffectID == nullptr)
@@ -70,7 +75,10 @@ namespace GameFunctions
 			request_set_effect = (f_request_set_effect)fAddr;
 			kill_effect = (f_kill_effect)killEfxAddr;
 		}
-
+		/// <summary>
+		/// create effect and previously specified position and rotation.
+		/// </summary>
+		/// <returns></returns>
 		volatile void* invoke() override
 		{
 			if (!utility::isGoodReadPtr(model, 8))
@@ -78,35 +86,58 @@ namespace GameFunctions
 			return request_set_effect(get_thread_context(), model, effectID.get(), pos, rot);
 		}
 
+		/// <summary>
+		/// operator call for class, create effect and previously specified position and rotation
+		/// </summary>
+		/// <returns></returns>
 		volatile void* operator()() override
 		{
 			return invoke();
 		}
 
+		/// <summary>
+		/// create effect at specified position and rotation
+		/// </summary>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <returns></returns>
 		volatile void* invoke(Vec3 pos, Quaternion rot)
 		{
 			this->pos = pos;
 			this->rot = rot;
 			return invoke();
 		}
-
+		/// <summary>
+		/// kill the effect being created by the class.
+		/// </summary>
 		void kill_efx()
 		{
 			if (!utility::isGoodReadPtr(model, 8))
 				return;
 			kill_effect(get_thread_context(), model, effectID.get());
 		}
-
+		/// <summary>
+		/// operator call for class, create effect at specified position and rotation
+		/// </summary>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <returns></returns>
 		volatile void* operator()(Vec3 pos, Quaternion rot)
 		{
 			return invoke(pos, rot);
 		}
-
+		/// <summary>
+		/// get ID of effect assigned
+		/// </summary>
+		/// <returns></returns>
 		std::shared_ptr<EffectID> get_effect_id()
 		{
 			return effectID;
 		}
-
+		/// <summary>
+		/// get address of kill effect function
+		/// </summary>
+		/// <returns></returns>
 		uintptr_t get_kill_efx_addr() const noexcept
 		{
 			return killEfxAddr;
