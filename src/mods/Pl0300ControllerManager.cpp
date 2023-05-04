@@ -159,7 +159,7 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::reset(EndLvlHooks::EndType res
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_start_func_hook(uintptr_t threadCntx, uintptr_t pl0300)
 {
-    _mod->_pl0300StartHook->get_original<decltype(Pl0300ControllerManager::pl0300_start_func_hook)>()(threadCntx, pl0300);
+    _mod->_pl0300StartDetour->get_trampoline<decltype(Pl0300ControllerManager::pl0300_start_func_hook)>()(threadCntx, pl0300);
     //pl0300.Start() setting up many fields, so i need to reset it after Start() was called for controlled pl0300.
     for (const auto i : _mod->_pl0300List)
     {
@@ -249,7 +249,7 @@ int PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_get_mission_n_hook(uintp
         if (auto plType = pl0300Ctrl->get_pl0300_type(); plType == Pl0300Type::PlHelper || plType == Pl0300Type::Em6000Friendly)
             return 0x3E;
     }
-    return _mod->_pl0300GetMissionHook->get_original<decltype(pl0300_get_mission_n_hook)>()(threadCntx, pl0300);
+    return _mod->_pl0300GetMissionDetour->get_trampoline<decltype(pl0300_get_mission_n_hook)>()(threadCntx, pl0300);
 }
 
 bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(uintptr_t threadCtxt, uintptr_t pl0300)
@@ -263,14 +263,14 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_check_dt_cancel_hook(ui
             break;
         }
     }
-    bool res = _mod->_pl0300CheckDtCancelHook->get_original<decltype(pl0300_check_dt_cancel_hook)>()(threadCtxt, pl0300);
+    bool res = _mod->_pl0300CheckDtCancelDetour->get_trampoline<decltype(pl0300_check_dt_cancel_hook)>()(threadCtxt, pl0300);
     *(CharGroup*)(pl0300 + 0x108) = charGroup;
     return res;
 }
 
 bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintptr_t threadCtxt, uintptr_t character)
 {
-    bool res = _mod->_checkEmThinkOffHook->get_original<decltype(check_em_think_off_hook)>()(threadCtxt, character);
+    bool res = _mod->_checkEmThinkOffDetour->get_trampoline<decltype(check_em_think_off_hook)>()(threadCtxt, character);
     for (const auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == character)
@@ -287,7 +287,7 @@ bool PlCntr::Pl0300Cntr::Pl0300ControllerManager::check_em_think_off_hook(uintpt
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_hook(uintptr_t threadCtxt, uintptr_t pl0300)
 {
-    _mod->_pl0300UpdateLockOnHook->get_original<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
+    _mod->_pl0300UpdateLockOnDetour->get_trampoline<decltype(pl0300_update_lock_on_hook)>()(threadCtxt, pl0300);
     for (auto i : _mod->_pl0300List)
     {
         if (i->get_pl() == pl0300 && !i->is_doppel())
@@ -307,11 +307,11 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_update_lock_on_target_o
             bool skipCall = false;
             _mod->_pl0300UpdateLockOnTargetEvent.invoke(threadCtxt, i, &skipCall);
             if (!skipCall)
-                _mod->_pl0300UpdateLockOnTargetOnEnemyHook->get_original<decltype(pl0300_update_lock_on_target_on_enemy_hook)>()(threadCtxt, pl0300);
+                _mod->_pl0300UpdateLockOnTargetOnEnemyDetour->get_trampoline<decltype(pl0300_update_lock_on_target_on_enemy_hook)>()(threadCtxt, pl0300);
             return;
         }
     }
-    _mod->_pl0300UpdateLockOnTargetOnEnemyHook->get_original<decltype(pl0300_update_lock_on_target_on_enemy_hook)>()(threadCtxt, pl0300);
+    _mod->_pl0300UpdateLockOnTargetOnEnemyDetour->get_trampoline<decltype(pl0300_update_lock_on_target_on_enemy_hook)>()(threadCtxt, pl0300);
 }
 
 void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook(uintptr_t threadCtxt, uintptr_t fsmPl0300Teleport)
@@ -324,11 +324,11 @@ void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_teleport_calc_dest_hook
             bool skipCall = false;
             _mod->_pl0300OnTeleportCalcDestinationEvent.invoke(threadCtxt, fsmPl0300Teleport, i, &skipCall);
             if (!skipCall)
-                _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
+                _mod->_pl0300TeleportCalcDestDetour->get_trampoline<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
             return;
         }
     }
-    _mod->_pl0300TeleportCalcDestHook->get_original<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
+    _mod->_pl0300TeleportCalcDestDetour->get_trampoline<decltype(pl0300_teleport_calc_dest_hook)>()(threadCtxt, fsmPl0300Teleport);
 }
 
 PlCntr::Pl0300Cntr::Pl0300ControllerManager::Pl0300ControllerManager()
@@ -583,44 +583,51 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unable to find Pl0300ControllerManager.pl0300DoppelDestroyReqBossCamAddr pattern.";
     }
 
-    if (!install_hook_absolute(requestAddEmAddr.value(), _requestAddEmObjHook, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
+    if (!install_new_detour(requestAddEmAddr.value(), _requestAddEmObjDetour, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.requestAddEm";
     }
 
-    if (!install_hook_absolute(pl0300CheckDamageAddr.value(), _pl0300CheckDamageHook, &em6000_damage_check_detour, &damageCheckRet, 0xB))
+    if (!install_new_detour(pl0300CheckDamageAddr.value(), _pl0300CheckDamageDetour, &em6000_damage_check_detour, &damageCheckRet, 0xB))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300CheckDamage";
     }
 
-    if (!install_hook_absolute(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamHook, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
+    if (!install_new_detour(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamDetour, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300DoppelDestroyReqBossCam";
     }
 
-    _pl0300GetMissionHook = std::make_unique<FunctionHook>(pl300MissionNo.value(), &pl0300_get_mission_n_hook);
-    _pl0300GetMissionHook->create();
+    _pl0300GetMissionDetour = std::make_shared<Detour_t>(pl300MissionNo.value(), &pl0300_get_mission_n_hook);
+    _pl0300GetMissionDetour->create();
+    m_detours.push_back(_pl0300GetMissionDetour);
 
-    _pl0300StartHook = std::make_unique<FunctionHook>(pl0300DoStartAddr.value(), &pl0300_start_func_hook);
-    _pl0300StartHook->create();
+    _pl0300StartDetour = std::make_shared<Detour_t>(pl0300DoStartAddr.value(), &pl0300_start_func_hook);
+    _pl0300StartDetour->create();
+    m_detours.push_back(_pl0300StartDetour);
 
-    _pl0300CheckDtCancelHook = std::make_unique<FunctionHook>(pl0300CheckDevilTriggerCancelAddr.value() + 0xA, &pl0300_check_dt_cancel_hook);
-    _pl0300CheckDtCancelHook->create();
+    _pl0300CheckDtCancelDetour = std::make_shared<Detour_t>(pl0300CheckDevilTriggerCancelAddr.value() + 0xA, &pl0300_check_dt_cancel_hook);
+    _pl0300CheckDtCancelDetour->create();
+    m_detours.push_back(_pl0300CheckDtCancelDetour);
 
-    _checkEmThinkOffHook = std::make_unique<FunctionHook>(checkEmThinkOffAddr.value(), &check_em_think_off_hook);
-    _checkEmThinkOffHook->create();
+    _checkEmThinkOffDetour = std::make_shared<Detour_t>(checkEmThinkOffAddr.value(), &check_em_think_off_hook);
+    _checkEmThinkOffDetour->create();
+    m_detours.push_back(_checkEmThinkOffDetour);
 
-    _pl0300UpdateLockOnHook = std::make_unique<FunctionHook>(pl0300UpdateLockOnAddr.value(), &pl0300_update_lock_on_hook);
-    _pl0300UpdateLockOnHook->create();
+    _pl0300UpdateLockOnDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnAddr.value(), &pl0300_update_lock_on_hook);
+    _pl0300UpdateLockOnDetour->create();
+    m_detours.push_back(_pl0300UpdateLockOnDetour);
 
-    _pl0300UpdateLockOnTargetOnEnemyHook = std::make_unique<FunctionHook>(pl0300UpdateLockOnTargetAddr.value() + 0x9, &pl0300_update_lock_on_target_on_enemy_hook);
-    _pl0300UpdateLockOnTargetOnEnemyHook->create();
+    _pl0300UpdateLockOnTargetOnEnemyDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnTargetAddr.value() + 0x9, &pl0300_update_lock_on_target_on_enemy_hook);
+    _pl0300UpdateLockOnTargetOnEnemyDetour->create();
+    m_detours.push_back(_pl0300UpdateLockOnTargetOnEnemyDetour);
 
-    _pl0300TeleportCalcDestHook = std::make_unique<FunctionHook>(pl0300TeleportDestAddr.value(), &pl0300_teleport_calc_dest_hook);
-    _pl0300TeleportCalcDestHook->create();
+    _pl0300TeleportCalcDestDetour = std::make_shared<Detour_t>(pl0300TeleportDestAddr.value(), &pl0300_teleport_calc_dest_hook);
+    _pl0300TeleportCalcDestDetour->create();
+    m_detours.push_back(_pl0300TeleportCalcDestDetour);
 
     PlayerTracker::before_reset_pad_input_sub<Pl0300ControllerManager>(std::make_shared<Events::EventHandler<Pl0300ControllerManager, uintptr_t, bool, bool*>>(this, &Pl0300ControllerManager::on_pl_pad_input_reset));
 

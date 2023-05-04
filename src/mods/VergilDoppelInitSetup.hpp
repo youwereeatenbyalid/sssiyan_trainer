@@ -22,7 +22,7 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> _setupDoppelModeHook;
+	std::shared_ptr<Detour_t> _setupDoppelModeDetour;
 
 	static inline VergilDoppelInitSetup* _mod = nullptr;
 
@@ -33,7 +33,7 @@ private:
 		bool skip = false;
 		_mod->_onSummonEvent.invoke(pl0800, delayState, &skip);
 		if (!skip)
-			_mod->_setupDoppelModeHook->get_original<decltype(setup_doppel_mode_hook)>()(threadCtxt, pl0800, delayState);
+			_mod->_setupDoppelModeDetour->get_trampoline<decltype(setup_doppel_mode_hook)>()(threadCtxt, pl0800, delayState);
 	}
 
 public:
@@ -70,8 +70,9 @@ public:
 			return "Unable to find VergilDoppelInitSetup.setupDoppelModeAddr pattern.";
 		}
 
-		_setupDoppelModeHook = std::make_unique<FunctionHook>(setupDoppelModeAddr.value(), &VergilDoppelInitSetup::setup_doppel_mode_hook);
-		_setupDoppelModeHook->create();
+		_setupDoppelModeDetour = std::make_shared<Detour_t>(setupDoppelModeAddr.value(), &VergilDoppelInitSetup::setup_doppel_mode_hook);
+		_setupDoppelModeDetour->create();
+		m_detours.push_back(_setupDoppelModeDetour);
 
 		return Mod::on_initialize();
 	}

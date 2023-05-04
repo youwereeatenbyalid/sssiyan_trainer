@@ -833,74 +833,74 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	PlayerTracker::summon_jmp_je = summon_addr.value() + 0x15B;
 	PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x11 + 0x14;
 
-	m_pl_manager_add_pl_detour = std::make_unique<Detour_t>(plManagerAddPlAddr.value(), &pl_manager_add_pl_hook);
+	m_pl_manager_add_pl_detour = std::make_shared<Detour_t>(plManagerAddPlAddr.value(), &pl_manager_add_pl_hook);
 	m_pl_manager_add_pl_detour->create();
 	m_detours.push_back(m_pl_manager_add_pl_detour);
 
-	m_pad_input_reset_detour = std::make_unique<Detour_t>(plResetPadInputAddr.value(), &pl_reset_pad_input_hook);
+	m_pad_input_reset_detour = std::make_shared<Detour_t>(plResetPadInputAddr.value(), &pl_reset_pad_input_hook);
 	m_pad_input_reset_detour->create();
 	m_detours.push_back(m_pad_input_reset_detour);
 
-	m_pl0800_on_guard_detour = std::make_unique<Detour_t>(pl0800GuardCheckAddr.value(), &pl0800_on_guard_hook);
+	m_pl0800_on_guard_detour = std::make_shared<Detour_t>(pl0800GuardCheckAddr.value(), &pl0800_on_guard_hook);
 	m_pl0800_on_guard_detour->create();
 	m_detours.push_back(m_pl0800_on_guard_detour);
 
-	m_pl_set_die_detour = std::make_unique<Detour_t>(plSetDieAddr.value() + 0x6, &pl_set_die_hook);
+	m_pl_set_die_detour = std::make_shared<Detour_t>(plSetDieAddr.value() + 0x6, &pl_set_die_hook);
 	if (!m_pl_set_die_detour->create())
 		return "Faild to install PlayerTracker.m_pl_set_die_hook;";
 	m_detours.push_back(m_pl_set_die_detour);
 
-	m_pl_lock_on_update_detour = std::make_unique<Detour_t>(plLockOnUpdateAddr.value() + 0xB, &pl_update_lock_on_hook);
+	m_pl_lock_on_update_detour = std::make_shared<Detour_t>(plLockOnUpdateAddr.value() + 0xB, &pl_update_lock_on_hook);
 	if (!m_pl_lock_on_update_detour->create())
 		return "Faild to install PlayerTracker.m_pl_lock_on_update_hook;";
 	m_detours.push_back(m_pl_lock_on_update_detour);
 
-	m_pl0000_quicksilver_slow_world_action_start_detour = std::make_unique<Detour_t>(pl0000QuickSilverWorldStartAddr.value(), &pl0000_quicksilver_slow_world_action_start_hook);
+	m_pl0000_quicksilver_slow_world_action_start_detour = std::make_shared<Detour_t>(pl0000QuickSilverWorldStartAddr.value(), &pl0000_quicksilver_slow_world_action_start_hook);
 	if (!m_pl0000_quicksilver_slow_world_action_start_detour->create())
 		return "Faild to install PlayerTracker.m_pl0000_quicksilver_slow_world_action_start_hook;";
 	m_detours.push_back(m_pl0000_quicksilver_slow_world_action_start_detour);
 
-	m_pl0000_quicksilver_stop_world_action_start_detour = std::make_unique<Detour_t>(pl0000QuickSilverWorldStopStartAddr.value(), &pl0000_quicksilver_stop_world_action_start_hook);
+	m_pl0000_quicksilver_stop_world_action_start_detour = std::make_shared<Detour_t>(pl0000QuickSilverWorldStopStartAddr.value(), &pl0000_quicksilver_stop_world_action_start_hook);
 	if (!m_pl0000_quicksilver_stop_world_action_start_detour->create())
 		return "Faild to install PlayerTracker.m_pl0000_quicksilver_stop_world_action_start_hook;";
 	m_detours.push_back(m_pl0000_quicksilver_stop_world_action_start_detour);
 
-	m_pl_add_dt_gauge_detour = std::make_unique<Detour_t>(plAddDtGaugeAddr.value(), &pl_add_dt_gauge_hook);
+	m_pl_add_dt_gauge_detour = std::make_shared<Detour_t>(plAddDtGaugeAddr.value(), &pl_add_dt_gauge_hook);
 	if (!m_pl_add_dt_gauge_detour->create())
 		return "Faild to install PlayerTracker.m_pl_add_dt_gauge_hook;";
 	m_detours.push_back(m_pl_add_dt_gauge_detour);
 
-	m_pl_just_escape_detour = std::make_unique<Detour_t>(plOnJustEscapeAddr.value() + 0xA, &pl_just_escape_hook);
+	m_pl_just_escape_detour = std::make_shared<Detour_t>(plOnJustEscapeAddr.value() + 0xA, &pl_just_escape_hook);
 	if (!m_pl_just_escape_detour->create())
 		return "Faild to install PlayerTracker.m_pl_just_escape_hook;";
 	m_detours.push_back(m_pl_just_escape_detour);
 
-	m_pl_remove_detour = std::make_unique<Detour_t>(plManagerRemovePlAddr.value(), &pl_manager_pl_remove_hook);
+	m_pl_remove_detour = std::make_shared<Detour_t>(plManagerRemovePlAddr.value(), &pl_manager_pl_remove_hook);
 	if (!m_pl_remove_detour->create())
 		return "Faild to install PlayerTracker.m_pl_remove_hook;";
 	m_detours.push_back(m_pl_remove_detour);
 
-	m_fsm2_pl_pos_cntr_update_speed_detour = std::make_unique<Detour_t>(fsmPosControllerUpdateSpeedAddr.value() + 0x3, &fsm2_pl_pos_cntrl_action_update_speed_hook);
+	m_fsm2_pl_pos_cntr_update_speed_detour = std::make_shared<Detour_t>(fsmPosControllerUpdateSpeedAddr.value() + 0x3, &fsm2_pl_pos_cntrl_action_update_speed_hook);
 	if (!m_fsm2_pl_pos_cntr_update_speed_detour->create())
 		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_update_speed_hook;";
 	m_detours.push_back(m_fsm2_pl_pos_cntr_update_speed_detour);
 
-	m_fsm2_pl_pos_cntr_start_action_detour = std::make_unique<Detour_t>(fsmPosControllerActionStartAddr.value(), &fsm2_pl_pos_cntrl_action_start_hook);
+	m_fsm2_pl_pos_cntr_start_action_detour = std::make_shared<Detour_t>(fsmPosControllerActionStartAddr.value(), &fsm2_pl_pos_cntrl_action_start_hook);
 	if (!m_fsm2_pl_pos_cntr_start_action_detour->create())
 		return "Faild to install PlayerTracker.m_fsm2_pl_pos_cntr_start_action_hook;";
 	m_detours.push_back(m_fsm2_pl_pos_cntr_start_action_detour);
 
-	m_pl0800_set_air_trick_action_detour = std::make_unique<Detour_t>(setAirTrickActionAddr.value(), &pl0800_set_air_trick_action_hook);
+	m_pl0800_set_air_trick_action_detour = std::make_shared<Detour_t>(setAirTrickActionAddr.value(), &pl0800_set_air_trick_action_hook);
 	if (!m_pl0800_set_air_trick_action_detour->create())
 		return "Faild to install PlayerTracker.m_pl0800_set_air_trick_action_hook;";
 	m_detours.push_back(m_pl0800_set_air_trick_action_detour);
 
-	m_fsm2_player_player_action_notify_action_end_detour = std::make_unique<Detour_t>(fsm2PlPlActionNotifyActionEndAddr.value(), &fsm2_player_player_action_notify_action_end_hook);
+	m_fsm2_player_player_action_notify_action_end_detour = std::make_shared<Detour_t>(fsm2PlPlActionNotifyActionEndAddr.value(), &fsm2_player_player_action_notify_action_end_hook);
 	if (!m_fsm2_player_player_action_notify_action_end_detour->create())
 		return "Faild to install PlayerTracker.m_fsm2_player_player_action_notify_action_end_hook;";
 	m_detours.push_back(m_fsm2_player_player_action_notify_action_end_detour);
 
-	m_pl_nero_set_table_hopper_detour = std::make_unique<Detour_t>(plNeroSetTableHopperAddr.value(), &pl_nero_set_table_hopper_hook);
+	m_pl_nero_set_table_hopper_detour = std::make_shared<Detour_t>(plNeroSetTableHopperAddr.value(), &pl_nero_set_table_hopper_hook);
 	if (!m_pl_nero_set_table_hopper_detour->create())
 		return "Faild to install PlayerTracker.m_pl_nero_set_table_hopper_hook;";
 	m_detours.push_back(m_pl_nero_set_table_hopper_detour);

@@ -7,14 +7,14 @@ class GameplayStateTracker : public Mod
 {
 private:
 	void init_check_box_info() override;
-	std::unique_ptr<FunctionHook> m_now_flow_hook;
-	std::unique_ptr<FunctionHook> m_gamemode_hook;
-	std::unique_ptr<FunctionHook> m_bploadflow_hook;
-	std::unique_ptr<FunctionHook> m_cutscene_hook;
-	std::unique_ptr<FunctionHook> m_pause_hook;
-	std::unique_ptr<FunctionHook> m_after_pfbmanager_init;
-	std::unique_ptr<FunctionHook> _ui3500GuiDoOnOpenHook;
-	std::unique_ptr<FunctionHook> _ui3500GuiDoOnClosedHook;
+	std::shared_ptr<Detour_t> m_now_flow_detour;
+	std::shared_ptr<Detour_t> m_gamemode_detour;
+	std::shared_ptr<Detour_t> m_bploadflow_detour;
+	std::shared_ptr<Detour_t> m_cutscene_detour;
+	std::shared_ptr<Detour_t> m_pause_detour;
+	std::shared_ptr<Detour_t> m_after_pfbmanager_init;
+	std::shared_ptr<Detour_t> _ui3500GuiDoOnOpenDetour;
+	std::shared_ptr<Detour_t> _ui3500GuiDoOnClosedDetour;
 
 	Events::Event<> _pfbManagerInited;
 	Events::Event<uintptr_t /*threadCntx*/, uintptr_t /*ui3500Gui*/> _onUi3500GuiOpen;//PhotoModeOpen?

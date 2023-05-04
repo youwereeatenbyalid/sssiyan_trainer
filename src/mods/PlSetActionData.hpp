@@ -48,7 +48,7 @@ private:
 
 	static inline bool isDoppelNow = false;
 
-	std::unique_ptr<FunctionHook> cur_action_hook;
+	std::shared_ptr<Detour_t> cur_action_detour;
 
 	static bool cmp_action_str(const std::array<char, ACTION_STR_LENGTH>& srcStr, int srcRealLength, const char* str)
 	{
@@ -168,7 +168,7 @@ public:
 	static void set_action_hook(uintptr_t vm, uintptr_t curPl, uintptr_t dotNetString, uint32_t layerNo, float startFrame, float interpolationFrame, int interpolationMode, int interpolationCurve,
 		bool isImmediate, bool passSelect, bool isPuppetTransition, int actionPriority)
 	{
-		_mod->cur_action_hook->get_original<decltype(set_action_hook)>()(vm, curPl, dotNetString, layerNo, startFrame, interpolationFrame, interpolationMode, interpolationCurve, isImmediate,
+		_mod->cur_action_detour->get_trampoline<decltype(set_action_hook)>()(vm, curPl, dotNetString, layerNo, startFrame, interpolationFrame, interpolationMode, interpolationCurve, isImmediate,
 			passSelect, isPuppetTransition, actionPriority);
 		//If Boss Vergil & Enemy
 		if (*(int*)(curPl + 0xE64) == 3 || *(int*)(curPl + 0x108) == 1)
@@ -252,8 +252,9 @@ public:
 			return "Unable to find PlSetActionData.plSetActionAddr pattern.";
 		}
 
-		cur_action_hook = std::make_unique<FunctionHook>(plSetActionAddr.value() + 0x4, &set_action_hook);
-		cur_action_hook->create();
+		cur_action_detour = std::make_shared<Detour_t>(plSetActionAddr.value() + 0x4, &set_action_hook);
+		cur_action_detour->create();
+		m_detours.push_back(cur_action_detour);
 
 		return Mod::on_initialize();
 	};

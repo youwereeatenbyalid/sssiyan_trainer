@@ -25,16 +25,16 @@ namespace PlCntr
 
 			typedef void* (*_EmManager_RequestAddObj)(uintptr_t threadCtxt, uintptr_t emManager, uintptr_t emObj);
 
-			std::unique_ptr<FunctionHook> _pl0300StartHook;
-			std::unique_ptr<FunctionHook> _requestAddEmObjHook;
-			std::unique_ptr<FunctionHook> _pl0300GetMissionHook;
-			std::unique_ptr<FunctionHook> _pl0300CheckDtCancelHook;
-			std::unique_ptr<FunctionHook> _checkEmThinkOffHook;
-			std::unique_ptr<FunctionHook> _pl0300UpdateLockOnHook;
-			std::unique_ptr<FunctionHook> _pl0300UpdateLockOnTargetOnEnemyHook;
-			std::unique_ptr<FunctionHook> _pl0300TeleportCalcDestHook;
-			std::unique_ptr<FunctionHook> _pl0300CheckDamageHook;
-			std::unique_ptr<FunctionHook> _pl0300DestroyDoppelRequestBossCamHook;
+			std::shared_ptr<Detour_t> _pl0300StartDetour;
+			std::shared_ptr<Detour_t> _requestAddEmObjDetour;
+			std::shared_ptr<Detour_t> _pl0300GetMissionDetour;
+			std::shared_ptr<Detour_t> _pl0300CheckDtCancelDetour;
+			std::shared_ptr<Detour_t> _checkEmThinkOffDetour;
+			std::shared_ptr<Detour_t> _pl0300UpdateLockOnDetour;
+			std::shared_ptr<Detour_t> _pl0300UpdateLockOnTargetOnEnemyDetour;
+			std::shared_ptr<Detour_t> _pl0300TeleportCalcDestDetour;
+			std::shared_ptr<Detour_t> _pl0300CheckDamageDetour;
+			std::shared_ptr<Detour_t> _pl0300DestroyDoppelRequestBossCamDetour;
 
 			static inline Pl0300ControllerManager* _mod = nullptr;
 

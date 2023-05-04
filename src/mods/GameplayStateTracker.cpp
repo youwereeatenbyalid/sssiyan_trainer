@@ -3,7 +3,7 @@
 
 void GameplayStateTracker::pfb_info_add_hook(uintptr_t threadCtxt, uintptr_t pfbInfoList, uintptr_t pfbInfo)
 {
-    _mod->m_after_pfbmanager_init->get_original<decltype(pfb_info_add_hook)>()(threadCtxt, pfbInfoList, pfbInfo);
+    _mod->m_after_pfbmanager_init->get_trampoline<decltype(pfb_info_add_hook)>()(threadCtxt, pfbInfoList, pfbInfo);
     if (pfbInfoList != 0 && GameFunctions::ListController::get_list_count(pfbInfoList) >= 43)
         _mod->_pfbManagerInited.invoke();
 }
@@ -11,13 +11,13 @@ void GameplayStateTracker::pfb_info_add_hook(uintptr_t threadCtxt, uintptr_t pfb
 void GameplayStateTracker::ui3500Gui_do_on_open_hook(uintptr_t threadCntx, uintptr_t ui3500Gui)
 {
     _mod->_onUi3500GuiOpen.invoke(threadCntx, ui3500Gui);
-    _mod->_ui3500GuiDoOnOpenHook->get_original<decltype(ui3500Gui_do_on_open_hook)>()(threadCntx, ui3500Gui);
+    _mod->_ui3500GuiDoOnOpenDetour->get_trampoline<decltype(ui3500Gui_do_on_open_hook)>()(threadCntx, ui3500Gui);
 }
 
 void GameplayStateTracker::ui3500Gui_do_on_closed_hook(uintptr_t threadCntx, uintptr_t ui3500Gui)
 {
     _mod->_onUi3500GuiClosed.invoke(threadCntx, ui3500Gui);
-    _mod->_ui3500GuiDoOnClosedHook->get_original<decltype(ui3500Gui_do_on_closed_hook)>()(threadCntx, ui3500Gui);
+    _mod->_ui3500GuiDoOnClosedDetour->get_trampoline<decltype(ui3500Gui_do_on_closed_hook)>()(threadCntx, ui3500Gui);
 }
 
 static naked void gamemode_detour()
@@ -145,48 +145,51 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
 
     _mod = this;
 
-    if (!install_hook_absolute(nowFlowAddr.value(), m_now_flow_hook, &now_flow_detour, &nowFlowRet, 0x6))
+    if (!install_new_detour(nowFlowAddr.value(), m_now_flow_detour, &now_flow_detour, &nowFlowRet, 0x6))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize GameplayStateTracker.nowFlowAddr";
     }
 
-    if (!install_hook_absolute(gameModeAddr.value(), m_gamemode_hook, &gamemode_detour, &gameModeRet, 0x6))
+    if (!install_new_detour(gameModeAddr.value(), m_gamemode_detour, &gamemode_detour, &gameModeRet, 0x6))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize GameplayStateTracker.gameModeAddr";
     }
 
-    if (!install_hook_absolute(bpFlowIdAddr.value() + 0x1, m_bploadflow_hook, &bp_forceload_detour, &bpRetJmp, 0x6))
+    if (!install_new_detour(bpFlowIdAddr.value() + 0x1, m_bploadflow_detour, &bp_forceload_detour, &bpRetJmp, 0x6))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize GameplayStateTracker.bpFlowId";
     }
 
-    if (!install_hook_absolute(isCutsceneAddr.value(), m_cutscene_hook, &is_cutscene_detour, &isCutsceneRet, 6))
+    if (!install_new_detour(isCutsceneAddr.value(), m_cutscene_detour, &is_cutscene_detour, &isCutsceneRet, 6))
     {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize GameplayStateTracker.isCutscene";
     }
 
-    if (!install_hook_absolute(isPauseAddr.value(), m_pause_hook, &is_pause_exe_detour, &isPauseExeRet, 0x8))
+    if (!install_new_detour(isPauseAddr.value(), m_pause_detour, &is_pause_exe_detour, &isPauseExeRet, 0x8))
     {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize GameplayStateTracker.isPause";
     }
 
-    m_after_pfbmanager_init = std::make_unique<FunctionHook>(pfbManagerAddItemAddr.value() + 0xF, &pfb_info_add_hook);
+    m_after_pfbmanager_init = std::make_shared<Detour_t>(pfbManagerAddItemAddr.value() + 0xF, &pfb_info_add_hook);
     m_after_pfbmanager_init->create();
+    m_detours.push_back(m_after_pfbmanager_init);
 
-    _ui3500GuiDoOnOpenHook = std::make_unique<FunctionHook>(ui3500GuiDoOnOpenAddr.value(), &ui3500Gui_do_on_open_hook);
-    if (!_ui3500GuiDoOnOpenHook->create())
+    _ui3500GuiDoOnOpenDetour = std::make_shared<Detour_t>(ui3500GuiDoOnOpenAddr.value(), &ui3500Gui_do_on_open_hook);
+    if (!_ui3500GuiDoOnOpenDetour->create())
         return "Can't create _ui3500GuiDoOnOpenHook.";
+    m_detours.push_back(_ui3500GuiDoOnOpenDetour);
 
-    _ui3500GuiDoOnClosedHook = std::make_unique<FunctionHook>(ui3500GuiDoOnClosedAddr.value() + 0x7, &ui3500Gui_do_on_closed_hook);
-    if (!_ui3500GuiDoOnClosedHook->create())
+    _ui3500GuiDoOnClosedDetour = std::make_shared<Detour_t>(ui3500GuiDoOnClosedAddr.value() + 0x7, &ui3500Gui_do_on_closed_hook);
+    if (!_ui3500GuiDoOnClosedDetour->create())
         return "Can't create _ui3500GuiDoOnClosedHook.";
+    m_detours.push_back(_ui3500GuiDoOnClosedDetour);
 
 	return Mod::on_initialize();
 }
