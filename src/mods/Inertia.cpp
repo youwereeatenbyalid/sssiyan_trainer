@@ -217,7 +217,7 @@ std::optional<std::string> Inertia::on_initialize() {
   if (!addrReduceRate) {
       return "Unable to find Inertia Reduce Rate pattern.";
   }
-  if (!install_hook_absolute(addrReduceRate.value(), m_detour2, &inertia_reduce_rate_detour, &reduce_rate_jmp_ret, 6)) {
+  if (!i/nstall_hook_absolute(addrReduceRate.value(), m_detour2, &inertia_reduce_rate_detour, &reduce_rate_jmp_ret, 6)) {
       //return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize Inertia Reduce Rate";

@@ -46,7 +46,7 @@ std::optional<std::string> NoOneTakesDamage::on_initialize() {
   //if (!addr) {
   //  return "Unable to find NoOneTakesDamage pattern.";
   //}
-  //if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
+  //if (!i/nstall_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 5)) {
   //  return a error string in case something goes wrong
   //  spdlog::error("[{}] failed to initialize", get_name());
   //  return "Failed to initialize NoOneTakesDamage";

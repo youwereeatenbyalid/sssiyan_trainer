@@ -108,7 +108,7 @@ std::optional<std::string> NoSlowmoOrHitstop::on_initialize() {
   if (!addr) {
       return "Unable to find NoSlowmoOrHitstop2 pattern.";
   }
-  if (!install_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
+  if (!i/nstall_hook_absolute(addr2.value(), m_function_hook2, &detour2, &jmp_ret2, 7)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize NoSlowmoOrHitstop2";
