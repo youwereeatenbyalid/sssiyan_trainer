@@ -445,6 +445,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilTrick;
+		m_depends_on = { "PlayerTracker" };
 		m_full_name_string = "Parry With Finesse (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Modifies Vergil's level 2 motivation block to a full counter.";
