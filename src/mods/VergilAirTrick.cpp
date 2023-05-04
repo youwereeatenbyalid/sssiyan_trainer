@@ -426,6 +426,7 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilTrick;
+	m_depends_on = { "InputSystem" };
 	m_full_name_string = "Air Trick Settings (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Adjust the properties of Vergil's Trick Actions.";

@@ -249,6 +249,7 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilTrick;
+	m_depends_on = { "GameplayStateTracker","VergilInstantSDT","InputSystem","EndLvlHooks"};
 	m_full_name_string = "DMC3 Judgement Cut End (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "When not in Devil Trigger, replaces Vergil's Judgment Cut End with his Judgment Cut Barrage from his boss fight in Devil May Cry 3. Can be executed without full STD bar.";

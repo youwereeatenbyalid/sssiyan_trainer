@@ -69,6 +69,9 @@ std::optional<std::string> DanteAirTrickSettings::on_initialize()
 	m_is_enabled = &cheaton;
 	m_on_page = Page_DanteCheat;
 	m_full_name_string = "Trick Settings (+)";
+	//This doesn't actually depend on GroundTrickNoDistanceRestriction, but that mod is controled through this mod's UI, 
+	//so the only way to toggle it on and off properly is to make this mod rely on it
+	m_depends_on = { "GroundTrickNoDistanceRestriction" };
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Adjust the properties of Dante's Trick Actions.";
 

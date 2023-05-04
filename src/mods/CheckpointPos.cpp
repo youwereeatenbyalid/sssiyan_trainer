@@ -70,6 +70,7 @@ std::optional<std::string> CheckpointPos::on_initialize() {
   m_is_enabled        = &cheaton;
   m_on_page           = Page_GameMode;
   m_full_name_string = "Custom Checkpoints (+)";
+  m_depends_on = { "PlayerTracker","GameplayStateTracker" };
   m_author_string    = "V.P.Zadov";
   m_description_string = "Create a custom checkpoint position. Uses boss checkpoints by default.";
 

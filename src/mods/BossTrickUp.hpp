@@ -186,6 +186,8 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilTrick;
+		//TrickTrailsEfx needed because set appear pos is called there (see line 89 in this file)
+		m_depends_on = { "InputSystem","PlayerTracker","VergilTrickTrailsEfx" };
 		m_full_name_string = "Boss's Trick Up (+)";
 		m_author_string = "V.P.Zadov, SSSiyan";
 		m_description_string = "Lock on + forward + trick will instantly teleport Vergil directly above the enemies head, similarly to how Boss Vergil teleports. Can interrupt any move what air trick can also. "

@@ -136,6 +136,7 @@ public:
 		m_on_page = Page_DanteCheat;
 		m_full_name_string = "Grounded Mustang in Air";
 		m_author_string = "V.P.Zadov";
+		m_depends_on = { "InputSystem" };
 		m_description_string = "Perform the grounded version of Mustang while airborne.";
 
 		set_up_hotkey();

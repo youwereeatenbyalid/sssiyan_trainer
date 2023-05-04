@@ -193,6 +193,7 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_Enemies;
 		m_full_name_string = "Boss Vergil Settings (+)";
+		m_depends_on = { "PlSetActionData","Pl0300ControllerManager"};
 		m_author_string = "V.P. Zadov";
 		m_description_string = "Buffs some of Boss Vergil's moves to increase the fight difficulty. Settings can't be changed mid-fight."; // I recommend to use it with akasha's \"Motivated boss Vergil\" file mod.";
 

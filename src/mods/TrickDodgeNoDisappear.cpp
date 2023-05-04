@@ -35,6 +35,7 @@ std::optional<std::string> TrickDodgeNoDisappear::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilVFXSettings;
+	m_depends_on = { "EndLvlHooks" };
 	m_full_name_string = "Change invisibility duration on Trick Dodge(+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Extend or complitely remove invisibility while trick dodging.";

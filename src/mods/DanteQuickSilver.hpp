@@ -114,6 +114,7 @@ public:
 		m_is_enabled = &cheaton;
 		m_on_page = Page_DanteCheat;
 		m_full_name_string = "Quicksilver style (+)";
+		m_depends_on = { "PlayerTracker","EndLvlHooks"};
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Adds a quicksilver style for Dante. Press twice on the selected style button to enable/disable quicksilver. This mod must be enabled before loading into a level.";
 

@@ -1517,6 +1517,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilTrick;
+		m_depends_on = { "Pl0300ControllerManager","PlayerTracker","GameplayStateTracker" };
 		m_full_name_string = "Boss Vergil Moves WIP (+)";
 		m_author_string = "V.P. Zadov";
 		m_description_string = "Adds some of boss Vergil's moves to playable Vergil. Must be enabled before entering a mission. "

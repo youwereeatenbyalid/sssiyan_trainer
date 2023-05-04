@@ -135,6 +135,7 @@ public:
 	{
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilCheat;
+		m_depends_on = { "PlayerTracker" };
 		m_full_name_string = "Quicksilver style (+)";
 		m_author_string = "V.P.Zadov";
 		return Mod::on_initialize();

@@ -30,6 +30,7 @@ std::optional<std::string> VergilSDTNoConcentrationLose::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 	m_is_enabled = &cheaton;
 	m_on_page = Page_VergilCheat;
+	m_depends_on = { "VergilSDTFormTracker" };
 	m_full_name_string = "No Concentration Loss When Hit In SDT";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Disable losing concentration when taking damage in SDT.";

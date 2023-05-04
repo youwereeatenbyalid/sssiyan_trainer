@@ -26,6 +26,7 @@ std::optional<std::string> VergilSDTAccumulateRework::on_initialize() {
   init_check_box_info();
   m_is_enabled = &VergilSDTAccumulateRework::cheaton;
   m_on_page = Page_VergilSDT;
+  m_depends_on = { "PlayerTracker" };
   m_full_name_string = "SDT Accumulate Rework (+)";
   m_author_string = "V.P.Zadov";
   m_description_string = "Vergil's SDT meter fills alongside his DT meter.";
