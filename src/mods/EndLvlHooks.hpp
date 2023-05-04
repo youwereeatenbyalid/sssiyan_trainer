@@ -46,15 +46,15 @@ namespace EndLvlHooks
 
         static inline EndLvlHooks* _mod = nullptr;
 
-        std::unique_ptr<FunctionHook> m_request_retire_mission_hook;
-        std::unique_ptr<FunctionHook> m_retry_mission_hook;
-        std::unique_ptr<FunctionHook> m_exit_mission_hook;
-        std::unique_ptr<FunctionHook> m_checkpoint_mission_hook;
-        std::unique_ptr<FunctionHook> m_secret_mission_hook;
-        std::unique_ptr<FunctionHook> m_exit_bp_mission_hook;
-        std::unique_ptr<FunctionHook> m_request_result_hook;
-        std::unique_ptr<FunctionHook> m_request_result_staffroll_hook;
-        std::unique_ptr<FunctionHook> m_restart_training_hook;
+        std::shared_ptr<Detour_t> m_request_retire_mission_hook;
+        std::shared_ptr<Detour_t> m_retry_mission_hook;
+        std::shared_ptr<Detour_t> m_exit_mission_hook;
+        std::shared_ptr<Detour_t> m_checkpoint_mission_hook;
+        std::shared_ptr<Detour_t> m_secret_mission_hook;
+        std::shared_ptr<Detour_t> m_exit_bp_mission_hook;
+        std::shared_ptr<Detour_t> m_request_result_hook;
+        std::shared_ptr<Detour_t> m_request_result_staffroll_hook;
+        std::shared_ptr<Detour_t> m_restart_training_hook;
 
     public:
 
@@ -64,49 +64,50 @@ namespace EndLvlHooks
         static inline void retry_mission_detour(uintptr_t threadCtxt, uintptr_t obj)
         {
             endLvlEvent.invoke(RetryMission);
-            _mod->m_retry_mission_hook->get_original<decltype(EndLvlHooks::retry_mission_detour)>()(threadCtxt, obj);
+            
+            _mod->m_retry_mission_hook->get_trampoline<decltype(EndLvlHooks::retry_mission_detour)>()(threadCtxt, obj);
         }
 
         static inline void exit_mission_detour(uintptr_t threadCtxt, uintptr_t obj, bool isChangeTitleMenu, bool isChangeResult, bool isChangeResultToMainMenu)
         {
             endLvlEvent.invoke(ExitMission);
-            _mod->m_exit_mission_hook->get_original<decltype(EndLvlHooks::exit_mission_detour)>()(threadCtxt, obj, isChangeTitleMenu, isChangeResult, isChangeResultToMainMenu);
+            _mod->m_exit_mission_hook->get_trampoline<decltype(EndLvlHooks::exit_mission_detour)>()(threadCtxt, obj, isChangeTitleMenu, isChangeResult, isChangeResultToMainMenu);
         }
 
         static inline void checkpoint_mission_detour(uintptr_t threadCtxt, uintptr_t obj, bool isFromPauseMenu)
         {
             endLvlEvent.invoke(CheckpointMission);
-            _mod->m_checkpoint_mission_hook->get_original<decltype(EndLvlHooks::checkpoint_mission_detour)>()(threadCtxt, obj, isFromPauseMenu);
+            _mod->m_checkpoint_mission_hook->get_trampoline<decltype(EndLvlHooks::checkpoint_mission_detour)>()(threadCtxt, obj, isFromPauseMenu);
         }
 
         static inline void smiss_exit_detour(uintptr_t threadCtxt, uintptr_t obj)
         {
             endLvlEvent.invoke(SecretMissionExit);
-            _mod->m_secret_mission_hook->get_original<decltype(EndLvlHooks::smiss_exit_detour)>()(threadCtxt, obj);
+            _mod->m_secret_mission_hook->get_trampoline<decltype(EndLvlHooks::smiss_exit_detour)>()(threadCtxt, obj);
         }
 
         static inline void exit_bp_mission_detour(uintptr_t threadCtxt, uintptr_t obj, bool isChangeTitleMenu, bool isChangeResultToMainMenu)
         {
             endLvlEvent.invoke(Bp);
-            _mod->m_exit_bp_mission_hook->get_original<decltype(EndLvlHooks::exit_bp_mission_detour)>()(threadCtxt, obj, isChangeTitleMenu, isChangeResultToMainMenu);
+            _mod->m_exit_bp_mission_hook->get_trampoline<decltype(EndLvlHooks::exit_bp_mission_detour)>()(threadCtxt, obj, isChangeTitleMenu, isChangeResultToMainMenu);
         }
 
         static inline void request_result_detour(uintptr_t threadCtxt, uintptr_t obj, bool isOverlayCapture)
         {
             endLvlEvent.invoke(RequestResult);
-            _mod->m_request_result_hook->get_original<decltype(EndLvlHooks::request_result_detour)>()(threadCtxt, obj, isOverlayCapture);
+            _mod->m_request_result_hook->get_trampoline<decltype(EndLvlHooks::request_result_detour)>()(threadCtxt, obj, isOverlayCapture);
         }
 
         static inline void request_staffresult_detour(uintptr_t threadCtxt, uintptr_t obj, bool isOverlayCapture)
         {
             endLvlEvent.invoke(RequestResultStaffRoll);
-            _mod->m_request_result_staffroll_hook->get_original<decltype(EndLvlHooks::request_staffresult_detour)>()(threadCtxt, obj, isOverlayCapture);
+            _mod->m_request_result_staffroll_hook->get_trampoline<decltype(EndLvlHooks::request_staffresult_detour)>()(threadCtxt, obj, isOverlayCapture);
         }
 
         static inline void restart_training_hook(uintptr_t threadCtxt, uintptr_t obj)
         {
             endLvlEvent.invoke(ResetTraining);
-            _mod->m_restart_training_hook->get_original<decltype(EndLvlHooks::restart_training_hook)>()(threadCtxt, obj);
+            _mod->m_restart_training_hook->get_trampoline<decltype(EndLvlHooks::restart_training_hook)>()(threadCtxt, obj);
         }
 
         std::string_view get_name() const override
@@ -176,23 +177,61 @@ namespace EndLvlHooks
             {
                 return "Unanable to find restartTraining pattern.";
             }
-
-            m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
+            
+            //m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
+            //m_retry_mission_hook->create();
+            m_retry_mission_hook = std::make_shared<Detour_t>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
             m_retry_mission_hook->create();
-            m_exit_mission_hook = std::make_unique<FunctionHook>(exitMissionAddr.value() + 0x9, &EndLvlHooks::exit_mission_detour);
+            m_detours.push_back(m_retry_mission_hook);
+
+            //m_exit_mission_hook = std::make_unique<FunctionHook>(exitMissionAddr.value() + 0x9, &EndLvlHooks::exit_mission_detour);
+            //m_exit_mission_hook->create();
+
+            m_exit_mission_hook = std::make_shared<Detour_t>(exitMissionAddr.value() + 0x9, &EndLvlHooks::exit_mission_detour);
             m_exit_mission_hook->create();
-            m_checkpoint_mission_hook = std::make_unique<FunctionHook>(checkpointMissionAddr.value(), &EndLvlHooks::checkpoint_mission_detour);
+            m_detours.push_back(m_exit_mission_hook);
+
+            //m_checkpoint_mission_hook = std::make_unique<FunctionHook>(checkpointMissionAddr.value(), &EndLvlHooks::checkpoint_mission_detour);
+            //m_checkpoint_mission_hook->create();
+            
+            m_checkpoint_mission_hook = std::make_shared<Detour_t>(checkpointMissionAddr.value(), &EndLvlHooks::checkpoint_mission_detour);
             m_checkpoint_mission_hook->create();
-            m_secret_mission_hook = std::make_unique<FunctionHook>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
+            m_detours.push_back(m_checkpoint_mission_hook);
+
+            //m_secret_mission_hook = std::make_unique<FunctionHook>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
+            //m_secret_mission_hook->create();
+
+            m_secret_mission_hook = std::make_shared<Detour_t>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
             m_secret_mission_hook->create();
-            m_exit_bp_mission_hook = std::make_unique<FunctionHook>(exitBpMissionAddr.value() + 0x2, &EndLvlHooks::exit_bp_mission_detour);
+            m_detours.push_back(m_secret_mission_hook);
+
+            //m_exit_bp_mission_hook = std::make_unique<FunctionHook>(exitBpMissionAddr.value() + 0x2, &EndLvlHooks::exit_bp_mission_detour);
+            //m_exit_bp_mission_hook->create();
+
+            m_exit_bp_mission_hook = std::make_shared<Detour_t>(exitBpMissionAddr.value() + 0x2, &EndLvlHooks::exit_bp_mission_detour);
             m_exit_bp_mission_hook->create();
-            m_request_result_hook = std::make_unique<FunctionHook>(requestResultAddr.value() + 0x4, &EndLvlHooks::request_result_detour);
+            m_detours.push_back(m_exit_bp_mission_hook);
+            
+            //m_request_result_hook = std::make_unique<FunctionHook>(requestResultAddr.value() + 0x4, &EndLvlHooks::request_result_detour);
+            //m_request_result_hook->create();
+            
+            m_request_result_hook = std::make_shared<Detour_t>(requestResultAddr.value() + 0x4, &EndLvlHooks::request_result_detour);
             m_request_result_hook->create();
-            m_request_result_staffroll_hook = std::make_unique<FunctionHook>(requestResultStaffRollAddr.value() + 0x10, &EndLvlHooks::request_staffresult_detour);
+            m_detours.push_back(m_request_result_hook);
+
+            //m_request_result_staffroll_hook = std::make_unique<FunctionHook>(requestResultStaffRollAddr.value() + 0x10, &EndLvlHooks::request_staffresult_detour);
+            //m_request_result_staffroll_hook->create();
+
+            m_request_result_staffroll_hook = std::make_shared<Detour_t>(requestResultStaffRollAddr.value() + 0x10, &EndLvlHooks::request_staffresult_detour);
             m_request_result_staffroll_hook->create();
-            m_restart_training_hook = std::make_unique<FunctionHook>(restartTrainingAddr.value(), &EndLvlHooks::restart_training_hook);
+            m_detours.push_back(m_request_result_staffroll_hook);
+            
+            //m_restart_training_hook = std::make_unique<FunctionHook>(restartTrainingAddr.value(), &EndLvlHooks::restart_training_hook);
+            //m_restart_training_hook->create();
+
+            m_restart_training_hook = std::make_shared<Detour_t>(restartTrainingAddr.value(), &EndLvlHooks::restart_training_hook);
             m_restart_training_hook->create();
+            m_detours.push_back(m_restart_training_hook);
 
             return Mod::on_initialize();
         };

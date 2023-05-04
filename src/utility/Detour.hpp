@@ -17,6 +17,8 @@ public:
 	*/
 	const auto& get_original() const { return m_original; }
 
+
+
 	/*
 	* Returns the address of the code the detour wouldl jump to
 	*/
@@ -26,6 +28,16 @@ public:
 	* Returns the address of a copy of the original code that has been replaced by the detour jump
 	*/
 	const auto& get_trampoline() const { return m_trampoline; }
+
+	/// <summary>
+	/// Returns get trampoline as a void function to call for original behavior (I think)
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <returns></returns>
+	template <typename T>
+	T* get_trampoline() const {
+		return reinterpret_cast<T*>(m_trampoline);
+	}
 
 	/*
 	* Returns the return address which the detour is supposed to jump to after execution
