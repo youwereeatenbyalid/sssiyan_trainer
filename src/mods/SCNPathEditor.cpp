@@ -170,7 +170,7 @@ std::optional<std::string> SCNPathEditor::on_initialize() {
   if (!addr) {
     return "Unable to find SCNPathEditor pattern.";
   }
-  if (!install_hook_absolute(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
+  if (!install_new_detour(addr.value(), m_function_hook, &detour, &jmp_ret, 6)) {
   //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize SCNPathEditor";

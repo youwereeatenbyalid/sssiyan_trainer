@@ -189,7 +189,7 @@ static naked void finish_pfb_detour()
 
 void DMC3JCE::jce_cancel_hook(uintptr_t threadCtxt, uintptr_t vergil)
 {
-	_mod->m_jce_cancel_hook->get_original<decltype(jce_cancel_hook)>()(threadCtxt, vergil);
+	_mod->m_jce_cancel_hook->get_trampoline<decltype(jce_cancel_hook)>()(threadCtxt, vergil);
 	if (!DMC3JCE::cheaton)
 		return;
 	if(jceController->is_executing())
@@ -201,7 +201,7 @@ void DMC3JCE::jce_cancel_hook(uintptr_t threadCtxt, uintptr_t vergil)
 
 void DMC3JCE::pl0800_start_jce_update(uintptr_t threadCtxt, uintptr_t fsmStartJce, uintptr_t actionArg)
 {
-	_mod->m_update_jce_hook->get_original<decltype(DMC3JCE::pl0800_start_jce_update)>()(threadCtxt, fsmStartJce, actionArg);
+	_mod->m_update_jce_hook->get_trampoline<decltype(DMC3JCE::pl0800_start_jce_update)>()(threadCtxt, fsmStartJce, actionArg);
 	//if cheat not on, end
 	if (!DMC3JCE::cheaton)
 		return;
@@ -310,40 +310,43 @@ std::optional<std::string> DMC3JCE::on_initialize()
 
 	_mod = this;
 
-	if (!install_hook_absolute(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
+	if (!install_new_detour(canExeJceAddr.value(), m_can_exe_jce_hook, &can_exe_jce_detour, &canExeJceRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.canExeJce";
 	}
 
-	if (!install_hook_absolute(canExeJceAddr1.value(), m_can_exe_jce1_hook, &can_exe_jce_detour1, &canExeJceRet1, 0x5))
+	if (!install_new_detour(canExeJceAddr1.value(), m_can_exe_jce1_hook, &can_exe_jce_detour1, &canExeJceRet1, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.canExeJce1";
 	}
 
-	if (!install_hook_absolute(subHumanJceAddr.value(), m_sub_human_jce_hook, &jcehuman_sub_sdt_detour, &subSdtRet, 0x9))
+	if (!install_new_detour(subHumanJceAddr.value(), m_sub_human_jce_hook, &jcehuman_sub_sdt_detour, &subSdtRet, 0x9))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.subHumanJce";
 	}
 
-	if (!install_hook_absolute(jcePrefab2Addr.value(), m_jce_prefab2_hook, &jceprefab2_detour, &jcePfb2Ret, 0xA))
+	if (!install_new_detour(jcePrefab2Addr.value(), m_jce_prefab2_hook, &jceprefab2_detour, &jcePfb2Ret, 0xA))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.jcePrefab2";
 	}
 
-	if (!install_hook_absolute(finishPfbAddr.value(), m_jce_finishpfb_hook, &finish_pfb_detour, &jceFinishPfbRet, 0x8))
+	if (!install_new_detour(finishPfbAddr.value(), m_jce_finishpfb_hook, &finish_pfb_detour, &jceFinishPfbRet, 0x8))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize DMC3JCE.finishPfb";
 	}
 
-	m_jce_cancel_hook = std::make_unique<FunctionHook>(cancelJceAddr.value(), &DMC3JCE::jce_cancel_hook);
+	m_jce_cancel_hook = std::make_shared<Detour_t>(cancelJceAddr.value(), &DMC3JCE::jce_cancel_hook);
 	m_jce_cancel_hook->create();
-	m_update_jce_hook = std::make_unique<FunctionHook>(jceStartUpdateAddr.value() + 0x8, &DMC3JCE::pl0800_start_jce_update);
+	m_detours.push_back(m_jce_cancel_hook);
+
+	m_update_jce_hook = std::make_shared<Detour_t>(jceStartUpdateAddr.value() + 0x8, &DMC3JCE::pl0800_start_jce_update);
 	m_update_jce_hook->create();
+	m_detours.push_back(m_update_jce_hook);
 
 	return Mod::on_initialize();
 }

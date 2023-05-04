@@ -169,19 +169,19 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 
 	airTrickEndDrawSelfCall = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 6C 24 18 56 48 83 EC 20 48 8B 41 50 41 0F").value_or(pBase + 0x12E2BA0);
 
-	if (!install_hook_absolute(endAirTrickAddr.value(), m_air_trick_end_hook, &trick_end_draw_self_detour, &airTrickEndRet, 0x5))
+	if (!install_new_detour(endAirTrickAddr.value(), m_air_trick_end_hook, &trick_end_draw_self_detour, &airTrickEndRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilTrickTrailsEfx.endAirTrick";
 	}
 
-	if (!install_hook_absolute(actionEndSetDrawSeflAddr.value(), m_trick_set_draw_self_hook, &action_set_draw_self_detour, &actionSetDrawSelfRet, 0x5))
+	if (!install_new_detour(actionEndSetDrawSeflAddr.value(), m_trick_set_draw_self_hook, &action_set_draw_self_detour, &actionSetDrawSelfRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilTrickTrailsEfx.actionEndSetDrawSefl";
 	}
 
-	if (!install_hook_absolute(trickDodgeEnableDrawSelfAddr.value(), m_trickdodge_set_draw_self_hook, &trickdodge_set_draw_self_detour, &trickDodgeSetDrawSelfRet, 0x5))
+	if (!install_new_detour(trickDodgeEnableDrawSelfAddr.value(), m_trickdodge_set_draw_self_hook, &trickdodge_set_draw_self_detour, &trickDodgeSetDrawSelfRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilTrickTrailsEfx.trickDodgeEnableDrawSelf";

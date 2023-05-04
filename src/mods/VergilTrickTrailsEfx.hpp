@@ -739,10 +739,10 @@ private:
 		std::make_unique<TrickDodgeRight>()
 	};
 
-	std::unique_ptr<FunctionHook> m_trick_start_hook;
-	std::unique_ptr<FunctionHook> m_air_trick_end_hook;
-	std::unique_ptr<FunctionHook> m_trick_set_draw_self_hook;
-	std::unique_ptr<FunctionHook> m_trickdodge_set_draw_self_hook;
+	std::shared_ptr<Detour_t> m_trick_start_hook;
+	std::shared_ptr<Detour_t> m_air_trick_end_hook;
+	std::shared_ptr<Detour_t> m_trick_set_draw_self_hook;
+	std::shared_ptr<Detour_t> m_trickdodge_set_draw_self_hook;
 
 public:
 

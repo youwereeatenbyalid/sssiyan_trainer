@@ -658,16 +658,16 @@ private:
 
 	void init_check_box_info() override;
 
-	std::unique_ptr<FunctionHook> m_can_exe_jce_hook;
-	std::unique_ptr<FunctionHook> m_can_exe_jce1_hook;
-	std::unique_ptr<FunctionHook> m_sub_human_jce_hook;
-	std::unique_ptr<FunctionHook> m_jce_timer_hook;
-	std::unique_ptr<FunctionHook> m_jce_crashpoint_hook;
-	std::unique_ptr<FunctionHook> m_jce_finishpfb_hook;
-	std::unique_ptr<FunctionHook> m_jce_prefab2_hook;
-	std::unique_ptr<FunctionHook> m_jce_cancel_hook;
+	std::shared_ptr<Detour_t> m_can_exe_jce_hook;
+	std::shared_ptr<Detour_t> m_can_exe_jce1_hook;
+	std::shared_ptr<Detour_t> m_sub_human_jce_hook;
+	std::shared_ptr<Detour_t> m_jce_timer_hook;
+	std::shared_ptr<Detour_t> m_jce_crashpoint_hook;
+	std::shared_ptr<Detour_t> m_jce_finishpfb_hook;
+	std::shared_ptr<Detour_t> m_jce_prefab2_hook;
+	std::shared_ptr<Detour_t> m_jce_cancel_hook;
 
-	std::unique_ptr<FunctionHook> m_update_jce_hook;
+	std::shared_ptr<Detour_t> m_update_jce_hook;
 };
 //clang-format on
 

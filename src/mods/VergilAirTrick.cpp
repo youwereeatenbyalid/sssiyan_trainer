@@ -400,7 +400,7 @@ static naked void air_trick_routine3_detour()
 float VergilAirTrick::trick_action_get_range_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction)
 {
 	if (!cheaton || !isTeleport)
-		return _mod->m_finish_range_hook->get_original<decltype(trick_action_get_range_hook)>()(threadCntx, fsm2TrickAction);
+		return _mod->m_finish_range_hook->get_trampoline<decltype(trick_action_get_range_hook)>()(threadCntx, fsm2TrickAction);
 	if (isTeleport)
 	{
 		if (!_mod->_isIgnoringTrickFinishRange || _mod->_isDefaultFinishRangeRequested)
@@ -412,11 +412,11 @@ float VergilAirTrick::trick_action_get_range_hook(uintptr_t threadCntx, uintptr_
 void VergilAirTrick::on_push_hit_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction, uintptr_t gameObj)
 {
 	if (!cheaton || !isTeleport)
-		_mod->m_on_push_hit_hook->get_original<decltype(on_push_hit_hook)>()(threadCntx, fsm2TrickAction, gameObj);
+		_mod->m_on_push_hit_hook->get_trampoline<decltype(on_push_hit_hook)>()(threadCntx, fsm2TrickAction, gameObj);
 	if (isTeleport)
 	{
 		if (!_mod->_isIgnoringTrickFinishRange || _mod->_isDefaultFinishRangeRequested)
-			return _mod->m_on_push_hit_hook->get_original<decltype(on_push_hit_hook)>()(threadCntx, fsm2TrickAction, gameObj);
+			return _mod->m_on_push_hit_hook->get_trampoline<decltype(on_push_hit_hook)>()(threadCntx, fsm2TrickAction, gameObj);
 	}
 }
 
@@ -483,53 +483,56 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	auto pushHitAddr = m_patterns_cache->find_addr(base, "40 53 55 41 56 48 83 EC 20 49 8B E8 4C 8B F2 48 8B 52");
 	//DevilMayCry5.app_fsm2_player_pl0800_TrickAction__onPushHit312697
 
-	if (!install_hook_absolute(initSpeedAddr.value()+0x3, m_initspeed_hook, &initspeed_detour, &initSpeedRet, 0x6)) {
+	if (!install_new_detour(initSpeedAddr.value()+0x3, m_initspeed_hook, &initspeed_detour, &initSpeedRet, 0x6)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.initSpeed"; 
     }
 
-	if (!install_hook_absolute(waitTimeAddr.value()+0x3, m_waittime_hook, &waittime_detour, &waitTimeRet, 0x6)) {
+	if (!install_new_detour(waitTimeAddr.value()+0x3, m_waittime_hook, &waittime_detour, &waitTimeRet, 0x6)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.waitTime"; 
     }
 
-	if (!install_hook_absolute(finishOffsetAddr.value()+0x1, m_finish_offset_hook, &finish_offset_detour, &finishOffsetRet, 0x18)) {
+	if (!install_new_detour(finishOffsetAddr.value()+0x1, m_finish_offset_hook, &finish_offset_detour, &finishOffsetRet, 0x18)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.finishOffset"; 
     }
 
-	if (!install_hook_absolute(maxSpeedZAddr.value()+0x3, m_maxspeed_z_hook, &maxspeedz_detour, &maxSpeedZRet, 0x8)) {
+	if (!install_new_detour(maxSpeedZAddr.value()+0x3, m_maxspeed_z_hook, &maxspeedz_detour, &maxSpeedZRet, 0x8)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.maxSpeedZ"; 
     }
 
-	if (!install_hook_absolute(maxXZAddr.value()+0x3, m_max_xz_hook, &max_xz_detour, &maxXZRet, 0x8)) {
+	if (!install_new_detour(maxXZAddr.value()+0x3, m_max_xz_hook, &max_xz_detour, &maxXZRet, 0x8)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.maxXZ"; 
     }
 
-	if (!install_hook_absolute(speedAccAddr.value(), m_speed_acc_hook, &speed_acc_detour, &speedAccRet, 0x8)) {
+	if (!install_new_detour(speedAccAddr.value(), m_speed_acc_hook, &speed_acc_detour, &speedAccRet, 0x8)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.speedAcc"; 
     }
 
-	if (!install_hook_absolute(routine3Addr.value()+0x3, m_teleport_hook, &air_trick_routine3_detour, &routineStartRet, 0x7)) {
+	if (!install_new_detour(routine3Addr.value()+0x3, m_teleport_hook, &air_trick_routine3_detour, &routineStartRet, 0x7)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.routine3"; 
     }
 
-	/*if (!install_hook_absolute(finishRangeAddr.value(), m_finish_range_hook, &finish_range_detour, &finishRangeRet, 0x9)) {
+	/*if (!install_new_detour(finishRangeAddr.value(), m_finish_range_hook, &finish_range_detour, &finishRangeRet, 0x9)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.finishRange"; 
     }*/
 
-	m_finish_range_hook = std::make_unique<FunctionHook>(finishRangeAddr.value() + 0x2, &trick_action_get_range_hook);
+	m_finish_range_hook = std::make_shared<Detour_t>(finishRangeAddr.value() + 0x2, &trick_action_get_range_hook);
 	if (!m_finish_range_hook->create())
 		return "Failed to initialize VergilAirTrick.m_finish_range_hook";
+	m_detours.push_back(m_finish_range_hook);
 
-	m_on_push_hit_hook = std::make_unique<FunctionHook>(pushHitAddr.value(), &on_push_hit_hook);
+	m_on_push_hit_hook = std::make_shared<Detour_t>(pushHitAddr.value(), &on_push_hit_hook);
 	if (!m_on_push_hit_hook->create())
 		return "Failed to initialize VergilAirTrick.m_on_push_hit_hook";
+	m_detours.push_back(m_on_push_hit_hook);
+
 	return Mod::on_initialize();
 }
 

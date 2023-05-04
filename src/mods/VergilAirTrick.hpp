@@ -100,18 +100,17 @@ private:
 	static float trick_action_get_range_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction);
 	static void on_push_hit_hook(uintptr_t threadCntx, uintptr_t fsm2TrickAction, uintptr_t gameObj);
 
-	std::unique_ptr<FunctionHook> m_airtrick_hook;
-    std::unique_ptr<FunctionHook> m_initspeed_hook;
-	std::unique_ptr<FunctionHook> m_waittime_hook;
-    std::unique_ptr<FunctionHook> m_finish_offset_hook;
-    std::unique_ptr<FunctionHook> m_maxspeed_z_hook;
-    std::unique_ptr<FunctionHook> m_max_xz_hook;
-    std::unique_ptr<FunctionHook> m_speed_acc_hook;
-	std::unique_ptr<FunctionHook> m_teleport_hook;
-	std::unique_ptr<FunctionHook> m_finish_range_hook;
-	std::unique_ptr<FunctionHook> m_on_push_hit_hook;
+	std::shared_ptr<Detour_t> m_airtrick_hook;
+    std::shared_ptr<Detour_t> m_initspeed_hook;
+	std::shared_ptr<Detour_t> m_waittime_hook;
+    std::shared_ptr<Detour_t> m_finish_offset_hook;
+    std::shared_ptr<Detour_t> m_maxspeed_z_hook;
+    std::shared_ptr<Detour_t> m_max_xz_hook;
+    std::shared_ptr<Detour_t> m_speed_acc_hook;
+	std::shared_ptr<Detour_t> m_teleport_hook;
+	std::shared_ptr<Detour_t> m_finish_range_hook;
+	std::shared_ptr<Detour_t> m_on_push_hit_hook;
 
 	InputSystem *_inputSystem = nullptr;
 	static inline VergilAirTrick *_mod;
 };
-
