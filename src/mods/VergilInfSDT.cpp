@@ -2,7 +2,7 @@
 
 void VergilInfSDT::dt_update_hook(uintptr_t threadCntx, uintptr_t pl0800)
 {
-    _mod->_pl0800DtUpdateHook->get_original<decltype(dt_update_hook)>()(threadCntx, pl0800);
+    _mod->_pl0800DtUpdateHook->get_trampoline<decltype(dt_update_hook)>()(threadCntx, pl0800);
     if (cheaton)
         *(float*)(pl0800 + 0x1B20) = 10000.0f;
 }
@@ -34,9 +34,10 @@ std::optional<std::string> VergilInfSDT::on_initialize() {
     return "Unable to find VergilInfSDT pattern.";
   }
 
-  _pl0800DtUpdateHook = std::make_unique<FunctionHook>(addr.value(), &dt_update_hook);
+  _pl0800DtUpdateHook = std::make_shared<Detour_t>(addr.value(), &VergilInfSDT::dt_update_hook);
   if (!_pl0800DtUpdateHook->create())
       return "Unable to create VergilInfSDT._pl0800DtUpdateHook";
+  m_detours.push_back(_pl0800DtUpdateHook);
   return Mod::on_initialize();
 }
 

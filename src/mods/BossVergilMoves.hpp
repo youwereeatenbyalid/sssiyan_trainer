@@ -1171,10 +1171,10 @@ private:
 	const std::array<char*, 3> _delayNames{ "Fast mode", "Default mode", "Slow mode" };
 	int _curPlId = 4;
 
-	std::unique_ptr<FunctionHook> _FE_doCommandSpecHook = nullptr;
-	std::unique_ptr<FunctionHook> _fuckCumpcomSyncHook = nullptr;
+	std::shared_ptr<Detour_t> _FE_doCommandSpecHook = nullptr;
+	std::shared_ptr<Detour_t> _fuckCumpcomSyncHook = nullptr;
 	std::unique_ptr<FunctionHook> _pl0800CheckCommandHook = nullptr;
-	std::unique_ptr<FunctionHook> _plSetOrbEfxHook = nullptr;
+	std::shared_ptr<Detour_t> _plSetOrbEfxHook = nullptr;
 
 	VergilDoppelInitSetup::DoppelDelayState _doppelSpeed = VergilDoppelInitSetup::DoppelDelayState::Slow;
 
@@ -1357,7 +1357,7 @@ private:
 	static bool force_edge_do_command_spec_ds_hook(uintptr_t threadCtxt, uintptr_t weaponForceEdge, int action)
 	{
 		const auto vergil = *(uintptr_t*)(weaponForceEdge + 0x310);
-		bool res = _mod->_FE_doCommandSpecHook->get_original<decltype(force_edge_do_command_spec_ds_hook)>()(threadCtxt, weaponForceEdge, action);
+		bool res = _mod->_FE_doCommandSpecHook->get_trampoline<decltype(force_edge_do_command_spec_ds_hook)>()(threadCtxt, weaponForceEdge, action);
 		if (!cheaton || !_mod->_isAirRaidEnabled || !_mod->_isPl0300Loaded || *(int*)(vergil + 0x9B0) == 2 || *(float*)(vergil + 0x1B20) < 5000.0f)
 			return res;
 
@@ -1441,7 +1441,7 @@ private:
 	{
 		if (*(int*)(pl + 0xE64) == 3 && *(int*)(pl + 0x108) == 0)
 			return;
-		_mod->_plSetOrbEfxHook->get_original<decltype(pl_set_orb_efx_hook)>()(threadCtxt, pl, orbTypeEnum);
+		_mod->_plSetOrbEfxHook->get_trampoline<decltype(pl_set_orb_efx_hook)>()(threadCtxt, pl, orbTypeEnum);
 	}
 
 	void on_sdk_init() override
@@ -1554,17 +1554,18 @@ public:
 		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t>>(this, &BossVergilMoves::on_pl_added));
 		PlayerTracker::on_pl_manager_pl_unload_sub(std::make_shared<Events::EventHandler<BossVergilMoves, uintptr_t, uintptr_t, uintptr_t, bool>>(this, &BossVergilMoves::on_pl_remove));
 
-		_FE_doCommandSpecHook = std::make_unique<FunctionHook>(doCommSpecAddr.value() + 0x6, &BossVergilMoves::force_edge_do_command_spec_ds_hook);
+		_FE_doCommandSpecHook = std::make_shared<Detour_t>(doCommSpecAddr.value() + 0x6, &BossVergilMoves::force_edge_do_command_spec_ds_hook);
 		if (!_FE_doCommandSpecHook->create())
 			return "Unable to create BossVergilMoves._FE_doCommandSpecHook.";
+		m_detours.push_back(_FE_doCommandSpecHook);
 
-		if (!install_hook_absolute(_fuckCumpcomAddr, _fuckCumpcomSyncHook, &sync_global_detour, &_gameSyncMechRet, 0x7))
+		if (!install_new_detour(_fuckCumpcomAddr, _fuckCumpcomSyncHook, &sync_global_detour, &_gameSyncMechRet, 0x7))
 			return "Cant create BossVergilMoves._fuckCumpcomSyncHook.";
 
-		_plSetOrbEfxHook = std::make_unique<FunctionHook>(plSetOrbEfxAddr.value(), &BossVergilMoves::pl_set_orb_efx_hook);
+		_plSetOrbEfxHook = std::make_shared<Detour_t>(plSetOrbEfxAddr.value(), &BossVergilMoves::pl_set_orb_efx_hook);
 		if (!_plSetOrbEfxHook->create())
 			return "Cant create BossVergilMoves._plSetOrbEfxHook (snow fix).";
-
+		m_detours.push_back(_plSetOrbEfxHook);
 		return Mod::on_initialize();
 	}
 

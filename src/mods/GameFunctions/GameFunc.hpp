@@ -438,7 +438,10 @@ namespace GameFunctions
 				auto base = g_framework->get_module().as<uintptr_t>();
 				//this needs to be changed to not be a static offset
 				//calls a function that adds a reference to the RE string so garbage collection doesn't immediately eat it. 
-				((f_add_ref)(base + 0x2526820))(_mngString);
+				//apparently already exists in the sdk
+				//((f_add_ref)(base + 0x2526820))(_mngString); //40 57 48 83 EC 20 8B 41 08 48 8B F9 85
+				utility::re_managed_object::add_ref(_mngString);
+				
 			}
 			memcpy(_data, (const void*)_mngString, 0x10);//just copy all remanagedObj stuff to fake string
 			*(int*)((uintptr_t)_data + 0x10) = _length;

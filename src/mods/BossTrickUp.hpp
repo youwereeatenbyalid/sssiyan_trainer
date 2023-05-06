@@ -40,7 +40,8 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::shared_ptr<Detour_t> m_trickup_action_hook;
+	//Don't think this is in use???
+	//std::shared_ptr<Detour_t> m_trickup_action_hook;
 
 	void on_pl0800_set_air_trick_action(uintptr_t threadCntxt, uintptr_t pl0800, uintptr_t targetGameObj, bool* skipCall)
 	{

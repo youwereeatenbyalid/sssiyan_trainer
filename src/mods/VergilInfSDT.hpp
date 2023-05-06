@@ -23,8 +23,5 @@ private:
   void init_check_box_info() override;
 
   static void dt_update_hook(uintptr_t threadCntx, uintptr_t pl0800);
-
-  std::unique_ptr<FunctionHook> m_function_hook1;
-  std::unique_ptr<FunctionHook> m_function_hook2;
-  std::unique_ptr<FunctionHook> _pl0800DtUpdateHook;
+  std::shared_ptr<Detour_t> _pl0800DtUpdateHook;
 };

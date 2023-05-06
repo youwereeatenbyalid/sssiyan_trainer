@@ -31,5 +31,5 @@ private:
 		_pl0800SetAirTrickActionMethod = sdk::find_method_definition("app.PlayerVergilPL", "setAirTrickAction(via.GameObject)");
 	}
 
-	std::unique_ptr<FunctionHook> _checkAirTrickHook;
+	std::shared_ptr<Detour_t> _checkAirTrickHook;
 };

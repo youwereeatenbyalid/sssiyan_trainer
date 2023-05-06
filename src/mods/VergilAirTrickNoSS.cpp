@@ -5,7 +5,7 @@
 bool VergilAirTrickNoSS::check_air_trick_hook(uintptr_t threadCntxt, uintptr_t pl0800)
 {
     if (!cheaton)
-        return _mod->_checkAirTrickHook->get_original<decltype(check_air_trick_hook)>()(threadCntxt, pl0800);
+        return _mod->_checkAirTrickHook->get_trampoline<decltype(check_air_trick_hook)>()(threadCntxt, pl0800);
     auto lockOnTarget = *(uintptr_t*)(pl0800 + 0x428);
     if (lockOnTarget == 0)
         return false;
@@ -48,10 +48,10 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
         return "Unable to find VergilAirTrickNoSS.checkAirTrickAddr pattern.";
     }
 
-    _checkAirTrickHook = std::make_unique<FunctionHook>(checkAirTrickAddr.value() + 0x9, &check_air_trick_hook);
+    _checkAirTrickHook = std::make_shared<Detour_t>(checkAirTrickAddr.value() + 0x9, &VergilAirTrickNoSS::check_air_trick_hook);
     if (!_checkAirTrickHook->create())
         return "Unable to create VergilAirTrickNoSS._checkAirTrickHook.";
-
+    m_detours.push_back(_checkAirTrickHook);
     return Mod::on_initialize();
 }
 

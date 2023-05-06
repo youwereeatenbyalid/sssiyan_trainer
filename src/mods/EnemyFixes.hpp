@@ -39,7 +39,7 @@ private:
 		m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 	}
 
-	std::unique_ptr<FunctionHook> m_trickup_action_hook;
+	//std::unique_ptr<FunctionHook> m_trickup_action_hook; I don't think this is used.
 
     static void btn_set_plpos_to(Vector3f& to, const char* btnContent = "Set center of floor to current player position")
     {

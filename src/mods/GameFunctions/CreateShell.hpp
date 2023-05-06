@@ -1,5 +1,6 @@
 #pragma once
 #include "Mods/GameFunctions/GameFunc.hpp"
+#include "reframework/API.hpp"
 #include <optional>
 //clang-format off
 namespace GameFunctions
@@ -20,7 +21,10 @@ namespace GameFunctions
 				static inline f_set_Capacity set_capacity{};
 				static inline const int listOffs = 0x60;
 				static inline std::mutex mt{};
-				static inline uintptr_t fAddr = 0x1A0DC10;
+				//DevilMayCry5.System_Collections_Generic_List_1_app_Shell___set_Capacity104832 
+				//No viable AOB here, any easy way of getting the method?
+				static inline uintptr_t fAddr = 0x1A0DC10; 
+
 				//CreateShell *baseRef;
 
 				bool invoke() override
@@ -44,27 +48,49 @@ namespace GameFunctions
 				static bool invoke(int capacity, uintptr_t threadContext)
 				{
 					bool res = false;
-					set_capacity = (f_set_Capacity)(g_framework->get_module().as<uintptr_t>() + fAddr);
-					if (threadContext != 0)
-					{
-						//Retrieve ShellManager singleton from offset
-						uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-						//if ShellManager exists
-						if (shellMng != 0)
-						{
-							//get shell list from ShellManager
-							uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
-							//if ShellManager gameobject exists
-							uintptr_t mngObj = *(uintptr_t*)(lst+0x10);
-							if (mngObj != 0)
-							{
-								int curCapacity = *(int*)(mngObj + 0x1C);
-								std::unique_lock<std::mutex> lock(mt);
-								if(capacity != curCapacity)
-									return res = set_capacity((void*)threadContext, (void*)lst, capacity);
-							}
+					
+					//new sick nasty reframework approach 
+					if (threadContext != 0) {
+						
+						auto& api = reframework::API::get();
+						const auto tdb = api->tdb();
+						//get the shell manager
+						auto shell_manager = api->get_managed_singleton("app.ShellManager");
+						if (shell_manager == nullptr)
+							return res;
+							//get the list
+						auto shell_list = shell_manager->get_field<reframework::API::ManagedObject>("ShellList");
+						if (shell_list == nullptr)
+							return res;
+							//check if capacity is acceptable
+						if (capacity != shell_list->call<int>("get_Capacity")) {
+							//if not, set the capacity appropriately
+							std::unique_lock<std::mutex> lock(mt);
+							shell_list->call("set_Capacity(System.Int32)",capacity);
+							res = true;
 						}
 					}
+					//set_capacity = (f_set_Capacity)(g_framework->get_module().as<uintptr_t>() + fAddr);
+					//if (threadContext != 0)
+					//{
+					//	//Retrieve ShellManager singleton from offset
+					//	uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+					//	//if ShellManager exists
+					//	if (shellMng != 0)
+					//	{
+					//		//get shell list from ShellManager
+					//		uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
+					//		//if shell list gameobject exists
+					//		uintptr_t mngObj = *(uintptr_t*)(lst+0x10);
+					//		if (mngObj != 0)
+					//		{
+					//			int curCapacity = *(int*)(mngObj + 0x1C);
+					//			std::unique_lock<std::mutex> lock(mt);
+					//			if(capacity != curCapacity)
+					//				return res = set_capacity((void*)threadContext, (void*)lst, capacity);
+					//		}
+					//	}
+					//}
 					return res;
 				}
 				/// <summary>
