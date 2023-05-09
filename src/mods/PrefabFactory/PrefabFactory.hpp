@@ -36,18 +36,24 @@ namespace PfbFactory
 		}
 
 		//Same stuff what ReSdk has but using absolute adress instead of slow AOB scan for first time
+		//DevilMayCry5.via::clr::ManagedObject::addRef 
+		//40 57 48 83 EC 20 8B 41 08 48 8B F9 85
 		static void add_ref(REManagedObject* obj)
 		{
 			if (obj == nullptr)
 				return;
-			static f_add_ref addRef = (f_add_ref)(g_framework->get_module().as<uintptr_t>() + 0x2526820);
-			addRef(obj);
+			utility::re_managed_object::add_ref(obj);
+			//static f_add_ref addRef = (f_add_ref)(g_framework->get_module().as<uintptr_t>() + 0x2526820);
+			//addRef(obj);
 		}
 
 		static inline void release(REManagedObject* obj)
 		{
-			static f_release release = (f_release)(g_framework->get_module().as<uintptr_t>() + 0x2526FA0);
-			release(obj);
+			utility::re_managed_object::release(obj);
+			//DevilMayCry5.sub_142526FA0 
+			//40 53 48 83 EC 20 8B 41 08 48 8B D9 85
+			//static f_release release = (f_release)(g_framework->get_module().as<uintptr_t>() + 0x2526FA0);
+			//release(obj);
 		}
 	};
 }
