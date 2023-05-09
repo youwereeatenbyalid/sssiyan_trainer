@@ -18,6 +18,9 @@ namespace GameFunctions
 		Vec3 pos;
 		PrefabInstantiate()
 		{
+			//DevilMayCry5.via_Prefab__instantiate24237 
+			//40 53 48 83 EC 30 41 0F 10 00 48 8B CA
+			//instantiate(via.vec3)
 			fAddr += 0x252100;
 			prefab_instantiate = (prefabInstantiate)fAddr;
 		}
@@ -46,8 +49,9 @@ namespace GameFunctions
 		/// <returns></returns>
 		uintptr_t invoke() override
 		{
+			//hmmmmm
 			if (fAddr != NULL && pfb != 0)
-				return prefab_instantiate(NULL, (void*)pfb, pos);
+				return (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pfb, "instantiate(via.vec3)", pos);
 			return 0;
 		}
 
@@ -55,7 +59,7 @@ namespace GameFunctions
 		{
 			pfb = prefab;
 			if (fAddr != NULL && pfb != 0)
-				return prefab_instantiate(NULL, (void*)pfb, pos);
+				return (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pfb, "instantiate(via.vec3)", pos);
 			return 0;
 		}
 		/// <summary>
@@ -84,6 +88,9 @@ namespace GameFunctions
 		Vec3 scale;
 		PrefabInstantiateScale()
 		{
+			//DevilMayCry5.via_Prefab__instantiate24240 
+			//4C 8B DC 53 48 81 EC C0 00 00 00 41
+			//instantiate(via.vec3, via.Quaternion, via.vec3)
 			fAddr += 0xA6E740;
 			prefab_instantiate_scale = (prefabInstantiateScale)fAddr;
 		}
@@ -108,7 +115,8 @@ namespace GameFunctions
 		uintptr_t invoke() override
 		{
 			if (fAddr != 0 && pfb != 0)
-				return prefab_instantiate_scale(NULL, (void*)pfb, pos, rot, scale);
+				return (uintptr_t)sdk::call_object_func_easy<REManagedObject*>((REManagedObject*)pfb, "instantiate(via.vec3, via.Quaternion, via.vec3)", pos, rot, scale);
+				//return prefab_instantiate_scale(NULL, (void*)pfb, pos, rot, scale);
 			return 0;
 		}
 

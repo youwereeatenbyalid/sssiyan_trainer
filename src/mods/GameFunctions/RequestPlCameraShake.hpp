@@ -21,6 +21,9 @@ namespace GameFunctions
 	public:
 		RequestPlCameraShake()
 		{
+			//DevilMayCry5.app_PlayerCameraController__RequestCameraShake147317 
+			//C3 CC CC 4C 8B DC 49 89 6B 18
+			//RequestCameraShake(via.vec3, via.Quaternion, via.vec3, System.Int32)
 			fAddr += 0xCBE390;
 			func = (f_request_camera_shake)fAddr;
 		}
@@ -52,7 +55,8 @@ namespace GameFunctions
 			auto context = get_thread_context();
 			if (context == 0)
 				return;
-			func(context, plCamera, pos, rot, hypocenter, priority);
+			sdk::call_object_func_easy<void*>((REManagedObject*)plCamera, "RequestCameraShake(via.vec3, via.Quaternion, via.vec3, System.Int32)", pos, rot, hypocenter, priority);
+			//func(context, plCamera, pos, rot, hypocenter, priority);
 		}
 
 		void invoke(Vec3 pos, Quaternion rot, Vec3 hypocenter, int priority)

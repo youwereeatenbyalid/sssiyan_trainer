@@ -36,6 +36,9 @@ namespace GameFunctions
 		PlayerSetDT(uintptr_t player)
 		{ 
 			pl = player;
+			//DevilMayCry5.app_Player__setDevilTrigger171564 
+			//48 89 5C 24 18 48 89 7C 24 20 41 56 48 83 EC 40 48 8B 02
+			//setDevilTrigger(app.player.PlayerBase.DevilTrigger, System.Boolean)
 			fAddr += 0x16A3040; //0x532B30;
 			setDT = (f_set_devil_trigger)fAddr;
 		}
@@ -49,7 +52,8 @@ namespace GameFunctions
 		{
 			if(!utility::isGoodReadPtr(pl, 8))
 				return false;
-			return setDT(get_thread_context(), pl, dt, isNotProduction);
+			return sdk::call_object_func_easy<bool>((REManagedObject*)pl, "setDevilTrigger(app.player.PlayerBase.DevilTrigger, System.Boolean)", dt, isNotProduction);
+			//return setDT(get_thread_context(), pl, dt, isNotProduction);
 		}
 
 		bool operator()(DevilTrigger dt, bool isNotProduction) noexcept { return invoke(dt, isNotProduction); }
@@ -67,7 +71,11 @@ namespace GameFunctions
 		PlVergilSetDT(uintptr_t player)
 		{
 			pl = player;
+			//DevilMayCry5.app_PlayerVergilPL__setDevilTrigger113917 
+			//40 53 55 57 41 57 48 83 EC 78
+			//setDevilTrigger(app.player.PlayerBase.DevilTrigger, System.Boolean)
 			fAddr += 0x532B30;
+
 			setDT = (f_set_devil_trigger)fAddr;
 		}
 	};
