@@ -51,22 +51,21 @@ namespace GameFunctions
 					
 					//new sick nasty reframework approach 
 					if (threadContext != 0) {
-						
-						auto& api = reframework::API::get();
-						const auto tdb = api->tdb();
 						//get the shell manager
-						auto shell_manager = api->get_managed_singleton("app.ShellManager");
-						if (shell_manager == nullptr)
+						auto shell_manager_sdk = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
+						if (shell_manager_sdk == nullptr)
 							return res;
 							//get the list
-						auto shell_list = shell_manager->get_field<reframework::API::ManagedObject>("ShellList");
+						//see praydog comments here: https://discord.com/channels/747884776693825727/909150039039959050/1104394795788541982
+						//alternatively call method for shell list?
+						auto shell_list = sdk::get_object_field<REManagedObject>(shell_manager_sdk, "ShellList");
 						if (shell_list == nullptr)
 							return res;
 							//check if capacity is acceptable
-						if (capacity != shell_list->call<int>("get_Capacity")) {
+						if (capacity != sdk::call_object_func_easy<int>(shell_list,"get_Capacity")) {
 							//if not, set the capacity appropriately
 							std::unique_lock<std::mutex> lock(mt);
-							shell_list->call("set_Capacity(System.Int32)",capacity);
+							sdk::call_object_func_easy<void*>(shell_list, "set_Capacity", capacity);
 							res = true;
 						}
 					}
@@ -100,17 +99,30 @@ namespace GameFunctions
 				static int get_capacity()
 				{
 					int capacity = -1;
-					uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-					if (shellMng != 0)
-					{
-						uintptr_t lst = *(uintptr_t*)(shellMng + listOffs);
-						uintptr_t mngObj = *(uintptr_t*)(lst + 0x10);
-						if (mngObj != 0)
-						{
-							capacity = *(int*)(mngObj + 0x1C);
-						}
-					}
-					return capacity;
+					//get the shell manager
+					auto shell_manager_sdk = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
+					if (shell_manager_sdk == nullptr)
+						return capacity;
+					//get the list
+					auto shell_list = sdk::get_object_field<REManagedObject>(shell_manager_sdk, "ShellList");
+					if (shell_list == nullptr)
+						return capacity;
+					//check if capacity is acceptable
+					return sdk::call_object_func_easy<int>(shell_list, "get_Capacity");
+
+
+					//int capacity = -1;
+					//uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+					//if (shellMng != 0)
+					//{
+					//	uintptr_t lst = *(uintptr_t*)(shellMng + listOffs);
+					//	uintptr_t mngObj = *(uintptr_t*)(lst + 0x10);
+					//	if (mngObj != 0)
+					//	{
+					//		capacity = *(int*)(mngObj + 0x1C);
+					//	}
+					//}
+					//return capacity;
 				}
 				
 			};
@@ -163,6 +175,9 @@ namespace GameFunctions
 
 		CreateShell(bool ignoreThreadContext = false, uintptr_t threadContext = 0)
 		{
+			//DevilMayCry5.app_ShellManager__createShell174685
+			//createShell(via.Prefab, via.vec3, via.Quaternion, app.GameModel, System.Int32, System.Int32, app.ShellManager.DelayParameter)
+			//48 8B C4 55 53 57 41 54 41 55 48
 			fAddr +=  0x1B0A400;
 			create_shell = (f_CreateShell)fAddr;
 			delay = nullptr;
@@ -198,25 +213,45 @@ namespace GameFunctions
 
 		int get_id() const {return id; }
 
-		bool is_shell_mng_valid() const { return *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450) != 0; }
+		bool is_shell_mng_valid() const {
+			auto shell_manager_sdk = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
+			return shell_manager_sdk != nullptr;
+		}
 
 		/// <summary></summary>
 		/// <returns>Return app.Shell object</returns>
 		volatile void* invoke() override
 		{
 			volatile void* res = 0;
-			if (pfb != 0 && fAddr != NULL)
+			if (pfb != 0 /* && fAddr != NULL*/)
 			{
-				uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-				if(shellMng == 0)
+				//SDK approach, works.
+				auto shell_manager_sdk = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
+				if (shell_manager_sdk == nullptr)
 					return 0;
-				if(!isIgnoringThreadContext)
-					threadContext = get_thread_context(/*contextRequestUnk++*/);
-				if (threadContext == 0)
-					return 0;
-				res = create_shell((void*)threadContext, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
-				if(contextRequestUnk >= 3)
-					contextRequestUnk = -1;
+				res = sdk::call_object_func_easy<REManagedObject*>(shell_manager_sdk, "createShell(via.Prefab, via.vec3, via.Quaternion, app.GameModel, System.Int32, System.Int32, app.ShellManager.DelayParameter)",
+					(void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
+				
+				//API Attempt, need to use Invoke
+				//auto& api = reframework::API::get();
+				//const auto tdb = api->tdb();
+				//auto shell_manager = api->get_managed_singleton("app.ShellManager");
+
+				//auto result = shell_manager->invoke("createShell(via.Prefab, via.vec3, via.Quaternion, app.GameModel, System.Int32, System.Int32, app.ShellManager.DelayParameter)",
+				//	{ (void*)pfb, (void*)&pos, (void*)&rot, (void*)owner, (void*)(intptr_t)&lvl, (void*)(intptr_t)&id, (void*)nullptr });
+
+				//Old approach, using static ref.
+				//res =  result.ptr;
+				//uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+				//if(shellMng == 0)
+				//	return 0;
+				//if(!isIgnoringThreadContext)
+				//	threadContext = get_thread_context(/*contextRequestUnk++*/);
+				//if (threadContext == 0)
+				//	return 0;
+				//res = create_shell((void*)threadContext, (void*)shellMng, (void*)pfb, pos, rot, (void*)owner, lvl, id, nullptr);
+				//if(contextRequestUnk >= 3)
+				//	contextRequestUnk = -1;
 			}
 			return res;
 		}
@@ -264,11 +299,16 @@ namespace GameFunctions
 
 		int get_list_shell_count() const
 		{
-			uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
-			if (shellMng == 0 || IsBadReadPtr((void*)shellMng, 8))
+			auto shell_manager_sdk = sdk::get_managed_singleton<REManagedObject>("app.ShellManager");
+			if (shell_manager_sdk == nullptr)
 				return -1;
-			uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
-			return *(int*)(lst + 0x18);
+			return sdk::call_object_func_easy<int>(shell_manager_sdk, "getShellCount");
+			//return shell_manager->call<int>("getShellCount");
+			//uintptr_t shellMng = *(uintptr_t*)(g_framework->get_module().as<uintptr_t>() + 0x7E60450);
+			//if (shellMng == 0 || IsBadReadPtr((void*)shellMng, 8))
+			//	return -1;
+			//uintptr_t lst = *(uintptr_t*)(shellMng + 0x60);
+			//return *(int*)(lst + 0x18);
 		}
 	};
 }

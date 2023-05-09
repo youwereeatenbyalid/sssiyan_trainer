@@ -52,8 +52,13 @@ namespace GameFunctions
 		GameModelSetAction(uintptr_t gameModel)
 		{
 			this->gameModel = gameModel;
-			fAddr += 0x12EC360;
-			set_action = (f_set_action)fAddr;
+
+			//DevilMayCry5.app_GameModel__setAction173857 
+			//setAction(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)
+			//AOB: ( CD part of address ) CC CC CC CC CC CC CC CC CC 48 89 5C 24 08 57 48 83 EC 60 48 8B 41
+			//57 48 83 EC 60 48 8B 41 50 48 8B FA 48 8B D9 48 83 78 18 00 0F 85 (9A) (backup AOB in case the first one doesn't work)
+			//fAddr += 0x12EC360;
+			//set_action = (f_set_action)fAddr;
 		}
 		/// <summary>
 		/// Set the action of the gamemodel.
@@ -74,7 +79,9 @@ namespace GameFunctions
 		{
 			if(!utility::isGoodReadPtr(gameModel, 8))
 				return;
-			set_action(get_thread_context(), gameModel, nameString, layerNo, startFrame, interpolationFrame, mode, curve, isImmediate, passSelect, isPuppetTransition, priority);
+			sdk::call_object_func_easy<void*>((REManagedObject*)gameModel, "setAction(System.String, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean, System.Boolean, app.GameModel.ActionPriority)",
+				nameString, layerNo, startFrame, interpolationFrame, mode, curve, isImmediate, passSelect, isPuppetTransition, priority);
+			//set_action(get_thread_context(), gameModel, nameString, layerNo, startFrame, interpolationFrame, mode, curve, isImmediate, passSelect, isPuppetTransition, priority);
 		}
 		/// <summary>
 		/// operator call for class. Set the action of the gamemodel.
@@ -117,8 +124,11 @@ namespace GameFunctions
 		PlVergilSetAction(uintptr_t playerVergil)
 		{
 			pl = playerVergil;
-			fAddr += 0x5456A0;
-			vergil_set_action = (f_vergil_set_action)fAddr;
+			//fAddr += 0x5456A0;
+			//48 89 5C 24 20 56 57 41 57 48 83 EC 60
+			//DevilMayCry5.app_PlayerVergilPL__setAction113951 
+			//setAction(app.PlayerVergilPL.Actions, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean)
+			//vergil_set_action = (f_vergil_set_action)fAddr;
 		}
 		/// <summary>
 		/// Set the action of the PL Vergil Gamemodel.
@@ -137,7 +147,10 @@ namespace GameFunctions
 		{
 			if(!utility::isGoodReadPtr(pl, 8))
 				return;
-			vergil_set_action(get_thread_context(), pl, action, layerNo, startFrame, interpolationFrame, mode, curve, isCommandAction, isPuppetTransition);
+			sdk::call_object_func_easy<void*>((REManagedObject*)pl, "setAction("
+				"app.PlayerVergilPL.Actions, System.UInt32, System.Single, System.Single, via.motion.InterpolationMode, via.motion.InterpolationCurve, System.Boolean, System.Boolean)",
+				action,						layerNo,		startFrame,		interpolationFrame, mode,					curve,							isCommandAction, isPuppetTransition);
+			//vergil_set_action(get_thread_context(), pl, action, layerNo, startFrame, interpolationFrame, mode, curve, isCommandAction, isPuppetTransition);
 		}
 		/// <summary>
 		/// operator call for class. Set the action of the PL Vergil Gamemodel.

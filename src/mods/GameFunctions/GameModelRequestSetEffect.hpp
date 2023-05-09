@@ -48,7 +48,8 @@ namespace GameFunctions
 	private:
 		uintptr_t model;
 		uintptr_t killEfxAddr = 0x12F5CE0;
-
+		//DevilMayCry5.app_GameModel__killEffect173892 "4D 85 C0 0F 84 35 01 00 00 55"
+		//killEffect(via.effect.script.EffectID)
 		typedef volatile void* (__cdecl* f_request_set_effect)(uintptr_t threadVM, uintptr_t gameModel, EffectID* effectID, Vec3 pos, Quaternion rot);
 		typedef void(__cdecl* f_kill_effect)(uintptr_t threadVM, uintptr_t gameModel, EffectID* effectID);
 
@@ -71,6 +72,9 @@ namespace GameFunctions
 			if (staticEffectID == nullptr)
 				throw std::runtime_error("staticEffectID can't be NULL");
 			killEfxAddr += fAddr;
+
+			//DevilMayCry5.app_GameModel__requestEffect173889 "48 8B C4 55 56 57 41 56 48 81 EC D8"
+			//requestEffect(via.effect.script.EffectID, via.vec3, via.Quaternion)
 			fAddr += 0x12F3E00;
 			request_set_effect = (f_request_set_effect)fAddr;
 			kill_effect = (f_kill_effect)killEfxAddr;
@@ -83,7 +87,12 @@ namespace GameFunctions
 		{
 			if (!utility::isGoodReadPtr(model, 8))
 				return nullptr;
-			return request_set_effect(get_thread_context(), model, effectID.get(), pos, rot);
+			return sdk::call_object_func_easy<void*>((REManagedObject*)model, 
+				"requestEffect(via.effect.script.EffectID, via.vec3, via.Quaternion)",
+				effectID.get(), pos, rot);
+			//auto game_model = reinterpret_cast<API::ManagedObject*>(model);
+			//return game_model->call<API::ManagedObject*>("requestEffect(via.effect.script.EffectID, via.vec3, via.Quaternion)", effectID.get(), pos, rot);
+			//return request_set_effect(get_thread_context(), model, effectID.get(), pos, rot);
 		}
 
 		/// <summary>
@@ -114,7 +123,14 @@ namespace GameFunctions
 		{
 			if (!utility::isGoodReadPtr(model, 8))
 				return;
-			kill_effect(get_thread_context(), model, effectID.get());
+			sdk::call_object_func_easy<void*>((REManagedObject*)model,
+				"killEffect(via.effect.script.EffectID)",
+				effectID.get());
+			//game_model->call<API::ManagedObject*>("killEffect(via.effect.script.EffectID)", effectID.get());
+			//kill_effect(get_thread_context(), model, effectID.get());
+			return;
+			
+			
 		}
 		/// <summary>
 		/// operator call for class, create effect at specified position and rotation
