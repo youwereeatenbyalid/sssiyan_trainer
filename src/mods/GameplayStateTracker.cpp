@@ -136,8 +136,15 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
         return "Unable to find GameplayStateTracker.ui3500GuiDoOnOpenAddr.";
     }
 
-    auto ui3500GuiDoOnClosedAddr = m_patterns_cache->find_addr(base, "5D 5B C3 CC CC CC CC 48 89 5C 24 10 56");
-    //DevilMayCry5.app_ui3500GUI__doOnOpen289005 (-0x7)
+    //"5D 5B C3 CC CC CC CC 48 89 5C 24 10 56" TU6
+    //DevilMayCry5.app_ui3500GUI__doOnClosed289146 (-0x7)
+
+    //5B 5D C3 CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 10 56
+    //DevilMayCry5.app_ui3500GUI__doOnClosed289146 
+    auto ui3500GuiDoOnClosedAddr = m_patterns_cache->find_addr(base, "5B 5D C3 CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 10 56");
+   
+    
+
     if (!ui3500GuiDoOnClosedAddr)
     {
         return "Unable to find GameplayStateTracker.ui3500GuiDoOnClosedAddr.";
@@ -186,7 +193,7 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
         return "Can't create _ui3500GuiDoOnOpenHook.";
     m_detours.push_back(_ui3500GuiDoOnOpenDetour);
 
-    _ui3500GuiDoOnClosedDetour = std::make_shared<Detour_t>(ui3500GuiDoOnClosedAddr.value() + 0x7, &ui3500Gui_do_on_closed_hook);
+    _ui3500GuiDoOnClosedDetour = std::make_shared<Detour_t>(ui3500GuiDoOnClosedAddr.value(), &ui3500Gui_do_on_closed_hook);
     if (!_ui3500GuiDoOnClosedDetour->create())
         return "Can't create _ui3500GuiDoOnClosedHook.";
     m_detours.push_back(_ui3500GuiDoOnClosedDetour);

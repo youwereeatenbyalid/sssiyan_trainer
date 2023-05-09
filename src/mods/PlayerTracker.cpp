@@ -659,15 +659,20 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!incombat_addr) {
 		return "Unable to find In Combat pattern.";
 	}
-	auto sin_addr = m_patterns_cache->find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
-	if (!sin_addr) {
-		return "Unable to find Sin pattern.";
-	}
+	//auto sin_addr = m_patterns_cache->find_addr(base, "0F 57 F6 F3 0F 5A F0 0F 28 C7 E8 D1 36");
+	//if (!sin_addr) {
+	//	return "Unable to find Sin pattern.";
+	//}
 
 	auto cos_addr = m_patterns_cache->find_addr(base, "F3 0F 59 87 88 0F 00 00");
 	if (!cos_addr) {
 		return "Unable to find Cos pattern.";
 	}
+
+	auto sin_addr = cos_addr.value() - 0xF;
+
+
+
 	auto threshhold_addr = m_patterns_cache->find_addr(base, "45 F3 0F 10 4A 30");//Broken by copyright update
 	if (!threshhold_addr) {
 		return "Unable to find threshhold pattern.";
@@ -695,36 +700,44 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		return "Unable to find PlayerTracker.pl0800GuardCheckAddr pattern.";
 	}
 
-	auto plSetDieAddr = m_patterns_cache->find_addr(base, "02 03 00 00 C3 CC 48 89 5C 24 08");
+	//C4 20 5F C3 CC CC 48 89 5C 24 08 57 48 83 EC 20 48 8B FA 48 8B D9 E8 EB 1E
+	//DevilMayCry5.app_Player__setDie171371-6
+	auto plSetDieAddr = m_patterns_cache->find_addr(base, "C4 20 5F C3 CC CC 48 89 5C 24 08 57 48 83 EC 20 48 8B FA 48 8B D9 E8 EB 1E");
+	//Tu6
+	// 02 03 00 00 C3 CC 48 89 5C 24 08
 	//DevilMayCry5.app_Player__setDie171231 (-0x6)
-	if (!pl0800GuardCheckAddr)
+
+
+	if (!plSetDieAddr)
 	{
 		return "Unable to find PlayerTracker.plSetDieAddr pattern.";
 	}
 
-	auto plLockOnUpdateAddr = m_patterns_cache->find_addr(base, "30 48 83 C4 20 5F C3 CC CC CC CC 48 89 5C 24 18 57 48 83 EC 20 48 8B 41");
+	auto plLockOnUpdateAddr = m_patterns_cache->find_addr(base, "5B 34 01 0F B6 C0 85 C0 0F 95 C0 48 83 C4 28 C3");
 	//DevilMayCry5.app_Player__updateLockOn171422 (-0xB)
+	//DevilMayCry5.app_Player__updateLockOn171562 
+
 	if (!plLockOnUpdateAddr)
 	{
 		return "Unable to find PlayerTracker.plLockOnUpdateAddr pattern.";
 	}
 
-	auto pl0000QuickSilverWorldStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 CB D2");
+	auto pl0000QuickSilverWorldStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 8B 46");
 	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldSlowAction__start315768
 	if (!pl0000QuickSilverWorldStartAddr)
 	{
 		return "Unable to find PlayerTracker.pl0000QuickSilverWorldStartAddr pattern.";
 	}
 
-	auto pl0000QuickSilverWorldStopStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 30 48 8B FA 48 8B D9 E8 2B BA");
+	auto pl0000QuickSilverWorldStopStartAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 30 48 8B FA 48 8B D9 E8 5B 77");
 	//DevilMayCry5.app_fsm2_player_pl0000_shell_QuickSilverWorldStopAction__start315771
 	if (!pl0000QuickSilverWorldStopStartAddr)
 	{
 		return "Unable to find PlayerTracker.pl0000QuickSilverWorldStopStartAddr pattern.";
 	}
 
-	auto plOnJustEscapeAddr = m_patterns_cache->find_addr(base, "CD CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 57 48 83 EC 40");
-	//DevilMayCry5.app_Player__onJustEscape171220 (-0xA)
+	auto plOnJustEscapeAddr = m_patterns_cache->find_addr(base, "CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 57 48 83 EC 40");
+	//DevilMayCry5.app_Player__onJustEscape171360  (-0xA)
 	if (!plOnJustEscapeAddr)
 	{
 		return "Unable to find PlayerTracker.plOnJustEscapeAddr pattern.";
@@ -758,7 +771,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!fsmPosControllerActionStartAddr)
 		return "Unable to find PlayerTracker.fsmPosControllerActionStartAddr pattern.";
 
-	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 7B");
+	auto setAirTrickActionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 70 48 8B DA 48 8B F9 E8 9B");
 	//DevilMayCry5.app_PlayerVergilPL__setAirTrickAction114006
 	if (!setAirTrickActionAddr)
 		return "Unable to find PlayerTracker.setAirTrickActionAddr pattern.";
@@ -770,7 +783,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 
 	auto plNeroSetTableHopperAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 30 48 8B D9 41 0F");
 	//DevilMayCry5.app_fsm2_player_PlayerAction__notifyActionEnd219004
-	if (!fsm2PlPlActionNotifyActionEndAddr)
+	if (!plNeroSetTableHopperAddr)
 		return "Unable to find PlayerTracker.plNeroSetTableHopperAddr pattern.";
 
 	auto setSwordStyleAddr = setTrickStyleAddr.value() - 0x22;
@@ -793,7 +806,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize In Combat";
 	}
-	if (!install_new_detour(sin_addr.value(), m_sin_detour, &sin_detour, &sin_jmp_ret, 7)) {
+	if (!install_new_detour(sin_addr, m_sin_detour, &sin_detour, &sin_jmp_ret, 7)) {
 		//  return a error string in case something goes wrong
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize Sin coordinate";
