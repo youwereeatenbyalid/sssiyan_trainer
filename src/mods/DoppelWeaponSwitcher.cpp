@@ -509,11 +509,13 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// Crash Prevention
   /// </summary>
   /// <returns></returns>
-  auto resetweapon_addr = m_patterns_cache->find_addr(base, "48 8B 03 48 8B 15 69 CF A5 07");
+  /// Tu6 update: "48 8B 03 48 8B 15 69 CF A5 07"
+  /// TU7 update: 74 52 48 8B 03 48 8B 15 ? ? ? ? (+2)
+  auto resetweapon_addr = m_patterns_cache->find_addr(base, "74 52 48 8B 03 48 8B 15 ? ? ? ?");
   if (!resetweapon_addr) {
       return "Unable to find resetweapon pattern.";
   }
-  if (!install_new_detour(resetweapon_addr.value(), m_resetweapon_detour, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
+  if (!install_new_detour(resetweapon_addr.value()+0x2, m_resetweapon_detour, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize resetweapon";

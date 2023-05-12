@@ -41,11 +41,11 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 	m_full_name_string	 = "Walking Guard (+)";
 	m_author_string		 = "V.P.Zadov";
 	m_description_string = "Vergil can block while walking.";
-
-	auto isPadInputAddr = m_patterns_cache->find_addr(base, "5B 41 00 0F B6 C8 48 8B 43 50"); //DevilMayCry5.exe+171128A (-0x3)
+	//.text:0000000141711287	app_fsm2_player_pl0800_ConcentGuard__update312953	call    app_PadInput__isNoLeverInputL79001
+	auto isPadInputAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 85 C9 0F 84 ? ? ? ? 48 8B 4F 60 48 85 C9 74 A8 "); //DevilMayCry5.exe+171128A (-0x3)
 	if (!isPadInputAddr)
 	{
-		return "Unanable to find VergilWalkingGuard.isPadInputAddr pattern.";
+		return "Unable to find VergilWalkingGuard.isPadInputAddr pattern.";
 	}
 
 	if (!install_new_detour(isPadInputAddr.value() + 0x3, m_is_pad_input_detour, &is_pad_input_detuor, &ret, 0x7))

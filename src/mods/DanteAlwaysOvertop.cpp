@@ -90,7 +90,9 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
   if (!addr2) {
     return "Unable to find DanteAlwaysOvertop pattern2.";
   }
-  auto addr3 = m_patterns_cache->find_addr(base, "09 00 00 48 8B 43 50 48 83 78 18 00 75 26 48 85 FF 74 A1 89 AF 40 03 00 00");
+
+  //DevilMayCry5.app_fsm2_player_pl0100_DanteEmeperorAction__setGear
+  auto addr3 = m_patterns_cache->find_addr(base, "89 AF ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 10 80 BF ? ? ? ? ? 74 07 C6 86 ? ? ? ? ? 48 8B 5C 24 ?");
   if (!addr3) {
     return "Unable to find DanteAlwaysOvertop pattern3.";
   }
@@ -105,7 +107,8 @@ std::optional<std::string> DanteAlwaysOvertop::on_initialize() {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysOvertop2";
   }
-  if (!install_new_detour(addr3.value()+19, m_detour3, &detour3, &jmp_ret3, 6)) {
+  //+19
+  if (!install_new_detour(addr3.value(), m_detour3, &detour3, &jmp_ret3, 6)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DanteAlwaysOvertop3";

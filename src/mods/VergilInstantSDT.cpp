@@ -94,6 +94,22 @@ void VergilInstantSDT::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
 }
+void VergilInstantSDT::on_sdk_init() {
+    auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+    auto addr1 = m_patterns_cache->find_addr(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
+    if (!addr1) {
+        spdlog::error("Unable to find VergilInstantSDT1 pattern.");
+        return;
+    }
+    uintptr_t functionaddr = sdk::find_method_definition("app.PlayerVergilPL", "get_isTheDTTransform()")->get_function_t<uintptr_t>();
+    //VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "02 02 48 8B 5C 24 30 32").value() + 2;
+    VergilInstantSDT::jmp_ja1 = functionaddr + 0xC2;
+    if(!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 6)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize", get_name());
+        //return "Failed to initialize VergilInstantSDT1";
+    }
+}
 
 std::optional<std::string> VergilInstantSDT::on_initialize() {
   init_check_box_info();
@@ -108,10 +124,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = m_patterns_cache->find_addr(base, "66 0F 2F CA 77 D9 F3 0F 10 8F 20");
-  if (!addr1) {
-    return "Unable to find VergilInstantSDT1 pattern.";
-  }
+
 
   auto addr2 = m_patterns_cache->find_addr(base, "00 00 00 F3 0F 10 5E 48");
   if (!addr2) {
@@ -130,13 +143,7 @@ std::optional<std::string> VergilInstantSDT::on_initialize() {
   }
   VergilInstantSDT::jmp_out4 = addr4.value() + 43;
 
-  VergilInstantSDT::jmp_ja1 = m_patterns_cache->find_addr(base, "02 02 48 8B 5C 24 30 32").value()+2;
 
-  if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 6)) {
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize VergilInstantSDT1";
-  }
   if (!install_new_detour(addr2.value()+3, m_detour2, &detour2, &jmp_ret2, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());

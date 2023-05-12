@@ -48,12 +48,15 @@ std::optional<std::string> PetChargeNoInterrupt::on_initialize() {
 
   set_up_hotkey();
   
-  auto INJECT_addr = m_patterns_cache->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
-  PetChargeNoInterrupt::je_return = INJECT_addr.value()+0x12;
+  //auto INJECT_addr = m_patterns_cache->find_addr(base, "74 10 48 8B D7 48 8B CB E8 C3");
+  //new address 2 back, so using + 2 on top of je offset which is +12
+  auto INJECT_addr = m_patterns_cache->find_addr(base, "85 C9 74 10 48 8B D7");
+
+  PetChargeNoInterrupt::je_return = INJECT_addr.value()+0x12+0x2;
   if (!INJECT_addr) {
     return "Unable to find INJECT pattern.";
   }
-  if (!install_new_detour(INJECT_addr.value(), m_INJECT_detour, &newmem_detour, &jmp_return, 5)) {
+  if (!install_new_detour(INJECT_addr.value()+0x2, m_INJECT_detour, &newmem_detour, &jmp_return, 5)) {
     //return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize INJECT";

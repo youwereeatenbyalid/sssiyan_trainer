@@ -521,15 +521,26 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unanable to find Pl0300ControllerManager.app_Em5900Base_AttackRate_AttackRateVergilMode__get_missionNo213806 pattern.";
     }
 
-    auto addEmFuncAddr = m_patterns_cache->find_addr(base, "B6 00 CC CC CC CC CC CC CC CC 48 89 5C 24 18");
-    requestAddEmFuncAddr = addEmFuncAddr ? addEmFuncAddr.value() + 0x0A : (uintptr_t)base + 0x19DD130;
+    auto addEmFuncAddr = m_patterns_cache->find_addr(base, "5F C3 CC CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 57 41 56");
+
+    if (!addEmFuncAddr)
+    {
+        return "Unanable to find Pl0300ControllerManager.addEmFuncAddr pattern.";
+    }
+
+    requestAddEmFuncAddr = addEmFuncAddr ? addEmFuncAddr.value(): (uintptr_t)base + 0x19DD130;
 
     auto requestBossCam = m_patterns_cache->find_addr(base, "48 8B C4 48 89 58 10 48 89 70 18 48 89 78 20 55 48 8D 68 A1 48 81 EC F0");
     //DevilMayCry5.app_PlayerCameraController__RequestBossCamera147662
+    if (!requestBossCam)
+    {
+        return "Unanable to find Pl0300ControllerManager.requestBossCam pattern.";
+    }
     requestBossCameraFunc = requestBossCam ? requestBossCam.value() : (uintptr_t)base + 0xD018E0;
 
-    auto requestAddEmAddr = m_patterns_cache->find_addr(base, "E8 8A A0 00 01"); // DevilMayCry5.exe+9D30A1 
-    if (!pl300MissionNo)
+    //tu7 aob 4C 8B C7 E8 ? ? ? ? 48 8B 46 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 15 ? ? ? ? 45 33 C0 8B 1D ? ? ? ? 48 8B CE E8 ? ? ? ?  +0x3
+    auto requestAddEmAddr = m_patterns_cache->find_addr(base, "4C 8B C7 E8 ? ? ? ? 48 8B 46 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 15 ? ? ? ? 45 33 C0 8B 1D ? ? ? ? 48 8B CE E8 ? ? ? ? "); // DevilMayCry5.exe+9D30A1 
+    if (!requestAddEmAddr)
     {
         return "Unanable to find Pl0300ControllerManager.requestAddEmAddr pattern.";
     }
@@ -552,14 +563,19 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     {
         return "Unable to find Pl0300ControllerManager.checkEmThinkOffAddr pattern.";
     }
-
-    auto pl0300UpdateLockOnAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 7B 35");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOn218720
-    if (!checkEmThinkOffAddr)
+    //.text:00000001409CDC80	app_player_pl0300_PlayerVergil__updateLockOn218720	mov     [rsp+arg_8], rbx
+    //tu6 aob 48 89 5C 24 10 57 48 83 EC 20 48 8B FA 48 8B D9 E8 7B 35
+    //tu7 aob 48 89 5C 24 ? 57 48 83 EC 20 48 8B FA 48 8B D9 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 83 BF ? ? ? ? ? 0F 94 C0 
+    auto pl0300UpdateLockOnAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 ? 57 48 83 EC 20 48 8B FA 48 8B D9 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 83 BF ? ? ? ? ? 0F 94 C0");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOn218720
+    if (!pl0300UpdateLockOnAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300UpdateLockOnAddr pattern.";
     }
-
-    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "B8 01 EB 8F CC CC CC CC CC 48 89 5C 24 08");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668(-0x9)
+    //app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy
+    //Get address that calls function E8 ? ? ? ? 48 8B 43 50 4C 39 60 18 0F 85 ? ? ? ? 48 8B 8F ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 33 D2 E8 ? ? ? ? 48 8B 4B 50
+    //tu6 aob B8 01 EB 8F CC CC CC CC CC 48 89 5C 24 08 -0x9
+    //Bad tu7 aob should be replaced with SDK find method later
+    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "28 C3 CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B 41 50 48");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668(-0x9)
     if (!pl0300UpdateLockOnTargetAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300UpdateLockOnTargetAddr pattern.";
@@ -577,13 +593,17 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Unable to find Pl0300ControllerManager.pl0300CheckDamageAddr pattern.";
     }
 
-    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 95 26 33 00");//DevilMayCry5.exe+9CF246
+    //.text:00000001409CF246	app_player_pl0300_PlayerVergil__destroyDoppleGanger218725	call    app_PlayerCameraController__RequestBossCamera147662
+    //E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52 call to function address points to (fuckin christ) +0x2A94+ 0x5+ 0x1D6
+    // tu6 aob E8 95 26 33 00
+    // tu7 aob E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52 +0x2C6F
+    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52");//DevilMayCry5.exe+9CF246
     if (!pl0300DoppelDestroyReqBossCamAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300DoppelDestroyReqBossCamAddr pattern.";
     }
 
-    if (!install_new_detour(requestAddEmAddr.value(), _requestAddEmObjDetour, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
+    if (!install_new_detour(requestAddEmAddr.value()+0x3, _requestAddEmObjDetour, &em6000_request_add_em_detour, &requestAddEmRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.requestAddEm";
@@ -595,7 +615,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Failed to initialize Pl0300ControllerManager.pl0300CheckDamage";
     }
 
-    if (!install_new_detour(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamDetour, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
+    if (!install_new_detour(pl0300DoppelDestroyReqBossCamAddr.value()+0x2C6F, _pl0300DestroyDoppelRequestBossCamDetour, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300DoppelDestroyReqBossCam";
@@ -621,7 +641,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     _pl0300UpdateLockOnDetour->create();
     m_detours.push_back(_pl0300UpdateLockOnDetour);
 
-    _pl0300UpdateLockOnTargetOnEnemyDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnTargetAddr.value() + 0x9, &pl0300_update_lock_on_target_on_enemy_hook);
+    _pl0300UpdateLockOnTargetOnEnemyDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnTargetAddr.value(), &pl0300_update_lock_on_target_on_enemy_hook);
     _pl0300UpdateLockOnTargetOnEnemyDetour->create();
     m_detours.push_back(_pl0300UpdateLockOnTargetOnEnemyDetour);
 

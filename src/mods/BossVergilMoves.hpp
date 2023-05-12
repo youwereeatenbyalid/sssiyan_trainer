@@ -1531,13 +1531,17 @@ public:
 			return "Unable to find BossVergilMoves.doCommSpecAddr.";
 
 		//_pl0800CheckCommandAddr = m_patterns_cache->find_addr(base, "FF 01 CC CC CC CC CC CC CC CC 48 89 5C 24 08").value_or(0);
-		_pl0800CheckCommandAddr = m_patterns_cache->find_addr(base, "38 48 83 C4 20 5F C3 CC CC 48 89 5C 24 10 57 48 83 EC 20 48 8B 41 50 48 8B FA").value_or(0);
+
+		//.text:00000001405823F0	app_PlayerVergilPL__updateCommandType114150	mov     [rsp+arg_8], rbx
+		//tu6 aob 38 48 83 C4 20 5F C3 CC CC 48 89 5C 24 10 57 48 83 EC 20 48 8B 41 50 48 8B FA+0x9
+		//tu7 aob 48 89 5C 24 ? 57 48 83 EC 20 48 8B 41 50 48 8B FA 48 8B D9 48 83 78 ? ? 0F 85 ? ? ? ? 80 BA ? ? ? ? ? 74 04 
+		_pl0800CheckCommandAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 ? 57 48 83 EC 20 48 8B 41 50 48 8B FA 48 8B D9 48 83 78 ? ? 0F 85 ? ? ? ? 80 BA ? ? ? ? ? 74 04 ").value_or(0);
 		//DevilMayCry5.app_PlayerVergilPL__checkCommand113989 (-0xA)
 		//DevilMayCry5.app_PlayerVergilPL__updateCommandType114150 (-0x9)
 		if (_pl0800CheckCommandAddr == 0)
 			return "Unable to find BossVergilMoves._pl0800CheckCommandAddr.";
-		else
-			_pl0800CheckCommandAddr += 0x9;//0xA;
+		//else
+		//	_pl0800CheckCommandAddr += 0x9;//0xA;
 
 		_fuckCumpcomAddr = m_patterns_cache->find_addr(base, "48 8B 89 28 02 00 00 48 89").value_or(0);//DevilMayCry5.exe+2AE4540
 		if (_fuckCumpcomAddr == 0)

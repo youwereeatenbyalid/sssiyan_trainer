@@ -3,17 +3,27 @@
 #include "sdk/ReClass.hpp"
 class BypassBPCav : public Mod {
 public:
-  BypassBPCav() = default;
+	BypassBPCav() {
+		_mod = this;
+	}
+	~BypassBPCav() {
+		_mod = nullptr;
+	}
   // mod name string for config
   std::string_view get_name() const override { return "BypassBPCav"; }
   std::string get_checkbox_name() override { return m_check_box_name; };
   std::string get_hotkey_name() override { return m_hot_key_name; };
+
+  static inline BypassBPCav* _mod = nullptr;
+
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
+  void on_sdk_init() override;
   uintptr_t static jmp_cavrfix1_return;
   uintptr_t static jmp_cavrfix2_return;
   uintptr_t static jmp_cavrfix3_return;
-
+  static bool m_cavrfix_sdk_hook(uintptr_t rcx, uintptr_t WeaponId);
+  
   bool static cheaton;
 
   // Override this things if you want to store values in the config file
@@ -34,6 +44,7 @@ private:
   void init_check_box_info() override;
 
   //function hooks
+  std::shared_ptr<Detour_t> m_cavrfix_sdk_detour;
   std::shared_ptr<Detour_t> m_cavrfix1_detour;
   std::shared_ptr<Detour_t> m_cavrfix2_detour;
   std::shared_ptr<Detour_t> m_cavrfix3_detour;

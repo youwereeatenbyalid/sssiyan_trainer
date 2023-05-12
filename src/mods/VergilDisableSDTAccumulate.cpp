@@ -41,16 +41,19 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto init_addr = m_patterns_cache->find_addr(base, "E8 09 F0 DB 00");
+  auto init_addr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 0F B6 D0 48 8B 43 50 48 8B 48 18 48 85 C9 0F 85 ? ? ? ? 85 D2 0F 85 ? ? ? ? 4C 8B 05 ? ? ? ? 48 8B D7");
   if (!init_addr) {
     return "Unanable to find VergilDisableSDTAccumulate::init_addr pattern.";
   }
 
-  auto func_addr_temp = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
+  //app.GameModel.isTag(System.UInt32, System.UInt32)
+  //tu6 aob C3 CC CC CC 48 89 6C 24 18 57 41 +0x4
+  //tu7 aob 5F C3 CC 48 89 6C 24 18 57 41 +0x3
+  auto func_addr_temp = m_patterns_cache->find_addr(base, "5F C3 CC 48 89 6C 24 18 57 41");
   if (!func_addr_temp) {
     return "Unanable to find VergilDisableSDTAccumulate::func_addr pattern.";
   }
-  VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x4;
+  VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x3;
 
   if (!install_new_detour(init_addr.value(), m_accumulatefunc_detour, &accumfunc_detour, &jmp_ret, 5)) {
     spdlog::error("[{}] failed to initialize", get_name());

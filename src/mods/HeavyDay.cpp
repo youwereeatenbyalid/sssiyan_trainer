@@ -699,7 +699,7 @@ void HeavyDay::init_check_box_info() {
 
 std::optional<std::string> HeavyDay::on_initialize() {
   init_check_box_info();
-
+  uintptr_t static_base = g_framework->get_module().as<uintptr_t>();
   auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled           = &HeavyDay::cheaton;
   m_on_page              = Page_GameMode;
@@ -722,8 +722,12 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto rgenable_addr = m_patterns_cache->find_addr(base, "41 80 B8 CA 0E 00 00 00 74 58");
   auto rgmod_addr = m_patterns_cache->find_addr(base, "4D F3 0F 10 4A 28");
   auto combatmode_addr = m_patterns_cache->find_addr(base, "41 88 86 93 00 00 00");
-  auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01");
-
+  //This is extremely unfortunate.
+  //code found in DevilMayCry5.System_Collections_Generic_List_1_app_HitController_DamageInfo___Add75048 
+  //AOB below should point to a call to the function this code can be found in.
+  //sig to containing function: (+0xA9) E8 ? ? ? ? EB 82 48 8B 96 ? ? ? ? 
+  //auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01"); old aob for Tu6, +0x55
+  auto dantefix_addr = static_base + 0xDD9B59;
   auto styleenable1_addr = m_patterns_cache->find_addr(base, "83 F8 39 0F 84 95 08 00 00");
   auto styleenable2_addr = m_patterns_cache->find_addr(base, "0F 87 4C 0D 00 00");
   auto styleenableend_addr = m_patterns_cache->find_addr(base,"23 00 00 44 0F 28 4C 24 70");
@@ -840,7 +844,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
         return "Failed to initialize combatmode";
     }
     
-    if (!install_new_detour(dantefix_addr.value()+0x55, m_dantefix_detour,
+    if (!install_new_detour(dantefix_addr, m_dantefix_detour,
         &dantefix_detour, &dantefix_jmp_ret, 6)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());

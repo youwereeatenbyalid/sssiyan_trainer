@@ -87,8 +87,8 @@ public:
 		m_description_string = "HP regenerates in SDT like it does in DT.";
 
 		set_up_hotkey();
-
-		auto updateDtHpAddr = m_patterns_cache->find_addr(base, "83 F8 01 75 0A E9 31");// DevilMayCry5.exe+196FE35
+		//DevilMayCry5.app_PlayerDante__updateDevilTriggerHpRecovery110218 +0x25
+		auto updateDtHpAddr = m_patterns_cache->find_addr(base, "80 BA ? ? ? ? ? 75 26 48 8B 41 50");// DevilMayCry5.exe+196FE35
 		if (!updateDtHpAddr)
 		{
 			return "Unanable to find DanteSDTRegen.updateDtHpAddr pattern.";
@@ -102,7 +102,7 @@ public:
 
 		//updateJne = updateDtHpAddr.value() + 0xF;
 
-		if (!install_new_detour(updateDtHpAddr.value(), m_dante_dt_update, &update_detour, &updateRet, 0x5))
+		if (!install_new_detour(updateDtHpAddr.value()+0x25, m_dante_dt_update, &update_detour, &updateRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DanteSDTRegen.updateDtHp";

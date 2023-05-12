@@ -100,20 +100,21 @@ public:
 		m_full_name_string = "Disable Roundtrip Callback Animation (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Disables the callback animations for Dante & Vergil's roundtrip moves.";
-
-		auto FEBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 AF F8");//DevilMayCry5.exe+C85DE6
+		//These are bad aob's and I do not care
+		//.text:0000000140C85DE6	app_WeaponForceEdge__checkRoundTripReturn222023	movss   [rsp+58h+var_38], xmm1
+		auto FEBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 ? E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 AB");//DevilMayCry5.exe+C85DE6
 		if (!FEBackAddr)
 		{
 			return "Unable to find NoRoundtripCallback.FEBackAddr pattern.";
 		}
-
-		auto RbBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 29 4A");//DevilMayCry5.exe+1261CFC
+		//.text:0000000141261CFC	app_WeaponRebellion__checkRoundTripReturn222041	movss   [rsp+58h+var_38], xmm1
+		auto RbBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 39 E2");//DevilMayCry5.exe+1261CFC
 		if (!RbBackAddr)
 		{
 			return "Unable to find NoRoundtripCallback.RbBackAddr pattern.";
 		}
-
-		auto SdBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 99 FF");//DevilMayCry5.exe+16E678C
+		//.text:00000001416E678C	app_WeaponSpada__checkRoundTripReturn222069	movss   [rsp+58h+var_38], xmm1
+		auto SdBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 49");//DevilMayCry5.exe+16E678C
 		if (!SdBackAddr)
 		{
 			return "Unable to find NoRoundtripCallback.SdBackAddr pattern.";

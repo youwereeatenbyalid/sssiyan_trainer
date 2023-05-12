@@ -71,6 +71,24 @@ void BypassBPCav::init_check_box_info() {
   m_hot_key_name   = m_prefix_hot_key_name + std::string(get_name());
 }
 
+bool BypassBPCav::m_cavrfix_sdk_hook(uintptr_t rcx, uintptr_t WeaponId) {
+    if (WeaponId == 6){
+        return false;
+    }else{
+        return _mod->m_cavrfix_sdk_detour->get_trampoline<decltype(m_cavrfix_sdk_hook)>()(rcx, WeaponId);
+    }
+}
+
+
+void BypassBPCav::on_sdk_init() {
+    auto method = sdk::find_method_definition("app.UserCapabilityManager", "isEquipDanteWeaponS(app.PlayerDante.WeaponS)");
+
+    m_cavrfix_sdk_detour = std::make_shared<Detour_t>(method->get_function(), &m_cavrfix_sdk_hook);
+    m_cavrfix_sdk_detour->create();
+    m_detours.push_back(m_cavrfix_sdk_detour);
+    //method.
+}
+
 std::optional<std::string> BypassBPCav::on_initialize() {
   init_check_box_info();
 
@@ -83,39 +101,39 @@ std::optional<std::string> BypassBPCav::on_initialize() {
   m_description_string   = "Allows you to take Cavaliere R into Bloody Palace.";
   set_up_hotkey();
 
-  auto cavrfix1_addr = m_patterns_cache->find_addr(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  //auto cavrfix1_addr = m_patterns_cache->find_addr(base, "1F 61 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
-  if (!cavrfix1_addr) {
-    return "Unable to find cavrfix1 pattern.";
-  }
-  if (!install_new_detour(cavrfix1_addr.value()+0x06, m_cavrfix1_detour, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
-    //return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize cavrfix1";
-  }
-  
-  
-  auto cavrfix2_addr = m_patterns_cache->find_addr(base, "96 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  //if (!cavrfix1_addr) {
+  //  return "Unable to find cavrfix1 pattern.";
+  //}
+  //if (!install_new_detour(cavrfix1_addr.value()+0x06, m_cavrfix1_detour, &newmem_detour1, &jmp_cavrfix1_return, 8)) {
+  //  //return a error string in case something goes wrong
+  //  spdlog::error("[{}] failed to initialize", get_name());
+  //  return "Failed to initialize cavrfix1";
+  //}
+  //
+  //
+  //auto cavrfix2_addr = m_patterns_cache->find_addr(base, "96 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
-  if (!cavrfix2_addr) {
-    return "Unable to find cavrfix2 pattern.";
-  }
-  if (!install_new_detour(cavrfix2_addr.value()+0x06, m_cavrfix2_detour, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
-    //return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize cavrfix2";
-  }
-  auto cavrfix3_addr = m_patterns_cache->find_addr(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
+  //if (!cavrfix2_addr) {
+  //  return "Unable to find cavrfix2 pattern.";
+  //}
+  //if (!install_new_detour(cavrfix2_addr.value()+0x06, m_cavrfix2_detour, &newmem_detour2, &jmp_cavrfix2_return, 8)) {
+  //  //return a error string in case something goes wrong
+  //  spdlog::error("[{}] failed to initialize", get_name());
+  //  return "Failed to initialize cavrfix2";
+  //}
+  //auto cavrfix3_addr = m_patterns_cache->find_addr(base, "97 60 00 0F B6 D0 48 8B 43 50 48 8B 48 18");
 
-  if (!cavrfix3_addr) {
-      return "Unable to find cavrfix3 pattern.";
-  }
+  //if (!cavrfix3_addr) {
+  //    return "Unable to find cavrfix3 pattern.";
+  //}
 
-  if (!install_new_detour(cavrfix3_addr.value() + 0x06, m_cavrfix3_detour, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
-      //return a error string in case something goes wrong
-      spdlog::error("[{}] failed to initialize", get_name());
-      return "Failed to initialize cavrfix3";
-  }
+  //if (!install_new_detour(cavrfix3_addr.value() + 0x06, m_cavrfix3_detour, &newmem_detour3, &jmp_cavrfix3_return, 8)) {
+  //    //return a error string in case something goes wrong
+  //    spdlog::error("[{}] failed to initialize", get_name());
+  //    return "Failed to initialize cavrfix3";
+  //}
   
 
   return Mod::on_initialize();

@@ -436,8 +436,12 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   if (!emDataLstAddr) {
     return "Unanable to find emDataLstAddr pattern.";
   }
-
-  auto emPrefabLoad = m_patterns_cache->find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
+  //.text:0000000140F34F8B	app_EnemyGeneratorController_GenerateEnemyManager_GenerateEnemyInfo__setupPrefab89939	mov     [rsp+38h+arg_0], rbx
+  //Tu7 aob:E8 ? ? ? ? 0F B6 C8 48 8B 47 50 4C 8B 48 18 4D 85 C9 75 23 -0x594F25+4+8B
+  //tu6 aob 48 89 5C 24 40 E8 3B
+  //-0x594F25+4+8B
+  //-0x594E96
+  auto emPrefabLoad = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 0F B6 C8 48 8B 47 50 4C 8B 48 18 4D 85 C9 75 23");// DevilMayCry5.exe+F34F8B
   if (!emPrefabLoad)
   {
       return "Unanable to find emPrefabLoad pattern.";
@@ -464,7 +468,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
     return "Failed to initialize EnemyWaveEditor.emDataLst"; 
   }
 
-  if (!install_new_detour(emPrefabLoad.value(), m_loadall_detour, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
+  if (!install_new_detour(emPrefabLoad.value()-0x594E96, m_loadall_detour, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemyWaveEditor.emPrefabLoad"; 
   }

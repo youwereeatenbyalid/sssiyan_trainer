@@ -526,6 +526,7 @@ std::optional<std::string> LDK::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
+  //This shit is borked, ask regret where to get it from
   LDK::containernum_addr = staticbase + 0x07E836F8;
 
 
@@ -541,7 +542,7 @@ std::optional<std::string> LDK::on_initialize() {
   if (!capbypass_addr2) {
     return "Unable to find Cap bypass 2 pattern.";
   }
-  auto nopfunction_addr1 = m_patterns_cache->find_addr(base, "E8 D7 0C 07 FF");
+  auto nopfunction_addr1 = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 47 50 48 83 78 ? ? 75 73 4C 8D 4C 24 ? ");
   if (!nopfunction_addr1) {
 	  return "Unable to find nop function 1 pattern.";
   }

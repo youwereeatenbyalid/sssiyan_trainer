@@ -279,8 +279,8 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		return "Unanable to find BossDanteSetup.charUpdateDelayAddr pattern.";
 	}
 
-	auto royalRevengeDelayAddr = m_patterns_cache->find_addr(base, "E8 92 4F DB FE"); // DevilMayCry5.exe+19C9BF9
-	if (!charUpdateDelayAddr)
+	auto royalRevengeDelayAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 BB F3 0F 10 05 ? ? ? ?"); // DevilMayCry5.exe+19C9BF9
+	if (!royalRevengeDelayAddr)
 	{
 		return "Unanable to find BossDanteSetup.royalRevengeDelayAddr pattern.";
 	}
@@ -296,8 +296,11 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	{
 		return "Unanable to find BossDanteSetup.setReleaseTypeAddr pattern.";
 	}
-
-	auto setGuardReactAddr = m_patterns_cache->find_addr(base, "E8 2A 7C 03 00"); // DevilMayCry5.exe+1991B91
+	//.text:0000000141991B91	app_PlayerDante__setGuardReaction110194	call    app_PlayerDante__setGuardReactionEnemyDante110482
+	//tu6 aob E8 2A 7C 03 00
+	//tu7 aob 0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10 +786+6
+	//tu7 aob 0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10 +0x78C
+	auto setGuardReactAddr = m_patterns_cache->find_addr(base, "0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10"); // DevilMayCry5.exe+1991B91
 	if (!setGuardReactAddr)
 	{
 		return "Unanable to find BossDanteSetup.setGuardReactAddr pattern.";
@@ -362,7 +365,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		return "Failed to initialize BossDanteSetup.setReleaseType";
 	}
 
-	if (!install_new_detour(setGuardReactAddr.value(), m_set_guard_ract_detour, &set_damage_react_detour, &damageReactRet, 0x5))
+	if (!install_new_detour(setGuardReactAddr.value()+0x78C, m_set_guard_ract_detour, &set_damage_react_detour, &damageReactRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.setGuardReact";

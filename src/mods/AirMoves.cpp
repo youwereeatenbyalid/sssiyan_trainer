@@ -567,7 +567,10 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Unable to find AirMoves.feDriveAirAddr pattern.";
 	}
 
-	auto rbStingerAirAddr = m_patterns_cache->find_addr(base, "07 2E 01 32 C0 48 8B 5C 24 60 48 83 C4 50 5F C3 48 8B 02 48 8B 48 F0");//DevilMayCry5.exe+1261038 (-0x23)
+	//.text:0000000141261036	app_WeaponRebellion__doCommandFS222035	call    rax
+	//tu6 aob 07 2E 01 32 C0 48 8B 5C 24 60 48 83 C4 50 5F C3 48 8B 02 48 8B 48 F0+ 0x23
+	//tu7 aob FF D0 0F B6 C8 48 8B 43 50 48 83 78 ? ? 75 D2 85 C9 74 CE 48 8B 97 ? ? ? ? 48 85 D2 74 B3 48 8B 82 ? ? ? ? 48 85 C0 74 A7 48 8B 40 28 48 85 C0 74 9E 83 78 10 01 7C A7 48 8B CB 48 85 D2 75 19 45 33 C0 41 8D 50 38 E8 ? ? ? ? 32 C0 48 8B 5C 24 ? 48 83 C4 50 5F C3 F3 0F 10 05 ? ? ? ? 45 33 C9 C6 44 24 ? ? 0F 57 C9 C6 44 24 ? ? C7 44 24 ? ? ? ? ? C7 44 24 ? ? ? ? ? 45 8D 41 0D 
+	auto rbStingerAirAddr = m_patterns_cache->find_addr(base, "FF D0 0F B6 C8 48 8B 43 50 48 83 78 ? ? 75 D2 85 C9 74 CE 48 8B 97 ? ? ? ? 48 85 D2 74 B3 48 8B 82 ? ? ? ? 48 85 C0 74 A7 48 8B 40 28 48 85 C0 74 9E 83 78 10 01 7C A7 48 8B CB 48 85 D2 75 19 45 33 C0 41 8D 50 38 E8 ? ? ? ? 32 C0 48 8B 5C 24 ? 48 83 C4 50 5F C3 F3 0F 10 05 ? ? ? ? 45 33 C9 C6 44 24 ? ? 0F 57 C9 C6 44 24 ? ? C7 44 24 ? ? ? ? ? C7 44 24 ? ? ? ? ? 45 8D 41 0D ");//DevilMayCry5.exe+1261038 (-0x23)
 	if (!rbStingerAirAddr)
 	{
 		return "Unable to find AirMoves.rbStingerAirAddr pattern.";
@@ -641,7 +644,7 @@ std::optional<std::string> AirMoves::on_initialize()
 		return "Failed to initialize AirMoves.voidSlashAir";
 	}
 
-	if (!install_new_detour(rbStingerAirAddr.value() + 0x23, m_rb_stinger_air_detour, &rb_stinger_air_detour, &rbStingerAirRet, 0x7))
+	if (!install_new_detour(rbStingerAirAddr.value(), m_rb_stinger_air_detour, &rb_stinger_air_detour, &rbStingerAirRet, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize AirMoves.rbStingerAir";

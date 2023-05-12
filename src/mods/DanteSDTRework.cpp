@@ -182,6 +182,16 @@ void DanteSDTRework::init_check_box_info() {
     m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 }
 
+void DanteSDTRework::on_sdk_init() {
+    //+ 807
+    auto hook_8_addr = sdk::find_method_definition("app.ui1015GUI", "updateTHEDevilgauge()")->get_function_t<uintptr_t>();
+    if (!install_new_detour(hook_8_addr+0x807, m_detour8, &detour8, &jmp_ret8, 8)) {
+        //  return a error string in case something goes wrong
+        spdlog::error("[{}] failed to initialize DanteSDTRework8");
+        //return "Failed to initialize DanteSDTRework8";
+    }
+}
+
 std::optional<std::string> DanteSDTRework::on_initialize() {
     init_check_box_info();
 
@@ -269,15 +279,15 @@ std::optional<std::string> DanteSDTRework::on_initialize() {
     }
     DanteSDTRework::jmp_jne7 = addr7.value() + 146; // DevilMayCry5.exe+16A212B copyright update
 
-    auto addr8 = m_patterns_cache->find_addr(base, "F3 0F 10 15 39 0F 10 06");
-    if (!addr8) {
-        return "Unable to find DanteSDTRework pattern8.";
-    }
-    if (!install_new_detour(addr8.value(), m_detour8, &detour8, &jmp_ret8, 8)) {
-        //  return a error string in case something goes wrong
-        spdlog::error("[{}] failed to initialize", get_name());
-        return "Failed to initialize DanteSDTRework8";
-    }
+    //auto addr8 = m_patterns_cache->find_addr(base, "F3 0F 10 15 39 0F 10 06");
+    //if (!addr8) {
+    //    return "Unable to find DanteSDTRework pattern8.";
+    //}
+    //if (!install_new_detour(addr8.value(), m_detour8, &detour8, &jmp_ret8, 8)) {
+    //    //  return a error string in case something goes wrong
+    //    spdlog::error("[{}] failed to initialize", get_name());
+    //    return "Failed to initialize DanteSDTRework8";
+    //}
 
     return Mod::on_initialize();
 }

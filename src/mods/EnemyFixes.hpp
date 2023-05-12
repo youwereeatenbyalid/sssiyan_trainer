@@ -1174,7 +1174,7 @@ public:
         }
 
         auto malphasAddr = m_patterns_cache->find_addr(base, "F3 0F 10 87 90 00 00 00 F3 0F 11 4D B4"); //DevilMayCry5.exe+105B4C3
-        if (!urizen3TpAddr)
+        if (!malphasAddr)
         {
             return "Unanable to find EnemyFixes.malphasAddr pattern.";
         }
@@ -1202,8 +1202,10 @@ public:
         //{
         //    return "Unanable to find EnemyFixes.shadowWarpAddr pattern.";
         //}
-
-        auto shadowFsmToCenterAddr = m_patterns_cache->find_addr(base, "4A F1 FE 48 8B 43 50 48 83 78 18 00"); // DevilMayCry5.exe+21B0114 (-0x3)
+        // .text:00000001421B0111	app_fsm2_enemy_em5801_Em5801WarpToBattleAreaCenter__start319624	call    app_fsm2_enemy_em5801_Em5801Action__start319587
+        //tu6 aob 4A F1 FE 48 8B 43 50 48 83 78 18 00 -0x3
+        //tu7 aob E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 15 ? ? ? ? 45 33 C0 48 8B CB E8 ? ? ? ? F3 0F 10 05 ? ? ? ? F3 0F 10 0D ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 11 40 ? F3 0F 11 48 ? F3 0F 11 50 ? F3 0F 10 05 ? ? ? ? F3 0F 10 0D ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 11 40 ? F3 0F 11 48 ? F3 0F 11 50 ? 48 8B 4B 50 
+        auto shadowFsmToCenterAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 15 ? ? ? ? 45 33 C0 48 8B CB E8 ? ? ? ? F3 0F 10 05 ? ? ? ? F3 0F 10 0D ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 11 40 ? F3 0F 11 48 ? F3 0F 11 50 ? F3 0F 10 05 ? ? ? ? F3 0F 10 0D ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 11 40 ? F3 0F 11 48 ? F3 0F 11 50 ? 48 8B 4B 50 "); // DevilMayCry5.exe+21B0114 (-0x3)
         if (!shadowFsmToCenterAddr)
         {
             return "Unanable to find EnemyFixes.shadowFsmToCenterAddr pattern.";
@@ -1216,7 +1218,7 @@ public:
         }
 
         auto timeHorseCenterAddr = m_patterns_cache->find_addr(base, "F3 44 0F 10 87 C0 0D 00 00"); // DevilMayCry5.exe+10CC7E5
-        if (!nightmireTeleExtFarAddr)
+        if (!timeHorseCenterAddr)
         {
             return "Unanable to find EnemyFixes.timeHorseCenterAddr pattern.";
         }
@@ -1334,7 +1336,7 @@ public:
             return "Failed to initialize EnemyFixes.cerberusThunderWave";
         }
 
-        if (!install_new_detour(shadowFsmToCenterAddr.value() + 0x3, m_shadow_warp_func_detour, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
+        if (!install_new_detour(shadowFsmToCenterAddr.value(), m_shadow_warp_func_detour, &fsm_shadow_warp_to_center_detour, &shadowWarpFuncRet, 0x9))
         {
             spdlog::error("[{}] failed to initialize", get_name());
             return "Failed to initialize EnemyFixes.shadowFsmToCenter";

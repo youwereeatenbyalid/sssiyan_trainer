@@ -466,6 +466,7 @@ public:
     std::vector<std::string> m_in_use_by{}; // Name of mods depending on this mod that are currently enabled
     std::vector<std::string> m_depends_on{}; // Name of mods this mod depends on
     bool m_last_state = false;
+    //bool m_failed_init = false;
     std::vector<std::shared_ptr<Detour_t>> m_detours{};
     //bool& m_is_enabled = *ischecked;
     int m_on_page = Page_None;

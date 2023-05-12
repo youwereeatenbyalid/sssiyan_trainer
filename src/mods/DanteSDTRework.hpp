@@ -10,7 +10,7 @@ public:
 	std::string get_hotkey_name() override { return m_hot_key_name; };
 	// called by m_mods->init() you'd want to override this
 	std::optional<std::string> on_initialize() override;
-
+	void on_sdk_init() override;
 	static uintptr_t jmp_ret1;
 	static uintptr_t jmp_jne1;
 	static uintptr_t jmp_ret2;
@@ -40,7 +40,6 @@ private:
 	// function hook instance for our detour, convinient wrapper
 	// around minhook
 	void init_check_box_info() override;
-
 	std::shared_ptr<Detour_t> m_detour1;
 	std::shared_ptr<Detour_t> m_detour2;
 	std::shared_ptr<Detour_t> m_detour3;

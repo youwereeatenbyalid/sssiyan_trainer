@@ -148,28 +148,38 @@ std::optional<std::string> VergilTrickTrailsEfx::on_initialize()
 		"will also affect what this mod creates. If you want to recreate boss Vergil's trick effects - Lordranis'es trick alternate or my recolor file mods are a must for the boss's trick smoke cloud.";
 
 	set_up_hotkey();
-
-	auto endAirTrickAddr = m_patterns_cache->find_addr(base, "E8 47 3B 50 FF");//DevilMayCry5.exe+1DDF054
+	//.text:0000000141DDF054	app_fsm2_player_pl0800_TrickAction__setFinish312707	call    app_GameModel__set_drawSelf173787
+	//tu6 aob E8 47 3B 50 FF
+	//tu7 aob EB 0C 45 33 C0 48 85 D2 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 43 50 +0xE
+	auto endAirTrickAddr = m_patterns_cache->find_addr(base, "EB 0C 45 33 C0 48 85 D2 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 43 50");//DevilMayCry5.exe+1DDF054
 	if (!endAirTrickAddr)
 	{
 		return "Unable to find VergilTrickTrailsEfx.endAirTrickAddr pattern.";
 	}
-
-	auto actionEndSetDrawSeflAddr = m_patterns_cache->find_addr(base, "E8 75 BD 68 00");//DevilMayCry5.exe+C56E26
+	//.text:0000000140C56E26	app_fsm2_gamemodel_GameModelEnableAction__end307235	call    app_GameModel__set_drawSelf173787
+	//tu6 aob E8 75 BD 68 00
+	//tu7 aob E8 ? ? ? ? 48 8B 43 50 48 39 68 18 0F 85 ? ? ? ? 48 8B 56 28 48 8B CB 48 85 D2 74 9F
+	auto actionEndSetDrawSeflAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 39 68 18 0F 85 ? ? ? ? 48 8B 56 28 48 8B CB 48 85 D2 74 9F");//DevilMayCry5.exe+C56E26
 	if (!actionEndSetDrawSeflAddr)
 	{
 		return "Unable to find VergilTrickTrailsEfx.actionEndSetDrawSeflAddr pattern.";
 	}
-
-	auto trickDodgeEnableDrawSelfAddr = m_patterns_cache->find_addr(base, "E8 A2 39 30 FF");//DevilMayCry5.exe+1FDF1F9
+	//.text:0000000141FDF1F9	app_fsm2_player_DrawSelfOffFrame__update311882	call    app_GameModel__set_drawSelf173787
+	//tu6 aob E8 A2 39 30 FF
+	//tu7 aob 75 38 41 8D 50 38 + 0x3A
+	auto trickDodgeEnableDrawSelfAddr = m_patterns_cache->find_addr(base, "75 38 41 8D 50 38");//DevilMayCry5.exe+1FDF1F9
 	if (!trickDodgeEnableDrawSelfAddr)
 	{
 		return "Unable to find VergilTrickTrailsEfx.trickDodgeEnableDrawSelfAddr pattern.";
 	}
+	auto airtrickendrawselfcalladdr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 6C 24 18 56 48 83 EC 20 48 8B 41 50 41 0F");
+	if (!airtrickendrawselfcalladdr)
+	{
+		return "Unable to find VergilTrickTrailsEfx.airtrickendrawselfcalladdr pattern.";
+	}
+	airTrickEndDrawSelfCall = airtrickendrawselfcalladdr.value();
 
-	airTrickEndDrawSelfCall = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 6C 24 18 56 48 83 EC 20 48 8B 41 50 41 0F").value_or(pBase + 0x12E2BA0);
-
-	if (!install_new_detour(endAirTrickAddr.value(), m_air_trick_end_hook, &trick_end_draw_self_detour, &airTrickEndRet, 0x5))
+	if (!install_new_detour(endAirTrickAddr.value() + 0xE, m_air_trick_end_hook, &trick_end_draw_self_detour, &airTrickEndRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilTrickTrailsEfx.endAirTrick";

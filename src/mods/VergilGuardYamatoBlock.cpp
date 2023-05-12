@@ -36,11 +36,13 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 	m_full_name_string = "DMC5 Shot Block (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Change block to the gunshot block.";
-
-	auto setActionAddr = m_patterns_cache->find_addr(base, "F3 0F 11 44 24 20 E8 F4 F3"); //DevilMayCry5.exe+5762A1
+	//.text:00000001405762A1	app_PlayerVergilPL__setAttackGuardAction114087	movss   dword ptr [rsp+0A8h+var_88], xmm0
+	//tu6 aob F3 0F 11 44 24 20 E8 F4 F3
+	//tu7 aob 45 8D 41 28 F3 0F 11 44 24 ? + 0x4
+	auto setActionAddr = m_patterns_cache->find_addr(base, "45 8D 41 28 F3 0F 11 44 24 ?"); //DevilMayCry5.exe+5762A1
 	if (!setActionAddr)
 	{
-		return "Unanable to find VergilGuardYamatoBlock.setActionAddr pattern.";
+		return "Unable to find VergilGuardYamatoBlock.setActionAddr pattern.";
 	}
 
 	auto efxAddr = m_patterns_cache->find_addr(base, "C6 8B 82 58 1B 00 00"); //DevilMayCry5.exe+576138 (-0x1)
@@ -49,7 +51,7 @@ std::optional<std::string> VergilGuardYamatoBlock::on_initialize()
 		return "Unanable to find VergilGuardYamatoBlock.efxAddr pattern.";
 	}
 
-	if (!install_new_detour(setActionAddr.value(), m_action_detour, detour, &ret, 0x6))
+	if (!install_new_detour(setActionAddr.value()+0x4, m_action_detour, detour, &ret, 0x6))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilGuardYamatoBlock.setAction";

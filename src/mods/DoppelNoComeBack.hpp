@@ -113,21 +113,30 @@ public:
 		{
 			return "Unable to find DoppelNoComeBack.doppelDistanceComeBackAddr pattern.";
 		}
-
-		auto doppeBwJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 CC 51 02 00");//DevilMayCry5.exe+528C5F
+		//.text:0000000140528C5F	app_PlayerVergilPL__updateDoppel113891	call    app_PlayerVergilPL__comeBackDoppelGanger113978
+		//tu6 aob E8 CC 51 02 00
+		//tu7 aob 48 8B D7 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 1F 48 8B 97 ? ? ? ? +0x3
+		auto doppeBwJustCumBackAddr = m_patterns_cache->find_addr(base, "48 8B D7 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 1F 48 8B 97 ? ? ? ? ");//DevilMayCry5.exe+528C5F
 		if (!doppeBwJustCumBackAddr)
 		{
 			return "Unable to find DoppelNoComeBack.doppeBwJustCumBackAddr pattern.";
 		}
-
-		auto doppeFeJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 BE 50 02 00");//DevilMayCry5.exe+528D6D
-		if (!doppeBwJustCumBackAddr)
+		//.text:0000000140528D6D	app_PlayerVergilPL__updateDoppel113891	call    app_PlayerVergilPL__comeBackDoppelGanger113978
+		//tu6 aob E8 BE 50 02 00
+		//tu7 aob E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 87 ? ? ? ? 48 8B 97 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 0F B6 88 ? ? ? ? 
+		auto doppeFeJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 87 ? ? ? ? 48 8B 97 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 0F B6 88 ? ? ? ? ");//DevilMayCry5.exe+528D6D
+		if (!doppeFeJustCumBackAddr)
 		{
 			return "Unable to find DoppelNoComeBack.doppeFeJustCumBackAddr pattern.";
 		}
 
 		jaJmp = doppelDistanceCumBackAddr.value() + 0x22;
-		doppelComeBackFunc = m_patterns_cache->find_addr(base, "48 89 5C 24 18 57 48 81 EC 90 00 00 00 48 8B 41 50 48").value_or(g_framework->get_module().as<uintptr_t>() + 0x54DE30);
+		auto doppelComeBackFuncAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 18 57 48 81 EC 90 00 00 00 48 8B 41 50 48");
+		if(!doppelComeBackFuncAddr) 
+		{
+			return "Unable to find DoppelNoComeBack.doppelComeBackFuncAddr pattern.";
+		}
+		doppelComeBackFunc = doppelComeBackFuncAddr.value();
 
 		if (!install_new_detour(doppelDistanceCumBackAddr.value(), m_distance_doppel_detour, &distance_detour, &distanceRet, 0x6))
 		{
@@ -135,7 +144,7 @@ public:
 			return "Failed to initialize DoppelNoComeBack.doppelDistanceComeBack";
 		}
 
-		if (!install_new_detour(doppeBwJustCumBackAddr.value(), m_bwjust_doppel_detour, &bw_just_detour, &bwJustRet, 0x5))
+		if (!install_new_detour(doppeBwJustCumBackAddr.value()+0x3, m_bwjust_doppel_detour, &bw_just_detour, &bwJustRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DoppelNoComeBack.doppeBwJustComemBack";

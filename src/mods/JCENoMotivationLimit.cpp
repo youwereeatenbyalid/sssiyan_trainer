@@ -100,8 +100,9 @@ std::optional<std::string> JCENoMotivationLimit::on_initialize()
 	m_full_name_string = "No Concentration Restriction On JCE";
 	m_author_string = "akasha51";
 	m_description_string = "Allow JCE at any concentration level.";
-
-	auto humanConcetrationAddr = m_patterns_cache->find_addr(base, "83 BA 58 1B 00 00 02 0F 85 F9 00 00 00 48 85 D2 74 7A F3 0F 10 8A 20 1B 00 00 F3 0F 10 05 0E A5 24 06 0F 5A C9 0F 5A C0");//"DevilMayCry5.exe"+1C0A520
+	//Tu7: DevilMayCry5.exe+1C12330
+	//.text:0000000141C0A520	app_WeaponYamatoPL__doCommandSpecial02222121	cmp     dword ptr [rdx+1B58h], 2
+	auto humanConcetrationAddr = m_patterns_cache->find_addr(base, "83 BA ? ? ? ? ? 0F 85 ? ? ? ? 48 85 D2 74 7A F3 0F 10 8A ? ? ? ? F3 0F 10 05 ? ? ? ? 0F 5A C9 0F 5A C0 66 0F 2F C1 0F 96 C0 84 C0 0F 84 ? ? ? ? 48 8B CB 48 85 D2 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 48 48 8B 97 ? ? ? ? 45 33 C0 48 8B CB 48 85 D2 74 7E E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 74 5C 48 8B 74 24 ? 32 C0 48 8B 5C 24 ? 48 83 C4 20 5F C3 48 85 D2 75 21 45 33 C0 48 8B CB 41 8D 50 38 E8 ? ? ? ? 48 8B 74 24 ? 32 C0 48 8B 5C 24 ? 48 83 C4 20 5F C3 83 BA ? ? ? ? ? 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 CA 48 8B 97 ? ? ? ? 48 8B CB 48 85 D2 75 0A 45 33 C0 BA ? ? ? ? EB AC 0F 57 DB 41 B8 ? ? ? ? E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 98 40 B6 01 48 8B 5C 24 ? 40 84 F6 48 8B 74 24 ? 0F 95 C0 48 83 C4 20 5F C3 CC CC CC CC");//"DevilMayCry5.exe"+1C0A520
 	if (!humanConcetrationAddr)
 	{
 		return "Unable to find JCENoMotivationLimit.humanConcetrationAddr pattern.";

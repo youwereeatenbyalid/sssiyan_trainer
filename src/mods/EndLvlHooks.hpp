@@ -171,7 +171,7 @@ namespace EndLvlHooks
                 return "Unanable to find requestResultStaffRollAddr pattern.";
             }
 
-            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 0B 69");
+            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 6B 6D");
             //DevilMayCry5.app_MissionSettingManager__restartTraining115258
             if (!restartTrainingAddr)
             {

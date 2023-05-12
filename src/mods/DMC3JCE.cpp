@@ -260,7 +260,9 @@ std::optional<std::string> DMC3JCE::on_initialize()
 		return "Unable to find DMC3JCE.canExeJceAddr pattern.";
 	}
 
-	auto canExeJceAddr1 = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 D8");//DevilMayCry5.exe+1C0A54C
+	//.text:0000000141C0A54C	app_WeaponYamatoPL__doCommandSpecial02222121	setbe   al
+	//tu7 aob 0F 96 C0 84 C0 0F 84 CF 00 00 00 48 8B CB 48 85 D2 0F 84 9D 00 00 00 E8 38
+	auto canExeJceAddr1 = m_patterns_cache->find_addr(base, "0F 96 C0 84 C0 0F 84 ? ? ? ? 48 8B CB 48 85 D2 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 48 48 8B 97 ? ? ? ? 45 33 C0 48 8B CB 48 85 D2 74 7E E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 74 5C 48 8B 74 24 ? 32 C0 48 8B 5C 24 ? 48 83 C4 20 5F C3 48 85 D2 75 21 45 33 C0 48 8B CB 41 8D 50 38 E8 ? ? ? ? 48 8B 74 24 ? 32 C0 48 8B 5C 24 ? 48 83 C4 20 5F C3 83 BA ? ? ? ? ? 75 50 45 33 C0 48 8B CB 48 85 D2 74 22 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 CA 48 8B 97 ? ? ? ? 48 8B CB 48 85 D2 75 0A 45 33 C0 BA ? ? ? ? EB AC 0F 57 DB 41 B8 ? ? ? ? E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 98 40 B6 01 48 8B 5C 24 ? 40 84 F6 48 8B 74 24 ? 0F 95 C0 48 83 C4 20 5F C3 CC CC CC ");//DevilMayCry5.exe+1C0A54C
 	if (!canExeJceAddr1)
 	{
 		return "Unable to find DMC3JCE.canExeJceAddr1 pattern.";

@@ -56,7 +56,12 @@ std::optional<std::string> DanteAlwaysQ4SDT::on_initialize() {
     return "Unable to find DanteAlwaysQ4SDT pattern.";
   }
 
-  DanteAlwaysQ4SDT::jmp_jne = m_patterns_cache->find_addr(base, "32 C0 48 8B 5C 24 30 48 83 C4 20 5F C3 E8 C6").value();
+  auto addr_jne = m_patterns_cache->find_addr(base, "75 CF 84 C0");
+  if (!addr_jne) {
+      return "Unable to find DanteAlwaysQ4SDT Jump JNE pattern.";
+  }
+  //wonder if you could get away with it just jumping to addr_jne.value() and folling the jump back instead of using -0x2F to get to the jump destination 
+  DanteAlwaysQ4SDT::jmp_jne = addr_jne.value()-0x2F;
 
   if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 13)) {
     //  return a error string in case something goes wrong

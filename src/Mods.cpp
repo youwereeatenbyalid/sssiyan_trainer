@@ -368,14 +368,14 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
-        m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
+        //m_mods.emplace_back(std::make_unique<VergilDoppelBanish>()); Broken AOB
 
 // V.P.Zadov
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
         m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
         m_mods.emplace_back(std::make_unique<EnemyFixes>());
-        m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods.
+        m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB UpdateLockOnTargetAddr
         // Common
         m_mods.emplace_back(std::make_unique<LockOnNoHold>());
         m_mods.emplace_back(std::make_unique<WitchTime>());
@@ -383,7 +383,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
         m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
-        m_mods.emplace_back(std::make_unique<AirMoves>());
+        //m_mods.emplace_back(std::make_unique<AirMoves>()); Broken AOB more static offsets than you could shake a stick at
         //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
         m_mods.emplace_back(std::make_unique<CheckpointPos>());
         m_mods.emplace_back(std::make_unique<BossDanteSetup>());
@@ -391,7 +391,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         m_mods.emplace_back(std::make_unique<PosActionEditor>());
-        m_mods.emplace_back(std::make_unique<NoRoundtripCallback>());
+        m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr
         m_mods.emplace_back(std::make_unique<EnemySpawner>());
         // Nero
         m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
@@ -447,15 +447,22 @@ Mods::Mods()
 }
 
 std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
+    std::string errors = "";
+    bool init_error = false;
     for (auto& mod : m_mods) {
         spdlog::info("{:s}::on_initialize()", mod->get_name().data());
 
         if (auto e = mod->on_initialize(); e != std::nullopt) {
+            init_error = true;
             spdlog::info("{:s}::on_initialize() has failed: {:s}", mod->get_name().data(), *e);
-            return e;
+            //return e;
+            errors += e.value()+"\n";
         }
+       
     }
-
+    if (init_error) {
+        return std::make_optional<std::string>(errors);
+    }
     for (auto& i : m_mods)
         i->after_all_inits();
 

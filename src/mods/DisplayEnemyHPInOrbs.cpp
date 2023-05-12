@@ -52,13 +52,21 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   set_up_hotkey();
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
+
   auto addr = m_patterns_cache->find_addr(base, "8B 6A 78 EB 02");
-  DisplayEnemyHPInOrbs::jmp_cont = m_patterns_cache->find_addr(base, "44 8B 05 D5 FC 9E 05").value();
-  // DisplayEnemyHPInOrbs::jmp_cont = (base + 0x02494A0C); // ?? 
+  
+  //44 8B 05 D5 FC 9E 05 (+0)
+  auto jmp_addr = m_patterns_cache->find_addr(base,"8B EE 44 8B 05 ? ? ? ? ? ? ? ?");
 
   if (!addr) {
-    return "Unable to find DisplayEnemyHPInOrbs pattern.";
+      return "Unable to find DisplayEnemyHPInOrbs pattern.";
   }
+
+  if (!jmp_addr) {
+    return "Unable to find DisplayEnemyHPInOrbs jump addr pattern.";
+  }
+
+  DisplayEnemyHPInOrbs::jmp_cont = jmp_addr.value()+0x2;
 
   if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong

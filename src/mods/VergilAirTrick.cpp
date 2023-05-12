@@ -477,12 +477,20 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	//{
 	//	return "Unanable to find AirTrick.finishRangeAddr pattern.";
 	//}
-	auto finishRangeAddr = m_patterns_cache->find_addr(base, "5B C3 40 53 55 41 56");
+	//tu6 aob 5B C3 40 53 55 41 56 +0x2
+	//tu7 aob 48 89 5C 24 20 55 56 41 56 48 83 EC 60 48 8B B2
+	auto finishRangeAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 55 56 41 56 48 83 EC 60 48 8B B2");
 	//DevilMayCry5.app_fsm2_player_pl0800_TrickAction__getRange312704 (-0x2)
-
+	if (!finishRangeAddr)
+	{
+		return "Unanable to find AirTrick.finishRangeAddr pattern.";
+	}
 	auto pushHitAddr = m_patterns_cache->find_addr(base, "40 53 55 41 56 48 83 EC 20 49 8B E8 4C 8B F2 48 8B 52");
 	//DevilMayCry5.app_fsm2_player_pl0800_TrickAction__onPushHit312697
-
+	if (!pushHitAddr)
+	{
+		return "Unanable to find AirTrick.pushHitAddr pattern.";
+	}
 	if (!install_new_detour(initSpeedAddr.value()+0x3, m_initspeed_hook, &initspeed_detour, &initSpeedRet, 0x6)) {
       spdlog::error("[{}] failed to initialize", get_name());
           return "Failed to initialize VergilAirTrick.initSpeed"; 
@@ -523,7 +531,7 @@ std::optional<std::string> VergilAirTrick::on_initialize()
           return "Failed to initialize VergilAirTrick.finishRange"; 
     }*/
 
-	m_finish_range_hook = std::make_shared<Detour_t>(finishRangeAddr.value() + 0x2, &trick_action_get_range_hook);
+	m_finish_range_hook = std::make_shared<Detour_t>(finishRangeAddr.value(), &trick_action_get_range_hook);
 	if (!m_finish_range_hook->create())
 		return "Failed to initialize VergilAirTrick.m_finish_range_hook";
 	m_detours.push_back(m_finish_range_hook);
