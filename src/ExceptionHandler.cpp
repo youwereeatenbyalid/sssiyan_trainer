@@ -34,7 +34,7 @@ LONG WINAPI eh::global_exception_handler(struct _EXCEPTION_POINTERS* ei) {
     spdlog::error("FS: {:x}", ei->ContextRecord->SegFs);
     spdlog::error("GS: {:x}", ei->ContextRecord->SegGs);
     spdlog::error("SS: {:x}", ei->ContextRecord->SegSs);
-
+    g_framework->log_active_mods();
     const auto module_within = utility::get_module_within(ei->ContextRecord->Rip);
 
     if (module_within) {

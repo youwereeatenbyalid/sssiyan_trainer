@@ -412,6 +412,11 @@ void ModFramework::load_trainer_settings(utility::Config& cfg)
     }
 }
 
+void ModFramework::log_active_mods()
+{
+    m_mods->log_active_mods();
+}
+
 void ModFramework::queue_notification(const ImGuiToast& notif) {
     if (m_is_notif_enabled) {
         ImGui::InsertNotification(notif);

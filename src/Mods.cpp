@@ -543,6 +543,16 @@ void Mods::load_mods(const std::optional<utility::Config>& cfg) const {
     }
 }
 
+void Mods::log_active_mods() const
+{
+    spdlog::error("Active mods:");
+    for (auto& mod: m_mods) {
+        if (*mod->m_is_enabled) {
+            spdlog::error(std::string(mod->get_name()));
+        }
+    }
+}
+
 bool Mods::update_mod_state(Mod* mod) const
 {
     *mod->m_is_enabled = (mod->m_in_use_by.size() != 0) || mod->user_enabled;

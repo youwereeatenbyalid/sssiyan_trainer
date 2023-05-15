@@ -27,6 +27,7 @@ public:
     void on_lua_state_destroyed(lua_State* l);
     void save_mods();
     void load_mods(const std::optional<utility::Config>& cfg = std::nullopt) const;
+    void log_active_mods() const;
     /*void static addressseek();
     std::string get_module_path(void* address) const;*/
     auto& get_config()

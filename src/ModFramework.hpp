@@ -26,17 +26,17 @@ class ModFramework {
 public:
     ModFramework();
     virtual ~ModFramework();
-    
+
     bool is_valid() const { return m_valid; }
-    
+
     bool is_dx11() const { return m_is_d3d11; }
-    
+
     bool is_dx12() const { return m_is_d3d12; }
-    
+
     const auto& get_mods() const { return m_mods; }
-    
+
     const auto& get_keyboard_state() const { return m_last_keys; }
-    
+
     const auto& get_controller_state() const { return m_last_controller_state; }
 
     const auto& get_scale() const { return m_scale; }
@@ -48,11 +48,11 @@ public:
     static bool get_ref_lua_enabled() { return m_ref_lua_enabled; }
 
     static void set_ref_lua_enabled(bool enabled) { m_ref_lua_enabled = enabled; }
-    
+
     Address get_module() const { return m_game_module; }
 
     auto get_thread_context() const { sdk::get_thread_context(); }
-    
+
     bool is_ready() const { return m_game_data_initialized; }
 
     auto get_menu_key() const { return KeyBinder::GetKeyboardKeys("Menu Key"); }
@@ -61,8 +61,8 @@ public:
 
     bool& get_kcw_show_state_ref() { return m_kcw_buffers.drawWindow; }
 
-	auto get_last_kc_bind_name() const { return m_kcw_buffers.bindName; }
-
+    auto get_last_kc_bind_name() const { return m_kcw_buffers.bindName; }
+    void log_active_mods();
     void set_current_kc_bind_name(const std::string& bindName) { m_kcw_buffers.bindName = bindName; }
 
     void set_kcw_name(const std::string& newName) { m_kcw_buffers.windowTitle = newName; }
