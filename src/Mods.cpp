@@ -247,13 +247,13 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<GameInput>());
 		// m_mods.emplace_back(std::make_unique<AprilFools>());
     // Common
-        //m_mods.emplace_back(std::make_unique<HeavyDay>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<HeavyDay>()); //AOB Broken
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
         m_mods.emplace_back(std::make_unique<Inertia>());
         //m_mods.emplace_back(std::make_unique<LDK>()); //AOB Broken
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
-        //m_mods.emplace_back(std::make_unique<DisableTitleTimer>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<DisableTitleTimer>()); //AOB Broken
 
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
@@ -275,7 +275,7 @@ Mods::Mods()
     // V
         m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
         m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
-        //m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>()); //AOB Broken
         m_mods.emplace_back(std::make_unique <InfiniteGambits>());
         m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
@@ -293,7 +293,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DeepTurbo>());
         m_mods.emplace_back(std::make_unique<BpStageJump>());
         m_mods.emplace_back(std::make_unique<FreezeBPTimer>());
-        //m_mods.emplace_back(std::make_unique<NoScreenShake>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<NoScreenShake>()); //AOB Broken
         m_mods.emplace_back(std::make_unique<DisplayEnemyHPInOrbs>());
         m_mods.emplace_back(std::make_unique<MovingTargetSwitch>());
         m_mods.emplace_back(std::make_unique<HUDOptions>());
@@ -368,7 +368,7 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
-        //m_mods.emplace_back(std::make_unique<VergilDoppelBanish>()); Broken AOB
+        //m_mods.emplace_back(std::make_unique<VergilDoppelBanish>()); //Broken AOB
 
 // V.P.Zadov
         // Background

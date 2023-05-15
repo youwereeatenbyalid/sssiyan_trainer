@@ -730,7 +730,11 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto dantefix_addr = static_base + 0xDD9B59;
   auto styleenable1_addr = m_patterns_cache->find_addr(base, "83 F8 39 0F 84 95 08 00 00");
   auto styleenable2_addr = m_patterns_cache->find_addr(base, "0F 87 4C 0D 00 00");
-  auto styleenableend_addr = m_patterns_cache->find_addr(base,"23 00 00 44 0F 28 4C 24 70");
+
+  //.text:0000000140FAB091	app_StylishManager__checkStylish137655	call    app_StylishManager__addSubjugationBouns137665
+  //old 23 00 00 44 0F 28 4C 24 70 +0x3
+  // direct reference: [actual address in first opcode] 75 7D 0F 28 D6// +0x7D+0x2 -> +0x7F
+  auto styleenableend_addr = m_patterns_cache->find_addr(base,"75 7D 0F 28 D6");
   
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";
@@ -777,6 +781,8 @@ std::optional<std::string> HeavyDay::on_initialize() {
   if(!styleenableend_addr){
       return "Unable to find style end pattern";
   }
+
+
     if (!install_new_detour(enemystep_addr.value(), m_enemystep_detour,
                                 &enemystep_detour, &enemystep_jmp_ret, 8)) {
     //  return a error string in case something goes wrong
@@ -867,8 +873,8 @@ std::optional<std::string> HeavyDay::on_initialize() {
     HeavyDay::enemystep_je_ret = enemystep_addr.value() + 0xB2;
     HeavyDay::dtenable_ja_ret  = dtenable_addr.value() + 0x166;
     
-    HeavyDay::styleenable1_jmp_je = styleenableend_addr.value()+0x3;
-    HeavyDay::styleenable2_jmp_ja = styleenableend_addr.value()+0x3;
+    HeavyDay::styleenable1_jmp_je = styleenableend_addr.value()+0x7F;
+    HeavyDay::styleenable2_jmp_ja = styleenableend_addr.value()+0x7F;
   return Mod::on_initialize();
 }
 

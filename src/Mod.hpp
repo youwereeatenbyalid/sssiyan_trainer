@@ -445,6 +445,23 @@ public:
         *ret = detour_type->get_return_address();
         return true;
     }
+
+    //This really shouldn't go here I think but I'm so fucking tired, Dark if you run into this later I'm really sorry.
+    
+    /// <summary>
+    /// OK, for some AOB's IDA generates, the pattern points to a call to the function we are trying to insert a detour at,
+    /// so we take that address of the call to the function,
+    /// read the relative offset, and then combine it with the address of the call to get the actual address to detour at. Honestly, it seems to work, so win.
+    /// </summary>
+    /// <param name="ip">pointer to call instruction</param>
+    /// <param name="offset_from_function">offset from function that we want to detour at</param>
+    /// <returns>address of function being called</returns>
+    uintptr_t getRelCallDestination(uintptr_t ip,uintptr_t offset_from_function = 0) {
+        signed long offset = *(signed long*)(ip + 1);
+        uintptr_t function_address = ip + 1 /*Skip call byte*/ + 4/*Skip to next instruction*/ + offset;
+        return function_address;
+    }
+
     //Calls after all mods has been initialized; Should be pure virtual but then i need to override this in all mods.............
     virtual void after_all_inits() {};
 
