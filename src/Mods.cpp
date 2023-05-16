@@ -56,8 +56,8 @@
        #include "mods/InfiniteGambits.hpp"
        #include "mods/EmpoweredCane.hpp"
     // Vergil
-        #include "mods/DoppelWeaponSwitcher.hpp"
-
+        //#include "mods/DoppelWeaponSwitcher.hpp"
+       #include "mods/LuaDoppelWeaponSwitcher.hpp"
     //Strive
         #include "mods/NeoBalrog.hpp"
     //lua test
@@ -250,7 +250,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<HeavyDay>()); //AOB Broken
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
         m_mods.emplace_back(std::make_unique<Inertia>());
-        //m_mods.emplace_back(std::make_unique<LDK>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<LDK>()); //AOB Broken
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>()); //AOB Broken
@@ -280,6 +280,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique <EmpoweredCane>());
     // Vergil
         //m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<LuaDoppelWeaponSwitcher>());
     // Strive
         m_mods.emplace_back(std::make_unique<NeoBalrog>());
     // Lua

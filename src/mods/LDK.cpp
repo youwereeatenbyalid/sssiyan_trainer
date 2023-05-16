@@ -527,7 +527,10 @@ std::optional<std::string> LDK::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   uintptr_t staticbase = g_framework->get_module().as<uintptr_t>();
   //This shit is borked, ask regret where to get it from
-  LDK::containernum_addr = staticbase + 0x07E836F8;
+  //75 04 33 C0 EB 1B <- jumps to opcode that accesses value
+  //tu6: 0x07E836F8
+  //tu7: 0x07E8DC30 
+  LDK::containernum_addr = staticbase + 0x07E8DC30;
 
 
   auto enemynumber_addr = m_patterns_cache->find_addr(base, "8B 40 70 89 87 50 07 00 00");
@@ -589,8 +592,8 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::cavforcevalid_jmp_ret2 = cavforcevalid_addr.value()+0x6;
   LDK::cavforcevalid_jmp_je = cavforcevalid_addr.value()+0x8;
 
-  LDK::missionmanager = staticbase+0x7E836F8;
-  LDK::enemygentype = staticbase+0x58E15A0;
+  LDK::missionmanager = staticbase+0x7E836F8; //This is just mission manager singleton, grab this with sdk later you moron.
+  //LDK::enemygentype = staticbase+0x58E15A0; <- unused
  
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
   LDK::nopfunction1_jmp_ret2       = nopfunction_addr1.value() + 0x83;
