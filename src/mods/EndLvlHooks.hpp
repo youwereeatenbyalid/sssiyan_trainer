@@ -136,46 +136,50 @@ namespace EndLvlHooks
             auto retryMissionAddr = m_patterns_cache->find_addr(base, "40 5F C3 CC CC CC 48 89 5C 24 18 56");// DevilMayCry5.exe+249DCA0 (-0x6)
             if (!retryMissionAddr)
             {
-                return "Unanable to find retryMissionAddr pattern.";
+                return "Unable to find retryMissionAddr pattern.";
             }
 
             auto exitMissionAddr = m_patterns_cache->find_addr(base, "20 5F C3 CC CC CC CC CC CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41");// DevilMayCry5.exe+249DA90 (-0x9)
             if (!retryMissionAddr)
             {
-                return "Unanable to find exitMissionAddr pattern.";
+                return "Unable to find exitMissionAddr pattern.";
             }
 
             auto checkpointMissionAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 41 0F B6 F8");// DevilMayCry5.exe+249DFA0
             if (!checkpointMissionAddr)
             {
-                return "Unanable to find checkpointMissionAddr pattern.";
+                return "Unable to find checkpointMissionAddr pattern.";
             }
 
             auto exitBpMissionAddr = m_patterns_cache->find_addr(base, "C3 CC 48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 41 56 48 83 EC 20 41");// DevilMayCry5.exe+24A1600 (-0x2)
             if (!exitBpMissionAddr)
             {
-                return "Unanable to find exitBpMissionAddr pattern.";
+                return "Unable to find exitBpMissionAddr pattern.";
             }
-
-            auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
-
+            auto exitSecretMissionCall = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 4C 39 70 18 74 8B");
+            //its first opcode of DevilMayCry5.app_MissionSettingManager__exitSecretMission115255 if that helps
+            //auto exitSecretMissionAddr = g_framework->get_module().as<uintptr_t>() + 0x249FD20; //Bad AOB shit
+            if (!exitSecretMissionCall)
+            {
+                return "Unable to find exitSecretMissionCall pattern.";
+            }
             auto requestResultAddr = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45");// DevilMayCry5.exe+88E940 (-0x4)
             if (!exitBpMissionAddr)
             {
-                return "Unanable to find requestResultAddr pattern.";
+                return "Unable to find requestResultAddr pattern.";
             }
 
             auto requestResultStaffRollAddr = m_patterns_cache->find_addr(base, "6E FF FF C3 CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 18" /*"48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45 33 FF 45 0F B6 F0 41 8B EF 48 8B F2"*/);// DevilMayCry5.app_FlowManager__requestResultStaffRoll241224// DevilMayCry5.exe+88F1D0
             if (!requestResultStaffRollAddr)
             {
-                return "Unanable to find requestResultStaffRollAddr pattern.";
+                return "Unable to find requestResultStaffRollAddr pattern.";
             }
 
             auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 6B 6D");
             //DevilMayCry5.app_MissionSettingManager__restartTraining115258
             if (!restartTrainingAddr)
             {
-                return "Unanable to find restartTraining pattern.";
+                return "Unable to find restartTraining pattern.";
             }
             
             //m_retry_mission_hook = std::make_unique<FunctionHook>(retryMissionAddr.value() + 0x6, &EndLvlHooks::retry_mission_detour);
@@ -201,6 +205,7 @@ namespace EndLvlHooks
             //m_secret_mission_hook = std::make_unique<FunctionHook>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
             //m_secret_mission_hook->create();
 
+            auto exitSecretMissionAddr = getRelCallDestination(exitSecretMissionCall.value());
             m_secret_mission_hook = std::make_shared<Detour_t>(exitSecretMissionAddr, &EndLvlHooks::smiss_exit_detour);
             m_secret_mission_hook->create();
             m_detours.push_back(m_secret_mission_hook);
