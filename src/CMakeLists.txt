@@ -306,6 +306,9 @@ set(MODS_SRC
 	
 	mods/NeoBalrog.hpp
 	mods/NeoBalrog.cpp
+	
+	mods/LuaDoppelWeaponSwitcher.hpp
+	mods/LuaDoppelWeaponSwitcher.cpp
 )
 
 set(HOOKS_SRC
