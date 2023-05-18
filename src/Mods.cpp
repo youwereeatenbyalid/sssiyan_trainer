@@ -570,7 +570,7 @@ bool Mods::update_mod_state(Mod* mod) const
 			}
 		}
 
-        bool enabled = true;
+        bool enabled = *mod->m_is_enabled;
 		for (const auto& detour : mod->m_detours) {
 			enabled &= detour->toggle(*mod->m_is_enabled);
 		}
