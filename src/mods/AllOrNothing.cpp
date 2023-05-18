@@ -7,7 +7,7 @@
 uintptr_t AllOrNothing::jmp_ret{NULL};
 bool AllOrNothing::cheaton{NULL};
 uint32_t AllOrNothing::stylebar{NULL};
-bool noonetakesdamage;
+//bool noonetakesdamage;
 bool onehitkill;
 float zerovalue = 0.0;
 float playermult = 10.0;
@@ -100,7 +100,7 @@ std::optional<std::string> AllOrNothing::on_initialize() {
   auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_on_page              = Page_GameMode;
   m_is_enabled           = &AllOrNothing::cheaton;
-  m_depends_on           = { "PlayerTracker","StyleRank"};
+  m_depends_on           = { "PlayerTracker","StyleRank" };
   m_full_name_string     = "Must Style (+)";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Disable damage altogether or when below a certain Style Rank.";

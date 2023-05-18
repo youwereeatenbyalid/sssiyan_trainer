@@ -34,8 +34,9 @@ std::optional<std::string> NoOneTakesDamage::on_initialize() {
   init_check_box_info();
 
   //auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  m_is_enabled = &NoOneTakesDamage::cheaton;
-  m_on_page    = Page_CommonCheat;
+  m_is_enabled           = &NoOneTakesDamage::cheaton;
+  m_on_page              = Page_CommonCheat;
+  m_depends_on           = { "AllOrNothing" };
   m_full_name_string     = "No One Takes Damage";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Players and enemies take no damage.";

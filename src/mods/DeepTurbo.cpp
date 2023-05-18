@@ -77,9 +77,9 @@ void DeepTurbo::init_check_box_info() {
 std::optional<std::string> DeepTurbo::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled          = &DeepTurbo::cheaton;
-  m_on_page             = Page_Mechanics;
-
+  m_is_enabled         = &DeepTurbo::cheaton;
+  m_on_page            = Page_Mechanics;
+  m_depends_on         = { "GameplayStateTracker" };
   m_full_name_string   = "Turbo (+)";
   m_author_string      = "deepdarkkapustka";
   m_description_string = "Change the game speed by adjusting the slider.\n\n"

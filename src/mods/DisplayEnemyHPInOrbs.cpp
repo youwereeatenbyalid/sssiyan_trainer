@@ -3,7 +3,6 @@
 #include "DamageMultiplier.hpp"
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
-uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};
 bool DisplayEnemyHPInOrbs::cheaton{NULL};
 
 // clang-format off
@@ -23,12 +22,10 @@ static naked void detour() {
         jmp cheatcode
 
     cheatcode:
-        CVTTSS2SI ebp, [DamageMultiplier::enemyhpvalue]
-        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
-
+        CVTTSS2SI ebx, [DamageMultiplier::enemyhpvalue]
         code:
-        mov ebp, [rdx+78h]
-        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
+        mov edi,00000045
+        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_ret]
 	}
 }
 
@@ -42,9 +39,9 @@ void DisplayEnemyHPInOrbs::init_check_box_info() {
 std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
   init_check_box_info();
 
-  m_is_enabled            = &DisplayEnemyHPInOrbs::cheaton;
-  m_on_page               = Page_Camera;
-
+  m_is_enabled           = &DisplayEnemyHPInOrbs::cheaton;
+  m_on_page              = Page_Camera;
+  m_depends_on           = { "DamageMultiplier" };
   m_full_name_string     = "Display Enemy HP in Orbs";
   m_author_string        = "SSSiyan";
   m_description_string   = "Displays the last hit enemy's HP in the orb counter on the top right.";
@@ -53,22 +50,13 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto addr = m_patterns_cache->find_addr(base, "8B 6A 78 EB 02");
+  auto addr = m_patterns_cache->find_addr(base, "6C 48 8B F7 BF 45 00 00 00");
   
-  //44 8B 05 D5 FC 9E 05 (+0)
-  auto jmp_addr = m_patterns_cache->find_addr(base,"8B EE 44 8B 05 ? ? ? ? ? ? ? ?");
-
   if (!addr) {
       return "Unable to find DisplayEnemyHPInOrbs pattern.";
   }
 
-  if (!jmp_addr) {
-    return "Unable to find DisplayEnemyHPInOrbs jump addr pattern.";
-  }
-
-  DisplayEnemyHPInOrbs::jmp_cont = jmp_addr.value()+0x2;
-
-  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
+  if (!install_new_detour(addr.value()+4, m_detour, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DisplayEnemyHPInOrbs";
