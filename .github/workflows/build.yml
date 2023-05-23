@@ -42,7 +42,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: list info
-        run: dir
+        run: dir ..
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.3.1
