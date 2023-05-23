@@ -37,11 +37,6 @@ jobs:
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.RELEASE_BUILD}}
-
-  make_fluffy_mod:
-    runs-on: windows-latest
-    needs: build_release
-    steps:
       - name: list info
         run: dir
         shell: cmd
