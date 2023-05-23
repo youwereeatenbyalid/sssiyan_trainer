@@ -40,7 +40,6 @@ jobs:
 
   make_fluffy_mod:
     runs-on: windows-latest
-    needs: build_release
     steps:
       - name: list info
         run: dir /b /a /s
