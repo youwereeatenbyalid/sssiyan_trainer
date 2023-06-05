@@ -29,7 +29,7 @@ std::optional<std::string> EnemySpawner::on_initialize()
 	m_on_page = Page_CommonCheat;
 	m_full_name_string = "Enemy Spawner (+)";
 	m_author_string = "V.P.Zadov";
-	m_depends_on = { "PlayerTracker","Pl0300ControllerManager" };
+	m_depends_on = { "GameplayStateTracker","PlayerTracker","Pl0300ControllerManager" };
 	m_description_string = "Spawn enemies on command.";
 
 	_spawnEmCoroutine.set_delay(0.3f);

@@ -25,11 +25,7 @@ private:
 
 	static bool check_air_trick_hook(uintptr_t threadCntxt, uintptr_t pl0800);
 
-	void on_sdk_init() override
-	{
-		_trickTargetCntrStartAirTrickMethod = sdk::find_method_definition("app.PlayerVergilPL.TrickTargetController", "startAirTrick(app.PlayerVergilPL)");
-		_pl0800SetAirTrickActionMethod = sdk::find_method_definition("app.PlayerVergilPL", "setAirTrickAction(via.GameObject)");
-	}
+	void on_sdk_init() override;
 
 	std::shared_ptr<Detour_t> _checkAirTrickHook;
 };

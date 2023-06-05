@@ -30,6 +30,16 @@ void VergilAirTrickNoSS::init_check_box_info() {
     m_hot_key_name = m_prefix_hot_key_name + std::string(get_name());
 }
 
+void VergilAirTrickNoSS::on_sdk_init() {
+        _trickTargetCntrStartAirTrickMethod = sdk::find_method_definition("app.PlayerVergilPL.TrickTargetController", "startAirTrick(app.PlayerVergilPL)");
+        _pl0800SetAirTrickActionMethod = sdk::find_method_definition("app.PlayerVergilPL", "setAirTrickAction(via.GameObject)");
+        auto hook_method = sdk::find_method_definition("app.PlayerVergilPL", "checkAirTrick()");
+        _checkAirTrickHook = std::make_shared<Detour_t>(hook_method->get_function(), &VergilAirTrickNoSS::check_air_trick_hook);
+        _checkAirTrickHook->create();
+        m_detours.push_back(_checkAirTrickHook);
+}
+
+
 std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
     init_check_box_info();
 
@@ -42,16 +52,16 @@ std::optional<std::string> VergilAirTrickNoSS::on_initialize() {
 
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-    auto checkAirTrickAddr = m_patterns_cache->find_addr(base, "FE 01 EB 8F CC CC CC CC CC 48 89 5C 24 18");
-    //DevilMayCry5.app_PlayerVergilPL__checkAirTrick113998 (-0x9)
-    if (!checkAirTrickAddr) {
-        return "Unable to find VergilAirTrickNoSS.checkAirTrickAddr pattern.";
-    }
+    //auto checkAirTrickAddr = m_patterns_cache->find_addr(base, "FE 01 EB 8F CC CC CC CC CC 48 89 5C 24 18");
+    ////DevilMayCry5.app_PlayerVergilPL__checkAirTrick113998 (-0x9)
+    //if (!checkAirTrickAddr) {
+    //    return "Unable to find VergilAirTrickNoSS.checkAirTrickAddr pattern.";
+    //}
 
-    _checkAirTrickHook = std::make_shared<Detour_t>(checkAirTrickAddr.value() + 0x9, &VergilAirTrickNoSS::check_air_trick_hook);
-    if (!_checkAirTrickHook->create())
-        return "Unable to create VergilAirTrickNoSS._checkAirTrickHook.";
-    m_detours.push_back(_checkAirTrickHook);
+    //_checkAirTrickHook = std::make_shared<Detour_t>(checkAirTrickAddr.value() + 0x9, &VergilAirTrickNoSS::check_air_trick_hook);
+    //if (!_checkAirTrickHook->create())
+    //    return "Unable to create VergilAirTrickNoSS._checkAirTrickHook.";
+    //m_detours.push_back(_checkAirTrickHook);
     return Mod::on_initialize();
 }
 

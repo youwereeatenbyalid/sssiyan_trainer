@@ -512,7 +512,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     m_full_name_string = "";
     m_author_string = "V.P. Zadov";
     m_description_string = "";
-
+    m_depends_on = { "GameplayStateTracker" };
     //set_up_hotkey();
 
     auto pl300MissionNo = m_patterns_cache->find_addr(base, "48 89 5C 24 08 57 48 83 EC 20 48 8B 41 50 48 8B D9 BF FF"); // app_Em5900Base_AttackRate_AttackRateVergilMode__get_missionNo213806
