@@ -60,6 +60,7 @@
        #include "mods/LuaDoppelWeaponSwitcher.hpp"
     //Strive
         #include "mods/NeoBalrog.hpp"
+        #include "mods/LuaDevilBreakerSwitcher.hpp"
     //lua test
         //#include "mods/TestLuaMod.hpp"
 
@@ -263,7 +264,8 @@ Mods::Mods()
 		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
-        m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
+        //m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
+        m_mods.emplace_back(std::make_unique<LuaDevilBreakerSwitcher>());
         //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());

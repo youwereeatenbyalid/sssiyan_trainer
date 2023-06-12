@@ -309,6 +309,9 @@ set(MODS_SRC
 	
 	mods/LuaDoppelWeaponSwitcher.hpp
 	mods/LuaDoppelWeaponSwitcher.cpp
+	
+	mods/LuaDevilBreakerSwitcher.hpp
+	mods/LuaDevilBreakerSwitcher.cpp
 )
 
 set(HOOKS_SRC
