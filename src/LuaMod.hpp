@@ -50,6 +50,9 @@ public:
 	/// Draw any imgui calls made by a lua script to the mod window. 
 	/// </summary>
 	void draw_lua_ui() {
+		if (!scripts_loaded) {
+			ImGui::Text("SCRIPT FAILED TO LOAD, CHECK YOUR SCRIPT FOLDER TO SEE IF FILES ARE MISSING");
+		}
 		if (ModFramework::get_ref_lua_enabled() && m_is_enabled != nullptr) {
 			API::LuaLock _{};
 			try {
@@ -72,7 +75,7 @@ public:
 			if (*m_is_enabled && !m_lua_loaded) {
 				load_lua_mod();
 			}
-			else if (*m_is_enabled && m_lua_loaded) {
+			else if (*m_is_enabled && m_lua_loaded && scripts_loaded) {
 				on_lua_mod_update();
 			}
 			else if (!*m_is_enabled && m_lua_loaded) {
@@ -89,25 +92,31 @@ public:
 	/// Loads scripts from the m_scripts vector into the mod state.
 	/// Needs LuaLock Before calling
 	/// </summary>
-	void load_scripts() {		
+	bool load_scripts() {		
+		bool successful_load = true;
 		for (auto& script : m_scripts) {
-			load_script(script);
+			bool result = load_script(script);
+			if (result == false) {
+				successful_load = false;
+			}
 		}
+		scripts_loaded = successful_load;
+		return successful_load;
 	}
 
 	/// <summary>
 	/// Wrapped for load script that uses the Scripts Folder as the default filepath parameter.
 	/// </summary>
 	/// <param name="script">name of lua file</param>
-	void load_script(std::string script) {
-		load_script(script, path(SCRIPT_FOLDER));
+	bool load_script(std::string script) {
+		return load_script(script, path(SCRIPT_FOLDER));
 	}
 	/// <summary>
 	/// Takes a file name and file path and attempts to load the file into the mod's lua script state.
 	/// </summary>
 	/// <param name="script">name of lua file</param>
 	/// <param name="script_path">path to lua file</param>
-	void load_script(std::string filename,std::filesystem::path filepath) {
+	bool load_script(std::string filename,std::filesystem::path filepath) {
 		sol::state_view mod_state_view{ m_mod_state };
 		auto scriptpath = filepath / filename;
 		std::string old_path = mod_state_view["package"]["path"];
@@ -126,12 +135,15 @@ public:
 		catch (const std::exception& e) {
 			spdlog::error(e.what());
 			store_last_error = e.what();
+			return false;
 		}
 		catch (...) {
 			spdlog::error((std::stringstream{} << "Unknown error when running script " << scriptpath).str().c_str());
 			store_last_error = "Unknown error when running script " + scriptpath.string();
+			return false;
 		}
 		mod_state_view["package"]["path"] = old_path;
+		return true;
 	}
 protected:
 	std::vector<sol::protected_function> m_on_draw_ui_fns{};
@@ -139,6 +151,7 @@ protected:
 	std::string store_last_error = "";
 	lua_State* m_global_state;
 	lua_State* m_mod_state;
+	bool scripts_loaded = false;
 	bool m_lua_loaded = false;
 
 private:
