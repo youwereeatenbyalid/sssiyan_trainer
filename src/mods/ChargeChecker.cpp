@@ -17,13 +17,14 @@ float breakerChargeMax{ NULL };
 
 // dante
 float danteOverdriveMult{ NULL };
+float danteLongBarrelMult{ NULL };
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour() {
 	__asm {
-        cmp byte ptr[ChargeChecker::cheaton], 1
+        cmp byte ptr [ChargeChecker::cheaton], 1
         jne code
         cmp [PlayerTracker::playerid], 0
         je nerocode
@@ -56,12 +57,20 @@ static naked void detour() {
         jmp code
 
     dantecode:
-        cmp dword ptr [rdi+48h], 1
+        cmp dword ptr [rdi+48h], 1 // button?
+        jne code
+        cmp dword ptr [PlayerTracker::danteweapon], 2 // DSD?
         je overdrivechargedante
+        cmp dword ptr [PlayerTracker::danteweapon], 4 // Cerberus?
+        je longbarrelchargedante
         jmp code
 
     overdrivechargedante:
         mulss xmm6, [danteOverdriveMult]
+        jmp code
+
+    longbarrelchargedante:
+        mulss xmm6, [danteLongBarrelMult]
         jmp code
 
     code:
@@ -149,6 +158,7 @@ void ChargeChecker::on_config_load(const utility::Config& cfg) {
   standardizeBreakerCharges = cfg.get<bool>("standardize_breaker_charges").value_or(false);
   // dante
   danteOverdriveMult = cfg.get<float>("dante_overdrive_charge").value_or(1.0f);
+  danteLongBarrelMult = cfg.get<float>("dante_long_barrel_charge").value_or(1.0f);
 }
 
 void ChargeChecker::on_config_save(utility::Config& cfg) {
@@ -161,6 +171,7 @@ void ChargeChecker::on_config_save(utility::Config& cfg) {
   cfg.set<bool>("standardize_breaker_charges", standardizeBreakerCharges);
   // dante
   cfg.set<float>("dante_overdrive_charge", danteOverdriveMult);
+  cfg.set<float>("dante_long_barrel_charge", danteLongBarrelMult);
 }
 
 void ChargeChecker::on_draw_ui() {
@@ -185,6 +196,8 @@ void ChargeChecker::on_draw_ui() {
   ImGui::Text("Dante");
   ImGui::Text("Overdrive Charge Speed Multiplier");
   UI::SliderFloat("##overdrivemultesliderdante", &danteOverdriveMult, 0.5f, 5.0f, "%.1f");
+  ImGui::Text("Long Barrel Charge Speed Multiplier");
+  UI::SliderFloat("##longbarrelmultesliderdante", &danteLongBarrelMult, 0.5f, 5.0f, "%.1f");
 
   // ImGui::Spacing();
   // ImGui::Separator();
