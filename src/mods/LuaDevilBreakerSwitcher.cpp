@@ -18,6 +18,7 @@ std::optional<std::string> LuaDevilBreakerSwitcher::on_initialize() {
     m_description_string = "Even funkier than before.";
     infinite_breakers = false;
     breaker_to_breaker_cancel = false;
+    verify_scripts();
     set_up_hotkey();
 
     g_keyBinds.Get()->AddBind(std::string(get_name()) + "SLOT1",

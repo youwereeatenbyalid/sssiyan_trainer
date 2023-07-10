@@ -26,6 +26,7 @@ std::optional<std::string> NeoBalrog::on_initialize() {
     m_description_string = "A modified moveset that unifies balrog's punch and kick movesets.\nTap attacks for kick moves and hold to enter welter stance.";
 
     set_up_hotkey();
+    verify_scripts();
     auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
     auto addr = m_patterns_cache->find_addr(base, "8B 91 CC 18 00 00 48 85 C0 0F 84 81");
     if (!addr) {
@@ -59,6 +60,6 @@ void NeoBalrog::on_lua_mod_update()
 
 void NeoBalrog::on_draw_ui()
 {
-    //draw_lua_ui();
+    draw_lua_ui();
 }
 

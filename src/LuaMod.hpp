@@ -88,6 +88,21 @@ public:
 	virtual void on_unload_lua_mod() = 0;
 	virtual void on_lua_mod_update() {};
 
+	bool verify_scripts() {
+		bool found_all_scripts = true;
+		for (auto& script : m_scripts) {
+			auto script_path = path(SCRIPT_FOLDER) / std::filesystem::path{ script };
+			bool result = std::filesystem::exists(script_path);
+			if (result == false) {
+				spdlog::error((std::stringstream{} << "Could not locate script " << script << "at " << script_path).str().c_str());
+				found_all_scripts = false;
+			}
+		}
+		scripts_loaded = found_all_scripts;
+		return found_all_scripts;
+			//m_scripts
+	}
+
 	/// <summary>
 	/// Loads scripts from the m_scripts vector into the mod state.
 	/// Needs LuaLock Before calling

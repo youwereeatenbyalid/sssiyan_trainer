@@ -51,7 +51,7 @@ std::optional<std::string> LuaDoppelWeaponSwitcher::on_initialize() {
     install_new_detour(addr_1.value(), m_init_hook_1, &init_detour_1, &jmp_ret_1, 7);
     install_new_detour(addr_2.value(), m_init_hook_2, &init_detour_2, &jmp_ret_2, 7);
     set_up_hotkey();
-
+    verify_scripts();
     return Mod::on_initialize();
 }
 
