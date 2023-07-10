@@ -377,66 +377,67 @@ Mods::Mods()
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
         m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
-        m_mods.emplace_back(std::make_unique<EnemyFixes>());
-        m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB UpdateLockOnTargetAddr
-        // Common
-        m_mods.emplace_back(std::make_unique<LockOnNoHold>());
-        m_mods.emplace_back(std::make_unique<WitchTime>());
-        // Gameplay
-        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
-        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
-        m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
-        //m_mods.emplace_back(std::make_unique<AirMoves>()); Broken AOB more static offsets than you could shake a stick at
-        //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>());
-        m_mods.emplace_back(std::make_unique<CheckpointPos>());
-        m_mods.emplace_back(std::make_unique<BossDanteSetup>());
-        m_mods.emplace_back(std::make_unique<BossVergilSettings>());
-        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
-        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
-        m_mods.emplace_back(std::make_unique<PosActionEditor>());
-        m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr
-        m_mods.emplace_back(std::make_unique<EnemySpawner>());
-        // Nero
-        m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
-        // Dante
-        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
-        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
-        m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
-        m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
-        m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
-        m_mods.emplace_back(std::make_unique<DanteSDTRegen>());
-        m_mods.emplace_back(std::make_unique<DanteSelectReleaseType>());
-        m_mods.emplace_back(std::make_unique<DanteQuickSilver>());
-        m_mods.emplace_back(std::make_unique<DanteAirMustang>());
-        // V
-        //Vergil
-        m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
-        m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
-        m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
-        m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
-        //m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
-        m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-        m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
-        m_mods.emplace_back(std::make_unique<VergilAirTrick>());
-        //m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
-        m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
-        m_mods.emplace_back(std::make_unique<DMC3JCE>());
-        m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
-        m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
-        m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
-        m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
-        m_mods.emplace_back(std::make_unique<AirTrickDodge>());
-        m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
-        m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
-        m_mods.emplace_back(std::make_unique<InstantDoppel>());
-        m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
-        m_mods.emplace_back(std::make_unique<BossTrickUp>());
-        m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>());
-        m_mods.emplace_back(std::make_unique<DoppelNoComeBack>());
-        m_mods.emplace_back(std::make_unique<BossVergilMoves>());
-        //m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>());
-        m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
-        m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
+        //m_mods.emplace_back(std::make_unique<EnemyFixes>());
+        //m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB UpdateLockOnTargetAddr
+        //// Common
+        //m_mods.emplace_back(std::make_unique<LockOnNoHold>());
+        //m_mods.emplace_back(std::make_unique<WitchTime>());
+        //// Gameplay
+        //m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
+        //m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
+        //m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+
+        ////m_mods.emplace_back(std::make_unique<AirMoves>()); Broken AOB more static offsets than you could shake a stick at
+        ////m_mods.emplace_back(std::make_unique<EnemyWaveSettings>()); Not even gonna try bro
+        //m_mods.emplace_back(std::make_unique<CheckpointPos>());
+        //m_mods.emplace_back(std::make_unique<BossDanteSetup>());
+        //m_mods.emplace_back(std::make_unique<BossVergilSettings>());
+        //m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        //m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        //m_mods.emplace_back(std::make_unique<PosActionEditor>());
+        //m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr
+        //m_mods.emplace_back(std::make_unique<EnemySpawner>());
+        //// Nero
+        //m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
+        //// Dante
+        //m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
+        //m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
+        //m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
+        //m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
+        //m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
+        //m_mods.emplace_back(std::make_unique<DanteSDTRegen>());
+        //m_mods.emplace_back(std::make_unique<DanteSelectReleaseType>());
+        //m_mods.emplace_back(std::make_unique<DanteQuickSilver>());
+        //m_mods.emplace_back(std::make_unique<DanteAirMustang>());
+        //// V
+        ////Vergil
+        //m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
+        //m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
+        //m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
+        //m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
+        ////m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
+        //m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
+        //m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
+        //m_mods.emplace_back(std::make_unique<VergilAirTrick>());
+        ////m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
+        //m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
+        //m_mods.emplace_back(std::make_unique<DMC3JCE>());
+        //m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
+        //m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
+        //m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
+        //m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
+        //m_mods.emplace_back(std::make_unique<AirTrickDodge>());
+        //m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
+        //m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
+        //m_mods.emplace_back(std::make_unique<InstantDoppel>());
+        //m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
+        //m_mods.emplace_back(std::make_unique<BossTrickUp>());
+        //m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>());
+        //m_mods.emplace_back(std::make_unique<DoppelNoComeBack>());
+        //m_mods.emplace_back(std::make_unique<BossVergilMoves>());
+        ////m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>());
+        //m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
+        //m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
 
 		for (const auto& mod : m_mods) {
 			m_name_to_mod_map.insert({ std::string(mod->get_name()), mod.get() });
