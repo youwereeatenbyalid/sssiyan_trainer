@@ -400,6 +400,7 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
 {
     cfg.set<bool>("HotkeyNotifications", m_is_notif_enabled);
     cfg.set<bool>("SaveAfterEachUIClose", m_save_after_close_ui);
+    cfg.set<bool>("OpenOnStartup", m_open_on_startup);
     cfg.set<bool>("LoadOnStartup", m_load_on_startup);
 }
 
@@ -409,6 +410,10 @@ void ModFramework::load_trainer_settings(utility::Config& cfg)
     if (m_load_on_startup) {
         m_is_notif_enabled = cfg.get<bool>("HotkeyNotifications").value_or(false);
         m_save_after_close_ui = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
+        m_open_on_startup = cfg.get<bool>("OpenOnStartup").value_or(true);
+    }
+    if (m_open_on_startup) {
+        m_draw_ui = true;
     }
 }
 
@@ -1694,6 +1699,7 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Hotkey Toggle Notifications", &m_is_notif_enabled);
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
+        ImGui::Checkbox("Open Trainer Window Automatically When The Game Launches", &m_open_on_startup);
         //ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilver\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
          //   "all this delays with turbo mod speed when it enabled.");
 

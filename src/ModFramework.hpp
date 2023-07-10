@@ -103,7 +103,7 @@ private:
     enum PanelID_ : uint8_t;
     enum OptionID_ : uint8_t;
 
-    static constexpr char TRAINER_VERSION_STR[7] = "v1.24c";
+    static constexpr char TRAINER_VERSION_STR[7] = "v1.24d";
 
     void draw_ui();
     void draw_panels() const;
@@ -195,6 +195,7 @@ private:
     bool m_is_notif_enabled{ false };
     bool m_save_after_close_ui{ false };
     bool m_load_on_startup{ true };
+    bool m_open_on_startup{ true };
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
