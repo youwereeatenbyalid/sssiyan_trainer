@@ -716,40 +716,42 @@ end
 --This function should take padinput as a parameter and return a slot number if a breaker request occured. Isolate the breakaway stuff in a separate function.
 local function GetRequestedGauntletSwitch(storage)
 	--if there is anything in the final frame, check input type.
-	if storage[buffer_size].up or storage[buffer_size].down or storage[buffer_size].left or storage[buffer_size].right then
-		--get the composite + reset buffer. 
-		local composite_pad = evaluate_storage(storage)
-		
-		if composite_pad.up and composite_pad.left then
-			return 5
-		end
-		
-		if composite_pad.up and composite_pad.right then
-			return 6
-		end
-		
-		if composite_pad.down and composite_pad.left then
-			return 7
-		end
-		
-		if composite_pad.down and composite_pad.right then
-			return 8
-		end
-		
-		if composite_pad.up then
-			return 1
-		end
-		
-		if composite_pad.down then
-			return 2
-		end
-		
-		if composite_pad.left then
-			return 3
-		end
-		
-		if composite_pad.right then
-			return 4
+	if sdk.get_managed_singleton("app.HIDManager"):get_inputMode() == 0 then 
+		if storage[buffer_size].up or storage[buffer_size].down or storage[buffer_size].left or storage[buffer_size].right then
+			--get the composite + reset buffer. 
+			local composite_pad = evaluate_storage(storage)
+			
+			if composite_pad.up and composite_pad.left then
+				return 5
+			end
+			
+			if composite_pad.up and composite_pad.right then
+				return 6
+			end
+			
+			if composite_pad.down and composite_pad.left then
+				return 7
+			end
+			
+			if composite_pad.down and composite_pad.right then
+				return 8
+			end
+			
+			if composite_pad.up then
+				return 1
+			end
+			
+			if composite_pad.down then
+				return 2
+			end
+			
+			if composite_pad.left then
+				return 3
+			end
+			
+			if composite_pad.right then
+				return 4
+			end
 		end
 	else
 		--keyboard checks
