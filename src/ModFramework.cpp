@@ -50,12 +50,13 @@ static void hook_init_end_callback(HANDLE hooking_thread)
 {
     --g_currently_hooking;
 }
+
 ModFramework::ModFramework()
     : m_game_module{ GetModuleHandle(nullptr) }
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	using std::filesystem::path;
 
-    using std::filesystem::path;
+	initialize_game_specifics();
 
     FunctionHook::get_hook_begin_callback() = &hook_init_begin_callback;
     FunctionHook::get_hook_end_callback() = &hook_init_end_callback;
@@ -90,10 +91,8 @@ ModFramework::ModFramework()
     spdlog::set_level(spdlog::level::debug);
 #endif
 
-	if (!hook_d3d12()) {
-		spdlog::error("Failed to hook D3D12 for initial test.");
-		return;
-	}
+    // Start the hooker thread :)
+    begin_hooking();
 
     // Setting up the maps for panel ID
     m_mods_panels_map["Gameplay"] = PanelID_Gameplay;
@@ -1134,11 +1133,26 @@ void ModFramework::reset_window_transforms(const std::string_view& window_name)
     window->SetWindowSizeAllowFlags |= ImGuiCond_Once;
 }
 
+void ModFramework::begin_hooking()
+{
+    std::thread hooker([this]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+		if (!hook_d3d12()) {
+			spdlog::error("Failed to hook D3D12 for initial test.");
+			return;
+		}
+    });
+
+    hooker.detach();
+}
+
 void ModFramework::initialize_game_specifics()
 {
 	// Game specific initialization stuff
-	std::thread init_thread([this]() {
-		spdlog::info("Loading REFramework SDK");
+    std::thread init_thread([this]() {
+        Sleep(500);
+    spdlog::info("Loading REFramework SDK");
 	reframework::initialize_sdk();
 
 	m_mods = std::make_unique<Mods>();

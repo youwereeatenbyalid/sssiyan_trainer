@@ -105,6 +105,8 @@ private:
 
     static constexpr char TRAINER_VERSION_STR[7] = "v1.24d";
 
+    void initialize_game_specifics();
+
     void draw_ui();
     void draw_panels() const;
     void draw_options() const;
@@ -114,6 +116,7 @@ private:
     bool is_window_focused(const std::string_view& window_name);
     void reset_window_transforms(const std::string_view& window_name);
 
+    void begin_hooking();
     bool hook_d3d11();
     bool hook_d3d12();
     
@@ -200,7 +203,7 @@ private:
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
 
-    inline static std::recursive_mutex s_hook_monitor_mutex{};
+    std::recursive_mutex s_hook_monitor_mutex{};
 
 private: // D3D11 Init
 	bool create_render_target_d3d11();

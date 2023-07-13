@@ -36,13 +36,14 @@ static naked void detour2() {
         setturbospeed:
         push rbx
         mov ebx, [DeepTurbo::turbospeed]
-        deepturbo:
+
+    deepturbo:
         mov [rax+00000388h], ebx
         movss xmm0, [rax+00000388h]
         pop rbx
         jmp qword ptr [DeepTurbo::jmp_ret2]
 
-        menucheck:
+    menucheck:
         cmp byte ptr [GameplayStateTracker::isCutscene], 1
         je code
         cmp dword ptr [GameplayStateTracker::gameMode], 1 //secretMission
@@ -52,7 +53,7 @@ static naked void detour2() {
         cmp byte ptr [GameplayStateTracker::isExecutePause], 1
         jne setturbospeed
 
-        menuturbo:
+    menuturbo:
         push rbx
         mov ebx, [DeepTurbo::menuSpeed]
         jmp deepturbo
