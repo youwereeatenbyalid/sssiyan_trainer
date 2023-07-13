@@ -96,7 +96,7 @@ public:
     void on_lua_state_destroyed(lua_State* l);
 
     auto& get_hook_monitor_mutex() {
-        return m_hook_monitor_mutex;
+        return s_hook_monitor_mutex;
     }
     
 private:
@@ -184,10 +184,10 @@ private:
     uint32_t m_last_controller_state{ 0 };
     std::unique_ptr<D3D11Hook> m_d3d11_hook{};
     std::unique_ptr<D3D12Hook> m_d3d12_hook{};
-    std::unique_ptr<WindowsMessageHook> m_windows_message_hook;
-    std::unique_ptr<DInputHook> m_dinput_hook;
-    std::unique_ptr<ControllerHook> m_controller_hook;
-    std::shared_ptr<spdlog::logger> m_logger;
+    std::unique_ptr<WindowsMessageHook> m_windows_message_hook{};
+    std::unique_ptr<DInputHook> m_dinput_hook{};
+    std::unique_ptr<ControllerHook> m_controller_hook{};
+    std::shared_ptr<spdlog::logger> m_logger{};
     
     std::string m_error{ "" };
 
@@ -200,7 +200,7 @@ private:
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;
 
-	std::recursive_mutex m_hook_monitor_mutex{};
+    inline static std::recursive_mutex s_hook_monitor_mutex{};
 
 private: // D3D11 Init
 	bool create_render_target_d3d11();

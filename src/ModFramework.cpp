@@ -53,6 +53,8 @@ static void hook_init_end_callback(HANDLE hooking_thread)
 ModFramework::ModFramework()
     : m_game_module{ GetModuleHandle(nullptr) }
 {
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
     using std::filesystem::path;
 
     FunctionHook::get_hook_begin_callback() = &hook_init_begin_callback;
@@ -88,10 +90,10 @@ ModFramework::ModFramework()
     spdlog::set_level(spdlog::level::debug);
 #endif
 
-    if (!hook_d3d12()) {
-        spdlog::error("Failed to hook D3D12 for initial test.");
-        return;
-    }
+	if (!hook_d3d12()) {
+		spdlog::error("Failed to hook D3D12 for initial test.");
+		return;
+	}
 
     // Setting up the maps for panel ID
     m_mods_panels_map["Gameplay"] = PanelID_Gameplay;
@@ -1043,31 +1045,6 @@ bool ModFramework::initialize() {
 
         KeyBinder::LoadBind("Menu Key");
         KeyBinder::LoadBind("Close Menu Key");
-
-        // Game specific initialization stuff
-        std::thread init_thread([this]() {
-			spdlog::info("Loading REFramework SDK");
-            reframework::initialize_sdk();
-
-            m_mods = std::make_unique<Mods>();
-
-            auto e = m_mods->on_initialize(m_load_on_startup);
-
-            if (e) {
-                if (e->empty()) {
-                    m_error = "An unknown error has occurred.";
-                }
-                else {
-                    m_error = *e;
-                }
-            }
-
-            KeyBinder::LoadAllBinds(true);
-
-			m_game_data_initialized = true;
-            });
-
-		init_thread.detach();
     }
 
     return true;
@@ -1155,6 +1132,34 @@ void ModFramework::reset_window_transforms(const std::string_view& window_name)
 
     window->SetWindowPosAllowFlags |= ImGuiCond_Once;
     window->SetWindowSizeAllowFlags |= ImGuiCond_Once;
+}
+
+void ModFramework::initialize_game_specifics()
+{
+	// Game specific initialization stuff
+	std::thread init_thread([this]() {
+		spdlog::info("Loading REFramework SDK");
+	reframework::initialize_sdk();
+
+	m_mods = std::make_unique<Mods>();
+
+	auto e = m_mods->on_initialize(m_load_on_startup);
+
+	if (e) {
+		if (e->empty()) {
+			m_error = "An unknown error has occurred.";
+		}
+		else {
+			m_error = *e;
+		}
+	}
+
+	KeyBinder::LoadAllBinds(true);
+
+	m_game_data_initialized = true;
+		});
+
+	init_thread.detach();
 }
 
 void ModFramework::draw_ui() {
@@ -1315,7 +1320,18 @@ void ModFramework::draw_ui() {
     }
 
     ImGui::SameLine();
-    ImGui::SetCursorPosX(trainer_width - tr_version_size.x);
+    
+    char* d3dver = nullptr;
+    if (m_is_d3d11) {
+        d3dver = "DX11";
+    }
+    else {
+        d3dver = "DX12";
+    }
+
+    ImGui::SetCursorPosX(trainer_width - ImGui::CalcTextSize(d3dver).x - 3.0f - tr_version_size.x);
+    ImGui::TextWrapped(d3dver);
+    ImGui::SameLine();
     ImGui::TextWrapped(TRAINER_VERSION_STR);
 
     ImGui::PopStyleColor(4);
