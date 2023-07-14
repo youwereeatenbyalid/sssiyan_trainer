@@ -3,6 +3,7 @@
 #include <mutex>
 #include <windows.h>
 #include <cstdint>
+#include <functional>
 
 #include <utility/Address.hpp>
 
@@ -16,8 +17,6 @@ public:
 	* Returns the address of where the detour should be placed
 	*/
 	const auto& get_original() const { return m_original; }
-
-
 
 	/*
 	* Returns the address of the code the detour wouldl jump to
@@ -99,9 +98,36 @@ public:
 	*/
 	bool toggle(bool state);
 
+	/*
+	* Set a callback that will be called before the detour is placed
+	* The argument of the callback is the current Detour_t object pointer
+	*/
+	void set_pre_hook_enable_callback(std::function<void(Detour_t*)> cb) { m_pre_hook_enable_callback = cb; }
+
+	/*
+	* Set a callback that will be called after the detour is placed
+	* The argument of the callback is the current Detour_t object pointer
+	*/
+	void set_post_hook_enable_callback(std::function<void(Detour_t*)> cb) { m_post_hook_enable_callback = cb; }
+
+	/*
+	* Set a callback that will be called before the detour is removed
+	* The argument of the callback is the current Detour_t object pointer
+	*/
+	void set_pre_hook_disable_callback(std::function<void(Detour_t*)> cb) { m_pre_hook_disable_callback = cb; }
+
+	/*
+	* Set a callback that will be called after the detour is removed
+	* The argument of the callback is the current Detour_t object pointer
+	*/
+	void set_post_hook_disable_callback(std::function<void(Detour_t*)> cb) { m_post_hook_disable_callback = cb;  }
+
 private:
 	std::recursive_mutex m_hook_mutex{};
 	bool m_is_enabled{ false };
+
+	std::function<void(Detour_t*)> m_pre_hook_enable_callback{}, m_post_hook_enable_callback{},
+		m_pre_hook_disable_callback{}, m_post_hook_disable_callback{};
 
 	int64_t m_return_offset = 0;
 	Address m_original{ nullptr };

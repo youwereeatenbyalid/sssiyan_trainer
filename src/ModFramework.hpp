@@ -33,6 +33,8 @@ public:
 
     bool is_dx12() const { return m_is_d3d12; }
 
+    void begin_initializing();
+
     const auto& get_mods() const { return m_mods; }
 
     const auto& get_keyboard_state() const { return m_last_keys; }

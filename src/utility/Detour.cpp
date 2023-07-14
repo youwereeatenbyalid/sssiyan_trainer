@@ -29,6 +29,9 @@ Detour_t::~Detour_t()
 
 bool Detour_t::enable()
 {
+	if (m_pre_hook_enable_callback)
+		m_pre_hook_enable_callback(this);
+
 	if (auto status = MH_EnableHook(m_original.as<LPVOID>()); status != MH_OK) {
 
 		spdlog::error("Failed to place the detour {:x}: {}", m_original.ptr(), MH_StatusToString(status));
@@ -37,6 +40,10 @@ bool Detour_t::enable()
 	}
 
 	m_is_enabled = true;
+	
+	if (m_post_hook_enable_callback)
+		m_post_hook_enable_callback(this);
+	
 	return true;
 }
 
@@ -57,12 +64,20 @@ bool Detour_t::create()
 }
 
 bool Detour_t::disable() {
+
+	if (m_pre_hook_disable_callback)
+		m_pre_hook_disable_callback(this);
+
 	if (auto status = MH_DisableHook(m_original.as<LPVOID>()); status != MH_OK) {
 		spdlog::error("Failed to remove the detour {:x}: {}", m_original.ptr(), MH_StatusToString(status));
 		return false;
 	}
 
 	m_is_enabled = false;
+	
+	if (m_post_hook_disable_callback)
+		m_post_hook_disable_callback(this);
+	
 	return true;
 }
 

@@ -56,8 +56,6 @@ ModFramework::ModFramework()
 {
 	using std::filesystem::path;
 
-	initialize_game_specifics();
-
     FunctionHook::get_hook_begin_callback() = &hook_init_begin_callback;
     FunctionHook::get_hook_end_callback() = &hook_init_end_callback;
 
@@ -91,9 +89,6 @@ ModFramework::ModFramework()
     spdlog::set_level(spdlog::level::debug);
 #endif
 
-    // Start the hooker thread :)
-    begin_hooking();
-
     // Setting up the maps for panel ID
     m_mods_panels_map["Gameplay"] = PanelID_Gameplay;
     m_mods_panels_map["Scenario"] = PanelID_Scenario;
@@ -122,6 +117,14 @@ ModFramework::~ModFramework() {
     }
 
     KeyBinder::ResetInstance();
+}
+
+void ModFramework::begin_initializing()
+{
+	initialize_game_specifics();
+
+	// Start the hooker thread :)
+	begin_hooking();
 }
 
 bool ModFramework::hook_d3d11()
@@ -1151,7 +1154,6 @@ void ModFramework::initialize_game_specifics()
 {
 	// Game specific initialization stuff
     std::thread init_thread([this]() {
-        Sleep(500);
     spdlog::info("Loading REFramework SDK");
 	reframework::initialize_sdk();
 

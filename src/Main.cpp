@@ -100,6 +100,9 @@ void startup_thread() {
 
     if (load_dinput8()) {
 		g_framework = std::make_unique<ModFramework>();
+        
+        // After the the main framework is instantiated we initialize
+        g_framework->begin_initializing();
     }
 }
 
