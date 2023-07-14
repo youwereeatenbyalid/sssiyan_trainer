@@ -223,17 +223,17 @@ void ModFramework::set_style(const float& scale) noexcept {
 
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 0.94f);
+    colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
     colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
     colors[ImGuiCol_Border] = ImVec4(0.50f, 0.93f, 0.93f, 0.80f);
     colors[ImGuiCol_BorderShadow] = ImVec4(0.29f, 0.29f, 0.29f, 0.80f);
-    colors[ImGuiCol_FrameBg] = ImVec4(0.09f, 0.60f, 0.64f, 0.54f);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.09f, 0.60f, 0.64f, 0.54);
     colors[ImGuiCol_FrameBgHovered] = ImVec4(0.50f, 0.93f, 0.93f, 0.50f);
     colors[ImGuiCol_FrameBgActive] = ImVec4(0.50f, 0.93f, 0.93f, 0.83f);
-    colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.15f, 0.15f, 0.94f);
-    colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.15f, 0.15f, 0.94f);
-    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, m_background_transparency);
     colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.95f);
     colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.49f, 0.92f, 0.91f, 1.00f);
@@ -406,6 +406,7 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
     cfg.set<bool>("SaveAfterEachUIClose", m_save_after_close_ui);
     cfg.set<bool>("OpenOnStartup", m_open_on_startup);
     cfg.set<bool>("LoadOnStartup", m_load_on_startup);
+    cfg.set<float>("BackgroundTransparency", m_background_transparency);
 }
 
 void ModFramework::load_trainer_settings(utility::Config& cfg)
@@ -415,6 +416,7 @@ void ModFramework::load_trainer_settings(utility::Config& cfg)
         m_is_notif_enabled = cfg.get<bool>("HotkeyNotifications").value_or(false);
         m_save_after_close_ui = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
         m_open_on_startup = cfg.get<bool>("OpenOnStartup").value_or(true);
+        m_background_transparency = cfg.get<float>("BackgroundTransparency").value_or(1.0f);
     }
     if (m_open_on_startup) {
         m_draw_ui = true;
@@ -1035,18 +1037,10 @@ bool ModFramework::initialize() {
         //std::lock_guard<std::mutex> lck(m_controllerhook_mtx);
         m_dinput_hook = std::make_unique<DInputHook>(m_wnd);
         m_controller_hook = std::make_unique<ControllerHook>();
+        m_first_frame = false; 
     }
     else {
         m_dinput_hook->set_window(m_wnd);
-    }
-
-    if (m_first_frame) {
-        m_first_frame = false;
-
-        spdlog::info("Loading trainer specific settings.");
-
-        KeyBinder::LoadBind("Menu Key");
-        KeyBinder::LoadBind("Close Menu Key");
     }
 
     return true;
@@ -1079,11 +1073,11 @@ void ModFramework::initialize_key_bindings()
         [this]() {
             if (!m_draw_ui && m_close_menu_guard) m_dinput_hook->ignore_input();
         },
-            [this]() {
-            if (!m_draw_ui && m_close_menu_guard) {
-                m_dinput_hook->acknowledge_input();
-                m_close_menu_guard = false;
-            }
+        [this]() {
+        if (!m_draw_ui && m_close_menu_guard) {
+            m_dinput_hook->acknowledge_input();
+            m_close_menu_guard = false;
+        }
         }, m_default_close_menu_key);
 }
 
@@ -1171,6 +1165,11 @@ void ModFramework::initialize_game_specifics()
 		}
 	}
 
+	spdlog::info("Loading key binds.");
+
+	KeyBinder::LoadBind("Menu Key");
+	KeyBinder::LoadBind("Close Menu Key");
+
 	KeyBinder::LoadAllBinds(true);
 
 	m_game_data_initialized = true;
@@ -1212,10 +1211,10 @@ void ModFramework::draw_ui() {
     }
     else {
         if (ImGui::IsWindowHovered(ImGuiFocusedFlags_AnyWindow)) {
-            style.Alpha = 0.7f;
+            style.Alpha = 0.75f;
         }
         else {
-            style.Alpha = 0.4f;
+            style.Alpha = 0.45f;
         }
     }
 
@@ -1733,6 +1732,13 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
         ImGui::Checkbox("Open Trainer Window Automatically When The Game Launches", &m_open_on_startup);
+        if (UI::SliderFloat("Trainer Background Transparency", &m_background_transparency, 0.0f, 1.0f, "%.2f")) {
+            auto& colors = ImGui::GetStyle().Colors;
+            colors[ImGuiCol_WindowBg].w = m_background_transparency;
+            colors[ImGuiCol_TitleBg].w = m_background_transparency;
+            colors[ImGuiCol_TitleBgActive].w = m_background_transparency;
+            colors[ImGuiCol_TitleBgCollapsed].w = m_background_transparency;
+        }
         //ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilver\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
          //   "all this delays with turbo mod speed when it enabled.");
 

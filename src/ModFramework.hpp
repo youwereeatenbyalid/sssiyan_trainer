@@ -201,6 +201,7 @@ private:
     bool m_save_after_close_ui{ false };
     bool m_load_on_startup{ true };
     bool m_open_on_startup{ true };
+    float m_background_transparency{ 1.0f };
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;

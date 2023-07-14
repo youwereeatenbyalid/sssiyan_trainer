@@ -697,8 +697,11 @@ bool UI::SliderFloat(const char* label, float* v, float v_min, float v_max, cons
     ret = UI_SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, format, thickness, 5.0f, flags);
     ImGui::SameLine(); ImGui::SetCursorPosY(defCursorPos.y);
     ImGui::SetNextItemWidth(50.0f);
-    ImGui::Text("Value: %.3f", *v);
-	ImGui::PopStyleVar(2);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+    ImGui::Text("Value: ");
+	ImGui::SameLine();
+	ImGui::Text(format, *v);
+	ImGui::PopStyleVar(3);
 	ImGui::PopStyleColor(5);
     return ret;
 }
