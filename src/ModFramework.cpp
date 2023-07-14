@@ -1154,6 +1154,7 @@ void ModFramework::initialize_game_specifics()
 {
 	// Game specific initialization stuff
     std::thread init_thread([this]() {
+
     spdlog::info("Loading REFramework SDK");
 	reframework::initialize_sdk();
 
