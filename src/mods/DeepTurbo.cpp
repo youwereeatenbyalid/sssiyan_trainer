@@ -1,28 +1,14 @@
 #include "DeepTurbo.hpp"
 
 uintptr_t DeepTurbo::jmp_ret1{NULL};
-uintptr_t DeepTurbo::jmp_ret2{NULL};
 
 float defscale   = 1.0;
-//float menuspeed  = 2.0f;
-int state        = 0;
-//bool shouldMenuSpeedup{NULL};
 bool DeepTurbo::cheaton{NULL};
-bool disableTurbo{NULL};
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
 static naked void detour1() {
-	__asm {
-        mov [rsi+68h], eax
-        mov [state], eax
-        mov [rsi+6Ch], r13d
-		jmp qword ptr [DeepTurbo::jmp_ret1]
-	}
-}
-
-static naked void detour2() {
 	__asm {
 		cmp byte ptr [DeepTurbo::cheaton], 1
         je cheatcode
@@ -31,11 +17,9 @@ static naked void detour2() {
     cheatcode:
         cmp byte ptr [DeepTurbo::isSpeedUpMenu], 1
         je menucheck
-        xor byte ptr [state], 0
-        jnz code
     setturbospeed:
         mulss xmm1, [DeepTurbo::turbospeed]
-        jmp qword ptr [DeepTurbo::jmp_ret2]
+        jmp qword ptr [DeepTurbo::jmp_ret1]
 
     menucheck:
         cmp byte ptr [GameplayStateTracker::isCutscene], 1
@@ -46,14 +30,15 @@ static naked void detour2() {
         jne menuturbo
         cmp byte ptr [GameplayStateTracker::isExecutePause], 1 //Paused
         jne setturbospeed
+        jmp code
 
     menuturbo:
         mulss xmm1, [DeepTurbo::menuSpeed]
-        jmp qword ptr [DeepTurbo::jmp_ret2]
+        jmp qword ptr [DeepTurbo::jmp_ret1]
 
     code:
-        mulss xmm1, [rax+00000388h]
-        jmp qword ptr [DeepTurbo::jmp_ret2]
+        mulss xmm1, [rbx+00000388h]
+        jmp qword ptr [DeepTurbo::jmp_ret1]
 	}
 }
 
@@ -78,26 +63,17 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   set_up_hotkey();
 
   auto base  = g_framework->get_module().as<HMODULE>(); // note HMODULE
-  auto addr1 = m_patterns_cache->find_addr(base, "89 46 68 44 89 6E 6C");
+  auto addr1 = m_patterns_cache->find_addr(base, "F3 0F 59 8B 88 03 00 00");
   if (!addr1) {
     return "Unable to find DeepTurbo1 pattern.";
-  }
-  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 59 8B 88 03 00 00");
-  if (!addr2) {
-    return "Unable to find DeepTurbo2 pattern.";
   }
 
   pauseBase = g_framework->get_module().as<uintptr_t>() + 0x7E55910;
 
-  if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 7)) {
+  if (!install_new_detour(addr1.value(), m_detour1, &detour1, &jmp_ret1, 8)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DeepTurbo1";
-  }
-  if (!install_new_detour(addr2.value(), m_detour2, &detour2, &jmp_ret2, 8)) {
-    //  return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize DeepTurbo2";
   }
 
   return Mod::on_initialize();
@@ -105,13 +81,11 @@ std::optional<std::string> DeepTurbo::on_initialize() {
 void DeepTurbo::on_config_load(const utility::Config& cfg) {
   turbospeed = cfg.get<float>("deep_turbo_value").value_or(1.2f);
   menuSpeed = cfg.get<float>("DeepTurbo.menuSpeed").value_or(1.6f);
-  disableTurbo      = cfg.get<bool>("disable_turbo").value_or(false);
   isSpeedUpMenu = cfg.get<bool>("DeepTurbo.isSpeedUpMenu").value_or(false);
 
 }
 void DeepTurbo::on_config_save(utility::Config& cfg) {
   cfg.set<float>("deep_turbo_value", turbospeed);
-  cfg.set<bool>("disable_turbo", disableTurbo);
   cfg.set<bool>("DeepTurbo.isSpeedUpMenu", isSpeedUpMenu);
   cfg.set<float>("DeepTurbo.menuSpeed", menuSpeed);
 }
