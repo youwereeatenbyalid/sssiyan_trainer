@@ -33,14 +33,8 @@ static naked void detour2() {
         je menucheck
         xor byte ptr [state], 0
         jnz code
-        setturbospeed:
-        push rbx
-        mov ebx, [DeepTurbo::turbospeed]
-
-    deepturbo:
-        mov [rax+00000388h], ebx
-        movss xmm0, [rax+00000388h]
-        pop rbx
+    setturbospeed:
+        mulss xmm1, [DeepTurbo::turbospeed]
         jmp qword ptr [DeepTurbo::jmp_ret2]
 
     menucheck:
@@ -48,22 +42,17 @@ static naked void detour2() {
         je code
         cmp dword ptr [GameplayStateTracker::gameMode], 1 //secretMission
         je setturbospeed
-        cmp dword ptr [GameplayStateTracker::nowFlow], 0x16//Gameplay
+        cmp dword ptr [GameplayStateTracker::nowFlow], 0x16 //Gameplay
         jne menuturbo
-        cmp byte ptr [GameplayStateTracker::isExecutePause], 1
+        cmp byte ptr [GameplayStateTracker::isExecutePause], 1 //Paused
         jne setturbospeed
 
     menuturbo:
-        push rbx
-        mov ebx, [DeepTurbo::menuSpeed]
-        jmp deepturbo
+        mulss xmm1, [DeepTurbo::menuSpeed]
+        jmp qword ptr [DeepTurbo::jmp_ret2]
 
     code:
-        push rbx
-        mov ebx, [defscale]
-        mov [rax+00000388h], ebx
-        movss xmm0, [rax+00000388h]
-        pop rbx
+        mulss xmm1, [rax+00000388h]
         jmp qword ptr [DeepTurbo::jmp_ret2]
 	}
 }
@@ -93,7 +82,7 @@ std::optional<std::string> DeepTurbo::on_initialize() {
   if (!addr1) {
     return "Unable to find DeepTurbo1 pattern.";
   }
-  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 10 80 88 03 00 00 48");
+  auto addr2 = m_patterns_cache->find_addr(base, "F3 0F 59 8B 88 03 00 00");
   if (!addr2) {
     return "Unable to find DeepTurbo2 pattern.";
   }
@@ -111,27 +100,18 @@ std::optional<std::string> DeepTurbo::on_initialize() {
     return "Failed to initialize DeepTurbo2";
   }
 
-  // save bytes, remember false = detour enabled
-  m_patch01 = Patch::create(addr2.value(), {0xF3, 0x0F, 0x10, 0x80, 0x88, 0x03, 0x00, 0x00}, false);
-
   return Mod::on_initialize();
 }
 void DeepTurbo::on_config_load(const utility::Config& cfg) {
-  //ischecked = cfg.get<bool>("deep_turbo_custom").value_or(false);
   turbospeed = cfg.get<float>("deep_turbo_value").value_or(1.2f);
   menuSpeed = cfg.get<float>("DeepTurbo.menuSpeed").value_or(1.6f);
-  //shouldMenuSpeedup = cfg.get<bool>("menu_speed_enable").value_or(false);
-  //menuspeed         = cfg.get<float>("menu_speed_value").value_or(1.0f);
   disableTurbo      = cfg.get<bool>("disable_turbo").value_or(false);
   isSpeedUpMenu = cfg.get<bool>("DeepTurbo.isSpeedUpMenu").value_or(false);
   m_patch01->toggle(disableTurbo);
 
 }
 void DeepTurbo::on_config_save(utility::Config& cfg) {
-  //cfg.set<bool>("deep_turbo_custom", ischecked);
   cfg.set<float>("deep_turbo_value", turbospeed);
-  //(*cfg.set<bool>("menu_speed_enable", shouldMenuSpeedup);
-  //cfg.set<float>("menu_speed_value", menuspeed);
   cfg.set<bool>("disable_turbo", disableTurbo);
   cfg.set<bool>("DeepTurbo.isSpeedUpMenu", isSpeedUpMenu);
   cfg.set<float>("DeepTurbo.menuSpeed", menuSpeed);
@@ -141,12 +121,6 @@ void DeepTurbo::on_draw_ui() {
   ImGui::Text("Game Speed");
   UI::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
   ImGui::Spacing();
-  /*ImGui::Text("Menu And Cutscene Speed"); // this works but only actually sped up pause screen, cutscenes and load screens
-  ImGui::Checkbox("Variable menu/cutscene speed", &shouldMenuSpeedup);
-  UI::SliderFloat("##Menu Speed slider", &menuspeed, 0.0f, 2.5f, "%.1f");*/
-  if (ImGui::Checkbox("Disable turbo writing to allow camera tool to freeze the game", &disableTurbo)) {
-    m_patch01->toggle(disableTurbo);
-  }
   ImGui::ShowHelpMarker("Enable this before using the camera tool if you want to use its built in freeze function.", 450.0f);
   ImGui::Spacing();
   ImGui::Checkbox("Separate speed for menus", &isSpeedUpMenu);
