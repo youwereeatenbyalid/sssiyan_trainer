@@ -107,7 +107,6 @@ void DeepTurbo::on_config_load(const utility::Config& cfg) {
   menuSpeed = cfg.get<float>("DeepTurbo.menuSpeed").value_or(1.6f);
   disableTurbo      = cfg.get<bool>("disable_turbo").value_or(false);
   isSpeedUpMenu = cfg.get<bool>("DeepTurbo.isSpeedUpMenu").value_or(false);
-  m_patch01->toggle(disableTurbo);
 
 }
 void DeepTurbo::on_config_save(utility::Config& cfg) {
@@ -120,8 +119,6 @@ void DeepTurbo::on_config_save(utility::Config& cfg) {
 void DeepTurbo::on_draw_ui() {
   ImGui::Text("Game Speed");
   UI::SliderFloat("##Speed slider", &turbospeed, 0.0f, 2.5f, "%.1f");
-  ImGui::Spacing();
-  ImGui::ShowHelpMarker("Enable this before using the camera tool if you want to use its built in freeze function.", 450.0f);
   ImGui::Spacing();
   ImGui::Checkbox("Separate speed for menus", &isSpeedUpMenu);
   if (isSpeedUpMenu)
