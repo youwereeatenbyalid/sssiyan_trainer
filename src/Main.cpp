@@ -14,7 +14,7 @@ extern lua_State* g_lua{nullptr};
 bool ModFramework::m_ref_lua_enabled{ false };
 
 void failed() {
-    MessageBox(0, "ModFramework: Unable to load the original dinput8.dll. Please report this to the developer.", "ModFramework", 0);
+    MessageBox(0, "Collab Trainer: Unable to load the original dinput8.dll. Please report this to the developer.", "Collab Trainer", 0);
     ExitProcess(0);
 }
 
