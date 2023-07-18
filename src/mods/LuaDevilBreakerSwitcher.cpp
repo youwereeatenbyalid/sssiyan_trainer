@@ -187,8 +187,9 @@ void LuaDevilBreakerSwitcher::on_draw_ui()
     //ImGui::ShowHelpMarker("If Nero's magazine has at least two breakers, the second breaker will be used in place of the devil bringer.");
     ImGui::Checkbox("Infinite Breakers##What Even", (bool*)&infinite_breakers);
     ImGui::Checkbox("Faster Breakers", (bool*)&breaker_to_breaker_cancel);
-    ImGui::Checkbox("Disable diagonal slots", (bool*)&disable_diagonal);
     ImGui::ShowHelpMarker("Removes Recovery on the breaker, allowing it to cancel into itself.");
+    ImGui::Checkbox("Disable diagonal slots", (bool*)&disable_diagonal);
+    
 
     //ImGui::Checkbox("Instant Keyboard Breakers", (bool*)&BreakerSwitcher::instantkeyboardbreakers);
     //ImGui::ShowHelpMarker("Activating the breaker swap hotkeys will also perform the breaker move.");
