@@ -52,7 +52,7 @@ dotomboypop = false
 
 autotomboypop = false
 
-
+disable_diagonal = false
 
 doaddb = false
 
@@ -720,21 +720,22 @@ local function GetRequestedGauntletSwitch(storage)
 		if storage[buffer_size].up or storage[buffer_size].down or storage[buffer_size].left or storage[buffer_size].right then
 			--get the composite + reset buffer. 
 			local composite_pad = evaluate_storage(storage)
-			
-			if composite_pad.up and composite_pad.left then
-				return 5
-			end
-			
-			if composite_pad.up and composite_pad.right then
-				return 6
-			end
-			
-			if composite_pad.down and composite_pad.left then
-				return 7
-			end
-			
-			if composite_pad.down and composite_pad.right then
-				return 8
+			if not disable_diagonal then
+				if composite_pad.up and composite_pad.left then
+					return 5
+				end
+				
+				if composite_pad.up and composite_pad.right then
+					return 6
+				end
+				
+				if composite_pad.down and composite_pad.left then
+					return 7
+				end
+				
+				if composite_pad.down and composite_pad.right then
+					return 8
+				end
 			end
 			
 			if composite_pad.up then
@@ -994,7 +995,10 @@ function ui_function()
 	if draw_comp.right then
 		--imgui.text("Right")	
 	end
-	
+	local diagonal_change,diagonal_value =  imgui.checkbox("Disable diagonals",disable_diagonal)
+	if diagonal_change then
+		disable_diagonal = diagonal_value
+	end
 	window_changed,window_value = imgui.drag_int("Buffer window",buffer_size,1,2,12)
 	
 	changed,value=  imgui.drag_int("Debug Breaker", custombreaker, 1, 0, 10)

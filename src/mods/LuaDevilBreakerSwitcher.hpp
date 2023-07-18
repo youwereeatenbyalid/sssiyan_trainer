@@ -17,6 +17,7 @@ public:
 	int keyboard_breaker = -1;
 	bool infinite_breakers = false;
 	bool breaker_to_breaker_cancel = false;
+	bool disable_diagonal = false;
 	//int breakaway_index;
 	void on_load_lua_mod() override;
 	void on_unload_lua_mod() override;

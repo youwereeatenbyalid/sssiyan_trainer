@@ -108,6 +108,7 @@ void LuaDevilBreakerSwitcher::on_config_load(const utility::Config& cfg) {
     breaker_to_breaker_cancel = cfg.get<bool>("faster_breaker").value_or(false);
     //BreakerSwitcher::instantkeyboardbreakers = cfg.get<bool>("instant_keyboard_breakers").value_or(false);
     //BreakerSwitcher::breakaway_button = bsinputs[breakaway_index];
+    disable_diagonal = cfg.get<bool>("disable_diagonal").value_or(false);
 }
 
 // during load
@@ -123,6 +124,7 @@ void LuaDevilBreakerSwitcher::on_config_save(utility::Config& cfg) {
     cfg.set<bool>("infinite_breakers", infinite_breakers);
     //cfg.set<bool>("use_secondary", BreakerSwitcher::use_secondary);
     cfg.set<bool>("faster_breaker", breaker_to_breaker_cancel);
+    cfg.set<bool>("disable_diagonal", disable_diagonal);
     //cfg.set<bool>("instant_keyboard_breakers", BreakerSwitcher::instantkeyboardbreakers);
 }
 
@@ -149,7 +151,7 @@ void LuaDevilBreakerSwitcher::on_lua_mod_update()
     keyboard_breaker = -1;
     //check if infinite breakers
     mod_state_view["nero_removeGauntlet"]["noConsumption"] = infinite_breakers;
-
+    mod_state_view["disable_diagonal"] = disable_diagonal;
     if (breakaway_type == 1) {
         mod_state_view["alwaysbreakaway"] = true;
     }
@@ -185,6 +187,7 @@ void LuaDevilBreakerSwitcher::on_draw_ui()
     //ImGui::ShowHelpMarker("If Nero's magazine has at least two breakers, the second breaker will be used in place of the devil bringer.");
     ImGui::Checkbox("Infinite Breakers##What Even", (bool*)&infinite_breakers);
     ImGui::Checkbox("Faster Breakers", (bool*)&breaker_to_breaker_cancel);
+    ImGui::Checkbox("Disable diagonal slots", (bool*)&disable_diagonal);
     ImGui::ShowHelpMarker("Removes Recovery on the breaker, allowing it to cancel into itself.");
 
     //ImGui::Checkbox("Instant Keyboard Breakers", (bool*)&BreakerSwitcher::instantkeyboardbreakers);
