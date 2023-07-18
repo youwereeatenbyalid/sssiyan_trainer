@@ -7,6 +7,12 @@ bool HoldToMash::cheaton{NULL};
 // clang-format off
 // only in clang/icl mode on x64, sorry
 
+
+//Issue with this right now is the renda check on the rising dragon is a single button, making it way too easy to get dragon punch.
+//actual field is app.RendaChecker.<count>k__BackingField at 0x14, set to 0.
+//Easiest solution is just requiring the hold button be held a few extra frames before copying to press and starting the recka,
+//but that might mess with other stuff. 
+//Also, I want to redo the mash stuff for ebony and ivory, so it might be worth redoing this as lua or with SDK.
   static naked void newmem_detour() {
 __asm {
   validation:
