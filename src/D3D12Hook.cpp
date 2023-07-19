@@ -195,11 +195,30 @@ bool D3D12Hook::hook() {
 }
 
 bool D3D12Hook::unhook() {
-    if (m_present_hook->remove() && m_resize_buffers_hook->remove() && m_resize_target_hook->remove() /*&& m_create_swap_chain_hook->remove()*/) {
-        m_hooked = false;
-        return true;
+    if (m_present_hook == nullptr) {
+        spdlog::error("m_present_hook is null");
+        return false;
     }
-
+        
+    if (m_resize_buffers_hook == nullptr){
+        spdlog::error("m_resize_buffers_hook is null");
+        return false;
+    }
+        
+    if (m_resize_target_hook == nullptr){
+        spdlog::error("m_resize_target_hook is null");
+        return false;
+    }
+        
+    try{
+        if (m_present_hook->remove() && m_resize_buffers_hook->remove() && m_resize_target_hook->remove() /*&& m_create_swap_chain_hook->remove()*/) {
+            m_hooked = false;
+            return true;
+        }
+    }
+    catch(...) {
+        spdlog::error("Something went horribly wrong unhooking D3D12");
+    };
     return false;
 }
 

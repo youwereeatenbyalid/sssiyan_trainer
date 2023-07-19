@@ -186,7 +186,9 @@ bool ModFramework::hook_d3d12()
             m_is_d3d12 = true;
             return true;
         }
-
+        spdlog::info("attempting to unhook DXD12");
+        if (m_d3d12_hook == nullptr)
+            spdlog::error("m_d3d12_hook is already null before unhook called");
         // We make sure to unhook any unwanted hooks if D3D12 didn't get hooked properly
         if (m_d3d12_hook->unhook())
             spdlog::info("D3D12 Unhooked!");
