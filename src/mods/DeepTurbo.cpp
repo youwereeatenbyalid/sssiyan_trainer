@@ -15,6 +15,8 @@ static naked void detour1() {
         jmp code
 
     cheatcode:
+        cmp byte ptr [GameplayStateTracker::isCutscene], 1
+        je code
         cmp byte ptr [DeepTurbo::isSpeedUpMenu], 1
         je menucheck
     setturbospeed:
@@ -22,8 +24,6 @@ static naked void detour1() {
         jmp qword ptr [DeepTurbo::jmp_ret1]
 
     menucheck:
-        cmp byte ptr [GameplayStateTracker::isCutscene], 1
-        je code
         cmp dword ptr [GameplayStateTracker::gameMode], 1 //secretMission
         je setturbospeed
         cmp dword ptr [GameplayStateTracker::nowFlow], 0x16 //Gameplay
