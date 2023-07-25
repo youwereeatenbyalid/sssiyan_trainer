@@ -121,14 +121,19 @@ local doppelganger = nil
 local store_weapon_data = nil
 local is_jc_interrupt = false
 
+local beowulf_exception = false
+
 local function pre_judgementCutCancel(args)
 	doppelganger = sdk.to_managed_object(args[2])
 	log.info("got doppel")
 	local vergil = doppelganger:call("get_cachedDoppelOwner")
 	log.info("got vergil")
-	
+	--if true then return sdk.PreHookResult.SKIP_ORIGINAL end
 	--doppelganger:set_field("<RoundTripCharge>k__BackingField",vergil:call("get_DoppelJudgeMentCutCharge"))
-	
+	--skips if both vergil and doppel have beowulf equipped and doing just combos.
+	if vergil:call("get_BeowulfCharge"):call("isJust") == true and vergil:call("get_cachedDoppel"):call("get_currentWeaponS") == 2 then
+		return sdk.PreHookResult.SKIP_ORIGINAL
+	end
 	if vergil:call("get_vergilTrack"):get_field("DoppelJudgeMentCutJR") == true or vergil:call("get_BeowulfCharge"):call("isJust") == true then return
 	else
 		if doppelganger:call("get_currentWeaponS") == 0 then return end
@@ -194,7 +199,10 @@ end
 
 local function pre_vergil_comeBackDoppelGanger(args)
 	local vergil = sdk.to_managed_object(args[2])
-	updateDoppelWeapon(vergil)
+
+	if vergil:call("get_BeowulfCharge"):call("isJust") == true and vergil:call("get_cachedDoppel"):call("get_currentWeaponS") == 2 then
+		return sdk.PreHookResult.SKIP_ORIGINAL
+	end
 end
 
 local function post_vergil_comeBackDoppelGanger(retval)
@@ -220,10 +228,39 @@ end
 --setupDoppelMode(app.PlayerVergilPL.DelayState) called from Player Vergil When summoning doppelganger
 --comeBackDoppelGanger()
 --changeWeaponS(app.PlayerVergilPL.WeaponS, System.Int32) (hook this to prevent doppelganger from 
+local vergil_updateDoppelDelayChange = {}
+vergil_updateDoppelDelayChange.method = sdk.find_type_definition("app.PlayerVergilPL"):get_method("updateDoppelDelayChange")
+function vergil_updateDoppelDelayChange.pre(args)
+	local vergil = sdk.to_managed_object(args[2])
+	local get_doppel_mode = vergil.IsDoppel
+	--log.debug(tostring(get_doppel_mode))
+	if get_doppel_mode then else
+		local pad_input = vergil:get_padInput()
+		local current_delay_state = vergil:get_CurrentDelayState()
+		if current_delay_state == 1 and pad_input:isButtonTrigger(0x800) then
+			updateDoppelWeapon(vergil)
+		end
+		if current_delay_state == 2 and pad_input:isButtonTrigger(0x100) then
+			updateDoppelWeapon(vergil)
+		end
+
+		if current_delay_state == 3 and pad_input:isButtonTrigger(0x400) then
+			updateDoppelWeapon(vergil)
+		end
+	end
+end
+
+function vergil_updateDoppelDelayChange.post(retval)
+	return retval
+end
+
 
 sdk.hook(vergil_setupDoppelMode_method,pre_vergil_setupDoppelMode,post_vergil_setupDoppelMode)
 sdk.hook(vergil_comeBackDoppelGanger_method,pre_vergil_comeBackDoppelGanger,post_vergil_comeBackDoppelGanger)
 sdk.hook(vergil_updateWeaponChange_method,pre_vergil_updateWeaponChange,post_vergil_updateWeaponChange)
+sdk.hook(vergil_updateDoppelDelayChange.method,vergil_updateDoppelDelayChange.pre,vergil_updateDoppelDelayChange.post)
+
+
 
 
 re.on_draw_ui(function()
