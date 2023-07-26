@@ -232,10 +232,12 @@ local vergil_updateDoppelDelayChange = {}
 vergil_updateDoppelDelayChange.method = sdk.find_type_definition("app.PlayerVergilPL"):get_method("updateDoppelDelayChange")
 function vergil_updateDoppelDelayChange.pre(args)
 	local vergil = sdk.to_managed_object(args[2])
+	if not vergil then return end
 	local get_doppel_mode = vergil.IsDoppel
 	--log.debug(tostring(get_doppel_mode))
 	if get_doppel_mode then else
 		local pad_input = vergil:get_padInput()
+		if not pad_input then return end
 		local current_delay_state = vergil:get_CurrentDelayState()
 		if current_delay_state == 1 and pad_input:isButtonTrigger(0x800) then
 			updateDoppelWeapon(vergil)
@@ -261,13 +263,23 @@ sdk.hook(vergil_updateWeaponChange_method,pre_vergil_updateWeaponChange,post_ver
 sdk.hook(vergil_updateDoppelDelayChange.method,vergil_updateDoppelDelayChange.pre,vergil_updateDoppelDelayChange.post)
 
 
-
+local function create_doppel_resource() 
+	local resource = sdk.create_resource("via.render.MeshMaterialResource", "Character/Weapon/wp03_000/wp03_000_Astral.mdf2"):add_ref()
+	local holder = resource:create_holder("via.render.MeshMaterialResourceHolder"):add_ref()
+	if holder ~= nil then
+		log.debug("successfully created resource")
+		get_currentplayer():call("get_cachedDoppel()"):call("get_weaponS_00"):get_field("Obj"):call("get_cachedMesh()"):call("set_Material(via.render.MeshMaterialResourceHolder)",holder)
+	end
+end
 
 re.on_draw_ui(function()
 	weapchange,weapvalue = imgui.slider_int("Weapon to swap to", weapon_value, 0, 2)
 	if weapchange then
 		weapon_value = weapvalue
 	end
+	--if imgui.button("create resource") then
+	--	create_doppel_resource()
+	--end
 	if imgui.button("Set weapon test") then
 		local vergil = get_currentplayer()
 			vergil:call("setSlotWeaponS(app.PlayerVergilPL.WeaponS, System.Boolean)",weapon_value,false)
