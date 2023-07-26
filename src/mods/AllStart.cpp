@@ -115,10 +115,17 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         je code*/
         push r11
         mov r11, [PlayerTracker::playerentity]
+        test r11,r11
+        je codepops
         add r11, 0x1888
         cmp byte ptr [r11], 3 // royal guard
         jne codepops
-        mov r11, [GameInput::holdframes] // amazing variable name
+
+        mov r11, [PlayerTracker::playerentity]
+        add r11, 0xEF0
+        mov r11, [r11]
+        add r11, 0x48
+        mov r11, [r11]
         shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
         test r11, 0x1
         pop r11
@@ -154,7 +161,7 @@ std::optional<std::string> AllStart::on_initialize() {
 
   m_is_enabled          = &AllStart::cheaton;
   m_on_page             = Page_Animation;
-  m_depends_on         = { "PlayerTracker, GameInput" };
+  m_depends_on         = { "PlayerTracker" };
   m_full_name_string   = "Selective Omnicancels (+)";
   m_author_string      = "SSSiyan, Dr.penguin";
   m_description_string = "Allows you to cancel out of a selection of moves with any action.";
