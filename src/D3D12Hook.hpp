@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <functional>
+#include <utility/PointerHook.hpp>
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi")
@@ -9,7 +10,7 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 
-#include "utility/FunctionHook.hpp"
+#include "utility/Detour.hpp"
 
 #define D3D12HOOK_INTERNAL(X) D3D12Hook::skip_detours([&]() X)
 
@@ -36,17 +37,17 @@ public:
 
 	static void signal_present_detour(const bool& state)
     {
-	    m_execute_present_detour = state;
+	    s_execute_present_detour = state;
     }
 
 	static void signal_resize_buffer_detour(const bool& state)
     {
-	    m_execute_resize_buffer_detour = state;
+	    s_execute_resize_buffer_detour = state;
     }
 
 	static void signal_resize_target_detour(const bool& state)
     {
-	    m_execute_resize_target_detour = state;
+	    s_execute_resize_target_detour = state;
     }
 
 	/*static void signal_create_swap_chain_detour(const bool& state)
@@ -127,11 +128,12 @@ protected:
 
     bool m_is_using_proton_swapchain{ false };
     bool m_hooked{ false };
+    bool m_is_phase_1{ true };
     bool m_inside_present{ false };
 
-    std::unique_ptr<FunctionHook> m_present_hook{};
-    std::unique_ptr<FunctionHook> m_resize_buffers_hook{};
-    std::unique_ptr<FunctionHook> m_resize_target_hook{};
+    std::unique_ptr<PointerHook> m_present_hook{};
+    std::unique_ptr<PointerHook> m_resize_buffers_hook{};
+    std::unique_ptr<PointerHook> m_resize_target_hook{};
     //std::unique_ptr<FunctionHook> m_create_swap_chain_hook{};
 
     OnPresentFn m_on_present{ nullptr };
@@ -139,9 +141,9 @@ protected:
     OnResizeTargetFn m_on_resize_target{ nullptr };
     //OnCreateSwapChainFn m_on_create_swap_chain{ nullptr };
 
-    static bool m_execute_present_detour;
-    static bool m_execute_resize_buffer_detour;
-    static bool m_execute_resize_target_detour;
+    static bool s_execute_present_detour;
+    static bool s_execute_resize_buffer_detour;
+    static bool s_execute_resize_target_detour;
     //static bool m_execute_create_swap_chain_detour;
 
     static HRESULT WINAPI present(IDXGISwapChain3* swap_chain, UINT sync_interval, UINT flags);

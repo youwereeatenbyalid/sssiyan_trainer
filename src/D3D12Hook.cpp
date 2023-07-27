@@ -1,17 +1,20 @@
 #include <spdlog/spdlog.h>
+#include <utility/Module.hpp>
+#include <utility/Thread.hpp>
 
 #include "D3D12Hook.hpp"
 
 #include "ModFramework.hpp"
 
-bool D3D12Hook::m_execute_present_detour{ true };
-bool D3D12Hook::m_execute_resize_buffer_detour{ true };
-bool D3D12Hook::m_execute_resize_target_detour{ true };
+bool D3D12Hook::s_execute_present_detour{ true };
+bool D3D12Hook::s_execute_resize_buffer_detour{ true };
+bool D3D12Hook::s_execute_resize_target_detour{ true };
 //bool D3D12Hook::m_execute_create_swap_chain_detour{ true };
 
 static D3D12Hook* g_d3d12_hook = nullptr;
 
 D3D12Hook::~D3D12Hook() {
+    g_d3d12_hook = nullptr;
     unhook();
 }
 
@@ -53,10 +56,38 @@ bool D3D12Hook::hook() {
 
     spdlog::info("Creating dummy device");
 
-    if (FAILED(d3d12_create_device(nullptr, feature_level, IID_PPV_ARGS(&device)))) {
-        spdlog::error("Failed to create D3D12 Dummy device\n");
-        return false;
-    }
+	// Get the original on-disk bytes of the D3D12CreateDevice export
+	const auto original_bytes = utility::get_original_bytes(d3d12_create_device);
+
+	// Temporarily unhook D3D12CreateDevice
+	// it allows compatibility with ReShade and other overlays that hook it
+	// this is just a dummy device anyways, we don't want the other overlays to be able to use it
+	if (original_bytes) {
+		spdlog::info("[D3D12] D3D12CreateDevice appears to be hooked, temporarily unhooking");
+
+		std::vector<uint8_t> hooked_bytes(original_bytes->size());
+		memcpy(hooked_bytes.data(), d3d12_create_device, original_bytes->size());
+
+		ProtectionOverride protection_override{ d3d12_create_device, original_bytes->size(), PAGE_EXECUTE_READWRITE };
+		memcpy(d3d12_create_device, original_bytes->data(), original_bytes->size());
+
+		if (FAILED(d3d12_create_device(nullptr, feature_level, IID_PPV_ARGS(&device)))) {
+			spdlog::error("[D3D12] Failed to create D3D12 Dummy device");
+			memcpy(d3d12_create_device, hooked_bytes.data(), hooked_bytes.size());
+			return false;
+		}
+
+		spdlog::info("[D3D12] Restoring hooked bytes for D3D12CreateDevice");
+		memcpy(d3d12_create_device, hooked_bytes.data(), hooked_bytes.size());
+	}
+	else { // D3D12CreateDevice is not hooked
+		if (FAILED(d3d12_create_device(nullptr, feature_level, IID_PPV_ARGS(&device)))) {
+			spdlog::error("[D3D12] Failed to create D3D12 Dummy device");
+			return false;
+		}
+	}
+
+	spdlog::info("[D3D12] Dummy device: {:x}", (uintptr_t)device);
 
     // Manually get CreateDXGIFactory export because the user may be running Windows 7
     const auto dxgi_module = LoadLibraryA("dxgi.dll");
@@ -94,12 +125,102 @@ bool D3D12Hook::hook() {
         return false;
     }
 
-    spdlog::info("Creating dummy swapchain");
+	spdlog::info("[D3D12] Creating dummy swapchain");
 
-    if (FAILED(factory->CreateSwapChainForComposition(command_queue, &swap_chain_desc1, NULL, &swap_chain1))) {
-        spdlog::error("Failed to create D3D12 Dummy DXGI SwapChain");
-        return false;
-    }
+	// used in CreateSwapChainForHwnd fallback
+	HWND hwnd = 0;
+	WNDCLASSEX wc{};
+
+	auto init_dummy_window = [&]() {
+		// fallback to CreateSwapChainForHwnd
+		wc.cbSize = sizeof(WNDCLASSEX);
+		wc.style = CS_HREDRAW | CS_VREDRAW;
+		wc.lpfnWndProc = DefWindowProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = GetModuleHandle(NULL);
+		wc.hIcon = NULL;
+		wc.hCursor = NULL;
+		wc.hbrBackground = NULL;
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = TEXT("COLLABTRAINER_DX12_DUMMY");
+		wc.hIconSm = NULL;
+
+		::RegisterClassEx(&wc);
+
+		hwnd = ::CreateWindow(wc.lpszClassName, TEXT("Collab Trainer DX Dummy Window"), WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, NULL, NULL, wc.hInstance, NULL);
+
+		swap_chain_desc1.BufferCount = 3;
+		swap_chain_desc1.Width = 0;
+		swap_chain_desc1.Height = 0;
+		swap_chain_desc1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swap_chain_desc1.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		swap_chain_desc1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swap_chain_desc1.SampleDesc.Count = 1;
+		swap_chain_desc1.SampleDesc.Quality = 0;
+		swap_chain_desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swap_chain_desc1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+		swap_chain_desc1.Scaling = DXGI_SCALING_STRETCH;
+		swap_chain_desc1.Stereo = FALSE;
+	};
+
+	std::vector<std::function<bool()>> swapchain_attempts{
+		// we call CreateSwapChainForComposition instead of CreateSwapChainForHwnd
+		// because some overlays will have hooks on CreateSwapChainForHwnd
+		// and all we're doing is creating a dummy swapchain
+		// we don't want to screw up the overlay
+		[&]() {
+			return !FAILED(factory->CreateSwapChainForComposition(command_queue, &swap_chain_desc1, nullptr, &swap_chain1));
+		},
+		[&]() {
+			init_dummy_window();
+
+			return !FAILED(factory->CreateSwapChainForHwnd(command_queue, hwnd, &swap_chain_desc1, nullptr, nullptr, &swap_chain1));
+		},
+		[&]() {
+			return !FAILED(factory->CreateSwapChainForHwnd(command_queue, GetDesktopWindow(), &swap_chain_desc1, nullptr, nullptr, &swap_chain1));
+		},
+	};
+
+	bool any_succeed = false;
+
+	for (auto i = 0; i < swapchain_attempts.size(); i++) {
+		auto& attempt = swapchain_attempts[i];
+
+		try {
+			spdlog::info("[D3D12] Trying swapchain attempt {}", i);
+
+			if (attempt()) {
+				spdlog::info("[D3D12] Created dummy swapchain on attempt {}", i);
+				any_succeed = true;
+				break;
+			}
+		}
+		catch (std::exception& e) {
+			spdlog::error("[D3D12] Failed to create dummy swapchain on attempt {}: {}", i, e.what());
+		}
+		catch (...) {
+			spdlog::error("[D3D12] Failed to create dummy swapchain on attempt {}: unknown exception", i);
+		}
+
+		spdlog::error("[D3D12] Attempt {} failed", i);
+	}
+
+	if (!any_succeed) {
+		spdlog::error("[D3D12] Failed to create D3D12 Dummy Swap Chain");
+
+		if (hwnd) {
+			::DestroyWindow(hwnd);
+		}
+
+		if (wc.lpszClassName != nullptr) {
+			::UnregisterClass(wc.lpszClassName, wc.hInstance);
+		}
+
+		return false;
+	}
+
+	spdlog::info("[D3D12] Querying dummy swapchain");
 
     spdlog::info("Querying dummy swapchain");
 
@@ -173,15 +294,34 @@ bool D3D12Hook::hook() {
         }
     }
 
-    auto present_fn = (*(uintptr_t**)swap_chain)[8]; // Present
-    auto resize_buffers_fn = (*(uintptr_t**)swap_chain)[13]; // ResizeBuffers
-    auto resize_target_fn = (*(uintptr_t**)swap_chain)[14]; // ResizeTarget
-    //auto create_swap_chain_fn = (*(uintptr_t**)factory)[15]; // CreateSwapChainForHwnd
+    utility::ThreadSuspender suspender{};
 
-    m_present_hook = std::make_unique<FunctionHook>(present_fn, (uintptr_t)&D3D12Hook::present);
-    m_resize_buffers_hook = std::make_unique<FunctionHook>(resize_buffers_fn, (uintptr_t)&D3D12Hook::resize_buffers);
-    m_resize_target_hook = std::make_unique<FunctionHook>(resize_target_fn, (uintptr_t)&D3D12Hook::resize_target);
-    //m_create_swap_chain_hook = std::make_unique<FunctionHook>(create_swap_chain_fn, (uintptr_t)&D3D12Hook::create_swap_chain);
+    try {
+        m_present_hook.reset();
+        m_resize_buffers_hook.reset();
+        m_resize_target_hook.reset();
+
+        m_is_phase_1 = true;
+
+		auto& present_fn = (*(void***)swap_chain)[8]; // Present
+		//auto& resize_buffers_fn = (*(void***)swap_chain)[13]; // ResizeBuffers
+		//auto& resize_target_fn = (*(void***)swap_chain)[14]; // ResizeTarget
+		//auto create_swap_chain_fn = (*(uintptr_t**)factory)[15]; // CreateSwapChainForHwnd
+
+		m_present_hook = std::make_unique<PointerHook>(&present_fn, (void*)&D3D12Hook::present);
+		//m_resize_buffers_hook = std::make_unique<PointerHook>(&resize_buffers_fn, (void*)&D3D12Hook::resize_buffers);
+		//m_resize_target_hook = std::make_unique<PointerHook>(&resize_target_fn, (void*)&D3D12Hook::resize_target);
+		//m_create_swap_chain_hook = std::make_unique<FunctionHook>(create_swap_chain_fn, (uintptr_t)&D3D12Hook::create_swap_chain);
+
+        //m_hooked = m_present_hook->enable() && m_resize_buffers_hook->enable() && m_resize_target_hook->enable();//&& m_create_swap_chain_hook->create();
+        m_hooked = true;
+    }
+	catch (const std::exception& e) {
+		spdlog::error("[D3D12] Failed to hook D3D12: {}", e.what());
+		m_hooked = false;
+	}
+
+	suspender.resume();
 
     device->Release();
     command_queue->Release();
@@ -189,56 +329,49 @@ bool D3D12Hook::hook() {
     swap_chain1->Release();
     swap_chain->Release();
 
-    m_hooked = m_present_hook->create() && m_resize_buffers_hook->create() && m_resize_target_hook->create();//&& m_create_swap_chain_hook->create()'
-
     return m_hooked;
 }
 
 bool D3D12Hook::unhook() {
-    if (m_present_hook == nullptr) {
-        spdlog::error("m_present_hook is null");
-        return false;
-    }
-        
-    if (m_resize_buffers_hook == nullptr){
-        spdlog::error("m_resize_buffers_hook is null");
-        return false;
-    }
-        
-    if (m_resize_target_hook == nullptr){
-        spdlog::error("m_resize_target_hook is null");
-        return false;
-    }
-        
+	if (!m_hooked) {
+		return true;
+	}
+
+    spdlog::info("[D3D12] Unhookin D3D12!");
+
+    utility::ThreadSuspender suspender{};
+
     try{
         if (m_present_hook->remove() && m_resize_buffers_hook->remove() && m_resize_target_hook->remove() /*&& m_create_swap_chain_hook->remove()*/) {
             m_hooked = false;
+			m_is_phase_1 = true;
             return true;
         }
     }
-    catch(...) {
-        spdlog::error("Something went horribly wrong unhooking D3D12");
+	catch (const std::exception& e) {
+		spdlog::error("[D3D12] Failed to unhook D3D12: {}", e.what());
     };
+
     return false;
 }
 
 void D3D12Hook::skip_detours(const std::function<void()>& code)
 {
-    const bool back_present             = m_execute_present_detour;
-    const bool back_resize_buffer       = m_execute_resize_buffer_detour;
-    const bool back_resize_target       = m_execute_resize_target_detour;
+    const bool back_present             = s_execute_present_detour;
+    const bool back_resize_buffer       = s_execute_resize_buffer_detour;
+    const bool back_resize_target       = s_execute_resize_target_detour;
 	//const bool back_create_swap_chain   = m_execute_create_swap_chain_detour;
 
-    m_execute_present_detour            = false;
-    m_execute_resize_buffer_detour      = false;
-    m_execute_resize_target_detour      = false;
+    s_execute_present_detour            = false;
+    s_execute_resize_buffer_detour      = false;
+    s_execute_resize_target_detour      = false;
     //m_execute_create_swap_chain_detour  = false;
 
     code();
 
-    m_execute_present_detour            = back_present;
-    m_execute_resize_buffer_detour      = back_resize_buffer;
-    m_execute_resize_target_detour      = back_resize_target;
+    s_execute_present_detour            = back_present;
+    s_execute_resize_buffer_detour      = back_resize_buffer;
+    s_execute_resize_target_detour      = back_resize_target;
     //m_execute_create_swap_chain_detour  = back_create_swap_chain;
 }
 
@@ -246,14 +379,70 @@ thread_local size_t g_d3d12_internal_inside_present = 0;
 HRESULT last_d3d12_present_result = S_OK;
 
 HRESULT WINAPI D3D12Hook::present(IDXGISwapChain3* swap_chain, UINT sync_interval, UINT flags) {
+    // Some D3D11 games test presentation for timing and composition purposes I don't know if this is necessary for D3D12 too but fuck it
+    // These calls are not rendering related, but rather a status request for the D3D runtime and as such should be ignored
+    if ((flags & DXGI_PRESENT_TEST) != 0)
+        return last_d3d12_present_result;
+
+    // Also skip if the main body of the application is not initialized yet
+    if (!g_framework)
+        return last_d3d12_present_result;
+
     std::scoped_lock _{ g_framework->get_hook_monitor_mutex() };
 
     auto d3d12 = g_d3d12_hook;
 
     // This line must be called before calling our detour function because we might have to unhook the function inside our detour.
-    auto present_fn = d3d12->m_present_hook->get_original<decltype(present)>();
+    auto present_fn = d3d12->m_present_hook->get_original<decltype(present)*>();
 
-    if (m_execute_present_detour && g_d3d12_internal_inside_present == 0) {
+	if (d3d12->m_is_phase_1) {
+		//d3d12->m_present_hook.reset();
+
+		// vtable hook the swapchain instead of global hooking
+		// this seems safer for whatever reason
+		// if we globally hook the vtable pointers, it causes all sorts of weird conflicts with other hooks
+		// dont hook present though via this hook so other hooks dont get confused
+        d3d12->m_resize_buffers_hook.reset();
+        d3d12->m_resize_target_hook.reset();
+
+        auto& resize_buffers_fn = (*(void***)swap_chain)[13];
+        auto& resize_target_fn = (*(void***)swap_chain)[14];
+
+        d3d12->m_resize_buffers_hook = std::make_unique<PointerHook>(&resize_buffers_fn, (void*)&D3D12Hook::resize_buffers);
+		d3d12->m_resize_target_hook = std::make_unique<PointerHook>(&resize_target_fn, (void*)&D3D12Hook::resize_target);
+		d3d12->m_is_phase_1 = false;
+	}
+
+	if (g_d3d12_internal_inside_present > 0) {
+    		auto original_bytes = utility::get_original_bytes(Address{ present_fn });
+
+		if (original_bytes) {
+			ProtectionOverride protection_override{ present_fn, original_bytes->size(), PAGE_EXECUTE_READWRITE };
+
+			memcpy(present_fn, original_bytes->data(), original_bytes->size());
+
+			spdlog::info("[D3D12] Present recursion detected, present restored to default!");
+		}
+
+		if ((uintptr_t)present_fn != (uintptr_t)D3D12Hook::present && g_d3d12_internal_inside_present == 1) {
+			spdlog::info("[D3D12] Attempting to call real present function");
+
+			g_d3d12_internal_inside_present++;
+			const auto result = present_fn(swap_chain, sync_interval, flags);
+			g_d3d12_internal_inside_present--;
+
+			if (result != S_OK) {
+				spdlog::error("[D3D12] Present failed: {:x}", result);
+			}
+
+			return result;
+		}
+
+		spdlog::info("[D3D12] Just returning S_OK");
+		return S_OK;
+	}
+
+	if (s_execute_present_detour/* && g_d3d12_internal_inside_present == 0*/) {
         D3D12HOOK_INTERNAL({
             d3d12->m_swap_chain = swap_chain;
             swap_chain->GetDevice(IID_PPV_ARGS(&d3d12->m_device));
@@ -324,9 +513,39 @@ HRESULT WINAPI D3D12Hook::resize_buffers(IDXGISwapChain3* swap_chain, UINT buffe
 
 	auto d3d12 = g_d3d12_hook;
 
-    auto resize_buffers_fn = d3d12->m_resize_buffers_hook->get_original<decltype(resize_buffers)>();
+    auto resize_buffers_fn = d3d12->m_resize_buffers_hook->get_original<decltype(resize_buffers)*>();
 
-    if (m_execute_resize_buffer_detour && g_d3d12_internal_inside_resize_buffers == 0) {
+	if (g_d3d12_internal_inside_resize_buffers > 0) {
+		auto original_bytes = utility::get_original_bytes(Address{ resize_buffers_fn });
+
+		if (original_bytes) {
+			ProtectionOverride protection_override{ resize_buffers_fn, original_bytes->size(), PAGE_EXECUTE_READWRITE };
+
+			memcpy(resize_buffers_fn, original_bytes->data(), original_bytes->size());
+
+			spdlog::info("[D3D12] Resize buffers recursion detected, resize buffers restored to default!");
+		}
+
+		if ((uintptr_t)resize_buffers_fn != (uintptr_t)&D3D12Hook::resize_buffers && g_d3d12_internal_inside_resize_buffers == 1) {
+			spdlog::info("[D3D12] Attempting to call the real resize buffers function");
+
+			g_d3d12_internal_inside_resize_buffers++;
+			const auto result = resize_buffers_fn(swap_chain, buffer_count, width, height, new_format, swap_chain_flags);
+			g_d3d12_internal_inside_resize_buffers--;
+
+			if (result != S_OK) {
+				spdlog::error("[D3D12] Resize buffers failed: {:x}", result);
+			}
+
+			return result;
+		}
+		else {
+			spdlog::info("[D3D12] Just returning S_OK");
+			return S_OK;
+		}
+	}
+
+    if (s_execute_resize_buffer_detour /*&& g_d3d12_internal_inside_resize_buffers == 0*/) {
     	D3D12HOOK_INTERNAL({
             d3d12->m_display_width = width;
             d3d12->m_display_height = height;
@@ -355,9 +574,39 @@ HRESULT WINAPI D3D12Hook::resize_target(IDXGISwapChain3* swap_chain, const DXGI_
 
     auto d3d12 = g_d3d12_hook;
 
-    auto resize_buffers_fn = d3d12->m_resize_target_hook->get_original<decltype(D3D12Hook::resize_target)>();
+	auto resize_target_fn = d3d12->m_resize_target_hook->get_original<decltype(D3D12Hook::resize_target)*>();
 
-    if (m_execute_resize_target_detour && g_d3d12_internal_inside_resize_target == 0) {
+	if (g_d3d12_internal_inside_resize_target > 0) {
+		auto original_bytes = utility::get_original_bytes(Address{ resize_target_fn });
+
+		if (original_bytes) {
+			ProtectionOverride protection_override{ resize_target_fn, original_bytes->size(), PAGE_EXECUTE_READWRITE };
+
+			memcpy(resize_target_fn, original_bytes->data(), original_bytes->size());
+
+			spdlog::info("[D3D12] Resize target recursion detected, resize target restored to default!");
+		}
+
+		if ((uintptr_t)resize_target_fn != (uintptr_t)&D3D12Hook::resize_target && g_d3d12_internal_inside_resize_target == 1) {
+			spdlog::info("[D3D12] Attempting to call the real resize target function");
+
+			g_d3d12_internal_inside_resize_target++;
+			const auto result = resize_target_fn(swap_chain, new_target_parameters);
+			g_d3d12_internal_inside_resize_target--;
+
+			if (result != S_OK) {
+				spdlog::error("[D3D12] Resize target failed: {:x}", result);
+			}
+
+			return result;
+		}
+		else {
+			spdlog::info("[D3D12] Just returning S_OK");
+			return S_OK;
+		}
+	}
+
+    if (s_execute_resize_target_detour /*&& g_d3d12_internal_inside_resize_target == 0*/) {
         D3D12HOOK_INTERNAL({
             d3d12->m_render_width = new_target_parameters->Width;
             d3d12->m_render_height = new_target_parameters->Height;
@@ -370,7 +619,7 @@ HRESULT WINAPI D3D12Hook::resize_target(IDXGISwapChain3* swap_chain, const DXGI_
 
     g_d3d12_internal_inside_resize_target++;
 
-    last_d3d12_resize_target_result = resize_buffers_fn(swap_chain, new_target_parameters);
+    last_d3d12_resize_target_result = resize_target_fn(swap_chain, new_target_parameters);
 
     g_d3d12_internal_inside_resize_target--;
 

@@ -118,7 +118,7 @@ private:
     bool is_window_focused(const std::string_view& window_name);
     void reset_window_transforms(const std::string_view& window_name);
 
-    void begin_hooking();
+    void begin_hooking_d3d();
     bool hook_d3d11();
     bool hook_d3d12();
     
@@ -201,7 +201,7 @@ private:
     bool m_save_after_close_ui{ false };
     bool m_load_on_startup{ true };
     bool m_open_on_startup{ true };
-    float m_background_transparency{ 1.0f };
+    float m_background_opacity{ 1.0f };
 
     // Game-specific stuff
     std::unique_ptr<Mods> m_mods;

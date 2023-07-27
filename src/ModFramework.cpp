@@ -124,7 +124,7 @@ void ModFramework::begin_initializing()
 	initialize_game_specifics();
 
 	// Start the hooker thread :)
-	begin_hooking();
+	begin_hooking_d3d();
 }
 
 bool ModFramework::hook_d3d11()
@@ -186,7 +186,7 @@ bool ModFramework::hook_d3d12()
             m_is_d3d12 = true;
             return true;
         }
-        spdlog::info("attempting to unhook DXD12");
+        spdlog::info("Attempting to unhook DXD12");
         if (m_d3d12_hook == nullptr)
             spdlog::error("m_d3d12_hook is already null before unhook called");
         // We make sure to unhook any unwanted hooks if D3D12 didn't get hooked properly
@@ -225,7 +225,7 @@ void ModFramework::set_style(const float& scale) noexcept {
 
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
+    colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_opacity);
     colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
     colors[ImGuiCol_Border] = ImVec4(0.50f, 0.93f, 0.93f, 0.80f);
@@ -233,9 +233,9 @@ void ModFramework::set_style(const float& scale) noexcept {
     colors[ImGuiCol_FrameBg] = ImVec4(0.09f, 0.60f, 0.64f, 0.54);
     colors[ImGuiCol_FrameBgHovered] = ImVec4(0.50f, 0.93f, 0.93f, 0.50f);
     colors[ImGuiCol_FrameBgActive] = ImVec4(0.50f, 0.93f, 0.93f, 0.83f);
-    colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
-    colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.15f, 0.15f, m_background_transparency);
-    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, m_background_transparency);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.15f, 0.15f, m_background_opacity);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.15f, 0.15f, m_background_opacity);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, m_background_opacity);
     colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.95f);
     colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.49f, 0.92f, 0.91f, 1.00f);
@@ -408,7 +408,7 @@ void ModFramework::save_trainer_settings(utility::Config& cfg) const
     cfg.set<bool>("SaveAfterEachUIClose", m_save_after_close_ui);
     cfg.set<bool>("OpenOnStartup", m_open_on_startup);
     cfg.set<bool>("LoadOnStartup", m_load_on_startup);
-    cfg.set<float>("BackgroundTransparency", m_background_transparency);
+    cfg.set<float>("BackgroundOpacity", m_background_opacity);
 }
 
 void ModFramework::load_trainer_settings(utility::Config& cfg)
@@ -418,7 +418,7 @@ void ModFramework::load_trainer_settings(utility::Config& cfg)
         m_is_notif_enabled = cfg.get<bool>("HotkeyNotifications").value_or(false);
         m_save_after_close_ui = cfg.get<bool>("SaveAfterEachUIClose").value_or(false);
         m_open_on_startup = cfg.get<bool>("OpenOnStartup").value_or(true);
-        m_background_transparency = cfg.get<float>("BackgroundTransparency").value_or(1.0f);
+        m_background_opacity = cfg.get<float>("BackgroundOpacity").value_or(1.0f);
     }
     if (m_open_on_startup) {
         m_draw_ui = true;
@@ -440,6 +440,12 @@ void ModFramework::on_frame_d3d11() {
     std::scoped_lock _{ m_ui_mutex };
 
     spdlog::debug("[D3D11] on_frame");
+
+	// Wait until hooking is complete
+	if (!m_d3d11_hook->is_hooked()) {
+		spdlog::info("[D3D11] D3D11 is not yet fully hooked, skipping this frame!");
+		return;
+	}
 
     if (!m_initialized) {
         if (!initialize()) {
@@ -498,6 +504,12 @@ void ModFramework::on_frame_d3d12() {
     std::scoped_lock _{ m_ui_mutex };
 
     spdlog::debug("[D3D12] on_frame");
+
+	// Wait until hooking is complete
+	if (!m_d3d12_hook->is_hooked()) {
+		spdlog::info("[D3D12] D3D12 is not yet fully hooked, skipping this frame!");
+		return;
+	}
 
     if (!m_initialized) {
         if (!initialize()) {
@@ -1132,7 +1144,7 @@ void ModFramework::reset_window_transforms(const std::string_view& window_name)
     window->SetWindowSizeAllowFlags |= ImGuiCond_Once;
 }
 
-void ModFramework::begin_hooking()
+void ModFramework::begin_hooking_d3d()
 {
     std::thread hooker([this]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -1734,12 +1746,12 @@ void ModFramework::draw_trainer_settings()
         ImGui::Checkbox("Save Config Automatically After UI/Game Gets Closed", &m_save_after_close_ui);
         ImGui::Checkbox("Load Config Automatically When The Game Launches", &m_load_on_startup);
         ImGui::Checkbox("Open Trainer Window Automatically When The Game Launches", &m_open_on_startup);
-        if (UI::SliderFloat("Trainer Background Transparency", &m_background_transparency, 0.0f, 1.0f, "%.2f")) {
+        if (UI::SliderFloat("Trainer Background Transparency", &m_background_opacity, 0.0f, 1.0f, "%.2f")) {
             auto& colors = ImGui::GetStyle().Colors;
-            colors[ImGuiCol_WindowBg].w = m_background_transparency;
-            colors[ImGuiCol_TitleBg].w = m_background_transparency;
-            colors[ImGuiCol_TitleBgActive].w = m_background_transparency;
-            colors[ImGuiCol_TitleBgCollapsed].w = m_background_transparency;
+            colors[ImGuiCol_WindowBg].w = m_background_opacity;
+            colors[ImGuiCol_TitleBg].w = m_background_opacity;
+            colors[ImGuiCol_TitleBgActive].w = m_background_opacity;
+            colors[ImGuiCol_TitleBgCollapsed].w = m_background_opacity;
         }
         //ImGui::ShowHelpMarker("Some mods like \"DMC3JCE\", \"Boss Vergil Moves\", \"quicksilver\", etc. are using coroutine system which allows to exceute actions with some delay. Check this if you want to sync "
          //   "all this delays with turbo mod speed when it enabled.");
