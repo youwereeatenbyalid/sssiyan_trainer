@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <sol/sol.hpp>
 class Mods;
+class Mod;
 
 #include "D3D11Hook.hpp"
 #include "D3D12Hook.hpp"
@@ -110,7 +111,7 @@ private:
     void initialize_game_specifics();
 
     void draw_ui();
-    void draw_panels() const;
+    void draw_panels();
     void draw_options() const;
     void draw_trainer_settings();
     void draw_notifs() const;
@@ -128,6 +129,8 @@ private:
     
     void prepare_textures();
     void initialize_key_bindings();
+
+    void start_explorer_thread();
 
     // UI
     bool m_draw_ui{ false };
@@ -156,7 +159,8 @@ private:
         PanelID_Gilver,
         PanelID_Vergil,
         PanelID_Strive,
-        PanelID_Trainer
+        PanelID_Trainer,
+        PanelID_SearchResults
     };
 
     PanelID_ m_focused_mod_panel{ PanelID_Gameplay };
@@ -179,6 +183,7 @@ private:
     
     std::mutex m_input_mutex{};
     std::mutex m_ui_mutex{};
+    std::mutex m_search_mutex{};
 
     HWND m_wnd{ 0 };
     HMODULE m_game_module{ 0 };
@@ -195,6 +200,12 @@ private:
     std::shared_ptr<spdlog::logger> m_logger{};
     
     std::string m_error{ "" };
+
+    // Explorer Thread - We have a dedicated thread for searching because this tanks performance if done per frame
+    std::thread m_explorer_thread{};
+    std::string m_search_term{};
+    bool m_signal_close_explorer_thread{ false };
+    std::vector<Mod*> m_search_results{};
 
     // Trainer settings
     bool m_is_notif_enabled{ false };
@@ -274,12 +285,14 @@ private:
         UI::Texture2DDX11 kbIconActiveDX11;
         UI::Texture2DDX11 keyIconsDX11;
         UI::Texture2DDX11 gearIconDX11;
+        UI::Texture2DDX11 magnifierIconDX11;
         
         // D3D12
         UI::Texture2DDX12 kbIconDX12;
         UI::Texture2DDX12 kbIconActiveDX12;
         UI::Texture2DDX12 keyIconsDX12;
         UI::Texture2DDX12 gearIconDX12;
+        UI::Texture2DDX12 magnifierIconDX12;
     } m_icons;
 };
 

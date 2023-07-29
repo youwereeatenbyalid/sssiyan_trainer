@@ -221,6 +221,7 @@ namespace UI {
 	BtnIndex_ REGPKeyToBtnIndex(const REGPK_Flag& key);
 
 	void KeyCaptureWindow(struct KCWBuffers& kcwBuffers, bool closeBtn = false);
+	
 	// fitHeight: Matches the last item's height with keeping the size ratio the same (Will override scale)
 	void KeyBindButton(const std::string& windowTitle, const std::string& bindName, KCWBuffers& kcwBuffers, const float& scale = 1.0f, bool fitHeight = false, ImVec4 tint_col = {1.0f, 1.0f, 1.0f, 1.0f}, bool showBtnsOnHover = true);
 

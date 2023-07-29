@@ -6,6 +6,7 @@
 #include <sdk/SDK.hpp>
 
 #include <shellapi.h>
+#include <set>
 
 // ours
 #include "fw-imgui/imgui_impl_win32.h"
@@ -99,9 +100,12 @@ ModFramework::ModFramework()
     m_mods_panels_map["Vergil"] = PanelID_Vergil;
     m_mods_panels_map["StriVe"] = PanelID_Strive;
     m_mods_panels_map["Trainer"] = PanelID_Trainer;
+    m_mods_panels_map["Search Results"] = PanelID_SearchResults;
 }
 
 ModFramework::~ModFramework() {
+    m_signal_close_explorer_thread = true;
+
     if (m_is_d3d11) ImGui_ImplDX11_Shutdown();
     if (m_is_d3d12) ImGui_ImplDX12_Shutdown();
 
@@ -125,6 +129,9 @@ void ModFramework::begin_initializing()
 
 	// Start the hooker thread :)
 	begin_hooking_d3d();
+
+    // Start the explorer thread
+    start_explorer_thread();
 }
 
 bool ModFramework::hook_d3d11()
@@ -437,7 +444,7 @@ void ModFramework::queue_notification(const ImGuiToast& notif) {
 }
 
 void ModFramework::on_frame_d3d11() {
-    std::scoped_lock _{ m_ui_mutex };
+    std::lock_guard _{ m_ui_mutex };
 
     spdlog::debug("[D3D11] on_frame");
 
@@ -501,7 +508,7 @@ void ModFramework::on_frame_d3d11() {
 }
 
 void ModFramework::on_frame_d3d12() {
-    std::scoped_lock _{ m_ui_mutex };
+    std::lock_guard _{ m_ui_mutex };
 
     spdlog::debug("[D3D12] on_frame");
 
@@ -843,9 +850,10 @@ bool ModFramework::initialize() {
         m_icons.kbIconActiveDX11 = UI::Texture2DDX11(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), pd3d_device);
         m_icons.keyIconsDX11 = UI::Texture2DDX11(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), pd3d_device);
         m_icons.gearIconDX11 = UI::Texture2DDX11(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), pd3d_device);
+        m_icons.magnifierIconDX11 = UI::Texture2DDX11(magnifierIcon.GetRGBAData(), magnifierIcon.GetWidth(), magnifierIcon.GetHeight(), pd3d_device);
 
         if (!m_logo_dx11 || !m_icons.kbIconDX11 || !m_icons.kbIconActiveDX11
-            || !m_icons.keyIconsDX11 || !m_icons.gearIconDX11) {
+            || !m_icons.keyIconsDX11 || !m_icons.gearIconDX11 || !m_icons.magnifierIconDX11) {
             spdlog::error("[D3D11] Failed to load textures!");
 
             if (!m_logo_dx11) {
@@ -867,6 +875,10 @@ bool ModFramework::initialize() {
             if (!m_icons.gearIconDX11) {
                 spdlog::error("[D3D11] m_icons.gearIconDX11 -> {}", m_icons.gearIconDX11.GetLastError().c_str());
             }
+
+			if (!m_icons.magnifierIconDX11) {
+				spdlog::error("[D3D11] m_icons.magnifierIconDX11 -> {}", m_icons.magnifierIconDX11.GetLastError().c_str());
+			}
 
             return false;
         }
@@ -1003,9 +1015,10 @@ bool ModFramework::initialize() {
         m_icons.kbIconActiveDX12 = UI::Texture2DDX12(kbIconActive.GetRGBAData(), kbIconActive.GetWidth(), kbIconActive.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 5);
         m_icons.keyIconsDX12 = UI::Texture2DDX12(keyIcons.GetRGBAData(), keyIcons.GetWidth(), keyIcons.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 6);
         m_icons.gearIconDX12 = UI::Texture2DDX12(gearIcon.GetRGBAData(), gearIcon.GetWidth(), gearIcon.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 7);
+		m_icons.magnifierIconDX12 = UI::Texture2DDX12(magnifierIcon.GetRGBAData(), magnifierIcon.GetWidth(), magnifierIcon.GetHeight(), pd3d_device, cmd_queue, m_d3d12.pd3d_srv_desc_heap.Get(), 8);
 
         if (!m_logo_dx12 || !m_icons.kbIconDX12 || !m_icons.kbIconActiveDX12
-            || !m_icons.keyIconsDX12 || !m_icons.gearIconDX12) {
+            || !m_icons.keyIconsDX12 || !m_icons.gearIconDX12 || !m_icons.magnifierIconDX12) {
             spdlog::error("[D3D12] Failed to load textures!");
 
             if (!m_logo_dx12) {
@@ -1027,6 +1040,10 @@ bool ModFramework::initialize() {
             if (!m_icons.gearIconDX12) {
                 spdlog::error("[D3D12] m_icons.gearIconDX12 -> {}", m_icons.gearIconDX12.GetLastError().c_str());
             }
+
+			if (!m_icons.magnifierIconDX12) {
+				spdlog::error("[D3D12] m_icons.magnifierIconDX12 -> {}", m_icons.magnifierIconDX12.GetLastError().c_str());
+			}
 
             return false;
         }
@@ -1067,6 +1084,7 @@ void ModFramework::prepare_textures()
     kbIconActive.ResizeByRatioH(21);
     keyIcons.ResizeByRatioW(512);
     gearIcon.ResizeByRatioW(25);
+    magnifierIcon.ResizeByRatioW(18);
 }
 
 void ModFramework::initialize_key_bindings()
@@ -1093,6 +1111,67 @@ void ModFramework::initialize_key_bindings()
             m_close_menu_guard = false;
         }
         }, m_default_close_menu_key);
+}
+
+void ModFramework::start_explorer_thread()
+{
+    m_explorer_thread = std::thread([&] {
+        std::string last_search_term = {};
+
+        while (!m_signal_close_explorer_thread) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+            if (m_game_data_initialized && !m_search_term.empty() && m_search_term != last_search_term) {
+                const auto& mod_names = m_mods->get_full_mod_names();
+
+                // Transform the names and the search term to lower case, for case insensitivity
+                std::vector<std::string> mod_names_lower{};
+                std::unordered_map<std::string, std::string> lower_to_original{};
+                for (const auto& mod_name : mod_names) {
+                    auto mod_name_lower = mod_name;
+                    std::transform(mod_name_lower.begin(), mod_name_lower.end(), mod_name_lower.begin(), [](unsigned char c) { return std::tolower(c); });
+                    mod_names_lower.push_back(mod_name_lower);
+                    lower_to_original.insert({mod_name_lower, mod_name});
+                }
+
+                // Transform the search term to lower
+                std::string search_term_lower = m_search_term;
+                std::transform(search_term_lower.begin(), search_term_lower.end(), search_term_lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+                // A set (so it would be alphabatically sorted) we store our results in
+                std::set<std::string> result_names_lower{};
+                for (const auto& mod_name : mod_names_lower) {
+                    if (mod_name.find(search_term_lower) != std::string::npos)
+                        result_names_lower.insert(mod_name);
+                }
+
+				// Fetch the mod pointer from the checkbox name and add it to our final results array,
+                // this needs to be behind a mutex lock so we don't try to write to it while it's being read by the ain thread
+				{
+					std::lock_guard _{ m_search_mutex };
+                    m_search_results.clear();
+                    for (const auto& result_name_lower : result_names_lower)
+                        if (const auto p_mod = m_mods->get_mod_by_full_name(lower_to_original.at(result_name_lower)); p_mod != nullptr)
+                            m_search_results.push_back(p_mod);
+                }
+			}
+			else if (m_search_term.empty()) {
+				// Clear the search results if the search term is empty,
+                // needs to be mutex locked
+                {
+                    std::lock_guard _{ m_search_mutex };
+                    m_search_results.clear();
+                }
+			}
+
+			// Store the current serach term so we can detet changes and don't do all this each iteration without change
+			last_search_term = m_search_term;
+        }
+
+        m_signal_close_explorer_thread = false;
+        });
+
+    m_explorer_thread.detach();
 }
 
 void ModFramework::focus_tab(const std::string_view& window_name)
@@ -1334,6 +1413,31 @@ void ModFramework::draw_ui() {
     const auto load_button_size = ImGui::CalcItemSize({ 0.0f, 0.0f }, load_label_size.x + style.FramePadding.x * 2.0f, load_label_size.y + style.FramePadding.y * 2.0f);
     const auto tr_version_size = ImGui::CalcTextSize(TRAINER_VERSION_STR);
 
+    {
+        static char search_term[255];
+
+        // Border Color
+		ImGui::PushStyleColor(ImGuiCol_Border, 0xFFA39818);
+        // Text Color
+		ImGui::PushStyleColor(ImGuiCol_Text, 0xFFFFFFFF);
+        // Hint Color
+		ImGui::PushStyleColor(ImGuiCol_TextDisabled, 0xFFC0C0C0);
+        // BG Color
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF51401E);
+        // Border Size
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.4f);
+        if(m_is_d3d11)
+            ImGui::SearchBarTextInput("##SearchBar", "Search Mods...", search_term, sizeof(search_term), m_icons.magnifierIconDX11, m_icons.magnifierIconDX11.GetSize(m_scale), 0xFFEDEE80, {200, 0}, 0);
+        else if (m_is_d3d12)
+			ImGui::SearchBarTextInput("##SearchBar", "Search Mods...", search_term, sizeof(search_term), m_icons.magnifierIconDX12, m_icons.magnifierIconDX12.GetSize(m_scale), 0xFFEDEE80, {200, 0}, 0);
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(4);
+
+        m_search_term = search_term;
+    }
+
+    ImGui::SameLine();
+
     ImGui::SetCursorPosX(trainer_width / 2 - (save_button_size.x + load_button_size.x) / 2);
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.25f, 0.38f, 1.00f));
@@ -1368,7 +1472,6 @@ void ModFramework::draw_ui() {
 
     ImGui::PopStyleVar();
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY());
     ImGui::Separator();
 
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
@@ -1383,14 +1486,15 @@ void ModFramework::draw_ui() {
         ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.4f, &left, &right);
 
         // Mods
-        ImGui::DockBuilderDockWindow("Gameplay", left);
-        ImGui::DockBuilderDockWindow("Scenario", left);
-        ImGui::DockBuilderDockWindow("System", left);
-        ImGui::DockBuilderDockWindow("Nero", left);
-        ImGui::DockBuilderDockWindow("Dante", left);
-        ImGui::DockBuilderDockWindow("V", left);
-        ImGui::DockBuilderDockWindow("Vergil", left);
-        ImGui::DockBuilderDockWindow("StriVe", left);
+		ImGui::DockBuilderDockWindow("Gameplay", left);
+		ImGui::DockBuilderDockWindow("Scenario", left);
+		ImGui::DockBuilderDockWindow("System", left);
+		ImGui::DockBuilderDockWindow("Nero", left);
+		ImGui::DockBuilderDockWindow("Dante", left);
+		ImGui::DockBuilderDockWindow("V", left);
+		ImGui::DockBuilderDockWindow("Vergil", left);
+		ImGui::DockBuilderDockWindow("StriVe", left);
+		ImGui::DockBuilderDockWindow("Search Results", left);
 
         // Settings
         ImGui::DockBuilderDockWindow("Options", right);
@@ -1421,11 +1525,11 @@ void ModFramework::draw_ui() {
     }
 
     // Store focused panels' ID
-    if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(left)->TabBar->SelectedTabId); window != nullptr) {
-        if (const auto panelID = m_mods_panels_map.find(window->Name); panelID != m_mods_panels_map.end()) {
-            m_focused_mod_panel = panelID->second;
-        }
-    }
+	if (const auto window = ImGui::FindWindowByID(ImGui::DockBuilderGetNode(left)->TabBar->SelectedTabId); window != nullptr) {
+		if (const auto panelID = m_mods_panels_map.find(window->Name); panelID != m_mods_panels_map.end()) {
+			m_focused_mod_panel = panelID->second;
+		}
+	}
 
     ImGui::PopStyleVar();
 
@@ -1446,7 +1550,7 @@ void ModFramework::draw_ui() {
     m_do_once_after_ui = true;
 }
 
-void ModFramework::draw_panels() const
+void ModFramework::draw_panels()
 {
 	const float modListIndent = 10.0f * m_scale;
 
@@ -1456,6 +1560,35 @@ void ModFramework::draw_panels() const
     static constexpr ImGuiWindowFlags panel_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing;
 
     ImGui::PushStyleColor(ImGuiCol_Header, { 0.26f, 0.59f, 0.98f, 0.31f });
+
+	if (!m_search_term.empty()) {
+		ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_SearchResults ? activeTabText : inactiveTabText);
+		ImGui::Begin("Search Results", nullptr, panel_flags);
+		ImGui::PopStyleColor();
+        {
+            if (m_error.empty() && m_game_data_initialized) {
+                if (!m_search_results.empty()) {
+                    std::scoped_lock _{ m_search_mutex };
+                    for (auto& result : m_search_results) {
+                        m_mods->draw_entry(result);
+                    }
+                }
+                else {
+                    ImGui::TextWrapped("No match found, search for the name of a mod!");
+                }
+			}
+			else if (!m_game_data_initialized) {
+				ImGui::TextWrapped("Trainer is currently initializing...");
+			}
+			else if (!m_error.empty()) {
+				ImGui::TextWrapped("Trainer error: %s", m_error.c_str());
+			}
+        }
+        ImGui::End();
+        ImGui::PopStyleColor();
+
+		return;
+	}
 
     ImGui::PushStyleColor(ImGuiCol_Text, m_focused_mod_panel == PanelID_Gameplay ? activeTabText : inactiveTabText);
     ImGui::Begin("Gameplay", nullptr, panel_flags);
