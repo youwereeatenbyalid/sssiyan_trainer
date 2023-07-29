@@ -205,6 +205,7 @@ private:
     std::thread m_explorer_thread{};
     std::string m_search_term{};
     bool m_signal_close_explorer_thread{ false };
+    bool m_is_searching{ false };
     std::vector<Mod*> m_search_results{};
 
     // Trainer settings

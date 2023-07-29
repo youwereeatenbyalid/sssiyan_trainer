@@ -1084,7 +1084,7 @@ void ModFramework::prepare_textures()
     kbIconActive.ResizeByRatioH(21);
     keyIcons.ResizeByRatioW(512);
     gearIcon.ResizeByRatioW(25);
-    magnifierIcon.ResizeByRatioW(18);
+    magnifierIcon.ResizeByRatioW(16);
 }
 
 void ModFramework::initialize_key_bindings()
@@ -1119,9 +1119,11 @@ void ModFramework::start_explorer_thread()
         std::string last_search_term = {};
 
         while (!m_signal_close_explorer_thread) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			m_is_searching = m_search_term.empty();
 
             if (m_game_data_initialized && !m_search_term.empty() && m_search_term != last_search_term) {
+                m_is_searching = true;
                 const auto& mod_names = m_mods->get_full_mod_names();
 
                 // Transform the names and the search term to lower case, for case insensitivity
@@ -1572,6 +1574,9 @@ void ModFramework::draw_panels()
                     for (auto& result : m_search_results) {
                         m_mods->draw_entry(result);
                     }
+                }
+                else if (m_is_searching) {
+                    ImGui::TextWrapped("Searching...");
                 }
                 else {
                     ImGui::TextWrapped("No match found, search for the name of a mod!");
