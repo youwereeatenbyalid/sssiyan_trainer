@@ -13,7 +13,7 @@ std::optional<std::string> LuaDevilBreakerSwitcher::on_initialize() {
     m_is_enabled = &LuaDevilBreakerSwitcher::cheaton;
     m_on_page = Page_Breaker;
     m_depends_on = { "PlayerTracker" };
-    m_full_name_string = "Breaker Switcher V5";
+    m_full_name_string = "Breaker Switcher V5 (+)";
     m_author_string = "The Hitchhiker";
     m_description_string = "Even funkier than before.";
     infinite_breakers = false;
