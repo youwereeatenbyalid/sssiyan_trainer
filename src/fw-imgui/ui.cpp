@@ -2593,52 +2593,153 @@ bool UI::DMC5ControlsButton(BtnIndex_ index, const float& scale)
 	return ret;
 }
 
-// Copied straight from CE
-template <typename T>
-bool UI::Combo(const char* label, const char** items, T count, T& var, T pos, bool save)
+static bool Items_SingleStringGetter(void* data, int idx, const char** out_text)
+{
+	// FIXME-OPT: we could pre-compute the indices to fasten this. But only 1 active combo means the waste is limited.
+	const char* items_separated_by_zeros = (const char*)data;
+	int items_count = 0;
+	const char* p = items_separated_by_zeros;
+	while (*p)
+	{
+		if (idx == items_count)
+			break;
+		p += strlen(p) + 1;
+		items_count++;
+	}
+	if (!*p)
+		return false;
+	if (out_text)
+		*out_text = p;
+	return true;
+}
+
+bool UI::Combo(const char* label, int* current_item, const char* items_separated_by_zeros, float item_width /*= 0*/, int popup_max_height_in_items /*= -1*/)
 {
 	bool update = false;
-	// ImGui::PushID(GUI_id);
-	// GUI_id++;
-	ImGui::PushItemWidth(100.0f);
+	auto def_text_col = ImGui::GetColorU32(ImGuiCol_Text);
+
+	ImGui::PushItemWidth(item_width);
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Border, OUTLINE_GRAY);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.50f, 0.93f, 0.93f, 1.00f));
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.26f, 0.59f, 0.98f, 0.00f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
 
-	// TODO(): Should we use labels?
-	if (ImGui::BeginCombo(label, items[var]))
+	size_t items_count = 0;
+	const char* p = items_separated_by_zeros;
+	while (*p)
 	{
-		for (T i = pos; i < count; i++)
+		p += strlen(p) + 1;
+		items_count++;
+	}
+
+	const char* preview_value = NULL;
+	if (*current_item >= 0 && *current_item < items_count)
+		Items_SingleStringGetter((void*)items_separated_by_zeros, *current_item, &preview_value);
+
+	if (ImGui::BeginCombo(label, preview_value))
+	{
+		for (int i = 0; i < items_count; i++)
 		{
-			// ImGui::PushID(GUI_id);
-			// GUI_id++;
-			bool selected = var == i ? true : false;
-			if (ImGui::Selectable(items[i], &selected))
+			bool selected = *current_item == i ? true : false;
+			bool pushed_def_text_color = false;
+
+			if (!selected) {
+				ImGui::PushStyleColor(ImGuiCol_Text, def_text_col);
+				pushed_def_text_color = true;
+			}
+
+			const char* item_to_show = NULL;
+			if (*current_item >= 0 && *current_item < items_count)
+				Items_SingleStringGetter((void*)items_separated_by_zeros, i, &item_to_show);
+
+			if (ImGui::Selectable(item_to_show, &selected))
 			{
-				var = i;
+				*current_item = i;
 				update = true;
 			}
-			// ImGui::PopID();
+
 			if (selected)
 			{
 				ImGui::SetItemDefaultFocus();
 			}
+
+			if (pushed_def_text_color) {
+				ImGui::PopStyleColor();
+			}
 		}
 		ImGui::EndCombo();
 	}
-	ImGui::PopStyleColor(7);
+	ImGui::PopStyleColor(11);
 	ImGui::PopStyleVar(1);
-	// ImGui::PopID();
 	ImGui::PopItemWidth();
+
 	return update;
 }
 
-bool UI::TabBtn(const char* text, bool state, ImVec2 size_arg, float rounding)
+bool UI::Combo(const char* label, int* current_item, const char* const items[], int items_count, float item_width /*= 0*/, int popup_max_height_in_items /*= -1*/)
+{
+	bool update = false;
+	auto def_text_col = ImGui::GetColorU32(ImGuiCol_Text);
+
+	ImGui::PushItemWidth(item_width);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+	ImGui::PushStyleColor(ImGuiCol_Border, OUTLINE_GRAY);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.50f, 0.93f, 0.93f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.26f, 0.59f, 0.98f, 0.00f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
+
+	if (ImGui::BeginCombo(label, items[*current_item]))
+	{
+		for (int i = 0; i < items_count; i++)
+		{
+			bool selected = *current_item == i ? true : false;
+			bool pushed_def_text_color = false;
+
+			if (!selected) {
+				ImGui::PushStyleColor(ImGuiCol_Text, def_text_col);
+				pushed_def_text_color = true;
+			}
+
+			if (ImGui::Selectable(items[i], &selected))
+			{
+				*current_item = i;
+				update = true;
+			}
+
+			if (selected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+
+			if (pushed_def_text_color) {
+				ImGui::PopStyleColor();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopStyleColor(11);
+	ImGui::PopStyleVar(1);
+	ImGui::PopItemWidth();
+
+	return update;
+}
+
+bool UI::TabButton(const char* text, bool state, ImVec2 size_arg, float rounding)
 {
 	bool res;
 	float border = state ? 1.2f : 0.0f;

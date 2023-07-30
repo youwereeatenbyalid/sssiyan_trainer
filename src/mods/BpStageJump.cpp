@@ -308,7 +308,7 @@ void BpStageJump::on_draw_ui() {
 		ImGui::Spacing();
 		ImGui::Separator();
 
-		ImGui::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
+		UI::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
 		if (palace_type == BALANCED){
 			ImGui::TextWrapped("Balanced palace randomizes each set of stagees by difficulty. IE, stagees 1-20 will be randomized, then 20-40, etc.");
 		}

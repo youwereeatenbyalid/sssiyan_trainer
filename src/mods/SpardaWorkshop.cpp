@@ -288,7 +288,7 @@ void SpardaWorkshop::on_draw_ui() {
     ImGui::Checkbox("Enable workshop in Bloody Palace", &SpardaWorkshop::bp_cheaton);
     ImGui::Spacing();
     ImGui::Text("Preset Barrel Positions");
-    if(ImGui::Combo("##Barrel Positions", &barrelindex, 
+    if(UI::Combo("##Barrel Positions", &barrelindex, 
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"
@@ -308,7 +308,7 @@ void SpardaWorkshop::on_draw_ui() {
     }
     ImGui::Separator();
     ImGui::Text("Preset Enemy Positions");
-    if (ImGui::Combo("##Enemy Positions", &enemyindex,
+    if (UI::Combo("##Enemy Positions", &enemyindex,
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"
@@ -332,7 +332,7 @@ void SpardaWorkshop::on_draw_ui() {
     }
     ImGui::Separator();
     ImGui::Text("Preset Player Positions");
-    if (ImGui::Combo("##Player Positions", &playerindex,
+    if (UI::Combo("##Player Positions", &playerindex,
         "Position 0\0Position 1\0Position 2\0Position 3\0"
         "Position 4\0Position 5\0Position 6\0Position 7\0"
         "Position 8\0Position 9\0Position 10\0Position 11\0"

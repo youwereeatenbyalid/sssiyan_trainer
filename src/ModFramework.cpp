@@ -1435,7 +1435,8 @@ void ModFramework::draw_ui() {
         ImGui::PopStyleVar();
         ImGui::PopStyleColor(4);
 
-        m_search_term = search_term;
+        if (m_game_data_initialized)
+            m_search_term = search_term;
     }
 
     ImGui::SameLine();

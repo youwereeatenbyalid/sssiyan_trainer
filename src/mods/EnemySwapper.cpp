@@ -74,7 +74,7 @@ void EnemySwapper::on_draw_ui() {
   if (_isAllSwap) {
     ImGui::TextWrapped("Swap to:");
     ImGui::SameLine();
-    ImGui::Combo("##Swap to", (int*)&_swapAllIndx, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(),20);
+    UI::Combo("##Swap to", (int*)&_swapAllIndx, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(),20);
   } 
   else {
 
@@ -114,7 +114,7 @@ void EnemySwapper::on_draw_ui() {
 
     ImGui::TextWrapped(EnemyData::EnemyNames[index]);
     uniqComboStr = "##SwapToCustom";
-    ImGui::Combo(uniqComboStr.c_str(), &_selectedCbIndex, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
+    UI::Combo(uniqComboStr.c_str(), &_selectedCbIndex, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
     ImGui::Spacing();
     ImGui::Separator();
 

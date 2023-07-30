@@ -111,6 +111,6 @@ void DifficultySelect::on_draw_ui() {
   auto difficultystring =
       "Human\0Devil Hunter\0Son of Sparda\0Dante Must Die\0Heaven or Hell\0Hell "
       "and Hell\0";
-  ImGui::Combo("Mission Difficulty", (int*)&DifficultySelect::missiondifficulty, difficultystring);
-  ImGui::Combo("Bloody Palace Difficulty", (int*)&DifficultySelect::bpdifficulty, difficultystring);
+  UI::Combo("Mission Difficulty", (int*)&DifficultySelect::missiondifficulty, difficultystring);
+  UI::Combo("Bloody Palace Difficulty", (int*)&DifficultySelect::bpdifficulty, difficultystring);
 }
