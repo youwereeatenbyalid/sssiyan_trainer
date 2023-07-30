@@ -29,7 +29,7 @@ public:
   void on_draw_debug_ui() override;
 
   void draw_combo_box(std::map<std::string, uint32_t> map,
-                      const char* title, uint32_t& value,
+                      const char* label, uint32_t& value,
                       std::string &combolabel);
 
 private:

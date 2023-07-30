@@ -307,7 +307,23 @@ void TauntSelector::on_draw_debug_ui() {
 
 // will show up in main window, dump ImGui widgets you want here
 
-void TauntSelector::draw_combo_box(std::map<std::string, uint32_t> map, const char* title, uint32_t &value, std::string &combolabel) {
+void TauntSelector::draw_combo_box(std::map<std::string, uint32_t> map, const char* label, uint32_t &value, std::string &combolabel) {
+  float cursorX = ImGui::GetCursorPosX();
+  
+  size_t label_len = strlen(label);
+
+  if (label[0] != '#' && label[1] != '#') {
+	  char label_to_show[255];
+	  memset(&label_to_show, '\0', sizeof(label_to_show));
+
+	  for (size_t i = 0; i < label_len && !(label[i] == '#' && label[i + 1] == '#'); i++)
+		  label_to_show[i] = label[i];
+
+	  ImGui::Text(label_to_show);
+	  cursorX += ImGui::CalcTextSize("X").x;
+	  ImGui::SetCursorPos(ImVec2(cursorX, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y));
+  }
+    
   auto def_text_col = ImGui::GetColorU32(ImGuiCol_Text);
   
   ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
@@ -323,7 +339,13 @@ void TauntSelector::draw_combo_box(std::map<std::string, uint32_t> map, const ch
   ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
   ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
 
-  if (ImGui::BeginCombo(title, combolabel.c_str()))
+  char internal_label[255];
+  memset(&internal_label, '\0', sizeof(internal_label));
+  memset(&internal_label, '#', 2);
+  if (size_t len = label_len; len < (sizeof(internal_label) - 3))
+	  memcpy(&internal_label[2], label, len);
+
+  if (ImGui::BeginCombo(internal_label, combolabel.c_str()))
   {
     for (std::map<std::string, uint32_t>::iterator it = map.begin(); it != map.end(); ++it) {
       bool is_selected = (value == it->second); // You can store your selection however you

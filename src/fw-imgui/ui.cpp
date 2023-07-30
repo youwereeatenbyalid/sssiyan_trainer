@@ -680,13 +680,13 @@ bool UI::SliderFloat(const char* label, float* v, float v_min, float v_max, cons
 
     float cursorX = ImGui::GetCursorPosX();
 
-    if(label[0] != '#' && label[1] != '#'){
-        ImGui::Text(label);
-        cursorX += ImGui::CalcTextSize("X").x;
-    }
+	if (label[0] != '#' && label[1] != '#') {
+		ImGui::Text(label);
+		cursorX += ImGui::CalcTextSize("X").x;
+	}
 
-    ImVec2 defCursorPos = ImGui::GetCursorPos();
-    ImGui::SetCursorPos(ImVec2(cursorX, ImGui::GetCursorPosY() + ImGui::CalcTextSize(label).y / 2));
+	ImVec2 defCursorPos = ImGui::GetCursorPos();
+	ImGui::SetCursorPos(ImVec2(cursorX, ImGui::GetCursorPosY() + ImGui::CalcTextSize(label).y / 2));
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Border, OUTLINE_GRAY);
@@ -2615,6 +2615,22 @@ static bool Items_SingleStringGetter(void* data, int idx, const char** out_text)
 
 bool UI::Combo(const char* label, int* current_item, const char* items_separated_by_zeros, float item_width /*= 0*/, int popup_max_height_in_items /*= -1*/)
 {
+	float cursorX = ImGui::GetCursorPosX();
+
+	size_t label_len = strlen(label);
+
+	if (label[0] != '#' && label[1] != '#') {
+		char label_to_show[255];
+		memset(&label_to_show, '\0', sizeof(label_to_show));
+
+		for (size_t i = 0; i < label_len && !(label[i] == '#' && label[i + 1] == '#'); i++)
+			label_to_show[i] = label[i];
+
+		ImGui::Text(label_to_show);
+		cursorX += ImGui::CalcTextSize("X").x;
+		ImGui::SetCursorPos(ImVec2(cursorX, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y));
+	}
+
 	bool update = false;
 	auto def_text_col = ImGui::GetColorU32(ImGuiCol_Text);
 
@@ -2644,7 +2660,13 @@ bool UI::Combo(const char* label, int* current_item, const char* items_separated
 	if (*current_item >= 0 && *current_item < items_count)
 		Items_SingleStringGetter((void*)items_separated_by_zeros, *current_item, &preview_value);
 
-	if (ImGui::BeginCombo(label, preview_value))
+	char internal_label[255];
+	memset(&internal_label, '\0', sizeof(internal_label));
+	memset(&internal_label, '#', 2);
+	if (size_t len = label_len; len < (sizeof(internal_label) - 3))
+		memcpy(&internal_label[2], label, len);
+
+	if (ImGui::BeginCombo(internal_label, preview_value))
 	{
 		for (int i = 0; i < items_count; i++)
 		{
@@ -2686,6 +2708,22 @@ bool UI::Combo(const char* label, int* current_item, const char* items_separated
 
 bool UI::Combo(const char* label, int* current_item, const char* const items[], int items_count, float item_width /*= 0*/, int popup_max_height_in_items /*= -1*/)
 {
+	float cursorX = ImGui::GetCursorPosX();
+
+	size_t label_len = strlen(label);
+
+	if (label[0] != '#' && label[1] != '#') {
+		char label_to_show[255];
+		memset(&label_to_show, '\0', sizeof(label_to_show));
+
+		for (size_t i = 0; i < label_len && !(label[i] == '#' && label[i + 1] == '#'); i++)
+			label_to_show[i] = label[i];
+
+		ImGui::Text(label_to_show);
+		cursorX += ImGui::CalcTextSize("X").x;
+		ImGui::SetCursorPos(ImVec2(cursorX, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y));
+	}
+
 	bool update = false;
 	auto def_text_col = ImGui::GetColorU32(ImGuiCol_Text);
 
@@ -2703,7 +2741,13 @@ bool UI::Combo(const char* label, int* current_item, const char* const items[], 
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.11f, 0.20f, 1.00f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.07f, 0.07f, 1.00f));
 
-	if (ImGui::BeginCombo(label, items[*current_item]))
+	char internal_label[255];
+	memset(&internal_label, '\0', sizeof(internal_label));
+	memset(&internal_label, '#', 2);
+	if (size_t len = label_len; len < (sizeof(internal_label) - 3))
+		memcpy(&internal_label[2], label, len);
+
+	if (ImGui::BeginCombo(internal_label, items[*current_item]))
 	{
 		for (int i = 0; i < items_count; i++)
 		{
