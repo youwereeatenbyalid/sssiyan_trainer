@@ -4,10 +4,13 @@
 
 uintptr_t AllStart::jmp_ret{NULL};
 bool AllStart::cheaton{NULL};
+bool AllStart::sdk_active{ false };
+bool AllStart::style_held{ false };
 uintptr_t AllStart::jmp_initial{NULL};
 int cancelId = 0;
 bool stingerjumpcancels;
 bool guardCancelsEverything;
+
 
 // clang-format off
 // only in clang/icl mode on x64, sorry
@@ -120,14 +123,21 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         add r11, 0x1888
         cmp byte ptr [r11], 3 // royal guard
         jne codepops
-
-        mov r11, [PlayerTracker::playerentity]
-        add r11, 0xEF0
-        mov r11, [r11]
-        add r11, 0x48
-        mov r11, [r11]
-        shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
-        test r11, 0x1
+//<<<<<<< Updated upstream
+//
+  //      mov r11, [PlayerTracker::playerentity]
+ //       add r11, 0xEF0
+//        mov r11, [r11]
+//        add r11, 0x48
+//        mov r11, [r11]
+//        shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
+//        test r11, 0x1
+//=======
+        //mov r11, [GameInput::holdframes] // amazing variable name
+        //shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
+        //test r11, 0x1
+        cmp byte ptr [AllStart::style_held], 1 //check if style is being held
+//>>>>>>> Stashed changes
         pop r11
         jne cancellable
         jmp code
@@ -150,6 +160,20 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
 }
 
 // clang-format on
+
+void AllStart::on_frame() {
+    if (!sdk_active)
+        return;
+    auto player_manager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
+    auto player = sdk::call_object_func_easy<REManagedObject*>(player_manager, "get_manualPlayer()");
+    auto pad_input = sdk::call_object_func_easy<REManagedObject*>(player, "get_padInput()");
+    AllStart::style_held = sdk::call_object_func_easy<bool>(pad_input, "isButtonOn(System.UInt32)", 0x1000);
+
+}
+
+void AllStart::on_sdk_init() {
+    sdk_active = true;
+}
 
 void AllStart::init_check_box_info() {
   m_check_box_name = m_prefix_check_box_name + std::string(get_name());
