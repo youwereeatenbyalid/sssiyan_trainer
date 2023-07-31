@@ -592,7 +592,8 @@ std::optional<std::string> LDK::on_initialize() {
   LDK::cavforcevalid_jmp_ret2 = cavforcevalid_addr.value()+0x6;
   LDK::cavforcevalid_jmp_je = cavforcevalid_addr.value()+0x8;
 
-  LDK::missionmanager = staticbase+0x7E836F8; //This is just mission manager singleton, grab this with sdk later you moron.
+//  LDK::missionmanager = staticbase+0x7E836F8; //This is just mission manager singleton, grab this with sdk later you moron.
+  LDK::missionmanager = staticbase + 0x7E671D8; //new mission manager
   //LDK::enemygentype = staticbase+0x58E15A0; <- unused
  
   LDK::hitvfxskip_jmp              = hitvfxskip_addr.value() - 0xB;
