@@ -855,11 +855,11 @@ void BreakerSwitcher::on_draw_ui() {
 //ImGui::InputInt("breaker down", (int*)&BreakerSwitcher::breakers[1]);
 //ImGui::InputInt("breaker left", (int*)&BreakerSwitcher::breakers[2]);
 //ImGui::InputInt("breaker right", (int*)&BreakerSwitcher::breakers[3]);
-ImGui::Combo("Breaker Type", (int*)&BreakerSwitcher::switcher_mode,"Off\0Switcher\0Cycler\0");
+UI::Combo("Breaker Type", (int*)&BreakerSwitcher::switcher_mode,"Off\0Switcher\0Cycler\0");
 
-ImGui::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold button to override\0On\0");
+UI::Combo("Breakaway Type", (int*)&BreakerSwitcher::breakaway_type, "Off\0Hold button to override\0On\0");
 if (BreakerSwitcher::breakaway_type == 1){
-    if (ImGui::Combo("Override button", &breakaway_index,
+    if (UI::Combo("Override button", &breakaway_index,
         "Sword\0Gun\0Jump\0Taunt\0"
         "Lock-on\0Change Target\0"
         "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"
@@ -880,28 +880,28 @@ ImGui::ShowHelpMarker("Activating the breaker swap hotkeys will also perform the
       "Overture\0Ragtime\0Helter Skelter\0Gerbera\0Punchline\0Buster "
       "Arm\0Rawhide\0Tomboy\0Mega Buster\0Gerbera GP01\0Pasta Breaker\0Sweet "
       "Surrender\0Monkey Business\0";
-ImGui::Combo("breaker up", (int*)&BreakerSwitcher::breakers[0], breakerboxstring);
+UI::Combo("breaker up", (int*)&BreakerSwitcher::breakers[0], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT1", std::string(get_name()) + "SLOT1", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker down", (int*)&BreakerSwitcher::breakers[1], breakerboxstring);
+UI::Combo("breaker down", (int*)&BreakerSwitcher::breakers[1], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT2", std::string(get_name()) + "SLOT2", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker left", (int*)&BreakerSwitcher::breakers[2], breakerboxstring);
+UI::Combo("breaker left", (int*)&BreakerSwitcher::breakers[2], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT3", std::string(get_name()) + "SLOT3", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker right", (int*)&BreakerSwitcher::breakers[3], breakerboxstring);
+UI::Combo("breaker right", (int*)&BreakerSwitcher::breakers[3], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT4", std::string(get_name()) + "SLOT4", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxstring);
+UI::Combo("breaker up left", (int*)&BreakerSwitcher::breakers[4], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT5", std::string(get_name()) + "SLOT5", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
+UI::Combo("breaker up right", (int*)&BreakerSwitcher::breakers[5], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT6", std::string(get_name()) + "SLOT6", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
+UI::Combo("breaker down left", (int*)&BreakerSwitcher::breakers[7], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT8", std::string(get_name()) + "SLOT8", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
-ImGui::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
+UI::Combo("breaker down right", (int*)&BreakerSwitcher::breakers[6], breakerboxstring);
 ImGui::SameLine();
 UI::KeyBindButton(std::string(get_name()) + "SLOT7", std::string(get_name()) + "SLOT7", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 }

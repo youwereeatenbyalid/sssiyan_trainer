@@ -83,7 +83,7 @@ void DisableBreakaway::on_config_save(utility::Config &cfg) {
 //void DisableBreakaway::on_draw_debug_ui() {}
 // will show up in main window, dump ImGui widgets you want here
 void DisableBreakaway::on_draw_ui() {
-    if (ImGui::Combo("Override button", &inputindex,
+    if (UI::Combo("Override button", &inputindex,
         "Sword\0Gun\0Jump\0Taunt\0"
         "Lock-on\0Change Target\0Breakaway\0Devil Trigger\0"
         "Dpad Up\0Dpad Down\0Dpad Left\0Dpad Right\0"

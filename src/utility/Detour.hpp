@@ -129,8 +129,8 @@ private:
 	std::function<void(Detour_t*)> m_pre_hook_enable_callback{}, m_post_hook_enable_callback{},
 		m_pre_hook_disable_callback{}, m_post_hook_disable_callback{};
 
-	int64_t m_return_offset = 0;
-	Address m_original{ nullptr };
-	Address m_destination{ nullptr };
-	void* m_trampoline{ nullptr };
+	int64_t m_return_offset = 0; // Offset from the the original address to return to
+	Address m_original{ nullptr }; // Address if the original code
+	Address m_destination{ nullptr }; // Address of the code to detour to
+	void* m_trampoline{ nullptr }; // Address of the trampoline
 };

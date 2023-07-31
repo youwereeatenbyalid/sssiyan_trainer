@@ -1,11 +1,12 @@
 #pragma once
 
 #include <functional>
+#include <utility/PointerHook.hpp>
 
 #include <d3d11.h>
 #include <dxgi.h>
 
-#include "utility/FunctionHook.hpp"
+#include "utility/Detour.hpp"
 
 #define D3D11HOOK_INTERNAL(X) D3D11Hook::skip_detours([&]() X)
 
@@ -29,12 +30,12 @@ public:
 
     static void signal_present_detour(const bool& state)
     {
-        m_execute_present_detour = state;
+        s_execute_present_detour = state;
     }
 
     static void signal_resize_buffer_detour(const bool& state)
     {
-        m_execute_resize_buffer_detour = state;
+        s_execute_resize_buffer_detour = state;
     }
 
     void on_present(OnPresentFn fn) { m_on_present = fn; }
@@ -48,13 +49,13 @@ protected:
     IDXGISwapChain* m_swap_chain{ nullptr };
     bool m_hooked{ false };
 
-    std::unique_ptr<FunctionHook> m_present_hook{};
-    std::unique_ptr<FunctionHook> m_resize_buffers_hook{};
+    std::unique_ptr<PointerHook> m_present_hook{};
+    std::unique_ptr<PointerHook> m_resize_buffers_hook{};
     OnPresentFn m_on_present{ nullptr };
     OnResizeBuffersFn m_on_resize_buffers{ nullptr };
 
-    static bool m_execute_present_detour;
-    static bool m_execute_resize_buffer_detour;
+    static bool s_execute_present_detour;
+    static bool s_execute_resize_buffer_detour;
 
     static HRESULT WINAPI present(IDXGISwapChain* swap_chain, UINT sync_interval, UINT flags);
     static HRESULT WINAPI resize_buffers(IDXGISwapChain* swap_chain, UINT buffer_count, UINT width, UINT height, DXGI_FORMAT new_format, UINT swap_chain_flags);

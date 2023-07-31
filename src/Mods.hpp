@@ -19,7 +19,8 @@ public:
     void on_draw_ui() const;
     void on_draw_debug_ui() const;
     void draw_entry(Mod* mod);
-    Mod* get_mod(const std::string& modName) const;
+    Mod* get_mod(const std::string& mod_name) const;
+    Mod* get_mod_by_full_name(const std::string& full_name) const;
     const std::string& get_focused_mod() const;
     void set_focused_mod(const std::string& modName) const;
     void on_pagelist_ui(int page, float indent = 0.f);
@@ -28,6 +29,7 @@ public:
     void save_mods();
     void load_mods(const std::optional<utility::Config>& cfg = std::nullopt) const;
     void log_active_mods() const;
+    const auto& get_full_mod_names() { return m_full_mod_name_list; }
     /*void static addressseek();
     std::string get_module_path(void* address) const;*/
     auto& get_config()
@@ -48,6 +50,8 @@ private:
     lua_State* global_lua_state{nullptr};
     std::unique_ptr<Coroutines::Coroutine<void(Mods::*)(), Mods*>> m_init_sdk_coroutine = std::make_unique<Coroutines::Coroutine<void(Mods::*)(), Mods*>>(&Mods::init_sdk, true, true);
 	std::unordered_map<std::string, Mod*> m_name_to_mod_map{};
+    std::unordered_map<std::string, Mod*> m_full_name_to_mod_map{};
+    std::vector<std::string> m_full_mod_name_list{};
 
     void init_sdk()
     {

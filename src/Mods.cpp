@@ -462,13 +462,16 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
             //return e;
             errors += e.value()+"\n";
         }
-       
     }
     if (init_error) {
         return std::make_optional<std::string>(errors);
     }
-    for (auto& i : m_mods)
-        i->after_all_inits();
+
+    for (auto& mod : m_mods) {
+        mod->after_all_inits();
+        m_full_mod_name_list.push_back(mod->m_full_name_string.c_str());
+		m_full_name_to_mod_map.insert({ mod->m_full_name_string.c_str(), mod.get() });
+    }
 
     if (load_configs)
     {
@@ -484,21 +487,30 @@ std::optional<std::string> Mods::on_initialize(const bool& load_configs) {
 }
 
 
-Mod* Mods::get_mod(const std::string& modName) const {
-	if (m_name_to_mod_map.find(modName) == m_name_to_mod_map.end()) {
+Mod* Mods::get_mod(const std::string& mod_name) const {
+	if (m_name_to_mod_map.find(mod_name) == m_name_to_mod_map.end()) {
 		return nullptr;
     }
 
-    return m_name_to_mod_map.at(modName);
+    return m_name_to_mod_map.at(mod_name);
+}
+
+Mod* Mods::get_mod_by_full_name(const std::string& full_name) const
+{
+	if (m_full_name_to_mod_map.find(full_name) == m_full_name_to_mod_map.end()) {
+		return nullptr;
+	}
+
+	return m_full_name_to_mod_map.at(full_name);
 }
 
 const std::string& Mods::get_focused_mod() const {
   return m_focused_mod;
 }
 
-void Mods::set_focused_mod(const std::string& modName) const
+void Mods::set_focused_mod(const std::string& mod_name) const
 {
-  m_focused_mod = modName;
+  m_focused_mod = mod_name;
 }
 
 void Mods::on_frame() const {

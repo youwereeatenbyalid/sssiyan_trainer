@@ -224,7 +224,7 @@ void EnemySpawner::on_draw_ui()
 	}
 
 	ImGui::TextWrapped("Select enemy:");
-	ImGui::Combo("##emCombo", &selectedIndx, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 25);
+	UI::Combo("##emCombo", &selectedIndx, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 25);
 	ImGui::TextWrapped("Enemy number: ");
 	UI::SliderInt("##EmNum", &emNum, 1, 20, "%d", 1.0F, ImGuiSliderFlags_AlwaysClamp);
 	ImGui::TextWrapped("Spawn point:");

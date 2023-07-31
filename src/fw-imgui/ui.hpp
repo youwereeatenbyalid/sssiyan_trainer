@@ -221,17 +221,17 @@ namespace UI {
 	BtnIndex_ REGPKeyToBtnIndex(const REGPK_Flag& key);
 
 	void KeyCaptureWindow(struct KCWBuffers& kcwBuffers, bool closeBtn = false);
+	
 	// fitHeight: Matches the last item's height with keeping the size ratio the same (Will override scale)
 	void KeyBindButton(const std::string& windowTitle, const std::string& bindName, KCWBuffers& kcwBuffers, const float& scale = 1.0f, bool fitHeight = false, ImVec4 tint_col = {1.0f, 1.0f, 1.0f, 1.0f}, bool showBtnsOnHover = true);
 
 	bool DMC5LayoutStyleButton(std::string label, char side = 'M', const float& scale = 1.0f, ImVec2 size = ImVec2(0.0f, 0.0f));
 	bool DMC5ControlsButton(BtnIndex_ index, const float& scale = 1.0f);
 	
-	// Copied straight from CE
-	template<typename T>
-	bool Combo(const char* label, const char** items, T count, T& var, T pos, bool save);
+	bool Combo(const char* label, int* current_item, const char* items_separated_by_zeros, float item_width = 0, int popup_max_height_in_items = -1);
+	bool Combo(const char* label, int* current_item, const char* const items[], int items_count, float item_width = 0, int popup_max_height_in_items = -1);
 
-	bool TabBtn(const char* text, bool state, ImVec2 size_arg = ImVec2(0.0f, 0.0f), float rounding = 0.0f);
+	bool TabButton(const char* text, bool state, ImVec2 size_arg = ImVec2(0.0f, 0.0f), float rounding = 0.0f);
 
 	enum class KeyMode_t : uint8_t
 	{

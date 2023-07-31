@@ -254,7 +254,7 @@ std::optional<std::string> BpStageJump::on_initialize() {
   m_is_enabled              = &BpStageJump::cheaton;
   m_on_page                 = Page_BloodyPalace;
   m_depends_on				= { "PlayerTracker" };
-  m_full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer. (+)";
+  m_full_name_string        = "Bp Stage Jump, Boss Rush & Randomizer (+)";
   m_author_string           = "SSSiyan, The HitchHiker";
   m_description_string      = "Allows you to skip to a BP stage of your choosing.";
 
@@ -308,7 +308,7 @@ void BpStageJump::on_draw_ui() {
 		ImGui::Spacing();
 		ImGui::Separator();
 
-		ImGui::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
+		UI::Combo("Palace Type", &palace_type, "Balanced Random Palace\0Partially Random Palace\0Truly Random Palace\0");
 		if (palace_type == BALANCED){
 			ImGui::TextWrapped("Balanced palace randomizes each set of stagees by difficulty. IE, stagees 1-20 will be randomized, then 20-40, etc.");
 		}

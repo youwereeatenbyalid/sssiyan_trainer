@@ -10,6 +10,11 @@ Detour_t::Detour_t(Address target, Address destination, int64_t return_offset)
 {
 	std::scoped_lock _{ m_hook_mutex };
 
+	// Initialize MinHook if it hasn't been already.
+	if (!g_is_minhook_initialized && MH_Initialize() == MH_OK) {
+		g_is_minhook_initialized = true;
+	}
+
 	// Create the hook. Call create afterwards to prevent race conditions accessing FunctionHook before it leaves its constructor.
 	if (const auto status = MH_CreateHook(m_original.as<LPVOID>(), m_destination.as<LPVOID>(), reinterpret_cast<LPVOID*>(&m_trampoline)); status == MH_OK) {
 		spdlog::info("Detour init successful {:p}->{:p}", m_original.ptr(), m_destination.ptr());
@@ -29,6 +34,8 @@ Detour_t::~Detour_t()
 
 bool Detour_t::enable()
 {
+	std::scoped_lock _{ m_hook_mutex };
+
 	if (m_pre_hook_enable_callback)
 		m_pre_hook_enable_callback(this);
 
@@ -49,6 +56,8 @@ bool Detour_t::enable()
 
 bool Detour_t::create()
 {
+	std::scoped_lock _{ m_hook_mutex };
+
 	if (m_trampoline != nullptr) {
 		return m_trampoline;
 	}
@@ -63,7 +72,9 @@ bool Detour_t::create()
 	return true;
 }
 
-bool Detour_t::disable() {
+bool Detour_t::disable() 
+{
+	std::scoped_lock _{ m_hook_mutex };
 
 	if (m_pre_hook_disable_callback)
 		m_pre_hook_disable_callback(this);
@@ -83,6 +94,7 @@ bool Detour_t::disable() {
 
 bool Detour_t::remove()
 {
+	std::scoped_lock _{ m_hook_mutex };
 	// Don't try to remove invalid detours.
 	if (!is_valid()) {
 		return true;

@@ -413,7 +413,7 @@ void BossDanteSetup::on_draw_ui()
 	if (isSdtTransformSetup)
 	{
 		ImGui::Spacing();
-		ImGui::Combo("SDT Transformation Type", (int*)&sdtTransformMode, "Normal SDT Transform\0 SSSS SDT Transform (Default)\0");
+		UI::Combo("SDT Transformation Type", (int*)&sdtTransformMode, "Normal SDT Transform\0 SSSS SDT Transform (Default)\0");
 		//ImGui::TextWrapped("Change transform mode to: 0 - always normal transform, 1 - always fast transform (default), 2 - first normal other fast (idk is this one even working?)");
 		//ImGui::SliderInt("##TransformMode", (int*)&sdtTransformMode, 0, 2);
 	}

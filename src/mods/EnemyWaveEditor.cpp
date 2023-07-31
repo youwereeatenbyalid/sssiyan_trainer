@@ -513,7 +513,7 @@ void EnemyWaveEditor::on_frame()
 }
 
 void EnemyWaveEditor::on_draw_ui() {
-  ImGui::Combo("Mode", (int*)&mode, modeNames.data(), modeNames.size());
+  UI::Combo("Mode", (int*)&mode, modeNames.data(), modeNames.size());
   switch (mode) {
   case EnemyWaveEditor::Mod: 
   {
@@ -711,7 +711,7 @@ void EnemyWaveEditor::print_mimiclist_items(int i)
 
 void EnemyWaveEditor::print_emdata_input(SetEmData &data) {
   ImGui::TextWrapped("Enemy:");
-  ImGui::Combo("##SelectEmCombmoBox", &data.selectedItem, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
+  UI::Combo("##SelectEmCombmoBox", &data.selectedItem, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
   ImGui::ShowHelpMarker("All \"Enemy Swapper\" enemies and spawn pos change fixes works with this mod even when swapper disabled. ");
   data.emId = EnemyData::indx_to_id(data.selectedItem);
   ImGui::Spacing();
