@@ -46,25 +46,55 @@ std::optional<std::string> HoldToMash::on_initialize() {
   auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled           = &HoldToMash::cheaton;
   m_on_page              = Page_QOL;
-  m_depends_on           = { "PlayerTracker" };
+  //m_depends_on           = { "PlayerTracker" };
+  m_scripts = { "HoldToMash.lua" };//scripts here
   m_full_name_string     = "Hold To Mash";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Hold button for inputs like twosometime, million stab, rising dragon, etc.";
 
   set_up_hotkey();
-  auto holdtomash_addr = m_patterns_cache->find_addr(base, "41 85 40 48 0F 97 C0");
-  
-  if (!holdtomash_addr) {
-    return "Unable to find holdtomash pattern.";
-  }
-  if (!install_new_detour(holdtomash_addr.value(), m_holdtomash_detour, &newmem_detour, &jmp_return, 7)) {
-    //return a error string in case something goes wrong
-    spdlog::error("[{}] failed to initialize", get_name());
-    return "Failed to initialize holdtomash";
-  }
+  //auto holdtomash_addr = m_patterns_cache->find_addr(base, "41 85 40 48 0F 97 C0");
+  //
+  //if (!holdtomash_addr) {
+  //  return "Unable to find holdtomash pattern.";
+  //}
+  //if (!install_new_detour(holdtomash_addr.value(), m_holdtomash_detour, &newmem_detour, &jmp_return, 7)) {
+  //  //return a error string in case something goes wrong
+  //  spdlog::error("[{}] failed to initialize", get_name());
+  //  return "Failed to initialize holdtomash";
+  //}
 
   return Mod::on_initialize();
 }
+
+
+void HoldToMash::on_load_lua_mod()
+{
+    API::LuaLock _{};
+    load_scripts();
+    //running lua on load here
+}
+
+void HoldToMash::on_unload_lua_mod()
+{
+    API::LuaLock _{};
+}
+
+void HoldToMash::on_lua_mod_update()
+{
+    API::LuaLock _{};
+    sol::state_view mod_state_view{ m_mod_state };
+    //lua actions on update here
+}
+
+
+
+void HoldToMash::on_draw_ui()
+{
+    draw_lua_ui();
+}
+
+
 
 // during load
 // void HoldToMash::on_config_load(const utility::Config &cfg) {}

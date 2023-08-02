@@ -26,7 +26,7 @@ naked void LuaDoppelWeaponSwitcher::init_detour_2()
 
 std::optional<std::string> LuaDoppelWeaponSwitcher::on_initialize() {
     init_check_box_info();
-    m_scripts = {"doppelweaponswitcher.lua"};//scripts here
+    m_scripts = {"doppelweaponswitcher.lua","vergilloadweaponoverride.lua"};//scripts here
     m_is_enabled = &LuaDoppelWeaponSwitcher::cheaton;
     m_on_page = Page_VergilDoppel;
     m_full_name_string = "Doppel Weapon Switcher";

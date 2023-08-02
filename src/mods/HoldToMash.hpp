@@ -1,7 +1,7 @@
 #pragma once
-#include "Mod.hpp"
+#include "LuaMod.hpp"
 #include "sdk/ReClass.hpp"
-class HoldToMash : public Mod {
+class HoldToMash : public LuaMod {
 public:
   HoldToMash() = default;
   // mod name string for config
@@ -14,6 +14,10 @@ public:
 
   static bool cheaton;
 
+  void on_load_lua_mod() override;
+  void on_unload_lua_mod() override;
+  void on_lua_mod_update() override;
+
   // Override this things if you want to store values in the config file
   // void on_config_load(const utility::Config& cfg) override;
   // void on_config_save(utility::Config& cfg) override;
@@ -22,7 +26,7 @@ public:
   // void on_frame() override;
   // on_draw_ui() is called only when the gui shows up
   // you are in the imgui window here.
-  // void on_draw_ui() override;
+  void on_draw_ui() override;
   // on_draw_debug_ui() is called when debug window shows up
   // void on_draw_debug_ui() override;
 private:
