@@ -3,7 +3,7 @@
 local enumerator = require("enumerator")
 local playermanip = require("PlayerManipulator")
 
-local DoublePress = {}
+DoublePress = {}
 DoublePress.threshhold = 0.0
 DoublePress.mash_frequency = 0.0
 DoublePress.mash_timer = 0.0
@@ -13,6 +13,7 @@ DoublePress.trigger_count = 0
 DoublePress.active = false
 DoublePress.type = 2
 DoublePress.type_enum = {"Hold to mash","Double Press to Mash"}
+--DoublePress.__index = DoublePress
 function DoublePress:new(o)
     o = o or {}
     setmetatable(o,self)
@@ -93,98 +94,12 @@ function DoublePress:mash(pad_input,delta_time)
     
 end
 
-local ebony_ivory_startup = {}
-ebony_ivory_startup.threshhold = 5
-ebony_ivory_startup.count = 0
-
-
-local renda_doublepress = {}
-renda_doublepress.threshhold = 12
-renda_doublepress.button_flag = 0
-renda_doublepress.frame_count = 0
-renda_doublepress.trigger_count = 0
-renda_doublepress.active = false
-
-local sword_renda = DoublePress:new({button_flag = 0x1,threshhold=12.0,mash_frequency=5.0})
-
-local style_renda = DoublePress:new({button_flag = 0x1000,threshhold=12.0,mash_frequency=5.0}) 
-
-
-local dante_ebony_ivory = DoublePress:new({button_flag=0x2,threshhold=12.0,mash_frequency=5.0})
-local vergil_summoned_swords = DoublePress:new({button_flag=0x2,threshhold=12.0,mash_frequency=5.0})
+sword_renda = DoublePress:new({button_flag = 0x1,threshhold=12.0,mash_frequency=5.0})
+style_renda = DoublePress:new({button_flag = 0x1000,threshhold=12.0,mash_frequency=5.0}) 
+dante_ebony_ivory = DoublePress:new({button_flag=0x2,threshhold=12.0,mash_frequency=5.0})
+vergil_summoned_swords = DoublePress:new({button_flag=0x2,threshhold=12.0,mash_frequency=5.0})
 
 --this needs more work, the double-press is "Sticky" right now. Maybe hook the reset function to reset the count properly?
-
-
-local function checkDoublePress(pad_input,double_press,button_flag)
-    --increment on trigger/button press + reset frame_count
-    if pad_input:call("isButtonTrigger(System.UInt32)",button_flag) then
-        double_press.trigger_count = double_press.trigger_count+1
-        double_press.frame_count = 0
-    end
-    --check if double press happened
-    if double_press.trigger_count > 1 then
-        double_press.active = true
-    end
-
-    --if frame counter exceeds threshhold reset double press
-    if double_press.frame_count > double_press.threshhold then
-        double_press.trigger_count = 0
-    else
-        --increment frame counter
-        double_press.frame_count = double_press.frame_count + 1
-    end
-
-    if pad_input:call("isButtonOn(System.UInt32)",button_flag) and double_press.active then
-        pad_input:call("clearButton(System.UInt32)",button_flag)	
-        local trigger_flags = pad_input:call("get_buttonTriggerFlags()")
-        local trigger_flags = trigger_flags + button_flag
-        pad_input:call("set_buttonTriggerFlags(System.UInt32)",trigger_flags)
-    end
-
-    --reset mash on release
-    if pad_input:call("isButtonRelease(System.UInt32)",button_flag) and double_press.active then
-        double_press.active = false
-        double_press.trigger_count = 0
-    end
-end
-
-local function checkDoublePress_timer(pad_input,double_press,button_flag,delta_time)
-    --increment on trigger/button press + reset frame_count
-    if pad_input:call("isButtonTrigger(System.UInt32)",button_flag) then
-        double_press.trigger_count = double_press.trigger_count+1
-        double_press.frame_count = 0.0
-    end
-    --check if double press happened
-    if double_press.trigger_count > 1 then
-        double_press.active = true
-        double_press.frequency_count = 0.0
-    end
-
-    --if frame counter exceeds threshhold reset double press
-    if double_press.frame_count > double_press.threshhold then
-        double_press.trigger_count = 0.0
-    else
-        --increment frame counter
-        double_press.frame_count = double_press.frame_count + delta_time
-    end
-
-    if double_press.active then
-        double_press.frequency_count = double_press.frequency_count+delta_time
-        if double_press.frequency_count > double_press.frequency then
-            pad_input:call("clearButton(System.UInt32)",button_flag)	
-            local trigger_flags = pad_input:call("get_buttonTriggerFlags()")
-            local trigger_flags = trigger_flags + button_flag
-            pad_input:call("set_buttonTriggerFlags(System.UInt32)",trigger_flags)
-            double_press.frequency_count = 0.0
-        end
-    end
-    --reset mash on release
-    if pad_input:call("isButtonRelease(System.UInt32)",button_flag) and double_press.active then
-        double_press.active = false
-        double_press.trigger_count = 0
-    end
-end
 
 local doCharacterUpdateCommon = {}
 doCharacterUpdateCommon.method = sdk.find_type_definition("app.Player"):get_method("doCharacterUpdateCommon")
@@ -285,8 +200,7 @@ local function draw_threshhold(label,double_press)
         double_press.mash_frequency = freq_value
     end 
 end
-re.on_draw_ui(function ()
-
+local function uifunction()
     draw_threshhold("Ebony and Ivory",dante_ebony_ivory)
     draw_threshhold("Vergil summoned swords",vergil_summoned_swords)
 	draw_threshhold("Sword Renda",sword_renda)
@@ -298,9 +212,6 @@ re.on_draw_ui(function ()
     imgui.spacing()
     imgui.text("Sword active "..tostring(sword_renda.active))
     imgui.text("Style active "..tostring(style_renda.active))
-end)
-
-re.on_application_entry("PreupdateBehavior",function ()
-
-end);
+end
+--re.on_draw_ui(uifunction)
 
