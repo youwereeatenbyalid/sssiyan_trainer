@@ -126,9 +126,11 @@ function doCharacterUpdateCommon.pre(args)
 				end
             end
         else
-            vergil_summoned_swords:update(pad_input,player:get_DeltaTime())
-            if vergil_summoned_swords.active then
-                vergil_summoned_swords:mash(pad_input,player:get_DeltaTime())
+            if player:call("get_playerID()") == 4 then
+                vergil_summoned_swords:update(pad_input,player:get_DeltaTime())
+                if vergil_summoned_swords.active then
+                    vergil_summoned_swords:mash(pad_input,player:get_DeltaTime())
+                end
             end
             --checkDoublePress_timer(pad_input,vergil_summoned_swords,0x2,player:get_DeltaTime())
         end
@@ -166,11 +168,15 @@ function rendaCheckerUpdate.pre(args)
     if not renda_checker then return end
     if not pad_input then return end
     if renda_checker:get_buttonBit() == sword_renda.button_flag and sword_renda.active then
-        sword_renda:mash(pad_input)
+        local count = renda_checker:call("get_count")
+        count = count + 1
+        renda_checker:call("set_count(System.UInt32)",count)
     end
 
     if renda_checker:get_buttonBit() == style_renda.button_flag and style_renda.active then
-        style_renda:mash(pad_input)
+        local count = renda_checker:call("get_count")
+        count = count + 1
+        renda_checker:call("set_count(System.UInt32)",count)
     end
     --log.debug(string.format("Renda checker count: %d",renda_checker:get_count()))
     --log.debug("Is Previous On: "..tostring(renda_checker:get_isPrevOn()))

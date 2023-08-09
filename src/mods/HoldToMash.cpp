@@ -119,16 +119,18 @@ void draw_threshhold(std::string label, float& threshhold, float& frequency) {
     ImGui::Text(label.c_str());
     ImGui::SliderFloat(("Startup Window##" + label).c_str(), &threshhold, 0.0, 120.0);
     ImGui::SliderFloat(("Frequency##" + label).c_str(), &frequency, 0.0, 10.0);
-    ImGui::Separator();
+    ImGui::Spacing();
 }
 
 void HoldToMash::on_draw_ui()
 {
+    draw_threshhold("Vergil Summon Sword Rapid-fire (Double Press)", summon_sword.threshhold, summon_sword.frequency);
+    ImGui::ShowHelpMarker("Because Vergil sword formations are hold inputs, the summon sword rapid fire is always triggered by double-pressing the gun button.");
+    ImGui::Separator();
     auto combostring = "Hold to Mash\0Double Press To Mash\0";
     UI::Combo("Activation Type", (int*)&activation_type, combostring);
     ImGui::Separator();
     draw_threshhold("Ebony & Ivory Rapid-fire", ebony_ivory.threshhold, ebony_ivory.frequency);
-    draw_threshhold("Vergil Summon Sword Rapid-fire", summon_sword.threshhold, summon_sword.frequency);
     draw_threshhold("Melee Mash", sword_renda.threshhold, sword_renda.frequency);
     draw_threshhold("Dante Style Mash", style_renda.threshhold, style_renda.frequency);
    

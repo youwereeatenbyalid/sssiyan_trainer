@@ -1,6 +1,7 @@
 #pragma once
 #include "LuaMod.hpp"
 #include "sdk/ReClass.hpp"
+#include "ImGuiExtensions/ImGuiExtensions.h"
 class HoldToMash : public LuaMod {
 public:
   HoldToMash() = default;
