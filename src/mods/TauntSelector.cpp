@@ -147,7 +147,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled = &TauntSelector::cheaton;
   m_on_page    = Page_Taunt;
-
+  m_depends_on = { "PlayerTracker","StyleRank" };
   m_full_name_string     = "Taunt Selector (+)";
   m_author_string        = "The HitchHiker";
   m_description_string   = "Allows you to specify what taunts will be used by each character.";
@@ -170,7 +170,7 @@ std::optional<std::string> TauntSelector::on_initialize() {
   nerotauntmap["Gun fakeout"] = 0x6D;
   nerotauntmap["Sword Rev"] = 0x6E;
   nerotauntmap["\"I'll play with you\""] = 0x6F;
-  //nerotauntmap["Sword Plant - Force Edge"] = 0x70;
+  nerotauntmap["\"Shall we dance?\""] = 0x70;
   nerotauntmap["Air Guitar"] = 0x71;
   nerotauntmap["Clapping"] = 0x72;
   nerotauntmap["Well! What is it!"] = 0x73;
@@ -180,11 +180,11 @@ std::optional<std::string> TauntSelector::on_initialize() {
   nerotauntmap["Hood Taunt"] = 0x77;
   nerotauntmap["Camera Taunt"] = 0x78;
   nerotauntmap["Air taunt"] = 0x79;
-  nerotauntmap["S-Rank Lock-On provocation"] = 0x7C;
-  nerotauntmap["Lock-On provocation"] = 0x7D;
+  nerotauntmap["Lock-On provocation"] = 0x7C;
+  nerotauntmap["S-Rank Lock-On provocation"] = 0x7D;
   nerotauntmap["EX provocation"] = 0x7F;
-  nerotauntmap["BP provocation"] = 0x83;
   nerotauntmap["BP provocation (Hoodless)"] = 0x82;
+  nerotauntmap["BP provocation"] = 0x83;
   nerotauntmap["Gum taunt"] = 0x85;
 
   dantetauntmap["Default"] = 0x0;
@@ -210,14 +210,18 @@ std::optional<std::string> TauntSelector::on_initialize() {
   vtauntmap["Slow Clap"] = 0x6A;
   vtauntmap["Ride of the Valkyries"] = 0x6B;
   vtauntmap["\"I need more strength\""] = 0x6C;
+  //6D - Provoke04.End
+  //6E - Provoke05.End
   vtauntmap["Mini pet"] = 0x6F;
   vtauntmap["\"You make me laugh\""] = 0x70;
   vtauntmap["Caprice 24 - Violin"] = 0x71;
   vtauntmap["Tap-Dance"] = 0x72;
-  //vtauntmap["\"Man, I'm bored\""] = 0x73;
+  vtauntmap["Coughing Fit"] = 0x73;
   vtauntmap["Pet Summon"] = 0x74;
   vtauntmap["Turn away"] = 0x75;
   vtauntmap["Air taunt"] = 0x79;
+  vtauntmap["S-Rank Air taunt"] = 0x7A;
+  //vtauntmap["AirProvoke03 (Unused)"] = 0x7B;
   vtauntmap["Lock-On provocation"] = 0x7C;
   vtauntmap["EX provocation"] = 0x7F;
   vtauntmap["BP provocation"] = 0x82;
