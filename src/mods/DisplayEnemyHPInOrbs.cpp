@@ -3,6 +3,7 @@
 #include "DamageMultiplier.hpp"
 
 uintptr_t DisplayEnemyHPInOrbs::jmp_ret{NULL};
+uintptr_t DisplayEnemyHPInOrbs::jmp_cont{NULL};
 bool DisplayEnemyHPInOrbs::cheaton{NULL};
 
 // clang-format off
@@ -22,10 +23,12 @@ static naked void detour() {
         jmp cheatcode
 
     cheatcode:
-        CVTTSS2SI ebx, [DamageMultiplier::enemyhpvalue]
-        code:
-        mov edi,00000045
-        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_ret]
+        CVTTSS2SI ebp, [DamageMultiplier::enemyhpvalue]
+        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
+
+    code:
+        mov ebp, [rdx+78h]
+        jmp qword ptr [DisplayEnemyHPInOrbs::jmp_cont]
 	}
 }
 
@@ -50,13 +53,14 @@ std::optional<std::string> DisplayEnemyHPInOrbs::on_initialize() {
 
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
-  auto addr = m_patterns_cache->find_addr(base, "6C 48 8B F7 BF 45 00 00 00");
+  auto addr = m_patterns_cache->find_addr(base, "8B 6A 78 EB 02");
+  DisplayEnemyHPInOrbs::jmp_cont = addr.value() + 7;
   
   if (!addr) {
       return "Unable to find DisplayEnemyHPInOrbs pattern.";
   }
 
-  if (!install_new_detour(addr.value()+4, m_detour, &detour, &jmp_ret, 5)) {
+  if (!install_new_detour(addr.value(), m_detour, &detour, &jmp_ret, 5)) {
     //  return a error string in case something goes wrong
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize DisplayEnemyHPInOrbs";
