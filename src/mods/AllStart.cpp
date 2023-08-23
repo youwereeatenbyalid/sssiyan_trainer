@@ -1,6 +1,5 @@
 #include "AllStart.hpp"
 #include "PlayerTracker.hpp"
-#include "GameInput.hpp"
 
 uintptr_t AllStart::jmp_ret{NULL};
 bool AllStart::cheaton{NULL};
@@ -123,8 +122,6 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         add r11, 0x1888
         cmp byte ptr [r11], 3 // royal guard
         jne codepops
-//<<<<<<< Updated upstream
-
         mov r11, [PlayerTracker::playerentity]
         add r11, 0xEF0
         mov r11, [r11]
@@ -132,12 +129,6 @@ static naked void detour() { // "DevilMayCry5.exe"+964B06
         mov r11, [r11]
         shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
         test r11, 0x1
-//=======
-        //mov r11, [GameInput::holdframes] // amazing variable name
-        //shr r11, 0xC //this bit shifts 12 times, so 0x1000->0x1
-        //test r11, 0x1
-        //cmp byte ptr [AllStart::style_held], 1 //check if style is being held
-//>>>>>>> Stashed changes
         pop r11
         jne cancellable
         jmp code
