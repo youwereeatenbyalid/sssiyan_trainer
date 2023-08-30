@@ -2,13 +2,15 @@
 #include "Mod.hpp"
 #include "Mods.hpp"
 #include "GameFunctions/GameFunc.hpp"
+#include "PlayerTracker.hpp"
 #include "GameplayStateTracker.hpp"
-#include "CheckpointPos.hpp"
-#include "InputSystem.hpp"
+#include "EndLvlHooks.hpp"
+//#include "CheckpointPos.hpp"
+//#include "InputSystem.hpp"
 #include "EnemyData.hpp"
 #include "ImGuiExtensions/ImGuiExtensions.h"
 #include <future>
-#include "mods/Pl0300ControllerManager.hpp"
+//#include "mods/Pl0300ControllerManager.hpp"
 #include "mods/Coroutine/Coroutines.hpp"
 
 //clang-format off
@@ -24,8 +26,8 @@ private:
 		BOBVergil
 	};
 
-	PlCntr::Pl0300Cntr::Pl0300ControllerManager* _pl0300Manager;
-	InputSystem* _inputSystemMod = nullptr;
+	//PlCntr::Pl0300Cntr::Pl0300ControllerManager* _pl0300Manager;
+	//InputSystem* _inputSystemMod = nullptr;
 	static inline EnemySpawner* _mod = nullptr;
 
 	int selectedIndx = 0;
@@ -39,36 +41,37 @@ private:
 
 	gf::Vec3 _spawnPos{ 0,0,0 };
 
-	PlCntr::HitControllerSettings _hcNextSpawnSettings;
-	PlCntr::HitControllerSettings _manualEm6000HcSettings;
+	//PlCntr::HitControllerSettings _hcNextSpawnSettings;
+	//PlCntr::HitControllerSettings _manualEm6000HcSettings;
 
-	std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000PlHelpersList;
-	std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000FriendlyList;
+	//std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000PlHelpersList;
+	//std::vector<std::weak_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>> _em6000FriendlyList;
 
 	void load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType loadType = Enemy);
 
 	using actionType = decltype(&EnemySpawner::load_and_spawn);
 
 	Coroutines::Coroutine<actionType, EnemySpawner*, int, gf::Vec3, int, LoadType> _spawnEmCoroutine{ &EnemySpawner::load_and_spawn };
-	Coroutines::Coroutine<void(EnemySpawner::*)(LoadType), EnemySpawner*, LoadType> _killVergilsCoroutine{ &EnemySpawner::kill_vergils, true, true };
+	//Coroutines::Coroutine<void(EnemySpawner::*)(LoadType), EnemySpawner*, LoadType> _killVergilsCoroutine{ &EnemySpawner::kill_vergils, true, true };
 
 	std::array<gf::Vec3, 3> _pl0300TeleportOffsets = { gf::Vec3(1.2f, 1.2f, 0), gf::Vec3(1.45f, -1.8f, 0), gf::Vec3(-1.35f, 2.0f, 0) };
 
-	std::mt19937 _rndGen{};
-	std::uniform_int_distribution<int> _rndTeleportOffsIndx{ 0, _pl0300TeleportOffsets.size() - 1 };
+	//std::mt19937 _rndGen{};
+	//std::uniform_int_distribution<int> _rndTeleportOffsIndx{ 0, _pl0300TeleportOffsets.size() - 1 };
 
 	void reset(EndLvlHooks::EndType endType) override;
 
 	gf::Vec3 get_pl_pos(const REManagedObject* plManager);
+	Vector3f get_player_coords();
 
 	void on_pl_added(uintptr_t threadCntxt, uintptr_t plManager, uintptr_t pl)
 	{
 		_isPlSpawned = true;
 	}
 
-	void kill_vergils(LoadType type);
+	//void kill_vergils(LoadType type);
 
-	void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool* skipOrig);
+	//void on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool* skipOrig);
 
 	inline int indx_to_id(int indx)
 	{
@@ -90,7 +93,7 @@ public:
 	{
 		_mod = this;
 		PlayerTracker::on_pl_mng_pl_add_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, uintptr_t>>(this, &EnemySpawner::on_pl_added));
-		_killVergilsCoroutine.ignoring_update_on_pause(false);
+		//_killVergilsCoroutine.ignoring_update_on_pause(false);
 	}
 
 	~EnemySpawner();

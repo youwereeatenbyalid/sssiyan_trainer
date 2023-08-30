@@ -396,7 +396,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         //m_mods.emplace_back(std::make_unique<PosActionEditor>());
         //m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr
-        //m_mods.emplace_back(std::make_unique<EnemySpawner>());
+        m_mods.emplace_back(std::make_unique<EnemySpawner>());
         //// Nero
         //m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
         //// Dante

@@ -2,23 +2,23 @@
 
 void EnemySpawner::after_all_inits()
 {
-	_pl0300Manager = (PlCntr::Pl0300Cntr::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
-	_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
-	_pl0300Manager->on_pl0300_teleport_calc_destination_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-		(this, &EnemySpawner::on_pl0300_trick_update));
+	//_pl0300Manager = (PlCntr::Pl0300Cntr::Pl0300ControllerManager*)(g_framework->get_mods()->get_mod("Pl0300ControllerManager"));
+	//_inputSystemMod = static_cast<InputSystem*>(g_framework->get_mods()->get_mod("InputSystem"));
+	//_pl0300Manager->on_pl0300_teleport_calc_destination_sub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
+	//	(this, &EnemySpawner::on_pl0300_trick_update));
 }
 
 void EnemySpawner::reset(EndLvlHooks::EndType endType)
 {
-	_em6000FriendlyList.clear();
-	_em6000PlHelpersList.clear();
+	//_em6000FriendlyList.clear();
+	//_em6000PlHelpersList.clear();
 	_isPlSpawned = false;
 }
 
 EnemySpawner::~EnemySpawner()
 {
-	_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
-		(this, &EnemySpawner::on_pl0300_trick_update));
+	//_pl0300Manager->on_pl0300_teleport_calc_destination_unsub(std::make_shared<Events::EventHandler<EnemySpawner, uintptr_t, uintptr_t, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller>, bool*>>
+	//	(this, &EnemySpawner::on_pl0300_trick_update));
 }
 
 std::optional<std::string> EnemySpawner::on_initialize()
@@ -29,20 +29,20 @@ std::optional<std::string> EnemySpawner::on_initialize()
 	m_on_page = Page_CommonCheat;
 	m_full_name_string = "Enemy Spawner (+)";
 	m_author_string = "V.P.Zadov";
-	m_depends_on = { "GameplayStateTracker","PlayerTracker","Pl0300ControllerManager" };
+	m_depends_on = { "GameplayStateTracker","PlayerTracker"/*,"Pl0300ControllerManager"*/,"EndLvlHooks"};
 	m_description_string = "Spawn enemies on command.";
 
 	_spawnEmCoroutine.set_delay(0.3f);
 
 	g_keyBinds.AddBind(std::string(get_name()) + "emSpawn", [this]
 		{
-			if(_isPlSpawned)
+			if(_isPlSpawned && cheaton)
 				_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, Enemy);
 		}, OnState_::OnState_Press);
 	g_keyBinds.AddBind(std::string(get_name()) + "getPlPos", [this]
 		{
-			if (_isPlSpawned)
-				_spawnPos = CheckpointPos::get_player_coords();
+			if (_isPlSpawned && cheaton)
+				_spawnPos = /*CheckpointPos::*/get_player_coords();
 		}, OnState_::OnState_Press);
 
 	return Mod::on_initialize();
@@ -50,16 +50,16 @@ std::optional<std::string> EnemySpawner::on_initialize()
 
 void EnemySpawner::on_config_load(const utility::Config& cfg)
 {
-	_hcNextSpawnSettings.baseAttackRate = cfg.get<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate").value_or(0.5f);
-	_hcNextSpawnSettings.isAttackNoDie = cfg.get<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie").value_or(false);
+	//_hcNextSpawnSettings.baseAttackRate = cfg.get<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate").value_or(0.5f);
+	//_hcNextSpawnSettings.isAttackNoDie = cfg.get<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie").value_or(false);
 	_isFriendlyVergilEx = cfg.get<bool>("EnemySpawner._isFriendlyVergilEx").value_or(false);
 	_isBobVergilEx = cfg.get<bool>("EnemySpawner._isBobVergilEx").value_or(false);
 }
 
 void EnemySpawner::on_config_save(utility::Config& cfg)
 {
-	cfg.set<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate", _hcNextSpawnSettings.baseAttackRate);
-	cfg.set<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie", _hcNextSpawnSettings.isAttackNoDie);
+	//cfg.set<float>("EnemySpawner._hcNextSpawnSettings.baseAttackRate", _hcNextSpawnSettings.baseAttackRate);
+	//cfg.set<bool>("EnemySpawner._hcNextSpawnSettings.isAttackNoDie", _hcNextSpawnSettings.isAttackNoDie);
 	cfg.set<bool>("EnemySpawner._isFriendlyVergilEx", _isFriendlyVergilEx);
 	cfg.set<bool>("EnemySpawner._isBobVergilEx", _isBobVergilEx);
 }
@@ -74,33 +74,33 @@ gf::Vec3 EnemySpawner::get_pl_pos(const REManagedObject* plManager)
 	return *(gf::Vec3*)(transform + 0x30);
 }
 
-void EnemySpawner::on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrig)
-{
-	for (const auto& i : _em6000PlHelpersList)
-	{
-		if (auto shared = i.lock(); shared != nullptr && shared->get_pl() == pl0300->get_pl())
-		{
-			*skipOrig = true;
-			auto upl0300 = pl0300->get_pl();
-			if (_mod->_inputSystemMod != nullptr && _mod->_inputSystemMod->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset))
-			{
-				*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-				*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
-			}
-			else
-			{
-				auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
-				if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
-					*(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(ccc + 0x60) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-				else
-					*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
-			}
-			*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
-			*(int*)(upl0300 + 0x2008) = 29;//teleportActionThink, teleport2NearTarget
-			return;
-		}
-	}
-}
+//void EnemySpawner::on_pl0300_trick_update(uintptr_t threadCntxt, uintptr_t fsmPl0300Teleport, std::shared_ptr<PlCntr::Pl0300Cntr::Pl0300Controller> pl0300, bool* skipOrig)
+//{
+//	for (const auto& i : _em6000PlHelpersList)
+//	{
+//		if (auto shared = i.lock(); shared != nullptr && shared->get_pl() == pl0300->get_pl())
+//		{
+//			*skipOrig = true;
+//			auto upl0300 = pl0300->get_pl();
+//			if (_mod->_inputSystemMod != nullptr && _mod->_inputSystemMod->is_action_button_pressed(InputSystem::PadInputGameAction::CameraReset))
+//			{
+//				*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+//				*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
+//			}
+//			else
+//			{
+//				auto ccc = *(uintptr_t*)(upl0300 + 0x1818);
+//				if (ccc != 0 && *(uintptr_t*)(ccc + 0x58) != 0)
+//					*(gf::Vec3*)(upl0300 + 0x1f40) = *(gf::Vec3*)(ccc + 0x60) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+//				else
+//					*(gf::Vec3*)(upl0300 + 0x1f40) = _mod->get_pl_pos(pl0300->get_pl_manager()) + _mod->_pl0300TeleportOffsets[_mod->_rndTeleportOffsIndx(_mod->_rndGen)];
+//			}
+//			*(gf::Vec3*)(fsmPl0300Teleport + 0x80) = *(gf::Vec3*)(upl0300 + 0x1f40);
+//			*(int*)(upl0300 + 0x2008) = 29;//teleportActionThink, teleport2NearTarget
+//			return;
+//		}
+//	}
+//}
 
 void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType loadType)
 {
@@ -125,28 +125,28 @@ void EnemySpawner::load_and_spawn(int emId, gf::Vec3 pos, int emNum, LoadType lo
 			}
 			return;
 		}
-		case FriendlyVergil:
-		{
-			auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly, pos, false, _isFriendlyVergilEx);
-			auto pl0300 = em6000.lock();
-			if (pl0300 == nullptr)
-				return;
-			pl0300->set_hitcontroller_settings(_hcNextSpawnSettings);
-			_em6000FriendlyList.push_back(em6000);
-			break;
-		}
-		case BOBVergil:
-		{
-			auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, pos, false, _isBobVergilEx);
-			auto pl0300 = em6000.lock();
-			if (pl0300 == nullptr)
-				return;
-			_em6000PlHelpersList.push_back(em6000);
-			pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
-			pl0300->set_em_step_enabled(_bobEmStep);
-			pl0300->set_jcut_num(_bobJcNum);
-			break;
-		}
+		//case FriendlyVergil:
+		//{
+		//	auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly, pos, false, _isFriendlyVergilEx);
+		//	auto pl0300 = em6000.lock();
+		//	if (pl0300 == nullptr)
+		//		return;
+		//	pl0300->set_hitcontroller_settings(_hcNextSpawnSettings);
+		//	_em6000FriendlyList.push_back(em6000);
+		//	break;
+		//}
+		//case BOBVergil:
+		//{
+		//	auto em6000 = _pl0300Manager->create_em6000(PlCntr::Pl0300Cntr::Pl0300Type::PlHelper, pos, false, _isBobVergilEx);
+		//	auto pl0300 = em6000.lock();
+		//	if (pl0300 == nullptr)
+		//		return;
+		//	_em6000PlHelpersList.push_back(em6000);
+		//	pl0300->set_hitcontroller_settings(_manualEm6000HcSettings);
+		//	pl0300->set_em_step_enabled(_bobEmStep);
+		//	pl0300->set_jcut_num(_bobJcNum);
+		//	break;
+		//}
 		default:
 		{
 			_spawnEmCoroutine.stop();
@@ -200,20 +200,33 @@ uintptr_t EnemySpawner::spawn_enemy(int emId, gf::Vec3 pos, volatile int*& outLo
 	return (uintptr_t)sdk::call_object_func_easy<void*>((REManagedObject*)pfb, "instantiate(via.vec3)", pos);
 }
 
-void EnemySpawner::kill_vergils(LoadType type)
-{
-	if (type == LoadType::FriendlyVergil)
-	{
-		_pl0300Manager->kill_all_friendly_em6000();
-		_em6000FriendlyList.clear();
-	}
-	else
-	{
-		for (const auto i : _em6000PlHelpersList)
-			_pl0300Manager->destroy_game_obj(i);
-		_em6000PlHelpersList.clear();
-	}
-	_killVergilsCoroutine.stop();
+//void EnemySpawner::kill_vergils(LoadType type)
+//{
+//	if (type == LoadType::FriendlyVergil)
+//	{
+//		_pl0300Manager->kill_all_friendly_em6000();
+//		_em6000FriendlyList.clear();
+//	}
+//	else
+//	{
+//		for (const auto i : _em6000PlHelpersList)
+//			_pl0300Manager->destroy_game_obj(i);
+//		_em6000PlHelpersList.clear();
+//	}
+//	_killVergilsCoroutine.stop();
+//}
+
+Vector3f EnemySpawner::get_player_coords(){
+	auto plManager = sdk::get_managed_singleton<REManagedObject>("app.PlayerManager");
+	if (plManager == 0)
+		return Vector3f{0,0,0};
+	auto pl = *(uintptr_t*)((uintptr_t)plManager + 0x60);
+	if (pl == 0)
+		return Vector3f { 0,0,0 };
+	auto gameObj = *(uintptr_t*)(pl + 0x10);
+	auto transform = *(uintptr_t*)(gameObj + 0x18);
+	gf::Vec3 pos = *(gf::Vec3*)(transform + 0x30);
+	return pos.to_vector3f();
 }
 
 void EnemySpawner::on_draw_ui()
@@ -230,10 +243,10 @@ void EnemySpawner::on_draw_ui()
 	ImGui::TextWrapped("Spawn point:");
 	ImGui::InputFloat3("##_spawnPos", (float*)&_spawnPos, "%.1f");
 	
-	if (_isPlSpawned)
+	if (_isPlSpawned && cheaton)
 	{
 		if (ImGui::Button("Use player's position as spawn point"))
-			_spawnPos = CheckpointPos::get_player_coords();
+			_spawnPos = /*CheckpointPos::*/get_player_coords();
 		ImGui::SameLine();
 		UI::KeyBindButton("Get player's position", std::string(get_name()) + "getPlPos", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 		ImGui::Spacing();
@@ -243,119 +256,119 @@ void EnemySpawner::on_draw_ui()
 		UI::KeyBindButton("Spawn enemy", std::string(get_name()) + "emSpawn", g_framework->get_kcw_buffers(), 1.0f, true, UI::BUTTONCOLOR);
 	}
 	ImGui::Spacing();
-	if (_isPlSpawned && ImGui::Button("Kill all enemies in current wave"))
+	if (_isPlSpawned && cheaton && ImGui::Button("Kill all enemies in current wave"))
 	{
 		auto emManager = sdk::get_managed_singleton<REManagedObject>("app.EnemyManager");
 		if (emManager != nullptr)
 			sdk::call_object_func_easy<void*>(emManager, "killAllEnemy()");
 	}
 
-	ImGui::Separator();
+	//ImGui::Separator();
 
-	if (ImGui::CollapsingHeader("Friendly Vergil settings"))
-	{
+	//if (ImGui::CollapsingHeader("Friendly Vergil settings"))
+	//{
 
-		ImGui::TextWrapped("Damage multiplier:");
-		UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Vergil attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
-		ImGui::Checkbox("Ex costume ##friendly", &_isFriendlyVergilEx);
+	//	ImGui::TextWrapped("Damage multiplier:");
+	//	UI::SliderFloat("##Em6000AttackRateF", &_hcNextSpawnSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+	//	ImGui::Checkbox("Vergil attacks can't kill enemy ##0", &_hcNextSpawnSettings.isAttackNoDie);
+	//	ImGui::Checkbox("Ex costume ##friendly", &_isFriendlyVergilEx);
 
-		ImGui::Separator();
+	//	ImGui::Separator();
 
-		if (_isPlSpawned && ImGui::Button("Spawn friendly Vergil"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, FriendlyVergil);
-		}
+	//	if (_isPlSpawned && ImGui::Button("Spawn friendly Vergil"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, FriendlyVergil);
+	//	}
 
-		if (_isPlSpawned)
-			ImGui::ShowHelpMarker("Spawns an enemy Vergil with the credits AI.");
+	//	if (_isPlSpawned)
+	//		ImGui::ShowHelpMarker("Spawns an enemy Vergil with the credits AI.");
 
 
-		ImGui::Spacing();
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Update all friendly Vergils settings"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			for (auto &i : _em6000FriendlyList)
-			{
-				if(auto em6000 = i.lock(); em6000 != nullptr)
-					em6000->set_hitcontroller_settings(_hcNextSpawnSettings);
-			}
-		}
+	//	if (_isPlSpawned && ImGui::Button("Update all friendly Vergils settings"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		for (auto &i : _em6000FriendlyList)
+	//		{
+	//			if(auto em6000 = i.lock(); em6000 != nullptr)
+	//				em6000->set_hitcontroller_settings(_hcNextSpawnSettings);
+	//		}
+	//	}
 
-		ImGui::Spacing();
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Teleport all friendly Vergil's to player's current position"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			_pl0300Manager->set_pos_to_all(CheckpointPos::get_player_coords(), PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly);
-		}
+	//	if (_isPlSpawned && ImGui::Button("Teleport all friendly Vergil's to player's current position"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		_pl0300Manager->set_pos_to_all(CheckpointPos::get_player_coords(), PlCntr::Pl0300Cntr::Pl0300Type::Em6000Friendly);
+	//	}
 
-		ImGui::Spacing();
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Kill all friendly Vergils"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			_killVergilsCoroutine.start(this, FriendlyVergil);
-		}
-	}
-	
-	if (ImGui::CollapsingHeader("Battle Of Brothers Vergils settings"))
-	{
-		ImGui::TextWrapped("Damage multiplier:");
-		UI::SliderFloat("##Em6000AttackRateB", &_manualEm6000HcSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::TextWrapped("JC num:");
-		UI::SliderInt("##Em6000JcNum", &_bobJcNum, 1, 4, "%d", 1.0f, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Checkbox("Attacks can't kill enemy ##1", &_manualEm6000HcSettings.isAttackNoDie);
-		ImGui::Checkbox("Enable junk boss's enemy step", &_bobEmStep);
-		ImGui::Checkbox("Ex costume ##BOB", &_isBobVergilEx);
+	//	if (_isPlSpawned && ImGui::Button("Kill all friendly Vergils"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		_killVergilsCoroutine.start(this, FriendlyVergil);
+	//	}
+	//}
+	//
+	//if (ImGui::CollapsingHeader("Battle Of Brothers Vergils settings"))
+	//{
+	//	ImGui::TextWrapped("Damage multiplier:");
+	//	UI::SliderFloat("##Em6000AttackRateB", &_manualEm6000HcSettings.baseAttackRate, 0, 1.0f, "%.2f", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+	//	ImGui::TextWrapped("JC num:");
+	//	UI::SliderInt("##Em6000JcNum", &_bobJcNum, 1, 4, "%d", 1.0f, ImGuiSliderFlags_AlwaysClamp);
+	//	ImGui::Checkbox("Attacks can't kill enemy ##1", &_manualEm6000HcSettings.isAttackNoDie);
+	//	ImGui::Checkbox("Enable junk boss's enemy step", &_bobEmStep);
+	//	ImGui::Checkbox("Ex costume ##BOB", &_isBobVergilEx);
 
-		ImGui::Separator();
+	//	ImGui::Separator();
 
-		if (_isPlSpawned && ImGui::Button("Try to spawn BOB Vergil"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, BOBVergil);
-		}
-		
-		ImGui::Spacing();
+	//	if (_isPlSpawned && ImGui::Button("Try to spawn BOB Vergil"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		_spawnEmCoroutine.start(this, indx_to_id(selectedIndx), _spawnPos, emNum, BOBVergil);
+	//	}
+	//	
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Change all BOB Vergils settings"))
-		{
-			for (const auto i : _em6000PlHelpersList)
-			{
-				auto pl0300Ctrl = i.lock();
-				pl0300Ctrl->set_hitcontroller_settings(_hcNextSpawnSettings);
-				pl0300Ctrl->set_jcut_num(_bobJcNum);
-				pl0300Ctrl->set_em_step_enabled(_bobEmStep);
-			}
-		}
+	//	if (_isPlSpawned && ImGui::Button("Change all BOB Vergils settings"))
+	//	{
+	//		for (const auto i : _em6000PlHelpersList)
+	//		{
+	//			auto pl0300Ctrl = i.lock();
+	//			pl0300Ctrl->set_hitcontroller_settings(_hcNextSpawnSettings);
+	//			pl0300Ctrl->set_jcut_num(_bobJcNum);
+	//			pl0300Ctrl->set_em_step_enabled(_bobEmStep);
+	//		}
+	//	}
 
-		ImGui::Spacing();
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Set player's position for all BOB Vergils"))
-		{
-			for (const auto i : _em6000PlHelpersList)
-				i.lock()->set_pos_full(CheckpointPos::get_player_coords());
-		}
+	//	if (_isPlSpawned && ImGui::Button("Set player's position for all BOB Vergils"))
+	//	{
+	//		for (const auto i : _em6000PlHelpersList)
+	//			i.lock()->set_pos_full(CheckpointPos::get_player_coords());
+	//	}
 
-		ImGui::Spacing();
+	//	ImGui::Spacing();
 
-		if (_isPlSpawned && ImGui::Button("Kill all BOB Vergils"))
-		{
-			if (_pl0300Manager == nullptr)
-				return;
-			_killVergilsCoroutine.start(this, BOBVergil);
-		}
+	//	if (_isPlSpawned && ImGui::Button("Kill all BOB Vergils"))
+	//	{
+	//		if (_pl0300Manager == nullptr)
+	//			return;
+	//		_killVergilsCoroutine.start(this, BOBVergil);
+	//	}
 
-		ImGui::Spacing();
-	}
-	ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vergil(s) to your side.");
-	
+	//	ImGui::Spacing();
+	//}
+	//ImGui::ShowHelpMarker("Control enemy Vergil like in DMC3 M19. Hold reset camera + style button to summon Vergil(s) to your side.");
+	//
 }
