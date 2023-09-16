@@ -427,7 +427,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
   auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
   m_is_enabled        = &cheaton;
-  m_on_page           = Page_Encounters;
+  //m_on_page           = Page_Encounters; Hiding this mod bc I don't feel like fully testing, but it needs to be active for enemy swapper so bleh
   m_full_name_string = "Enemy Wave Editor (+)";
   m_author_string    = "V.P.Zadov";
   m_description_string = "Replace a mission's set of encounters with your own. Uses the spawn animation and position from the original mission.";

@@ -377,14 +377,14 @@ Mods::Mods()
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
         m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
-        //m_mods.emplace_back(std::make_unique<EnemyFixes>());
+        m_mods.emplace_back(std::make_unique<EnemyFixes>());
         //m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB UpdateLockOnTargetAddr
         //// Common
         //m_mods.emplace_back(std::make_unique<LockOnNoHold>());
         //m_mods.emplace_back(std::make_unique<WitchTime>());
         //// Gameplay
         //m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
-        //m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
         //m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
 
         ////m_mods.emplace_back(std::make_unique<AirMoves>()); Broken AOB more static offsets than you could shake a stick at
@@ -392,7 +392,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<CheckpointPos>());
         //m_mods.emplace_back(std::make_unique<BossDanteSetup>());
         //m_mods.emplace_back(std::make_unique<BossVergilSettings>());
-        //m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
         //m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
         //m_mods.emplace_back(std::make_unique<PosActionEditor>());
         //m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr

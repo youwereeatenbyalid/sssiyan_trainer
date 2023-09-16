@@ -25,8 +25,8 @@ namespace EnemyData
 		ScudoAngelo = 14,
 		ProtoAngelo = 15,
 		DeathScissors = 16,
-		Hellbat = 17,
-		Pyrobat = 18,
+		Pyrobat = 17,
+		Hellbat = 18,
 		QliphotsTentacle = 19,
 		Goliath = 23,
 		Malphas = 24,
@@ -68,8 +68,8 @@ namespace EnemyData
 	 "Scudo Angelo",//14, 
 	 "Proto Angelo", //15
 	 "Death Scrissors",//16
-	 "Hellbat", //17
-	 "Pyrobat", //18
+	 "Pyrobat", //17
+	 "Hellbat", //18
 	 "Qliphoth's tentacle",//19 
 	 "Goliath", //20
 	 "Malphas", //21

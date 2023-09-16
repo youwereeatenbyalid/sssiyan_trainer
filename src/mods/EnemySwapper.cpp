@@ -2,7 +2,7 @@
 #include <string>
 #include "sdk/ReClass.hpp"
 #include "EnemySpawner.hpp"
-#include "BossVergilMoves.hpp"
+//#include "BossVergilMoves.hpp"
 
 static std::string uniqStr = "";
 std::string uniqComboStr = "";//For comboboxes
@@ -98,8 +98,15 @@ void EnemySwapper::on_draw_ui() {
             uniqStr = EnemyData::EnemyNames[i];
         }
 
-        if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick))
-            _swapSettings[i]->swapId = EnemyData::indx_to_id(_selectedCbIndex);
+        if (ImGui::Selectable(uniqStr.c_str(), state, ImGuiSelectableFlags_AllowDoubleClick)){
+            if (ImGui::IsMouseDoubleClicked(0)) {
+                set_swapper_setting(i, i);
+            }else{
+
+                _swapSettings[i]->swapId = EnemyData::indx_to_id(_selectedCbIndex);
+            }
+
+        }
         else
             index = i;
         ImGui::PopStyleColor(2);
@@ -112,9 +119,9 @@ void EnemySwapper::on_draw_ui() {
     ImGui::Spacing();
     ImGui::Separator();
 
-    ImGui::TextWrapped(EnemyData::EnemyNames[index]);
+    ImGui::TextWrapped("Swap selections to enemy:"); //EnemyData::EnemyNames[index] this was being showed even though it was always dante? Unclear why
     uniqComboStr = "##SwapToCustom";
-    UI::Combo(uniqComboStr.c_str(), &_selectedCbIndex, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size(), 20);
+    UI::Combo(uniqComboStr.c_str(), &_selectedCbIndex, EnemyData::EnemyNames.data(), EnemyData::EnemyNames.size());
     ImGui::Spacing();
     ImGui::Separator();
 
@@ -177,6 +184,7 @@ std::optional<std::string> EnemySwapper::on_initialize() {
 
   m_is_enabled = &cheaton;
   m_on_page         = Page_Encounters;
+  m_depends_on = { "EnemyWaveEditor" };
   m_full_name_string   = "Enemy Swapper (+)";
   m_author_string      = "V.P.Zadov";
   m_description_string = "Swap enemy spawns. Affects normal spawns & hell judecca summons.";
