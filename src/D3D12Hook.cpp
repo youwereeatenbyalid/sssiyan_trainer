@@ -229,6 +229,8 @@ bool D3D12Hook::hook() {
         return false;
     }
 
+    utility::ThreadSuspender suspender{};
+
     spdlog::info("Finding command queue offset");
     
     // Find the command queue offset in the swapchain
@@ -293,8 +295,6 @@ bool D3D12Hook::hook() {
             }
         }
     }
-
-    utility::ThreadSuspender suspender{};
 
     try {
         m_present_hook.reset();

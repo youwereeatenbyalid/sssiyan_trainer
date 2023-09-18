@@ -43,6 +43,8 @@ bool D3D11Hook::hook() {
     swap_chain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
     swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
+    utility::ThreadSuspender suspender{};
+
 	const auto original_bytes = utility::get_original_bytes(&D3D11CreateDeviceAndSwapChain);
 
 	// Temporarily unhook D3D11CreateDeviceAndSwapChain
@@ -76,8 +78,6 @@ bool D3D11Hook::hook() {
 			return false;
 		}
 	}
-
-    utility::ThreadSuspender suspender{};
 
     try {
 		m_present_hook.reset();
