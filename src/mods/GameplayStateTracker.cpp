@@ -193,7 +193,7 @@ std::optional<std::string> GameplayStateTracker::on_initialize()
         return "Can't create _ui3500GuiDoOnOpenHook.";
     m_detours.push_back(_ui3500GuiDoOnOpenDetour);
 
-    _ui3500GuiDoOnClosedDetour = std::make_shared<Detour_t>(ui3500GuiDoOnClosedAddr.value(), &ui3500Gui_do_on_closed_hook);
+    _ui3500GuiDoOnClosedDetour = std::make_shared<Detour_t>(ui3500GuiDoOnClosedAddr.value() + 0xE, &ui3500Gui_do_on_closed_hook);
     if (!_ui3500GuiDoOnClosedDetour->create())
         return "Can't create _ui3500GuiDoOnClosedHook.";
     m_detours.push_back(_ui3500GuiDoOnClosedDetour);
