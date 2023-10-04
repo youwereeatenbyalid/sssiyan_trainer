@@ -99,7 +99,7 @@ void HoldToMash::on_lua_mod_update()
     mod_state_view["sword_renda"]["type"] = activation_type + 1;
     mod_state_view["style_renda"]["type"] = activation_type + 1;
     mod_state_view["dante_ebony_ivory"]["type"] = activation_type + 1;
-    mod_state_view["vergil_summoned_swords"]["type"] = activation_type + 1;
+    //mod_state_view["vergil_summoned_swords"]["type"] = activation_type + 1;
 
     mod_state_view["dante_ebony_ivory"]["threshhold"] = ebony_ivory.threshhold;
     mod_state_view["dante_ebony_ivory"]["mash_frequency"] = ebony_ivory.frequency;
