@@ -106,7 +106,7 @@ private:
     enum PanelID_ : uint8_t;
     enum OptionID_ : uint8_t;
 
-    static constexpr char TRAINER_VERSION_STR[7] = "v1.24g";
+    static constexpr char TRAINER_VERSION_STR[7] = "v1.24h";
 
     void initialize_game_specifics();
 
