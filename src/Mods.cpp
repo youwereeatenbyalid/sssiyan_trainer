@@ -16,6 +16,7 @@
     // V
       // Not even in my wildest dreams
     // Vergil
+
 // Hitch
     // Background
         #include "mods/PlayerTracker.hpp"
@@ -138,7 +139,8 @@
         #include "mods/VergilInfConcentration.hpp"
         #include "mods/VergilNoTrickRestriction.hpp"
         #include "mods/VergilTrickUpLockedOn.hpp"
-    // Dr.penguin
+
+// Dr.penguin
     // Background
     // Common
     // Gameplay
