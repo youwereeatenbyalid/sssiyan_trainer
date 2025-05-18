@@ -823,7 +823,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 		return "Failed to initialize stick threshhold";
 	}
 
-	if (!install_new_detour(setTrickStyleAddr.value(), m_set_trick_style_detour, &trickster_cmp_detour, &_setTrickStyleRet, 7)) {
+	/*if (!install_new_detour(setTrickStyleAddr.value(), m_set_trick_style_detour, &trickster_cmp_detour, &_setTrickStyleRet, 7)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize PlayerTracker.setTrickStyle";
 	}
@@ -841,7 +841,7 @@ std::optional<std::string> PlayerTracker::on_initialize() {
 	if (!install_new_detour(setRoyalStyleAddr, m_set_royal_style_detour, &royalguard_cmp_detour, &_setRoyalStyleRet, 7)) {
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize PlayerTracker.setRoyalStyle";
-	}
+	}*/
 
 	PlayerTracker::summon_jmp_je = summon_addr.value() + 0x15B;
 	PlayerTracker::threshhold_jmp_jb = threshhold_addr.value() + 0x11 + 0x14;

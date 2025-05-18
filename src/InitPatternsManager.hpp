@@ -55,7 +55,7 @@ public:
 
 	std::optional<uintptr_t> find_addr(HMODULE base, const std::string &pattern)
 	{
-		if (true)//(patternsCfg == nullptr) temp fix
+		if /*(true)*/ (patternsCfg == nullptr) // temp fix
 			return utility::scan(base, pattern);
 		auto uintptrBase = (uintptr_t)base;
 		if (!isEmptyFile && isInitViaPatternsList)
