@@ -23,7 +23,7 @@ uintptr_t CameraSettings::jmp_retNoVignette;
 
 bool CameraSettings::cheaton{NULL};
 
-float fov = 65.0;
+float CameraSettings::fov = 65.0;
 
 float horizontalmult = 100.0;
 float horizontalsens = 3.25;
@@ -40,7 +40,7 @@ static naked void detourFoV() {
 		cmp byte ptr [CameraSettings::cheaton], 1
         jne code
     cheatcode:
-        movss xmm2, [fov]
+        movss xmm2, [CameraSettings::fov]
         jmp qword ptr [CameraSettings::jmp_retFoV]
 
     code:

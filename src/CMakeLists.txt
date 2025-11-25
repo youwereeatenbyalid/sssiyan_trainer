@@ -300,6 +300,8 @@ set(MODS_SRC
     mods/DanteAirMustang.hpp
     mods/WitchTime.hpp
     mods/ParryWithFinesse.hpp
+    mods/DrawLines.hpp
+    mods/DrawLines.cpp
 	
 	mods/TestLuaMod.hpp
 	mods/TestLuaMod.cpp
@@ -357,6 +359,8 @@ set(UTILITY_SRC
     utility/FunctionHook.cpp
 	utility/Detour.hpp
     utility/Detour.cpp
+    utility/WorldVisualizer.hpp
+    utility/WorldVisualizer.cpp
 )
 
 set(FRAMEWORK_SRC

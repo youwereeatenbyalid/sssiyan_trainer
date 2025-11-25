@@ -11,6 +11,7 @@ public:
   std::string get_hotkey_name() override { return m_hot_key_name; };
   // called by m_mods->init() you'd want to override this
   std::optional<std::string> on_initialize() override;
+  static float fov;
   static uintptr_t jmp_retFoV;
   static uintptr_t jmp_retHorizontalSensClockwise;
   static uintptr_t jmp_retHorizontalSensAntiClockwise;

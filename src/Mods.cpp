@@ -80,6 +80,7 @@
         #include "mods/CameraSettings.hpp"
         #include "mods/LandCancels.hpp"
         #include "mods/InfHP.hpp"
+        #include "mods/DrawLines.hpp"
     // Gameplay
         #include "mods/Reversals.hpp"
         #include "mods/NoJCCooldown.hpp"
@@ -305,6 +306,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
         m_mods.emplace_back(std::make_unique<InfHP>());
+		m_mods.emplace_back(std::make_unique<DrawLines>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<Reversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
