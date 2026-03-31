@@ -418,7 +418,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
         //m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
         //m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
-        //m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>());
+        //m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>()); // works 2025, but adds too many options so I'm using my old version instead
         ////m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
         //m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
         //m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());

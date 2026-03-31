@@ -1,6 +1,6 @@
 #include "VergilInfJdCs.hpp"
 #include "PlayerTracker.hpp"
-#include "VergilSetMaxJJC.hpp"
+// #include "VergilSetMaxJJC.hpp"
 uintptr_t VergilInfJdCs::jmp_ret{NULL};
 bool VergilInfJdCs::cheaton{NULL};
 
@@ -9,11 +9,15 @@ bool VergilInfJdCs::cheaton{NULL};
 
 static naked void detour() {
 	__asm {
-        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
-        jne code
-        cmp byte ptr [VergilSetMaxJJC::infinitejjdc], 1
+        cmp byte ptr [VergilInfJdCs::cheaton], 1
         je cheatcode
-        jmp code
+
+        cmp dword ptr [PlayerTracker::playerid], 4 //change this to the char number obviously
+        jne code
+
+        // cmp byte ptr [VergilSetMaxJJC::infinitejjdc], 1
+        // je cheatcode
+        // jmp code
 
     cheatcode:
 		jmp qword ptr [VergilInfJdCs::jmp_ret]
@@ -35,7 +39,7 @@ std::optional<std::string> VergilInfJdCs::on_initialize() {
   init_check_box_info();
 
   m_is_enabled            = &VergilInfJdCs::cheaton;
-  //m_on_page               = vergilcheat;
+  m_on_page               = Page_VergilCheat;
 
   m_full_name_string     = "Infinite Just Judgement Cuts";
   m_author_string        = "SSSiyan";
