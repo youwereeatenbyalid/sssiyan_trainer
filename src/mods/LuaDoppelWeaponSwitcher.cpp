@@ -29,7 +29,7 @@ std::optional<std::string> LuaDoppelWeaponSwitcher::on_initialize() {
     m_scripts = {"doppelweaponswitcher.lua","vergilloadweaponoverride.lua"};//scripts here
     m_is_enabled = &LuaDoppelWeaponSwitcher::cheaton;
     m_on_page = Page_VergilDoppel;
-    m_full_name_string = "Doppel Weapon Switcher";
+    m_full_name_string = "Lua Doppel Weapon Switcher";
     m_author_string = "The HitchHiker";
     m_description_string = "Assign different weapons to the Doppelganger.\n"
         "The Doppelganger will use the weapon you had equipped when you summoned it."

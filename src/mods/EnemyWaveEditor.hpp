@@ -5,17 +5,17 @@
 #include "Mod.hpp"
 #include "EnemyData.hpp"
 #include "ListEditor/MimicList.hpp"
-#include <mutex>
+//#include <mutex>
 #include <condition_variable>
 #include "JsonStthm.h"
 #include <filesystem>
 #include <random>
-#include <map>
-#include <sstream>
+//#include <map>
+//#include <sstream>
 #include "ImGuiExtensions/ImGuiExtensions.h"
 #include "GameplayStateTracker.hpp"
 #include "EndLvlHooks.hpp"
-#include <algorithm>
+//#include <algorithm>
 #include "sdk/DMC5.hpp"
 
 #define SELECTABLE_STYLE_ACT	ImVec4(0.26f, 0.39f, 0.58f, 0.41f)

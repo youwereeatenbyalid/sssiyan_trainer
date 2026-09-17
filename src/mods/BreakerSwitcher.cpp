@@ -676,7 +676,7 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto base              = g_framework->get_module().as<HMODULE>(); // note HMODULE
   m_is_enabled           = &BreakerSwitcher::cheaton;
   m_on_page              = Page_Breaker;
-  m_depends_on           = { "PlayerTracker" };
+  m_depends_on           = { "PlayerTracker", "GameInput" };
   m_full_name_string     = "Breaker Switcher (+)";
   m_author_string        = "The HitchHiker (original version by Nino)\n Disable Breakaway made with assistance from Lidemi";
   m_description_string   = "Make sure your d-pad is bound to breakaway, then "
@@ -765,7 +765,9 @@ std::optional<std::string> BreakerSwitcher::on_initialize() {
   auto NeroUIOverride_addr = m_patterns_cache->find_addr(base, "0F 85 DC 02 00 00 48 8B 87 08");
   auto breakerinputcontrol_addr = m_patterns_cache->find_addr(base, "41 8D 41 FF 48 8B FA");
   //DevilMayCry5.app_PlayerNero__createGauntlet
-  auto call_nero_creategauntlet_addr = m_patterns_cache->find_addr(base, "C3 CC CC CC 40 53 56 41 55 48");
+  auto call_nero_creategauntlet_addr = m_patterns_cache->find_addr(base, "C3 CC CC 40 53 56 41 55");
+  // tu6: "C3 CC CC 40 53 56 41 55");
+  // tu7?: "C3 CC CC CC 40 53 56 41 55 48");
   auto bringerinputcontroller_addr = m_patterns_cache->find_addr(base, "75 4E 80 BA C2 18 00 00 00");
 
 

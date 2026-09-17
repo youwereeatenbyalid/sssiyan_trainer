@@ -287,7 +287,7 @@ static naked void emlist_detour()
 		push r11
         mov rcx, rax//[EnemyWaveEditor::curListAddr]
         sub rsp, 32
-        call qword ptr [EnemyWaveEditor::handle_emlist_asm]
+        call EnemyWaveEditor::handle_emlist_asm
         add rsp, 32
         pop r11
 		pop r10
@@ -356,7 +356,7 @@ static naked void load_enemy_detour()
 		push r11//
         mov rcx, rdx
         sub rsp, 32
-        call qword ptr [EnemyWaveEditor::load_prefabs_asm]
+        call EnemyWaveEditor::load_prefabs_asm
         add rsp, 32
         pop r11//
 		pop r10//
@@ -434,29 +434,29 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
 
   auto emDataLstAddr = m_patterns_cache->find_addr(base, "83 78 18 01 0F 8C 66 02 00 00");// DevilMayCry5.exe+FE5583
   if (!emDataLstAddr) {
-    return "Unanable to find emDataLstAddr pattern.";
+    return "Unable to find emDataLstAddr pattern.";
   }
   //.text:0000000140F34F8B	app_EnemyGeneratorController_GenerateEnemyManager_GenerateEnemyInfo__setupPrefab89939	mov     [rsp+38h+arg_0], rbx
-  //Tu7 aob:E8 ? ? ? ? 0F B6 C8 48 8B 47 50 4C 8B 48 18 4D 85 C9 75 23 -0x594F25+4+8B
   //tu6 aob 48 89 5C 24 40 E8 3B
+  //Tu7 aob:E8 ? ? ? ? 0F B6 C8 48 8B 47 50 4C 8B 48 18 4D 85 C9 75 23 -0x594F25+4+8B
   //-0x594F25+4+8B
   //-0x594E96
-  auto emPrefabLoad = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 0F B6 C8 48 8B 47 50 4C 8B 48 18 4D 85 C9 75 23");// DevilMayCry5.exe+F34F8B
+  auto emPrefabLoad = m_patterns_cache->find_addr(base, "48 89 5C 24 40 E8 3B");// DevilMayCry5.exe+F34F8B
   if (!emPrefabLoad)
   {
-      return "Unanable to find emPrefabLoad pattern.";
+      return "Unable to find emPrefabLoad pattern.";
   }
 
   auto bossDanteCrashAddr = m_patterns_cache->find_addr(base, "45 89 7E 08 41 88 96 98 00 00 00");// DevilMayCry5.exe+25BBF28
   if (!bossDanteCrashAddr)
   {
-      return "Unanable to find bossDanteCrashAddr pattern.";
+      return "Unable to find bossDanteCrashAddr pattern.";
   }
 
   auto bpFadeInFix = m_patterns_cache->find_addr(base, "3B 48 74 0F 8C 9F 01 00 00");// DevilMayCry5.exe+36ED34
   if (!bpFadeInFix)
   {
-      return "Unanable to find bpFadeInFix pattern.";
+      return "Unable to find bpFadeInFix pattern.";
   }
 
   retJl = emDataLstAddr.value() + 0x270;
@@ -468,7 +468,7 @@ std::optional<std::string> EnemyWaveEditor::on_initialize() {
     return "Failed to initialize EnemyWaveEditor.emDataLst"; 
   }
 
-  if (!install_new_detour(emPrefabLoad.value()-0x594E96, m_loadall_detour, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
+  if (!install_new_detour(emPrefabLoad.value(), m_loadall_detour, &load_enemy_detour, &prefabLoadJmp, 0x5)) {
     spdlog::error("[{}] failed to initialize", get_name());
     return "Failed to initialize EnemyWaveEditor.emPrefabLoad"; 
   }

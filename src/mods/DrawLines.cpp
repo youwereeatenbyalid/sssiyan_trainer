@@ -16,9 +16,10 @@ struct HitboxSnapshot {
     float radius;
 };
 static std::vector<HitboxSnapshot> hitDataList;
-
+static std::mutex hitDataMutex;
 static void AddHitDataPtr(void* ptr) {
     auto* hitData = (HitData*)(ptr);
+    std::lock_guard<std::mutex> lock(hitDataMutex);
     hitDataList.push_back({ hitData->pos, hitData->radius }); // this line crashes in levels or vergil idk how fix
 }
 
@@ -124,8 +125,8 @@ void DrawLines::Draw3dShapes() {
     if (!ply) { return; }
     camera* cam = ply->cam;
     if (!cam) { return; }
-    enemy* em = GetVoidEnemy();
-    if (!em) { return; }
+    // enemy* em = GetVoidEnemy(); // needs tu6 address
+    // if (!em) { return; }
 
     ImVec2 displaySize = ImGui::GetIO().DisplaySize; // wrong if windowed, should get game res
     float aspectRatio = displaySize.x / displaySize.y;

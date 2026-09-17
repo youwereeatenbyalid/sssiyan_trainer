@@ -143,7 +143,7 @@ struct HitData {
 };
 
 static player* GetPlayer() {
-	uintptr_t* playerManagerPtr = *(uintptr_t**)((uintptr_t)DrawLines::baseAddr + 0x7E61690);
+	uintptr_t* playerManagerPtr = *(uintptr_t**)((uintptr_t)DrawLines::baseAddr + 0x7E571A0); // tu7: 0x7E61690);
 	if (!playerManagerPtr) { return nullptr; }
 
 	PlayerManager* playerManager = (PlayerManager*)playerManagerPtr;

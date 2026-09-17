@@ -438,32 +438,32 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 
 	auto waitTimeAddr = m_patterns_cache->find_addr(base, "07 00 00 8B 86 B8 00 00 00"); //DevilMayCry5.exe+1DDCB5D
     if (!waitTimeAddr) {
-          return "Unanable to find AirTrick.waitTime pattern.";
+          return "Unable to find AirTrick.waitTime pattern.";
     }
 
 	auto finishOffsetAddr = m_patterns_cache->find_addr(base, "60 F3 0F 10 86 D0 00 00 00"); //DevilMayCry5.exe+1DDC4FF
     if (!waitTimeAddr) {
-          return "Unanable to find AirTrick.finishOffsetAddr pattern.";
+          return "Unable to find AirTrick.finishOffsetAddr pattern.";
     }
 
 	auto initSpeedAddr = m_patterns_cache->find_addr(base, "08 00 00 8B 86 A0 00 00 00"); //DevilMayCry5.exe+1DDCB43
     if (!initSpeedAddr) {
-          return "Unanable to find AirTrick.initSpeedAddr pattern.";
+          return "Unable to find AirTrick.initSpeedAddr pattern.";
     }
 
 	auto maxSpeedZAddr = m_patterns_cache->find_addr(base, "0A 00 00 F3 0F 10 86 A8 00 00 00"); //DevilMayCry5.exe+1DDD585
     if (!maxSpeedZAddr) {
-          return "Unanable to find AirTrick.maxSpeedZAddr pattern.";
+          return "Unable to find AirTrick.maxSpeedZAddr pattern.";
     }
 
 	auto maxXZAddr = m_patterns_cache->find_addr(base, "06 00 00 F3 0F 10 96 B0 00 00 00"); //DevilMayCry5.exe+1DDCCC5
     if (!maxXZAddr) {
-          return "Unanable to find AirTrick.maxXZAddr pattern.";
+          return "Unable to find AirTrick.maxXZAddr pattern.";
     }
 
 	auto speedAccAddr = m_patterns_cache->find_addr(base, "F3 0F 10 8E A4 00 00 00 0F 5A C0 0F 5A C9 48 85 C0 0F 84 40"); //DevilMayCry5.exe+1DDD539
     if (!speedAccAddr) {
-          return "Unanable to find AirTrick.speedAccAddr pattern.";
+          return "Unable to find AirTrick.speedAccAddr pattern.";
     }
 
 	auto routine3Addr = m_patterns_cache->find_addr(base, "03 00 00 C7 47 68 03 00 00 00"); //DevilMayCry5.exe+1DE0427
@@ -475,21 +475,21 @@ std::optional<std::string> VergilAirTrick::on_initialize()
 	//auto finishRangeAddr = m_patterns_cache->find_addr(base, "F3 41 0F 10 86 AC 00 00 00"); //DevilMayCry5.exe+1DDE979
 	//if (!routine3Addr)
 	//{
-	//	return "Unanable to find AirTrick.finishRangeAddr pattern.";
+	//	return "Unable to find AirTrick.finishRangeAddr pattern.";
 	//}
 	//tu6 aob 5B C3 40 53 55 41 56 +0x2
 	//tu7 aob 48 89 5C 24 20 55 56 41 56 48 83 EC 60 48 8B B2
-	auto finishRangeAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 20 55 56 41 56 48 83 EC 60 48 8B B2");
+	auto finishRangeAddr = m_patterns_cache->find_addr(base, "5B C3 40 53 55 41 56");
 	//DevilMayCry5.app_fsm2_player_pl0800_TrickAction__getRange312704 (-0x2)
 	if (!finishRangeAddr)
 	{
-		return "Unanable to find AirTrick.finishRangeAddr pattern.";
+		return "Unable to find AirTrick.finishRangeAddr pattern.";
 	}
 	auto pushHitAddr = m_patterns_cache->find_addr(base, "40 53 55 41 56 48 83 EC 20 49 8B E8 4C 8B F2 48 8B 52");
 	//DevilMayCry5.app_fsm2_player_pl0800_TrickAction__onPushHit312697
 	if (!pushHitAddr)
 	{
-		return "Unanable to find AirTrick.pushHitAddr pattern.";
+		return "Unable to find AirTrick.pushHitAddr pattern.";
 	}
 	if (!install_new_detour(initSpeedAddr.value()+0x3, m_initspeed_hook, &initspeed_detour, &initSpeedRet, 0x6)) {
       spdlog::error("[{}] failed to initialize", get_name());
@@ -531,7 +531,7 @@ std::optional<std::string> VergilAirTrick::on_initialize()
           return "Failed to initialize VergilAirTrick.finishRange"; 
     }*/
 
-	m_finish_range_hook = std::make_shared<Detour_t>(finishRangeAddr.value(), &trick_action_get_range_hook);
+	m_finish_range_hook = std::make_shared<Detour_t>(finishRangeAddr.value()+0x2, &trick_action_get_range_hook);
 	if (!m_finish_range_hook->create())
 		return "Failed to initialize VergilAirTrick.m_finish_range_hook";
 	m_detours.push_back(m_finish_range_hook);

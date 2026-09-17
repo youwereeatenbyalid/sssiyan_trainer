@@ -108,13 +108,15 @@ public:
 			return "Unable to find NoRoundtripCallback.FEBackAddr pattern.";
 		}
 		//.text:0000000141261CFC	app_WeaponRebellion__checkRoundTripReturn222041	movss   [rsp+58h+var_38], xmm1
-		auto RbBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 39 E2");//DevilMayCry5.exe+1261CFC
+		auto RbBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 29 4A"); //DevilMayCry5.exe+1261CFC
+		// tu7: "F3 0F 11 4C 24 20 E8 39 E2");
 		if (!RbBackAddr)
 		{
 			return "Unable to find NoRoundtripCallback.RbBackAddr pattern.";
 		}
 		//.text:00000001416E678C	app_WeaponSpada__checkRoundTripReturn222069	movss   [rsp+58h+var_38], xmm1
-		auto SdBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 49");//DevilMayCry5.exe+16E678C
+		auto SdBackAddr = m_patterns_cache->find_addr(base, "F3 0F 11 4C 24 20 E8 99 FF"); //DevilMayCry5.exe+16E678C
+		//tu7: "F3 0F 11 4C 24 20 E8 49");
 		if (!SdBackAddr)
 		{
 			return "Unable to find NoRoundtripCallback.SdBackAddr pattern.";

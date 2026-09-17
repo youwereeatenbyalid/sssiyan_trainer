@@ -1,7 +1,7 @@
 #include "VergilWalkingGuard.hpp"
 #include "PlayerTracker.hpp"
 
-static naked void is_pad_input_detuor()
+static naked void is_pad_input_detour()
 {
 	__asm {
 		cmp byte ptr [VergilWalkingGuard::cheaton], 0
@@ -42,13 +42,13 @@ std::optional<std::string> VergilWalkingGuard::on_initialize()
 	m_author_string		 = "V.P.Zadov";
 	m_description_string = "Vergil can block while walking.";
 	//.text:0000000141711287	app_fsm2_player_pl0800_ConcentGuard__update312953	call    app_PadInput__isNoLeverInputL79001
-	auto isPadInputAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 85 C9 0F 84 ? ? ? ? 48 8B 4F 60 48 85 C9 74 A8 "); //DevilMayCry5.exe+171128A (-0x3)
+	auto isPadInputAddr = m_patterns_cache->find_addr(base, "0F B6 C8 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 85 C9 0F 84 ? ? ? ? 48 8B 4F 60 48 85 C9 74 A8"); //DevilMayCry5.exe+171128A (-0x3)
 	if (!isPadInputAddr)
 	{
 		return "Unable to find VergilWalkingGuard.isPadInputAddr pattern.";
 	}
 
-	if (!install_new_detour(isPadInputAddr.value() + 0x3, m_is_pad_input_detour, &is_pad_input_detuor, &ret, 0x7))
+	if (!install_new_detour(isPadInputAddr.value(), m_is_pad_input_detour, &is_pad_input_detour, &ret, 0x7))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize VergilWalkingGuard.isPadInput";

@@ -726,8 +726,8 @@ std::optional<std::string> HeavyDay::on_initialize() {
   //code found in DevilMayCry5.System_Collections_Generic_List_1_app_HitController_DamageInfo___Add75048 
   //AOB below should point to a call to the function this code can be found in.
   //sig to containing function: (+0xA9) E8 ? ? ? ? EB 82 48 8B 96 ? ? ? ? 
-  //auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01"); old aob for Tu6, +0x55
-  auto dantefix_addr = static_base + 0xDD9B59;
+  auto dantefix_addr = m_patterns_cache->find_addr(base, "41 8D 50 38 E8 23 F4 76 01"); // Tu6, +0x55
+  //tu7: auto dantefix_addr = static_base + 0xDD9B59;
   auto styleenable1_addr = m_patterns_cache->find_addr(base, "83 F8 39 0F 84 95 08 00 00");
   auto styleenable2_addr = m_patterns_cache->find_addr(base, "0F 87 4C 0D 00 00");
 
@@ -850,7 +850,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
         return "Failed to initialize combatmode";
     }
     
-    if (!install_new_detour(dantefix_addr, m_dantefix_detour,
+    if (!install_new_detour(dantefix_addr.value() + 0x55, m_dantefix_detour,
         &dantefix_detour, &dantefix_jmp_ret, 6)) {
         //  return a error string in case something goes wrong
         spdlog::error("[{}] failed to initialize", get_name());

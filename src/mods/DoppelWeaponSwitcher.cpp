@@ -511,11 +511,11 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
   /// <returns></returns>
   /// Tu6 update: "48 8B 03 48 8B 15 69 CF A5 07"
   /// TU7 update: 74 52 48 8B 03 48 8B 15 ? ? ? ? (+2)
-  auto resetweapon_addr = m_patterns_cache->find_addr(base, "74 52 48 8B 03 48 8B 15 ? ? ? ?");
+  auto resetweapon_addr = m_patterns_cache->find_addr(base, "48 8B 03 48 8B 15 69 CF A5 07");
   if (!resetweapon_addr) {
       return "Unable to find resetweapon pattern.";
   }
-  if (!install_new_detour(resetweapon_addr.value()+0x2, m_resetweapon_detour, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
+  if (!install_new_detour(resetweapon_addr.value(), m_resetweapon_detour, &resetweapon_detour, &resetweapon_jmp_ret, 10)) {
       //  return a error string in case something goes wrong
       spdlog::error("[{}] failed to initialize", get_name());
       return "Failed to initialize resetweapon";
@@ -683,7 +683,7 @@ std::optional<std::string> DoppelWeaponSwitcher::on_initialize() {
 // void DoppelWeaponSwitcher::on_frame() {}
 // will show up in debug window, dump ImGui widgets you want here
 void DoppelWeaponSwitcher::on_draw_debug_ui() {
-ImGui::Text("Weapon id: %X",DoppelWeaponSwitcher::doppelweaponid);
+ImGui::Text("Weapon id: %X", DoppelWeaponSwitcher::doppelweaponid);
 ImGui::Text("Weapon id: %X", DoppelWeaponSwitcher::doppelweaponparameter);
 ImGui::Text("Weapon id: %X", DoppelWeaponSwitcher::weaponresetparameter);
 ImGui::Text("Weapon id: %X", DoppelWeaponSwitcher::yamatotype);

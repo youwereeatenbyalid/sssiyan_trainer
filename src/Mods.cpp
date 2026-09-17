@@ -48,7 +48,6 @@
 		#include "mods/LongerRagtimeBubble.hpp"
         #include "mods/NeroSuperMovesNoDT.hpp"
         #include "mods/ExceedValue.hpp"
-        #include "mods/DTWingsOnly.hpp"
     // Dante
     // V
        #include "mods/InfiniteSummonPowerup.hpp"
@@ -57,7 +56,7 @@
        #include "mods/InfiniteGambits.hpp"
        #include "mods/EmpoweredCane.hpp"
     // Vergil
-        //#include "mods/DoppelWeaponSwitcher.hpp"
+       #include "mods/DoppelWeaponSwitcher.hpp"
        #include "mods/LuaDoppelWeaponSwitcher.hpp"
     //Strive
         #include "mods/NeoBalrog.hpp"
@@ -164,7 +163,7 @@
        #include "mods/EnemySwapper.hpp"
        #include "mods/EnemyFixes.hpp"
        #include "mods/EnemyDataSettings.hpp"
-       //#include "mods/EnemyWaveSettings.hpp"
+       #include "mods/EnemyWaveSettings.hpp"
        #include "mods/CheckpointPos.hpp"
        #include "mods/MissionManager.hpp"
        #include "mods/EnemyWaveEditor.hpp"
@@ -243,21 +242,21 @@ Mods::Mods()
     // Background
         m_mods.emplace_back(std::make_unique<PlayerTracker>());
         m_mods.emplace_back(std::make_unique<StyleRank>());
-        //m_mods.emplace_back(std::make_unique<SinCoordinate>());
-        //m_mods.emplace_back(std::make_unique<CosCoordinate>());
-        //m_mods.emplace_back(std::make_unique<MoveID>());
+        //m_mods.emplace_back(std::make_unique<SinCoordinate>()); // idk what this is for
+        //m_mods.emplace_back(std::make_unique<CosCoordinate>()); // idk what this is for
+        //m_mods.emplace_back(std::make_unique<MoveID>());        // idk what this is for
 		m_mods.emplace_back(std::make_unique<HoldToMash>()); //has to come before game input??
         m_mods.emplace_back(std::make_unique<TextEditor>());
         m_mods.emplace_back(std::make_unique<GameInput>());
 		// m_mods.emplace_back(std::make_unique<AprilFools>());
     // Common
-        m_mods.emplace_back(std::make_unique<HeavyDay>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<HeavyDay>()); // untested
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
         m_mods.emplace_back(std::make_unique<Inertia>());
-        m_mods.emplace_back(std::make_unique<LDK>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<LDK>());
         m_mods.emplace_back(std::make_unique<TauntSelector>());
         m_mods.emplace_back(std::make_unique<DisableAutoAssist>());
-        m_mods.emplace_back(std::make_unique<DisableTitleTimer>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
 
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
@@ -267,9 +266,9 @@ Mods::Mods()
 		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
-        //m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
+        m_mods.emplace_back(std::make_unique<BreakerSwitcher>());
         m_mods.emplace_back(std::make_unique<LuaDevilBreakerSwitcher>());
-        //m_mods.emplace_back(std::make_unique<DisableBreakaway>());
+        //m_mods.emplace_back(std::make_unique<DisableBreakaway>()); // no longer needed, now part of db switcher
         m_mods.emplace_back(std::make_unique<CaliburExceed>());
         m_mods.emplace_back(std::make_unique<NothingCancelsBubble>());
 		m_mods.emplace_back(std::make_unique<LongerRagtimeBubble>());
@@ -280,14 +279,14 @@ Mods::Mods()
     // V
         m_mods.emplace_back(std::make_unique <InfiniteSummonPowerup>());
         m_mods.emplace_back(std::make_unique <InfiniteSummonVitality>());
-        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>()); //AOB Broken
+        m_mods.emplace_back(std::make_unique <PetChargeNoInterrupt>());
         m_mods.emplace_back(std::make_unique <InfiniteGambits>());
-        m_mods.emplace_back(std::make_unique <EmpoweredCane>());
+        m_mods.emplace_back(std::make_unique <EmpoweredCane>()); // only works visually
     // Vergil
-        //m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>()); //AOB Broken
-        m_mods.emplace_back(std::make_unique<LuaDoppelWeaponSwitcher>());
+        m_mods.emplace_back(std::make_unique<DoppelWeaponSwitcher>()); // AOB Broken, uses some static offsets
+        //m_mods.emplace_back(std::make_unique<LuaDoppelWeaponSwitcher>()); // doesn't work, and the "set weapon test" sets player's weapon rather than doppel's weapon
     // Strive
-        m_mods.emplace_back(std::make_unique<NeoBalrog>());
+        m_mods.emplace_back(std::make_unique<NeoBalrog>()); // I think shows an error if you alt f4 while this is running, might be another mod though
     // Lua
         //m_mods.emplace_back(std::make_unique<TestLuaMod>());
         
@@ -306,14 +305,14 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<CameraSettings>());
         m_mods.emplace_back(std::make_unique<LandCancels>());
         m_mods.emplace_back(std::make_unique<InfHP>());
-		m_mods.emplace_back(std::make_unique<DrawLines>());
+		m_mods.emplace_back(std::make_unique<DrawLines>()); // doesn't work very well on V
     // Gameplay
         m_mods.emplace_back(std::make_unique<Reversals>());
         m_mods.emplace_back(std::make_unique<NoJCCooldown>());
         m_mods.emplace_back(std::make_unique<AlwaysSTaunts>());
         m_mods.emplace_back(std::make_unique<AllStart>());
         m_mods.emplace_back(std::make_unique<AllStartManual>());
-        m_mods.emplace_back(std::make_unique<JumpStart>());           // Must initialize after AllStart
+        m_mods.emplace_back(std::make_unique<JumpStart>()); // Must initialize after AllStart
         m_mods.emplace_back(std::make_unique<DamageMultiplier>());
         m_mods.emplace_back(std::make_unique<PlayerDamageMult>());
         m_mods.emplace_back(std::make_unique<InfDT>());
@@ -325,12 +324,12 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<EnemyInstantDT>());
         m_mods.emplace_back(std::make_unique<ChargeChecker>());
         m_mods.emplace_back(std::make_unique<WalkOnKeyboard>());
-        m_mods.emplace_back(std::make_unique<WeightReset>());
+        m_mods.emplace_back(std::make_unique<WeightReset>()); // often doesn't work, need a better way of getting moveid
         m_mods.emplace_back(std::make_unique<DisableGauntletStages>());
         m_mods.emplace_back(std::make_unique<NoSlowmoOrHitstop>());
         m_mods.emplace_back(std::make_unique<DamageType>());
     // Nero
-        //m_mods.emplace_back(std::make_unique<NeroInfBreakers>());
+        //m_mods.emplace_back(std::make_unique<NeroInfBreakers>()); // replaced by breaker switcher
         m_mods.emplace_back(std::make_unique<NeroDisableWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroSwapWiresnatch>());
         m_mods.emplace_back(std::make_unique<NeroTomboyLockOn>());
@@ -352,7 +351,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DanteGuardflyWip>());
         m_mods.emplace_back(std::make_unique<DanteVariableGuard>());
         m_mods.emplace_back(std::make_unique<AerialPushbackVertical>());
-        m_mods.emplace_back(std::make_unique<AerialPushback>());      // init after AerialPushbackVertical
+        m_mods.emplace_back(std::make_unique<AerialPushback>()); // init after AerialPushbackVertical
         m_mods.emplace_back(std::make_unique<DanteRedlineCav>());
         m_mods.emplace_back(std::make_unique<DanteSDTRework>());
     // V
@@ -375,73 +374,73 @@ Mods::Mods()
     // Dante
     // V
     // Vergil
-        //m_mods.emplace_back(std::make_unique<VergilDoppelBanish>()); //Broken AOB
+        m_mods.emplace_back(std::make_unique<VergilDoppelBanish>());
 
 // V.P.Zadov
         // Background
         m_mods.emplace_back(std::make_unique<PlSetActionData>());
         m_mods.emplace_back(std::make_unique<EndLvlHooks::EndLvlHooks>());
         m_mods.emplace_back(std::make_unique<EnemyFixes>());
-        //m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB UpdateLockOnTargetAddr
+        //m_mods.emplace_back(std::make_unique<PlCntr::Pl0300Cntr::Pl0300ControllerManager>());//Bunch of em6000 hooks, some of them are using by other mods. Broken AOB on tu7 UpdateLockOnTargetAddr // TESTING
         //// Common
-        //m_mods.emplace_back(std::make_unique<LockOnNoHold>());
-        //m_mods.emplace_back(std::make_unique<WitchTime>());
+        m_mods.emplace_back(std::make_unique<LockOnNoHold>());
+        //m_mods.emplace_back(std::make_unique<WitchTime>()); // TESTING, currently does nothing
         //// Gameplay
-        //m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper
-        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings
-        //m_mods.emplace_back(std::make_unique<EnemyDataSettings>());
+        m_mods.emplace_back(std::make_unique<MissionManager>());//Must initilize before EmSwapper, seems to just get mission number // TESTING
+        m_mods.emplace_back(std::make_unique<EnemySwapper>());//Must initilize before EnemyDataSettings // TESTING, crashes
+        //m_mods.emplace_back(std::make_unique<EnemyDataSettings>()); // TESTING
 
-        ////m_mods.emplace_back(std::make_unique<AirMoves>()); Broken AOB more static offsets than you could shake a stick at
-        ////m_mods.emplace_back(std::make_unique<EnemyWaveSettings>()); Not even gonna try bro
-        //m_mods.emplace_back(std::make_unique<CheckpointPos>());
-        //m_mods.emplace_back(std::make_unique<BossDanteSetup>());
-        //m_mods.emplace_back(std::make_unique<BossVergilSettings>());
-        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>());
-        //m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
-        //m_mods.emplace_back(std::make_unique<PosActionEditor>());
-        //m_mods.emplace_back(std::make_unique<NoRoundtripCallback>()); //Broken AOB NoRoundtripCallback.FEBackAddr
+        //m_mods.emplace_back(std::make_unique<AirMoves>()); // Broken AOB more static offsets than you could shake a stick at // TESTING, crashes when doing air stinger
+        //m_mods.emplace_back(std::make_unique<EnemyWaveSettings>()); // Not even gonna try bro // TESTING
+        //m_mods.emplace_back(std::make_unique<CheckpointPos>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<BossDanteSetup>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<BossVergilSettings>()); // TESTING, crashes
+        m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>()); // TESTING, crashes in handle_emlist_asm because it's not initialized
+        //m_mods.emplace_back(std::make_unique<SecretMissionTimer>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<PosActionEditor>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<NoRoundtripCallback>());
         m_mods.emplace_back(std::make_unique<EnemySpawner>());
         //// Nero
-        //m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>());
+        //m_mods.emplace_back(std::make_unique<Pl0000SlowWorldStop>()); // TESTING
         //// Dante
-        //m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
-        //m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>());
-        //m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());
-        //m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
-        //m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
-        //m_mods.emplace_back(std::make_unique<DanteSDTRegen>());
-        //m_mods.emplace_back(std::make_unique<DanteSelectReleaseType>());
+        m_mods.emplace_back(std::make_unique<DanteAirTrickSettings>());
+        m_mods.emplace_back(std::make_unique<GroundTrickNoDistanceRestriction>()); // used in air trick settings I think but has no ui
+        m_mods.emplace_back(std::make_unique<DanteNoSdtStun>());                     // TESTING
+        m_mods.emplace_back(std::make_unique<JudgementCustomCost>());
+        m_mods.emplace_back(std::make_unique<DanteDtNoActivationCost>());
+        m_mods.emplace_back(std::make_unique<DanteSDTRegen>());                      // TESTING
+        m_mods.emplace_back(std::make_unique<DanteSelectReleaseType>());
         //m_mods.emplace_back(std::make_unique<DanteQuickSilver>());
-        //m_mods.emplace_back(std::make_unique<DanteAirMustang>());
+        //m_mods.emplace_back(std::make_unique<DanteAirMustang>());                    // TESTING, crashes when doing air mustang
         //// V
         ////Vergil
-        //m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>());
-        //m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker
-        //m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>());
-        //m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>()); // works 2025, but adds too many options so I'm using my old version instead
-        ////m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker
-        //m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>());
-        //m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>());
-        //m_mods.emplace_back(std::make_unique<VergilAirTrick>());
-        ////m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed intil better times
-        //m_mods.emplace_back(std::make_unique<InfiniteTrickUp>());
-        //m_mods.emplace_back(std::make_unique<DMC3JCE>());
-        //m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088
-        //m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>());
-        //m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
-        //m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
-        //m_mods.emplace_back(std::make_unique<AirTrickDodge>());
-        //m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>());
-        //m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
-        //m_mods.emplace_back(std::make_unique<InstantDoppel>());
-        //m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>());
-        //m_mods.emplace_back(std::make_unique<BossTrickUp>());
-        //m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>());
-        //m_mods.emplace_back(std::make_unique<DoppelNoComeBack>());
-        //m_mods.emplace_back(std::make_unique<BossVergilMoves>());
-        ////m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>());
-        //m_mods.emplace_back(std::make_unique<VergilQuickSilver>());
-        //m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
+        //m_mods.emplace_back(std::make_unique<VergilSDTFormTracker>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilNoAfterimages>());//Must initilize after VergilSDTFormTracker // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilDisableSDTAccumulate>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilSetMaxJJC>()); // works 2025, but adds too many options so I'm using my old version instead // TESTING
+        ////m_mods.emplace_back(std::make_unique<VergilAdditionalJJC>());//Must initilize after VergilSetMaxJJC and VergilSDTFormTracker // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilSDTAccumulateRework>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilSDTNoConcentrationLose>()); // TESTING
+        m_mods.emplace_back(std::make_unique<VergilAirTrick>()); // TESTING, instant transmission crashes
+        ////m_mods.emplace_back(std::make_unique<VergilSDTTrickEfx>());//Removed until better times
+        m_mods.emplace_back(std::make_unique<InfiniteTrickUp>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<DMC3JCE>()); // TESTING, crashes
+        //m_mods.emplace_back(std::make_unique<JCENoMotivationLimit>()); // akasha51 https://www.nexusmods.com/devilmaycry5/users/1241088 // TESTING
+        ////m_mods.emplace_back(std::make_unique<TrickDodgeNoDisappear>()); // TESTING, doesn't work but idc
+        m_mods.emplace_back(std::make_unique<VergilWalkingGuard>());
+        m_mods.emplace_back(std::make_unique<VergilGuardYamatoBlock>());
+        m_mods.emplace_back(std::make_unique<AirTrickDodge>());
+        //m_mods.emplace_back(std::make_unique<VergilNoRoyalForkDelay>()); // TESTING
+        m_mods.emplace_back(std::make_unique<VergilDoppelInitSetup>());
+        m_mods.emplace_back(std::make_unique<InstantDoppel>()); // requires VergilDoppelInitSetup, crashes on init without it
+        //m_mods.emplace_back(std::make_unique<VergilTrickTrailsEfx>()); // TESTING, needs aob
+        //m_mods.emplace_back(std::make_unique<BossTrickUp>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<VergilSDTAlwaysCancels>()); // TESTING
+        //m_mods.emplace_back(std::make_unique<DoppelNoComeBack>()); // TESTING, crashes on init so probably relies on something
+        //m_mods.emplace_back(std::make_unique<BossVergilMoves>()); // TESTING
+        m_mods.emplace_back(std::make_unique<VergilGuardSlowMotion>()); // works but meh idc about it
+        //m_mods.emplace_back(std::make_unique<VergilQuickSilver>()); // TESTING
+        m_mods.emplace_back(std::make_unique<ParryWithFinesse>());
 
 		for (const auto& mod : m_mods) {
 			m_name_to_mod_map.insert({ std::string(mod->get_name()), mod.get() });

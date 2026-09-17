@@ -1,4 +1,3 @@
-
 #include "CaliburExceed.hpp"
 #include "mods/PlayerTracker.hpp"
 uintptr_t CaliburExceed::jmp_ret{NULL};
@@ -45,7 +44,9 @@ std::optional<std::string> CaliburExceed::on_initialize() {
 
   set_up_hotkey();
   //DevilMayCry5.app_PlayerNero__setCalibar
-  auto addr = m_patterns_cache->find_addr(base, "92 40 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  auto addr = m_patterns_cache->find_addr(base, "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  // tu6: "16 41 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
+  // tu7: "92 40 00 8B CF EB 03 8B 48 18 48 8B 43 50 48 39 78 18");
   if (!addr) {
     return "Unable to find CaliburExceed pattern.";
   }

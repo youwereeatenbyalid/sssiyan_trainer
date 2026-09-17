@@ -32,7 +32,7 @@ public:
 	static inline void set_enemy_num(int num) { enemyNum = num; }
 	//static inline std::array<int, EnemySwapper::enemyListCount> enemiesNum;
 
-	 std::string_view get_name() const override { return "EnemyDataSetting"; }
+	 std::string_view get_name() const override { return "EnemyDataSettings"; }
      std::string get_checkbox_name() override { return m_check_box_name; };
      std::string get_hotkey_name() override { return m_hot_key_name; };
 

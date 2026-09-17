@@ -169,13 +169,16 @@ namespace EndLvlHooks
                 return "Unable to find requestResultAddr pattern.";
             }
 
-            auto requestResultStaffRollAddr = m_patterns_cache->find_addr(base, "6E FF FF C3 CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 18" /*"48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45 33 FF 45 0F B6 F0 41 8B EF 48 8B F2"*/);// DevilMayCry5.app_FlowManager__requestResultStaffRoll241224// DevilMayCry5.exe+88F1D0
+            auto requestResultStaffRollAddr = m_patterns_cache->find_addr(base, "6E FF FF C3 CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 18");
+            /*"48 89 5C 24 18 48 89 6C 24 20 56 41 56 41 57 48 83 EC 50 45 33 FF 45 0F B6 F0 41 8B EF 48 8B F2"*/// DevilMayCry5.app_FlowManager__requestResultStaffRoll241224// DevilMayCry5.exe+88F1D0
             if (!requestResultStaffRollAddr)
             {
                 return "Unable to find requestResultStaffRollAddr pattern.";
             }
 
-            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 6B 6D");
+            auto restartTrainingAddr = m_patterns_cache->find_addr(base, "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 0B 69");
+            // tu6: "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 0B 69");
+            // tu7: "48 89 5C 24 10 56 48 83 EC 20 48 8B F2 48 8B D9 E8 6B 6D");
             //DevilMayCry5.app_MissionSettingManager__restartTraining115258
             if (!restartTrainingAddr)
             {
