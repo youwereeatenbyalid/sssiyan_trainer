@@ -58,7 +58,7 @@ public:
 			je cheat
 
 			originalcode:
-			call qword ptr [DoppelNoComeBack::doppelComeBackFunc]
+			call DoppelNoComeBack::doppelComeBackFunc
 			jmp qword ptr [DoppelNoComeBack::bwJustRet]
 
 			cheat:
@@ -75,7 +75,7 @@ public:
 			je cheat
 
 			originalcode:
-			call qword ptr [DoppelNoComeBack::doppelComeBackFunc]
+			call DoppelNoComeBack::doppelComeBackFunc
 			jmp qword ptr [DoppelNoComeBack::feJustRet]
 
 			cheat:
@@ -102,6 +102,7 @@ public:
 		auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 		m_is_enabled = &cheaton;
 		m_on_page = Page_VergilDoppel;
+		m_depends_on = { "DoppelWeaponSwitcher" };
 		m_full_name_string = "Disable doppelganger auto-return (+)";
 		m_author_string = "V.P.Zadov";
 		m_description_string = "Disable the doppelganger automatically returning after a just JdC or when it gets too far away from Vergil.";
@@ -116,7 +117,7 @@ public:
 		//.text:0000000140528C5F	app_PlayerVergilPL__updateDoppel113891	call    app_PlayerVergilPL__comeBackDoppelGanger113978
 		//tu6 aob E8 CC 51 02 00
 		//tu7 aob 48 8B D7 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 1F 48 8B 97 ? ? ? ? +0x3
-		auto doppeBwJustCumBackAddr = m_patterns_cache->find_addr(base, "48 8B D7 E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 75 1F 48 8B 97 ? ? ? ? ");//DevilMayCry5.exe+528C5F
+		auto doppeBwJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 CC 51 02 00");//DevilMayCry5.exe+528C5F
 		if (!doppeBwJustCumBackAddr)
 		{
 			return "Unable to find DoppelNoComeBack.doppeBwJustCumBackAddr pattern.";
@@ -124,7 +125,7 @@ public:
 		//.text:0000000140528D6D	app_PlayerVergilPL__updateDoppel113891	call    app_PlayerVergilPL__comeBackDoppelGanger113978
 		//tu6 aob E8 BE 50 02 00
 		//tu7 aob E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 87 ? ? ? ? 48 8B 97 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 0F B6 88 ? ? ? ? 
-		auto doppeFeJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 83 78 ? ? 0F 85 ? ? ? ? 48 8B 87 ? ? ? ? 48 8B 97 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 0F B6 88 ? ? ? ? ");//DevilMayCry5.exe+528D6D
+		auto doppeFeJustCumBackAddr = m_patterns_cache->find_addr(base, "E8 BE 50 02 00");//DevilMayCry5.exe+528D6D
 		if (!doppeFeJustCumBackAddr)
 		{
 			return "Unable to find DoppelNoComeBack.doppeFeJustCumBackAddr pattern.";
@@ -144,7 +145,7 @@ public:
 			return "Failed to initialize DoppelNoComeBack.doppelDistanceComeBack";
 		}
 
-		if (!install_new_detour(doppeBwJustCumBackAddr.value()+0x3, m_bwjust_doppel_detour, &bw_just_detour, &bwJustRet, 0x5))
+		if (!install_new_detour(doppeBwJustCumBackAddr.value(), m_bwjust_doppel_detour, &bw_just_detour, &bwJustRet, 0x5))
 		{
 			spdlog::error("[{}] failed to initialize", get_name());
 			return "Failed to initialize DoppelNoComeBack.doppeBwJustComemBack";

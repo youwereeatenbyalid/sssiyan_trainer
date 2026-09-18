@@ -73,7 +73,7 @@ static naked void rapidslash_aircheck_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::RapidSlash
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -106,7 +106,7 @@ static naked void fedrive_aircheck_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::FEDrive
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -139,7 +139,7 @@ static naked void void_slash_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::VoidSlash
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -172,7 +172,7 @@ static naked void rb_stinger_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::RBStinger
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -205,7 +205,7 @@ static naked void sp_stinger_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::SPStinger
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -238,7 +238,7 @@ static naked void ds_stinger_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::DSStinger
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -271,7 +271,7 @@ static naked void balrog_updraft_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::BRKUpdraft
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -304,7 +304,7 @@ static naked void cerberus_ice_age_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::IceAge
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -337,7 +337,7 @@ static naked void cerberus_blitz_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::CerbBlitz
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -370,7 +370,7 @@ static naked void beo_kick13_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::BWKick13
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -447,7 +447,7 @@ static naked void sparda_rt_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::SpardaRT
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -480,7 +480,7 @@ static naked void rebellion_rt_air_detour()
 		push rcx
 		mov ecx, AirMoves::Moves::RebellionRT
 		sub rsp, 32
-		call qword ptr[AirMoves::is_movecheat_enabled_asm]
+		call AirMoves::is_movecheat_enabled_asm
 		add rsp, 32
 		cmp al, 0
 		pop rcx
@@ -542,7 +542,7 @@ std::optional<std::string> AirMoves::on_initialize()
 	auto p64Base = g_framework->get_module().as<uintptr_t>();
 	m_is_enabled = &cheaton;
 	m_on_page = Page_Mechanics;
-	m_depends_on = { "PlSetActionData","PlayerTracker"};
+	m_depends_on = { "PlSetActionData","PlayerTracker" };
 	m_full_name_string = "Air Moves (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Allow characters to perform certain ground moves in the air.";

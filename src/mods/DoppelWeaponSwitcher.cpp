@@ -275,35 +275,42 @@ static naked void doppelonlyjjdc_detour() {
         je jmp_ret
         jmp jmp_call
     jmp_call:
-        call qword ptr [DoppelWeaponSwitcher::doppelonlyjjdc_jmp_call]
+        call DoppelWeaponSwitcher::doppelonlyjjdc_jmp_call
     jmp_ret:
         jmp qword ptr [DoppelWeaponSwitcher::doppelonlyjjdc_jmp_ret]
     }
 }
-static naked void doppelonlyjjdcteleport_detour() {
+
+static naked void doppelonlyjjdcteleport_detour()
+{
     __asm {
     validation:
         mov rdx, rdi
-        cmp [PlayerTracker::playerid], 4 //change this to the char number obviously
+        cmp [PlayerTracker::playerid], 4
         jne jmp_call
-        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
-        je cheatcode
         cmp byte ptr [DoppelNoComeBack::cheaton], 1
         je no_cum_back_check
+        cmp byte ptr [DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
         jmp jmp_call
+
     cheatcode:
         mov rdx, rdi
         cmp byte ptr [rdi+0x00001C3D], 00
         je jmp_ret
         jmp jmp_call
-    jmp_call:
-        call qword ptr[DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_call]
-    jmp_ret:
-        jmp qword ptr[DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_ret]
+
     no_cum_back_check:
         cmp byte ptr [DoppelNoComeBack::byJC], 1
         je jmp_ret
+        cmp byte ptr[DoppelWeaponSwitcher::cheaton], 1
+        je cheatcode
         jmp jmp_call
+
+    jmp_call:
+        call DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_call
+    jmp_ret:
+        jmp qword ptr [DoppelWeaponSwitcher::doppelonlyjjdcteleport_jmp_ret]
     }
 }
 

@@ -61,7 +61,7 @@ private:
 			push r11
 			mov rcx, rdi
 			sub rsp, 32
-			call qword ptr [DanteAirMustang::check_input_asm]
+			call DanteAirMustang::check_input_asm
 			add rsp, 32
 			cmp al, 01
 			pop r11

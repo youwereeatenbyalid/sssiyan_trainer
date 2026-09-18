@@ -34,7 +34,7 @@ static naked void can_exe_jce_detour()
 
 		cheat:
 		push rax
-		call qword ptr [DMC3JCE::can_execute_asm]
+		call DMC3JCE::can_execute_asm
 		cmp al, 0
 		pop rax
 		je originalcode
@@ -60,7 +60,7 @@ static naked void can_exe_jce_detour1()//need to check cur weapon too
 
 		cheat:
 		push rax
-		call qword ptr [DMC3JCE::can_execute_asm]
+		call DMC3JCE::can_execute_asm
 		cmp al, 0
 		pop rax
 		je originalcode
@@ -93,7 +93,7 @@ static naked void jcehuman_sub_sdt_detour()
 		cheat:
 		push rax
 		sub rsp, 32
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
+		call DMC3JCE::use_default_behaviour_asm
 		add rsp, 32
 		cmp al, 1
 		pop rax
@@ -122,7 +122,7 @@ static naked void jceprefab2_detour()
 		cheat:
 		push rax
 		sub rsp, 32
-		call qword ptr [DMC3JCE::use_default_behaviour_asm]
+		call DMC3JCE::use_default_behaviour_asm
 		add rsp, 32
 		cmp al, 1
 		pop rax
@@ -168,7 +168,7 @@ static naked void finish_pfb_detour()
 		push r10
 		push r11
 		mov rcx, r8
-		call qword ptr [DMC3JCE::end_jcesdt_asm]
+		call DMC3JCE::end_jcesdt_asm
 		pop r11
 		pop r10
 		pop r9

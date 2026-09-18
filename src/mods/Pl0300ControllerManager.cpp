@@ -25,7 +25,7 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_request_add_em_de
         push r10
         push r11
         sub rsp, 32
-        call qword ptr [Pl0300ControllerManager::is_pl0300_controller_asm]
+        call Pl0300ControllerManager::is_pl0300_controller_asm
         add rsp, 32
         pop r11
         pop r10
@@ -63,7 +63,7 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::em6000_damage_check_deto
         push rsp
         mov rcx, rdi
         sub rsp, 32
-        call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
+        call Pl0300ControllerManager::check_pl0300_asm
         add rsp, 32
         pop rsp
         pop r9
@@ -99,7 +99,7 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_destroy_doppel_re
         push rsp
         mov rcx, rbx
         sub rsp, 32
-        call qword ptr [Pl0300ControllerManager::check_pl0300_asm]
+        call Pl0300ControllerManager::check_pl0300_asm
         add rsp, 32
         pop rsp
         pop r9
@@ -113,7 +113,7 @@ naked void PlCntr::Pl0300Cntr::Pl0300ControllerManager::pl0300_destroy_doppel_re
         jmp qword ptr[Pl0300ControllerManager::doppelDestroyReqBossCamRet]
 
         originalcode:
-        call qword ptr [Pl0300ControllerManager::requestBossCameraFunc]
+        call Pl0300ControllerManager::requestBossCameraFunc
         jmp qword ptr [Pl0300ControllerManager::doppelDestroyReqBossCamRet]
     }
 }
@@ -575,7 +575,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     //Get address that calls function E8 ? ? ? ? 48 8B 43 50 4C 39 60 18 0F 85 ? ? ? ? 48 8B 8F ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 33 D2 E8 ? ? ? ? 48 8B 4B 50
     //tu6 aob B8 01 EB 8F CC CC CC CC CC 48 89 5C 24 08 -0x9
     //Bad tu7 aob should be replaced with SDK find method later
-    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "28 C3 CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B 41 50 48");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668(-0x9)
+    auto pl0300UpdateLockOnTargetAddr = m_patterns_cache->find_addr(base, "B8 01 EB 8F CC CC CC CC CC 48 89 5C 24 08");//DevilMayCry5.app_player_pl0300_PlayerVergil__updateLockOnTargetOnEnemy218668(-0x9)
     if (!pl0300UpdateLockOnTargetAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300UpdateLockOnTargetAddr pattern.";
@@ -594,10 +594,10 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     }
 
     //.text:00000001409CF246	app_player_pl0300_PlayerVergil__destroyDoppleGanger218725	call    app_PlayerCameraController__RequestBossCamera147662
-    //E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52 call to function address points to (fuckin christ) +0x2A94+ 0x5+ 0x1D6
+    //E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52 call to function address points to (fuckin christ) +0x2A94+ 0x5+ 0x1D6 // 
     // tu6 aob E8 95 26 33 00
     // tu7 aob E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52 +0x2C6F
-    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 ? ? ? ? 48 8B 43 50 48 39 68 18 74 52");//DevilMayCry5.exe+9CF246
+    auto pl0300DoppelDestroyReqBossCamAddr = m_patterns_cache->find_addr(base, "E8 95 26 33 00");//DevilMayCry5.exe+9CF246
     if (!pl0300DoppelDestroyReqBossCamAddr)
     {
         return "Unable to find Pl0300ControllerManager.pl0300DoppelDestroyReqBossCamAddr pattern.";
@@ -615,7 +615,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
         return "Failed to initialize Pl0300ControllerManager.pl0300CheckDamage";
     }
 
-    if (!install_new_detour(pl0300DoppelDestroyReqBossCamAddr.value()+0x2C6F, _pl0300DestroyDoppelRequestBossCamDetour, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
+    if (!install_new_detour(pl0300DoppelDestroyReqBossCamAddr.value(), _pl0300DestroyDoppelRequestBossCamDetour, &pl0300_destroy_doppel_request_boss_camera_detour, &doppelDestroyReqBossCamRet, 0x5))
     {
         spdlog::error("[{}] failed to initialize", get_name());
         return "Failed to initialize Pl0300ControllerManager.pl0300DoppelDestroyReqBossCam";
@@ -641,7 +641,7 @@ std::optional<std::string> PlCntr::Pl0300Cntr::Pl0300ControllerManager::on_initi
     _pl0300UpdateLockOnDetour->create();
     m_detours.push_back(_pl0300UpdateLockOnDetour);
 
-    _pl0300UpdateLockOnTargetOnEnemyDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnTargetAddr.value(), &pl0300_update_lock_on_target_on_enemy_hook);
+    _pl0300UpdateLockOnTargetOnEnemyDetour = std::make_shared<Detour_t>(pl0300UpdateLockOnTargetAddr.value() - 0x9, &pl0300_update_lock_on_target_on_enemy_hook);
     _pl0300UpdateLockOnTargetOnEnemyDetour->create();
     m_detours.push_back(_pl0300UpdateLockOnTargetOnEnemyDetour);
 

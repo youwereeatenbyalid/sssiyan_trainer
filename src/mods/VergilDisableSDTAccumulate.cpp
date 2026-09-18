@@ -49,11 +49,11 @@ std::optional<std::string> VergilDisableSDTAccumulate::on_initialize() {
   //app.GameModel.isTag(System.UInt32, System.UInt32)
   //tu6 aob C3 CC CC CC 48 89 6C 24 18 57 41 +0x4
   //tu7 aob 5F C3 CC 48 89 6C 24 18 57 41 +0x3
-  auto func_addr_temp = m_patterns_cache->find_addr(base, "5F C3 CC 48 89 6C 24 18 57 41");
+  auto func_addr_temp = m_patterns_cache->find_addr(base, "C3 CC CC CC 48 89 6C 24 18 57 41");
   if (!func_addr_temp) {
     return "Unanable to find VergilDisableSDTAccumulate::func_addr pattern.";
   }
-  VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x3;
+  VergilDisableSDTAccumulate::func_addr = func_addr_temp.value() + 0x4;
 
   if (!install_new_detour(init_addr.value(), m_accumulatefunc_detour, &accumfunc_detour, &jmp_ret, 5)) {
     spdlog::error("[{}] failed to initialize", get_name());

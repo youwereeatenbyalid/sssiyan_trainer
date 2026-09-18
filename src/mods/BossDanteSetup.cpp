@@ -115,7 +115,7 @@ static naked void revenge_delay_detour()
 		jmp qword ptr [BossDanteSetup::workRateRoyalRevengeRet]
 
 		originalcode:
-		call qword ptr [BossDanteSetup::setWorkRateCall]
+		call BossDanteSetup::setWorkRateCall
 		jmp qword ptr [BossDanteSetup::workRateRoyalRevengeRet]
 	}
 }
@@ -180,7 +180,7 @@ static naked void set_damage_react_detour()
 		push r11
 		mov rcx, rdx
 		sub rsp, 32
-		call qword ptr [BossDanteSetup::set_rg_action_asm]
+		call BossDanteSetup::set_rg_action_asm
 		add rsp, 32
 		pop r11
 		pop r10
@@ -196,7 +196,7 @@ static naked void set_damage_react_detour()
 		je skip
 
 		originalcode:
-		call qword ptr [BossDanteSetup::setGuardReactionEmDante]
+		call BossDanteSetup::setGuardReactionEmDante
 		skip:
 		jmp qword ptr [BossDanteSetup::damageReactRet]
 	}
@@ -300,7 +300,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 	//tu6 aob E8 2A 7C 03 00
 	//tu7 aob 0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10 +786+6
 	//tu7 aob 0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10 +0x78C
-	auto setGuardReactAddr = m_patterns_cache->find_addr(base, "0F 85 ? ? ? ? 48 8B 43 50 48 8B 8A ? ? ? ? 48 83 78 ? ? 0F 85 ? ? ? ? 45 33 C0 48 85 C9 75 10"); // DevilMayCry5.exe+1991B91
+	auto setGuardReactAddr = m_patterns_cache->find_addr(base, "E8 2A 7C 03 00"); // DevilMayCry5.exe+1991B91
 	if (!setGuardReactAddr)
 	{
 		return "Unanable to find BossDanteSetup.setGuardReactAddr pattern.";
@@ -365,7 +365,7 @@ std::optional<std::string> BossDanteSetup::on_initialize()
 		return "Failed to initialize BossDanteSetup.setReleaseType";
 	}
 
-	if (!install_new_detour(setGuardReactAddr.value()+0x78C, m_set_guard_ract_detour, &set_damage_react_detour, &damageReactRet, 0x5))
+	if (!install_new_detour(setGuardReactAddr.value(), m_set_guard_ract_detour, &set_damage_react_detour, &damageReactRet, 0x5))
 	{
 		spdlog::error("[{}] failed to initialize", get_name());
 		return "Failed to initialize BossDanteSetup.setGuardReact";

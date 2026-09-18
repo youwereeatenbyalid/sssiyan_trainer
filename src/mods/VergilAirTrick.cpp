@@ -361,38 +361,49 @@ static naked void air_trick_routine3_detour()
 	__asm {
 		cmp byte ptr [VergilAirTrick::cheaton], 0
 		je originalcode
+
 		cmp byte ptr [VergilAirTrick::isTeleport], 0
 		je originalcode
 
-		cheat:
-		je originalcode
 		push rax
 		push rbx
 		push rcx
 		push rdx
+		push rsi
 		push rdi
-		push rsp
+		push rbp
 		push r8
 		push r9
 		push r10
 		push r11
+		push r12
+		push r13
+		push r14
+		push r15
+
+		sub rsp, 0x28
 		mov rcx, rdi
-		sub rsp, 32
-		call qword ptr [VergilAirTrick::change_pos_asm]
-		add rsp, 32
+		call VergilAirTrick::change_pos_asm // this contains some raw asm and needs to be perfectly aligned. It may break between debug/release etc
+
+		add rsp, 0x28
+		pop r15
+		pop r14
+		pop r13
+		pop r12
 		pop r11
 		pop r10
 		pop r9
 		pop r8
-		pop rsp
+		pop rbp
 		pop rdi
+		pop rsi
 		pop rdx
 		pop rcx
 		pop rbx
 		pop rax
 
 		originalcode:
-		mov dword ptr [rdi + 0x68], 0x3
+		mov dword ptr [rdi+0x68], 3
 		jmp qword ptr [VergilAirTrick::routineStartRet]
 	}
 }
@@ -442,7 +453,7 @@ std::optional<std::string> VergilAirTrick::on_initialize()
     }
 
 	auto finishOffsetAddr = m_patterns_cache->find_addr(base, "60 F3 0F 10 86 D0 00 00 00"); //DevilMayCry5.exe+1DDC4FF
-    if (!waitTimeAddr) {
+    if (!finishOffsetAddr) {
           return "Unable to find AirTrick.finishOffsetAddr pattern.";
     }
 
