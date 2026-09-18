@@ -1,0 +1,1 @@
+runtime - Copy.args is the version we were previously shipping. In the current runtime.args I have omitted `/PermanentMemorySize:351272960` because it was somehow stopping detours from initializing. Increasing or decreasing the value didn't help. This may cause issues with LDK.

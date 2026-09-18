@@ -396,8 +396,8 @@ Mods::Mods()
         // m_mods.emplace_back(std::make_unique<BossDanteSetup>()); // crashes on loading the enemy, can't find anything useful in the stack
         m_mods.emplace_back(std::make_unique<BossVergilSettings>()); // TESTING, crashes
         m_mods.emplace_back(std::make_unique<WaveEditorMod::EnemyWaveEditor>()); // I think EnemySwapper needs this
-        //m_mods.emplace_back(std::make_unique<SecretMissionTimer>()); // TESTING
-        //m_mods.emplace_back(std::make_unique<PosActionEditor>()); // TESTING
+        m_mods.emplace_back(std::make_unique<SecretMissionTimer>());
+        m_mods.emplace_back(std::make_unique<PosActionEditor>());
         m_mods.emplace_back(std::make_unique<NoRoundtripCallback>());
         m_mods.emplace_back(std::make_unique<EnemySpawner>());
         //// Nero

@@ -54,7 +54,7 @@ std::optional<std::string> SecretMissionTimer::on_initialize()
 	auto base = g_framework->get_module().as<HMODULE>(); // note HMODULE
 
 	m_is_enabled= &cheaton;
-	m_on_page = Page_SecretMission;
+	m_on_page = Page_GameMode;
 	m_full_name_string = "Freeze secret missions timer (+)";
 	m_author_string = "V.P.Zadov";
 	m_description_string = "Also can prevent starting \"no ground\" timer on sm9.";
