@@ -715,7 +715,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
   auto lockon_addr = m_patterns_cache->find_addr(base, "39 82 08 01 00 00 0F");
   auto targetswitch_addr = m_patterns_cache->find_addr(base, "44 85 A7 90 00 00 00");
   auto damageall_addr = m_patterns_cache->find_addr(base, "41 8B 40 20 83 F9 01");
-  auto pvp1_addr = m_patterns_cache->find_addr(base, "83 BB F4 00 00 00 01");
+  auto pvp1_addr = m_patterns_cache->find_addr(base, "83 BB F4 00 00 00 01 0F");
   auto pvp2_addr         = m_patterns_cache->find_addr(base, "41 8B 86 F4 00 00 00");
   auto danteclientside_addr = m_patterns_cache->find_addr(base, "8B 42 5C 83 F8 10 74 36");
   auto dtenable_addr = m_patterns_cache->find_addr(base, "0F 87 60 01 00 00 A9");
@@ -734,7 +734,7 @@ std::optional<std::string> HeavyDay::on_initialize() {
   //.text:0000000140FAB091	app_StylishManager__checkStylish137655	call    app_StylishManager__addSubjugationBouns137665
   //old 23 00 00 44 0F 28 4C 24 70 +0x3
   // direct reference: [actual address in first opcode] 75 7D 0F 28 D6// +0x7D+0x2 -> +0x7F
-  auto styleenableend_addr = m_patterns_cache->find_addr(base,"75 7D 0F 28 D6");
+  auto styleenableend_addr = m_patterns_cache->find_addr(base,"23 00 00 44 0F 28 4C 24 70");
   
   if (!enemystep_addr) {
     return "Unable to find Enemy Step pattern.";

@@ -250,7 +250,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<GameInput>());
 		// m_mods.emplace_back(std::make_unique<AprilFools>());
     // Common
-        m_mods.emplace_back(std::make_unique<HeavyDay>()); // untested
+        m_mods.emplace_back(std::make_unique<HeavyDay>()); // untested // requires AllOrNothing
         m_mods.emplace_back(std::make_unique<MoveReplacer>());
         m_mods.emplace_back(std::make_unique<Inertia>());
         m_mods.emplace_back(std::make_unique<LDK>());
@@ -262,7 +262,7 @@ Mods::Mods()
         //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
-		m_mods.emplace_back(std::make_unique<OneHitKill>());
+        m_mods.emplace_back(std::make_unique<OneHitKill>());
 		m_mods.emplace_back(std::make_unique<NoOneTakesDamage>());
         m_mods.emplace_back(std::make_unique<DifficultySelect>());
     // Nero
