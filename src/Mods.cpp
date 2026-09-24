@@ -259,7 +259,7 @@ Mods::Mods()
         m_mods.emplace_back(std::make_unique<DisableTitleTimer>());
 
         m_mods.emplace_back(std::make_unique<SpardaWorkshop>());
-        //m_mods.emplace_back(std::make_unique<SCNPathEditor>());
+        //m_mods.emplace_back(std::make_unique<SCNPathEditor>()); // Sparda's workshop works without this?? maybe its necessary for LDK, haven't tested
     // Gameplay
         m_mods.emplace_back(std::make_unique<AllOrNothing>());
         m_mods.emplace_back(std::make_unique<OneHitKill>());
